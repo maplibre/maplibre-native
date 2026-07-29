@@ -1,90 +1,130 @@
 <!DOCTYPE html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>OfflineGeometryRegionDefinition</title>
     <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
-    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
-<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" async="async"></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
 </head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-                    <a class="library-name--link" href="../../../index.html">
-                            MapLibre Native Android
-                    </a>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    MapLibre Native Android
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+13.4.1        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":MapLibreAndroid/openglRelease">openglRelease</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":MapLibreAndroid/openglRelease"
+                                       data-filter=":MapLibreAndroid/openglRelease"/>
+                                <span class="checkbox--icon"></span>
+                                openglRelease
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div class="library-version">
-13.0.2            </div>
-        </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":MapLibreAndroid/webgpuWgpuRelease">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.offline/OfflineGeometryRegionDefinition///PointingToDeclaration//936287327">
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    MapLibre Native Android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.offline/OfflineGeometryRegionDefinition///PointingToDeclaration//-2079570027">
   <div class="breadcrumbs"><a href="../../../index.html">MapLibre Native Android</a><span class="delimiter">/</span><a href="../index.html">org.maplibre.android.offline</a><span class="delimiter">/</span><span class="current">OfflineGeometryRegionDefinition</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Offline</span><wbr></wbr><span>Geometry</span><wbr></wbr><span>Region</span><wbr></wbr><span><span>Definition</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">OfflineGeometryRegionDefinition</a> : <a href="../-offline-region-definition/index.html">OfflineRegionDefinition</a></div><p class="paragraph">An offline region defined by a style URL, geometry, zoom range, and device pixel ratio.</p><p class="paragraph">Both minZoom and maxZoom must be ≥ 0, and maxZoom must be ≥ minZoom.</p><p class="paragraph">maxZoom may be ∞, in which case for each tile source, the region will include tiles from minZoom up to the maximum zoom level provided by that source.</p><p class="paragraph">pixelRatio must be ≥ 0 and should typically be 1.0 or 2.0.</p><p class="paragraph">if includeIdeographs is false, offline region will not include CJK glyphs</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">OfflineGeometryRegionDefinition</a> : <a href="../-offline-region-definition/index.html">OfflineRegionDefinition</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android//MapLibreAndroid/src/main/java/org/maplibre/android/offline/OfflineGeometryRegionDefinition.kt#L29">source</a>)</span></span></div><p class="paragraph">An offline region defined by a style URL, geometry, zoom range, and device pixel ratio.</p><p class="paragraph">Both minZoom and maxZoom must be ≥ 0, and maxZoom must be ≥ minZoom.</p><p class="paragraph">maxZoom may be ∞, in which case for each tile source, the region will include tiles from minZoom up to the maximum zoom level provided by that source.</p><p class="paragraph">pixelRatio must be ≥ 0 and should typically be 1.0 or 2.0.</p><p class="paragraph">if includeIdeographs is false, offline region will not include CJK glyphs</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="369711943%2FConstructors%2F936287327" anchor-label="OfflineGeometryRegionDefinition" id="369711943%2FConstructors%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="369711943%2FConstructors%2F-2079570027" anchor-label="OfflineGeometryRegionDefinition" id="369711943%2FConstructors%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-offline-geometry-region-definition.html"><span>Offline</span><wbr></wbr><span>Geometry</span><wbr></wbr><span>Region</span><wbr></wbr><span><span>Definition</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="369711943%2FConstructors%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="369711943%2FConstructors%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleURL<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">geometry<span class="token operator">: </span><span data-unresolved-link="org.maplibre.geojson/Geometry///PointingToDeclaration/">Geometry</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">pixelRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Constructor to create an OfflineGeometryRegionDefinition from parameters.</p></div><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleURL<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">geometry<span class="token operator">: </span><span data-unresolved-link="org.maplibre.geojson/Geometry///PointingToDeclaration/">Geometry</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">pixelRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">includeIdeographs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Constructor to create an OfflineGeometryRegionDefinition from parameters.</p></div><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parcel<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Constructor to create an OfflineGeometryRegionDefinition from a Parcel.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleURL<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">geometry<span class="token operator">: </span><span data-unresolved-link="org.maplibre.geojson/Geometry///PointingToDeclaration/">Geometry</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">pixelRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Constructor to create an OfflineGeometryRegionDefinition from parameters.</p></div><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleURL<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">geometry<span class="token operator">: </span><span data-unresolved-link="org.maplibre.geojson/Geometry///PointingToDeclaration/">Geometry</span><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">minZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a><span class="token punctuation">, </span></span><span class="parameter ">pixelRatio<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a><span class="token punctuation">, </span></span><span class="parameter ">includeIdeographs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Constructor to create an OfflineGeometryRegionDefinition from parameters.</p></div><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parcel<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Constructor to create an OfflineGeometryRegionDefinition from a Parcel.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -92,18 +132,18 @@
         </div>
       </div>
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="1482933034%2FClasslikes%2F936287327" anchor-label="Companion" id="1482933034%2FClasslikes%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1482933034%2FClasslikes%2F-2079570027" anchor-label="Companion" id="1482933034%2FClasslikes%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1482933034%2FClasslikes%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1482933034%2FClasslikes%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -111,123 +151,123 @@
         </div>
       </div>
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="401868354%2FProperties%2F936287327" anchor-label="bounds" id="401868354%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="401868354%2FProperties%2F-2079570027" anchor-label="bounds" id="401868354%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="bounds.html"><span><span>bounds</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="401868354%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="401868354%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="bounds.html">bounds</a><span class="token operator">: </span><a href="../../org.maplibre.android.geometry/-lat-lng-bounds/index.html">LatLngBounds</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Calculates the bounding box for the Geometry it contains to retain backwards compatibility</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="bounds.html">bounds</a><span class="token operator">: </span><a href="../../org.maplibre.android.geometry/-lat-lng-bounds/index.html">LatLngBounds</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Calculates the bounding box for the Geometry it contains to retain backwards compatibility</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="663418021%2FProperties%2F936287327" anchor-label="geometry" id="663418021%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="663418021%2FProperties%2F-2079570027" anchor-label="geometry" id="663418021%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="geometry.html"><span><span>geometry</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="663418021%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="663418021%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">var </span><a href="geometry.html">geometry</a><span class="token operator">: </span><span data-unresolved-link="org.maplibre.geojson/Geometry///PointingToDeclaration/">Geometry</span><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">var </span><a href="geometry.html">geometry</a><span class="token operator">: </span><span data-unresolved-link="org.maplibre.geojson/Geometry///PointingToDeclaration/">Geometry</span><span class="token operator">?</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-494292687%2FProperties%2F936287327" anchor-label="includeIdeographs" id="-494292687%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-494292687%2FProperties%2F-2079570027" anchor-label="includeIdeographs" id="-494292687%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="include-ideographs.html"><span>include</span><wbr></wbr><span><span>Ideographs</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-494292687%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-494292687%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="include-ideographs.html">includeIdeographs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Specifies whether to include ideographic glyphs in downloaded font data. Ideographic glyphs make up the majority of downloaded font data, but it is possible to configure the renderer to use locally installed fonts instead of relying on fonts downloaded as part of the offline pack.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="include-ideographs.html">includeIdeographs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Specifies whether to include ideographic glyphs in downloaded font data. Ideographic glyphs make up the majority of downloaded font data, but it is possible to configure the renderer to use locally installed fonts instead of relying on fonts downloaded as part of the offline pack.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="698808300%2FProperties%2F936287327" anchor-label="maxZoom" id="698808300%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="698808300%2FProperties%2F-2079570027" anchor-label="maxZoom" id="698808300%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="max-zoom.html"><span>max</span><wbr></wbr><span><span>Zoom</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="698808300%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="698808300%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="max-zoom.html">maxZoom</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Gets the maximum zoom level the OfflineRegion map can be displayed at.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="max-zoom.html">maxZoom</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Gets the maximum zoom level the OfflineRegion map can be displayed at.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-902920770%2FProperties%2F936287327" anchor-label="minZoom" id="-902920770%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-902920770%2FProperties%2F-2079570027" anchor-label="minZoom" id="-902920770%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="min-zoom.html"><span>min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-902920770%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-902920770%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="min-zoom.html">minZoom</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Gets the minimum zoom level the OfflineRegion map can be displayed at.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="min-zoom.html">minZoom</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-double/index.html">Double</a></div><div class="brief "><p class="paragraph">Gets the minimum zoom level the OfflineRegion map can be displayed at.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1649275694%2FProperties%2F936287327" anchor-label="pixelRatio" id="-1649275694%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-1649275694%2FProperties%2F-2079570027" anchor-label="pixelRatio" id="-1649275694%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="pixel-ratio.html"><span>pixel</span><wbr></wbr><span><span>Ratio</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1649275694%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1649275694%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="pixel-ratio.html">pixelRatio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-float/index.html">Float</a></div><div class="brief "><p class="paragraph">Gets the pixel ratio of the OfflineRegion map.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="pixel-ratio.html">pixelRatio</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-float/index.html">Float</a></div><div class="brief "><p class="paragraph">Gets the pixel ratio of the OfflineRegion map.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="843124889%2FProperties%2F936287327" anchor-label="styleURL" id="843124889%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="843124889%2FProperties%2F-2079570027" anchor-label="styleURL" id="843124889%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="style-u-r-l.html"><span>style</span><wbr></wbr><span><span>URL</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="843124889%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="843124889%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="style-u-r-l.html">styleURL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns the map style url of the OfflineRegion.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">var </span><a href="style-u-r-l.html">styleURL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns the map style url of the OfflineRegion.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-951927843%2FProperties%2F936287327" anchor-label="type" id="-951927843%2FProperties%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-951927843%2FProperties%2F-2079570027" anchor-label="type" id="-951927843%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="type.html"><span><span>type</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-951927843%2FProperties%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-951927843%2FProperties%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="type.html">type</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Gets the type of the OfflineRegionDefinition (&quot;tileregion&quot;, &quot;shaperegion&quot;).</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="type.html">type</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Gets the type of the OfflineRegionDefinition (&quot;tileregion&quot;, &quot;shaperegion&quot;).</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -235,33 +275,33 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-582499470%2FFunctions%2F936287327" anchor-label="describeContents" id="-582499470%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-582499470%2FFunctions%2F-2079570027" anchor-label="describeContents" id="-582499470%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="describe-contents.html"><span>describe</span><wbr></wbr><span><span>Contents</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-582499470%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-582499470%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="describe-contents.html"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="describe-contents.html"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1319385775%2FFunctions%2F936287327" anchor-label="writeToParcel" id="1319385775%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1319385775%2FFunctions%2F-2079570027" anchor-label="writeToParcel" id="1319385775%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="write-to-parcel.html"><span>write</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Parcel</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1319385775%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1319385775%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="write-to-parcel.html"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dest<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">flags<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="write-to-parcel.html"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dest<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">flags<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -272,17 +312,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2026 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -1,90 +1,179 @@
 <!DOCTYPE html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>GLTextureViewRenderThread</title>
     <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
-    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
-<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" async="async"></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
 </head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-                    <a class="library-name--link" href="../../../index.html">
-                            MapLibre Native Android
-                    </a>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    MapLibre Native Android
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+13.4.1        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":MapLibreAndroid/openglRelease">openglRelease</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":MapLibreAndroid/openglRelease"
+                                       data-filter=":MapLibreAndroid/openglRelease"/>
+                                <span class="checkbox--icon"></span>
+                                openglRelease
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div class="library-version">
-13.0.2            </div>
-        </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":MapLibreAndroid/webgpuWgpuRelease">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.maps.renderer.textureview/GLTextureViewRenderThread///PointingToDeclaration//936287327">
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    MapLibre Native Android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.maps.renderer.textureview/GLTextureViewRenderThread///PointingToDeclaration//-2079570027">
   <div class="breadcrumbs"><a href="../../../index.html">MapLibre Native Android</a><span class="delimiter">/</span><a href="../index.html">org.maplibre.android.maps.renderer.textureview</a><span class="delimiter">/</span><span class="current">GLTextureViewRenderThread</span></div>
   <div class="cover ">
     <h1 class="cover"><span>GLTexture</span><wbr></wbr><span>View</span><wbr></wbr><span>Render</span><wbr></wbr><span><span>Thread</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">GLTextureViewRenderThread</a></div><p class="paragraph">The render thread is responsible for managing the communication between the ui thread and the render thread it creates. Also, the EGL and GL contexts are managed from here.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">GLTextureViewRenderThread</a> : <span data-unresolved-link="org.maplibre.android.maps.renderer.textureview/TextureViewRenderThread///PointingToDeclaration/">TextureViewRenderThread</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android//MapLibreAndroid/src/opengl/java/org/maplibre/android/maps/renderer/textureview/GLTextureViewRenderThread.java#L27">source</a>)</span></span></div><p class="paragraph">The render thread is responsible for managing the communication between the ui thread and the render thread it creates. Also, the EGL and GL contexts are managed from here.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="2063455446%2FConstructors%2F936287327" anchor-label="GLTextureViewRenderThread" id="2063455446%2FConstructors%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="471087205%2FConstructors%2F-2079570027" anchor-label="GLTextureViewRenderThread" id="471087205%2FConstructors%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-g-l-texture-view-render-thread.html"><span>GLTexture</span><wbr></wbr><span>View</span><wbr></wbr><span>Render</span><wbr></wbr><span><span>Thread</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2063455446%2FConstructors%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="471087205%2FConstructors%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>textureView<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/view/TextureView.html">TextureView</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>mapRenderer<span class="token operator">: </span>TextureViewMapRenderer</span></span><span class="token punctuation">)</span></div><div class="brief ">Create a render thread for the given TextureView / Maprenderer combination.</div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>textureView<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/view/TextureView.html">TextureView</a><span class="token punctuation">, </span></span><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>mapRenderer<span class="token operator">: </span><a href="../-texture-view-map-renderer/index.html">TextureViewMapRenderer</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Create a render thread for the given TextureView / Maprenderer combination.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1047751662%2FProperties%2F-2079570027" anchor-label="MAX_PRIORITY" id="1047751662%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1047751662%2FProperties%2F-2079570027"><span>MAX_</span><wbr></wbr><span>PRIORITY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1047751662%2FProperties%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#1047751662%2FProperties%2F-2079570027">MAX_PRIORITY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">10</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-604655268%2FProperties%2F-2079570027" anchor-label="MIN_PRIORITY" id="-604655268%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-604655268%2FProperties%2F-2079570027"><span>MIN_</span><wbr></wbr><span>PRIORITY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-604655268%2FProperties%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#-604655268%2FProperties%2F-2079570027">MIN_PRIORITY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">1</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="481106758%2FProperties%2F-2079570027" anchor-label="NORM_PRIORITY" id="481106758%2FProperties%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#481106758%2FProperties%2F-2079570027"><span>NORM_</span><wbr></wbr><span>PRIORITY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="481106758%2FProperties%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">val </span><a href="index.html#481106758%2FProperties%2F-2079570027">NORM_PRIORITY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">5</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -92,18 +181,648 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="1158289936%2FFunctions%2F936287327" anchor-label="run" id="1158289936%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="925248164%2FFunctions%2F-2079570027" anchor-label="activeCount" id="925248164%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="run.html"><span><span>run</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158289936%2FFunctions%2F936287327"></span>
+                  <div><a href="index.html#925248164%2FFunctions%2F-2079570027"><span>active</span><wbr></wbr><span><span>Count</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="925248164%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="run.html"><span class="token function">run</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#925248164%2FFunctions%2F-2079570027"><span class="token function">activeCount</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="78173473%2FFunctions%2F-2079570027" anchor-label="checkAccess" id="78173473%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#78173473%2FFunctions%2F-2079570027"><span>check</span><wbr></wbr><span><span>Access</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="78173473%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#78173473%2FFunctions%2F-2079570027"><span class="token function">checkAccess</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2119597422%2FFunctions%2F-2079570027" anchor-label="countStackFrames" id="2119597422%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2119597422%2FFunctions%2F-2079570027"><span>count</span><wbr></wbr><span>Stack</span><wbr></wbr><span><span>Frames</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2119597422%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2119597422%2FFunctions%2F-2079570027"><span class="token function">countStackFrames</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="573726890%2FFunctions%2F-2079570027" anchor-label="currentThread" id="573726890%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#573726890%2FFunctions%2F-2079570027"><span>current</span><wbr></wbr><span><span>Thread</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="573726890%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#573726890%2FFunctions%2F-2079570027"><span class="token function">currentThread</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.html">Thread</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1541003917%2FFunctions%2F-2079570027" anchor-label="destroy" id="-1541003917%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1541003917%2FFunctions%2F-2079570027"><span><span>destroy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1541003917%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1541003917%2FFunctions%2F-2079570027"><span class="token function">destroy</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1182734919%2FFunctions%2F-2079570027" anchor-label="dumpStack" id="-1182734919%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1182734919%2FFunctions%2F-2079570027"><span>dump</span><wbr></wbr><span><span>Stack</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1182734919%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1182734919%2FFunctions%2F-2079570027"><span class="token function">dumpStack</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2044729335%2FFunctions%2F-2079570027" anchor-label="enumerate" id="-2044729335%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2044729335%2FFunctions%2F-2079570027"><span><span>enumerate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2044729335%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-2044729335%2FFunctions%2F-2079570027"><span class="token function">enumerate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tarray<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.html">Thread</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="234414466%2FFunctions%2F-2079570027" anchor-label="getAllStackTraces" id="234414466%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#234414466%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span>All</span><wbr></wbr><span>Stack</span><wbr></wbr><span><span>Traces</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="234414466%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#234414466%2FFunctions%2F-2079570027"><span class="token function">getAllStackTraces</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/Map.html">Map</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.html">Thread</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/StackTraceElement.html">StackTraceElement</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-654234629%2FFunctions%2F-2079570027" anchor-label="getContextClassLoader" id="-654234629%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-654234629%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span>Context</span><wbr></wbr><span>Class</span><wbr></wbr><span><span>Loader</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-654234629%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-654234629%2FFunctions%2F-2079570027"><span class="token function">getContextClassLoader</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/ClassLoader.html">ClassLoader</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="75440658%2FFunctions%2F-2079570027" anchor-label="getDefaultUncaughtExceptionHandler" id="75440658%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#75440658%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span>Default</span><wbr></wbr><span>Uncaught</span><wbr></wbr><span>Exception</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="75440658%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#75440658%2FFunctions%2F-2079570027"><span class="token function">getDefaultUncaughtExceptionHandler</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.UncaughtExceptionHandler.html">Thread.UncaughtExceptionHandler</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1154473532%2FFunctions%2F-2079570027" anchor-label="getId" id="1154473532%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1154473532%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1154473532%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1154473532%2FFunctions%2F-2079570027"><span class="token function">getId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2046195636%2FFunctions%2F-2079570027" anchor-label="getName" id="-2046195636%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2046195636%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2046195636%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-2046195636%2FFunctions%2F-2079570027"><span class="token function">getName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1478072915%2FFunctions%2F-2079570027" anchor-label="getPriority" id="1478072915%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1478072915%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span><span>Priority</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1478072915%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#1478072915%2FFunctions%2F-2079570027"><span class="token function">getPriority</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1953074182%2FFunctions%2F-2079570027" anchor-label="getStackTrace" id="-1953074182%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1953074182%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span>Stack</span><wbr></wbr><span><span>Trace</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1953074182%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1953074182%2FFunctions%2F-2079570027"><span class="token function">getStackTrace</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/StackTraceElement.html">StackTraceElement</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1528754478%2FFunctions%2F-2079570027" anchor-label="getState" id="-1528754478%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1528754478%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1528754478%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1528754478%2FFunctions%2F-2079570027"><span class="token function">getState</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.State.html">Thread.State</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1757263054%2FFunctions%2F-2079570027" anchor-label="getThreadGroup" id="1757263054%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1757263054%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span>Thread</span><wbr></wbr><span><span>Group</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1757263054%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#1757263054%2FFunctions%2F-2079570027"><span class="token function">getThreadGroup</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/ThreadGroup.html">ThreadGroup</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1640941319%2FFunctions%2F-2079570027" anchor-label="getUncaughtExceptionHandler" id="1640941319%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1640941319%2FFunctions%2F-2079570027"><span>get</span><wbr></wbr><span>Uncaught</span><wbr></wbr><span>Exception</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1640941319%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1640941319%2FFunctions%2F-2079570027"><span class="token function">getUncaughtExceptionHandler</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.UncaughtExceptionHandler.html">Thread.UncaughtExceptionHandler</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2047715643%2FFunctions%2F-2079570027" anchor-label="holdsLock" id="2047715643%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#2047715643%2FFunctions%2F-2079570027"><span>holds</span><wbr></wbr><span><span>Lock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2047715643%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#2047715643%2FFunctions%2F-2079570027"><span class="token function">holdsLock</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-638971094%2FFunctions%2F-2079570027" anchor-label="interrupt" id="-638971094%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-638971094%2FFunctions%2F-2079570027"><span><span>interrupt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-638971094%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-638971094%2FFunctions%2F-2079570027"><span class="token function">interrupt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1961623595%2FFunctions%2F-2079570027" anchor-label="interrupted" id="1961623595%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1961623595%2FFunctions%2F-2079570027"><span><span>interrupted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1961623595%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1961623595%2FFunctions%2F-2079570027"><span class="token function">interrupted</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-92445750%2FFunctions%2F-2079570027" anchor-label="isAlive" id="-92445750%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-92445750%2FFunctions%2F-2079570027"><span>is</span><wbr></wbr><span><span>Alive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-92445750%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-92445750%2FFunctions%2F-2079570027"><span class="token function">isAlive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="19687615%2FFunctions%2F-2079570027" anchor-label="isDaemon" id="19687615%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#19687615%2FFunctions%2F-2079570027"><span>is</span><wbr></wbr><span><span>Daemon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="19687615%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#19687615%2FFunctions%2F-2079570027"><span class="token function">isDaemon</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1277548661%2FFunctions%2F-2079570027" anchor-label="isInterrupted" id="1277548661%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1277548661%2FFunctions%2F-2079570027"><span>is</span><wbr></wbr><span><span>Interrupted</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1277548661%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#1277548661%2FFunctions%2F-2079570027"><span class="token function">isInterrupted</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-409370521%2FFunctions%2F-2079570027" anchor-label="join" id="-409370521%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-409370521%2FFunctions%2F-2079570027"><span><span>join</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-409370521%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-409370521%2FFunctions%2F-2079570027"><span class="token function">join</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">millis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1544870345%2FFunctions%2F-2079570027" anchor-label="onSpinWait" id="-1544870345%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1544870345%2FFunctions%2F-2079570027"><span>on</span><wbr></wbr><span>Spin</span><wbr></wbr><span><span>Wait</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1544870345%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1544870345%2FFunctions%2F-2079570027"><span class="token function">onSpinWait</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1652745195%2FFunctions%2F-2079570027" anchor-label="onSurfaceTextureAvailable" id="-1652745195%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1851152579%2FFunctions%2F-2079570027"><span>on</span><wbr></wbr><span>Surface</span><wbr></wbr><span>Texture</span><wbr></wbr><span><span>Available</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1652745195%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="index.html#1851152579%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureAvailable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1471943010%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureAvailable</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">surfaceTexture<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a><span class="token punctuation">, </span></span><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1252308069%2FFunctions%2F-2079570027" anchor-label="onSurfaceTextureDestroyed" id="1252308069%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#838589675%2FFunctions%2F-2079570027"><span>on</span><wbr></wbr><span>Surface</span><wbr></wbr><span>Texture</span><wbr></wbr><span><span>Destroyed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1252308069%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="index.html#838589675%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureDestroyed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-234979898%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureDestroyed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">surfaceTexture<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-894077847%2FFunctions%2F-2079570027" anchor-label="onSurfaceTextureSizeChanged" id="-894077847%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#626717101%2FFunctions%2F-2079570027"><span>on</span><wbr></wbr><span>Surface</span><wbr></wbr><span>Texture</span><wbr></wbr><span>Size</span><wbr></wbr><span><span>Changed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-894077847%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="index.html#626717101%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureSizeChanged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">p2<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1707443000%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureSizeChanged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">surfaceTexture<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a><span class="token punctuation">, </span></span><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1617733033%2FFunctions%2F-2079570027" anchor-label="onSurfaceTextureUpdated" id="1617733033%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1686938291%2FFunctions%2F-2079570027"><span>on</span><wbr></wbr><span>Surface</span><wbr></wbr><span>Texture</span><wbr></wbr><span><span>Updated</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1617733033%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="index.html#-1686938291%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureUpdated</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a></span></span><span class="token punctuation">)</span></div><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-2050066200%2FFunctions%2F-2079570027"><span class="token function">onSurfaceTextureUpdated</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">surfaceTexture<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/SurfaceTexture.html">SurfaceTexture</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1122232896%2FFunctions%2F-2079570027" anchor-label="resume" id="-1122232896%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1122232896%2FFunctions%2F-2079570027"><span><span>resume</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1122232896%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-1122232896%2FFunctions%2F-2079570027"><span class="token function">resume</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1158289936%2FFunctions%2F-2079570027" anchor-label="run" id="1158289936%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="run.html"><span><span>run</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1158289936%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="run.html"><span class="token function">run</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1076814916%2FFunctions%2F-2079570027" anchor-label="setContextClassLoader" id="-1076814916%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1076814916%2FFunctions%2F-2079570027"><span>set</span><wbr></wbr><span>Context</span><wbr></wbr><span>Class</span><wbr></wbr><span><span>Loader</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1076814916%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1076814916%2FFunctions%2F-2079570027"><span class="token function">setContextClassLoader</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cl<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/ClassLoader.html">ClassLoader</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="922564819%2FFunctions%2F-2079570027" anchor-label="setDaemon" id="922564819%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#922564819%2FFunctions%2F-2079570027"><span>set</span><wbr></wbr><span><span>Daemon</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="922564819%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#922564819%2FFunctions%2F-2079570027"><span class="token function">setDaemon</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">on<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="482898308%2FFunctions%2F-2079570027" anchor-label="setDefaultUncaughtExceptionHandler" id="482898308%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#482898308%2FFunctions%2F-2079570027"><span>set</span><wbr></wbr><span>Default</span><wbr></wbr><span>Uncaught</span><wbr></wbr><span>Exception</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="482898308%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#482898308%2FFunctions%2F-2079570027"><span class="token function">setDefaultUncaughtExceptionHandler</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eh<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.UncaughtExceptionHandler.html">Thread.UncaughtExceptionHandler</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1196535995%2FFunctions%2F-2079570027" anchor-label="setName" id="1196535995%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1196535995%2FFunctions%2F-2079570027"><span>set</span><wbr></wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1196535995%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#1196535995%2FFunctions%2F-2079570027"><span class="token function">setName</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="655595724%2FFunctions%2F-2079570027" anchor-label="setPriority" id="655595724%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#655595724%2FFunctions%2F-2079570027"><span>set</span><wbr></wbr><span><span>Priority</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="655595724%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#655595724%2FFunctions%2F-2079570027"><span class="token function">setPriority</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">newPriority<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-877890105%2FFunctions%2F-2079570027" anchor-label="setUncaughtExceptionHandler" id="-877890105%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-877890105%2FFunctions%2F-2079570027"><span>set</span><wbr></wbr><span>Uncaught</span><wbr></wbr><span>Exception</span><wbr></wbr><span><span>Handler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-877890105%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-877890105%2FFunctions%2F-2079570027"><span class="token function">setUncaughtExceptionHandler</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eh<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Thread.UncaughtExceptionHandler.html">Thread.UncaughtExceptionHandler</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-600307526%2FFunctions%2F-2079570027" anchor-label="sleep" id="-600307526%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-600307526%2FFunctions%2F-2079570027"><span><span>sleep</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-600307526%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-600307526%2FFunctions%2F-2079570027"><span class="token function">sleep</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">millis<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="614703627%2FFunctions%2F-2079570027" anchor-label="start" id="614703627%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#614703627%2FFunctions%2F-2079570027"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="614703627%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#614703627%2FFunctions%2F-2079570027"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1315242891%2FFunctions%2F-2079570027" anchor-label="stop" id="1315242891%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1315242891%2FFunctions%2F-2079570027"><span><span>stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1315242891%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#1315242891%2FFunctions%2F-2079570027"><span class="token function">stop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1383820431%2FFunctions%2F-2079570027" anchor-label="suspend" id="-1383820431%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1383820431%2FFunctions%2F-2079570027"><span><span>suspend</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1383820431%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="index.html#-1383820431%2FFunctions%2F-2079570027"><span class="token function">suspend</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1632822175%2FFunctions%2F-2079570027" anchor-label="toString" id="-1632822175%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1632822175%2FFunctions%2F-2079570027"><span>to</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1632822175%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1632822175%2FFunctions%2F-2079570027"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1341563584%2FFunctions%2F-2079570027" anchor-label="yield" id="-1341563584%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-1341563584%2FFunctions%2F-2079570027"><span><span>yield</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1341563584%2FFunctions%2F-2079570027"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="index.html#-1341563584%2FFunctions%2F-2079570027"><span class="token function">yield</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -114,17 +833,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2026 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

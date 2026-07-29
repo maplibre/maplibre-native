@@ -1,90 +1,130 @@
 <!DOCTYPE html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>MapSnapshotter</title>
     <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
-    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
-<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" async="async"></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
 </head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-                    <a class="library-name--link" href="../../../index.html">
-                            MapLibre Native Android
-                    </a>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    MapLibre Native Android
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+13.4.1        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":MapLibreAndroid/openglRelease">openglRelease</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":MapLibreAndroid/openglRelease"
+                                       data-filter=":MapLibreAndroid/openglRelease"/>
+                                <span class="checkbox--icon"></span>
+                                openglRelease
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div class="library-version">
-13.0.2            </div>
-        </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":MapLibreAndroid/webgpuWgpuRelease">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.snapshotter/MapSnapshotter///PointingToDeclaration//936287327">
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    MapLibre Native Android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.snapshotter/MapSnapshotter///PointingToDeclaration//-2079570027">
   <div class="breadcrumbs"><a href="../../../index.html">MapLibre Native Android</a><span class="delimiter">/</span><a href="../index.html">org.maplibre.android.snapshotter</a><span class="delimiter">/</span><span class="current">MapSnapshotter</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Map</span><wbr></wbr><span><span>Snapshotter</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">MapSnapshotter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="-options/index.html">MapSnapshotter.Options</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">The map snapshotter creates a large of the map, rendered off the UI thread. The snapshotter itself must be used on the UI thread (for access to the main looper)</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">MapSnapshotter</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="-options/index.html">MapSnapshotter.Options</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android//MapLibreAndroid/src/main/java/org/maplibre/android/snapshotter/MapSnapshotter.kt#L40">source</a>)</span></span></div><p class="paragraph">The map snapshotter creates a large of the map, rendered off the UI thread. The snapshotter itself must be used on the UI thread (for access to the main looper)</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="-479671974%2FConstructors%2F936287327" anchor-label="MapSnapshotter" id="-479671974%2FConstructors%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-479671974%2FConstructors%2F-2079570027" anchor-label="MapSnapshotter" id="-479671974%2FConstructors%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-map-snapshotter.html"><span>Map</span><wbr></wbr><span><span>Snapshotter</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-479671974%2FConstructors%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-479671974%2FConstructors%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="-options/index.html">MapSnapshotter.Options</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="-options/index.html">MapSnapshotter.Options</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -92,78 +132,78 @@
         </div>
       </div>
       <div data-togglable="TYPE">
-        <h2 class="">Types</h2>
-        <div class="table"><a data-name="297366361%2FClasslikes%2F936287327" anchor-label="Companion" id="297366361%2FClasslikes%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="297366361%2FClasslikes%2F-2079570027" anchor-label="Companion" id="297366361%2FClasslikes%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="297366361%2FClasslikes%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="297366361%2FClasslikes%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1227846939%2FClasslikes%2F936287327" anchor-label="ErrorHandler" id="1227846939%2FClasslikes%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1227846939%2FClasslikes%2F-2079570027" anchor-label="ErrorHandler" id="1227846939%2FClasslikes%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-error-handler/index.html"><span>Error</span><wbr></wbr><span><span>Handler</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1227846939%2FClasslikes%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1227846939%2FClasslikes%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-error-handler/index.html">ErrorHandler</a></div><div class="brief "><p class="paragraph">Can be used to get notified of errors in snapshot generation</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-error-handler/index.html">ErrorHandler</a></div><div class="brief "><p class="paragraph">Can be used to get notified of errors in snapshot generation</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1958665959%2FClasslikes%2F936287327" anchor-label="Observer" id="1958665959%2FClasslikes%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1958665959%2FClasslikes%2F-2079570027" anchor-label="Observer" id="1958665959%2FClasslikes%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-observer/index.html"><span><span>Observer</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1958665959%2FClasslikes%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1958665959%2FClasslikes%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-observer/index.html">Observer</a></div><div class="brief "><p class="paragraph">Can be used to get notified on snapshotter style loading completion.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-observer/index.html">Observer</a></div><div class="brief "><p class="paragraph">Can be used to get notified on snapshotter style loading completion.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-256723705%2FClasslikes%2F936287327" anchor-label="Options" id="-256723705%2FClasslikes%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-256723705%2FClasslikes%2F-2079570027" anchor-label="Options" id="-256723705%2FClasslikes%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-options/index.html"><span><span>Options</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-256723705%2FClasslikes%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-256723705%2FClasslikes%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">class </span><a href="-options/index.html">Options</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">MapSnapshotter options</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">class </span><a href="-options/index.html">Options</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">MapSnapshotter options</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-673488959%2FClasslikes%2F936287327" anchor-label="SnapshotReadyCallback" id="-673488959%2FClasslikes%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-673488959%2FClasslikes%2F-2079570027" anchor-label="SnapshotReadyCallback" id="-673488959%2FClasslikes%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-snapshot-ready-callback/index.html"><span>Snapshot</span><wbr></wbr><span>Ready</span><wbr></wbr><span><span>Callback</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-673488959%2FClasslikes%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-673488959%2FClasslikes%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-snapshot-ready-callback/index.html">SnapshotReadyCallback</a></div><div class="brief "><p class="paragraph">Get notified on snapshot completion.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><span class="token keyword">interface </span><a href="-snapshot-ready-callback/index.html">SnapshotReadyCallback</a></div><div class="brief "><p class="paragraph">Get notified on snapshot completion.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -171,183 +211,183 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
-        <div class="table"><a data-name="682770398%2FFunctions%2F936287327" anchor-label="addImage" id="682770398%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="682770398%2FFunctions%2F-2079570027" anchor-label="addImage" id="682770398%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="add-image.html"><span>add</span><wbr></wbr><span><span>Image</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="682770398%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="682770398%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="add-image.html"><span class="token function">addImage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bitmap<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/Bitmap.html">Bitmap</a><span class="token punctuation">, </span></span><span class="parameter ">sdf<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Adds an image to be used in the snapshotter's style</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="add-image.html"><span class="token function">addImage</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">bitmap<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/Bitmap.html">Bitmap</a><span class="token punctuation">, </span></span><span class="parameter ">sdf<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Adds an image to be used in the snapshotter's style</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1084849230%2FFunctions%2F936287327" anchor-label="cancel" id="1084849230%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1084849230%2FFunctions%2F-2079570027" anchor-label="cancel" id="1084849230%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="cancel.html"><span><span>cancel</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1084849230%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1084849230%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="cancel.html"><span class="token function">cancel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Must be called in on the thread the object was created on.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="cancel.html"><span class="token function">cancel</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Must be called in on the thread the object was created on.</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1350877545%2FFunctions%2F936287327" anchor-label="getLayer" id="-1350877545%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-1350877545%2FFunctions%2F-2079570027" anchor-label="getLayer" id="-1350877545%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-layer.html"><span>get</span><wbr></wbr><span><span>Layer</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1350877545%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1350877545%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-layer.html"><span class="token function">getLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.maplibre.android.style.layers/-layer/index.html">Layer</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns Layer of a style that is used by a snapshotter</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-layer.html"><span class="token function">getLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.maplibre.android.style.layers/-layer/index.html">Layer</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns Layer of a style that is used by a snapshotter</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1145475715%2FFunctions%2F936287327" anchor-label="getSource" id="1145475715%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1145475715%2FFunctions%2F-2079570027" anchor-label="getSource" id="1145475715%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="get-source.html"><span>get</span><wbr></wbr><span><span>Source</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1145475715%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1145475715%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-source.html"><span class="token function">getSource</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.maplibre.android.style.sources/-source/index.html">Source</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns Source of a style that is used by a snapshotter</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-source.html"><span class="token function">getSource</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.maplibre.android.style.sources/-source/index.html">Source</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns Source of a style that is used by a snapshotter</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-998799247%2FFunctions%2F936287327" anchor-label="setCameraPosition" id="-998799247%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-998799247%2FFunctions%2F-2079570027" anchor-label="setCameraPosition" id="-998799247%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-camera-position.html"><span>set</span><wbr></wbr><span>Camera</span><wbr></wbr><span><span>Position</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-998799247%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-998799247%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-camera-position.html"><span class="token function">setCameraPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cameraPosition<span class="token operator">: </span><a href="../../org.maplibre.android.camera/-camera-position/index.html">CameraPosition</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new <a href="../../org.maplibre.android.camera/-camera-position/index.html">CameraPosition</a></p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-camera-position.html"><span class="token function">setCameraPosition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cameraPosition<span class="token operator">: </span><a href="../../org.maplibre.android.camera/-camera-position/index.html">CameraPosition</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new <a href="../../org.maplibre.android.camera/-camera-position/index.html">CameraPosition</a></p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1645320532%2FFunctions%2F936287327" anchor-label="setObserver" id="1645320532%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1645320532%2FFunctions%2F-2079570027" anchor-label="setObserver" id="1645320532%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-observer.html"><span>set</span><wbr></wbr><span><span>Observer</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1645320532%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1645320532%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-observer.html"><span class="token function">setObserver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">observer<span class="token operator">: </span><a href="-observer/index.html">MapSnapshotter.Observer</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets observer for a snapshotter</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-observer.html"><span class="token function">setObserver</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">observer<span class="token operator">: </span><a href="-observer/index.html">MapSnapshotter.Observer</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets observer for a snapshotter</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1616713830%2FFunctions%2F936287327" anchor-label="setPadding" id="1616713830%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1616713830%2FFunctions%2F-2079570027" anchor-label="setPadding" id="1616713830%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-padding.html"><span>set</span><wbr></wbr><span><span>Padding</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1616713830%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1616713830%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-padding.html"><span class="token function">setPadding</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">left<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">top<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">right<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">bottom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter padding with a new <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int-array/index.html">IntArray</a></p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-padding.html"><span class="token function">setPadding</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">left<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">top<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">right<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">bottom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter padding with a new <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int-array/index.html">IntArray</a></p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1890666505%2FFunctions%2F936287327" anchor-label="setRegion" id="-1890666505%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-1890666505%2FFunctions%2F-2079570027" anchor-label="setRegion" id="-1890666505%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-region.html"><span>set</span><wbr></wbr><span><span>Region</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1890666505%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1890666505%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-region.html"><span class="token function">setRegion</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">region<span class="token operator">: </span><a href="../../org.maplibre.android.geometry/-lat-lng-bounds/index.html">LatLngBounds</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new <a href="../../org.maplibre.android.geometry/-lat-lng-bounds/index.html">LatLngBounds</a></p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-region.html"><span class="token function">setRegion</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">region<span class="token operator">: </span><a href="../../org.maplibre.android.geometry/-lat-lng-bounds/index.html">LatLngBounds</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new <a href="../../org.maplibre.android.geometry/-lat-lng-bounds/index.html">LatLngBounds</a></p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="134605616%2FFunctions%2F936287327" anchor-label="setSize" id="134605616%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="134605616%2FFunctions%2F-2079570027" anchor-label="setSize" id="134605616%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-size.html"><span>set</span><wbr></wbr><span><span>Size</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="134605616%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="134605616%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-size.html"><span class="token function">setSize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new size</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-size.html"><span class="token function">setSize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new size</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1053890096%2FFunctions%2F936287327" anchor-label="setStyleJson" id="-1053890096%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-1053890096%2FFunctions%2F-2079570027" anchor-label="setStyleJson" id="-1053890096%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-style-json.html"><span>set</span><wbr></wbr><span>Style</span><wbr></wbr><span><span>Json</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1053890096%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1053890096%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-style-json.html"><span class="token function">setStyleJson</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleJson<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new style json</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-style-json.html"><span class="token function">setStyleJson</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleJson<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new style json</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-278234319%2FFunctions%2F936287327" anchor-label="setStyleUrl" id="-278234319%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="-278234319%2FFunctions%2F-2079570027" anchor-label="setStyleUrl" id="-278234319%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="set-style-url.html"><span>set</span><wbr></wbr><span>Style</span><wbr></wbr><span><span>Url</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-278234319%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-278234319%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-style-url.html"><span class="token function">setStyleUrl</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new style url</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><span class="token keyword">external </span><span class="token keyword">fun </span><a href="set-style-url.html"><span class="token function">setStyleUrl</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">styleUrl<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Updates the snapshotter with a new style url</p></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1572553406%2FFunctions%2F936287327" anchor-label="start" id="1572553406%2FFunctions%2F936287327" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease"></a>
-          <div class="table-row" data-filterable-current=":MapLibreAndroid/webgpuWgpuRelease" data-filterable-set=":MapLibreAndroid/webgpuWgpuRelease">
+<a data-name="1572553406%2FFunctions%2F-2079570027" anchor-label="start" id="1572553406%2FFunctions%2F-2079570027" data-filterable-set=":MapLibreAndroid/openglRelease"></a>
+          <div class="table-row table-row_content" data-filterable-current=":MapLibreAndroid/openglRelease" data-filterable-set=":MapLibreAndroid/openglRelease">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="start.html"><span><span>start</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1572553406%2FFunctions%2F936287327"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1572553406%2FFunctions%2F-2079570027"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/webgpuWgpuRelease"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a></div></div><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><a href="-snapshot-ready-callback/index.html">MapSnapshotter.SnapshotReadyCallback</a><span class="token punctuation">, </span></span><span class="parameter ">errorHandler<span class="token operator">: </span><a href="-error-handler/index.html">MapSnapshotter.ErrorHandler</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts loading and rendering the snapshot. The callbacks will be fired on the calling thread.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid/openglRelease"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a></div></div><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">callback<span class="token operator">: </span><a href="-snapshot-ready-callback/index.html">MapSnapshotter.SnapshotReadyCallback</a><span class="token punctuation">, </span></span><span class="parameter ">errorHandler<span class="token operator">: </span><a href="-error-handler/index.html">MapSnapshotter.ErrorHandler</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts loading and rendering the snapshot. The callbacks will be fired on the calling thread.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -358,17 +398,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2026 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
