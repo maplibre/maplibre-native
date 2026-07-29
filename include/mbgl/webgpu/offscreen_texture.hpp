@@ -16,6 +16,7 @@ public:
     bool isRenderable() override;
     PremultipliedImage readStillImage() override;
     const gfx::Texture2DPtr& getTexture() override;
+    gfx::Texture2DPtr takeTexture();
 };
 
 } // namespace webgpu

@@ -222,7 +222,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
         for (const auto& positionedGlyph : line.positionedGlyphs) {
             if (!positionedGlyph.rect.hasArea()) continue;
 
-            // The rects have an addditional buffer that is not included in their size;
+            // The rects have an additional buffer that is not included in their size;
             const float glyphPadding = 1.0f;
             float rectBuffer = 3.0f + glyphPadding;
             float pixelRatio = 1.0f;

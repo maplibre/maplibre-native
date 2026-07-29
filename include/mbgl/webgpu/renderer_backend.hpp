@@ -37,12 +37,14 @@ public:
     void setSurface(void* nativeWindow);
 
     // WebGPU-specific methods
+    // Emdawn hosts that use synchronous readback must create the instance with
+    // WGPUInstanceFeatureName_TimedWaitAny enabled.
     void setInstance(void* instance);
-    void setDevice(void* device);
-    void setQueue(void* queue);
+    void setDevice(WGPUDevice device);
+    void setQueue(WGPUQueue queue);
     void* getInstance() const;
-    void* getDevice() const;
-    void* getQueue() const;
+    WGPUDevice getDevice() const;
+    WGPUQueue getQueue() const;
     void* getSurface() const;
 
     // Surface texture access - can be overridden by platform backends

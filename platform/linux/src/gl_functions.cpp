@@ -3,7 +3,6 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <GLES3/gl3.h>
-#include <GLES3/gl3ext.h>
 
 namespace mbgl {
 namespace platform {

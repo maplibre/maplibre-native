@@ -15,6 +15,8 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <map>
+#include <set>
 #include <string>
 
 namespace mbgl {
@@ -45,6 +47,10 @@ public:
                                             context.createShader(ShaderType::Fragment, fragmentSource),
                                             attributeLocations.getFirstAttribName())) {
             attributeLocations.queryLocations(program);
+            if (!attributeLocations.hasExpectedFirstLocation()) {
+                throw std::runtime_error("Shader is missing active attribute at location 0: " +
+                                         std::string(attributeLocations.getFirstAttribName()));
+            }
             uniformStates.queryLocations(program);
         }
 
@@ -80,7 +86,7 @@ public:
         gl::UniformStates<UniformList> uniformStates;
     };
 
-    void draw(gfx::Context& genericContext,
+    bool draw(gfx::Context& genericContext,
               gfx::RenderPass&,
               const gfx::DrawMode& drawMode,
               const gfx::DepthMode& depthMode,
@@ -101,6 +107,10 @@ public:
         context.setCullFaceMode(cullFaceMode);
 
         const uint32_t key = gl::AttributeKey<AttributeList>::compute(attributeBindings);
+        if (failedInstances.contains(key)) {
+            return false;
+        }
+
         auto it = instances.find(key);
         if (it == instances.end()) {
             try {
@@ -112,7 +122,8 @@ public:
                          .first;
             } catch (const std::runtime_error& e) {
                 Log::Error(Event::OpenGL, e.what());
-                return;
+                failedInstances.insert(key);
+                return false;
             }
         }
 
@@ -125,10 +136,12 @@ public:
         vertexArray.bind(context, indexBuffer, instance.attributeLocations.toBindingArray(attributeBindings));
 
         context.draw(drawMode, indexOffset, indexLength);
+        return true;
     }
 
 private:
     std::map<uint32_t, std::unique_ptr<Instance>> instances;
+    std::set<uint32_t> failedInstances;
 };
 
 } // namespace gl

@@ -124,6 +124,14 @@ void Renderer::getFeatureState(FeatureState& state,
     impl->orchestrator.getFeatureState(state, sourceID, sourceLayerID, featureID);
 }
 
+FeatureState Renderer::getFeatureState(const std::string& sourceID,
+                                       const std::optional<std::string>& sourceLayerID,
+                                       const std::string& featureID) const {
+    FeatureState state;
+    getFeatureState(state, sourceID, sourceLayerID, featureID);
+    return state;
+}
+
 void Renderer::removeFeatureState(const std::string& sourceID,
                                   const std::optional<std::string>& sourceLayerID,
                                   const std::optional<std::string>& featureID,

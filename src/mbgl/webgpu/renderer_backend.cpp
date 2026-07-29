@@ -35,8 +35,8 @@ namespace webgpu {
 class RendererBackend::Impl {
 public:
     void* instance = nullptr;
-    void* device = nullptr;
-    void* queue = nullptr;
+    WGPUDevice device = nullptr;
+    WGPUQueue queue = nullptr;
     void* surface = nullptr;
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     wgpu::TextureFormat colorFormat = wgpu::TextureFormat::Undefined;
@@ -46,7 +46,9 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
       impl(std::make_unique<Impl>()) {}
 
-RendererBackend::~RendererBackend() = default;
+RendererBackend::~RendererBackend() {
+    context.reset();
+}
 
 void RendererBackend::activate() {
     // Activation logic if needed
@@ -134,11 +136,11 @@ void RendererBackend::setInstance(void* instance) {
     impl->instance = instance;
 }
 
-void RendererBackend::setDevice(void* device) {
+void RendererBackend::setDevice(WGPUDevice device) {
     impl->device = device;
 }
 
-void RendererBackend::setQueue(void* queue) {
+void RendererBackend::setQueue(WGPUQueue queue) {
     impl->queue = queue;
 }
 
@@ -146,11 +148,11 @@ void* RendererBackend::getInstance() const {
     return impl->instance;
 }
 
-void* RendererBackend::getDevice() const {
+WGPUDevice RendererBackend::getDevice() const {
     return impl->device;
 }
 
-void* RendererBackend::getQueue() const {
+WGPUQueue RendererBackend::getQueue() const {
     return impl->queue;
 }
 

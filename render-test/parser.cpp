@@ -1227,7 +1227,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[4].IsArray());  // end [lat, lng, zoom]
 
             if (metadata.mapMode != mbgl::MapMode::Continuous) {
-                metadata.errorMessage = "Map mode must be Continous for " + panGestureOp + " operation";
+                metadata.errorMessage = "Map mode must be Continuous for " + panGestureOp + " operation";
                 return {};
             }
 

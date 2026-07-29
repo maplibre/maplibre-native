@@ -46,7 +46,7 @@ public:
 
     struct RenderFrameStatus {
         RenderMode mode;
-        bool needsRepaint; // In continous mode, shows that there are ongoig transitions.
+        bool needsRepaint; // In continuous mode, shows that there are ongoig transitions.
         bool placementChanged;
         gfx::RenderingStats renderingStats;
     };

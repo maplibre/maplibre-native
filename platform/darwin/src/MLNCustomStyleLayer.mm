@@ -117,7 +117,8 @@ public:
         .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
         .pitch = static_cast<CGFloat>(parameters.pitch),
         .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)};
+        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
+        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
 
     if (layer.mapView) {
       [layer drawInMapView:layer.mapView withContext:drawingContext];

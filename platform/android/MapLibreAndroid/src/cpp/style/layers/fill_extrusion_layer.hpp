@@ -26,6 +26,8 @@ public:
 
     // Properties
 
+    jni::Local<jni::Object<jni::ObjectTag>> getFillExtrusionRoundedCornerDistance(jni::JNIEnv&);
+
     jni::Local<jni::Object<jni::ObjectTag>> getFillExtrusionOpacity(jni::JNIEnv&);
     void setFillExtrusionOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay);
     jni::Local<jni::Object<TransitionOptions>> getFillExtrusionOpacityTransition(jni::JNIEnv&);

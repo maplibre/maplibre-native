@@ -450,7 +450,14 @@ private:
                         std::string data = *responseMetadata.data;
 
                         if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
-                            data = util::decompress(data);
+                            try {
+                                data = util::decompress(data);
+                            } catch (const std::exception& e) {
+                                callback(std::make_unique<Response::Error>(
+                                    Response::Error::Reason::Other,
+                                    std::string("Error decompressing PMTiles metadata: ") + e.what()));
+                                return;
+                            }
                         }
 
                         parse_callback(data);

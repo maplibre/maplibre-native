@@ -111,7 +111,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
                          gfx::IndexVector<Triangles>& fillIndexes,
                          SegmentVector& fillSegments) {
     for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
+        // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
         std::size_t totalVertices = totalVerticesCheck(polygon);
@@ -133,7 +133,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::IndexVector<gfx::Lines>& lineIndexes,
                                   SegmentVector& lineSegments) {
     for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
+        // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
         std::size_t totalVertices = totalVerticesCheck(polygon);
@@ -171,7 +171,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
     lineOptions.type = FeatureType::Polygon;
 
     for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
+        // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
         std::size_t totalVertices = totalVerticesCheck(polygon);
@@ -223,7 +223,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
     }
 
     for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
+        // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
 
         const std::size_t totalVertices = totalVerticesCheck(polygon);

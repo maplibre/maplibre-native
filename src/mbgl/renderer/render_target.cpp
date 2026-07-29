@@ -70,6 +70,9 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
                                                                   .clearColor = Color{0.0f, 0.0f, 0.0f, 1.0f},
                                                                   .clearDepth = {},
                                                                   .clearStencil = {}});
+#if MLN_RENDER_BACKEND_OPENGL
+    parameters.updateStencilBufferAvailability();
+#endif
 
     const gfx::ScissorRect prevScissorRect = parameters.scissorRect;
     const auto& size = getTexture()->getSize();

@@ -11,9 +11,14 @@ endif()
 message(STATUS "Configuring wgpu-native WebGPU implementation")
 
 set(_mln_wgpu_source_dir "${PROJECT_SOURCE_DIR}/vendor/wgpu-native")
+if ("${MLN_WEBGPU_IMPL_FFI_BUNDLED_WEBGPU_HEADER}" STREQUAL "")
+    set(WEBGPU_H_DIR ${_mln_wgpu_source_dir}/ffi/webgpu-headers)
+else()
+    set(WEBGPU_H_DIR ${MLN_WEBGPU_IMPL_WEBGPU_HEADER_DIR})
+endif()
 
 # Check if wgpu-native exists
-if(NOT EXISTS "${_mln_wgpu_source_dir}/ffi/webgpu-headers/webgpu.h")
+if(NOT EXISTS "${WEBGPU_H_DIR}/webgpu.h")
     message(FATAL_ERROR
         "wgpu-native not found at ${_mln_wgpu_source_dir}. "
         "Please ensure the wgpu-native submodule is initialized: "
@@ -78,23 +83,25 @@ macro(mln_wgpu_find_exact_library out_var out_description)
 endmacro()
 
 # On Android/iOS, use manual path search since find_library may not work with cross-compilation toolchains
-macro(mln_wgpu_find_library)
-    if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        mln_wgpu_find_exact_library(WGPU_LIBRARY "wgpu-native library")
-    else()
-        find_library(WGPU_LIBRARY
-            NAMES wgpu_native libwgpu_native
-            PATHS ${_wgpu_lib_search_paths}
-            NO_DEFAULT_PATH
-            NO_CMAKE_FIND_ROOT_PATH
-        )
-    endif()
-endmacro()
+if (NOT MLN_WEBGPU_IMPL_FFI)
+    macro(mln_wgpu_find_library)
+        if(ANDROID OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
+            mln_wgpu_find_exact_library(WGPU_LIBRARY "wgpu-native library")
+        else()
+            find_library(WGPU_LIBRARY
+                NAMES wgpu_native libwgpu_native
+                PATHS ${_wgpu_lib_search_paths}
+                NO_DEFAULT_PATH
+                NO_CMAKE_FIND_ROOT_PATH
+            )
+        endif()
+    endmacro()
 
-mln_wgpu_find_library()
-mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
+    mln_wgpu_find_library()
+	mln_wgpu_find_exact_library(WGPU_STATIC_LIBRARY "wgpu-native static library")
+endif()
 
-if(NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION)
+if(NOT MLN_WEBGPU_IMPL_FFI AND (NOT WGPU_LIBRARY OR MLN_WGPU_NATIVE_VERSION))
     # Use a specific version of WGPU. This is required when to a rust application
     # which uses wgpu directly instead of wgpu-native
     if (MLN_WGPU_NATIVE_VERSION)
@@ -204,7 +211,7 @@ if(NOT EXISTS "${_webgpu_cpp_header}")
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} generate.py
             --use-init-macros
-            --header ${_mln_wgpu_source_dir}/ffi/webgpu-headers/webgpu.h
+            --header ${WEBGPU_H_DIR}/webgpu.h
             --output ${_webgpu_cpp_header}
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/vendor/webgpu-cpp"
         RESULT_VARIABLE _gen_result
@@ -278,42 +285,45 @@ endif()
 # Create interface library
 add_library(mbgl-vendor-wgpu INTERFACE)
 
+# For the ffi we don't link the wgpu library, because we link in the final stage with the rust wgpu version
 target_link_libraries(mbgl-vendor-wgpu INTERFACE ${WGPU_LIBRARY})
 
 # Add include directories for webgpu.h, wgpu.h, and C++ wrapper
 target_include_directories(mbgl-vendor-wgpu
     SYSTEM INTERFACE
         ${_webgpu-cpp-output_dir}         # For webgpu.hpp webgpu/webgpu_cpp.h compatibility shim
-        ${_mln_wgpu_source_dir}/ffi/webgpu-headers # webgpu.h
+        ${WEBGPU_H_DIR}
         ${_mln_wgpu_source_dir}/ffi # wgpu.h
 )
 
 # Platform-specific system libraries that wgpu-native needs
-if(APPLE)
-    target_link_libraries(mbgl-vendor-wgpu INTERFACE
-        "-framework Foundation"
-        "-framework QuartzCore"
-        "-framework Metal"
-    )
-elseif(WIN32)
-    target_link_libraries(mbgl-vendor-wgpu INTERFACE
-        d3d12
-        dxgi
-        d3dcompiler
-        ws2_32
-        userenv
-        bcrypt
-        ntdll
-    )
-elseif(ANDROID)
-    mln_wgpu_android_link_library(mbgl-vendor-wgpu)
-else() # Linux
-    # wgpu-native on Linux might need these depending on the build configuration
-    find_package(Threads REQUIRED)
-    target_link_libraries(mbgl-vendor-wgpu INTERFACE
-        Threads::Threads
-        ${CMAKE_DL_LIBS}
-    )
+if (NOT MLN_WEBGPU_IMPL_FFI)
+    if(APPLE)
+        target_link_libraries(mbgl-vendor-wgpu INTERFACE
+            "-framework Foundation"
+            "-framework QuartzCore"
+            "-framework Metal"
+        )
+    elseif(WIN32)
+        target_link_libraries(mbgl-vendor-wgpu INTERFACE
+            d3d12
+            dxgi
+            d3dcompiler
+            ws2_32
+            userenv
+            bcrypt
+            ntdll
+        )
+    elseif(ANDROID)
+        mln_wgpu_android_link_library(mbgl-vendor-wgpu)
+    else() # Linux
+        # wgpu-native on Linux might need these depending on the build configuration
+        find_package(Threads REQUIRED)
+        target_link_libraries(mbgl-vendor-wgpu INTERFACE
+            Threads::Threads
+            ${CMAKE_DL_LIBS}
+        )
+    endif()
 endif()
 
 # Suppress warnings from wgpu headers
@@ -324,11 +334,22 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     )
 endif()
 
-set_target_properties(
-    mbgl-vendor-wgpu
-    PROPERTIES
-        INTERFACE_MAPLIBRE_NAME "wgpu-native"
-        INTERFACE_MAPLIBRE_URL "https://github.com/gfx-rs/wgpu-native"
-        INTERFACE_MAPLIBRE_AUTHOR "gfx-rs developers"
-        INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/vendor/wgpu-native/LICENSE.MIT"
-)
+if (NOT MLN_WEBGPU_IMPL_FFI)
+    set_target_properties(
+        mbgl-vendor-wgpu
+        PROPERTIES
+            INTERFACE_MAPLIBRE_NAME "wgpu-native"
+            INTERFACE_MAPLIBRE_URL "https://github.com/gfx-rs/wgpu-native"
+            INTERFACE_MAPLIBRE_AUTHOR "gfx-rs developers"
+            INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/vendor/wgpu-native/LICENSE.MIT"
+    )
+else()
+    set_target_properties(
+        mbgl-vendor-wgpu
+        PROPERTIES
+            INTERFACE_MAPLIBRE_NAME "wgpu-ffi"
+            INTERFACE_MAPLIBRE_URL "https://github.com/maplibre/maplibre-native"
+            INTERFACE_MAPLIBRE_AUTHOR "Maplibre Contributors"
+            INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md"
+    )
+endif()

@@ -1,7 +1,7 @@
 # Release Policy
 
 > [!NOTE]
-> The following release policiy applies specifically to MapLibre **Android** and MapLibre **iOS**.
+> The following release policy applies specifically to MapLibre **Android** and MapLibre **iOS**.
 
 - We use [semantic versioning](https://semver.org/). Breaking changes will always result in a major release.
 - Despite having extensive tests in place, as a FOSS project we have limited QA testing capabilities. When major changes took place we may opt to put out a pre-release to let the community help with testing.

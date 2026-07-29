@@ -7,7 +7,7 @@
 namespace mbgl {
 
 /// A movable type-erasing function wrapper. This allows to store arbitrary
-/// invokable things (like std::function<>, or the result of a movable-only
+/// invocable things (like std::function<>, or the result of a movable-only
 /// std::bind()) in the queue. Source:
 /// http://stackoverflow.com/a/29642072/331379
 class WorkTask : private util::noncopyable {
