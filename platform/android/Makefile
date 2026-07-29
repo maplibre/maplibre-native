@@ -50,7 +50,7 @@ MLN_ANDROID_DALVIKVM = dalvikvm$(if $(filter arm-v8 x86-64,$1),64,32)
 MLN_ANDROID_APK_SUFFIX = $(if $(filter Release,$(BUILDTYPE)),release,debug)
 MLN_ANDROID_CORE_TEST_DIR = MapLibreAndroid/.externalNativeBuild/cmake/$(buildtype)/$2/core-tests
 MLN_ANDROID_BENCHMARK_DIR = MapLibreAndroid/.externalNativeBuild/cmake/$(buildtype)/$2/benchmark
-MLN_ANDROID_STL ?= c++_static
+MLN_ANDROID_STL ?= c++_shared
 SOCKET_TIMEOUT = 360000
 CONNECTION_TIMEOUT = 360000
 MLN_ANDROID_GRADLE = ./gradlew --parallel --max-workers=$(JOBS) -Pmapbox.buildtype=$(buildtype) -Pmapbox.stl=$(MLN_ANDROID_STL) -Dorg.gradle.internal.http.socketTimeout=$(SOCKET_TIMEOUT) -Dorg.gradle.internal.http.connectionTimeout=$(CONNECTION_TIMEOUT)
