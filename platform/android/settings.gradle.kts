@@ -45,4 +45,3 @@ buildCache {
         isEnabled = true
     }
 }
-include(":MapLibrePluginsExampleLibrary")

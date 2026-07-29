@@ -139,7 +139,6 @@ kotlin {
 
 dependencies {
     implementation(project(":MapLibreAndroid"))
-    implementation(project(":MapLibrePluginsExampleLibrary"))
 
     implementation(libs.maplibreNavigation) {
         exclude(group = "org.maplibre.gl", module = "android-sdk")

@@ -203,11 +203,19 @@ fun getGitRevision(shortRev: Boolean = true): String {
 val syncPrefabHeaders by tasks.registering(Sync::class) {
     val nativeRoot = rootProject.rootDir.resolve("../..")
     from(nativeRoot.resolve("include")) {
+        include("mbgl/util/vectors.hpp")
         include("mbgl/style/layers/custom_layer_host.hpp")
         include("mbgl/style/layers/custom_layer_init_parameters.hpp")
         include("mbgl/style/layers/custom_layer_render_parameters.hpp")
         include("mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp")
         include("mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp")
+    }
+    from(nativeRoot.resolve("src")) {
+        include("mbgl/plugin/plugin.hpp")
+        include("mbgl/plugin/plugin_manager.hpp")
+        include("mbgl/plugin/plugin_map_layer.hpp")
+        include("mbgl/plugin/plugin_style_preprocessor.hpp")
+        include("mbgl/util/mat4.hpp")
     }
     into(project.rootDir.resolve("prefab-headers"))
 }
