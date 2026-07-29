@@ -35,7 +35,8 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
             abi = project.property("maplibre.abis") as String
         }
 
-        var stl = "c++_static"
+        // The public Prefab API passes STL-owned values across shared library boundaries.
+        var stl = "c++_shared"
         if (project.hasProperty("mapbox.stl")) {
             stl = project.property("mapbox.stl") as String
         }

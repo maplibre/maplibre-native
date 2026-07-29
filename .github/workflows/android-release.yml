@@ -131,10 +131,10 @@ jobs:
         run: |
           renderer=${{ matrix.RENDERER }}
           if [ "$renderer" = "opengl" ]; then
-            ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToMavenCentralRepository
-            ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToMavenCentralRepository
+            ./gradlew -Pmapbox.stl=c++_shared :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToMavenCentralRepository
+            ./gradlew -Pmapbox.stl=c++_shared :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToMavenCentralRepository
           else
-            ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
+            ./gradlew -Pmapbox.stl=c++_shared :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
           fi
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
