@@ -248,6 +248,11 @@ run-android-test-app-center:
 run-android-publish:
 	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmaplibre.abis=all :MapLibreAndroid:publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
+# Publishes the OpenGL Android SDK to Maven Local without release signing credentials.
+.PHONY: android-publish-local
+android-publish-local:
+	$(MLN_ANDROID_GRADLE_SINGLE_JOB) -Pmaplibre.abis=all -Pmaplibre.signing.enabled=false :MapLibreAndroid:publishOpenglreleasePublicationToMavenLocal
+
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo
 android-gfxinfo:

@@ -16,6 +16,9 @@ plugins {
 
 val androidComponents = extensions.getByType<LibraryAndroidComponentsExtension>()
 val androidLibrary = extensions.getByType<LibraryExtension>()
+val signingEnabled = providers.gradleProperty("maplibre.signing.enabled")
+    .map(String::toBoolean)
+    .getOrElse(true)
 
 androidLibrary.publishing {
     singleVariant("vulkanRelease")
@@ -27,7 +30,9 @@ androidLibrary.publishing {
 afterEvaluate {
     mavenPublishing {
         publishToMavenCentral(true)
-        signAllPublications()
+        if (signingEnabled) {
+            signAllPublications()
+        }
     }
 }
 
