@@ -486,8 +486,9 @@ enum {
     idFillExtrusionOutlinePosAttribute,
 #else
     idFillExtrusionNormal2DVertexAttribute,
-    idFillExtrusionCentroidVertexAttribute,
 #endif
+    // Both paths carry the polygon centroid, for terrain elevation
+    idFillExtrusionCentroidVertexAttribute,
 
     // Data driven
     idFillExtrusionBaseVertexAttribute,

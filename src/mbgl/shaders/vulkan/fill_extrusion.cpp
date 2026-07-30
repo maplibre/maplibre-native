@@ -39,7 +39,9 @@ const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceA
     AttributeInfo{4, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
     AttributeInfo{5, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
 };
-const std::array<TextureInfo, 0> FillExtrusionInstancedShaderSource::textures = {};
+const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = {
+    TextureInfo{0, idFillExtrusionDEMTexture},
+};
 
 //
 // Fill extrusion pattern

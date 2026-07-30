@@ -176,7 +176,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::V
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 5> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
 
@@ -243,11 +243,14 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
 struct OutlineInstance {
     int pos;
     uint decimals_ed;
+    int centroid; // packed 2x int16; matches FillExtrusionLayoutVertex stride
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {
     OutlineInstance instance[];
 } instanceVector;
+
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D dem_sampler;
 
 layout(location = 0) out mediump vec4 frag_color;
 
@@ -291,7 +294,15 @@ void main() {
 
     const vec3 normal = vec3(-edgevector.y, edgevector.x, 0.0);
     const float t = float(in_position.y);
-    const float z = t > 0.0 ? height : base;
+
+    // Raise the whole extrusion by the terrain elevation sampled once at the polygon
+    // centroid (so it does not shear across a slope), and drop ground-level floors
+    // slightly so buildings do not hang off a slope - matches the GL path / gl-js.
+    const vec2 centroid = unpack_int(instanceVector.instance[gl_InstanceIndex].centroid);
+    const float ele = get_elevation(centroid, dem_sampler, drawable.dem_coords, drawable.dem_unpack,
+                                    drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float elevBase = base + ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    const float z = t > 0.0 ? (height + ele) : elevBase;
 
     gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
     applySurfaceTransform();
@@ -689,6 +700,7 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
 struct OutlineInstance {
     int pos;
     uint decimals_ed;
+    int centroid; // packed 2x int16; matches FillExtrusionLayoutVertex stride
 };
 
 layout(std430, set = DRAWABLE_UBO_SET_INDEX, binding = idFillExtrusionInstancedDrawableUBO) readonly buffer FillExtrusionInstanceVector {

@@ -99,9 +99,9 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         if (totalVertices == 0) continue;
 
-#if !MLN_USE_FILL_EXTRUSION_INSTANCING
         // Polygon centroid (outer ring), so the whole extrusion is raised by a
-        // single terrain elevation instead of shearing across a slope (as gl-js does)
+        // single terrain elevation instead of shearing across a slope (as gl-js does).
+        // Both the instanced and non-instanced paths carry it, for terrain elevation.
         Point<int16_t> centroid{0, 0};
         if (!polygon.empty() && !polygon.front().empty()) {
             Point<double> accum{0.0, 0.0};
@@ -113,7 +113,6 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             centroid.x = static_cast<int16_t>(std::floor(accum.x / count));
             centroid.y = static_cast<int16_t>(std::floor(accum.y / count));
         }
-#endif
 
         std::vector<uint32_t> flatIndices;
         flatIndices.reserve(totalVertices);
@@ -134,7 +133,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         const auto processRingPoints =
             [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-                vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2));
+                vertices.emplace_back(layoutVertex(p1, edgeDistance, !p2, centroid));
                 flatIndices.emplace_back(triangleIndex);
                 triangleIndex++;
 

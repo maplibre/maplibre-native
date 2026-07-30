@@ -202,7 +202,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::M
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 5> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -224,6 +224,7 @@ struct VertexStage {
 struct OutlineInstance {
     short2 pos;
     ushort2 decimals_ed;
+    short2 centroid; // matches FillExtrusionLayoutVertex; used for terrain elevation
 };
 
 struct FragmentStage {
@@ -241,7 +242,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
                                 uint instanceID [[ instance_id ]],
-                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
+                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]]) {
 
     bool isDiscarded = glMod(float(outline[instanceID].decimals_ed.x), 2.0) > 0.0;
     if (isDiscarded) {
@@ -270,7 +273,19 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float3 normal = float3(-edgevector.y, edgevector.x, 0.0);
     const float t = float(vertx.pos.y);
-    const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
+    // Raise the whole extrusion by the terrain elevation sampled once at the polygon
+    // centroid (so it does not shear across a slope), and drop ground-level floors
+    // slightly so buildings do not hang off a slope - matches the GL path / gl-js.
+    const float ele = get_elevation(float2(outline[instanceID].centroid),
+                                    demTexture,
+                                    demSampler,
+                                    drawable.dem_coords,
+                                    drawable.dem_unpack,
+                                    drawable.dem_dim,
+                                    drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
+    const float elevBase = base + ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    const float z = (t != 0.0) ? (height + ele) : elevBase;
 
     const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
 
@@ -554,6 +569,7 @@ struct VertexStage {
 struct OutlineInstance {
     short2 pos;
     ushort2 decimals_ed;
+    short2 centroid; // matches FillExtrusionLayoutVertex; used for terrain elevation
 };
 
 struct FragmentStage {
