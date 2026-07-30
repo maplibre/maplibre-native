@@ -352,6 +352,27 @@ surface (`setEnableDepth(true)`), the depth-pass gate (`depthDirty`/camera-moved
 and the per-mode mesh-tile cap all live in `render_terrain.cpp` and apply to every
 backend. Vulkan was spot-checked (renders, re-enable OK); Metal/WebGPU were not.
 
+**Low-end device result (US828, MediaTek GPU, OpenGL, 2026-07-30, git 5864482).**
+The load-mode budgets do **not** help on the device they were designed for:
+
+| mode | fps mean | worstMs med/p95/max | jank/s | enc p95/max |
+|---|---|---|---|---|
+| quality | 8.0 | 262/722/983 | 6.01 | 768/1354 |
+| balanced | 8.2 | 265/732/990 | 6.14 | 735/1297 |
+| performance | 8.2 | 270/701/865 | 6.23 | 698/1324 |
+
+All three modes are within noise of each other, even though the per-mode tile
+cap meant Performance drew 24 mesh tiles against Quality's 64 - a 62% cut in
+terrain tiles for no measurable gain. Encode is 700-1350ms per frame and the
+whole scene runs at ~8 fps (the Adreno 750 does ~105 fps on the same build).
+
+This is the experiment the `TerrainLoadMode` budgets existed to justify, and it
+says they do not work: the bottleneck on this hardware is not the number of
+terrain mesh tiles or how many drapes re-render per frame. Something else
+dominates - the 1024x1024 drape targets, the DEM uploads, or the non-terrain
+layers - and should be measured before any more tuning of the budgets. Consider
+whether Balanced/Performance earn their complexity at all in their current form.
+
 **Vulkan performance** (SM-S948U, same flight/benchmark as GL, 90s/mode) is well
 ahead of GL: quality 115.2 fps / 2.66 jank-per-s vs GL's 105.0 / 5.38, performance
 113.9 / 2.58 vs 86.9 / 10.87.
