@@ -22,7 +22,10 @@ std::unique_ptr<Layout> FillExtrusionLayerFactory::createLayout(
     std::unique_ptr<GeometryTileLayer> layer,
     const std::vector<Immutable<style::LayerProperties>>& group) {
     using namespace style;
-    using LayoutType = PatternLayout<FillExtrusionBucket, FillExtrusionLayerProperties, FillExtrusionPattern>;
+    using LayoutType = PatternLayout<FillExtrusionBucket,
+                                     FillExtrusionLayerProperties,
+                                     FillExtrusionPattern,
+                                     FillExtrusionLayoutProperties>;
     return std::unique_ptr<Layout>(new (std::nothrow)
                                        LayoutType(parameters.bucketParameters, group, std::move(layer), parameters));
 }
