@@ -13,11 +13,6 @@ layout (location = 1) in vec2 a_decimals_ed;
 layout (location = 2) in vec2 a_normal2d;
 layout (location = 3) in vec2 a_centroid;
 out vec4 v_color;
-// Clip position + terrain-on flag, for per-fragment terrain occlusion (see the
-// fragment shader): a ridge can cut through a building, so unlike a symbol it
-// cannot be faded as a whole in the vertex stage.
-out highp vec4 v_terrain_pos;
-out mediump float v_depth_enabled;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
@@ -38,8 +33,7 @@ layout (std140) uniform FillExtrusionDrawableUBO {
     highp float u_dem_dim;
     highp float u_dem_exaggeration;
     lowp float u_dem_enabled;
-    // Terrain enabled (occlusion active); repurposed pad slot, matches C++ depth_enabled
-    lowp float u_depth_enabled;
+    lowp float drawable_pad2;
 };
 
 uniform sampler2D u_dem;
@@ -113,10 +107,6 @@ highp vec4 color = u_color;
 
     gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
 
-    // Forward clip position + terrain-on flag for per-fragment terrain occlusion
-    v_terrain_pos = gl_Position;
-    v_depth_enabled = u_depth_enabled;
-
     // Relative luminance (how dark/bright is the surface color?)
     float colorvalue = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
 
@@ -154,26 +144,9 @@ highp vec4 color = u_color;
 }
 )";
     static constexpr const char* fragment = R"(in vec4 v_color;
-in highp vec4 v_terrain_pos;
-in mediump float v_depth_enabled;
-
-uniform sampler2D u_terrain_depth;
 
 void main() {
     fragColor = v_color;
-
-    // Terrain occlusion: hide the parts of a building that fall behind the terrain.
-    // Per fragment (not per drawable) so a building poking above a ridge keeps its
-    // visible upper portion while the covered lower part is cut away. depth_opacity()
-    // is the fragment-prelude twin of the symbol path's, so both use one convention.
-    if (v_depth_enabled != 0.0) {
-        highp vec3 frag = v_terrain_pos.xyz / v_terrain_pos.w;
-        highp float visibility = depth_opacity(frag, u_terrain_depth);
-        if (visibility <= 0.0) {
-            discard;
-        }
-        fragColor.a *= visibility;
-    }
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

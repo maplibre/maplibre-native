@@ -343,7 +343,6 @@ enum {
 enum {
     idFillExtrusionImageTexture,
     idFillExtrusionDEMTexture,
-    idFillExtrusionTerrainDepthTexture,
     fillExtrusionTextureCount
 };
 

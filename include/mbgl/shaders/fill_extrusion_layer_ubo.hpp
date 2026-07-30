@@ -28,7 +28,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /* 144 */ float dem_dim;
     /* 148 */ float dem_exaggeration;
     /* 152 */ float dem_enabled;
-    /* 156 */ float depth_enabled; // terrain on: fragment shader occludes buildings behind terrain
+    /* 156 */ float pad2;
     /* 160 */
 };
 static_assert(sizeof(FillExtrusionDrawableUBO) == 10 * 16);
