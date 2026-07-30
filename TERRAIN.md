@@ -291,7 +291,23 @@ buildable/testable in this environment (Metal needs macOS; WebGPU builds via the
 | **fill-extrusion elevation** | yes | **NO** | **NO** | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
-**Fill-extrusion terrain elevation is missing on Metal and Vulkan.** Those two
+**Fill-extrusion terrain elevation on Metal/Vulkan: attempted, still broken.**
+A first implementation landed (carry the polygon centroid through the instanced
+path: instanced `FillExtrusionLayoutVertex` gains `centroid`, bound as instance
+attribute `a3`; `OutlineInstance` gains a matching field in all four mtl/vulkan
+shader variants so the shared SSBO stride stays consistent; the plain instanced
+shader samples `get_elevation()` and raises base/height). It builds on GL,
+Vulkan and WebGPU-Dawn, but **on device the Vulkan buildings are still wrong** -
+they render as flat patches lying in the terrain surface rather than extruded
+boxes (2026-07-30). So the centroid is not reaching the shader correctly, or the
+DEM binding/`dem_enabled` is not set for instanced drawables. Next step: verify
+what the shader actually receives (e.g. output the sampled elevation or the
+unpacked centroid as colour) before changing more code - the SSBO packing of
+instance attributes into `OutlineInstance` is the prime suspect, since the
+backend builds that buffer from the registered instance attributes and the
+tight `int/uint/int` struct layout has not been confirmed to match.
+
+Original diagnosis: Those two
 backends use the instanced fill-extrusion path
 (`MLN_USE_FILL_EXTRUSION_INSTANCING = METAL || VULKAN`), whose layout vertex is
 `<pos, decimals_ed>` - it has no `centroid` attribute, so there is nothing to
