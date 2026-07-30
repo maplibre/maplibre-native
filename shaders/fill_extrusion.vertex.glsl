@@ -3,6 +3,11 @@ layout (location = 1) in vec2 a_decimals_ed;
 layout (location = 2) in vec2 a_normal2d;
 layout (location = 3) in vec2 a_centroid;
 out vec4 v_color;
+// Clip position + terrain-on flag, for per-fragment terrain occlusion (see the
+// fragment shader): a ridge can cut through a building, so unlike a symbol it
+// cannot be faded as a whole in the vertex stage.
+out highp vec4 v_terrain_pos;
+out mediump float v_depth_enabled;
 
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
@@ -23,7 +28,8 @@ layout (std140) uniform FillExtrusionDrawableUBO {
     highp float u_dem_dim;
     highp float u_dem_exaggeration;
     lowp float u_dem_enabled;
-    lowp float drawable_pad2;
+    // Terrain enabled (occlusion active); repurposed pad slot, matches C++ depth_enabled
+    lowp float u_depth_enabled;
 };
 
 uniform sampler2D u_dem;
@@ -78,6 +84,10 @@ void main() {
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
     gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
+
+    // Forward clip position + terrain-on flag for per-fragment terrain occlusion
+    v_terrain_pos = gl_Position;
+    v_depth_enabled = u_depth_enabled;
 
     // Relative luminance (how dark/bright is the surface color?)
     float colorvalue = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;

@@ -7,6 +7,7 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/renderer/texture_pool.hpp>
+#include <mbgl/util/mat4.hpp>
 
 #include <array>
 #include <memory>
@@ -37,6 +38,12 @@ class Drawable;
 class ShaderRegistry;
 class Texture2D;
 } // namespace gfx
+
+#if MLN_RENDER_BACKEND_OPENGL
+namespace gl {
+class Texture2DArray;
+} // namespace gl
+#endif
 
 /**
  * @brief Manages 3D terrain rendering using DEM (Digital Elevation Model) data
@@ -196,6 +203,10 @@ public:
 
     const TerrainMesh& getMesh(gfx::Context& context);
 
+    /// Mesh used by the instanced depth pass. Aliased to the full terrain mesh for now;
+    /// the coarser depth-only mesh optimization from the source PR can be pulled separately.
+    const TerrainMesh& getDepthMesh(gfx::Context& context);
+
     /**
      * @brief Get the layer group for terrain drawables
      */
@@ -256,6 +267,12 @@ private:
     // Layer group and viewport-sized target for the terrain depth pass
     LayerGroupBasePtr depthLayerGroup;
     std::shared_ptr<RenderTarget> depthRenderTarget;
+    // The depth pass output only changes when the camera moves or the terrain mesh
+    // set changes, so it is re-rendered only then (as maplibre-gl-js's maybeDrawDepth
+    // does) instead of every frame. depthDirty is set when depth drawables are added
+    // or removed; lastDepthProjMatrix detects camera movement.
+    bool depthDirty = true;
+    std::optional<mat4> lastDepthProjMatrix;
     // See getDepthTexture
     std::shared_ptr<gfx::Texture2D> placeholderDepthTexture;
 
@@ -273,8 +290,13 @@ private:
     // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
     // an ancestor tile's DEM is bound); read by the terrain layer tweaker
     std::map<OverscaledTileID, std::array<float, 4>> drawableDemCoords;
+#if MLN_RENDER_BACKEND_OPENGL
+    // Per-tile demTextureArray layer (own or ancestor DEM), -1 when the tile has no packed DEM;
+    // feeds the instanced depth pass (see rebuildInstancedDepthDrawable / depthInstances).
+    std::map<OverscaledTileID, float> drawableDemLayer;
+#endif
 
-    // Mesh resolution (vertices per side)
+    // Mesh resolution (grid cells per side)
     static constexpr size_t MESH_SIZE = 128;
 
     // Log the camera eye's clearance over the rendered terrain (throttled), so tests can report
@@ -285,6 +307,13 @@ private:
     // Only log when the eye is within this clearance of the terrain (or below it); above this,
     // stay silent to keep normal viewing noise-free. Also filters DEM-miss (groundM==0) rows.
     static constexpr double kAboveGroundAlertM = 1000.0; // metres
+
+    // Cap on the number of terrain mesh tiles processed per frame (0 = unlimited).
+    // Everything downstream scales with this: mesh drawables, drape targets, drape
+    // re-renders, depth-pass draws. When the cover exceeds the cap, the tiles
+    // nearest the map center are kept and the farthest (toward the horizon at high
+    // tilt) are dropped. Tune to trade terrain render distance for frame time.
+    static constexpr size_t MAX_MESH_TILES = 24;
 
     // Cached DEM source
     RenderSource* demSource = nullptr;
@@ -308,6 +337,38 @@ private:
     // this, preventing unbounded growth while browsing (previously reached 2GB+)
     static constexpr size_t maxDEMTextures = 96;
     uint64_t demUpdateCounter = 0;
+
+#if MLN_RENDER_BACKEND_OPENGL
+    // OpenGL-only: the same DEM tiles packed into one GL_TEXTURE_2D_ARRAY so the
+    // depth pass (and later the surface pass) can sample a per-instance layer in a
+    // single instanced draw instead of one draw per tile. Populated alongside the
+    // per-tile textures above (which remain the source of truth for CPU elevation
+    // and non-instanced sampling); a simple free-list recycles layer slots as tiles
+    // come and go. Cap the layer count to keep the array a bounded size.
+    static constexpr uint32_t maxDEMArrayLayers = 64;
+    std::unique_ptr<gl::Texture2DArray> demTextureArray;
+    std::map<UnwrappedTileID, uint32_t> demArrayLayer; // tile -> array layer index
+    std::vector<uint32_t> demArrayFreeLayers;          // recycled layer slots
+    uint32_t demArrayNextLayer = 0;                    // next never-used slot
+    void packDEMArrayLayer(gfx::Context&, const UnwrappedTileID&, const DEMData&);
+    void freeDEMArrayLayer(const UnwrappedTileID&);
+
+    // Instanced depth pass: one draw covers every mesh tile, sampling each tile's DEM from
+    // its demTextureArray layer (see terrain_depth.vertex / TerrainDepthInstanceUBO). Rebuilt
+    // when the tile set changes; the per-instance transform matrix is refreshed every frame in
+    // updateInstancedDepthUBO (renderDepth), since it depends on the camera.
+    static constexpr uint32_t maxDepthInstances = 64; // must match TERRAIN_MAX_INSTANCES in shader
+    struct DepthInstance {
+        OverscaledTileID tileID;
+        std::array<float, 4> demCoords; // scale, x/y offset, dem_dim (.w)
+        float demLayer;                 // demTextureArray layer for this tile (own or ancestor)
+    };
+    std::vector<DepthInstance> depthInstances; // current tile set, index == a_instance / gl_InstanceID
+    std::size_t depthInstanceSignature = 0;    // hash of the tile set the instanced drawable was built for
+    gfx::UniformBufferPtr depthInstanceUBO;    // TerrainDepthInstanceUBO[N], refreshed per frame
+    void rebuildInstancedDepthDrawable(gfx::Context&, gfx::ShaderRegistry&);
+    void updateInstancedDepthUBO(PaintParameters&);
+#endif
 
     // See getPlaceholderDEMTexture
     std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;

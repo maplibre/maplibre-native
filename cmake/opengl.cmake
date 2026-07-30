@@ -147,6 +147,8 @@ list(APPEND SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/dynamic_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_2d_array.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_2d_array.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
 )

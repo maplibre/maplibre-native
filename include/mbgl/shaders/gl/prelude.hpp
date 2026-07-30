@@ -112,6 +112,29 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
     return elevation * dem_exaggeration;
 }
 
+// Like get_elevation, but samples the DEM from one layer of a sampler2DArray, for the
+// instanced terrain depth pass (one draw covers many tiles, each with its own DEM layer).
+// Identical bilinear terrarium/mapbox decode; the layer is selected per instance.
+float get_elevation_array(vec2 pos, highp sampler2DArray dem, float layer, vec4 dem_coords,
+                          vec4 dem_unpack, float dem_dim, float dem_exaggeration) {
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.0;
+    vec2 f = fract(coord);
+    vec2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
+    float d = 1.0 / (dem_dim + 2.0);
+    vec4 tl = texture(dem, vec3(c, layer)) * 255.0;
+    tl.a = -1.0;
+    vec4 tr = texture(dem, vec3(c + vec2(d, 0.0), layer)) * 255.0;
+    tr.a = -1.0;
+    vec4 bl = texture(dem, vec3(c + vec2(0.0, d), layer)) * 255.0;
+    bl.a = -1.0;
+    vec4 br = texture(dem, vec3(c + vec2(d, d), layer)) * 255.0;
+    br.a = -1.0;
+    float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                          mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                          f.y);
+    return elevation * dem_exaggeration;
+}
+
 // Place a clip-space position computed with a tile-local drape matrix into the
 // current terrain drape render target. `matrix` is the drawable's tile-local
 // orthographic matrix with the drawable's tile (z, x, y) stored in its unused
@@ -138,37 +161,39 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
     return clip;
 }
 
-// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl),
-// converted to NDC z, as in the maplibre-gl-js prelude
+// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl).
+// Matches maplibre-gl-js unpack(): the depth pass packs gl_Position.z/gl_Position.w
+// (clip-space NDC z) directly, so no window-depth remap (no *2-1, no glDepthRange dependency).
 float unpack_depth(vec4 rgba_depth) {
     const highp vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+    return dot(rgba_depth, bit_shift);
+}
+
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully hidden,
+// with a soft ramp and a small bias so geometry sitting exactly on the terrain surface
+// (e.g. a label anchored to it) does not occlude itself. Matches maplibre-gl-js depthOpacity().
+highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    // gl-js uses 500 (ramp over ~0.002 NDC). Our perspective depth is compressed into a tighter
+    // NDC band near the far plane, so behind-ridge separations are only a few 1e-4; steepen to
+    // 5000 so those fully occlude. On-surface labels keep d = +0.0001 > 0 and stay fully visible.
+    return 1.0 - max(0.0, min(1.0, -d * 5000.0));
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth sampler and enable flag are
 // passed as arguments.
-// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
-// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
-// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
-// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
-highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
-    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
-    return 1.0 - max(0.0, min(1.0, -d * 500.0));
-}
 float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
     vec3 frag = pos.xyz / pos.w;
-    // check if coordinate is fully visible
     highp float d = depth_opacity(frag, depth_texture);
     if (d > 0.95) {
         return 1.0;
     }
-    // if not, sample some pixels above: a label whose anchor is just behind a
-    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
+    // a label whose anchor is just behind a ridge still shows if its glyphs poke above it
     return (d + depth_opacity(frag + vec3(0.0, 0.01, 0.0), depth_texture)) / 2.0;
 }
 )";
@@ -191,6 +216,23 @@ precision mediump float;
 #endif
 
 out highp vec4 fragColor;
+
+// Terrain occlusion for 3D geometry, per fragment. Mirrors the vertex prelude's
+// unpack_depth()/depth_opacity() (same convention: the terrain depth pass packs
+// clip-space NDC z, so no window-depth remap), but usable from a fragment shader:
+// a symbol fades as a whole label in the vertex stage, whereas an extruded building
+// is real geometry that a ridge can cut through, so it must be tested per fragment.
+float unpack_depth(vec4 rgba_depth) {
+    const highp vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift);
+}
+
+// 1 = in front of the terrain (visible), 0 = behind it (hidden), with the same soft
+// ramp and self-occlusion bias as the vertex-side depth_opacity().
+highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 5000.0));
+}
 )";
 };
 

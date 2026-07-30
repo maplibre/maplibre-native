@@ -343,6 +343,7 @@ enum {
 enum {
     idFillExtrusionImageTexture,
     idFillExtrusionDEMTexture,
+    idFillExtrusionTerrainDepthTexture,
     fillExtrusionTextureCount
 };
 
@@ -391,6 +392,7 @@ enum {
 enum {
     idTerrainDEMTexture,
     idTerrainMapTexture,
+    idTerrainDEMArrayTexture, // sampler2DArray of packed DEM tiles for the instanced GL depth pass
     terrainTextureCount
 };
 
@@ -570,6 +572,7 @@ enum {
 enum {
     idTerrainPosVertexAttribute,
     idTerrainTexturePosVertexAttribute,
+    idTerrainInstanceVertexAttribute, // per-instance index for the instanced GL depth pass
     terrainVertexAttributeCount
 };
 

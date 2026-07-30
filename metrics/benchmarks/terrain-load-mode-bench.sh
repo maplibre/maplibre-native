@@ -83,6 +83,17 @@ for M in quality balanced performance; do
   echo
 done
 
+# The test app PERSISTS the load mode across launches, so leaving the device on the last
+# mode benchmarked (performance) silently changes behaviour for any manual testing that
+# follows - Performance caps drape re-renders per frame, which looks like drape "flicker"
+# while zooming out. Restore the default (Quality) so the device is left as found.
+echo ">> restoring load mode to quality (default)"
+adb shell am force-stop "$PKG" >/dev/null 2>&1
+adb shell am start -n "$PKG/$ACT" --es mode quality >/dev/null 2>&1
+sleep 6
+adb shell am force-stop "$PKG" >/dev/null 2>&1
+echo
+
 # ---- summary (portable: sort + awk percentiles) ----
 pct() { sort -n | awk -v p="$1" '{a[++n]=$1} END{ if(n==0){print "NA"; exit} i=int(p/100*n+0.5); if(i<1)i=1; if(i>n)i=n; printf "%.1f", a[i] }'; }
 meanpos() { awk '$1>0{s+=$1;n++} END{ printf "%.1f", (n? s/n : 0) }'; }

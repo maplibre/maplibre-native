@@ -17,6 +17,11 @@
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/tile/raster_dem_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/gl/context.hpp>
+#include <mbgl/gl/texture_2d_array.hpp>
+#include <mbgl/gl/drawable_gl.hpp> // gl::DrawableGL::setArrayTexture for the instanced depth DEM
+#endif
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
@@ -31,12 +36,17 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/geo.hpp>
+#include <mbgl/math/angles.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/map/camera.hpp>
+#include <mbgl/util/convert.hpp> // util::cast for the instanced depth UBO matrix
+#include <mbgl/util/hash.hpp>    // util::hash_combine for the depth-instance set signature
+#include <mbgl/gfx/vertex_attribute.hpp> // VertexAttributeArray for the a_instance attribute
 
 #include <algorithm>
 #include <cmath>
@@ -234,6 +244,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             } else if (auto texture = createDEMTexture(context, *demData)) {
                 // Keep the texture available for elevation sampling by non-draped layers
                 demTextures[renderTile.id] = {texture, demData->dim, demUpdateCounter};
+#if MLN_RENDER_BACKEND_OPENGL
+                // Also pack this tile's DEM into the array for the (upcoming) instanced
+                // depth pass. Additive: the per-tile texture above is still the fallback.
+                packDEMArrayLayer(context, renderTile.id, *demData);
+#endif
             }
         }
     }
@@ -246,6 +261,36 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // limits to the frustum (elevation included), so no extra cull is needed.
     std::set<UnwrappedTileID> meshTiles = computeMeshCover(state, updateParameters);
 
+    // Cap the mesh tile count: keep those nearest the map center, drop the farthest
+    // (the horizon tiles a high tilt pulls in). Everything downstream - drape
+    // targets, re-renders, depth draws - scales with this count.
+    if (MAX_MESH_TILES > 0 && meshTiles.size() > MAX_MESH_TILES) {
+        // Map center in normalized web-mercator [0,1] (standard projection)
+        const LatLng center = state.getLatLng();
+        const double cx = center.longitude() / 360.0 + 0.5;
+        const double latRad = util::deg2rad(center.latitude());
+        const double cy = 0.5 - std::log(std::tan(M_PI / 4.0 + latRad / 2.0)) / (2.0 * M_PI);
+
+        const auto tileDist2 = [&](const UnwrappedTileID& id) {
+            const double scale = static_cast<double>(1u << id.canonical.z);
+            const double tx = (static_cast<double>(id.canonical.x) + 0.5) / scale + id.wrap;
+            const double ty = (static_cast<double>(id.canonical.y) + 0.5) / scale;
+            const double dx = tx - cx;
+            const double dy = ty - cy;
+            return dx * dx + dy * dy;
+        };
+
+        std::vector<UnwrappedTileID> sorted(meshTiles.begin(), meshTiles.end());
+        std::partial_sort(sorted.begin(),
+                          sorted.begin() + static_cast<std::ptrdiff_t>(MAX_MESH_TILES),
+                          sorted.end(),
+                          [&](const UnwrappedTileID& a, const UnwrappedTileID& b) {
+                              return tileDist2(a) < tileDist2(b);
+                          });
+        meshTiles = std::set<UnwrappedTileID>(sorted.begin(),
+                                              sorted.begin() + static_cast<std::ptrdiff_t>(MAX_MESH_TILES));
+    }
+
     // Drop drawables and cached DEM textures for tiles that left the mesh tile
     // set, keeping everything else intact between frames
     std::unordered_set<OverscaledTileID> currentTiles;
@@ -256,9 +301,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID()); });
     auto* depthLg = static_cast<LayerGroup*>(depthLayerGroup.get());
     if (depthLg) {
-        depthLg->removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID());
-        });
+        if (depthLg->removeDrawablesIf([&](gfx::Drawable& drawable) {
+                return drawable.getTileID() && !currentTiles.contains(*drawable.getTileID());
+            }) > 0) {
+            depthDirty = true;
+        }
     }
     for (auto it = tilesWithDrawables.begin(); it != tilesWithDrawables.end();) {
         if (!currentTiles.contains(it->first)) {
@@ -280,7 +327,14 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                 break;
             }
         }
-        it = related ? std::next(it) : demTextures.erase(it);
+        if (related) {
+            it = std::next(it);
+        } else {
+#if MLN_RENDER_BACKEND_OPENGL
+            freeDEMArrayLayer(it->first);
+#endif
+            it = demTextures.erase(it);
+        }
     }
     // Cap the cache: ancestor/descendant relations accumulate while browsing
     // (zooming makes whole chains "related"), which previously grew past 2GB
@@ -298,6 +352,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             if (demTextures.size() <= maxDEMTextures) {
                 break;
             }
+#if MLN_RENDER_BACKEND_OPENGL
+            freeDEMArrayLayer(id);
+#endif
             demTextures.erase(id);
         }
     }
@@ -323,11 +380,13 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // dimension rides in .w for the shader's get_elevation() call.
         std::array<float, 4> demCoords{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
         uint8_t demTier = 0;
+        const UnwrappedTileID* demTileUsed = nullptr; // DEM tile whose texture / array-layer this tile uses
 
         if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
             cached->second.lastUsed = demUpdateCounter;
             demTexture = cached->second.texture;
             demTier = 2;
+            demTileUsed = &unwrapped;
         } else {
             // Fall back to the closest cached ancestor DEM
             const UnwrappedTileID* ancestorID = nullptr;
@@ -353,6 +412,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             } else {
                 ancestorEntry->lastUsed = demUpdateCounter;
                 demTier = 1;
+                demTileUsed = ancestorID;
                 const auto off = demSubTileOffset(unwrapped.canonical, ancestorID->canonical);
                 demCoords = {{1.0f / (util::EXTENT * off.scale),
                               off.dx / off.scale,
@@ -372,10 +432,22 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             if (depthLg) {
                 depthLg->removeDrawablesIf(
                     [&](gfx::Drawable& drawable) { return drawable.getTileID() && *drawable.getTileID() == tileID; });
+                depthDirty = true;
             }
             tilesWithDrawables.erase(existing);
         }
         drawableDemCoords[tileID] = demCoords;
+#if MLN_RENDER_BACKEND_OPENGL
+        {
+            float layer = -1.0f;
+            if (demTileUsed) {
+                if (const auto la = demArrayLayer.find(*demTileUsed); la != demArrayLayer.end()) {
+                    layer = static_cast<float>(la->second);
+                }
+            }
+            drawableDemLayer[tileID] = layer;
+        }
+#endif
 
         // Create terrain drawable for this tile
         const auto renderTarget = texturePool.getRenderTarget(unwrapped);
@@ -386,12 +458,16 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         if (drawable) {
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = demTier;
+#if !MLN_RENDER_BACKEND_OPENGL
+            // Non-GL backends: one depth drawable per tile (no instancing path there).
             if (depthLg) {
                 if (auto depthDrawable = createDrawableForTile(
                         context, shaders, tileID, demTexture, nullptr, /*depthPass=*/true)) {
                     depthLg->addDrawable(std::move(depthDrawable));
+                    depthDirty = true;
                 }
             }
+#endif
         }
     }
 
@@ -400,6 +476,40 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     if (updateParameters && updateParameters->debugAboveGroundLog) {
         logAboveGroundMargin(state);
     }
+
+#if MLN_RENDER_BACKEND_OPENGL
+    // GL: collect the per-instance (tile, dem_coords, dem_layer) list for the whole mesh tile
+    // set and rebuild the single instanced depth drawable only when that set changes (its
+    // transforms refresh every frame in updateInstancedDepthUBO). Tiles without a packed DEM
+    // array layer (-1) are skipped - they briefly miss depth occlusion, the same tolerance the
+    // old ancestor/placeholder fallback had.
+    {
+        std::vector<DepthInstance> instances;
+        instances.reserve(meshTiles.size());
+        std::size_t sig = 0;
+        for (const auto& unwrapped : meshTiles) {
+            const OverscaledTileID tileID(unwrapped.canonical.z, unwrapped.wrap, unwrapped.canonical);
+            const auto lc = drawableDemLayer.find(tileID);
+            if (lc == drawableDemLayer.end() || lc->second < 0.0f || instances.size() >= maxDepthInstances) {
+                continue;
+            }
+            const auto cc = drawableDemCoords.find(tileID);
+            const std::array<float, 4> coords =
+                cc != drawableDemCoords.end()
+                    ? cc->second
+                    : std::array<float, 4>{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
+            instances.push_back({tileID, coords, lc->second});
+            util::hash_combine(sig, std::hash<OverscaledTileID>{}(tileID));
+            util::hash_combine(sig, static_cast<int>(lc->second));
+        }
+        depthInstances = std::move(instances);
+        if (sig != depthInstanceSignature) {
+            depthInstanceSignature = sig;
+            rebuildInstancedDepthDrawable(context, shaders);
+            depthDirty = true;
+        }
+    }
+#endif
 }
 
 void RenderTerrain::logAboveGroundMargin(const TransformState& state) {
@@ -564,7 +674,30 @@ void RenderTerrain::renderDepth(RenderOrchestrator& orchestrator,
     if (!depthRenderTarget) {
         return;
     }
+    // The packed-depth output is a function of the camera projection and the terrain mesh set
+    // only. When neither changed since the last depth render, the existing depth texture is
+    // still correct - skip the whole pass. This is what makes a static scene cheap; the depth
+    // is redrawn only on camera movement or a mesh/tile change. (From 604f293; without this
+    // gate the pass ran every frame, which is the state that flickered.)
+    const mat4& proj = parameters.transformParams.projMatrix;
+    const bool cameraMoved = !lastDepthProjMatrix || *lastDepthProjMatrix != proj;
+    if (!depthDirty && !cameraMoved) {
+        return;
+    }
+
+#if MLN_RENDER_BACKEND_OPENGL
+    // Instanced depth pass: refresh the per-instance UBO array (camera-dependent transforms)
+    // and bind the packed DEM array to the unit the shader's u_dem_array sampler expects. The
+    // instanced drawable carries no gfx textures, so nothing else touches this unit during the
+    // depth render. (Bind integration is the main on-device shakeout item - Texture2DArray is
+    // GL-only and outside the gfx texture abstraction.)
+    updateInstancedDepthUBO(parameters);
+    // The DEM array is bound by the instanced drawable itself (DrawableGL::setArrayTexture ->
+    // bindTextures), so no manual bind here.
+#endif
     depthRenderTarget->render(orchestrator, renderTree, parameters);
+    lastDepthProjMatrix = proj;
+    depthDirty = false;
 }
 
 void RenderTerrain::prepareDepthTarget(PaintParameters& parameters) {
@@ -593,6 +726,7 @@ void RenderTerrain::prepareDepthTarget(PaintParameters& parameters) {
     // target was first created on an early frame
     if (depthLayerGroup) {
         depthRenderTarget->addLayerGroup(depthLayerGroup, /*replace=*/true);
+        depthDirty = true; // fresh target must be drawn
     }
 }
 
@@ -630,6 +764,12 @@ const RenderTerrain::TerrainMesh& RenderTerrain::getMesh(gfx::Context& context) 
         generateMesh(context);
     }
     return *mesh;
+}
+
+const RenderTerrain::TerrainMesh& RenderTerrain::getDepthMesh(gfx::Context& context) {
+    // The instanced depth pass reuses the full terrain mesh; the source PR's coarser
+    // depth-only mesh (getDepthMesh/buildMesh) is a separable optimization not pulled here.
+    return getMesh(context);
 }
 
 void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
@@ -820,6 +960,11 @@ std::unique_ptr<gfx::Drawable> RenderTerrain::createDrawableForTile(gfx::Context
         // texture) must not main-depth-test against this surface, or they would be
         // culled by the terrain they sit on - the symbol tweaker disables their
         // depth test while terrain is enabled.
+        // Match maplibre-gl-js / Mapbox: the terrain surface is opaque 3D geometry
+        // drawn with a depth test+write (LEQUAL, ReadWrite), not the earlier
+        // depth-off / "2D for now" hack. On tiled GPUs (this device is PowerVR) opaque
+        // depth-tested geometry is eligible for hidden-surface removal, so occluded
+        // fragments skip the drape sample instead of always running it.
         builder->setDepthType(gfx::DepthMaskType::ReadWrite);
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setEnableDepth(true);
@@ -890,5 +1035,165 @@ void RenderTerrain::deactivate(UniqueChangeRequestVec& changes) {
     // the orchestrator, so that is all we need to unregister here.
     activateLayerGroup(false, changes);
 }
+
+#if MLN_RENDER_BACKEND_OPENGL
+void RenderTerrain::packDEMArrayLayer(gfx::Context& context, const UnwrappedTileID& id, const DEMData& demData) {
+    const auto& imagePtr = demData.getImagePtr();
+    if (!imagePtr || imagePtr->size.isEmpty()) {
+        return;
+    }
+    if (!demTextureArray) {
+        demTextureArray = std::make_unique<gl::Texture2DArray>(static_cast<gl::Context&>(context));
+    }
+    // All DEM tiles from one source share a size, so this allocates once and no-ops after.
+    demTextureArray->allocate(imagePtr->size, maxDEMArrayLayers);
+    if (!demTextureArray->valid()) {
+        return;
+    }
+
+    uint32_t layer = 0;
+    if (const auto it = demArrayLayer.find(id); it != demArrayLayer.end()) {
+        layer = it->second; // re-upload into the tile's existing slot
+    } else if (!demArrayFreeLayers.empty()) {
+        layer = demArrayFreeLayers.back();
+        demArrayFreeLayers.pop_back();
+        demArrayLayer[id] = layer;
+    } else if (demArrayNextLayer < maxDEMArrayLayers) {
+        layer = demArrayNextLayer++;
+        demArrayLayer[id] = layer;
+    } else {
+        return; // array full - tile keeps its per-tile texture, just not instanced
+    }
+    demTextureArray->uploadLayer(layer, imagePtr->data.get());
+}
+
+void RenderTerrain::freeDEMArrayLayer(const UnwrappedTileID& id) {
+    if (const auto it = demArrayLayer.find(id); it != demArrayLayer.end()) {
+        demArrayFreeLayers.push_back(it->second);
+        demArrayLayer.erase(it);
+    }
+}
+
+// Build the single instanced depth drawable covering the current depthInstances: the shared
+// depth mesh drawn N times, with a_instance = [0..N-1] selecting each tile's slot in the
+// TerrainDepthInstanceUBO array (filled per frame in updateInstancedDepthUBO). No tile id is
+// set, so the terrain tweaker skips it; no gfx textures, since the DEM array is bound manually
+// in renderDepth. Called only when the tile set changes.
+void RenderTerrain::rebuildInstancedDepthDrawable(gfx::Context& context, gfx::ShaderRegistry& shaders) {
+    auto* depthLg = static_cast<LayerGroup*>(depthLayerGroup.get());
+    if (!depthLg) {
+        return;
+    }
+    depthLg->clearDrawables();
+    const std::size_t n = depthInstances.size();
+    if (n == 0 || !demTextureArray || !demTextureArray->valid()) {
+        return;
+    }
+
+    const auto& depthMeshRef = getDepthMesh(context);
+    if (depthMeshRef.vertices.empty() || depthMeshRef.indices.empty()) {
+        return;
+    }
+    auto shader = context.getGenericShader(shaders, "TerrainDepthShader");
+    if (!shader) {
+        return;
+    }
+    auto builder = context.createDrawableBuilder("terrain-depth-instanced");
+    if (!builder) {
+        return;
+    }
+    builder->setShader(shader);
+    builder->setRenderPass(RenderPass::Translucent);
+    builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+    builder->setColorMode(gfx::ColorMode::unblended());
+    builder->setEnableDepth(true);
+    builder->setIs3D(true);
+
+    std::vector<uint8_t> vtx(depthMeshRef.vertices.size() * sizeof(int16_t));
+    std::memcpy(vtx.data(), depthMeshRef.vertices.data(), vtx.size());
+    builder->setRawVertices(std::move(vtx), depthMeshRef.vertexCount, gfx::AttributeDataType::Short4);
+
+    SegmentVector segs;
+    segs.emplace_back(0, 0, depthMeshRef.vertexCount, depthMeshRef.indexCount);
+    std::vector<uint16_t> idx = depthMeshRef.indices;
+    builder->setSegments(gfx::Triangles(), std::move(idx), segs.data(), segs.size());
+
+    // Per-instance index attribute (divisor 1). Its element count is the instance count the
+    // GL backend draws (drawInstanced uses instanceAttrs->getMinCount()).
+    auto instAttrs = context.createVertexAttributeArray();
+    if (const auto& a = instAttrs->set(shaders::idTerrainInstanceVertexAttribute)) {
+        for (std::size_t i = 0; i < n; ++i) {
+            a->set(i, static_cast<float>(i));
+        }
+    }
+    builder->setInstanceAttributes(std::move(instAttrs));
+
+    builder->flush(context);
+    auto drawables = builder->clearDrawables();
+    if (!drawables.empty()) {
+        // Bind the packed DEM array as u_dem_array (slot idTerrainDEMArrayTexture); DrawableGL
+        // binds it in bindTextures() with the program active, using the shader sampler location.
+        static_cast<gl::DrawableGL&>(*drawables[0])
+            .setArrayTexture(demTextureArray.get(), shaders::idTerrainDEMArrayTexture);
+        depthLg->addDrawable(std::move(drawables[0]));
+    }
+}
+
+// Refresh the per-instance UBO array every frame (the transform depends on the camera) and
+// bind it + the shared props UBO directly on the instanced drawable, so the terrain tweaker's
+// layer-level TerrainDrawableUBO consolidation does not clobber it. Bound at idTerrainDrawableUBO
+// as the array the shader indexes by a_instance.
+void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
+    auto* depthLg = static_cast<LayerGroup*>(depthLayerGroup.get());
+    const std::size_t n = depthInstances.size();
+
+    if (!depthLg || n == 0) {
+        return;
+    }
+    auto& context = parameters.context;
+
+    // The shader declares the block as a fixed array u_inst[TERRAIN_MAX_INSTANCES]
+    // (== maxDepthInstances), so GLES requires the bound buffer/range to be at least
+    // that full static size (sizeof(UBO) * maxDepthInstances). Allocate the whole block
+    // and fill only the first n entries; the rest stay zero-initialized. Sizing the
+    // buffer to n instead triggers "Bound buffer is too small" and the draw is dropped.
+    std::vector<shaders::TerrainDepthInstanceUBO> arr(maxDepthInstances);
+    for (std::size_t i = 0; i < n; ++i) {
+        const auto& inst = depthInstances[i];
+        mat4 m = parameters.matrixForTile(inst.tileID.toUnwrapped());
+#if !MLN_RENDER_BACKEND_OPENGL
+        m[2] = 0.5 * (m[2] + m[3]);
+        m[6] = 0.5 * (m[6] + m[7]);
+        m[10] = 0.5 * (m[10] + m[11]);
+        m[14] = 0.5 * (m[14] + m[15]);
+#endif
+        arr[i].matrix = util::cast<float>(m);
+        arr[i].dem_coords = inst.demCoords;
+        arr[i].dem_layer = inst.demLayer;
+        arr[i].pad1 = arr[i].pad2 = arr[i].pad3 = 0.0f;
+    }
+    const std::size_t bytes = sizeof(shaders::TerrainDepthInstanceUBO) * maxDepthInstances;
+    if (!depthInstanceUBO || depthInstanceUBO->getSize() < bytes) {
+        depthInstanceUBO = context.createUniformBuffer(arr.data(), bytes, false, true);
+    } else {
+        depthInstanceUBO->update(arr.data(), bytes);
+    }
+
+    // Shared evaluated props (unpack / exaggeration / skirt offset), same as the tweaker.
+    const auto zoom = std::max(static_cast<double>(parameters.state.getZoom()), 0.0);
+    const float elevationOffset = static_cast<float>(util::M2PI * util::EARTH_RADIUS_M / std::pow(2.0, zoom) / 5.0);
+    const shaders::TerrainEvaluatedPropsUBO propsUBO = {.unpack = getDEMUnpackVector(),
+                                                        .exaggeration = getExaggeration(),
+                                                        .elevation_offset = elevationOffset,
+                                                        .pad1 = 0.0f,
+                                                        .pad2 = 0.0f};
+
+    depthLg->visitDrawables([&](gfx::Drawable& drawable) {
+        auto& u = drawable.mutableUniformBuffers();
+        u.set(shaders::idTerrainDrawableUBO, depthInstanceUBO);
+        u.createOrUpdate(shaders::idTerrainEvaluatedPropsUBO, &propsUBO, context);
+    });
+}
+#endif
 
 } // namespace mbgl

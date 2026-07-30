@@ -550,6 +550,7 @@ void Context::setDirtyState() {
     vertexBuffer.setDirty();
     bindVertexArray.setDirty();
     globalVertexArrayState.setDirty();
+    invalidateUniformBufferBindings();
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
@@ -825,6 +826,72 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
 
     stats.numDrawCalls++;
     stats.totalDrawCalls++;
+}
+
+void Context::drawInstanced(const gfx::DrawMode& drawMode,
+                            std::size_t indexOffset,
+                            std::size_t indexLength,
+                            std::size_t instanceCount) {
+    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC_GL();
+
+    if (instanceCount <= 1) {
+        draw(drawMode, indexOffset, indexLength);
+        return;
+    }
+
+    switch (drawMode.type) {
+        case gfx::DrawModeType::Lines:
+        case gfx::DrawModeType::LineLoop:
+        case gfx::DrawModeType::LineStrip:
+            lineWidth = drawMode.size;
+            break;
+        default:
+            break;
+    }
+
+    MBGL_CHECK_ERROR(glDrawElementsInstanced(Enum<gfx::DrawModeType>::to(drawMode.type),
+                                             static_cast<GLsizei>(indexLength),
+                                             GL_UNSIGNED_SHORT,
+                                             reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset),
+                                             static_cast<GLsizei>(instanceCount)));
+
+    // One GPU draw call, but it issued instanceCount worth of geometry - count it
+    // as one for the encoder-cost metric, which is the point of instancing.
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
+}
+
+void Context::bindUniformBufferRange(uint32_t bindingIndex, uint32_t buffer, int64_t offset, int64_t size) {
+    if (uniformBufferBindings.size() <= bindingIndex) {
+        uniformBufferBindings.resize(bindingIndex + 1);
+    }
+    auto& cur = uniformBufferBindings[bindingIndex];
+    if (cur.buffer == buffer && cur.offset == offset && cur.size == size) {
+        return; // identical binding already in place - skip the redundant GL call
+    }
+    cur = {buffer, offset, size};
+    MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
+                                       static_cast<GLuint>(bindingIndex),
+                                       static_cast<GLuint>(buffer),
+                                       static_cast<GLintptr>(offset),
+                                       static_cast<GLsizeiptr>(size)));
+}
+
+void Context::unbindUniformBuffer(uint32_t bindingIndex) {
+    if (uniformBufferBindings.size() <= bindingIndex) {
+        uniformBufferBindings.resize(bindingIndex + 1);
+    }
+    auto& cur = uniformBufferBindings[bindingIndex];
+    if (cur.buffer == 0) {
+        return;
+    }
+    cur = {0, -1, -1};
+    MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(bindingIndex), 0));
+}
+
+void Context::invalidateUniformBufferBindings() {
+    uniformBufferBindings.clear();
 }
 
 void Context::performCleanup() {
