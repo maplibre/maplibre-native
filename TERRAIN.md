@@ -310,10 +310,20 @@ footprints in the **draped** map texture. The bug is therefore
 **fill-extrusion not drawing at all on Vulkan**, not elevation being wrong -
 which also fits the report that Vulkan buildings used to work and regressed.
 
-Next step: find why the instanced FE drawables produce nothing on Vulkan
-(are they built? do they reach a render pass? does the instance count/SSBO
-bind?), starting with terrain OFF to see whether they draw at all, and only
-then revisit elevation. The upstream commit that moved Vulkan onto the
+**Terrain-off comparison (2026-07-30): Vulkan fill-extrusion is broken
+regardless of terrain.** With terrain OFF at building zoom, Vulkan renders
+roads, labels and the flat footprint fills but **no 3D extrusions at all**,
+where GL at the same zoom shows solid extruded boxes. Combined with the colour
+diagnostic emitting no fragments, the instanced FE path simply does not draw on
+Vulkan - terrain is not involved. (The flat footprints are a separate style
+layer and are expected; they are draped, so they follow the surface.)
+
+Next step: this is now a plain instanced-path bug, not a terrain bug - chase it
+with terrain off. Are the instanced drawables built at all (drawable count),
+do they reach a render pass, is the instance count non-zero, and does the
+`OutlineInstance` SSBO bind? `1b6ed35` "Vulkan fill extrusion instancing
+(#4310)" is the commit that moved Vulkan onto this path. Only once extrusions
+draw does the elevation work (5864482) become meaningful/testable. The upstream commit that moved Vulkan onto the
 instanced path is `1b6ed35` "Vulkan fill extrusion instancing (#4310)"; the
 pre-existing per-backend elevation gap is separate from whatever stops the
 draw. The `OutlineInstance` SSBO packing (tight `int/uint/int` vs the
