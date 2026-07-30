@@ -300,12 +300,24 @@ shader samples `get_elevation()` and raises base/height). It builds on GL,
 Vulkan and WebGPU-Dawn, but **on device the Vulkan buildings are still wrong** -
 they render as flat patches lying in the terrain surface rather than extruded
 boxes (2026-07-30). So the centroid is not reaching the shader correctly, or the
-DEM binding/`dem_enabled` is not set for instanced drawables. Next step: verify
-what the shader actually receives (e.g. output the sampled elevation or the
-unpacked centroid as colour) before changing more code - the SSBO packing of
-instance attributes into `OutlineInstance` is the prime suspect, since the
-backend builds that buffer from the registered instance attributes and the
-tight `int/uint/int` struct layout has not been confirmed to match.
+DEM binding/`dem_enabled` is not set for instanced drawables. **Diagnostic run (2026-07-30):** the plain instanced Vulkan FE shader was
+temporarily made to output a flat colour keyed on what it receives (red =
+`dem_enabled == 0`, yellow = elevation sampled as 0, green = real elevation).
+On device **no diagnostic pixels appeared at all** - not even red. So that
+shader is producing no fragments in the scene, and the flat building-shaped
+patches visible on the terrain are *not* extrusions: they are building
+footprints in the **draped** map texture. The bug is therefore
+**fill-extrusion not drawing at all on Vulkan**, not elevation being wrong -
+which also fits the report that Vulkan buildings used to work and regressed.
+
+Next step: find why the instanced FE drawables produce nothing on Vulkan
+(are they built? do they reach a render pass? does the instance count/SSBO
+bind?), starting with terrain OFF to see whether they draw at all, and only
+then revisit elevation. The upstream commit that moved Vulkan onto the
+instanced path is `1b6ed35` "Vulkan fill extrusion instancing (#4310)"; the
+pre-existing per-backend elevation gap is separate from whatever stops the
+draw. The `OutlineInstance` SSBO packing (tight `int/uint/int` vs the
+registered instance attributes) remains unverified.
 
 Original diagnosis: Those two
 backends use the instanced fill-extrusion path
