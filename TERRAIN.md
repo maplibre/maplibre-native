@@ -48,7 +48,8 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
 - **Layer Draping**: background, fill, line, raster, hillshade, and color-relief
   layers render into per-tile render targets draped over the terrain mesh
 - **Elevated Layers**: symbol, circle, and fill-extrusion layers sample the DEM in
-  their vertex shaders and are displaced by the terrain elevation
+  their vertex shaders and are displaced by the terrain elevation. **Caveat:
+  fill-extrusion elevation is GL/WebGPU only** - see the backend parity section.
 - **Exaggeration**: styled vertical exaggeration multiplier (1.0 = true scale)
 - **Shared Elevation Function**: a `get_elevation()` helper in every backend's
   shader prelude
@@ -273,6 +274,52 @@ Implemented:
   use, matching maplibre-gl-js
 - Hillshade prepare-target lifetime fixed (no more OOM / monotonic GPU-memory
   growth while panning terrain with a hillshade layer - see Performance below)
+
+## Backend parity (audited 2026-07-29, Android)
+
+Terrain work has been developed and tested almost entirely on **OpenGL**. A first
+audit against the other backends found the following. Only GL and Vulkan are
+buildable/testable in this environment (Metal needs macOS; WebGPU builds via the
+`webgpuDawn`/`webgpuWgpu` flavours but has not been run).
+
+| | OpenGL | Vulkan | Metal | WebGPU |
+|---|---|---|---|---|
+| builds | yes | yes | not here | yes (Dawn) |
+| terrain renders | yes | **yes, verified on device** | untested | untested |
+| terrain off->on (all 3 load modes) | yes | **yes, verified** | untested | untested |
+| symbol occlusion | yes | looks correct on device | untested | untested |
+| **fill-extrusion elevation** | yes | **NO** | **NO** | yes |
+| instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
+
+**Fill-extrusion terrain elevation is missing on Metal and Vulkan.** Those two
+backends use the instanced fill-extrusion path
+(`MLN_USE_FILL_EXTRUSION_INSTANCING = METAL || VULKAN`), whose layout vertex is
+`<pos, decimals_ed>` - it has no `centroid` attribute, so there is nothing to
+sample the DEM with, and their shaders never call `get_elevation()` even though
+their drawable UBOs already carry the `dem_*` fields. Buildings therefore render
+at sea level while the terrain is elevated, so they float above or sink below it
+(seen on device, Vulkan, 2026-07-29). Fixing it means carrying the polygon
+centroid through the instanced path (per-instance attribute or the instance UBO)
+and adding the elevation lines to `shaders/{mtl,vulkan}/fill_extrusion`.
+
+**Depth-convention divergence.** GL's terrain depth pass now packs clip-space NDC
+z and its `unpack_depth()` does no `*2-1` remap; Metal/Vulkan/WebGPU still pack
+window depth (`FragCoord.z`) and keep the remap. Each backend is internally
+consistent, so occlusion works on each, but only GL has the corrected convention
+and the tuned soft ramp - worth converging.
+
+**Shared-code changes validated only on GL.** The opaque depth-tested terrain
+surface (`setEnableDepth(true)`), the depth-pass gate (`depthDirty`/camera-moved)
+and the per-mode mesh-tile cap all live in `render_terrain.cpp` and apply to every
+backend. Vulkan was spot-checked (renders, re-enable OK); Metal/WebGPU were not.
+
+**Vulkan performance** (SM-S948U, same flight/benchmark as GL, 90s/mode) is well
+ahead of GL: quality 115.2 fps / 2.66 jank-per-s vs GL's 105.0 / 5.38, performance
+113.9 / 2.58 vs 86.9 / 10.87.
+
+**Open: one intermittent Vulkan crash.** A `SIGSEGV` in the render thread during a
+Balanced-mode benchmark run (0 samples captured). Not reproduced in four
+subsequent launches, so it is rare; no backtrace captured yet.
 
 ## Remaining Work for Production
 
