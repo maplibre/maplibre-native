@@ -562,8 +562,23 @@ This known issue is closed.
   explicit depth-texture `calculate_visibility` path - fill-extrusions are real
   3D geometry, so this is more likely a depth-test / draw-order gap against the
   terrain surface (the elevated building geometry not depth-testing against the
-  nearer terrain mesh) than a need for the symbol depth-texture path. Not yet
-  investigated.
+  nearer terrain mesh) than a need for the symbol depth-texture path.
+  - **Attempted and reverted (2026-07-29).** A per-fragment version of the symbol
+    path was tried: `unpack_depth()`/`depth_opacity()` added to the *fragment*
+    prelude, the fill-extrusion vertex forwarding its clip position, and the
+    fragment discarding where the packed terrain depth is nearer. Per fragment
+    (not per drawable) so a ridge can cut through a building, keeping the part
+    that pokes above - which is the behaviour we want. It compiled and ran, but
+    on device it discarded **every** building fragment while terrain was on
+    (buildings vanished entirely; they returned with terrain off), so it was
+    reverted.
+  - Prime suspect for the next attempt: the comparison is in the wrong space.
+    The fill-extrusion drawable's matrix is built with `nearClipped = true`
+    (`FillExtrusionLayerTweaker`), so its clip-space z is not on the same scale
+    as the terrain depth pass's packed z; the symbol path compares a
+    `projectedPoint` that does match. Verify the two depths agree (e.g. render
+    the sampled depth as colour) *before* wiring the discard, and note the depth
+    pass now packs clip-space NDC z with no `*2-1` remap.
 - The terrain mesh/drape cover is now a direct elevation-aware ideal cover
   (`RenderTerrain::computeMeshCover`, see the tile-cover item above), but only
   *visibility* is elevation-aware. Native's tile LOD system
