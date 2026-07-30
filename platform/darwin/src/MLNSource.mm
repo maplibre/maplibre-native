@@ -3,8 +3,8 @@
 #import "MLNStyleValue_Private.h"
 #import "MLNStyle_Private.h"
 #import "NSBundle+MLNAdditions.h"
+#import "NSDictionary+MLNAdditions.h"
 #import "NSException+MLNAdditions.h"
-#import "NSExpression+MLNPrivateAdditions.h"
 
 #include <mbgl/map/map.hpp>
 #include <mbgl/renderer/renderer.hpp>
@@ -138,11 +138,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
     return NO;
   }
 
-  mbgl::FeatureState featureState;
-  for (NSString *key in state) {
-    NSExpression *expression = [NSExpression expressionForConstantValue:state[key]];
-    featureState[key.UTF8String] = expression.mgl_constantMBGLValue;
-  }
+  mbgl::FeatureState featureState = [state mgl_propertyMap];
 
   renderer->setFeatureState(
       self.rawSource->getID(),

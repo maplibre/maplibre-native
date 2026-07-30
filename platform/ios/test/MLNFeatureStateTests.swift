@@ -71,9 +71,18 @@ class MLNFeatureStateTests: XCTestCase, MLNMapViewDelegate {
         waitForRenderedFrame()
         waitForRenderedFrame()
 
-        // Set state and read it back through the renderer.
-        XCTAssertTrue(source.setFeatureState(featureID: "feature-1", state: ["selected": true]))
-        XCTAssertEqual(source.featureState(featureID: "feature-1")?["selected"] as? Bool, true)
+        // Set state and read it back through the renderer. A value may be any
+        // valid JSON type, including nested containers.
+        XCTAssertTrue(source.setFeatureState(
+            featureID: "feature-1",
+            state: ["selected": true, "meta": ["nested": ["deep": true]]]
+        ))
+        let initial = source.featureState(featureID: "feature-1")
+        XCTAssertEqual(initial?["selected"] as? Bool, true)
+        XCTAssertEqual(
+            ((initial?["meta"] as? [String: Any])?["nested"] as? [String: Any])?["deep"] as? Bool,
+            true
+        )
 
         // Merging keeps existing keys.
         XCTAssertTrue(source.setFeatureState(featureID: "feature-1", state: ["hovered": true]))
