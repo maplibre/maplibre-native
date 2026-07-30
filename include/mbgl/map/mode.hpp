@@ -7,6 +7,7 @@
 #include <mbgl/util/util.hpp>
 #include <mbgl/util/traits.hpp>
 
+#include <cstddef>
 #include <cstdint>
 
 namespace mbgl {
@@ -56,17 +57,24 @@ enum class TerrainLoadMode : uint8_t {
 struct TerrainLoadBudget {
     int newTileBuildsPerFrame;  ///< max NEW tiles that build their drawables per frame
     int drapeRerendersPerFrame; ///< max terrain drape targets that re-render per frame
+    /// Hard cap on terrain mesh tiles per frame (0 = unlimited). When the cover exceeds it the
+    /// tiles nearest the map centre are kept and the farthest - the horizon tiles a high tilt
+    /// pulls in - are dropped. Everything downstream scales with this (mesh draws, drape
+    /// targets and re-renders, depth instances), so it is the bluntest frame-time lever - and
+    /// it costs terrain render *distance*, which is why Quality keeps a generous cap rather
+    /// than the aggressive one Performance uses.
+    size_t maxMeshTiles;
 };
 
 constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     switch (mode) {
         case TerrainLoadMode::Balanced:
-            return {32, 16};
+            return {32, 16, 48};
         case TerrainLoadMode::Performance:
-            return {8, 4};
+            return {8, 4, 24};
         case TerrainLoadMode::Quality:
         default:
-            return {0, 0}; // unlimited
+            return {0, 0, 64}; // no per-frame budget, generous tile cap
     }
 }
 

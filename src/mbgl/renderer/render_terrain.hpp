@@ -308,12 +308,10 @@ private:
     // stay silent to keep normal viewing noise-free. Also filters DEM-miss (groundM==0) rows.
     static constexpr double kAboveGroundAlertM = 1000.0; // metres
 
-    // Cap on the number of terrain mesh tiles processed per frame (0 = unlimited).
-    // Everything downstream scales with this: mesh drawables, drape targets, drape
-    // re-renders, depth-pass draws. When the cover exceeds the cap, the tiles
-    // nearest the map center are kept and the farthest (toward the horizon at high
-    // tilt) are dropped. Tune to trade terrain render distance for frame time.
-    static constexpr size_t MAX_MESH_TILES = 24;
+    // The mesh-tile cap now comes from the per-map TerrainLoadMode
+    // (TerrainLoadBudget::maxMeshTiles) rather than a single constant, so Quality keeps a long
+    // terrain render distance while Balanced/Performance trade it for frame time. See
+    // RenderTerrain::update.
 
     // Cached DEM source
     RenderSource* demSource = nullptr;

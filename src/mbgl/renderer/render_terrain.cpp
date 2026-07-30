@@ -264,7 +264,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // Cap the mesh tile count: keep those nearest the map center, drop the farthest
     // (the horizon tiles a high tilt pulls in). Everything downstream - drape
     // targets, re-renders, depth draws - scales with this count.
-    if (MAX_MESH_TILES > 0 && meshTiles.size() > MAX_MESH_TILES) {
+    // Per-mode cap (TerrainLoadBudget::maxMeshTiles): Quality keeps a generous cap so terrain
+    // render distance stays long; Balanced/Performance trade distance for frame time.
+    const size_t maxMeshTiles = updateParameters ? terrainLoadBudget(updateParameters->terrainLoadMode).maxMeshTiles
+                                                 : 0;
+    if (maxMeshTiles > 0 && meshTiles.size() > maxMeshTiles) {
         // Map center in normalized web-mercator [0,1] (standard projection)
         const LatLng center = state.getLatLng();
         const double cx = center.longitude() / 360.0 + 0.5;
@@ -282,13 +286,13 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
 
         std::vector<UnwrappedTileID> sorted(meshTiles.begin(), meshTiles.end());
         std::partial_sort(sorted.begin(),
-                          sorted.begin() + static_cast<std::ptrdiff_t>(MAX_MESH_TILES),
+                          sorted.begin() + static_cast<std::ptrdiff_t>(maxMeshTiles),
                           sorted.end(),
                           [&](const UnwrappedTileID& a, const UnwrappedTileID& b) {
                               return tileDist2(a) < tileDist2(b);
                           });
         meshTiles = std::set<UnwrappedTileID>(sorted.begin(),
-                                              sorted.begin() + static_cast<std::ptrdiff_t>(MAX_MESH_TILES));
+                                              sorted.begin() + static_cast<std::ptrdiff_t>(maxMeshTiles));
     }
 
     // Drop drawables and cached DEM textures for tiles that left the mesh tile
