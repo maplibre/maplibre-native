@@ -107,12 +107,6 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
         coverParams.tileLodPitchThreshold = updateParameters->tileLodPitchThreshold;
         coverParams.tileLodMode = updateParameters->tileLodMode;
         zoomShift = updateParameters->tileLodZoomShift;
-        // Coarsen the cover for the terrain load mode (Balanced/Performance): fewer cover
-        // tiles means fewer terrain mesh draw calls and drape targets, which is the dominant
-        // per-frame cost on CPU-encode-bound low-end GPUs (where the GPU sits idle and the
-        // frame rate tracks encode time). Both the mesh build and the drape-target allocation
-        // call computeMeshCover with the same params, so the two stay in lockstep.
-        zoomShift += terrainLoadBudget(updateParameters->terrainLoadMode).coverZoomShift;
     }
 
     const double zoom = util::clamp<double>(state.getZoom() + zoomShift, state.getMinZoom(), state.getMaxZoom());
