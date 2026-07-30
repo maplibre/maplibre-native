@@ -306,6 +306,27 @@ altogether (no extrusions with terrain on OR off; a colour diagnostic in the
 shader emitted no fragments at all). Reverting restored the buildings, verified
 on device.
 
+**Second attempt, also reverted - the real trigger is the sampler, not the
+stride.** A follow-up tried elevation *without* touching the instance record:
+sample the DEM at each vertex's own outline position (`p1`/`p2`, already in the
+shader), leaving `OutlineInstance` at 8 bytes. Buildings disappeared again,
+exactly as before. Since that change altered no stride, the common factor across
+both failures is **declaring a `sampler2D` in the plain instanced Vulkan FE
+shader** (`DRAWABLE_IMAGE_SET_INDEX` binding 0) plus registering a `TextureInfo`
+for it. The instanced path evidently has no image descriptor set bound for that
+drawable, so adding the binding breaks pipeline creation / the draw and nothing
+renders.
+
+**So the first thing to fix is the texture binding on instanced FE drawables**,
+not the elevation maths. Check whether `FillExtrusionLayerTweaker`'s
+`drawable.setTexture(..., idFillExtrusionDEMTexture)` actually reaches the
+instanced drawables, and whether the Vulkan backend allocates an image
+descriptor set for a drawable whose shader declares textures on that path
+(`FillExtrusionInstancedShaderSource::textures` was empty before these
+attempts - the pattern-instanced variant does have one, so compare against it).
+Once a texture can be bound at all, either elevation approach (per-vertex
+outline position, or a real centroid) becomes viable.
+
 Lessons for the next attempt:
 - **Do not change the instanced vertex stride.** The Vulkan `OutlineInstance`
   SSBO and the C++ layout vertex must agree, and the backend builds that buffer
