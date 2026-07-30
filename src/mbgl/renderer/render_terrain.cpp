@@ -384,7 +384,10 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // dimension rides in .w for the shader's get_elevation() call.
         std::array<float, 4> demCoords{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
         uint8_t demTier = 0;
-        const UnwrappedTileID* demTileUsed = nullptr; // DEM tile whose texture / array-layer this tile uses
+        // DEM tile whose texture / array-layer this tile uses. Only *read* by the GL
+        // instanced-depth block below, so mark it maybe_unused: other backends keep the
+        // per-tile depth drawables and would otherwise fail -Wunused-but-set-variable.
+        [[maybe_unused]] const UnwrappedTileID* demTileUsed = nullptr;
 
         if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
             cached->second.lastUsed = demUpdateCounter;
