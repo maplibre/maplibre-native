@@ -461,15 +461,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::UShort2);
         }
-        // Per-polygon centroid, so the instanced path can raise the extrusion by the
-        // terrain elevation the same way the non-instanced one does
-        if (const auto& attr = instanceAttrs->set(idFillExtrusionCentroidVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedVertices,
-                                   offsetof(FillExtrusionLayoutVertex, a3),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillExtrusionLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
 
         if (doDepthPass) {
             instancedDepthBuilder->setRawVertices({}, instanceVertexCount, gfx::AttributeDataType::Short2);

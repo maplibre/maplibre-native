@@ -18,11 +18,7 @@ using FillExtrusionBinders = PaintPropertyBinders<style::FillExtrusionPaintPrope
 using FillExtrusionStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-// Terrain elevation needs the polygon centroid on the instanced path too, so the
-// instance record matches the non-instanced one here (see OutlineInstance in the
-// mtl/vulkan shaders, which mirrors this layout).
-using FillExtrusionLayoutVertex =
-    gfx::Vertex<TypeList<attributes::pos, attributes::decimals_ed, attributes::centroid>>;
+using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::decimals_ed>>;
 #else
 using FillExtrusionLayoutVertex =
     gfx::Vertex<TypeList<attributes::pos, attributes::decimals_ed, attributes::normal2d, attributes::centroid>>;
@@ -55,10 +51,7 @@ public:
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-    static FillExtrusionLayoutVertex layoutVertex(const Point<double>& p,
-                                                  uint16_t edgeDistance,
-                                                  bool isDiscarded,
-                                                  Point<int16_t> centroid) {
+    static FillExtrusionLayoutVertex layoutVertex(const Point<double>& p, uint16_t edgeDistance, bool isDiscarded) {
         auto intPart = Point<double>(std::floor(p.x), std::floor(p.y));
         // Multiply factional part by 2^7 to pack them into integers [0..127]
         auto fracPart = convertPoint<uint8_t>((p - intPart) * 128.0);
@@ -69,9 +62,7 @@ public:
                 static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + (isDiscarded ? 1 : 0)),
                 // The edgeDistance attribute is used for wrapping fill_extrusion patterns
                 edgeDistance
-            },
-            // Per-polygon centroid, so the extrusion is raised by one terrain elevation
-            {centroid.x, centroid.y}};
+            }};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(const Point<double>& p,
