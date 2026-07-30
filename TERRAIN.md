@@ -291,54 +291,34 @@ buildable/testable in this environment (Metal needs macOS; WebGPU builds via the
 | **fill-extrusion elevation** | yes | **NO** | **NO** | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
-**Fill-extrusion terrain elevation on Metal/Vulkan: attempted, still broken.**
-A first implementation landed (carry the polygon centroid through the instanced
-path: instanced `FillExtrusionLayoutVertex` gains `centroid`, bound as instance
-attribute `a3`; `OutlineInstance` gains a matching field in all four mtl/vulkan
-shader variants so the shared SSBO stride stays consistent; the plain instanced
-shader samples `get_elevation()` and raises base/height). It builds on GL,
-Vulkan and WebGPU-Dawn, but **on device the Vulkan buildings are still wrong** -
-they render as flat patches lying in the terrain surface rather than extruded
-boxes (2026-07-30). So the centroid is not reaching the shader correctly, or the
-DEM binding/`dem_enabled` is not set for instanced drawables. **Diagnostic run (2026-07-30):** the plain instanced Vulkan FE shader was
-temporarily made to output a flat colour keyed on what it receives (red =
-`dem_enabled == 0`, yellow = elevation sampled as 0, green = real elevation).
-On device **no diagnostic pixels appeared at all** - not even red. So that
-shader is producing no fragments in the scene, and the flat building-shaped
-patches visible on the terrain are *not* extrusions: they are building
-footprints in the **draped** map texture. The bug is therefore
-**fill-extrusion not drawing at all on Vulkan**, not elevation being wrong -
-which also fits the report that Vulkan buildings used to work and regressed.
+**Fill-extrusion terrain elevation on Metal/Vulkan: still open.** Metal and
+Vulkan use the instanced fill-extrusion path
+(`MLN_USE_FILL_EXTRUSION_INSTANCING = METAL || VULKAN`, from upstream `1b6ed35`
+"Vulkan fill extrusion instancing" #4310). Its layout vertex is
+`<pos, decimals_ed>` with no `centroid`, so those shaders never sample the DEM:
+buildings render at sea level while the terrain is elevated, i.e. they float
+above / sink below it. GL and WebGPU (non-instanced path) are correct.
 
-**Terrain-off comparison (2026-07-30): Vulkan fill-extrusion is broken
-regardless of terrain.** With terrain OFF at building zoom, Vulkan renders
-roads, labels and the flat footprint fills but **no 3D extrusions at all**,
-where GL at the same zoom shows solid extruded boxes. Combined with the colour
-diagnostic emitting no fragments, the instanced FE path simply does not draw on
-Vulkan - terrain is not involved. (The flat footprints are a separate style
-layer and are expected; they are draped, so they follow the surface.)
+**An attempted fix was reverted (`5864482` -> `fbf87d9`).** Adding `centroid` to
+the instanced layout vertex changed its stride from 8 to 12 bytes and broke the
+Vulkan instance/SSBO buffer outright - fill-extrusion stopped rendering
+altogether (no extrusions with terrain on OR off; a colour diagnostic in the
+shader emitted no fragments at all). Reverting restored the buildings, verified
+on device.
 
-Next step: this is now a plain instanced-path bug, not a terrain bug - chase it
-with terrain off. Are the instanced drawables built at all (drawable count),
-do they reach a render pass, is the instance count non-zero, and does the
-`OutlineInstance` SSBO bind? `1b6ed35` "Vulkan fill extrusion instancing
-(#4310)" is the commit that moved Vulkan onto this path. Only once extrusions
-draw does the elevation work (5864482) become meaningful/testable. The upstream commit that moved Vulkan onto the
-instanced path is `1b6ed35` "Vulkan fill extrusion instancing (#4310)"; the
-pre-existing per-backend elevation gap is separate from whatever stops the
-draw. The `OutlineInstance` SSBO packing (tight `int/uint/int` vs the
-registered instance attributes) remains unverified.
-
-Original diagnosis: Those two
-backends use the instanced fill-extrusion path
-(`MLN_USE_FILL_EXTRUSION_INSTANCING = METAL || VULKAN`), whose layout vertex is
-`<pos, decimals_ed>` - it has no `centroid` attribute, so there is nothing to
-sample the DEM with, and their shaders never call `get_elevation()` even though
-their drawable UBOs already carry the `dem_*` fields. Buildings therefore render
-at sea level while the terrain is elevated, so they float above or sink below it
-(seen on device, Vulkan, 2026-07-29). Fixing it means carrying the polygon
-centroid through the instanced path (per-instance attribute or the instance UBO)
-and adding the elevation lines to `shaders/{mtl,vulkan}/fill_extrusion`.
+Lessons for the next attempt:
+- **Do not change the instanced vertex stride.** The Vulkan `OutlineInstance`
+  SSBO and the C++ layout vertex must agree, and the backend builds that buffer
+  from the registered instance attributes; the packing was never confirmed.
+  Prefer carrying the centroid somewhere that does not resize the instance
+  record (e.g. the drawable UBO, since the whole extrusion shares one centroid
+  per polygon... note that is per-drawable, not per-polygon, so it may need a
+  different approach), or fix the buffer description first.
+- **Verify on device with terrain OFF first** - extrusions must still draw
+  before elevation can be judged.
+- A quick way to tell the failure modes apart: colour the extrusion fragments by
+  `dem_enabled` / sampled elevation. No fragments at all means the draw is
+  broken, not the elevation.
 
 **Depth-convention divergence.** GL's terrain depth pass now packs clip-space NDC
 z and its `unpack_depth()` does no `*2-1` remap; Metal/Vulkan/WebGPU still pack
