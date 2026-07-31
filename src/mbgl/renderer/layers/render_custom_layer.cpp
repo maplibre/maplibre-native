@@ -54,7 +54,9 @@ void initializeHost(const std::shared_ptr<style::CustomLayerHost>& host, [[maybe
 #endif
 }
 
-void callPreRender(const std::shared_ptr<style::CustomLayerHost>& host,gfx::Context& context, const PaintParameters &paintParameters) {
+void callPreRender(const std::shared_ptr<style::CustomLayerHost>& host,
+                   gfx::Context& context,
+                   const PaintParameters& paintParameters) {
 #if MLN_RENDER_BACKEND_METAL
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);
 #elif MLN_RENDER_BACKEND_VULKAN
@@ -62,9 +64,9 @@ void callPreRender(const std::shared_ptr<style::CustomLayerHost>& host,gfx::Cont
 #else
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif
-     host->preRender(context, parameters);
+    host->preRender(context, parameters);
 }
-            
+
 } // namespace
 
 RenderCustomLayer::RenderCustomLayer(Immutable<style::CustomLayer::Impl> _impl)
@@ -104,7 +106,7 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                [[maybe_unused]] const TransformState& state,
                                const std::shared_ptr<UpdateParameters>&,
-                               [[maybe_unused]] const PaintParameters &paintParameters,
+                               [[maybe_unused]] const PaintParameters& paintParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
@@ -131,7 +133,7 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
         MBGL_CHECK_ERROR(initializeHost(host, context));
         needsInitialize = false;
     }
-    
+
     // call the pre-render
     MBGL_CHECK_ERROR(callPreRender(host, context, paintParameters));
 

@@ -24,7 +24,7 @@ public:
      * `deinitialize` function.
      */
     virtual void initialize(const CustomLayerInitParameters&) = 0;
-    
+
     /**
      * Called right before the layers start rendering.
      */

@@ -162,7 +162,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
                                 const std::shared_ptr<UpdateParameters>&,
-                                [[maybe_unused]] const PaintParameters &paintParameters,
+                                [[maybe_unused]] const PaintParameters& paintParameters,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {

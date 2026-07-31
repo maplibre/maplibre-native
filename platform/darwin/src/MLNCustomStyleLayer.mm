@@ -102,44 +102,46 @@ public:
       [layer didMoveToMapView:layer.mapView];
     }
   }
-    
-    void preRender(const mbgl::gfx::Context& context, const mbgl::style::CustomLayerRenderParameters &parameters) override {
-        if (!layer) return;
+
+  void preRender(const mbgl::gfx::Context &context,
+                 const mbgl::style::CustomLayerRenderParameters &parameters) override {
+    if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        auto renderPassDesc = static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters).renderPassDesc.get();
+    auto renderPassDesc =
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .renderPassDesc.get();
     MTL::CommandBuffer *cmdPtr =
-      static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
-          .commandBuffer.get();
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .commandBuffer.get();
     id<MTLCommandBuffer> commandBuffer = (__bridge id<MTLCommandBuffer>)cmdPtr;
     layer.commandBuffer = commandBuffer;
     layer.renderPassDesc = (__bridge MTLRenderPassDescriptor *)renderPassDesc;
 
 #endif
 
-      MLNStyleLayerDrawingContext drawingContext = {
-          .size = CGSizeMake(parameters.width, parameters.height),
-          .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
-          .zoomLevel = parameters.zoom,
-          .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
-          .pitch = static_cast<CGFloat>(parameters.pitch),
-          .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
-          .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
-          .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
+    MLNStyleLayerDrawingContext drawingContext = {
+        .size = CGSizeMake(parameters.width, parameters.height),
+        .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+        .zoomLevel = parameters.zoom,
+        .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+        .pitch = static_cast<CGFloat>(parameters.pitch),
+        .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
+        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
 
-      if (layer.mapView) {
-          [layer preDrawInMapView:layer.mapView withContext:drawingContext];
-      }
-
+    if (layer.mapView) {
+      [layer preDrawInMapView:layer.mapView withContext:drawingContext];
     }
+  }
 
   void render(const mbgl::style::CustomLayerRenderParameters &parameters) override {
     if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
     MTL::CommandBuffer *cmdPtr =
-      static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
-          .commandBuffer.get();
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .commandBuffer.get();
     id<MTLCommandBuffer> commandBuffer = (__bridge id<MTLCommandBuffer>)cmdPtr;
     layer.commandBuffer = commandBuffer;
     MTL::RenderCommandEncoder *ptr =

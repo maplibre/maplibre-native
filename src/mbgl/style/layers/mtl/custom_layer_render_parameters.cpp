@@ -12,10 +12,10 @@ namespace style {
 namespace mtl {
 
 CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParameters& paintParameters)
-    : mbgl::style::CustomLayerRenderParameters(paintParameters),renderPass(paintParameters.renderPass)
-{
-    const mbgl::gfx::Renderable &renderable = paintParameters.backend.getDefaultRenderable();
-    const mbgl::mtl::RenderableResource &resource = renderable.getResource<mbgl::mtl::RenderableResource>();
+    : mbgl::style::CustomLayerRenderParameters(paintParameters),
+      renderPass(paintParameters.renderPass) {
+    const mbgl::gfx::Renderable& renderable = paintParameters.backend.getDefaultRenderable();
+    const mbgl::mtl::RenderableResource& resource = renderable.getResource<mbgl::mtl::RenderableResource>();
     renderPassDesc = renderable.getResource<mbgl::mtl::RenderableResource>().getRenderPassDescriptor();
     if (const auto& buffer_ = resource.getCommandBuffer()) {
         commandBuffer = buffer_;
