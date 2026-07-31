@@ -222,7 +222,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
         for (const auto& positionedGlyph : line.positionedGlyphs) {
             if (!positionedGlyph.rect.hasArea()) continue;
 
-            // The rects have an addditional buffer that is not included in their size;
+            // The rects have an additional buffer that is not included in their size;
             const float glyphPadding = 1.0f;
             float rectBuffer = 3.0f + glyphPadding;
             float pixelRatio = 1.0f;
@@ -267,11 +267,15 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 builtInOffset = {0.0f, 0.0f};
             }
 
+            // rectBuffer is in 1x logical units; only rect.w/h carry the texture
+            // scale. GL JS keeps 2x glyphs centered by storing fractional
+            // left/top metrics, so native local glyphs do the same.
+            const float textureScale = positionedGlyph.metrics.isDoubleResolution ? 2.0f : 1.0f;
             const float x1 = (positionedGlyph.metrics.left - rectBuffer) * positionedGlyph.scale - halfAdvance +
                              builtInOffset.x;
             const float y1 = (-positionedGlyph.metrics.top - rectBuffer) * positionedGlyph.scale + builtInOffset.y;
-            const float x2 = x1 + rect.w * positionedGlyph.scale / pixelRatio;
-            const float y2 = y1 + rect.h * positionedGlyph.scale / pixelRatio;
+            const float x2 = x1 + rect.w / textureScale * positionedGlyph.scale / pixelRatio;
+            const float y2 = y1 + rect.h / textureScale * positionedGlyph.scale / pixelRatio;
 
             Point<float> tl{x1, y1};
             Point<float> tr{x2, y1};

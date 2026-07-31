@@ -23,13 +23,11 @@ if(MSVC)
     )
 
     find_package(CURL REQUIRED)
-    find_package(dlfcn-win32 REQUIRED)
     find_package(ICU OPTIONAL_COMPONENTS i18n uc)
     find_package(JPEG REQUIRED)
     find_package(libuv REQUIRED)
     find_package(PNG REQUIRED)
     find_package(WebP REQUIRED)
-    find_path(DLFCN_INCLUDE_DIRS dlfcn.h)
     find_path(LIBUV_INCLUDE_DIRS uv.h)
 elseif(DEFINED ENV{MSYSTEM})
     set(MSYS 1)
@@ -187,7 +185,6 @@ target_include_directories(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/windows/include
         ${CURL_INCLUDE_DIRS}
-        ${DLFCN_INCLUDE_DIRS}
         ${JPEG_INCLUDE_DIRS}
         ${LIBUV_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
@@ -234,7 +231,6 @@ if(MSVC)
         mbgl-core
         PRIVATE
             ${CURL_LIBRARIES}
-            dlfcn-win32::dl
     )
 elseif(MSYS)
     target_link_libraries(

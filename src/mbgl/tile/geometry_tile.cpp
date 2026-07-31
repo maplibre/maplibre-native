@@ -126,11 +126,11 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     assert(atlasTextures);
 
     if (const auto& glyphDynamicTexture = layoutResult->glyphAtlas.dynamicTexture) {
-        glyphDynamicTexture->uploadDeferredImages();
+        glyphDynamicTexture->uploadDeferredImages(uploadPass);
         atlasTextures->glyph = glyphDynamicTexture->getTexture();
     }
     if (const auto& imageDynamicTexture = layoutResult->imageAtlas.dynamicTexture) {
-        imageDynamicTexture->uploadDeferredImages();
+        imageDynamicTexture->uploadDeferredImages(uploadPass);
         atlasTextures->icon = imageDynamicTexture->getTexture();
     }
 
@@ -226,7 +226,9 @@ GeometryTile::~GeometryTile() {
 
     if (layoutResult) {
         threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {
+                layoutResult_->dynamicTextureAtlas->removeUnusedDynamicTextures();
+            });
     }
 }
 
@@ -332,7 +334,7 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
     }
 }
 
-void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t resultCorrelationID) {
+void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64_t resultCorrelationID) {
     MLN_TRACE_FUNC();
 
     loaded = true;
@@ -537,7 +539,7 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
     }
 
     for (const auto& sourceLayer : *options.sourceLayers) {
-        // Go throught all sourceLayers, if any
+        // Go through all sourceLayers, if any
         // to gather all the features
         auto layer = getData()->getLayer(sourceLayer);
 

@@ -39,6 +39,17 @@ FillExtrusionLayer::~FillExtrusionLayer() = default;
 
 // Property getters
 
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionRoundedCornerDistance(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionRoundedCornerDistance()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionRoundedCornerDistance()));
+}
+
 jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionOpacity(jni::JNIEnv& env) {
     using namespace mbgl::android::conversion;
     auto layer = layerPtr.get();
@@ -288,6 +299,8 @@ void FillExtrusionJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         jni::MakePeer<FillExtrusionLayer, jni::String&, jni::String&>,
         "initialize",
         "finalize",
+        METHOD(&FillExtrusionLayer::getFillExtrusionRoundedCornerDistance,
+               "nativeGetFillExtrusionRoundedCornerDistance"),
         METHOD(&FillExtrusionLayer::getFillExtrusionOpacityTransition, "nativeGetFillExtrusionOpacityTransition"),
         METHOD(&FillExtrusionLayer::setFillExtrusionOpacityTransition, "nativeSetFillExtrusionOpacityTransition"),
         METHOD(&FillExtrusionLayer::getFillExtrusionOpacity, "nativeGetFillExtrusionOpacity"),

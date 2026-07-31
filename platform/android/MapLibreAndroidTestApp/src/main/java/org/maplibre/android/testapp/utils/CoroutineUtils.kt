@@ -7,23 +7,36 @@ import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapView
 import kotlin.coroutines.resume
 
-suspend fun MapView.setStyleSuspend(styleUrl: String): Unit =
+suspend fun MapView.setStyleSuspend(styleUrl: String): Boolean =
     suspendCancellableCoroutine { continuation ->
-        var listener: MapView.OnDidFinishLoadingStyleListener? = null
+        lateinit var listener: MapView.OnDidFinishLoadingStyleListener
+        lateinit var errorListener: MapView.OnDidFailLoadingMapListener
 
         var resumed = false
-        listener = MapView.OnDidFinishLoadingStyleListener {
+        val resume: (Boolean) -> Unit = { result ->
             if (!resumed) {
                 resumed = true
-                listener?.let { removeOnDidFinishLoadingStyleListener(it) }
-                continuation.resume(Unit)
+                removeOnDidFinishLoadingStyleListener(listener)
+                removeOnDidFailLoadingMapListener(errorListener)
+                continuation.resume(result)
             }
         }
+
+        listener = MapView.OnDidFinishLoadingStyleListener {
+            resume(true)
+        }
+
+        errorListener = MapView.OnDidFailLoadingMapListener {
+            resume(false)
+        }
+
         addOnDidFinishLoadingStyleListener(listener)
+        addOnDidFailLoadingMapListener(errorListener)
         getMapAsync { map -> map.setStyle(styleUrl) }
 
         continuation.invokeOnCancellation {
             removeOnDidFinishLoadingStyleListener(listener)
+            removeOnDidFailLoadingMapListener(errorListener)
         }
 
     }

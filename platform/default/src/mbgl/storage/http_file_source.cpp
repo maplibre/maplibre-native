@@ -15,7 +15,6 @@
 
 #include <curl/curl.h>
 
-#include <dlfcn.h>
 #include <queue>
 #include <cassert>
 #include <cstring>

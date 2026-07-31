@@ -34,7 +34,7 @@ android {
         manifestPlaceholders["SENTRY_ENV"] = ""
     }
 
-    nativeBuild(listOf("example-custom-layer"))
+    nativeBuild(emptyList())
 
     packaging {
         resources.excludes += listOf("META-INF/LICENSE.txt", "META-INF/NOTICE.txt", "LICENSE.txt")
@@ -82,7 +82,8 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_OPENGL=ON")
+                    arguments += "-DMLN_WITH_OPENGL=ON"
+                    targets += "example-custom-layer"
                 }
             }
         }
@@ -90,7 +91,8 @@ android {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
-                    arguments("-DMLN_WITH_VULKAN=ON")
+                    arguments += "-DMLN_WITH_VULKAN=ON"
+                    targets += "example-vulkan-custom-layer"
                 }
             }
         }
@@ -169,6 +171,9 @@ dependencies {
     androidTestImplementation(libs.androidxTestExtJUnit)
     androidTestImplementation(libs.androidxTestCoreKtx)
     androidTestImplementation(libs.kotlinxCoroutinesTest)
+
+    // version conflict when using androidTestImplementation
+    implementation(libs.androidxTracing)
 }
 
 apply<SentryConditionalPlugin>()

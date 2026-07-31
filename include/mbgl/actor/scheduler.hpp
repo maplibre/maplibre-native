@@ -95,7 +95,7 @@ public:
     /// Get the *sequenced* scheduler for asynchronous tasks.
     /// Unlike the method above, the returned scheduler
     /// (once stored) represents a single thread, thus each
-    /// newly scheduled task is guarantied to run after the
+    /// newly scheduled task is guaranteed to run after the
     /// previously scheduled one.
     ///
     /// Sequenced scheduler can be used for running tasks

@@ -1,12 +1,12 @@
 # Release Policy
 
 > [!NOTE]
-> The following release policiy applies specifically to MapLibre **Android** and MapLibre **iOS**.
+> The following release policy applies specifically to MapLibre **Android** and MapLibre **iOS**.
 
 - We use [semantic versioning](https://semver.org/). Breaking changes will always result in a major release.
 - Despite having extensive tests in place, as a FOSS project we have limited QA testing capabilities. When major changes took place we may opt to put out a pre-release to let the community help with testing.
 - In principle the `main` branch should always be in a releasable state.
-- The release process is automated and documented (see [Release MapLibre iOS](./ios/release.md) and [Release MapLibre Android](./android/release.md)). Anyone with write access should be able to push out a release.
+- The release process is automated and documented (see [Release MapLibre iOS](./platforms/ios/release.md) and [Release MapLibre Android](./platforms/android/release.md)). Anyone with write access should be able to push out a release.
 - There is no fixed release cadence, but you are welcome to request a release on any of the communication channels.
 - We do not have long-term support (LTS) releases.
 - If you need a feature or a bugfix ported to and old version of MapLibre, you need to do the backporting yourself (see steps below).

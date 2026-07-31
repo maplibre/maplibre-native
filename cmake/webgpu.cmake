@@ -9,12 +9,17 @@ target_compile_definitions(
         MLN_RENDER_BACKEND_WEBGPU=1
 )
 
+target_include_directories(
+        mbgl-core
+        PUBLIC
+        ${PROJECT_SOURCE_DIR}/platform/default/include
+)
+
 list(APPEND
         SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
@@ -113,9 +118,15 @@ include(${PROJECT_SOURCE_DIR}/vendor/webgpu.cmake)
 if(MLN_WEBGPU_IMPL_DAWN)
     include(${PROJECT_SOURCE_DIR}/vendor/dawn.cmake)
     if(TARGET mbgl-vendor-dawn)
-        target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
+        if(MLN_WEBGPU_EMDAWN)
+            # Emdawn is a compiler/linker port rather than a conventional
+            # library. Consumers must inherit its final-link options.
+            target_link_libraries(mbgl-core PUBLIC mbgl-vendor-dawn)
+        else()
+            target_link_libraries(mbgl-core PRIVATE mbgl-vendor-dawn)
+        endif()
     endif()
-elseif(MLN_WEBGPU_IMPL_WGPU)
+elseif(MLN_WEBGPU_IMPL_WGPU OR MLN_WEBGPU_IMPL_FFI)
     # Include wgpu-native integration
     include(${PROJECT_SOURCE_DIR}/vendor/wgpu.cmake)
     if(TARGET mbgl-vendor-wgpu)
@@ -123,4 +134,9 @@ elseif(MLN_WEBGPU_IMPL_WGPU)
         # Add WebGPU-Cpp implementation file (required for wgpu-native backend)
         list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_cpp_impl.cpp)
     endif()
+endif()
+
+# Headless backend uses Dawn native / wgpu-native bootstrap; skip for emdawnwebgpu.
+if(NOT MLN_WEBGPU_EMDAWN)
+    list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp)
 endif()

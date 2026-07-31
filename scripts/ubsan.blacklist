@@ -9,7 +9,7 @@ src:*/mbgl/util/hash.hpp
 #############################################################################
 # vendor libs
 
-# unsigned integer overflow: unsigned interger index in for loop
+# unsigned integer overflow: unsigned integer index in for loop
 src:*/vendor/earcut.hpp/include/mapbox/earcut.hpp
 
 # unsigned integer overflow: hash function: str_hash

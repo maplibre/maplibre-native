@@ -16,7 +16,7 @@ The following ideas drive the design proposal for the improved API.
 
 * (G1 **`maplibre-native`**) The annotation API should be a part of `maplibre-native`.
 * (G2 **frictionless migration**) The new API should create as few friction as necessary for existing users of the annotations plugin during migrations.
-* (G3 **Kotlin-first**) The API should facilitate Kotlin langauge features where appropriate.
+* (G3 **Kotlin-first**) The API should facilitate Kotlin language features where appropriate.
 * (G4 **power**) The annotations API should be as powereful as it was before. No functionality should be lost.
 * (G5 **learnability**) At the same time, it should have a high learnability, such that new users find their way around the API with ease.
 * (G6 **ease**) The API should be user-friendly and easy to use.
@@ -113,7 +113,7 @@ The `setUsedDataDrivenProperties` mechanism should check for variations to the d
 
 The annotations API currently uses code generation to generate the annotation objects. This should no longer be done in the future for the following reasons.
 
-* Code generation incentivises non-specific, flat APIs – even where hiearchical objects or other specific constructs make more sense.
+* Code generation incentivises non-specific, flat APIs – even where hierarchical objects or other specific constructs make more sense.
 * In a similar way, it makes it harder to assign documentation to specific method →(G5 **learnability**). The current generated docs don't read like they were written with the Android implementation in mind, because they are copied from the spec.
 * When switching to Kotlin and when removing the `*Options` classes (G3 **Kotlin-first**), boilerplate code is reduced by a significant amount.
 

@@ -649,7 +649,7 @@ void Context::setCullFaceMode(const gfx::CullFaceMode& mode) {
     cullFace = mode.enabled;
 
     // These shouldn't need to be updated when face culling is disabled, but we
-    // might end up having the same isssues with Adreno 2xx GPUs as noted in
+    // might end up having the same issues with Adreno 2xx GPUs as noted in
     // Context::setDepthMode.
     cullFaceSide = mode.side;
     cullFaceWinding = mode.winding;

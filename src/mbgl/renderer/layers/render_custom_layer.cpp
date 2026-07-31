@@ -13,6 +13,12 @@
 #include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 
+#if MLN_RENDER_BACKEND_VULKAN
+#include <mbgl/vulkan/context.hpp>
+#include <mbgl/vulkan/renderer_backend.hpp>
+#include <mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp>
+#endif
+
 // TODO: platform agnostic error checks
 #define MBGL_CHECK_ERROR(cmd) (cmd)
 
@@ -27,13 +33,27 @@ inline const CustomLayer::Impl& impl(const Immutable<style::Layer::Impl>& impl) 
     return static_cast<const CustomLayer::Impl&>(*impl);
 }
 
+void initializeHost(const std::shared_ptr<style::CustomLayerHost>& host, [[maybe_unused]] gfx::Context& context) {
+#if MLN_RENDER_BACKEND_VULKAN
+    {
+        auto& vkBackend = static_cast<mbgl::vulkan::Context&>(context).getBackend();
+        style::vulkan::CustomLayerInitParameters params(
+            vkBackend.getDispatcher(), vkBackend.getDevice().get(), vkBackend.getPhysicalDevice());
+        host->initialize(params);
+    }
+#else
+    {
+        style::CustomLayerInitParameters params;
+        host->initialize(params);
+    }
+#endif
+}
 } // namespace
 
 RenderCustomLayer::RenderCustomLayer(Immutable<style::CustomLayer::Impl> _impl)
     : RenderLayer(makeMutable<CustomLayerProperties>(std::move(_impl))),
       host(impl(baseImpl).host) {
     assert(gfx::BackendScope::exists());
-    MBGL_CHECK_ERROR(host->initialize());
 }
 
 RenderCustomLayer::~RenderCustomLayer() {
@@ -86,7 +106,12 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
             MBGL_CHECK_ERROR(host->deinitialize());
         }
         host = impl(baseImpl).host;
-        MBGL_CHECK_ERROR(host->initialize());
+        needsInitialize = true;
+    }
+
+    if (needsInitialize) {
+        MBGL_CHECK_ERROR(initializeHost(host, context));
+        needsInitialize = false;
     }
 
     // create drawable

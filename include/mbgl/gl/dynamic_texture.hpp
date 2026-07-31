@@ -12,7 +12,7 @@ public:
     DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType);
 
     void uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) override;
-    void uploadDeferredImages() override;
+    void uploadDeferredImages(gfx::UploadPass&) override;
     bool removeTexture(const gfx::TextureHandle& texHandle) override;
 
     using ImagesToUpload =

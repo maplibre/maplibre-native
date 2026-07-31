@@ -378,6 +378,32 @@ TEST(Transform, MoveBy) {
     ASSERT_NEAR(0.0, trueCenter.longitude(), 1.1);
 }
 
+// On a pitched map a large (fling-sized) pan offset must be reduced so it can
+// never reach the horizon -- otherwise the unprojected pan direction flips and the
+// pan reverses (or lands in the tile-less void). See maplibre-native#3105.
+TEST(Transform, MoveByPitchedDoesNotCrossHorizon) {
+    Transform transform;
+    transform.resize({1000, 1000});
+    const auto start = CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(10.0).withPitch(60.0);
+
+    // Panning "up" the screen on a north-up pitched map moves the center north.
+    transform.jumpTo(start);
+    transform.moveBy({0.0, 300.0});
+    const double moderateLat = transform.getLatLng().latitude();
+
+    // A fling-sized offset toward the horizon must keep moving the center the same
+    // way (north) -- before the fix it reversed south and stay bounded (clamped
+    // short of the horizon).
+    transform.jumpTo(start);
+    transform.moveBy({0.0, 100000.0});
+    const double flingLat = transform.getLatLng().latitude();
+
+    EXPECT_GT(moderateLat, 0.0);             // moved north
+    EXPECT_GT(flingLat, 0.0);                // still north; not reversed
+    EXPECT_GE(flingLat, moderateLat);        // fling goes at least as far as the moderate pan
+    EXPECT_LT(flingLat, util::LATITUDE_MAX); // but is bounded, not off near the horizon
+}
+
 TEST(Transform, Antimeridian) {
     Transform transform;
     transform.resize({1000, 1000});

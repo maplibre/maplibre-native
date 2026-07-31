@@ -3,6 +3,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <cassert>
+#include <memory>
 
 #ifdef CI_BUILD
 #include <chrono>
@@ -80,12 +81,9 @@ public:
     }
 
     static std::shared_ptr<const GLXDisplayConfig> create() {
-        static std::weak_ptr<const GLXDisplayConfig> instance;
-        auto shared = instance.lock();
-        if (!shared) {
-            instance = shared = std::make_shared<GLXDisplayConfig>(Key{});
-        }
-        return shared;
+        // C++11 magic static guarantees thread-safe one-shot initialization.
+        static const auto instance = std::make_shared<GLXDisplayConfig>(Key{});
+        return instance;
     }
 
 public:

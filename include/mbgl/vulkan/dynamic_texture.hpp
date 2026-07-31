@@ -10,7 +10,7 @@ namespace vulkan {
 
 class Context;
 struct BufferAllocation;
-using UniqueBufferAllocation = std::unique_ptr<BufferAllocation>;
+using SharedBufferAllocation = std::shared_ptr<BufferAllocation>;
 
 class DynamicTexture : public gfx::DynamicTexture {
 public:
@@ -18,7 +18,7 @@ public:
     ~DynamicTexture() override;
 
     void uploadImage(const uint8_t* pixelData, gfx::TextureHandle& texHandle) override;
-    void uploadDeferredImages() override;
+    void uploadDeferredImages(gfx::UploadPass&) override;
     bool removeTexture(const gfx::TextureHandle& texHandle) override;
 
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
@@ -26,7 +26,7 @@ public:
         std::unordered_map<gfx::TextureHandle, std::shared_ptr<vulkan::Texture2D>, gfx::TextureHandle::Hasher>;
 #else
     using TextureBuffersToUpload =
-        std::unordered_map<gfx::TextureHandle, UniqueBufferAllocation, gfx::TextureHandle::Hasher>;
+        std::unordered_map<gfx::TextureHandle, SharedBufferAllocation, gfx::TextureHandle::Hasher>;
 #endif
 
 private:

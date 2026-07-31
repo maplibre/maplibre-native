@@ -10,6 +10,7 @@
 #include <mbgl/storage/offline_database.hpp>
 #include <mbgl/storage/offline_download.hpp>
 #include <mbgl/storage/http_file_source.hpp>
+#include <mbgl/text/glyph_range.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/compression.hpp>
@@ -346,10 +347,10 @@ TEST(OfflineDownload, ExcludeIdeographs) {
     observer->statusChangedFn = [&](OfflineRegionStatus status) {
         if (status.complete()) {
             EXPECT_EQ(status.completedTileCount, status.requiredTileCount);
-            EXPECT_EQ(138u,
-                      status.completedResourceCount); // 130 glyphs, 2 sprite images,
-                                                      // 2 sprite jsons, 1 tile, 1
-                                                      // style, source, image
+            EXPECT_EQ(NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK + 8u,
+                      status.completedResourceCount); // glyph ranges, 2 sprite images,
+                                                      // 2 sprite jsons, 1 tile, 1 style,
+                                                      // source, image
             EXPECT_EQ(test.size, status.completedResourceSize);
 
             download.setState(OfflineRegionDownloadState::Inactive);

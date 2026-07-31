@@ -75,7 +75,7 @@ std::map<std::string, std::string> createTokenMap(const std::string& urlTemplate
 
     // --- extract token values
     // /tiles{path}/tiles.json in tiles/satellite/tiles.json
-    // e.g. path = /satelite
+    // e.g. path = /satellite
     std::regex tokenPattern(R"(\{domain\}|\{path\}|\{directory\}|\{filename\}|\{extension\})");
     std::string templatePattern = std::regex_replace(
         urlTemplate, tokenPattern, "(.+)", std::regex_constants::match_any);

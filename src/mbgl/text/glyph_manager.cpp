@@ -71,7 +71,8 @@ void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphD
 
 Glyph GlyphManager::generateLocalSDF(const FontStack& fontStack, GlyphID glyphID) {
     Glyph local = localGlyphRasterizer->rasterizeGlyph(fontStack, glyphID);
-    local.bitmap = util::transformRasterToSDF(local.bitmap, 8, .25);
+    const double radius = local.metrics.isDoubleResolution ? 16.0 : 8.0;
+    local.bitmap = util::transformRasterToSDF(local.bitmap, radius, .25);
     return local;
 }
 

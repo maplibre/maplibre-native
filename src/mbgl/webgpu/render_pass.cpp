@@ -25,7 +25,9 @@ public:
     WGPURenderPassEncoder encoder = nullptr;
     WGPUCommandEncoder commandEncoder = nullptr;
     const gfx::UniformBufferArray* globalUniformBuffers = nullptr;
+    // Required here because it must life as long as the render pass
     wgpu::TextureView colorView;
+    // Required here because it must life as long as the render pass
     wgpu::TextureView depthStencilView;
     wgpu::TextureFormat previousColorFormat = wgpu::TextureFormat::Undefined;
     wgpu::TextureFormat previousDepthStencilFormat = wgpu::TextureFormat::Undefined;
@@ -183,6 +185,10 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         wgpuRenderPassEncoderSetScissorRect(impl->encoder, 0, 0, size.width, size.height);
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to begin render pass");
+#if MLN_WEBGPU_IMPL_WGPU
+        wgpuTextureViewRelease(impl->colorView);
+        wgpuTextureViewRelease(impl->depthStencilView);
+#endif
         impl->colorView = nullptr;
         impl->depthStencilView = nullptr;
     }
@@ -198,6 +204,15 @@ RenderPass::~RenderPass() {
         }
         wgpuRenderPassEncoderRelease(impl->encoder);
     }
+
+#if MLN_WEBGPU_IMPL_WGPU
+    if (impl->colorView) {
+        wgpuTextureViewRelease(impl->colorView);
+    }
+    if (impl->depthStencilView) {
+        wgpuTextureViewRelease(impl->depthStencilView);
+    }
+#endif
 
     auto& backend = static_cast<RendererBackend&>(commandEncoder.getContext().getBackend());
     if (impl->colorFormatUpdated) {

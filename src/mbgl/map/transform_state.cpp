@@ -162,7 +162,7 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
 
     // Move the center of perspective to center of specified edgeInsets.
     // Values are in range [-1, 1] where the upper and lower range values
-    // position viewport center to the screen edges. This is overriden
+    // position viewport center to the screen edges. This is overridden
     // if using axonometric perspective (not in public API yet, Issue #11882).
     // TODO(astojilj): Issue #11882 should take edge insets into account, too.
     if (!axonometric) {

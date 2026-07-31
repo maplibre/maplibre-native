@@ -18,7 +18,7 @@ public:
     ~RenderPass() override;
 
     vulkan::CommandEncoder& getEncoder() { return commandEncoder; }
-    const gfx::RenderPassDescriptor& getDescriptor() { return descriptor; }
+    const gfx::RenderPassDescriptor& getDescriptor() const { return descriptor; }
     void endEncoding();
 
     void clearStencil(uint32_t value = 0) const;

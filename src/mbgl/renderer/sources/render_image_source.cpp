@@ -132,7 +132,7 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     tileIds.push_back(tileCover[0]);
 
     bool hasVisibleTile = false;
-    // Add additional wrapped tile ids if neccessary
+    // Add additional wrapped tile ids if necessary
     Range<uint8_t> zoomRange(0, zoom);
     auto idealTiles = util::tileCover({.transformState = transformState,
                                        .tileLodMinRadius = parameters.tileLodMinRadius,

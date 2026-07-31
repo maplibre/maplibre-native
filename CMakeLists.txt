@@ -368,6 +368,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/background_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/circle_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_host.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_init_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_extrusion_layer.hpp
@@ -1220,7 +1222,7 @@ endif()
 # The Xcode generator with Dawn component targets (no monolithic library) breaks export()
 # because dawn_native/dawn_proc aren't in an export set. Skip export in that case.
 set(_can_export TRUE)
-if(TARGET mbgl-vendor-dawn AND NOT TARGET dawn::webgpu_dawn)
+if(TARGET mbgl-vendor-dawn AND NOT TARGET dawn::webgpu_dawn AND NOT MLN_WEBGPU_EMDAWN)
     set(_can_export FALSE)
 endif()
 if(_can_export)
@@ -1255,7 +1257,7 @@ if(MLN_WITH_METAL AND MLN_CREATE_AUTORELEASEPOOL)
     # in memory leaks when autoreleased objects are created.
 
     # Platforms such as iOS and GLFW use ARC with @autoreleasepool blocks, for these platforms
-    # creating an AutoreleasePool is not neccesary (and in fact will not work).
+    # creating an AutoreleasePool is not necessary (and in fact will not work).
     # When using MapLibre Native with Metal on other platforms such as Node.js, you can pass
     # this variable to ensure an AutoReleasePool is created in the render loop.
     # See also:

@@ -14,6 +14,7 @@ namespace gfx {
 
 class Context;
 class Texture2D;
+class UploadPass;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
 
 class TextureHandle {
@@ -60,12 +61,15 @@ public:
     std::optional<TextureHandle> addImage(const uint8_t* pixelData, const Size& imageSize, int32_t uniqueId = -1);
 
     virtual void uploadImage(const uint8_t* pixelData, TextureHandle& texHandle);
-    virtual void uploadDeferredImages() {};
+    virtual void uploadDeferredImages(UploadPass&) {};
     virtual bool removeTexture(const TextureHandle& texHandle);
 
 protected:
+    DynamicTexture(Size size, TexturePixelType pixelType);
+
     mapbox::ShelfPack shelfPack;
     Texture2DPtr texture;
+    TexturePixelType pixelFormat;
     int numTextures = 0;
     std::mutex mutex;
 };
