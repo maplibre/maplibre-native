@@ -1,6 +1,8 @@
 # Rendering Engine API
 
-The `multiBackend` flavor packs both the OpenGL ES and Vulkan native libraries into a single AAR and selects between them at runtime. Other flavors define a single backend at compile time in Gradle (see [Rendering Backends](./android-rendering-backends.md))
+The `multiBackend` flavor packs both the OpenGL ES and Vulkan native libraries into a single AAR and selects between them at runtime. Other flavors define a single backend at compile time in Gradle (see [Rendering Backends](./android-rendering-backends.md)).
+
+It's published to Maven Central as `org.maplibre.gl:android-sdk-vulkan-opengl`.
 
 ## OpenGL ES vs. Vulkan
 

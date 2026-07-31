@@ -4,13 +4,15 @@ The rendering backend is selected at build time through Gradle product flavors.
 
 ## Available backends
 
-| Flavor | Backend | Status | Notes |
-|---|---|---|---|
-| `opengl` | OpenGL ES | Stable | Default, widest device compatibility |
-| `vulkan` | Vulkan | Stable | Better performance on modern devices |
-| `webgpuDawn` | WebGPU (Dawn) | Experimental | Uses Vulkan internally, see [WebGPU](./android-webgpu.md) |
-| `webgpuWgpu` | WebGPU (wgpu-native) | Experimental | Uses Vulkan internally, arm64-v8a only, see [WebGPU](./android-webgpu.md) |
-| `multiBackend` | OpenGL ES + Vulkan | Experimental | Both backends in one AAR, chosen at runtime, see [Rendering Engine API](./android-rendering-engine-api.md) |
+| Flavor | Backend | Status | Maven Central artifact | Notes |
+|---|---|---|---|---|
+| `opengl` | OpenGL ES | Stable | `org.maplibre.gl:android-sdk-opengl` | Default, widest device compatibility |
+| `vulkan` | Vulkan | Stable | `org.maplibre.gl:android-sdk-vulkan` | Better performance on modern devices |
+| `webgpuDawn` | WebGPU (Dawn) | Experimental | not published | Uses Vulkan internally, see [WebGPU](./android-webgpu.md) |
+| `webgpuWgpu` | WebGPU (wgpu-native) | Experimental | not published | Uses Vulkan internally, arm64-v8a only, see [WebGPU](./android-webgpu.md) |
+| `multiBackend` | OpenGL ES + Vulkan | Experimental | `org.maplibre.gl:android-sdk-vulkan-opengl` | Both backends in one AAR, chosen at runtime, see [Rendering Engine API](./android-rendering-engine-api.md) |
+
+`org.maplibre.gl:android-sdk` is also published and currently maps to the `vulkan` flavor's release build. `-debug` suffixed artifact (e.g. `android-sdk-vulkan-debug`) is published for each flavor as well.
 
 ## Building with a specific backend
 
