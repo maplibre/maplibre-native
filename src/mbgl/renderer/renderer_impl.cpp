@@ -254,7 +254,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // Updates all layer groups and process changes
     if (staticData && staticData->shaders) {
         orchestrator.updateLayers(
-            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, renderTree);
+            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, parameters, renderTree);
     }
 
     orchestrator.processChanges();

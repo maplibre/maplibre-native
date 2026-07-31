@@ -135,9 +135,18 @@
 
 }
 
+- (void)preDrawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
+    id<MTLCommandBuffer> commandBuffer = self.commandBuffer;
+    
+    id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
+    [blitEncoder endEncoding];
+}
+
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
     // Use the supplied render command encoder to encode commands
+    id<MTLCommandBuffer> commandBuffer = self.commandBuffer;
     id<MTLRenderCommandEncoder> renderEncoder = self.renderEncoder;
+    MTLRenderPassDescriptor *renderPassDesc = self.renderPassDesc;
     if(renderEncoder != nil)
     {
         MLNBackendResource* resource = [mapView backendResource];
@@ -176,7 +185,7 @@
         [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0
                           vertexCount:3];
-    }
+    }    
 }
 
 - (void)willMoveFromMapView:(MLNMapView *)mapView {

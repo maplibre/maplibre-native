@@ -165,6 +165,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState&,
                                const std::shared_ptr<UpdateParameters>&,
+                               const PaintParameters &paintParameters,
                                const RenderTree&,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
