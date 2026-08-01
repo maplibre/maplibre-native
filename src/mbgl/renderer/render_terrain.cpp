@@ -1192,7 +1192,7 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
     }
 
     // Shared evaluated props (unpack / exaggeration / skirt offset), same as the tweaker.
-    const auto zoom = std::max(static_cast<double>(parameters.state.getZoom()), 0.0);
+    const auto zoom = std::max(parameters.state.getZoom(), 0.0);
     const float elevationOffset = static_cast<float>(util::M2PI * util::EARTH_RADIUS_M / std::pow(2.0, zoom) / 5.0);
     const shaders::TerrainEvaluatedPropsUBO propsUBO = {.unpack = getDEMUnpackVector(),
                                                         .exaggeration = getExaggeration(),
