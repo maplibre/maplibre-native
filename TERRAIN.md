@@ -299,6 +299,12 @@ Vulkan use the instanced fill-extrusion path
 buildings render at sea level while the terrain is elevated, i.e. they float
 above / sink below it. GL and WebGPU (non-instanced path) are correct.
 
+**Not a recent regression.** Checked out `c2d28b9` (2026-07-21, "fix-terrain-3d-memory-leak")
+and built the Vulkan flavour: buildings float there too. That commit already has
+Vulkan on the instanced path with no `get_elevation` in its FE shader, so the gap
+dates from whenever Vulkan moved onto that path (`1b6ed35`, #4310) - not from any
+of this session's terrain work.
+
 **An attempted fix was reverted (`5864482` -> `fbf87d9`).** Adding `centroid` to
 the instanced layout vertex changed its stride from 8 to 12 bytes and broke the
 Vulkan instance/SSBO buffer outright - fill-extrusion stopped rendering
