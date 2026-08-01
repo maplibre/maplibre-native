@@ -11,8 +11,8 @@
     11.52517,
     47.34487
   ],
-  "zoom": 13.5,
-  "pitch": 60,
+  "zoom": 12,
+  "pitch": 45,
   "bearing": 0,
   "sources": {
     "terrain": {
@@ -30,54 +30,113 @@
         "features": [
           {
             "type": "Feature",
-            "properties": { "height": 300 },
+            "properties": {
+              "height": 300
+            },
             "geometry": {
               "type": "Polygon",
               "coordinates": [
                 [
-                  [11.5150, 47.3380],
-                  [11.5190, 47.3380],
-                  [11.5190, 47.3405],
-                  [11.5150, 47.3405],
-                  [11.5150, 47.3380]
+                  [
+                    11.50517,
+                    47.33287
+                  ],
+                  [
+                    11.51117,
+                    47.33287
+                  ],
+                  [
+                    11.51117,
+                    47.33687
+                  ],
+                  [
+                    11.50517,
+                    47.33687
+                  ],
+                  [
+                    11.50517,
+                    47.33287
+                  ]
                 ]
               ]
             }
           },
           {
             "type": "Feature",
-            "properties": { "height": 300 },
+            "properties": {
+              "height": 300
+            },
             "geometry": {
               "type": "Polygon",
               "coordinates": [
                 [
-                  [11.5250, 47.3430],
-                  [11.5290, 47.3430],
-                  [11.5290, 47.3455],
-                  [11.5250, 47.3455],
-                  [11.5250, 47.3430]
+                  [
+                    11.52517,
+                    47.34487
+                  ],
+                  [
+                    11.53117,
+                    47.34487
+                  ],
+                  [
+                    11.53117,
+                    47.34887
+                  ],
+                  [
+                    11.52517,
+                    47.34887
+                  ],
+                  [
+                    11.52517,
+                    47.34487
+                  ]
                 ]
               ]
             }
           },
           {
             "type": "Feature",
-            "properties": { "height": 300 },
+            "properties": {
+              "height": 300
+            },
             "geometry": {
               "type": "Polygon",
               "coordinates": [
                 [
-                  [11.5350, 47.3480],
-                  [11.5390, 47.3480],
-                  [11.5390, 47.3505],
-                  [11.5350, 47.3505],
-                  [11.5350, 47.3480]
+                  [
+                    11.545169999999999,
+                    47.35687
+                  ],
+                  [
+                    11.551169999999999,
+                    47.35687
+                  ],
+                  [
+                    11.551169999999999,
+                    47.36087
+                  ],
+                  [
+                    11.545169999999999,
+                    47.36087
+                  ],
+                  [
+                    11.545169999999999,
+                    47.35687
+                  ]
                 ]
               ]
             }
           }
         ]
       }
+    },
+    "osm": {
+      "type": "raster",
+      "tiles": [
+        "local://tiles/number/{z}.png"
+      ],
+      "maxzoom": 17,
+      "tileSize": 256
     }
   },
   "layers": [
@@ -89,12 +148,20 @@
       }
     },
     {
+      "id": "osm",
+      "type": "raster",
+      "source": "osm"
+    },
+    {
       "id": "buildings",
       "type": "fill-extrusion",
       "source": "buildings",
       "paint": {
         "fill-extrusion-color": "#c0392b",
-        "fill-extrusion-height": ["get", "height"],
+        "fill-extrusion-height": [
+          "get",
+          "height"
+        ],
         "fill-extrusion-base": 0,
         "fill-extrusion-opacity": 1.0
       }
@@ -102,6 +169,6 @@
   ],
   "terrain": {
     "source": "terrain",
-    "exaggeration": 1
+    "exaggeration": 0.45
   }
 }

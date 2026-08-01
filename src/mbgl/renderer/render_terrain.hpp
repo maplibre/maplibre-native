@@ -73,6 +73,16 @@ public:
     std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
                                                const std::shared_ptr<UpdateParameters>& updateParameters) const;
 
+    /// Resolve the DEM render source from the orchestrator if not yet bound.
+    /// Renderer::Impl::render calls this before building the frame's drape-target
+    /// pool from computeMeshCover: the source is otherwise first bound inside
+    /// update(), which runs after the pool is built, so the FIRST frame after a
+    /// style (re)load computed an empty cover -> zero drape targets -> update()
+    /// created no terrain drawables -> terrain rendered nothing. Continuous
+    /// rendering hid this (frame 2 recovers); single-frame still renders - the
+    /// render tests - stayed blank.
+    void prepareSource(class RenderOrchestrator& orchestrator);
+
     /**
      * @brief Update terrain rendering (create/update drawables)
      * @param orchestrator Render orchestrator for accessing render sources

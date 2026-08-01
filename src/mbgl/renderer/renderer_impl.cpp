@@ -255,6 +255,11 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // drape target per tile. Same `state`/`updateParameters` as the update call,
         // so the two sets match; stale targets (tiles that left the cover) are
         // released so the pool tracks the view instead of growing unbounded.
+        // Bind the DEM source before computing the cover: it is otherwise first
+        // bound inside RenderTerrain::update (which runs after this pool is
+        // built), leaving the first frame with an empty cover and no terrain -
+        // permanent blankness in single-frame still renders (the render tests).
+        terrain->prepareSource(orchestrator);
         const std::set<UnwrappedTileID> demTileIDs = terrain->computeMeshCover(state, updateParameters);
         for (const auto& id : demTileIDs) {
             texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);

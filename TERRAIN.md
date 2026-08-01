@@ -811,21 +811,50 @@ from entering the terrain in the first place rather than correcting afterwards.
   and run as part of the normal render-test suite, with native-rendered baselines
   captured on-device (`default`/`pitched-world` un-ignored in `5b17c5a`, skirts in
   `5303d65`; `pitched-world`'s baseline refreshed in `5d39f97`).
-  - **Current status: all five FAIL on Linux CI.** The style JSON is verified
-    byte-identical to the gl-js originals (only `default` differs, in whitespace),
-    so these are faithful ports. They fail because native's terrain **tile-cover
-    requests tiles the fixture DB does not have** - the overview pyramid and the
-    near/frontier edges (e.g. `terrain-shading/12-2178-1433`, the `terrain/`
-    z6-z9 ancestors) - so terrain renders empty on CI and the pixel compare fails.
-    Those exact tiles are **absent from gl-js's own fixtures too**: for the
-    identical camera gl-js requests a *different* tile set, so there is nothing to
-    copy in. This is a symptom of the Phase 3 tile-cover / Phase 4
-    terrain-anchored-camera work (native over-requests overview/near tiles vs
-    gl-js), not a baseline or fixture-loading bug. Once the camera/tile-cover
-    converges with gl-js the tests should request the fixture set that already
-    exists. Render tests read tiles from the SQLite `metrics/cache-style.db`
-    (flat tiles under `metrics/integration/tiles/` are loaded into it); there is
-    no official populate tool yet.
+  - **2026-08-01 - ROOT CAUSE of the blank renders FOUND AND FIXED.** The prior
+    explanation below (missing fixture tiles) was incomplete: still renders drew
+    terrain **entirely blank** even where every needed tile was cached. The real
+    cause was a first-frame ordering bug: `Renderer::Impl::render` builds the
+    frame's drape-target pool from `computeMeshCover()` *before*
+    `RenderTerrain::update()` runs, but `demSource` was only bound inside
+    `update()` - so on the first frame after a style load the cover was empty,
+    zero drape targets existed, `update()` then found no render target for any
+    mesh tile (all `getRenderTarget()` misses) and created zero terrain
+    drawables. Continuous rendering recovered on frame 2, which is why devices
+    never showed it; single-frame still renders (every render test, local and
+    CI) stayed permanently blank. Fixed by extracting the source binding into
+    `RenderTerrain::prepareSource()` and calling it in `Renderer::Impl::render`
+    before the pool is built. Diagnosed with temporary counters: `impl:
+    drapeTargets=0` vs `update: meshTiles=6 rtMisses=6` in the same frame.
+  - **Current status after the fix (local Windows GL runner):**
+    `terrain/fill-extrusion` (new, see below) **passes**; `default`,
+    `pitched-world`, `skirts-auto`, `skirts-none`, `occlusion-debug` still fail -
+    their baselines were captured on-device, and `default`'s actual is still
+    blank even with the fix, so at least one further cause remains (its own
+    fixture coverage / style URLs are suspects: `occlusion-debug` centers on the
+    cached `terrain-shading` z12 block but its edge tiles are absent, and the
+    missing-fixture analysis below still applies to the remaining diffs).
+  - The earlier analysis, still relevant for the residual failures: the style
+    JSON is byte-identical to the gl-js originals (only `default` differs, in
+    whitespace). Native's terrain tile-cover requests tiles the fixture DB does
+    not have - the overview pyramid and the near/frontier edges (e.g.
+    `terrain-shading/12-2178-1433`, the `terrain/` z6-z9 ancestors) - and those
+    exact tiles are absent from gl-js's own fixtures too (for the identical
+    camera gl-js requests a *different* tile set). That part is a symptom of the
+    Phase 3 tile-cover / Phase 4 terrain-anchored-camera work. Render tests read
+    tiles from the SQLite `metrics/cache-style.db` (flat tiles under
+    `metrics/integration/tiles/` are loaded into it, manually - there is no
+    official populate tool; match the existing `tiles` table row format with
+    `insert or replace`).
+  - **`terrain/fill-extrusion` (new)**: guards fill-extrusion elevation on
+    terrain - buildings must rest on the slope, not at sea level. Inline-GeoJSON
+    buildings + the draped numbered raster over the cached Innsbruck
+    `terrain-shading` block, camera pitch 45 / zoom 12 / exaggeration 0.45.
+    Baseline generated with the local Windows OpenGL runner (`-p
+    metrics/linux-opengl.json -u default`), the backend that elevates FE
+    correctly today; provisional until Linux CI confirms. This test is the
+    regression guard for the Metal/Vulkan FE-elevation gap: those backends
+    should FAIL it until the instanced path samples the DEM.
   - The gl-js `terrain/symbol` test is still worth porting now that symbols are
     elevated (needs its DEM fixtures loaded into `metrics/cache-style.db`).
 - **Android**: the test app has five "3D Terrain" activities in the Style

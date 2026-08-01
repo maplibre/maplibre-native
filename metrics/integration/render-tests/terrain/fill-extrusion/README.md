@@ -3,32 +3,33 @@
 Guards that fill-extrusion geometry is raised by the terrain elevation instead of
 being drawn at sea level.
 
-The camera is pitched 60 degrees over sloping ground near Innsbruck with three
-tall (300m) red buildings spread across the slope. If a backend does not sample
-the DEM for fill-extrusion, the buildings sink into / float over the hillside
-rather than resting on it, which is plainly visible in the diff.
+The camera looks 45 degrees down at sloping ground near Innsbruck (the same
+cached `terrain-shading` DEM fixture block the other terrain tests use, z12
+tiles 2178-2179 / 1433-1435) with three tall (300m) red buildings spread across
+the slope and the numbered debug raster draped over the surface so the terrain
+relief is visible in the image. If a backend does not sample the DEM for
+fill-extrusion, the buildings sink into / float over the hillside rather than
+resting on it, which is plainly visible in the diff.
 
 The buildings are **inline GeoJSON**, so this test needs no fixtures beyond the
-terrain DEM tiles the neighbouring terrain tests already use
-(`tiles/terrain-shading/{z}-{x}-{y}.terrain.png`).
+DEM (`local://tiles/terrain-shading/{z}-{x}-{y}.terrain.png`) and numbered
+raster (`local://tiles/number/{z}.png`) tiles already in `metrics/cache-style.db`
+(render tests read tiles from that SQLite cache, offline - not from the flat
+files under `tiles/`).
 
-## Generating expected.png
+## expected.png
 
-There is no baseline committed yet - it must be produced by a renderer that is
-known to handle this correctly, which today means **OpenGL** (Metal and Vulkan
-use the instanced fill-extrusion path, which does not sample the DEM - see the
-backend parity section of TERRAIN.md).
+Generated with the **OpenGL** render-test runner (`-u default`), which is the
+backend known to elevate fill-extrusion correctly today - a Vulkan/Metal-generated
+baseline would bake the floating-buildings bug in as "expected" (see the backend
+parity section of TERRAIN.md).
 
-    mbgl-render-test-runner --update-results \
-        --manifest-path metrics/integration/render-tests/... 
+    mbgl-render-test-runner -p metrics/linux-opengl.json -u default         -f "terrain/fill-extrusion"
 
-Two cautions learned from the existing terrain tests:
+The committed baseline was produced on Windows/OpenGL (AMD); treat it as
+provisional until Linux CI regenerates or confirms it.
 
-1. **Generate it with an OpenGL build.** A Vulkan/Metal-generated baseline would
-   bake the floating-buildings bug in as "expected".
-2. **Generate it on the platform CI runs** (Linux), not on a dev machine. The
-   other terrain tests' baselines were captured on-device and currently fail on
-   Linux CI, partly for this reason.
-
-Until a baseline exists the test will report as failing/missing, which is the
-intended state: it documents a real defect on Metal/Vulkan.
+Note: generating any terrain baseline requires the first-frame terrain fix in
+`RenderTerrain::prepareSource` - before it, still renders (the render tests)
+always drew terrain blank because the DEM source was bound only after the
+frame's drape-target pool was built.

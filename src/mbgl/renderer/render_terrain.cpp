@@ -169,6 +169,17 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     return out;
 }
 
+void RenderTerrain::prepareSource(RenderOrchestrator& orchestrator) {
+    // Find the DEM source if we haven't already (see header: must happen before
+    // the frame's drape-target pool is built, or the first frame renders no terrain)
+    if (!demSource && !impl->sourceID.empty()) {
+        demSource = orchestrator.getRenderSource(impl->sourceID);
+        if (!demSource) {
+            Log::Warning(Event::Render, "Terrain could not find DEM source: " + impl->sourceID);
+        }
+    }
+}
+
 void RenderTerrain::update(RenderOrchestrator& orchestrator,
                            gfx::ShaderRegistry& shaders,
                            gfx::Context& context,
@@ -177,13 +188,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
                            const std::shared_ptr<UpdateParameters>& updateParameters,
                            const RenderTree& /*renderTree*/,
                            UniqueChangeRequestVec& changes) {
-    // Find the DEM source if we haven't already
-    if (!demSource && !impl->sourceID.empty()) {
-        demSource = orchestrator.getRenderSource(impl->sourceID);
-        if (!demSource) {
-            Log::Warning(Event::Render, "Terrain could not find DEM source: " + impl->sourceID);
-        }
-    }
+    prepareSource(orchestrator);
 
     // Create layer group if we don't have one (including after rebuild)
     if (!layerGroup) {
