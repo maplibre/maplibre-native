@@ -288,7 +288,7 @@ buildable/testable in this environment (Metal needs macOS; WebGPU builds via the
 | terrain renders | yes | **yes, verified on device** | untested | untested |
 | terrain off->on (all 3 load modes) | yes | **yes, verified** | untested | untested |
 | symbol occlusion | yes | looks correct on device | untested | untested |
-| **fill-extrusion elevation** | yes | **NO** | **NO** | yes |
+| **fill-extrusion elevation** | yes | **NO** (struct synced, shaders pending) | **yes** (2026-08-01, render test passes vs GL baseline) | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
 **Fill-extrusion terrain elevation on Metal/Vulkan: still open.** Metal and
@@ -322,6 +322,46 @@ shader** (`DRAWABLE_IMAGE_SET_INDEX` binding 0) plus registering a `TextureInfo`
 for it. The instanced path evidently has no image descriptor set bound for that
 drawable, so adding the binding breaks pipeline creation / the draw and nothing
 renders.
+
+**2026-08-01 - FIXED on Vulkan (render test passes against the GL baseline).**
+Both prior failures are now fully explained; neither was the elevation maths:
+
+1. **Vulkan binds drawable textures by texture-id slot, not TextureInfo order.**
+   `vulkan::ImageDescriptorSet::update` uses the drawable texture array index as
+   `dstBinding` and never consults `getSamplerLocation`. The attempts declared
+   `dem_sampler` at GLSL `binding = 0` while the tweaker set the DEM at
+   `idFillExtrusionDEMTexture` (= 1), so the sampler read the backend's dummy
+   texture - which unpacks to a ~1.6e6 m elevation and moved every building out
+   of the frustum. They were never "not rendering"; they were in orbit. The
+   pattern shader only worked because `idFillExtrusionImageTexture` happens to
+   be 0. The DEM sampler must be declared at `binding = 1`.
+2. **The OutlineInstance SSBO is the bucket's shared vertex buffer, aliased.**
+   `vulkan::Drawable::setSharedBuffers` binds the raw vertex buffer as the
+   storage buffer - there is no repacking. The GLSL struct must match
+   `FillExtrusionLayoutVertex` byte-for-byte. The centroid therefore packs two
+   int16 into one 32-bit word exactly like `pos` (C++ 12 B == std430 stride
+   12 B); an `ivec2` would std430-align to 8 and desync the stride - the actual
+   failure mode of attempt one.
+
+Implementation (all verified via `terrain/fill-extrusion` on the local Windows
+Vulkan runner, pixel-matching the GL baseline): centroid added to the
+instancing-path `FillExtrusionLayoutVertex` (8->12 B) and packed by the bucket
+on both paths; roof shader samples the DEM at a per-vertex `in_centroid`
+attribute (location 5); wall shader reads `centroid_pos` from the aliased
+instance record; both declare `dem_sampler` at binding 1 with
+`TextureInfo{1, idFillExtrusionDEMTexture}`; same base/height lift as GL
+(including the 10 m basement drop gated on dem_enabled). The plain FE suite on
+Vulkan: 28 passed, 1 failed (`fill-extrusion-pattern/tile-buffer`) - confirmed
+failing identically on the pre-change build, pre-existing.
+
+**Metal: struct layout synced (both MSL OutlineInstance structs gained
+`short2 centroid_pos`), so Metal keeps rendering with the 12-byte vertex - but
+its shaders do not sample the DEM yet.** Metal respects TextureInfo/
+getSamplerLocation, so its wiring is the conventional kind: add a DEM texture
+argument + the same centroid elevation to the four MSL FE shaders. Until then
+`terrain/fill-extrusion` fails on Metal CI by design (that is the test's job).
+
+*(Historical analysis below, kept for the record.)*
 
 **So the first thing to fix is the texture binding on instanced FE drawables**,
 not the elevation maths. Check whether `FillExtrusionLayerTweaker`'s

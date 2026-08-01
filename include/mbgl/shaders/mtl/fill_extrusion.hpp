@@ -221,9 +221,14 @@ struct VertexStage {
 #endif
 };
 
+// Aliases the 12-byte FillExtrusionLayoutVertex (shared vertex buffer used as
+// the instance buffer); centroid_pos is the polygon centroid for terrain
+// elevation. Keep the layout in sync with the C++ struct and the Vulkan
+// OutlineInstance.
 struct OutlineInstance {
     short2 pos;
     ushort2 decimals_ed;
+    short2 centroid_pos;
 };
 
 struct FragmentStage {
@@ -551,9 +556,14 @@ struct VertexStage {
 #endif
 };
 
+// Aliases the 12-byte FillExtrusionLayoutVertex (shared vertex buffer used as
+// the instance buffer); centroid_pos is the polygon centroid for terrain
+// elevation. Keep the layout in sync with the C++ struct and the Vulkan
+// OutlineInstance.
 struct OutlineInstance {
     short2 pos;
     ushort2 decimals_ed;
+    short2 centroid_pos;
 };
 
 struct FragmentStage {
