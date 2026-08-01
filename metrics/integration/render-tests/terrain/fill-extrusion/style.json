@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 512,
+      "width": 512,
+      "description": "Fill-extrusion over 3D terrain: buildings must sit ON the terrain surface (raised by the DEM elevation at their centroid), not at sea level. Rendered at a pitch over sloping ground so a building drawn without elevation sinks into / floats over the hillside instead of resting on it. Buildings are inline GeoJSON so the test needs no extra tile fixtures beyond the terrain DEM."
+    }
+  },
+  "center": [
+    11.52517,
+    47.34487
+  ],
+  "zoom": 13.5,
+  "pitch": 60,
+  "bearing": 0,
+  "sources": {
+    "terrain": {
+      "type": "raster-dem",
+      "tiles": [
+        "local://tiles/terrain-shading/{z}-{x}-{y}.terrain.png"
+      ],
+      "maxzoom": 12,
+      "tileSize": 256
+    },
+    "buildings": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": { "height": 300 },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [11.5150, 47.3380],
+                  [11.5190, 47.3380],
+                  [11.5190, 47.3405],
+                  [11.5150, 47.3405],
+                  [11.5150, 47.3380]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": { "height": 300 },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [11.5250, 47.3430],
+                  [11.5290, 47.3430],
+                  [11.5290, 47.3455],
+                  [11.5250, 47.3455],
+                  [11.5250, 47.3430]
+                ]
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": { "height": 300 },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [11.5350, 47.3480],
+                  [11.5390, 47.3480],
+                  [11.5390, 47.3505],
+                  [11.5350, 47.3505],
+                  [11.5350, 47.3480]
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "buildings",
+      "type": "fill-extrusion",
+      "source": "buildings",
+      "paint": {
+        "fill-extrusion-color": "#c0392b",
+        "fill-extrusion-height": ["get", "height"],
+        "fill-extrusion-base": 0,
+        "fill-extrusion-opacity": 1.0
+      }
+    }
+  ],
+  "terrain": {
+    "source": "terrain",
+    "exaggeration": 1
+  }
+}
