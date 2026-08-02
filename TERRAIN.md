@@ -917,15 +917,41 @@ from entering the terrain in the first place rather than correcting afterwards.
     | `{z}-{x}-{y}.terrain.png` | pitched-world |
     | `{z}-{x}-{y}.terrarium.png` | (present in cache-style.db, unused by these tests) |
 
-    No test mixes families internally, which is the rule to keep: **a single test
-    must only use tiles of one encoding**, since one `raster-dem` source applies one
-    unpack vector to everything it loads. Mixing terrarium and Terrain-RGB under one
-    source silently produces garbage elevations rather than an error.
-    **Suspect for `pitched-world`:** it is the only test on the bare
-    `{z}-{x}-{y}.terrain.png` family and the only one whose geometry is *over-filled*
-    rather than blank - the signature of elevations decoded with the wrong unpack
-    (a terrarium tile read as Terrain-RGB). Verify that family's true encoding before
-    chasing its camera (`zoom: -2.5`) as the cause.
+    **VERIFIED BY DECODING THE PIXELS (2026-08-02) - `tiles/terrain/` is
+    genuinely MIXED.** Every tile was decoded both ways (terrarium
+    `(R*256+G+B/256)-32768` vs Terrain-RGB `-10000+(R*65536+G*256+B)*0.1`) and
+    classified by which yields a plausible land elevation:
+
+    | family | tiles | encodings | used by |
+    |---|---|---|---|
+    | `terrain/` | 16 | **11 terrarium + 5 terrain-rgb - MIXED** | skirts-auto, skirts-none |
+    | `terrain-shading/` | 40 | all terrain-rgb (uniform) | default, occlusion-debug, fill-extrusion |
+    | bare `*.terrain.png` | 11 | all terrain-rgb (uniform) | pitched-world |
+    | `*.terrarium.png` | 1 | terrarium | (unused) |
+
+    The mixing is *inside one directory*, under identical `{z}-{x}-{y}.terrain.png`
+    naming, so it is invisible from the filename - only the pixel values (or the
+    tint: terrarium reads red/yellow, Terrain-RGB blue/green) reveal it. A
+    misdecode is not subtle: terrarium tiles read as Terrain-RGB come out at
+    ~870,000 m, and Terrain-RGB tiles read as terrarium at ~-32,000 m.
+
+    **Consequence for skirts-auto / skirts-none:** they declare no `encoding` (so
+    Terrain-RGB) but 11 of the 16 tiles they can load are terrarium. Any of those
+    that loads decodes to ~870 km and throws the mesh far outside the frustum -
+    a better explanation for their blank output than the missing ancestor pyramid
+    alone. The two causes likely compound: missing ancestors AND garbage
+    elevations from the tiles that are present. Fix by splitting the directory by
+    encoding (or setting `encoding` per source) *and* supplying the ancestors.
+
+    **Correction:** an earlier note here guessed `pitched-world`'s over-filled
+    geometry was a terrarium tile misread as Terrain-RGB. That is disproven - its
+    bare `*.terrain.png` family is uniformly Terrain-RGB. Its `zoom: -2.5` camera
+    remains the open suspect (see the zoom-0 relief item).
+
+    **Rule to keep:** one `raster-dem` source applies a single unpack vector to
+    everything it loads, so a test must only ever see tiles of one encoding.
+    Verify with the decode-both-ways check above when adding DEM fixtures; the
+    failure mode is silent.
 
   - **Current status after the fix (local Windows GL runner):**
     `terrain/fill-extrusion` (new, see below) **passes**; `default`,
