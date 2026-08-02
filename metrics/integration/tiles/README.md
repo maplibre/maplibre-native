@@ -23,6 +23,7 @@
   the DB under that folder's URL template, so a style pointing at the folder can
   load all of it. Note the reverse is not guaranteed: a tile may also be cached
   under an older template that no longer matches its on-disk location.
-- `jaxa/` is uniform in *encoding* but not in *tile size*: the four
-  `12-758-*`/`12-759-*` tiles are 256px, the rest 512px. Style `tileSize` drives
-  the cover zoom, so check it when adding tiles.
+- Keep each folder uniform in tile size as well as encoding. Style `tileSize`
+  drives which zoom the cover requests (512 vs 256 shifts it by one level), so a
+  mixed-size folder makes the required tile set depend on which tiles happen to
+  load. `jaxa/` is currently all 512px.
