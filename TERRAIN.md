@@ -905,6 +905,28 @@ from entering the terrain in the first place rather than correcting afterwards.
        Alps terrain rises above the sea-level-anchored camera and the view ends up
        under the surface. Testable locally by lowering the exaggeration.
 
+  - **DEM encoding hygiene (2026-08-02).** The fixture DB holds **three distinct
+    DEM tile families** plus a terrarium one, and every terrain test style omits
+    `encoding`, so all of them decode as the `raster-dem` default `mapbox`
+    (Terrain-RGB):
+
+    | family | used by |
+    |---|---|
+    | `terrain-shading/{z}-{x}-{y}.terrain.png` | default, occlusion-debug, fill-extrusion |
+    | `terrain/{z}-{x}-{y}.terrain.png` | skirts-auto, skirts-none |
+    | `{z}-{x}-{y}.terrain.png` | pitched-world |
+    | `{z}-{x}-{y}.terrarium.png` | (present in cache-style.db, unused by these tests) |
+
+    No test mixes families internally, which is the rule to keep: **a single test
+    must only use tiles of one encoding**, since one `raster-dem` source applies one
+    unpack vector to everything it loads. Mixing terrarium and Terrain-RGB under one
+    source silently produces garbage elevations rather than an error.
+    **Suspect for `pitched-world`:** it is the only test on the bare
+    `{z}-{x}-{y}.terrain.png` family and the only one whose geometry is *over-filled*
+    rather than blank - the signature of elevations decoded with the wrong unpack
+    (a terrarium tile read as Terrain-RGB). Verify that family's true encoding before
+    chasing its camera (`zoom: -2.5`) as the cause.
+
   - **Current status after the fix (local Windows GL runner):**
     `terrain/fill-extrusion` (new, see below) **passes**; `default`,
     `pitched-world`, `skirts-auto`, `skirts-none`, `occlusion-debug` still fail -
