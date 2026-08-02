@@ -29,8 +29,12 @@
 //   1 = flat red. CONFIRMED red everywhere -> the fragment runs and the
 //       problem is the sample; stays black -> the fragment is not executing or
 //       its output is being discarded/overwritten.
-//   2 = visualise UV as (u, v, 0, 1). Sane UVs give a red/green gradient per
+//   2 = visualise UV as (u, v, 0, 1). CONFIRMED: u or v pinned to exactly 0
+//       over the black regions - the constant-edge UV a skirt vertex carries.
+//   3 = paint skirt fragments blue, sample normally elsewhere. If the blue
+//       covers what used to be black, the skirts are drawing over the surface
+//       instead of being hidden behind it. Sane UVs give a red/green gradient per
 //       tile; black or garbage in the failing regions localises it to the UVs.
 #ifndef MLN_TERRAIN_FRAG_PROBE
-#define MLN_TERRAIN_FRAG_PROBE 2
+#define MLN_TERRAIN_FRAG_PROBE 3
 #endif

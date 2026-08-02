@@ -12,6 +12,10 @@ namespace shaders {
 // (src/mbgl/renderer/terrain_diagnostics.hpp). 0 is the real one.
 #if MLN_TERRAIN_FRAG_PROBE == 1
 #define MLN_TERRAIN_FRAG_BODY "return half4(1.0h, 0.0h, 0.0h, 1.0h);"
+#elif MLN_TERRAIN_FRAG_PROBE == 3
+#define MLN_TERRAIN_FRAG_BODY                                           \
+    "if (in.is_skirt > 0.5) { return half4(0.0h, 0.0h, 1.0h, 1.0h); } " \
+    "return half4(mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y)));"
 #elif MLN_TERRAIN_FRAG_PROBE == 2
 #define MLN_TERRAIN_FRAG_BODY "return half4(half(in.uv.x), half(in.uv.y), 0.0h, 1.0h);"
 #else
@@ -76,6 +80,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 uv;
     float elevation;
+    float is_skirt;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -109,6 +114,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position  = position,
         .uv        = uv,
         .elevation = elevation,
+        .is_skirt  = (float(vertx.pos.z) == 1.0) ? 1.0 : 0.0,
     };
 }
 
