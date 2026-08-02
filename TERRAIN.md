@@ -879,7 +879,21 @@ from entering the terrain in the first place rather than correcting afterwards.
     | skirts-auto / skirts-none | blank | blank | missing ancestor-pyramid fixtures |
     | pitched-world | (unclassified) | over-filled | zoom -2.5, see zoom-0 relief item |
 
-    1. **Metal black bands = drape texture not bound.** The Metal terrain fragment
+    1. **Metal black bands - ROOT CAUSE FOUND AND FIXED (96f0a95).** The black
+       was the terrain *skirts*, drawn unoccluded and smearing the drape tiles'
+       black border texel (u or v = 0) down every curtain. mtl::Drawable::draw
+       sets no depth-stencil state for 3D drawables (the layer group owns it);
+       mtl::TileLayerGroup does that job, but the plain mtl::LayerGroup that
+       holds RenderTerrain's mesh and depth-pass drawables never did - so on
+       Metal the terrain drew with the encoder default (depth test Always,
+       write off) and triangle order decided visibility. GL/Vulkan pick
+       depthModeFor3D inside the drawable and were unaffected. Established by
+       a fragment-probe sequence (flat red -> UV visualisation -> skirt-flag
+       blue) after drape dumps proved the drape textures pixel-identical to
+       GL. The same fix should restore the Metal terrain depth pass (symbol
+       occlusion). The next paragraph's earlier drape-texture theory is
+       superseded.
+       *(earlier, superseded analysis:)* Metal black bands = drape texture not bound. The Metal terrain fragment
        samples `mapTexture` (mtl/terrain.hpp fragmentMain); an unbound/never-rendered
        drape texture reads black. GL renders the identical scene perfectly, so mesh,
        cover and DEM are all fine - only Metal's per-tile drape texture binding fails
