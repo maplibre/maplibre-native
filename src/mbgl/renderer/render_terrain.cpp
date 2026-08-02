@@ -264,7 +264,12 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     // (blurry roads) or leave uncovered areas as skirt. DEM/drape textures fall
     // back to ancestors per tile below while exact tiles load. tileCover already
     // limits to the frustum (elevation included), so no extra cull is needed.
-    std::set<UnwrappedTileID> meshTiles = computeMeshCover(state, updateParameters);
+    // Use the cover Renderer::Impl already computed for this frame when available:
+    // recomputing here can yield a different set once demDim is known (see
+    // setFrameMeshCover), which would desync this mesh from the drape-target pool.
+    std::set<UnwrappedTileID> meshTiles = frameMeshCover ? std::move(*frameMeshCover)
+                                                         : computeMeshCover(state, updateParameters);
+    frameMeshCover.reset();
 
     // Cap the mesh tile count: keep those nearest the map center, drop the farthest
     // (the horizon tiles a high tilt pulls in). Everything downstream - drape

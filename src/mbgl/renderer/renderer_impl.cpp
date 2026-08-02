@@ -266,6 +266,8 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
         frameDrapeTargetCount = demTileIDs.size();
+        // Hand the exact cover to RenderTerrain so its mesh matches this pool
+        terrain->setFrameMeshCover(demTileIDs);
     } else {
         // The pool persists across frames, so release the drape targets when
         // terrain is disabled instead of holding their textures indefinitely

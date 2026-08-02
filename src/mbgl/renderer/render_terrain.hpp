@@ -83,6 +83,16 @@ public:
     /// render tests - stayed blank.
     void prepareSource(class RenderOrchestrator& orchestrator);
 
+    /// Cache the mesh cover Renderer::Impl computed for this frame, so update()
+    /// meshes exactly the tile set the drape-target pool was built from.
+    /// computeMeshCover() is not stable within a frame: it derives its tile size
+    /// from `demDim`, which is 0 until the first DEM decodes and only then takes
+    /// the source's real value. For a 256px DEM the pre-pool call therefore falls
+    /// back to 512 and covers a different (shallower) tile set than the in-update
+    /// call, so every getRenderTarget() lookup missed and no terrain drawable was
+    /// ever created - the map rendered empty.
+    void setFrameMeshCover(std::set<UnwrappedTileID> cover) { frameMeshCover = std::move(cover); }
+
     /**
      * @brief Update terrain rendering (create/update drawables)
      * @param orchestrator Render orchestrator for accessing render sources
@@ -325,6 +335,9 @@ private:
 
     // Cached DEM source
     RenderSource* demSource = nullptr;
+    /// Mesh cover for the current frame, set by Renderer::Impl before the drape
+    /// target pool is built; consumed (and cleared) by update()
+    std::optional<std::set<UnwrappedTileID>> frameMeshCover;
 
     // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
     std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
