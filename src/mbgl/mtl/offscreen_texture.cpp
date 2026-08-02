@@ -67,6 +67,14 @@ public:
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
         if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
             colorTarget->setTexture(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+            // An offscreen texture exists to be sampled afterwards, so its colour
+            // MUST be written back to the texture. Metal defaults a colour
+            // attachment to MTL::StoreActionDontCare, which on a tile-based GPU
+            // leaves the resolved texture undefined once the pass ends: the
+            // terrain drape targets rendered correctly (right content, right
+            // count, no errors) yet the terrain surface sampled black over large
+            // areas. Depth below is deliberately DontCare - it is not read back.
+            colorTarget->setStoreAction(MTL::StoreActionStore);
         }
 
         if (depthTexture) {
