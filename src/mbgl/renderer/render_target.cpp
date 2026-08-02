@@ -435,9 +435,15 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // Draws ISSUED into this target. Fragments killed by a stencil/depth test
         // still count here, so a non-zero value alongside a black target means the
         // draws reached the GPU and were discarded, not that nothing was submitted.
+        // Also record what the target was cleared to. Areas of a drape target not
+        // covered by a draped drawable show this colour, so a black clear where the
+        // style background is not black would explain black regions on the terrain
+        // surface even though every draw succeeded.
         Log::Info(Event::Render,
                   "DRAPE " + util::toString(*drapeTileID) +
-                      " drawCalls=" + std::to_string(context.renderingStats().numDrawCalls - drawCallsBefore));
+                      " drawCalls=" + std::to_string(context.renderingStats().numDrawCalls - drawCallsBefore) +
+                      " clear=" + std::to_string(backgroundColor.r) + "," + std::to_string(backgroundColor.g) + "," +
+                      std::to_string(backgroundColor.b) + "," + std::to_string(backgroundColor.a));
         parameters.currentDrapeTile = {{0, 0, 0, 0}};
         // Leaving drape placement: the masks just built do not apply to what renders next
         parameters.invalidateTileClippingMasks();
