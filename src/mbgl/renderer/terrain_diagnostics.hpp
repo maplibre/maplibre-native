@@ -14,8 +14,9 @@
 // can upload them as artifacts. This answers the question logging cannot: whether
 // the drape texture itself contains the draped map (so the bug is in how terrain
 // samples it) or is blank/black (so the bug is in the draping). Off by default
-// even when MLN_TERRAIN_DIAG is on, because it reads back every target every
-// frame - set MLN_TERRAIN_DUMP_DRAPES=1 to enable.
+// frame. DISABLED: the dumps proved the drape targets are correct on Metal
+// (pixel-identical to OpenGL), so draping is not the bug - set to 1 only if that
+// needs re-checking.
 #ifndef MLN_TERRAIN_DUMP_DRAPES
-#define MLN_TERRAIN_DUMP_DRAPES 1
+#define MLN_TERRAIN_DUMP_DRAPES 0
 #endif
