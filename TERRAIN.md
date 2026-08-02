@@ -932,6 +932,36 @@ from entering the terrain in the first place rather than correcting afterwards.
        Alps terrain rises above the sea-level-anchored camera and the view ends up
        under the surface. Testable locally by lowering the exaggeration.
 
+       **CONFIRMED 2026-08-02, and the root cause is a missing feature, not a
+       bug: the camera is never anchored to the terrain.** Everything the
+       renderer does is healthy - the diagnostics report `meshTiles=3 created=3
+       noRenderTarget=0 demTextures=3 demDim=512`, and all three drape targets
+       render real content (`drawCalls=3/6/1`, clear 1,1,1,1). The frame is
+       white because the mesh clips away entirely. Editing only the
+       exaggeration proves it: at `2` the output PNG is 850 B (blank), at `0.45`
+       it is 6.3 kB of rendered terrain - and even then the framing is a
+       close-up where gl-js's baseline shows a wide pitched vista, i.e. the
+       camera is still too low, just no longer underground.
+
+       `TransformState` has a `centerAltitude`, but grep shows it is only ever
+       written from explicit `CameraOptions` / flyTo interpolation
+       (`transform.cpp` 130/186/378) - **nothing derives it from the terrain**.
+       gl-js runs `transform.updateElevation()` every frame, setting
+       `_centerAltitude` from the DEM under the map centre. Without that, the
+       ground rises toward a camera that stays at its sea-level altitude:
+       Innsbruck's valley floor (~575 m) puts the camera ~260 m too low at
+       exaggeration 0.45 (merely too close) and ~1150 m too low at 2, which is
+       below the surrounding peaks (~2600 m, doubled) - hence the empty frame.
+       This is exactly why every terrain test that passes today uses a small
+       exaggeration.
+
+       Fixing it is Phase 4 work, not a patch: the transform would have to learn
+       the terrain elevation at the centre each frame (the renderer knows it,
+       `TransformState` does not), and that value feeds `cameraToCenterDistance`,
+       the projection matrices, free-camera, and the pitch limit that keeps the
+       camera above ground. Until then `terrain/default` should stay enabled and
+       failing - it is the regression guard for this gap.
+
   - **DEM encoding hygiene (2026-08-02).** The fixture DB holds **three distinct
     DEM tile families** plus a terrarium one, and every terrain test style omits
     `encoding`, so all of them decode as the `raster-dem` default `mapbox`
