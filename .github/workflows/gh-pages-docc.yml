@@ -15,7 +15,6 @@ on:
 
 jobs:
   gh-pages-docc-build:
-    if: ${{ github.ref_name == 'main' }}
     name: Build DocC Docs
     runs-on: macos-latest
     steps:
