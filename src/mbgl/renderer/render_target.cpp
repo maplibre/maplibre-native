@@ -17,6 +17,7 @@
 #if MLN_TERRAIN_DIAG && MLN_TERRAIN_DUMP_DRAPES
 #include <mbgl/util/image.hpp>
 #include <fstream>
+#include <cstdio>
 #endif
 #include <mbgl/util/string.hpp>
 
@@ -515,7 +516,13 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         try {
             const auto img = offscreenTexture->readStillImage();
             const auto png = encodePNG(img);
-            const auto name = "drape_" + std::to_string(drapeTileID->canonical.z) + "-" +
+            // Sequence prefix: different tests cover the same tile ids, so without it
+            // a later test silently overwrites an earlier test's dump. Match a file to
+            // its test by the position of its "DRAPE dumped" line in the log.
+            static int dumpSeq = 0;
+            char seq[8];
+            std::snprintf(seq, sizeof(seq), "%04d", dumpSeq++);
+            const auto name = "drape_" + std::string(seq) + "_" + std::to_string(drapeTileID->canonical.z) + "-" +
                               std::to_string(drapeTileID->canonical.x) + "-" +
                               std::to_string(drapeTileID->canonical.y) + "_w" + std::to_string(drapeTileID->wrap) +
                               ".png";
