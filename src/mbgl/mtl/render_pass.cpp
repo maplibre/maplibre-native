@@ -29,6 +29,23 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                     }
                 }
             }
+            // DIAGNOSTIC: Metal is the only backend that does not act on the
+            // descriptor's clearDepth/clearStencil (gl and vulkan render_pass.cpp both
+            // do). The offscreen stencil attachment is created with a texture but no
+            // load action, so it defaults to MTL::LoadActionDontCare and the pass runs
+            // against undefined stencil - which would make the drape's tile clipping
+            // masks discard fragments and leave the target at its clear colour.
+            {
+                auto* stencilAtt = rpd->stencilAttachment();
+                const bool haveStencilTex = stencilAtt && stencilAtt->texture();
+                Log::Info(Event::Render,
+                          std::string("MTLPASS ") + name + " clearDepthReq=" + (descriptor.clearDepth ? "yes" : "no") +
+                              " clearStencilReq=" + (descriptor.clearStencil ? "yes" : "no") +
+                              " stencilAttachment=" + (haveStencilTex ? "yes" : "no") + " stencilLoadAction=" +
+                              (haveStencilTex ? std::to_string(static_cast<int>(stencilAtt->loadAction())) : "-") +
+                              " (MTL::LoadActionDontCare=0, Load=1, Clear=2)");
+            }
+
             encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
 
             const auto& texture = rpd->colorAttachments()->object(0)->texture();

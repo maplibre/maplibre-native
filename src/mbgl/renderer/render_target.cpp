@@ -430,7 +430,14 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
     if (drapeTileID) {
         // Terrain drape target: render the orchestrator's draped layer groups
         // (their tweakers already ran in the main layer group update)
+        const auto drawCallsBefore = context.renderingStats().numDrawCalls;
         renderDrapedLayerGroups(orchestrator, parameters);
+        // Draws ISSUED into this target. Fragments killed by a stencil/depth test
+        // still count here, so a non-zero value alongside a black target means the
+        // draws reached the GPU and were discarded, not that nothing was submitted.
+        Log::Info(Event::Render,
+                  "DRAPE " + util::toString(*drapeTileID) +
+                      " drawCalls=" + std::to_string(context.renderingStats().numDrawCalls - drawCallsBefore));
         parameters.currentDrapeTile = {{0, 0, 0, 0}};
         // Leaving drape placement: the masks just built do not apply to what renders next
         parameters.invalidateTileClippingMasks();
