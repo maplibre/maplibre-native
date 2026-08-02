@@ -8,22 +8,3 @@
 | `{z}-{x}-{y}.terrain.png` (`12-758-*`, `12-759-*`) | PNG raster-DEM (Mapbox terrain-RGB encoding), 256px | Terrain DEM tiles over the Grand Canyon, z12 | Source unknown. |
 | `terrain/{z}-{x}-{y}.terrain.png` | PNG raster-DEM (**mixed**: terrarium and terrain-RGB) | Terrain DEM tiles for two unrelated regions | Terrarium tiles over the Grand Canyon from [AWS Terrain Tiles](https://registry.opendata.aws/terrain-tiles/); terrain-RGB tiles over the Dead Sea, source unknown. |
 | `terrain-shading/{z}-{x}-{y}.terrain.png` | PNG raster-DEM (Mapbox terrain-RGB encoding) | Terrain DEM tiles over the Alps (N47 E011) | Matches the [maplibre/demotiles](https://demotiles.maplibre.org/terrain-tiles/tiles.json) `jaxa_terrainrgb_N047E011` set. Credit: [AW3D30 (JAXA)](https://www.eorc.jaxa.jp/ALOS/en/dataset/aw3d30/aw3d30_e.htm). |
-
-### Notes for adding DEM fixtures
-
-- **One `raster-dem` source applies a single unpack vector to everything it
-  loads**, so all tiles reachable by one source must share an encoding. Mixing
-  terrarium and terrain-RGB produces garbage elevations *silently* - a terrarium
-  tile read as terrain-RGB decodes to ~870,000 m. Verify by decoding both ways
-  and keeping whichever yields a plausible elevation.
-- Tests read tiles from the SQLite `metrics/cache-style.db`, **not** from these
-  files; the files are provenance/source-of-record. Adding a tile here has no
-  effect until it is also inserted into that DB (match the existing `tiles` table
-  row format and use `insert or replace`). Keep every file in a folder present in
-  the DB under that folder's URL template, so a style pointing at the folder can
-  load all of it. Note the reverse is not guaranteed: a tile may also be cached
-  under an older template that no longer matches its on-disk location.
-- Keep each folder uniform in tile size as well as encoding. Style `tileSize`
-  drives which zoom the cover requests (512 vs 256 shifts it by one level), so a
-  mixed-size folder makes the required tile set depend on which tiles happen to
-  load. `jaxa/` is currently all 512px.
