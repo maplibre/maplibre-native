@@ -288,10 +288,10 @@ buildable/testable in this environment (Metal needs macOS; WebGPU builds via the
 | terrain renders | yes | **yes, verified on device** | untested | untested |
 | terrain off->on (all 3 load modes) | yes | **yes, verified** | untested | untested |
 | symbol occlusion | yes | looks correct on device | untested | untested |
-| **fill-extrusion elevation** | yes | **NO** (struct synced, shaders pending) | **yes** (2026-08-01, render test passes vs GL baseline) | yes |
+| **fill-extrusion elevation** | yes | **yes** (2026-08-01, render test pixel-matches the GL baseline) | **yes** (2026-08-02, shaders sample the DEM; CI confirmation pending) | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
-**Fill-extrusion terrain elevation on Metal/Vulkan: still open.** Metal and
+**Fill-extrusion terrain elevation on Metal/Vulkan (history; both now fixed).** Metal and
 Vulkan use the instanced fill-extrusion path
 (`MLN_USE_FILL_EXTRUSION_INSTANCING = METAL || VULKAN`, from upstream `1b6ed35`
 "Vulkan fill extrusion instancing" #4310). Its layout vertex is
@@ -354,12 +354,25 @@ instance record; both declare `dem_sampler` at binding 1 with
 Vulkan: 28 passed, 1 failed (`fill-extrusion-pattern/tile-buffer`) - confirmed
 failing identically on the pre-change build, pre-existing.
 
-**Metal: struct layout synced (both MSL OutlineInstance structs gained
-`short2 centroid_pos`), so Metal keeps rendering with the 12-byte vertex - but
-its shaders do not sample the DEM yet.** Metal respects TextureInfo/
-getSamplerLocation, so its wiring is the conventional kind: add a DEM texture
-argument + the same centroid elevation to the four MSL FE shaders. Until then
-`terrain/fill-extrusion` fails on Metal CI by design (that is the test's job).
+**2026-08-02 - Metal done too.** Metal respects TextureInfo/getSamplerLocation,
+so none of the Vulkan binding trickery applies: the DEM is declared
+`texture2d<float, access::sample> demTexture [[texture(0)]]` +
+`sampler demSampler [[sampler(0)]]` on the vertex function (mtl::Texture2D::bind
+binds to both stages), registered as `TextureInfo{0, idFillExtrusionDEMTexture}`.
+The roof shader reads a new per-vertex `short2 centroid [[attribute(5)]]`
+(`AttributeInfo{5, Short2, fillExtrusionUBOCount + 0, idFillExtrusionCentroid
+VertexAttribute}` - same buffer index as pos/decimals_ed, since all three are
+interleaved in the bucket's 12-byte shared vertex); the wall shader reads
+`centroid_pos` from the aliased `OutlineInstance` record (synced in 62e1fdc).
+Both apply the GL lift verbatim. `mtl::circle.hpp` is the precedent for a
+vertex-stage DEM sampler on Metal, including the terrain-off case: the tweaker
+only calls `setTexture` when `parameters.terrain` exists, and `get_elevation`
+early-returns on `dem_enabled == 0`, so the declared-but-unbound argument is
+never sampled.
+
+The **pattern** FE variants still do not elevate, on any backend - GL's
+`fill_extrusion_pattern.vertex.glsl` has no `u_dem` either, so Metal matches.
+Worth closing on all four backends together rather than diverging here.
 
 *(Historical analysis below, kept for the record.)*
 
@@ -994,8 +1007,10 @@ from entering the terrain in the first place rather than correcting afterwards.
     Baseline generated with the local Windows OpenGL runner (`-p
     metrics/linux-opengl.json -u default`), the backend that elevates FE
     correctly today; provisional until Linux CI confirms. This test is the
-    regression guard for the Metal/Vulkan FE-elevation gap: those backends
-    should FAIL it until the instanced path samples the DEM.
+    regression guard for the FE-elevation gap on the instanced path: it caught
+    Vulkan (fixed 62e1fdc) and Metal (fixed 2026-08-02) rendering their
+    buildings at sea level, and should FAIL on any backend that stops sampling
+    the DEM.
   - The gl-js `terrain/symbol` test is still worth porting now that symbols are
     elevated (needs its DEM fixtures loaded into `metrics/cache-style.db`).
 - **Android**: the test app has five "3D Terrain" activities in the Style
