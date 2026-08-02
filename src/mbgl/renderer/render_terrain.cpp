@@ -472,7 +472,14 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             ++diagNoTarget;
             continue;
         }
-        auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, renderTarget->getTexture());
+        const auto& drapeTex = renderTarget->getTexture();
+        // Identity of the drape texture this tile's drawable will sample. Compare
+        // against the "DRAPE ... renderedInto=" line for the same tile: if they
+        // differ, the drawable is sampling a texture nothing rendered into.
+        Log::Info(Event::Render,
+                  "TERRAIN tile " + util::toString(unwrapped) +
+                      " bindsTexture=" + std::to_string(reinterpret_cast<uintptr_t>(drapeTex.get())));
+        auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, drapeTex);
         if (drawable) {
             ++diagCreated;
             lg->addDrawable(std::move(drawable));

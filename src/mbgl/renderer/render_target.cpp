@@ -266,7 +266,8 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
         });
         Log::Info(Event::Render,
                   "DRAPE " + util::toString(*drapeTileID) + " render groups=" + std::to_string(drapedCount) +
-                      " enabledDrawables=" + std::to_string(enabled));
+                      " enabledDrawables=" + std::to_string(enabled) +
+                      " renderedInto=" + std::to_string(reinterpret_cast<uintptr_t>(getTexture().get())));
     }
 
     // draw draped layer groups, opaque pass
