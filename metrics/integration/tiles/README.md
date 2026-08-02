@@ -19,8 +19,10 @@
 - Tests read tiles from the SQLite `metrics/cache-style.db`, **not** from these
   files; the files are provenance/source-of-record. Adding a tile here has no
   effect until it is also inserted into that DB (match the existing `tiles` table
-  row format and use `insert or replace`). Consequently the on-disk folder name
-  need not match the style URL, and for the moved `jaxa/` tiles it does not.
+  row format and use `insert or replace`). Keep every file in a folder present in
+  the DB under that folder's URL template, so a style pointing at the folder can
+  load all of it. Note the reverse is not guaranteed: a tile may also be cached
+  under an older template that no longer matches its on-disk location.
 - `jaxa/` is uniform in *encoding* but not in *tile size*: the four
   `12-758-*`/`12-759-*` tiles are 256px, the rest 512px. Style `tileSize` drives
   the cover zoom, so check it when adding tiles.
