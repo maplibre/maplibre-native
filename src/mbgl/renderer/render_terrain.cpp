@@ -373,6 +373,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     }
 
     // Create terrain drawables for each mesh tile
+    std::size_t diagCreated = 0, diagNoTarget = 0;
     for (const auto& unwrapped : meshTiles) {
         const OverscaledTileID tileID(unwrapped.canonical.z, unwrapped.wrap, unwrapped.canonical);
 
@@ -468,10 +469,12 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // Create terrain drawable for this tile
         const auto renderTarget = texturePool.getRenderTarget(unwrapped);
         if (!renderTarget) {
+            ++diagNoTarget;
             continue;
         }
         auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, renderTarget->getTexture());
         if (drawable) {
+            ++diagCreated;
             lg->addDrawable(std::move(drawable));
             tilesWithDrawables[tileID] = demTier;
 #if !MLN_RENDER_BACKEND_OPENGL
@@ -486,6 +489,15 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
 #endif
         }
     }
+
+    // Rendering-path diagnostic, cheap and once per frame: lets a CI render-test log
+    // show whether the terrain mesh matched the drape-target pool (see prepareSource /
+    // setFrameMeshCover, both of which caused blank terrain when they did not).
+    Log::Info(Event::Render,
+              "TERRAIN meshTiles=" + std::to_string(meshTiles.size()) + " created=" +
+                  std::to_string(diagCreated) + " noRenderTarget=" + std::to_string(diagNoTarget) +
+                  " demTextures=" + std::to_string(demTextures.size()) + " demDim=" +
+                  std::to_string(demDim) + " drawables=" + std::to_string(lg->getDrawableCount()));
 
     // Debug-only, off by default: gate the whole above-ground check (per-frame free-camera +
     // elevation sampling) on the flag so it costs nothing unless explicitly enabled.

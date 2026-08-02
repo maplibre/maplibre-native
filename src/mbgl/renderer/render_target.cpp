@@ -12,6 +12,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <cmath>
@@ -252,6 +253,22 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
     size_t drapedCount = 0;
     visitDrapedGroups(visitForward, [&](LayerGroupBase&) { drapedCount++; });
 
+    {
+        // Rendering-path diagnostic: a drape target that renders with zero enabled
+        // drawables bakes the clear colour (opaque black), which is what the Metal
+        // terrain surface shows in CI. Logged on every backend so GL and Metal runs
+        // of the same test can be compared directly.
+        std::size_t enabled = 0;
+        visitDrapedGroups(visitForward, [&](LayerGroupBase& lg) {
+            static_cast<TileLayerGroup&>(lg).visitDrawables([&](gfx::Drawable& d) {
+                if (d.getEnabled()) enabled++;
+            });
+        });
+        Log::Info(Event::Render,
+                  "DRAPE " + util::toString(*drapeTileID) + " render groups=" + std::to_string(drapedCount) +
+                      " enabledDrawables=" + std::to_string(enabled));
+    }
+
     // draw draped layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
     parameters.currentLayer = 0;
@@ -308,6 +325,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
             }
         }
         if (bakedSignature && *bakedSignature == targetSignature) {
+            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " skip=signature");
             return RenderResult::Skipped;
         }
 
@@ -324,6 +342,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // since panning changes none of them, and it is the maplibre-gl-js
         // behaviour (render a terrain tile's texture only when its stack changes).
         if (coverage.sameContentAs(bakedCoverage)) {
+            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " skip=sameContent");
             bakedSignature = targetSignature;
             return RenderResult::Skipped;
         }
@@ -337,6 +356,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // "worse" and falls through to re-render. The target's lifetime bounds
         // staleness: when its terrain tile leaves the cover it is destroyed.
         if (coverage.worseThan(bakedCoverage)) {
+            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " skip=worse");
             // Keeping the already-baked (better) content: record that at this
             // signature the decision was to hold, so future identical frames skip
             // the scan too. A real change (drawable set, zoom, properties) moves the
@@ -352,6 +372,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // rendered on a subsequent frame. A never-rendered target falls through (rendering
         // it now avoids a blank tile), so bursts of *new* targets are not deferred.
         if (!canRerender && hasRenderedContent) {
+            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " deferred");
             return RenderResult::Deferred;
         }
 
