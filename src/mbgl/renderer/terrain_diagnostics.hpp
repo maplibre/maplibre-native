@@ -20,3 +20,17 @@
 #ifndef MLN_TERRAIN_DUMP_DRAPES
 #define MLN_TERRAIN_DUMP_DRAPES 0
 #endif
+
+// Terrain fragment-shader probe (Metal). Everything outside the draw measures
+// correct - the drape texture is opaque and pixel-identical to OpenGL, bound at
+// slot 1 / location 1 - yet the surface renders black, so the next thing to
+// isolate is the fragment invocation itself:
+//   0 = off, sample the drape texture normally
+//   1 = flat red. Surface turns red everywhere -> the fragment runs and the
+//       problem is the sample; stays black -> the fragment is not executing or
+//       its output is being discarded/overwritten.
+//   2 = visualise UV as (u, v, 0, 1). Sane UVs give a red/green gradient per
+//       tile; black or garbage in the failing regions localises it to the UVs.
+#ifndef MLN_TERRAIN_FRAG_PROBE
+#define MLN_TERRAIN_FRAG_PROBE 1
+#endif
