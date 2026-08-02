@@ -20,6 +20,7 @@
   "sources": {
     "terrainSource": {
       "type": "raster-dem",
+      "encoding": "terrarium",
       "tiles": [
         "local://tiles/terrain/{z}-{x}-{y}.terrain.png"
       ],
