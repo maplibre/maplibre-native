@@ -31,10 +31,19 @@
 //       its output is being discarded/overwritten.
 //   2 = visualise UV as (u, v, 0, 1). CONFIRMED: u or v pinned to exactly 0
 //       over the black regions - the constant-edge UV a skirt vertex carries.
-//   3 = paint skirt fragments blue, sample normally elsewhere. If the blue
-//       covers what used to be black, the skirts are drawing over the surface
-//       instead of being hidden behind it. Sane UVs give a red/green gradient per
-//       tile; black or garbage in the failing regions localises it to the UVs.
+//   3 = paint skirt fragments blue, sample normally elsewhere. CONFIRMED:
+//       blue bands exactly where black was (plus black above them: the curtain
+//       quads mix surface-edge verts (z=0) with skirt verts (z=1), so the flag
+//       interpolates 0->1 down each curtain and only the bottom half passed the
+//       0.5 threshold - blue bottoms, border-smear-black tops, ONE phenomenon).
+//
+// ROOT CAUSE (fixed in mtl::LayerGroup::render): mtl::Drawable::draw sets no
+// depth-stencil state for 3D drawables - the layer group owns that - and the
+// plain (non-tile) Metal layer group never provided it, so the terrain mesh
+// drew with the encoder default: depth test Always, write off. The skirts,
+// later in the index buffer, painted over the surface, smearing the drape
+// tiles' black border texels down every curtain. GL/Vulkan pick their 3D depth
+// mode in the drawable itself, which is why only Metal showed it.
 #ifndef MLN_TERRAIN_FRAG_PROBE
-#define MLN_TERRAIN_FRAG_PROBE 3
+#define MLN_TERRAIN_FRAG_PROBE 0
 #endif
