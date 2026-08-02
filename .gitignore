@@ -61,3 +61,6 @@ out.png
 **/target/
 **/*.rs.bk
 **/*.profraw
+
+# TEMPORARY: terrain drape diagnostic dumps (see src/mbgl/renderer/terrain_diagnostics.hpp)
+drape_*.png
