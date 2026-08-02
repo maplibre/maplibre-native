@@ -44,8 +44,8 @@
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/map/camera.hpp>
-#include <mbgl/util/convert.hpp> // util::cast for the instanced depth UBO matrix
-#include <mbgl/util/hash.hpp>    // util::hash_combine for the depth-instance set signature
+#include <mbgl/util/convert.hpp>         // util::cast for the instanced depth UBO matrix
+#include <mbgl/util/hash.hpp>            // util::hash_combine for the depth-instance set signature
 #include <mbgl/gfx/vertex_attribute.hpp> // VertexAttributeArray for the a_instance attribute
 
 #include <algorithm>
@@ -290,12 +290,11 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         };
 
         std::vector<UnwrappedTileID> sorted(meshTiles.begin(), meshTiles.end());
-        std::partial_sort(sorted.begin(),
-                          sorted.begin() + static_cast<std::ptrdiff_t>(maxMeshTiles),
-                          sorted.end(),
-                          [&](const UnwrappedTileID& a, const UnwrappedTileID& b) {
-                              return tileDist2(a) < tileDist2(b);
-                          });
+        std::partial_sort(
+            sorted.begin(),
+            sorted.begin() + static_cast<std::ptrdiff_t>(maxMeshTiles),
+            sorted.end(),
+            [&](const UnwrappedTileID& a, const UnwrappedTileID& b) { return tileDist2(a) < tileDist2(b); });
         meshTiles = std::set<UnwrappedTileID>(sorted.begin(),
                                               sorted.begin() + static_cast<std::ptrdiff_t>(maxMeshTiles));
     }

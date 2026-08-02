@@ -39,7 +39,7 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     // this many metres into a curtain that hides the cracks between neighbouring
     // tiles at different zoom levels. ~1/5 of the tile's world width at this zoom,
     // matching maplibre-gl-js Terrain.getSkirtLength().
-    const auto zoom = std::max(static_cast<double>(parameters.state.getZoom()), 0.0);
+    const auto zoom = std::max(parameters.state.getZoom(), 0.0);
     const float elevationOffset = static_cast<float>(util::M2PI * util::EARTH_RADIUS_M / std::pow(2.0, zoom) / 5.0);
 
     // Populate layer-level UBO with terrain properties

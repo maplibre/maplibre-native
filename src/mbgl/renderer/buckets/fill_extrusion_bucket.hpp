@@ -24,8 +24,7 @@ using FillExtrusionStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
 // shader-side OutlineInstance struct exactly: pos and centroid each pack two
 // int16 into one 32-bit word (std430 stride 12). Do not add members with
 // wider alignment (e.g. a GLSL ivec2 aligns to 8 and desyncs the stride).
-using FillExtrusionLayoutVertex =
-    gfx::Vertex<TypeList<attributes::pos, attributes::decimals_ed, attributes::centroid>>;
+using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::decimals_ed, attributes::centroid>>;
 #else
 using FillExtrusionLayoutVertex =
     gfx::Vertex<TypeList<attributes::pos, attributes::decimals_ed, attributes::normal2d, attributes::centroid>>;
@@ -68,13 +67,13 @@ public:
 
         return FillExtrusionLayoutVertex{
             {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
-            { // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
-                static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + (isDiscarded ? 1 : 0)),
-                // The edgeDistance attribute is used for wrapping fill_extrusion patterns
-                edgeDistance
-            },
+            {// We pack a bool (`isDiscarded`) indicating whether this instance is discarded
+             static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + (isDiscarded ? 1 : 0)),
+             // The edgeDistance attribute is used for wrapping fill_extrusion patterns
+             edgeDistance},
             // Per-polygon centroid, so the extrusion is raised by one terrain elevation
-            {centroid.x, centroid.y}};
+            { centroid.x,
+              centroid.y }};
     }
 #else
     static FillExtrusionLayoutVertex layoutVertex(const Point<double>& p,

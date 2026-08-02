@@ -49,6 +49,20 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+    drape_tile: vec4<f32>,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundDrawableUnionUBO>;
 @group(0) @binding(4) var<uniform> props: BackgroundPropsUBO;
@@ -137,6 +151,20 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+    drape_tile: vec4<f32>,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundPatternDrawableUnionUBO>;
 @group(0) @binding(4) var<uniform> props: BackgroundPatternPropsUBO;
@@ -200,8 +228,17 @@ struct BackgroundPatternPropsUBO {
 
 struct GlobalPaintParamsUBO {
     pattern_atlas_texsize: vec2<f32>,
-    // other fields...
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+    drape_tile: vec4<f32>,
 };
+
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(4) var<uniform> props: BackgroundPatternPropsUBO;

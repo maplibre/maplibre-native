@@ -1047,6 +1047,8 @@ MLN_DRAWABLES_GL_SOURCE = [
     "src/mbgl/gl/dynamic_texture.cpp",
     "src/mbgl/gl/layer_group_gl.cpp",
     "src/mbgl/gl/texture2d.cpp",
+    "src/mbgl/gl/texture_2d_array.cpp",
+    "src/mbgl/gl/texture_2d_array.hpp",
     "src/mbgl/gl/uniform_buffer_gl.cpp",
     "src/mbgl/gl/vertex_attribute_gl.cpp",
     "src/mbgl/shaders/gl/shader_info.cpp",
