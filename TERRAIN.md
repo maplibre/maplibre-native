@@ -866,6 +866,45 @@ from entering the terrain in the first place rather than correcting afterwards.
     `RenderTerrain::prepareSource()` and calling it in `Renderer::Impl::render`
     before the pool is built. Diagnosed with temporary counters: `impl:
     drapeTargets=0` vs `update: meshTiles=6 rtMisses=6` in the same frame.
+  - **2026-08-02 - the six terrain failures are THREE independent bugs, not one.**
+    Established by diffing the local GL runner against the macOS/Metal CI images
+    (node-ci run on the 62e1fdc merge) - the earlier single "missing fixtures"
+    explanation is wrong as a blanket claim:
+
+    | test | GL (local) | Metal (CI) | cause |
+    |---|---|---|---|
+    | occlusion-debug | renders correctly | black bands | Metal-only |
+    | fill-extrusion | passes | black bands | Metal-only |
+    | default | blank | blank | camera/exaggeration (below) |
+    | skirts-auto / skirts-none | blank | blank | missing ancestor-pyramid fixtures |
+    | pitched-world | (unclassified) | over-filled | zoom -2.5, see zoom-0 relief item |
+
+    1. **Metal black bands = drape texture not bound.** The Metal terrain fragment
+       samples `mapTexture` (mtl/terrain.hpp fragmentMain); an unbound/never-rendered
+       drape texture reads black. GL renders the identical scene perfectly, so mesh,
+       cover and DEM are all fine - only Metal's per-tile drape texture binding fails
+       for a subset of tiles. Same family as the Vulkan `binding = 1` bug fixed in
+       62e1fdc, different mechanism. **Metal-specific; do not chase it in shared code.**
+    2. **skirts-auto / skirts-none: genuinely missing fixtures, and the tile set
+       differs from gl-js.** Their DEM source has **no `maxzoom`**, so
+       `computeMeshCover`'s `zoomRange{0, demSource->getMaxZoom()}` lets tileCover
+       DFS from z0 and native requests a whole **ancestor pyramid** -
+       `terrain/6-11-25`, `7-23-50`, `8-47-100`, `9-94-200/201`, `9-95-200`,
+       `10-189-400/403`, `10-190-403`, `10-191-401` - none of which are in
+       `cache-style.db` (it holds `terrain/` at 16 entries only). gl-js requests only
+       its ideal-zoom set for the same camera, which is why its fixture set has no
+       such pyramid. This is the concrete form of the long-suspected
+       native-vs-gl-js cover/zoom-level difference: **native over-requests
+       ancestors**. Two ways out - make the cover stop over-requesting (the real
+       fix, Phase 3 tile-cover convergence), or add the pyramid tiles to the cache.
+    3. **terrain/default is NOT a fixture problem.** It reports **zero** cache
+       misses and still renders blank. Its distinguishing parameters are
+       `exaggeration: 2` + `pitch: 60` + `zoom: 13`; the two tests that DO render
+       (occlusion-debug, fill-extrusion) both use `exaggeration: 0.45`. That points
+       at camera-inside-terrain (Phase 4) rather than data: at 2x exaggeration the
+       Alps terrain rises above the sea-level-anchored camera and the view ends up
+       under the surface. Testable locally by lowering the exaggeration.
+
   - **Current status after the fix (local Windows GL runner):**
     `terrain/fill-extrusion` (new, see below) **passes**; `default`,
     `pitched-world`, `skirts-auto`, `skirts-none`, `occlusion-debug` still fail -
