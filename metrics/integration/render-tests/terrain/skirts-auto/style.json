@@ -19,11 +19,10 @@
   "sources": {
     "terrainSource": {
       "type": "raster-dem",
-      "encoding": "terrarium",
       "tiles": [
-        "local://tiles/terrain/{z}-{x}-{y}.terrain.png"
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.png"
       ],
-      "tileSize": 256
+      "tileSize": 512
     },
     "features": {
       "type": "geojson",
