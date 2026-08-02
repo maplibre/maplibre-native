@@ -70,10 +70,12 @@ public:
             // An offscreen texture exists to be sampled afterwards, so its colour
             // MUST be written back to the texture. Metal defaults a colour
             // attachment to MTL::StoreActionDontCare, which on a tile-based GPU
-            // leaves the resolved texture undefined once the pass ends: the
-            // terrain drape targets rendered correctly (right content, right
-            // count, no errors) yet the terrain surface sampled black over large
-            // areas. Depth below is deliberately DontCare - it is not read back.
+            // leaves the resolved texture undefined once the pass ends. Depth
+            // below is deliberately DontCare - it is not read back.
+            // (Committed while chasing the black terrain bands, which turned out
+            // to be the missing 3D depth state in mtl::LayerGroup; this changed
+            // nothing there, but relying on the default is undefined behaviour
+            // regardless, so it stays.)
             colorTarget->setStoreAction(MTL::StoreActionStore);
         }
 

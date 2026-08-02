@@ -3,24 +3,9 @@
 #include <mbgl/shaders/terrain_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <mbgl/renderer/terrain_diagnostics.hpp>
 
 namespace mbgl {
 namespace shaders {
-
-// Fragment body for the terrain surface, selected by MLN_TERRAIN_FRAG_PROBE
-// (src/mbgl/renderer/terrain_diagnostics.hpp). 0 is the real one.
-#if MLN_TERRAIN_FRAG_PROBE == 1
-#define MLN_TERRAIN_FRAG_BODY "return half4(1.0h, 0.0h, 0.0h, 1.0h);"
-#elif MLN_TERRAIN_FRAG_PROBE == 3
-#define MLN_TERRAIN_FRAG_BODY                                           \
-    "if (in.is_skirt > 0.5) { return half4(0.0h, 0.0h, 1.0h, 1.0h); } " \
-    "return half4(mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y)));"
-#elif MLN_TERRAIN_FRAG_PROBE == 2
-#define MLN_TERRAIN_FRAG_BODY "return half4(half(in.uv.x), half(in.uv.y), 0.0h, 1.0h);"
-#else
-#define MLN_TERRAIN_FRAG_BODY "return half4(mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y)));"
-#endif
 
 constexpr auto terrainShaderPrelude = R"(
 
@@ -80,7 +65,6 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 uv;
     float elevation;
-    float is_skirt;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -114,7 +98,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position  = position,
         .uv        = uv,
         .elevation = elevation,
-        .is_skirt  = (float(vertx.pos.z) == 1.0) ? 1.0 : 0.0,
     };
 }
 
@@ -132,7 +115,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // 1.0 - uv.y. Metal's NDC is Y-up, so the RTT is stored upright and the V must NOT
     // be flipped here - sampling 1.0 - uv.y flips the draped map vertically (north/south
     // swapped about the view). Sample uv.y directly on Metal.
-    )" MLN_TERRAIN_FRAG_BODY R"(
+    return half4(mapTexture.sample(mapSampler, float2(in.uv.x, in.uv.y)));
 }
 )";
 };

@@ -12,13 +12,6 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/hash.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/renderer/terrain_diagnostics.hpp>
-#if MLN_TERRAIN_DIAG && MLN_TERRAIN_DUMP_DRAPES
-#include <mbgl/util/image.hpp>
-#include <fstream>
-#include <cstdio>
-#endif
 #include <mbgl/util/string.hpp>
 
 #include <cmath>
@@ -259,25 +252,6 @@ void RenderTarget::renderDrapedLayerGroups(RenderOrchestrator& orchestrator, Pai
     size_t drapedCount = 0;
     visitDrapedGroups(visitForward, [&](LayerGroupBase&) { drapedCount++; });
 
-    {
-        // Rendering-path diagnostic: a drape target that renders with zero enabled
-        // drawables bakes the clear colour (opaque black), which is what the Metal
-        // terrain surface shows in CI. Logged on every backend so GL and Metal runs
-        // of the same test can be compared directly.
-        std::size_t enabled = 0;
-        visitDrapedGroups(visitForward, [&](LayerGroupBase& lg) {
-            static_cast<TileLayerGroup&>(lg).visitDrawables([&](gfx::Drawable& d) {
-                if (d.getEnabled()) enabled++;
-            });
-        });
-#if MLN_TERRAIN_DIAG
-        Log::Info(Event::Render,
-                  "DRAPE " + util::toString(*drapeTileID) + " render groups=" + std::to_string(drapedCount) +
-                      " enabledDrawables=" + std::to_string(enabled) +
-                      " renderedInto=" + std::to_string(reinterpret_cast<uintptr_t>(getTexture().get())));
-#endif
-    }
-
     // draw draped layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
     parameters.currentLayer = 0;
@@ -334,9 +308,6 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
             }
         }
         if (bakedSignature && *bakedSignature == targetSignature) {
-#if MLN_TERRAIN_DIAG
-            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " skip=signature");
-#endif
             return RenderResult::Skipped;
         }
 
@@ -353,9 +324,6 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // since panning changes none of them, and it is the maplibre-gl-js
         // behaviour (render a terrain tile's texture only when its stack changes).
         if (coverage.sameContentAs(bakedCoverage)) {
-#if MLN_TERRAIN_DIAG
-            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " skip=sameContent");
-#endif
             bakedSignature = targetSignature;
             return RenderResult::Skipped;
         }
@@ -369,9 +337,6 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // "worse" and falls through to re-render. The target's lifetime bounds
         // staleness: when its terrain tile leaves the cover it is destroyed.
         if (coverage.worseThan(bakedCoverage)) {
-#if MLN_TERRAIN_DIAG
-            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " skip=worse");
-#endif
             // Keeping the already-baked (better) content: record that at this
             // signature the decision was to hold, so future identical frames skip
             // the scan too. A real change (drawable set, zoom, properties) moves the
@@ -387,9 +352,6 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // rendered on a subsequent frame. A never-rendered target falls through (rendering
         // it now avoids a blank tile), so bursts of *new* targets are not deferred.
         if (!canRerender && hasRenderedContent) {
-#if MLN_TERRAIN_DIAG
-            Log::Info(Event::Render, "DRAPE " + util::toString(*drapeTileID) + " deferred");
-#endif
             return RenderResult::Deferred;
         }
 
@@ -446,22 +408,7 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
     if (drapeTileID) {
         // Terrain drape target: render the orchestrator's draped layer groups
         // (their tweakers already ran in the main layer group update)
-        const auto drawCallsBefore = context.renderingStats().numDrawCalls;
         renderDrapedLayerGroups(orchestrator, parameters);
-        // Draws ISSUED into this target. Fragments killed by a stencil/depth test
-        // still count here, so a non-zero value alongside a black target means the
-        // draws reached the GPU and were discarded, not that nothing was submitted.
-        // Also record what the target was cleared to. Areas of a drape target not
-        // covered by a draped drawable show this colour, so a black clear where the
-        // style background is not black would explain black regions on the terrain
-        // surface even though every draw succeeded.
-#if MLN_TERRAIN_DIAG
-        Log::Info(Event::Render,
-                  "DRAPE " + util::toString(*drapeTileID) +
-                      " drawCalls=" + std::to_string(context.renderingStats().numDrawCalls - drawCallsBefore) +
-                      " clear=" + std::to_string(backgroundColor.r) + "," + std::to_string(backgroundColor.g) + "," +
-                      std::to_string(backgroundColor.b) + "," + std::to_string(backgroundColor.a));
-#endif
         parameters.currentDrapeTile = {{0, 0, 0, 0}};
         // Leaving drape placement: the masks just built do not apply to what renders next
         parameters.invalidateTileClippingMasks();
@@ -505,35 +452,6 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
 
     parameters.renderPass.reset();
     parameters.encoder->present(*offscreenTexture);
-
-#if MLN_TERRAIN_DIAG && MLN_TERRAIN_DUMP_DRAPES
-    // Dump the baked drape target so CI can upload it. This distinguishes the two
-    // remaining possibilities directly: if the PNG shows the draped map, the
-    // draping works and terrain is sampling it wrongly; if it is blank or black,
-    // the draping itself is at fault. present() above has already committed and
-    // waited, so the texture is complete here.
-    if (drapeTileID) {
-        try {
-            const auto img = offscreenTexture->readStillImage();
-            const auto png = encodePNG(img);
-            // Sequence prefix: different tests cover the same tile ids, so without it
-            // a later test silently overwrites an earlier test's dump. Match a file to
-            // its test by the position of its "DRAPE dumped" line in the log.
-            static int dumpSeq = 0;
-            char seq[8];
-            std::snprintf(seq, sizeof(seq), "%04d", dumpSeq++);
-            const auto name = "drape_" + std::string(seq) + "_" + std::to_string(drapeTileID->canonical.z) + "-" +
-                              std::to_string(drapeTileID->canonical.x) + "-" +
-                              std::to_string(drapeTileID->canonical.y) + "_w" + std::to_string(drapeTileID->wrap) +
-                              ".png";
-            std::ofstream out(name, std::ios::binary);
-            out.write(png.data(), static_cast<std::streamsize>(png.size()));
-            Log::Info(Event::Render, "DRAPE dumped " + name + " bytes=" + std::to_string(png.size()));
-        } catch (const std::exception& e) {
-            Log::Warning(Event::Render, std::string("DRAPE dump failed: ") + e.what());
-        }
-    }
-#endif
 
     // Render-once (hillshade prepare) target baked; skip it on subsequent frames.
     if (renderOnce) {

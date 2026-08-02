@@ -1,5 +1,4 @@
 #include <mbgl/mtl/drawable.hpp>
-#include <mbgl/renderer/terrain_diagnostics.hpp>
 
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
@@ -425,28 +424,6 @@ void Drawable::bindTextures(RenderPass& renderPass) const {
         if (const auto& texture = textures[id]) {
             if (const auto& location = shader->getSamplerLocation(id)) {
                 static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
-#if MLN_TERRAIN_DIAG
-                // The drape targets are known good (their dumps match OpenGL), so the
-                // remaining suspect is consumption: does the terrain drawable actually
-                // bind its map texture (slot idTerrainMapTexture) at draw time, and to
-                // which sampler location? Scoped to terrain so it cannot spam.
-                if (getName().find("terrain") != std::string::npos) {
-                    const auto sz = texture->getSize();
-                    Log::Info(Event::Render,
-                              "MTLBIND " + getName() + " slot=" + std::to_string(id) +
-                                  " location=" + std::to_string(*location) + " size=" + std::to_string(sz.width) + "x" +
-                                  std::to_string(sz.height) +
-                                  " tex=" + std::to_string(reinterpret_cast<uintptr_t>(texture.get())));
-                }
-#endif
-            } else {
-#if MLN_TERRAIN_DIAG
-                if (getName().find("terrain") != std::string::npos) {
-                    Log::Warning(Event::Render,
-                                 "MTLBIND " + getName() + " slot=" + std::to_string(id) +
-                                     " HAS TEXTURE BUT NO SAMPLER LOCATION - not bound");
-                }
-#endif
             }
         }
     }
