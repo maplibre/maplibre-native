@@ -44,8 +44,11 @@ public:
                        float pixelRatio,
                        bool showCollisionBoxes_,
                        gfx::DynamicTextureAtlasPtr,
-                       std::shared_ptr<FontFaces> fontFaces);
+                       std::shared_ptr<FontFaces> fontFaces,
+                       TileObserver* observer);
     ~GeometryTileWorker();
+
+    void setObserver(TileObserver* observer);
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
                    std::set<std::string> availableImages,
@@ -123,6 +126,8 @@ private:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     std::shared_ptr<FontFaces> fontFaces;
+
+    TileObserver* observer;
 };
 
 } // namespace mbgl

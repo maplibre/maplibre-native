@@ -7,6 +7,7 @@
 #include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/util/symbol_error_observer.hpp>
 
 #include <cstdint>
 #include <exception>
@@ -19,7 +20,7 @@ namespace gfx {
 class ShaderRegistry;
 }
 
-class RendererObserver {
+class RendererObserver : public SymbolErrorObserver {
 public:
     virtual ~RendererObserver() = default;
 

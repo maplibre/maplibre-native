@@ -440,6 +440,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string_indexer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/symbol_error_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tile_server_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
@@ -917,6 +918,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/convert.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/error_sink.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/error_sink.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/event.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/filesystem.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/font_stack.cpp

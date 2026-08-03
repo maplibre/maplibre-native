@@ -1,5 +1,6 @@
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
+#include <mbgl/util/error_sink.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <utility>
@@ -265,21 +266,32 @@ inline std::string locationSuffix(const source_location& source) {
            util::toString(source.line()) + ")";
 }
 } // namespace
+
+void SymbolInstance::fail(const std::string& message) const {
+    isFailed = true;
+    Log::Error(Event::Crash, message);
+
+    // Report as soon as the failure is detected, on the thread which detected it. The destination
+    // is the observer owning that thread, installed with an `ErrorScope`, see `SymbolErrorObserver`.
+    ErrorSink::report(message);
+
+    assert(false);
+}
+
 bool SymbolInstance::check(std::uint64_t v, int n, const source_location& source) const {
+    fail("SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) +
+         locationSuffix(source));
+
     if (!isFailed && v != checkVal) {
-        isFailed = true;
-        Log::Error(Event::Crash,
-                   "SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) +
-                       locationSuffix(source));
+        fail("SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) +
+             locationSuffix(source));
     }
     return !isFailed;
 }
 
 bool SymbolInstance::checkKey(const source_location& source) const {
     if (!isFailed && key.size() > 10000) { // largest observed value=62
-        isFailed = true;
-        Log::Error(Event::Crash,
-                   "SymbolInstance key corrupted with size=" + util::toString(key.size()) + locationSuffix(source));
+        fail("SymbolInstance key corrupted with size=" + util::toString(key.size()) + locationSuffix(source));
     }
     return !isFailed;
 }
@@ -288,16 +300,16 @@ bool SymbolInstance::checkIndex(const std::optional<std::size_t>& index,
                                 std::size_t size,
                                 const source_location& source) const {
     if (index.has_value() && *index >= size) {
-        isFailed = true;
-        Log::Error(Event::Crash,
-                   "SymbolInstance index corrupted with value=" + util::toString(*index) +
-                       " size=" + util::toString(size) + locationSuffix(source));
+        fail("SymbolInstance index corrupted with value=" + util::toString(*index) + " size=" + util::toString(size) +
+             locationSuffix(source));
     }
     return !isFailed;
 }
 
 void SymbolInstance::forceFail() const {
-    isFailed = true;
+    if (!isFailed) {
+        fail("SymbolInstance marked as failed by an external check");
+    }
 }
 
 // this is just to avoid warnings about the values never being set
