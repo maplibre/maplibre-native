@@ -273,6 +273,22 @@ private:  // Private utilities for converting from mgl to mbgl values
 
   // Array
   void getMBGLValue(ObjCType rawValue, std::vector<MBGLElement> &mbglValue) {
+    if (![rawValue isKindOfClass:[NSArray class]]) {
+      // The style spec allows a scalar wherever a numberArray or colorArray is expected (it
+      // even keeps scalar defaults for those properties), and Converter<std::vector<T>> in
+      // mbgl::style::conversion turns a scalar into a one-element vector. Do the same here
+      // instead of sending -count to a color or a string, which raises
+      // doesNotRecognizeSelector and terminates the app.
+      id scalarValue = rawValue;
+      if ([scalarValue isKindOfClass:[NSExpression class]] &&
+          [scalarValue expressionType] == NSConstantValueExpressionType) {
+        scalarValue = [scalarValue constantValue];
+      }
+      MBGLElement mbglElement;
+      getMBGLValue(scalarValue, mbglElement);
+      mbglValue.push_back(mbglElement);
+      return;
+    }
     mbglValue.reserve(rawValue.count);
     for (id obj in rawValue) {
       id constantObject = obj;
