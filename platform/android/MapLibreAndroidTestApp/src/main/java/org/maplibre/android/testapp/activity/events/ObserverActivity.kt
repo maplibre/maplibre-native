@@ -27,7 +27,8 @@ class ObserverActivity : AppCompatActivity(),
     MapView.OnGlyphsRequestedListener,
     MapView.OnSpriteLoadedListener,
     MapView.OnSpriteRequestedListener,
-    MapView.OnDidFinishRenderingFrameWithStatsListener {
+    MapView.OnDidFinishRenderingFrameWithStatsListener,
+    MapView.OnSymbolErrorListener {
     // # --8<-- [end:ObserverActivity]
 
     private lateinit var mapView: MapView
@@ -52,6 +53,7 @@ class ObserverActivity : AppCompatActivity(),
         mapView.addOnSpriteLoadedListener(this)
         mapView.addOnSpriteRequestedListener(this)
         mapView.addOnDidFinishRenderingFrameListener(this)
+        mapView.addOnSymbolErrorListener(this)
         // # --8<-- [end:addListeners]
 
         // # --8<-- [start:renderStatsTracker]
@@ -157,6 +159,10 @@ class ObserverActivity : AppCompatActivity(),
 
     override fun onDidFinishRenderingFrame(fully: Boolean, stats: RenderingStats) {
         renderStatsTracker.addFrame(stats)
+    }
+
+    override fun onSymbolError(message: String) {
+        Logger.i(TAG, "onSymbolError: $message")
     }
     // # --8<-- [end:mapEvents]
 
