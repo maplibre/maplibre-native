@@ -202,6 +202,7 @@ HeadlessBackend::HeadlessBackend(Size size_, SwapBehaviour swapBehaviour_, gfx::
 HeadlessBackend::~HeadlessBackend() {
     // Explicitly reset the renderable resource
     setResource(nullptr);
+    context.reset();
 
     if (impl) {
         // Clean up textures

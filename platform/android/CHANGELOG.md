@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## 13.4.1
+
+### 🐞 Bug fixes
+
+- core: check if edge length is zero for rounded corners  ([#4424](https://github.com/maplibre/maplibre-native/pull/4424)).
+
 ## 13.4.0
 
 ### ✨ Features and improvements
