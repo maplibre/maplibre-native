@@ -237,6 +237,16 @@ jni::Local<jni::Object<>> RasterLayer::getRasterFadeDuration(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toRasterLayer(*layer).getRasterFadeDuration()));
 }
 
+jni::Local<jni::Object<>> RasterLayer::getResampling(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterStandardResampling()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toRasterLayer(*layer).getRasterStandardResampling()));
+}
+
 // RasterJavaLayerPeerFactory
 
 RasterJavaLayerPeerFactory::~RasterJavaLayerPeerFactory() = default;
@@ -296,7 +306,8 @@ void RasterJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&RasterLayer::setRasterContrastTransition, "nativeSetRasterContrastTransition"),
         METHOD(&RasterLayer::getRasterContrast, "nativeGetRasterContrast"),
         METHOD(&RasterLayer::getRasterResampling, "nativeGetRasterResampling"),
-        METHOD(&RasterLayer::getRasterFadeDuration, "nativeGetRasterFadeDuration"));
+        METHOD(&RasterLayer::getRasterFadeDuration, "nativeGetRasterFadeDuration"),
+        METHOD(&RasterLayer::getResampling, "nativeGetResampling"));
 }
 
 } // namespace android

@@ -246,4 +246,17 @@ public class HillshadeLayerTest extends BaseLayerTest {
     layer.setProperties(hillshadeMethod(propertyValue));
     assertEquals(layer.getHillshadeMethod().getValue(), propertyValue);
   }
+
+  @Test
+  @UiThreadTest
+  public void testResamplingAsConstant() {
+    Timber.i("resampling");
+    assertNotNull(layer);
+    assertNull(layer.getResampling().getValue());
+
+    // Set and Get
+    String propertyValue = RESAMPLING_LINEAR;
+    layer.setProperties(resampling(propertyValue));
+    assertEquals(layer.getResampling().getValue(), propertyValue);
+  }
 }

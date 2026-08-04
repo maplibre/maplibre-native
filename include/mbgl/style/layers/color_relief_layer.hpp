@@ -34,6 +34,12 @@ public:
     void setColorReliefOpacityTransition(const TransitionOptions&);
     TransitionOptions getColorReliefOpacityTransition() const;
 
+    static PropertyValue<ResamplingType> getDefaultColorReliefResampling();
+    const PropertyValue<ResamplingType>& getColorReliefResampling() const;
+    void setColorReliefResampling(const PropertyValue<ResamplingType>&);
+    void setColorReliefResamplingTransition(const TransitionOptions&);
+    TransitionOptions getColorReliefResamplingTransition() const;
+
     // Private implementation
 
     class Impl;

@@ -12,12 +12,21 @@ function absPath(relativePath) {
   return path.join(import.meta.dirname, "..", relativePath);
 }
 
+function propertyClassName(property, type) {
+  if (property.name === 'resampling') {
+    if (type === 'raster') return 'RasterStandardResampling';
+    return camelize(type + '-' + property.name);
+  }
+  return camelize(property.name);
+}
+
 function setupGlobalEjsHelpers() {
   const funcs = {
     camelize,
     snakeCaseUpper,
     iff,
-    camelizeWithLeadingLowercase
+    camelizeWithLeadingLowercase,
+    propertyClassName
   };
   for (const [funcName, func] of Object.entries(funcs)) {
     // @ts-ignore

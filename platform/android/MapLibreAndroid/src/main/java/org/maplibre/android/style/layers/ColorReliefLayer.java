@@ -205,6 +205,18 @@ public class ColorReliefLayer extends Layer {
     }
   }
 
+  /**
+   * Get the Resampling property
+   *
+   * @return property wrapper value around String
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<String> getResampling() {
+    checkThread();
+    return (PropertyValue<String>) new PropertyValue("resampling", nativeGetResampling());
+  }
+
   @NonNull
   @Keep
   private native Object nativeGetColorReliefOpacity();
@@ -219,6 +231,10 @@ public class ColorReliefLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetColorReliefColor();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetResampling();
 
   @Override
   @Keep

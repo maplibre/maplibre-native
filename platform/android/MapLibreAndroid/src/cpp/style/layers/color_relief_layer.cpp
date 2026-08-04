@@ -80,6 +80,16 @@ jni::Local<jni::Object<>> ColorReliefLayer::getColorReliefColor(jni::JNIEnv& env
     return std::move(*convert<jni::Local<jni::Object<>>>(env, toColorReliefLayer(*layer).getColorReliefColor()));
 }
 
+jni::Local<jni::Object<>> ColorReliefLayer::getResampling(jni::JNIEnv& env) {
+    using namespace mbgl::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::ColorReliefLayer::getDefaultColorReliefResampling()));
+    }
+    return std::move(*convert<jni::Local<jni::Object<>>>(env, toColorReliefLayer(*layer).getColorReliefResampling()));
+}
+
 // ColorReliefJavaLayerPeerFactory
 
 ColorReliefJavaLayerPeerFactory::~ColorReliefJavaLayerPeerFactory() = default;
@@ -123,7 +133,8 @@ void ColorReliefJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&ColorReliefLayer::getColorReliefOpacityTransition, "nativeGetColorReliefOpacityTransition"),
         METHOD(&ColorReliefLayer::setColorReliefOpacityTransition, "nativeSetColorReliefOpacityTransition"),
         METHOD(&ColorReliefLayer::getColorReliefOpacity, "nativeGetColorReliefOpacity"),
-        METHOD(&ColorReliefLayer::getColorReliefColor, "nativeGetColorReliefColor"));
+        METHOD(&ColorReliefLayer::getColorReliefColor, "nativeGetColorReliefColor"),
+        METHOD(&ColorReliefLayer::getResampling, "nativeGetResampling"));
 }
 
 } // namespace android

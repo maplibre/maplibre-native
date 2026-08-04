@@ -199,4 +199,17 @@ public class ColorReliefLayerTest extends BaseLayerTest {
     layer.setProperties(colorReliefOpacity(propertyValue));
     assertEquals(layer.getColorReliefOpacity().getValue(), propertyValue);
   }
+
+  @Test
+  @UiThreadTest
+  public void testResamplingAsConstant() {
+    Timber.i("resampling");
+    assertNotNull(layer);
+    assertNull(layer.getResampling().getValue());
+
+    // Set and Get
+    String propertyValue = RESAMPLING_LINEAR;
+    layer.setProperties(resampling(propertyValue));
+    assertEquals(layer.getResampling().getValue(), propertyValue);
+  }
 }

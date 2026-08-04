@@ -54,6 +54,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getRasterFadeDuration(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getResampling(jni::JNIEnv&);
+
 }; // class RasterLayer
 
 class RasterJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::RasterLayerFactory {

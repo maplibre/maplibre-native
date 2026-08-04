@@ -32,6 +32,8 @@ public:
 
     jni::Local<jni::Object<jni::ObjectTag>> getColorReliefColor(jni::JNIEnv&);
 
+    jni::Local<jni::Object<jni::ObjectTag>> getResampling(jni::JNIEnv&);
+
 }; // class ColorReliefLayer
 
 class ColorReliefJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::ColorReliefLayerFactory {

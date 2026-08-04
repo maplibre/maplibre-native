@@ -114,6 +114,8 @@ template std::optional<PropertyValue<Position>> Converter<PropertyValue<Position
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<RasterResamplingType>> Converter<PropertyValue<RasterResamplingType>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
+template std::optional<PropertyValue<ResamplingType>> Converter<PropertyValue<ResamplingType>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<SymbolAnchorType>> Converter<PropertyValue<SymbolAnchorType>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<std::vector<TextVariableAnchorType>>>

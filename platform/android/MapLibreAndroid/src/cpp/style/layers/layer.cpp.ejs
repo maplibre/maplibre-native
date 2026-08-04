@@ -59,9 +59,9 @@ namespace android {
         using namespace mbgl::android::conversion;
         auto layer = layerPtr.get();
         if (!layer) {
-            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::<%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>()));
+            return std::move(*convert<jni::Local<jni::Object<>>>(env, style::<%- camelize(type) %>Layer::getDefault<%- propertyClassName(property, type) %>()));
         }
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, to<%- camelize(type) %>Layer(*layer).get<%- camelize(property.name) %>()));
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, to<%- camelize(type) %>Layer(*layer).get<%- propertyClassName(property, type) %>()));
     }
 
 <% } else { -%>
@@ -87,7 +87,7 @@ namespace android {
         if (!layer) {
             return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
         }
-        mbgl::style::TransitionOptions options = to<%- camelize(type) %>Layer(*layer).get<%- camelize(property.name) %>Transition();
+        mbgl::style::TransitionOptions options = to<%- camelize(type) %>Layer(*layer).get<%- propertyClassName(property, type) %>Transition();
         return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
 
@@ -99,7 +99,7 @@ namespace android {
         mbgl::style::TransitionOptions options;
         options.duration.emplace(mbgl::Milliseconds(duration));
         options.delay.emplace(mbgl::Milliseconds(delay));
-        to<%- camelize(type) %>Layer(*layer).set<%- camelize(property.name) %>Transition(options);
+        to<%- camelize(type) %>Layer(*layer).set<%- propertyClassName(property, type) %>Transition(options);
     }
 
 <% } -%>

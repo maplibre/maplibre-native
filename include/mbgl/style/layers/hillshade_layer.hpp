@@ -69,6 +69,12 @@ public:
     void setHillshadeShadowColorTransition(const TransitionOptions&);
     TransitionOptions getHillshadeShadowColorTransition() const;
 
+    static PropertyValue<ResamplingType> getDefaultHillshadeResampling();
+    const PropertyValue<ResamplingType>& getHillshadeResampling() const;
+    void setHillshadeResampling(const PropertyValue<ResamplingType>&);
+    void setHillshadeResamplingTransition(const TransitionOptions&);
+    TransitionOptions getHillshadeResamplingTransition() const;
+
     // Private implementation
 
     class Impl;

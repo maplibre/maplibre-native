@@ -15,10 +15,19 @@ delete styleSpec["paint_location-indicator"];
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
 import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
 
+function propertyClassName(property, type) {
+    if (property.name === 'resampling') {
+        if (type === 'raster') return 'RasterStandardResampling';
+        return camelize(type + '-' + property.name);
+    }
+    return camelize(property.original || property.name);
+}
+
 function setupGlobalEjsHelpers() {
     const funcs = {
       camelize,
-      unhyphenate
+      unhyphenate,
+      propertyClassName
     };
     for (const [funcName, func] of Object.entries(funcs)) {
       // @ts-ignore
