@@ -3,7 +3,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(WebAPIDataExample)
+/// #-example-code(WebAPIDataExample)
 class WebAPIDataExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 

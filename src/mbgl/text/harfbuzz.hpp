@@ -26,13 +26,13 @@ struct HBShapeAdjust {
 
 class HBShaper {
 public:
-    explicit HBShaper(GlyphIDType type, const std::string &fontFileData, const FreeTypeLibrary &lib);
+    explicit HBShaper(GlyphIDType type, const std::string& fontFileData, const FreeTypeLibrary& lib);
     ~HBShaper();
 
-    void createComplexGlyphIDs(const std::u16string &text,
-                               std::vector<GlyphID> &glyphIDs,
-                               std::vector<HBShapeAdjust> &adjusts);
-    Glyph rasterizeGlyph(const GlyphID &glyph);
+    void createComplexGlyphIDs(const std::u16string& text,
+                               std::vector<GlyphID>& glyphIDs,
+                               std::vector<HBShapeAdjust>& adjusts);
+    Glyph rasterizeGlyph(const GlyphID& glyph);
 
     bool valid();
 

@@ -9,9 +9,9 @@
 
 class MetalBackend final : public mbgl::mtl::RendererBackend, public mbgl::gfx::Renderable {
 public:
-    MetalBackend(NSWindow *window);
+    MetalBackend(NSWindow* window);
 
-    mbgl::gfx::Renderable &getDefaultRenderable() override;
+    mbgl::gfx::Renderable& getDefaultRenderable() override;
     void activate() override;
     void deactivate() override;
     void updateAssumedState() override;

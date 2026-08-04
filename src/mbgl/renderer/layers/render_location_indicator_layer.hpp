@@ -26,27 +26,27 @@ public:
     ~RenderLocationIndicatorLayer() override;
 
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
-    void update(gfx::ShaderRegistry &,
-                gfx::Context &,
-                const TransformState &,
-                const std::shared_ptr<UpdateParameters> &,
-                const RenderTree &,
-                UniqueChangeRequestVec &) override;
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
 #endif
 
 private:
-    void transition(const TransitionParameters &) override;
-    void evaluate(const PropertyEvaluationParameters &) override;
+    void transition(const TransitionParameters&) override;
+    void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     void markContextDestroyed() override;
-    void prepare(const LayerPrepareParameters &) override;
+    void prepare(const LayerPrepareParameters&) override;
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
-    void render(PaintParameters &) override;
+    void render(PaintParameters&) override;
 #endif
 
-    void populateDynamicRenderFeatureIndex(DynamicFeatureIndex &) const override;
+    void populateDynamicRenderFeatureIndex(DynamicFeatureIndex&) const override;
 
 private:
     bool contextDestroyed = false;
