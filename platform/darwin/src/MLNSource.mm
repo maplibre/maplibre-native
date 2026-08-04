@@ -66,7 +66,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
 }
 
 - (BOOL)removeFromStylable:(id<MLNStylable>)mapView
-                     error:(NSError *__nullable *__nullable)outError {
+                     error:(NSError * __nullable * __nullable)outError {
   MLNAssertStyleSourceIsValid();
   BOOL removed = NO;
 

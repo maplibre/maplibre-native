@@ -1,7 +1,7 @@
 import XCTest
 
 class MLNSourceTests: MLNMapViewIntegrationTest {
-    // See testForRaisingExceptionsOnStaleStyleObjects for Obj-C sibling.
+    /// See testForRaisingExceptionsOnStaleStyleObjects for Obj-C sibling.
     func testForRaisingExceptionsOnStaleStyleObjectsOnRemoveFromMapView() {
         guard
             let configURL = URL(string: "mapbox://examples.2uf7qges")

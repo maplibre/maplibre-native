@@ -22,8 +22,8 @@ class LocationIndicatorLayer::Impl : public Layer::Impl {
 public:
     using Layer::Impl::Impl;
 
-    bool hasLayoutDifference(const Layer::Impl &) const override;
-    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer> &) const override;
+    bool hasLayoutDifference(const Layer::Impl&) const override;
+    void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
     LocationIndicatorLayoutProperties::Unevaluated layout;
     LocationIndicatorPaintProperties::Transitionable paint;

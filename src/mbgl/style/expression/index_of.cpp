@@ -15,7 +15,7 @@ IndexOf::IndexOf(std::unique_ptr<Expression> keyword_,
       input(std::move(input_)),
       fromIndex(std::move(fromIndex_)) {}
 
-EvaluationResult IndexOf::evaluate(const EvaluationContext &params) const {
+EvaluationResult IndexOf::evaluate(const EvaluationContext& params) const {
     const EvaluationResult evaluatedKeyword = keyword->evaluate(params);
     const EvaluationResult evaluatedInput = input->evaluate(params);
     if (!evaluatedKeyword) {
@@ -45,16 +45,16 @@ EvaluationResult IndexOf::evaluate(const EvaluationContext &params) const {
     }
 
     return evaluatedInput->match(
-        [&](const std::string &s) { return evaluateForStringInput(s, *evaluatedKeyword, fromIndexValue); },
-        [&](const std::vector<Value> &v) { return evaluateForArrayInput(v, *evaluatedKeyword, fromIndexValue); },
-        [&](const auto &) -> EvaluationResult {
+        [&](const std::string& s) { return evaluateForStringInput(s, *evaluatedKeyword, fromIndexValue); },
+        [&](const std::vector<Value>& v) { return evaluateForArrayInput(v, *evaluatedKeyword, fromIndexValue); },
+        [&](const auto&) -> EvaluationResult {
             return EvaluationError{"Expected second argument to be of type array or string, but found " +
                                    toString(typeOf(*evaluatedInput)) + " instead."};
         });
 }
 
-EvaluationResult IndexOf::evaluateForArrayInput(const std::vector<Value> &array,
-                                                const Value &keywordValue,
+EvaluationResult IndexOf::evaluateForArrayInput(const std::vector<Value>& array,
+                                                const Value& keywordValue,
                                                 size_t fromIndexValue) const {
     for (size_t index = fromIndexValue; index < array.size(); ++index) {
         if (array[index] == keywordValue) {
@@ -64,15 +64,15 @@ EvaluationResult IndexOf::evaluateForArrayInput(const std::vector<Value> &array,
     return static_cast<double>(-1);
 }
 
-EvaluationResult IndexOf::evaluateForStringInput(const std::string &string,
-                                                 const Value &keywordValue,
+EvaluationResult IndexOf::evaluateForStringInput(const std::string& string,
+                                                 const Value& keywordValue,
                                                  size_t fromIndexValue) const {
     std::string keywordString = keywordValue.match(
-        [](const std::string &s) { return s; },
+        [](const std::string& s) { return s; },
         [](bool b) { return b ? std::string{"true"} : std::string{"false"}; },
         [](NullValue) { return std::string{"null"}; },
         [](double n) { return util::toString(n); },
-        [](const auto &) -> std::string {
+        [](const auto&) -> std::string {
             // it should be impossible to get here - we do validation in evaluate()
             assert(false);
             return "";
@@ -84,7 +84,7 @@ EvaluationResult IndexOf::evaluateForStringInput(const std::string &string,
     return static_cast<double>(index);
 }
 
-void IndexOf::eachChild(const std::function<void(const Expression &)> &visit) const {
+void IndexOf::eachChild(const std::function<void(const Expression&)>& visit) const {
     visit(*keyword);
     visit(*input);
     if (fromIndex) {
@@ -93,7 +93,7 @@ void IndexOf::eachChild(const std::function<void(const Expression &)> &visit) co
 }
 
 using namespace mbgl::style::conversion;
-ParseResult IndexOf::parse(const Convertible &value, ParsingContext &ctx) {
+ParseResult IndexOf::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
 
     std::size_t length = arrayLength(value);
@@ -115,9 +115,9 @@ ParseResult IndexOf::parse(const Convertible &value, ParsingContext &ctx) {
         std::make_unique<IndexOf>(std::move(*keyword), std::move(*input), fromIndex ? std::move(*fromIndex) : nullptr));
 }
 
-bool IndexOf::operator==(const Expression &e) const noexcept {
+bool IndexOf::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::IndexOf) {
-        auto rhs = static_cast<const IndexOf *>(&e);
+        auto rhs = static_cast<const IndexOf*>(&e);
         const auto fromIndexEqual = (fromIndex && rhs->fromIndex && *fromIndex == *(rhs->fromIndex)) ||
                                     (!fromIndex && !rhs->fromIndex);
         return *keyword == *(rhs->keyword) && *input == *(rhs->input) && fromIndexEqual;

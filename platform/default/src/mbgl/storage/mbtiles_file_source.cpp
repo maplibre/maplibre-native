@@ -28,11 +28,11 @@
 #endif
 
 namespace {
-bool acceptsURL(const std::string &url) {
+bool acceptsURL(const std::string& url) {
     return url.starts_with(mbgl::util::MBTILES_PROTOCOL);
 }
 
-std::string url_to_path(const std::string &url) {
+std::string url_to_path(const std::string& url) {
     return mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(mbgl::util::MBTILES_PROTOCOL)));
 }
 } // namespace
@@ -42,11 +42,11 @@ using namespace rapidjson;
 
 class MBTilesFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl> &, const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_)
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
-    std::vector<double> &split(const std::string &s, char delim, std::vector<double> &elems) {
+    std::vector<double>& split(const std::string& s, char delim, std::vector<double>& elems) {
         std::stringstream ss(s);
         std::string item;
         while (std::getline(ss, item, delim)) {
@@ -56,13 +56,13 @@ public:
         return elems;
     }
 
-    std::vector<double> split(const std::string &s, char delim) {
+    std::vector<double> split(const std::string& s, char delim) {
         std::vector<double> elems;
         split(s, delim, elems);
         return elems;
     }
 
-    std::string serialize(Document &doc) {
+    std::string serialize(Document& doc) {
         StringBuffer buffer;
         Writer<StringBuffer> writer(buffer);
         doc.Accept(writer);
@@ -70,16 +70,16 @@ public:
         return std::string(buffer.GetString(), buffer.GetSize());
     }
 
-    std::string db_path(const std::string &path) { return path.substr(0, path.find('?')); }
+    std::string db_path(const std::string& path) { return path.substr(0, path.find('?')); }
 
     // Generate a tilejson resource from .mbtiles file
-    void request_tilejson(const Resource &resource, ActorRef<FileSourceRequest> req) {
+    void request_tilejson(const Resource& resource, ActorRef<FileSourceRequest> req) {
         const auto path = url_to_path(resource.url);
 
         Response response;
 
         Document doc;
-        auto &allocator = doc.GetAllocator();
+        auto& allocator = doc.GetAllocator();
 
         std::map<std::string, std::string> values;
         auto db = mapbox::sqlite::Database::open(path, mapbox::sqlite::ReadOnly);
@@ -145,7 +145,7 @@ public:
         const auto minZoom = minz.empty() ? 0 : std::stoi(minz);
         const auto maxZoom = maxz.empty() ? 0 : std::stoi(maxz);
 
-        for (auto const &entry : values) {
+        for (auto const& entry : values) {
             if (entry.first == "scale") {
                 doc.AddMember("scale", std::stod(entry.second), allocator);
             } else if (entry.first == "minzoom" || entry.first == "maxzoom") {
@@ -187,10 +187,10 @@ public:
     }
 
     // Load data for specific tile
-    void request_tile(const Resource &resource, ActorRef<FileSourceRequest> req) {
+    void request_tile(const Resource& resource, ActorRef<FileSourceRequest> req) {
         std::string base_path = url_to_path(resource.url);
         std::string path = db_path(base_path);
-        auto &db = get_db(path);
+        auto& db = get_db(path);
 
         int iy = resource.tileData->y;
         int iz = resource.tileData->z;
@@ -245,7 +245,7 @@ public:
 private:
     std::map<std::string, mapbox::sqlite::Database> db_cache;
 
-    void close_db(const std::string &path) {
+    void close_db(const std::string& path) {
         auto ptr = db_cache.find(path);
         if (ptr != db_cache.end()) {
             db_cache.erase(path);
@@ -255,7 +255,7 @@ private:
     void close_all() { db_cache.clear(); }
 
     // Multiple databases open simultaneously, to effectively support multiple .mbtiles maps
-    mapbox::sqlite::Database &get_db(const std::string &path) {
+    mapbox::sqlite::Database& get_db(const std::string& path) {
         auto ptr = db_cache.find(path);
         if (ptr != db_cache.end()) {
             return ptr->second;
@@ -272,14 +272,14 @@ private:
     ClientOptions clientOptions;
 };
 
-MBTilesFileSource::MBTilesFileSource(const ResourceOptions &resourceOptions, const ClientOptions &clientOptions)
+MBTilesFileSource::MBTilesFileSource(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : thread(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "MBTilesFileSource",
           resourceOptions.clone(),
           clientOptions.clone())) {}
 
-std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resource, FileSource::Callback callback) {
+std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource& resource, FileSource::Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
     // assume if there is a tile request, that the mbtiles file has been validated
@@ -316,7 +316,7 @@ std::unique_ptr<AsyncRequest> MBTilesFileSource::request(const Resource &resourc
     return req;
 }
 
-bool MBTilesFileSource::canRequest(const Resource &resource) const {
+bool MBTilesFileSource::canRequest(const Resource& resource) const {
     return acceptsURL(resource.url);
 }
 
