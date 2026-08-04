@@ -279,9 +279,6 @@ void SymbolInstance::fail(const std::string& message) const {
 }
 
 bool SymbolInstance::check(std::uint64_t v, int n, const source_location& source) const {
-    fail("SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) +
-         locationSuffix(source));
-
     if (!isFailed && v != checkVal) {
         fail("SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) +
              locationSuffix(source));
