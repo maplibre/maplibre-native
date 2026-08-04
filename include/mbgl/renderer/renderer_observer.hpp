@@ -22,7 +22,7 @@ class ShaderRegistry;
 
 class RendererObserver : public SymbolErrorObserver {
 public:
-    virtual ~RendererObserver() = default;
+    ~RendererObserver() override = default;
 
     enum class RenderMode : uint32_t {
         Partial,

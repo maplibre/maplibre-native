@@ -12,7 +12,7 @@ class Tile;
 
 class TileObserver : public SymbolErrorObserver {
 public:
-    virtual ~TileObserver() = default;
+    ~TileObserver() override = default;
 
     virtual void onTileChanged(Tile&) {}
     virtual void onTileError(Tile&, std::exception_ptr) {}
