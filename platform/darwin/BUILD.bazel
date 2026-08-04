@@ -304,6 +304,7 @@ objc_library(
 
 exports_files(
     [
+        "bazel/example_config.bzl",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",

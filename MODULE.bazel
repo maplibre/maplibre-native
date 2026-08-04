@@ -31,10 +31,10 @@ single_version_override(
     version = "3.3.0",
 )
 
-node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "20.14.0")
 
-npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
     name = "npm",
     data = ["package.json"],
