@@ -278,22 +278,20 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
         const auto vertexOffset = featureEntry.vertexOffset;
 
         if (!alphaIsConstant || !strokeAlphaIsConstant) {
-            const auto interpAlpha = alphaIsConstant ? std::array<float, 2>{1, 1}
-                                                     : std::get<0>(alphaBinder->getVertexValue(vertexOffset)).a1;
-            const auto interpStrokeAlpha = strokeAlphaIsConstant
-                                               ? std::array<float, 2>{1, 1}
-                                               : std::get<0>(strokeAlphaBinder->getVertexValue(vertexOffset)).a1;
-            // const auto interpAlpha = std::get<0>(alphaBinder->getVertexValue(vertexOffset)).a1;
+            const auto& [alphaVertex] = alphaBinder->getVertexValue(vertexOffset);
+            const auto& [strokeAlphaVertex] = strokeAlphaBinder->getVertexValue(vertexOffset);
+            const auto interpAlpha = alphaIsConstant ? std::array<float, 2>{1, 1} : alphaVertex.a1;
+            const auto interpStrokeAlpha = strokeAlphaIsConstant ? std::array<float, 2>{1, 1} : strokeAlphaVertex.a1;
             if (mbgl::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0 &&
                 mbgl::util::interpolate(interpStrokeAlpha[0], interpStrokeAlpha[1], zoomFraction) == 0) {
                 continue;
             }
         }
         if (!colorIsConstant) {
-            const auto alpha = unpack_mix_alpha(std::get<0>(colorBinder->getVertexValue(vertexOffset)).a1,
-                                                zoomFraction);
-            const auto strokeAlpha = unpack_mix_alpha(std::get<0>(strokeColorBinder->getVertexValue(vertexOffset)).a1,
-                                                      zoomFraction);
+            const auto& [colorVertex] = colorBinder->getVertexValue(vertexOffset);
+            const auto& [strokeColorVertex] = strokeColorBinder->getVertexValue(vertexOffset);
+            const auto alpha = unpack_mix_alpha(colorVertex.a1, zoomFraction);
+            const auto strokeAlpha = unpack_mix_alpha(strokeColorVertex.a1, zoomFraction);
             if (alpha == 0 && strokeAlpha == 0) {
                 continue;
             }

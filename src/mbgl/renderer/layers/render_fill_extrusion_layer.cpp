@@ -85,8 +85,8 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
 
         if (!colorIsConstant) {
             // Consider only the value for the first vertex of this feature, for now.
-            const auto packedColor = std::get<0>(colorBinder->getVertexValue(featureEntry.vertexOffset)).a1;
-            if (unpack_mix_alpha(packedColor, zoomFraction) == 0) {
+            const auto& [vertex] = colorBinder->getVertexValue(featureEntry.vertexOffset);
+            if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
                 continue;
             }
         }

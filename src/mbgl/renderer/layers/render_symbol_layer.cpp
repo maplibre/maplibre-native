@@ -580,16 +580,16 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             const auto& opacityProperty = isText ? textOpacity : iconOpacity;
             if (!opacityProperty.isConstant()) {
                 const auto& opacityBinder = isText ? textBinders.get<TextOpacity>() : iconBinders.get<IconOpacity>();
-                const auto& interpAlpha = std::get<0>(opacityBinder->getVertexValue(vertexOffset)).a1;
-                if (mbgl::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0) {
+                const auto [vertex] = opacityBinder->getVertexValue(vertexOffset);
+                if (mbgl::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
                     continue;
                 }
             }
             const auto& colorProperty = isText ? textColor : iconColor;
             if (!colorProperty.isConstant()) {
                 const auto& colorBinder = isText ? textBinders.get<TextColor>() : iconBinders.get<IconColor>();
-                const auto& packedColor = std::get<0>(colorBinder->getVertexValue(vertexOffset)).a1;
-                if (unpack_mix_alpha(packedColor, zoomFraction) == 0) {
+                const auto [vertex] = colorBinder->getVertexValue(vertexOffset);
+                if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
                     continue;
                 }
             }

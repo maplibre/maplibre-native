@@ -163,14 +163,14 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
         const auto vertexOffset = featureEntry.vertexOffset;
 
         if (!alphaIsConstant) {
-            const auto interpAlpha = std::get<0>(alphaBinder->getVertexValue(vertexOffset)).a1;
-            if (mbgl::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0) {
+            const auto& [vertex] = alphaBinder->getVertexValue(vertexOffset);
+            if (mbgl::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
                 continue;
             }
         }
         if (!colorIsConstant) {
-            const auto packedColor = std::get<0>(colorBinder->getVertexValue(vertexOffset)).a1;
-            if (unpack_mix_alpha(packedColor, zoomFraction) == 0) {
+            const auto& [vertex] = colorBinder->getVertexValue(vertexOffset);
+            if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
                 continue;
             }
         }
