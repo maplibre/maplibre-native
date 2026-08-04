@@ -453,12 +453,6 @@ mat4 getScreenMatrix(vec2f translation) {
     matrix::translate(m, m, translation[0], translation[1], 0);
     return m;
 }
-// Rotate the 2D part of a vector with a 2x2 matrix
-vec4 rotate(const mat2& m, const vec4& v) {
-    using namespace matrix;
-    using namespace vector;
-    return vec(m * vec2{v[0], v[1]}, v[2], v[3]);
-}
 } // namespace
 
 void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
