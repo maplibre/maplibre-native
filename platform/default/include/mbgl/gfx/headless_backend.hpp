@@ -16,11 +16,18 @@ namespace gfx {
 class HeadlessBackend : public gfx::Renderable {
 public:
     // Factory.
+#if MLN_WEBGPU_EMDAWN
+    static std::unique_ptr<HeadlessBackend> Create(const Size size = {256, 256},
+                                                   SwapBehaviour swapBehavior = SwapBehaviour::NoFlush,
+                                                   const gfx::ContextMode contextMode = gfx::ContextMode::Unique) =
+        delete;
+#else
     static std::unique_ptr<HeadlessBackend> Create(const Size size = {256, 256},
                                                    SwapBehaviour swapBehavior = SwapBehaviour::NoFlush,
                                                    const gfx::ContextMode contextMode = gfx::ContextMode::Unique) {
         return Backend::Create<HeadlessBackend, Size, SwapBehaviour, gfx::ContextMode>(size, swapBehavior, contextMode);
     }
+#endif
 
     virtual PremultipliedImage readStillImage() = 0;
     virtual RendererBackend* getRendererBackend() = 0;

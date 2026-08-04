@@ -53,10 +53,12 @@ Context::Context(RendererBackend& backend_)
       backend(backend_),
       globalUniformBuffers(std::make_unique<UniformBufferArray>()) {}
 
-Context::~Context() = default;
+Context::~Context() {
+    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+}
 
 void Context::beginFrame() {
-    // Begin a new frame - WebGPU command recording starts here
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::endFrame() {
@@ -64,11 +66,11 @@ void Context::endFrame() {
 }
 
 void Context::performCleanup() {
-    // Clean up unused resources
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::reduceMemoryUsage() {
-    // Free cached resources to reduce memory
+    backend.getThreadPool().runRenderJobs();
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
