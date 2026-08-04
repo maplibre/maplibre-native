@@ -12,11 +12,12 @@ namespace shaders {
 
 using FillExtrusionShaderSource = ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 4> FillExtrusionShaderSource::attributes = {
+const std::array<AttributeInfo, 5> FillExtrusionShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute, idFillExtrusionInstanced},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UShort2, idFillExtrusionDecimalsEdAttribute, idFillExtrusionInstanced},
+    AttributeInfo{2, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillExtrusionShaderSource::textures = {};
 
@@ -31,7 +32,7 @@ const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attribute
 };
 const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, idFillExtrusionInstanced},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute, idFillExtrusionInstanced},
+    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionDecimalsEdAttribute, idFillExtrusionInstanced},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
@@ -45,12 +46,13 @@ const std::array<TextureInfo, 0> FillExtrusionInstancedShaderSource::textures = 
 
 using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>;
 
-const std::array<AttributeInfo, 5> FillExtrusionPatternShaderSource::attributes = {
+const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute, idFillExtrusionInstanced},
-    AttributeInfo{1, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UShort2, idFillExtrusionDecimalsEdAttribute, idFillExtrusionInstanced},
+    AttributeInfo{2, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillExtrusionPatternShaderSource::textures = {
     TextureInfo{0, idFillExtrusionImageTexture},
@@ -67,7 +69,7 @@ const std::array<AttributeInfo, 1> FillExtrusionPatternInstancedShaderSource::at
 };
 const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::instanceAttributes = {
     AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, idFillExtrusionInstanced},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionEdDiscardAttribute, idFillExtrusionInstanced},
+    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionDecimalsEdAttribute, idFillExtrusionInstanced},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
