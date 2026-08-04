@@ -71,8 +71,8 @@
 }
 
 - (CLLocationCoordinate2D)coordinate {
-  // pole of inaccessibility
-  auto poi = mapbox::polylabel([self polygon]);
+  // pole of inaccessibility; use precision appropriate for geographic coordinates (degrees)
+  auto poi = mapbox::polylabel([self polygon], 1e-4);
 
   return MLNLocationCoordinate2DFromPoint(poi);
 }

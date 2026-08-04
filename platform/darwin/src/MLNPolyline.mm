@@ -6,7 +6,6 @@
 #import "MLNFeature.h"
 #import "MLNLoggingConfiguration_Private.h"
 
-#import <mapbox/polylabel.hpp>
 #import <mbgl/util/geojson.hpp>
 
 @implementation MLNPolyline
