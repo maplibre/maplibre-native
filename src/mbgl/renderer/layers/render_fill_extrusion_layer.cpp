@@ -5,6 +5,7 @@
 #include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/plugin/plugin_drawable_data.hpp>
 #include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -374,7 +375,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         colorBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 
-        const auto finish = [&](gfx::DrawableBuilder& builder) {
+        const auto finish = [&](gfx::DrawableBuilder& builder, bool exposeToPlugins) {
             if (!bucket.sharedTriangles->elements()) {
                 return;
             }
@@ -392,14 +393,40 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setBinders(renderData.bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
 
+                if (exposeToPlugins) {
+#if MLN_RENDER_BACKEND_OPENGL
+                    constexpr int8_t normalLocation = 2;
+                    constexpr int8_t baseLocation = 3;
+                    constexpr int8_t heightLocation = 4;
+#else
+                    constexpr int8_t normalLocation = -1;
+                    const int8_t baseLocation = hasPattern ? 2 : 3;
+                    const int8_t heightLocation = hasPattern ? 3 : 4;
+#endif
+                    auto data = std::make_unique<gfx::PluginDrawableData>(
+                        MLN_PLUGIN_DRAW_PACKET_TRIANGLES,
+                        false,
+                        -1,
+                        0,
+                        1,
+                        normalLocation,
+                        baseLocation,
+                        heightLocation);
+                    data->packet.base_is_attribute =
+                        propertiesAsUniforms.second.contains(idFillExtrusionBaseVertexAttribute) ? 0 : 1;
+                    data->packet.height_is_attribute =
+                        propertiesAsUniforms.second.contains(idFillExtrusionHeightVertexAttribute) ? 0 : 1;
+                    drawable->setData(std::move(data));
+                }
+
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
         if (doDepthPass) {
-            finish(*depthBuilder);
+            finish(*depthBuilder, false);
         }
-        finish(*colorBuilder);
+        finish(*colorBuilder, true);
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
         if (doDepthPass && !instancedDepthBuilder) {
@@ -466,7 +493,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         instancedColorBuilder->setVertexAttributes(std::move(instanceVertexAttrs));
         instancedColorBuilder->setInstanceAttributes(std::move(instanceAttrs));
 
-        const auto finishInstance = [&](gfx::DrawableBuilder& instancedBuilder) {
+        const auto finishInstance = [&](gfx::DrawableBuilder& instancedBuilder, bool exposeToPlugins) {
             if (!staticDataIndices->elements()) {
                 return;
             }
@@ -482,14 +509,33 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setBinders(renderData.bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
 
+                if (exposeToPlugins) {
+                    const int8_t baseLocation = hasPattern ? 3 : 4;
+                    const int8_t heightLocation = hasPattern ? 4 : 5;
+                    auto data = std::make_unique<gfx::PluginDrawableData>(
+                        MLN_PLUGIN_DRAW_PACKET_INSTANCED_WALLS,
+                        true,
+                        0,
+                        1,
+                        2,
+                        -1,
+                        baseLocation,
+                        heightLocation);
+                    data->packet.base_is_attribute =
+                        instancePropertiesAsUniforms.second.contains(idFillExtrusionBaseVertexAttribute) ? 0 : 1;
+                    data->packet.height_is_attribute =
+                        instancePropertiesAsUniforms.second.contains(idFillExtrusionHeightVertexAttribute) ? 0 : 1;
+                    drawable->setData(std::move(data));
+                }
+
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
         if (doDepthPass) {
-            finishInstance(*instancedDepthBuilder);
+            finishInstance(*instancedDepthBuilder, false);
         }
-        finishInstance(*instancedColorBuilder);
+        finishInstance(*instancedColorBuilder, true);
 #endif
     }
 }

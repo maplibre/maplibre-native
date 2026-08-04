@@ -292,6 +292,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
 
+    // Existing-layer plugins prepare offscreen resources after all MapLibre
+    // drawables have been uploaded and before any main render pass begins.
+    orchestrator.preparePlugins(parameters);
+
     const Size atlasSize = parameters.patternAtlas.getPixelSize();
     const auto& worldSize = parameters.staticData.backendSize;
     const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
@@ -340,6 +344,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, 3D pass
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            orchestrator.renderPluginsBefore(layerGroup, parameters);
             layerGroup.render(orchestrator, parameters);
             if (parameters.currentLayer > 0) {
                 parameters.currentLayer--;
@@ -388,6 +393,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
+            orchestrator.renderPluginsBefore(layerGroup, parameters);
             layerGroup.render(orchestrator, parameters);
             parameters.currentLayer++;
         });
@@ -402,6 +408,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, translucent pass
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            orchestrator.renderPluginsBefore(layerGroup, parameters);
             layerGroup.render(orchestrator, parameters);
             if (parameters.currentLayer > 0) {
                 parameters.currentLayer--;

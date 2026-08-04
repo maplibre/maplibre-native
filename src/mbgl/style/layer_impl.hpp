@@ -8,6 +8,7 @@
 #include <rapidjson/stringbuffer.h>
 
 #include <limits>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -58,6 +59,10 @@ public:
     float minZoom = -std::numeric_limits<float>::infinity();
     float maxZoom = std::numeric_limits<float>::infinity();
     VisibilityType visibility = VisibilityType::Visible;
+
+    // Constant properties supplied by runtime plugins. The property schema is
+    // process-wide; values belong to the immutable layer implementation.
+    std::map<std::string, Value> pluginProperties;
 
 protected:
     Impl(const Impl&) = default;

@@ -1,6 +1,7 @@
 #include <mbgl/renderer/render_layer.hpp>
 
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/plugin/plugin_layer_host.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -20,10 +21,21 @@ using namespace style;
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
       baseImpl(evaluatedProperties->baseImpl),
-      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
+      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {
+    auto host = std::make_unique<plugin::PluginLayerHost>(
+        baseImpl->id, baseImpl->getTypeInfo()->type, baseImpl);
+    if (!host->empty()) {
+        pluginHost = std::move(host);
+    }
+}
+
+RenderLayer::~RenderLayer() = default;
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
+    if (pluginHost) {
+        pluginHost->updateLayer(baseImpl);
+    }
     transition(parameters);
 }
 
@@ -85,7 +97,29 @@ void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 }
 
 void RenderLayer::markContextDestroyed() {
-    // no-op
+    if (pluginHost) {
+        pluginHost->contextLost();
+    }
+}
+
+void RenderLayer::preparePlugins(PaintParameters& parameters) {
+    if (pluginHost && needsRendering()) {
+        pluginDrawPackets.clear();
+        if (layerGroup) {
+            visitLayerGroupDrawables(*layerGroup, [&](const gfx::Drawable& drawable) {
+                if (drawable.getEnabled()) {
+                    drawable.collectPluginDrawPackets(pluginDrawPackets);
+                }
+            });
+        }
+        pluginHost->prepareFrame(parameters, pluginDrawPackets);
+    }
+}
+
+void RenderLayer::renderPluginsBefore(PaintParameters& parameters) {
+    if (pluginHost && needsRendering() && hasRenderPass(parameters.pass)) {
+        pluginHost->renderBeforeLayer(parameters, pluginDrawPackets);
+    }
 }
 
 void RenderLayer::checkRenderability(const PaintParameters& parameters, const uint32_t activeBindingCount) {

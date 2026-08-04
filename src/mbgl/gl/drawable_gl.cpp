@@ -1,10 +1,12 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture2d.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
+#include <mbgl/plugin/plugin_drawable_data.hpp>
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/instrumentation.hpp>
@@ -19,6 +21,77 @@ DrawableGL::DrawableGL(std::string name_)
 
 DrawableGL::~DrawableGL() {
     impl->attributeBuffers.clear();
+}
+
+struct IndexBufferGL : public gfx::IndexBufferBase {
+    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBufferGL() override = default;
+
+    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+};
+
+namespace {
+
+mln_plugin_attribute_type pluginAttributeType(gfx::AttributeDataType type) {
+    switch (type) {
+        case gfx::AttributeDataType::Short2:
+            return MLN_PLUGIN_ATTRIBUTE_INT16_X2;
+        case gfx::AttributeDataType::UShort2:
+            return MLN_PLUGIN_ATTRIBUTE_UINT16_X2;
+        case gfx::AttributeDataType::Float:
+            return MLN_PLUGIN_ATTRIBUTE_FLOAT;
+        case gfx::AttributeDataType::Float2:
+            return MLN_PLUGIN_ATTRIBUTE_FLOAT_X2;
+        default:
+            return MLN_PLUGIN_ATTRIBUTE_NONE;
+    }
+}
+
+mln_plugin_buffer_binding_v1 pluginBinding(const gfx::AttributeBindingArray& bindings,
+                                           int8_t location,
+                                           std::size_t segmentVertexOffset) {
+    mln_plugin_buffer_binding_v1 result{};
+    result.struct_size = sizeof(result);
+    if (location < 0 || static_cast<std::size_t>(location) >= bindings.size()) return result;
+    const auto& binding = bindings[location];
+    if (!binding || !binding->vertexBufferResource) return result;
+    const auto& resource = static_cast<const VertexBufferResource&>(*binding->vertexBufferResource);
+    result.buffer = resource.getBuffer().get();
+    result.offset = binding->attribute.offset + segmentVertexOffset * binding->vertexStride;
+    result.stride = binding->vertexStride;
+    result.type = pluginAttributeType(binding->attribute.dataType);
+    return result;
+}
+
+} // namespace
+
+void DrawableGL::collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>& packets) const {
+    const auto* metadata = drawableData ? drawableData->getPluginData() : nullptr;
+    if (!metadata || !impl->indexes || !impl->indexes->getBuffer()) return;
+    const auto& indexBuffer = static_cast<const IndexBufferGL&>(*impl->indexes->getBuffer());
+    if (!indexBuffer.buffer) return;
+    const auto& resource = indexBuffer.buffer->getResource<IndexBufferResource>();
+
+    for (const auto& drawSegment : impl->segments) {
+        const auto& segment = drawSegment->getSegment();
+        if (!segment.indexLength) continue;
+        auto packet = metadata->packet;
+        packet.index_buffer = resource.buffer.get();
+        packet.index_offset = segment.indexOffset * sizeof(std::uint16_t);
+        packet.index_count = static_cast<uint32_t>(segment.indexLength);
+        packet.instance_count = 1;
+        packet.base_vertex = 0;
+        packet.wall_vertex =
+            pluginBinding(impl->attributeBindings, metadata->wallVertexLocation, segment.vertexOffset);
+        packet.position = pluginBinding(impl->attributeBindings, metadata->positionLocation, segment.vertexOffset);
+        packet.decimals_edge =
+            pluginBinding(impl->attributeBindings, metadata->decimalsLocation, segment.vertexOffset);
+        packet.normal = pluginBinding(impl->attributeBindings, metadata->normalLocation, segment.vertexOffset);
+        packet.base = pluginBinding(impl->attributeBindings, metadata->baseLocation, segment.vertexOffset);
+        packet.height = pluginBinding(impl->attributeBindings, metadata->heightLocation, segment.vertexOffset);
+        packets.push_back(packet);
+    }
 }
 
 void DrawableGL::draw(PaintParameters& parameters) const {
@@ -132,14 +205,6 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
 void DrawableGL::setVertexAttrId(const size_t id) {
     impl->vertexAttrId = id;
 }
-
-struct IndexBufferGL : public gfx::IndexBufferBase {
-    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
-        : buffer(std::move(buffer_)) {}
-    ~IndexBufferGL() override = default;
-
-    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
-};
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (isCustom) {

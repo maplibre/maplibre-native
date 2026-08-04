@@ -4,6 +4,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
+#include <mbgl/plugin/plugin_drawable_data.hpp>
 #include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -99,6 +100,18 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto pixelY = static_cast<int32_t>(tileSizeAtNearestZoom * tileID.canonical.y);
         const auto numTiles = std::pow(2, tileID.canonical.z);
         const auto heightFactor = static_cast<float>(-numTiles / util::tileSize_D / 8.0);
+        const auto baseInterpolation = std::get<0>(binders->get<FillExtrusionBase>()->interpolationFactor(zoom));
+        const auto heightInterpolation = std::get<0>(binders->get<FillExtrusionHeight>()->interpolationFactor(zoom));
+
+        if (auto* data = drawable.getData() ? drawable.getData()->getPluginData() : nullptr) {
+            data->setMatrix(matrix);
+            data->packet.constant_base = constOrDefault<FillExtrusionBase>(evaluated);
+            data->packet.constant_height = constOrDefault<FillExtrusionHeight>(evaluated);
+            data->packet.base_interpolation = baseInterpolation;
+            data->packet.height_interpolation = heightInterpolation;
+            data->packet.height_factor = heightFactor;
+            data->packet.layer_opacity = evaluated.get<FillExtrusionOpacity>();
+        }
 
         Size textureSize = {0, 0};
         if (const auto& tex = drawable.getTexture(idFillExtrusionImageTexture)) {
@@ -123,8 +136,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             .height_factor = heightFactor,
             .tile_ratio = tileRatio,
 
-            .base_t = std::get<0>(binders->get<FillExtrusionBase>()->interpolationFactor(zoom)),
-            .height_t = std::get<0>(binders->get<FillExtrusionHeight>()->interpolationFactor(zoom)),
+            .base_t = baseInterpolation,
+            .height_t = heightInterpolation,
             .color_t = std::get<0>(binders->get<FillExtrusionColor>()->interpolationFactor(zoom)),
             .pattern_from_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
             .pattern_to_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),

@@ -33,6 +33,7 @@ public:
     ~DrawableGL() override;
 
     void draw(PaintParameters&) const override;
+    void collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>&) const override;
 
     struct DrawSegmentGL;
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;

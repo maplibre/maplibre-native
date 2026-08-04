@@ -24,7 +24,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-include(":MapLibreAndroid", ":MapLibreAndroidTestApp", ":MapLibreAndroidLint")
+include(":MapLibreAndroid", ":MapLibreAndroidTestApp", ":MapLibreAndroidLint", ":android-plugin-api")
+project(":android-plugin-api").projectDir = file("MapLibrePluginApi")
 
 rootProject.name = "MapLibreAndroid"
 

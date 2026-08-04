@@ -372,7 +372,8 @@ std::optional<Error> HeatmapLayer::setPropertyInternal(const std::string& name, 
 }
 
 StyleProperty HeatmapLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> HeatmapLayer::mutableBaseImpl() const {

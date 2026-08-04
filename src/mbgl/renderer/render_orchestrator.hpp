@@ -142,6 +142,9 @@ public:
 
     void processChanges();
 
+    void preparePlugins(PaintParameters&);
+    void renderPluginsBefore(const LayerGroupBase&, PaintParameters&);
+
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
 

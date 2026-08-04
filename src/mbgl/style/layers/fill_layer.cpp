@@ -500,7 +500,8 @@ std::optional<Error> FillLayer::setPropertyInternal(const std::string& name, con
 }
 
 StyleProperty FillLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> FillLayer::mutableBaseImpl() const {

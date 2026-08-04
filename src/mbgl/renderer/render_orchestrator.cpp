@@ -807,6 +807,18 @@ const RenderLayer* RenderOrchestrator::getRenderLayer(const std::string& id) con
     return it != renderLayers.end() ? it->second.get() : nullptr;
 }
 
+void RenderOrchestrator::preparePlugins(PaintParameters& parameters) {
+    for (RenderLayer& layer : orderedLayers) {
+        layer.preparePlugins(parameters);
+    }
+}
+
+void RenderOrchestrator::renderPluginsBefore(const LayerGroupBase& group, PaintParameters& parameters) {
+    if (auto* layer = getRenderLayer(group.getName())) {
+        layer->renderPluginsBefore(parameters);
+    }
+}
+
 RenderSource* RenderOrchestrator::getRenderSource(const std::string& id) const {
     auto it = renderSources.find(id);
     return it != renderSources.end() ? it->second.get() : nullptr;

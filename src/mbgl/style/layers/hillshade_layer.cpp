@@ -520,7 +520,8 @@ std::optional<Error> HillshadeLayer::setPropertyInternal(const std::string& name
 }
 
 StyleProperty HillshadeLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> HillshadeLayer::mutableBaseImpl() const {

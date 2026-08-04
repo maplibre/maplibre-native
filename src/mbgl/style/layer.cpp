@@ -4,6 +4,7 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/layer_observer.hpp>
+#include <mbgl/plugin/plugin_registry.hpp>
 #include <mbgl/tile/tile.hpp>
 
 #include <mbgl/renderer/render_layer.hpp>
@@ -144,7 +145,31 @@ Value Layer::serialize() const {
         result["layout"] = mapbox::base::ValueObject{std::make_pair("visibility", "none")};
     }
 
+    for (const auto& [name, value] : baseImpl->pluginProperties) {
+        const auto definition = plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name);
+        if (!definition) continue;
+        const auto section = definition->scope == MLN_PLUGIN_PROPERTY_PAINT ? "paint" : "layout";
+        auto& object = result[section];
+        if (!object.getObject()) object = mapbox::base::ValueObject{};
+        object.getObject()->insert_or_assign(name, value);
+    }
+
     return result;
+}
+
+StyleProperty Layer::getPluginProperty(const std::string& name) const {
+    const auto value = baseImpl->pluginProperties.find(name);
+    if (value != baseImpl->pluginProperties.end()) {
+        return {value->second, StyleProperty::Kind::Constant};
+    }
+    const auto definition = plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name);
+    return definition ? StyleProperty{definition->defaultValue, StyleProperty::Kind::Constant} : StyleProperty{};
+}
+
+bool Layer::getPluginBoolean(const std::string& name, bool defaultValue) const {
+    const auto property = getPluginProperty(name);
+    if (const auto* value = property.getValue().getBool()) return *value;
+    return defaultValue;
 }
 
 void Layer::serializeProperty(Value& out, const StyleProperty& property, const char* propertyName, bool isPaint) const {
@@ -169,6 +194,9 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     using namespace conversion;
     std::optional<Error> error = setPropertyInternal(name, value);
     if (!error) return error; // Successfully set by the derived class implementation.
+    if (plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name)) {
+        return setPluginProperty(name, value);
+    }
     if (name == "visibility") return setVisibility(value);
     if (name == "minzoom") {
         if (auto zoom = convert<float>(value, *error)) {
@@ -211,6 +239,33 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
         }
     }
     return error;
+}
+
+std::optional<conversion::Error> Layer::setPluginProperty(const std::string& name,
+                                                          const conversion::Convertible& value) {
+    using namespace conversion;
+    const auto definition = plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name);
+    if (!definition) return Error{"layer doesn't support this property"};
+
+    auto impl_ = mutableBaseImpl();
+    if (isUndefined(value)) {
+        if (impl_->pluginProperties.erase(name) != 0) {
+            baseImpl = std::move(impl_);
+            observer->onLayerChanged(*this);
+        }
+        return std::nullopt;
+    }
+
+    const auto converted = toValue(value);
+    if (!converted || !plugin::PluginRegistry::valueMatches(definition->type, *converted)) {
+        return Error{"plugin property '" + name + "' has the wrong constant type"};
+    }
+    const auto existing = impl_->pluginProperties.find(name);
+    if (existing != impl_->pluginProperties.end() && existing->second == *converted) return std::nullopt;
+    impl_->pluginProperties.insert_or_assign(name, *converted);
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+    return std::nullopt;
 }
 
 std::optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& value) {

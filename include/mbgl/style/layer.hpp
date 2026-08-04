@@ -145,6 +145,9 @@ public:
     virtual StyleProperty getProperty(const std::string&) const = 0;
     virtual Value serialize() const;
 
+    StyleProperty getPluginProperty(const std::string&) const;
+    bool getPluginBoolean(const std::string&, bool defaultValue = false) const;
+
     // Private implementation
     /// @cond FALSE
 
@@ -171,6 +174,8 @@ public:
     expression::Dependency getDependencies() const noexcept;
 
 private:
+    std::optional<conversion::Error> setPluginProperty(const std::string& name,
+                                                       const conversion::Convertible& value);
     std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);
     std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
     std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);

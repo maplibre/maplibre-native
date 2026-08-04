@@ -1930,7 +1930,8 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
 }
 
 StyleProperty SymbolLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> SymbolLayer::mutableBaseImpl() const {

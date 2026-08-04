@@ -27,7 +27,36 @@ androidLibrary.publishing {
 afterEvaluate {
     mavenPublishing {
         publishToMavenCentral(true)
-        signAllPublications()
+        val requestedTasks = gradle.startParameter.taskNames
+        val reposiliteOnly = requestedTasks.any { it.contains("Reposilite", ignoreCase = true) } &&
+            requestedTasks.none { it.contains("MavenCentral", ignoreCase = true) }
+        if (!reposiliteOnly) {
+            signAllPublications()
+        }
+    }
+}
+
+publishing {
+    repositories {
+        val target = providers.gradleProperty("reposiliteUrl")
+            .orElse(providers.environmentVariable("REPOSILITE_URL"))
+        if (target.isPresent) {
+            val repositoryUri = uri(target.get())
+            val repositoryUsername = providers.gradleProperty("reposiliteUsername")
+                .orElse(providers.environmentVariable("REPOSILITE_USERNAME"))
+            val repositoryPassword = providers.gradleProperty("reposilitePassword")
+                .orElse(providers.environmentVariable("REPOSILITE_PASSWORD"))
+            maven {
+                name = "reposilite"
+                url = repositoryUri
+                if (repositoryUsername.isPresent && repositoryPassword.isPresent) {
+                    credentials {
+                        username = repositoryUsername.get()
+                        password = repositoryPassword.get()
+                    }
+                }
+            }
+        }
     }
 }
 

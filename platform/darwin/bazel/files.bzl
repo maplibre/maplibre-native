@@ -54,6 +54,7 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [
+    "src/MLNPluginAPI.h",
     "src/MLNActionJournalOptions.h",
     "src/MLNAnnotation.h",
     "src/MLNAttributedExpression.h",

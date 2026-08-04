@@ -501,7 +501,8 @@ std::optional<Error> RasterLayer::setPropertyInternal(const std::string& name, c
 }
 
 StyleProperty RasterLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> RasterLayer::mutableBaseImpl() const {

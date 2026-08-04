@@ -984,6 +984,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/work_request.cpp
 )
 list(APPEND SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_drawable_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_host.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_host.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_registry.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_registry.cpp
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
