@@ -111,9 +111,9 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
         // Each vertex is considered twice, once at the base z and once at the height z
         const auto vertexOffset = featureEntry.vertexOffset;
         const auto vertexCount = featureEntry.vertexCount;
-        const auto getVertex = [&bucket, vertexOffset, vertexCount, base, height](std::size_t i) {
-            const auto& vertex = bucket.vertices.at(vertexOffset + (i % vertexCount)).a1;
-            const auto z = (i < vertexCount) ? base : height;
+        const auto getVertex = [&bucket, vertexOffset, vertexCount, base, height](std::size_t vi) {
+            const auto& vertex = bucket.vertices.at(vertexOffset + (vi % vertexCount)).a1;
+            const auto z = (vi < vertexCount) ? base : height;
             return vec3{vertex[0] + 0.0, vertex[1] + 0.0, z};
         };
         if (const auto bound = computeFeatureNDCBound(2 * vertexCount, *tileMatrix, getVertex)) {

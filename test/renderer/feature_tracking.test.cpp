@@ -124,7 +124,7 @@ struct FeatureTrackingTest {
             {Geometry<double>{Point<double>{0.01, 0.02}}, {{"name", "0"}, {"opacity", 0.5}}, "pt0"},
             {Geometry<double>{Point<double>{0.012, 0.022}}, {{"name", "0"}}, "pt0_overlap"},
             {Geometry<double>{Point<double>{0.03, -0.04}}, {{"name", "1"}, {"opacity", 0.0}}, "pt1"},
-            {Geometry<double>{Point{0.1, 0.2}}, {{"name", "2"}}, "pt2"}, // outside the rendered area
+            {Geometry<double>{Point<double>{0.1, 0.2}}, {{"name", "2"}}, "pt2"}, // outside the rendered area
             {Geometry<double>{LineString<double>{{0.01, 0.02}, {0.03, -0.04}}}, {{"name", "3"}}, "l1"},
             {Geometry<double>{Polygon<double>{{{0.01, 0.02}, {0.03, -0.04}, {-0.07, -0.08}, {-0.06, 0.04}}}},
              {{"name", "4"}},

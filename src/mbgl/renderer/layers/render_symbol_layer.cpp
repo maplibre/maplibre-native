@@ -542,18 +542,6 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
     const mat4 iconDrawableMatrix = isScreenSpace ? getScreenMatrix(iconTranslation)
                                                   : getTileMatrix(iconTranslation, iconTranslationAnchor);
 
-    // TODO: How to get at the RenderableResource from here?
-    // applySurfaceTransform uses `y=*-1` as the default (`{1,0,0,-1}`), but that doesn't seem to match other results
-    mat2 surfaceRotation{1, 0, 0, 1};
-    // applySurfaceTransform:
-    // if (hasSurfaceTransformSupport) {
-    // float surfaceRotation = renderableResource.getRotation();
-    // /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
-    // /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
-    // rotation = platformParams.rotation[GLOBAL_SET_INDEX]
-    //     gl_Position.xy = platformParams.rotation * gl_Position.xy;
-    // }
-
     const auto computeBufferBounds = [&](const SymbolBucket::Buffer& buffer, bool isText) {
         const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
                                    : iconPropertyValues(evaluated, bucketLayout);
@@ -662,16 +650,15 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                     symbol_rotation = std::atan2((b[1] - a[1]) / aspect_ratio, b[0] - a[0]);
                 }
 
-                const auto angle_sin = sin(segment_angle + symbol_rotation);
-                const auto angle_cos = cos(segment_angle + symbol_rotation);
+                const auto angle_sin = std::sin(segment_angle + symbol_rotation);
+                const auto angle_cos = std::cos(segment_angle + symbol_rotation);
                 const mat2 rotation_matrix{angle_cos, -1.0 * angle_sin, angle_sin, angle_cos};
 
                 const vec4 projected_pos = labelPlaneMatrix * vec(in_projected_pos, 0, 1);
                 const vec2 pos0 = {projected_pos[0] / projected_pos[3], projected_pos[1] / projected_pos[3]};
                 const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
 
-                const vec4 outPos = rotate(surfaceRotation,
-                                           glCoordMatrix * vec(pos0 + rotation_matrix * posOffset, 0.0, 1.0));
+                const vec4 outPos = glCoordMatrix * vec(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
                 return slice<0, 3>(outPos) / outPos[3];
             };
             if (const auto bound = computeFeatureNDCBound(vertexCount, getVertex)) {
