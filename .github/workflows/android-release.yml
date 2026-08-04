@@ -134,7 +134,7 @@ jobs:
           if [ "$renderer" = "opengl" ]; then
             ./gradlew :MapLibreAndroid:publishOpengl${{ env.buildtype }}PublicationToMavenCentralRepository
             ./gradlew :MapLibreAndroid:publishDefault${{ env.buildtype }}PublicationToMavenCentralRepository
-          elif [ "$renderer" = "opengl" ]; then
+          elif [ "$renderer" = "vulkan" ]; then
             ./gradlew :MapLibreAndroid:publishVulkan${{ env.buildtype }}PublicationToMavenCentralRepository
           elif [ "$renderer" = "multiBackend" ]; then
             ./gradlew :MapLibreAndroid:publishMultibackend${{ env.buildtype }}PublicationToMavenCentralRepository
