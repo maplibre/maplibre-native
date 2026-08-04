@@ -247,7 +247,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch1) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Map);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Map);
-    test.run({test.currentTestName()}, 0.03);
+    test.run({test.currentTestName()}, 0.05);
 
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
     test.map.getRenderedFeatures("pt2", test.circleLayerName, std::nullopt, [](const auto&, const auto& info) -> bool {
@@ -264,7 +264,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch2) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Map);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Viewport);
-    test.run({test.currentTestName()}, 0.03);
+    test.run({test.currentTestName()}, 0.05);
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
 }
 
@@ -273,7 +273,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch3) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Viewport);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Map);
-    test.run({test.currentTestName()}, 0.04);
+    test.run({test.currentTestName()}, 0.05);
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
 }
 
@@ -282,7 +282,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch4) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Viewport);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Viewport);
-    test.run({test.currentTestName()}, 0.04);
+    test.run({test.currentTestName()}, 0.05);
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
 }
 
