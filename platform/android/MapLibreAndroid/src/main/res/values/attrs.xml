@@ -181,6 +181,7 @@
         <!-- Map layer configuration -->
         <attr name="maplibre_layer_above" format="string"/>
         <attr name="maplibre_layer_below" format="string"/>
+        <attr name="maplibre_bearing_on_top" format="boolean"/>
 
         <!-- Icon scale based on map zoom levels -->
         <attr name="maplibre_maxZoomIconScale" format="float"/>
