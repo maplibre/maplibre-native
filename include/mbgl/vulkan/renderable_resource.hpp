@@ -24,6 +24,7 @@ public:
     const vk::Extent2D& getExtent() const { return extent; }
     const vk::UniqueRenderPass& getRenderPass() const { return renderPass; }
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;
+    virtual float getRotation() const { return 0.0f; }
 
 protected:
     RendererBackend& backend;
@@ -47,6 +48,7 @@ protected:
     void setColorFormat(vk::Format format);
     void setDepthFormat(vk::Format format);
 
+    void copySurfaceToReadTexture();
     void swap() override;
 
 public:
@@ -69,7 +71,7 @@ public:
     bool didSurfaceTransformUpdate() const;
 
     // rotation needed to align framebuffer contents with device surface
-    float getRotation();
+    float getRotation() const override;
 
     void setSurfaceTransformPollingInterval(int32_t value) { surfaceTransformPollingInterval = value; }
     int32_t getSurfaceTransformPollingInterval() const { return surfaceTransformPollingInterval; }
@@ -77,7 +79,7 @@ public:
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
 
-    void enableSurfaceRead(bool value = true);
+    void queueSurfaceRead();
     std::shared_ptr<PremultipliedImage> readImage();
 
 protected:
@@ -104,6 +106,7 @@ protected:
 
     int32_t surfaceTransformPollingInterval{-1};
     bool surfaceRead{false};
+    std::unique_ptr<Texture2D> readTexture{nullptr};
 };
 
 class Renderable : public gfx::Renderable {

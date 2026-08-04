@@ -558,53 +558,75 @@ const vk::Sampler& Texture2D::getVulkanSampler() {
 }
 
 void Texture2D::copyImage(vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset) {
-    if (!image) return;
-
-    create();
+    if (!image) {
+        return;
+    }
 
     context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
-        const auto copyInfo = vk::ImageCopy()
-                                  .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                                  .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                                  .setExtent({imageSize.width, imageSize.height, 1})
-                                  .setDstOffset({xOffset, yOffset, 0});
-
-        transitionToTransferWriteLayout(commandBuffer);
-        commandBuffer->copyImage(image,
-                                 vk::ImageLayout::eTransferSrcOptimal,
-                                 imageAllocation->image,
-                                 imageLayout,
-                                 copyInfo,
-                                 context.getBackend().getDispatcher());
-        transitionToGeneralLayout(commandBuffer);
+        copyImage(image, imageSize, xOffset, yOffset, commandBuffer);
     });
 }
 
-void Texture2D::blitImage(vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset) {
-    if (!image) return;
+void Texture2D::copyImage(
+    vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset, const vk::UniqueCommandBuffer& commandBuffer) {
+    if (!image) {
+        return;
+    }
 
     create();
 
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
-        const std::array<vk::Offset3D, 2> offsets = {
-            vk::Offset3D{xOffset, yOffset, 0},
-            {static_cast<int32_t>(imageSize.width), static_cast<int32_t>(imageSize.height), 1}};
-        const auto blitInfo = vk::ImageBlit()
-                                  .setSrcOffsets(offsets)
-                                  .setDstOffsets(offsets)
-                                  .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
-                                  .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1});
+    const auto copyInfo = vk::ImageCopy()
+                              .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                              .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                              .setExtent({imageSize.width, imageSize.height, 1})
+                              .setDstOffset({xOffset, yOffset, 0});
 
-        transitionToTransferWriteLayout(commandBuffer);
-        commandBuffer->blitImage(image,
-                                 vk::ImageLayout::eTransferSrcOptimal,
-                                 imageAllocation->image,
-                                 imageLayout,
-                                 blitInfo,
-                                 vk::Filter::eNearest,
-                                 context.getBackend().getDispatcher());
-        transitionToGeneralLayout(commandBuffer);
+    transitionToTransferWriteLayout(commandBuffer);
+    commandBuffer->copyImage(image,
+                             vk::ImageLayout::eTransferSrcOptimal,
+                             imageAllocation->image,
+                             imageLayout,
+                             copyInfo,
+                             context.getBackend().getDispatcher());
+    transitionToGeneralLayout(commandBuffer);
+}
+
+void Texture2D::blitImage(vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset) {
+    if (!image) {
+        return;
+    }
+
+    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+        blitImage(image, imageSize, xOffset, yOffset, commandBuffer);
     });
+}
+
+void Texture2D::blitImage(
+    vk::Image image, Size imageSize, uint16_t xOffset, uint16_t yOffset, const vk::UniqueCommandBuffer& commandBuffer) {
+    if (!image) {
+        return;
+    }
+
+    create();
+
+    const std::array<vk::Offset3D, 2> offsets = {
+        vk::Offset3D{xOffset, yOffset, 0},
+        {static_cast<int32_t>(imageSize.width), static_cast<int32_t>(imageSize.height), 1}};
+    const auto blitInfo = vk::ImageBlit()
+                              .setSrcOffsets(offsets)
+                              .setDstOffsets(offsets)
+                              .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                              .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1});
+
+    transitionToTransferWriteLayout(commandBuffer);
+    commandBuffer->blitImage(image,
+                             vk::ImageLayout::eTransferSrcOptimal,
+                             imageAllocation->image,
+                             imageLayout,
+                             blitInfo,
+                             vk::Filter::eNearest,
+                             context.getBackend().getDispatcher());
+    transitionToGeneralLayout(commandBuffer);
 }
 
 std::shared_ptr<PremultipliedImage> Texture2D::readImage() {

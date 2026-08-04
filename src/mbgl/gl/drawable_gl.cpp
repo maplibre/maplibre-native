@@ -243,7 +243,7 @@ gfx::ColorMode DrawableGL::makeColorMode(PaintParameters& parameters) const {
 }
 
 gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const {
-    if (enableStencil) {
+    if (enableStencil && parameters.stencilClippingAvailable) {
         if (!is3D && tileID) {
             return parameters.stencilModeForClipping(tileID->toUnwrapped());
         }

@@ -290,7 +290,7 @@ TileCover::Impl::Impl(int32_t z, const Geometry<double>& geom, bool project)
     boundsMap = apply_visitor(toBoundsMap, geom);
     if (boundsMap.empty()) return;
 
-    // Iniitalize the active edge table, and current row span
+    // Initialize the active edge table, and current row span
     currentBounds = boundsMap.begin();
     tileY = 0;
     nextRow();

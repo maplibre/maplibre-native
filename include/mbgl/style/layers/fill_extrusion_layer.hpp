@@ -19,6 +19,12 @@ public:
     FillExtrusionLayer(const std::string& layerID, const std::string& sourceID);
     ~FillExtrusionLayer() override;
 
+    // Layout properties
+
+    static PropertyValue<float> getDefaultFillExtrusionRoundedCornerDistance();
+    const PropertyValue<float>& getFillExtrusionRoundedCornerDistance() const;
+    void setFillExtrusionRoundedCornerDistance(const PropertyValue<float>&);
+
     // Paint properties
 
     static PropertyValue<float> getDefaultFillExtrusionBase();

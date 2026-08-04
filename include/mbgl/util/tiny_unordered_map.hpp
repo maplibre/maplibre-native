@@ -11,7 +11,7 @@ namespace util {
 /// A wrapper around `unordered_map` which uses linear search below some threshold of size.
 ///
 /// Currently an immutable map, not allowing insert or delete, but could be extended to allow that, with extra cost when
-/// transitioning over the threshold value, of course. The maped values can be modified via reference accessors, just
+/// transitioning over the threshold value, of course. The mapped values can be modified via reference accessors, just
 /// not the set of keys or the keys themselves. Since the small-case elements are stored separately from
 /// `unordered_map`, we can't use that class' iterators, and its interface is private.  A wrapper iterator might allow
 /// for a better and more complete public interface.

@@ -23,7 +23,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
     gfx::DynamicTexture::uploadImage(pixelData, texHandle);
 }
 
-void DynamicTexture::uploadDeferredImages() {
+void DynamicTexture::uploadDeferredImages(gfx::UploadPass&) {
     std::scoped_lock lock(mutex);
     if (deferredCreation) {
         texture->create();

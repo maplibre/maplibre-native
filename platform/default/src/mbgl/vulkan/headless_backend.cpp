@@ -26,8 +26,8 @@ public:
     void bind() override {}
 
     void swap() override {
+        queueSurfaceRead();
         SurfaceRenderableResource::swap();
-        static_cast<Context&>(backend.getContext()).waitFrame();
     }
 };
 
@@ -41,8 +41,6 @@ HeadlessBackend::HeadlessBackend(const Size size_,
 
 HeadlessBackend::~HeadlessBackend() {
     gfx::BackendScope guard{*this, gfx::BackendScope::ScopeType::Implicit};
-
-    texture.reset();
 
     // Explicitly reset the renderable resource
     resource.reset();
@@ -79,21 +77,11 @@ PremultipliedImage HeadlessBackend::readStillImage() {
         resource = std::make_unique<HeadlessRenderableResource>(*this);
     }
 
-    auto& contextImpl = static_cast<Context&>(*context);
     auto& resourceImpl = static_cast<HeadlessRenderableResource&>(*resource);
 
-    if (!texture) {
-        texture = std::make_unique<Texture2D>(contextImpl);
-        texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
-        texture->setUsage(Texture2DUsage::Read);
-    }
-
-    texture->setSize(size);
-
-    contextImpl.waitFrame();
-    texture->copyImage(resourceImpl.getAcquiredImage(), size);
-
-    return std::move(*texture->readImage());
+    auto image = resourceImpl.readImage();
+    assert(image);
+    return std::move(*image);
 }
 
 RendererBackend* HeadlessBackend::getRendererBackend() {

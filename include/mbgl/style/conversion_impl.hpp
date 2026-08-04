@@ -78,7 +78,7 @@ namespace style {
    `const char *`; return value:
          * is true when evaluated in a boolean context iff the named member
    exists
-         * is convertable to a `V` or `V&` when dereferenced
+         * is convertible to a `V` or `V&` when dereferenced
       * `eachMember(v, [] (const std::string&, const V&) -> std::optional<Error>
    {...})` -- called only if `isObject(v)`; calls the provided lambda once for
    each key and value of the object; short-circuits if any call returns an

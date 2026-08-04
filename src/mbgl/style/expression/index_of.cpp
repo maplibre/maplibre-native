@@ -1,6 +1,7 @@
 #include "mbgl/style/expression/expression.hpp"
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/index_of.hpp>
+#include <mbgl/style/expression/utf8_op_helpers.hpp>
 #include <mbgl/util/string.hpp>
 
 namespace mbgl {
@@ -77,10 +78,13 @@ EvaluationResult IndexOf::evaluateForStringInput(const std::string &string,
             assert(false);
             return "";
         });
-    size_t index = string.find(keywordString, fromIndexValue);
-    if (index == std::string::npos) {
+    size_t fromIndexByteOffset = getUnicodeCharacterOffsetOnValidatedUtf8(string, fromIndexValue);
+    size_t byte_index = string.find(keywordString, fromIndexByteOffset);
+    if (byte_index == std::string::npos) {
         return static_cast<double>(-1);
     }
+    std::string_view prefix(string.data(), byte_index);
+    size_t index = unicodeLengthOnValidatedUtf8(prefix);
     return static_cast<double>(index);
 }
 

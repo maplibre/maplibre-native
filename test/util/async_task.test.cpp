@@ -169,8 +169,8 @@ TEST(AsyncTask, scheduleAndReplyValue) {
         loop.stop();
     };
 
-    std::shared_ptr<Scheduler> sheduler = Scheduler::GetBackground();
-    sheduler->scheduleAndReplyValue(util::SimpleIdentity::Empty, runInBackground, onResult);
+    std::shared_ptr<Scheduler> scheduler = Scheduler::GetBackground();
+    scheduler->scheduleAndReplyValue(util::SimpleIdentity::Empty, runInBackground, onResult);
     loop.run();
 }
 
@@ -197,11 +197,11 @@ TEST(AsyncTask, SequencedScheduler) {
         loop.stop();
     };
 
-    std::shared_ptr<Scheduler> sheduler = Scheduler::GetSequenced();
+    std::shared_ptr<Scheduler> scheduler = Scheduler::GetSequenced();
 
-    sheduler->schedule(first);
-    sheduler->schedule(second);
-    sheduler->schedule(third);
+    scheduler->schedule(first);
+    scheduler->schedule(second);
+    scheduler->schedule(third);
     loop.run();
 }
 

@@ -57,4 +57,4 @@ In 2023 we co-opted Bazel as a build tool (generator), mostly due to it having b
 | Qt | ✅ | ❌ |
 
 
-[^3]: Some targets are supported, see [here](ios/README.md#cmake).
+[^3]: Some targets are supported, see [here](ios/#cmake).

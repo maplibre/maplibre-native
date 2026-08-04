@@ -12,6 +12,8 @@ target_compile_definitions(
 
 list(APPEND
         INCLUDE_FILES
+        ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
@@ -57,6 +59,7 @@ list(APPEND
 
 list(APPEND
         SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/vulkan/custom_layer_render_parameters.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/context.cpp

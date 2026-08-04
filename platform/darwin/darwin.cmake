@@ -108,6 +108,9 @@ include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 set(CMAKE_OBJC_FLAGS "-fobjc-arc")
 set(CMAKE_OBJCXX_FLAGS "-fobjc-arc")
 
+# The generated Objective-C style sources are shared by Darwin SDK targets.
+# Keep the file lists here, but only SDK targets should call the generation
+# helper so mbgl-core builds do not require Bazel.
 set(MLN_GENERATED_DARWIN_CODE_DIR
     ${CMAKE_BINARY_DIR}/generated-darwin-code/src
 )
@@ -154,23 +157,36 @@ set(MLN_GENERATED_DARWIN_STYLE_HEADERS
     ${MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS}
 )
 
-find_program(BAZEL bazel REQUIRED)
+function(mbgl_add_darwin_style_code_target)
+    if(TARGET mbgl-darwin-style-code)
+        return()
+    endif()
 
-add_custom_command(
-    OUTPUT ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
-    COMMAND ${CMAKE_COMMAND} -E rm -Rf
-        "${PROJECT_SOURCE_DIR}/bazel-bin/platform/darwin/src"
-    COMMAND ${BAZEL} build //platform/darwin:generated_code
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/bazel-bin/platform/darwin/src"
-        ${MLN_GENERATED_DARWIN_CODE_DIR}
-    COMMENT "Generating Darwin style source and header files"
-    VERBATIM
-)
+    # Do not require Bazel at configure time. CMake may define Darwin SDK
+    # targets even when the requested build target is only mbgl-core.
+    find_program(BAZEL bazel)
+    if(BAZEL)
+        set(_bazel_command ${BAZEL})
+    else()
+        set(_bazel_command bazel)
+    endif()
 
-add_custom_target(mbgl-darwin-style-code
-    DEPENDS ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
-)
+    add_custom_command(
+        OUTPUT ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
+        COMMAND ${CMAKE_COMMAND} -E rm -Rf
+            "${PROJECT_SOURCE_DIR}/bazel-bin/platform/darwin/src"
+        COMMAND ${_bazel_command} build //platform/darwin:generated_code
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${PROJECT_SOURCE_DIR}/bazel-bin/platform/darwin/src"
+            ${MLN_GENERATED_DARWIN_CODE_DIR}
+        COMMENT "Generating Darwin style source and header files"
+        VERBATIM
+    )
+
+    add_custom_target(mbgl-darwin-style-code
+        DEPENDS ${MLN_GENERATED_DARWIN_STYLE_SOURCE} ${MLN_GENERATED_DARWIN_STYLE_HEADERS}
+    )
+endfunction()
 
 # Custom layer examples use OpenGL ES / Metal APIs directly and are not
 # available for WebGPU builds.

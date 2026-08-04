@@ -2,7 +2,7 @@
 
 We make iOS releases to GitHub (a downloadable XCFramework), the [Swift Package Index](https://swiftpackageindex.com/maplibre/maplibre-gl-native-distribution) and [CocoaPods](https://cocoapods.org/). Everyone with write access to the repository is able to make releases using the instructions below.
 
-Also see the current [release policy](../release-policy.md).
+Also see the current [release policy](../../release-policy.md).
 
 ## Making a release
 

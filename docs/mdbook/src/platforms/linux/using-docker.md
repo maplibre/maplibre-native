@@ -1,6 +1,6 @@
 # Building with Docker
 
-These steps will allow you to compile code as described [here](./README.md) using a Docker container. All the steps should be executed from the root of the repository.
+These steps will allow you to compile code as described [here](./) using a Docker container. All the steps should be executed from the root of the repository.
 
 > [!IMPORTANT]
 > Not all platform builds are currently supported. Docker builds are a work in progress.

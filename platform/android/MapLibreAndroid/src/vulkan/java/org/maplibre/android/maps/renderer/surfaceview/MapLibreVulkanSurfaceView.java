@@ -162,6 +162,11 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
       }
     }
 
+    @Override
+    public boolean ableToDraw() {
+      return graphicsSurfaceCreated && readyToDraw();
+    }
+
     private boolean graphicsSurfaceCreated;
 
     private final WeakReference<MapLibreVulkanSurfaceView> mSurfaceViewWeakRef;

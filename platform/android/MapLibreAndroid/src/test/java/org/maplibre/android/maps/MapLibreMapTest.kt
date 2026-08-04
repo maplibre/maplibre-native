@@ -261,4 +261,5 @@ class MapLibreMapTest : BaseTest() {
         verify { developerAnimationListener.onDeveloperAnimationStarted() }
         verify { nativeMapView.setZoom(2.0, target, 0) }
     }
+
 }

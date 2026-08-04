@@ -73,6 +73,8 @@ void CommandEncoder::submitCommandBuffer() {
     WGPUStringView label = {"Command Buffer", strlen("Command Buffer")};
     cmdBufferDesc.label = label;
     WGPUCommandBuffer cmdBuffer = wgpuCommandEncoderFinish(encoder, &cmdBufferDesc);
+    wgpuCommandEncoderRelease(encoder);
+    encoder = nullptr;
 
     if (cmdBuffer) {
         wgpuQueueSubmit(queue, 1, &cmdBuffer);

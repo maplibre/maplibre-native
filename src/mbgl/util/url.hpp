@@ -9,7 +9,7 @@ namespace util {
 std::string percentEncode(const std::string&);
 std::string percentDecode(const std::string&);
 
-// Class that holds position + lenth pairs for scheme, domain, path + query string of a URL.
+// Class that holds position + length pairs for scheme, domain, path + query string of a URL.
 class URL {
 public:
     using Segment = std::pair<size_t, size_t>; // position, length
@@ -22,7 +22,7 @@ public:
     URL(const std::string&);
 };
 
-// Class that holds position + lenth pairs for directory, extension, and
+// Class that holds position + length pairs for directory, extension, and
 // filename of a path. The extension will contain the preceding ., and
 // optionally a preceding @2x specifier. The filename will not contain the file
 // extension.

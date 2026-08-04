@@ -11,21 +11,13 @@ namespace mbgl {
     the glyph and appropriate metrics. GlyphManager will then use TinySDF to
     transform the rasterized bitmap into an SDF.
 
-    The JS equivalent of this functionality will only generate glyphs in the
-    'CJK Unified Ideographs' and 'Hangul Syllables' ranges, for which it can
-    get away with rendering a fixed 30px square image and GlyphMetrics of:
-
-        width: 24,
-        height: 24,
-        left: 0,
-        top: -8,
-        advance: 24
-
-    The JS equivalent also uses heuristic evaluation of the font stack name
-    to control the font-weight it uses during rasterization.
+    The shared default codepoint filter is
+    util::i18n::allowsFixedWidthGlyphGeneration.
+    Following maplibre-gl-js, platform implementations use 2x bitmaps with
+    1x metrics via GlyphMetrics::isDoubleResolution.
 
     It is left to platform-specific implementation to decide how best to
-    map a FontStack to a particular rasterization.
+    map a FontStack to a particular rasterization (font, weight, style).
 
     The default implementation simply refuses to rasterize any glyphs.
 */

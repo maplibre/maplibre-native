@@ -60,14 +60,17 @@ GlyphRange getGlyphRange(GlyphID glyph);
 struct GlyphMetrics {
     uint32_t width = 0;
     uint32_t height = 0;
-    int32_t left = 0;
-    int32_t top = 0;
+    float left = 0;
+    float top = 0;
     uint32_t advance = 0;
+    // True when the glyph bitmap is rendered at 2x texture resolution
+    // (e.g. local CJK glyphs).
+    bool isDoubleResolution = false;
 };
 
 inline bool operator==(const GlyphMetrics &lhs, const GlyphMetrics &rhs) {
     return lhs.width == rhs.width && lhs.height == rhs.height && lhs.left == rhs.left && lhs.top == rhs.top &&
-           lhs.advance == rhs.advance;
+           lhs.advance == rhs.advance && lhs.isDoubleResolution == rhs.isDoubleResolution;
 }
 
 class Glyph {

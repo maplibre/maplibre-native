@@ -219,6 +219,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
             case SourceType::Video:
             case SourceType::Annotations:
             case SourceType::CustomVector:
+            case SourceType::CustomMVTVector:
                 break;
         }
     }
@@ -333,6 +334,7 @@ void OfflineDownload::activateDownload() {
                 case SourceType::Video:
                 case SourceType::Annotations:
                 case SourceType::CustomVector:
+                case SourceType::CustomMVTVector:
                     break;
             }
         }
@@ -341,9 +343,10 @@ void OfflineDownload::activateDownload() {
             const bool includeIdeographs = std::visit([](auto& reg) { return reg.includeIdeographs; }, definition);
             for (const auto& fontStack : parser.fontStacks()) {
                 for (char16_t i = 0; i < GLYPH_RANGES_PER_FONT_STACK; i++) {
-                    // Assumes that if a glyph range starts with fixed width/ideographic
-                    // characters, the entire range will be fixed width.
-                    if (includeIdeographs || !util::i18n::allowsFixedWidthGlyphGeneration(i * GLYPHS_PER_GLYPH_RANGE)) {
+                    // Only skip a range when every codepoint in it can be
+                    // generated locally; some ranges (e.g. 0xFF00) are mixed.
+                    if (includeIdeographs ||
+                        !util::i18n::glyphRangeIsEntirelyLocallyGenerated(i * GLYPHS_PER_GLYPH_RANGE)) {
                         auto range = getGlyphRange(i * GLYPHS_PER_GLYPH_RANGE);
                         queueResource(Resource::glyphs(
                             parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second}));

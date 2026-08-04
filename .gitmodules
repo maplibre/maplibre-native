@@ -103,7 +103,7 @@
 [submodule "vendor/maplibre-tile-spec"]
 	path = vendor/maplibre-tile-spec
 	url = https://github.com/maplibre/maplibre-tile-spec.git
-	branch = cpp
+	branch = main
 [submodule "vendor/kdbush.hpp"]
 	path = vendor/kdbush.hpp
 	url = https://github.com/mourner/kdbush.hpp.git
@@ -113,3 +113,6 @@
 [submodule "vendor/wgpu-native"]
 	path = vendor/wgpu-native
 	url = https://github.com/gfx-rs/wgpu-native.git
+[submodule "vendor/metal-cpp"]
+	path = vendor/metal-cpp
+	url = https://github.com/apple/metal-cpp

@@ -145,4 +145,10 @@ struct ToGeometryCollection {
     }
 };
 
+using GeometryCoordinateFloat = Point<float>;
+using GeometryCoordinatesFloat = std::vector<GeometryCoordinateFloat>;
+using GeometryCollectionFloat = std::vector<GeometryCoordinatesFloat>;
+
+GeometryCollectionFloat roundPolygonCorners(GeometryCollection& polygon, double radius);
+
 } // namespace mbgl

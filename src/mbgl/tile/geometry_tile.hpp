@@ -76,10 +76,10 @@ public:
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
-        LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
-                     std::unique_ptr<FeatureIndex> featureIndex_,
-                     gfx::GlyphAtlas glyphAtlas_,
-                     gfx::ImageAtlas imageAtlas_,
+        LayoutResult(mbgl::unordered_map<std::string, LayerRenderData>&& renderData_,
+                     std::unique_ptr<FeatureIndex>&& featureIndex_,
+                     gfx::GlyphAtlas&& glyphAtlas_,
+                     gfx::ImageAtlas&& imageAtlas_,
                      gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_)
             : layerRenderData(std::move(renderData_)),
               featureIndex(std::move(featureIndex_)),
@@ -89,7 +89,7 @@ public:
 
         ~LayoutResult();
     };
-    void onLayout(std::shared_ptr<LayoutResult>, uint64_t correlationID);
+    void onLayout(std::shared_ptr<LayoutResult>&&, uint64_t correlationID);
 
     void onError(std::exception_ptr, uint64_t correlationID);
 

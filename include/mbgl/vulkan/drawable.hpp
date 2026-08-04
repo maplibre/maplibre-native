@@ -52,6 +52,10 @@ public:
                                 const SegmentBase* segments,
                                 std::size_t segmentCount) override;
 
+    void setTextures(const Textures& textures_) noexcept override;
+    void setTextures(Textures&& textures_) noexcept override;
+    void setTexture(gfx::Texture2DPtr texture, size_t id) override;
+
 protected:
     void setSharedBuffers(const gfx::VertexAttributeArray&, const gfx::AttributeBindingArray&);
     void buildVulkanInputBindings();

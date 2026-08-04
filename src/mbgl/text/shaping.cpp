@@ -371,7 +371,7 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
 
     std::list<PotentialBreak> potentialBreaks;
     float currentX = 0;
-    // Find first occurance of zero width space (ZWSP) character.
+    // Find first occurrence of zero width space (ZWSP) character.
     const bool hasServerSuggestedBreaks = logicalInput.rawText().find_first_of(ZWSP) != std::string::npos;
 
     for (std::size_t i = 0; i < logicalInput.length(); i++) {
