@@ -32,6 +32,9 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
         setContentView(R.layout.activity_query_features_box)
         val selectionBox = findViewById<View>(R.id.selection_box)
 
+        val hiliteLayerName = "highlighted-shapes-layer"
+        val hiliteSourceName = "highlighted-shapes-source"
+
         // Initialize map as normal
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.onCreate(savedInstanceState)
@@ -39,8 +42,8 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
             this@QueryRenderedFeaturesBoxHighlightActivity.maplibreMap = maplibreMap
 
             // Add layer / source
-            val source = GeoJsonSource("highlighted-shapes-source")
-            val layer: Layer = FillLayer("highlighted-shapes-layer", "highlighted-shapes-source")
+            val source = GeoJsonSource(hiliteSourceName)
+            val layer: Layer = FillLayer(hiliteLayerName, hiliteSourceName)
                 .withProperties(PropertyFactory.fillColor(Color.RED))
             selectionBox.setOnClickListener { view: View? ->
                 // Query
@@ -57,7 +60,7 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
                     Expression.toNumber(Expression.get("height")),
                     Expression.literal(10)
                 )
-                val features = maplibreMap.queryRenderedFeatures(box, filter, "building")
+                val features = maplibreMap.queryRenderedFeatures(box, filter, "building", "building-3d")
 
                 // Show count
                 Toast.makeText(
@@ -75,6 +78,15 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
                     .withSource(source)
                     .withLayer(layer)
             )
+        }
+        mapView.addOnDidFinishRenderingFrameListener { complete, stats ->
+            if (complete) {
+                stats.renderedFeatures.entries.filter { it.key.layerID.equals(hiliteLayerName) }
+                    .forEach { (_, info) ->
+                        info.joinToString(", ", transform = { "${it.featureID}" })
+                            .also { Timber.d("Highlighted features: $it") }
+                }
+            }
         }
     }
 

@@ -192,8 +192,8 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
                                                      aligned);
         }
 
-        const auto getVertex = [&bucket, vertexOffset](std::size_t i) {
-            const auto& vertex = bucket.vertices.at(vertexOffset + i).a1;
+        const auto getVertex = [&bucket, vertexOffset](std::size_t vi) {
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
             return vec3{vertex[0] + 0.0, vertex[1] + 0.0, 0};
         };
         if (const auto bound = computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {

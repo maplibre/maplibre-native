@@ -223,9 +223,9 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
                                                      aligned);
         }
 
-        const auto getVertex = [&bucket, vertexOffset](std::size_t i) {
+        const auto getVertex = [&bucket, vertexOffset](std::size_t vi) {
             // Not considering line width yet
-            const auto& vertex = bucket.vertices.at(vertexOffset + i).a1;
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
             return vec3{vertex[0] / 2.0, vertex[1] / 2.0, 0};
         };
 

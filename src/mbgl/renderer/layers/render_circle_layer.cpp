@@ -316,8 +316,8 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
                                                      aligned);
         }
 
-        const auto getVertex = [&](std::size_t i) {
-            const auto& vertex = bucket.vertices.at(vertexOffset + i).a1;
+        const auto getVertex = [&](std::size_t vi) {
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
             const bool useProjectedCenter = !pitchWithMap || !scaleWithMap;
             return getVertexImpl({vertex, *tileMatrix, radius, strokeWidth, extrudeScale, useProjectedCenter});
         };
