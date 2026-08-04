@@ -194,11 +194,7 @@ if(NOT MLN_WITH_WEBGPU)
     set(_custom_layer_sources
         "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
         "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
-        "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     )
-    if(MLN_WITH_METAL)
-        list(APPEND _custom_layer_sources "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm")
-    endif()
 
     add_library(
         custom-layer-examples
