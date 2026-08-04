@@ -1,6 +1,9 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 
+#include <mutex>
+#include <shared_mutex>
+
 namespace mbgl {
 namespace gfx {
 

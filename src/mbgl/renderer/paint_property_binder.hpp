@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <type_traits>
+#include <variant>
 
 namespace mbgl {
 
