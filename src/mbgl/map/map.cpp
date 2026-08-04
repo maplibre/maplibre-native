@@ -618,8 +618,8 @@ void Map::getRenderedFeatures(const std::optional<std::string>& featureId,
     const auto& features = impl->lastFrameStats->frameRenderedFeatures;
 
     using LayerFeaturesMap = gfx::RenderingStats::LayerFeaturesMap;
-    const auto searchFeatures = [&](const LayerFeaturesMap& features) {
-        for (const auto& [fId, fInfo] : features) {
+    const auto searchFeatures = [&](const LayerFeaturesMap& features_) {
+        for (const auto& [fId, fInfo] : features_) {
             if ((!featureId || fId == *featureId) && !result(fId, fInfo)) {
                 return false;
             }

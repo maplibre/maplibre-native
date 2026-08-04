@@ -348,10 +348,14 @@ public:
         void addRenderedFeature(std::string featureID,
                                 const gfx::RenderingStats::NDCBound& bound,
                                 mbgl::unordered_set<OverscaledTileID> tileIDs) {
-            const auto& [iter, inserted] = renderedFeatures.insert(
-                {std::move(featureID), {.ndcBound = bound, .tileIDs = std::move(tileIDs)}});
-            if (auto& value = iter->second; !inserted) {
-                value.mergeFrom(bound, tileIDs);
+            // don't use insert to eliminate the double-lookup because it doesn't
+            // guarantee that the source isn't moved when the item is not inserted.
+            if (const auto hit = renderedFeatures.find(featureID); hit != renderedFeatures.end()) {
+                // already exists, merge
+                hit->second.mergeFrom(bound, tileIDs);
+            } else {
+                // new feature, add it
+                renderedFeatures.insert({std::move(featureID), {.ndcBound = bound, .tileIDs = std::move(tileIDs)}});
             }
         }
 

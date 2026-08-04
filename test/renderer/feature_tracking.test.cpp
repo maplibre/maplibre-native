@@ -121,9 +121,9 @@ struct FeatureTrackingTest {
 
     static mapbox::geojson::feature_collection defaultGeometry() {
         return {
-            {Geometry<double>{Point{0.01, 0.02}}, {{"name", "0"}, {"opacity", 0.5}}, "pt0"},
-            {Geometry<double>{Point{0.012, 0.022}}, {{"name", "0"}}, "pt0_overlap"},
-            {Geometry<double>{Point{0.03, -0.04}}, {{"name", "1"}, {"opacity", 0.0}}, "pt1"},
+            {Geometry<double>{Point<double>{0.01, 0.02}}, {{"name", "0"}, {"opacity", 0.5}}, "pt0"},
+            {Geometry<double>{Point<double>{0.012, 0.022}}, {{"name", "0"}}, "pt0_overlap"},
+            {Geometry<double>{Point<double>{0.03, -0.04}}, {{"name", "1"}, {"opacity", 0.0}}, "pt1"},
             {Geometry<double>{Point{0.1, 0.2}}, {{"name", "2"}}, "pt2"}, // outside the rendered area
             {Geometry<double>{LineString<double>{{0.01, 0.02}, {0.03, -0.04}}}, {{"name", "3"}}, "l1"},
             {Geometry<double>{Polygon<double>{{{0.01, 0.02}, {0.03, -0.04}, {-0.07, -0.08}, {-0.06, 0.04}}}},
@@ -247,7 +247,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch1) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Map);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Map);
-    test.run();
+    test.run({test.currentTestName()}, 0.03);
 
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
     test.map.getRenderedFeatures("pt2", test.circleLayerName, std::nullopt, [](const auto&, const auto& info) -> bool {
@@ -264,7 +264,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch2) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Map);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Viewport);
-    test.run();
+    test.run({test.currentTestName()}, 0.03);
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
 }
 
@@ -273,7 +273,7 @@ TEST(FeatureTracking, NDCBoundCirclePitch3) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Viewport);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Map);
-    test.run();
+    test.run({test.currentTestName()}, 0.04);
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
 }
 
@@ -282,14 +282,14 @@ TEST(FeatureTracking, NDCBoundCirclePitch4) {
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
     test.getCircleLayer()->setCirclePitchAlignment(AlignmentType::Viewport);
     test.getCircleLayer()->setCirclePitchScale(CirclePitchScaleType::Viewport);
-    test.run();
+    test.run({test.currentTestName()}, 0.04);
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt2", test.circleLayerName));
 }
 
 TEST(FeatureTracking, NDCBoundFill) {
     FeatureTrackingTest test(CameraOptions().withZoom(10.0));
     test.getFillLayer()->setVisibility(VisibilityType::Visible);
-    test.run();
+    test.run({test.currentTestName()}, 0.01);
 
     EXPECT_EQ(1, test.map.getRenderedFeatureCount("poly0", test.fillLayerName));
     test.map.getRenderedFeatures("poly0", test.fillLayerName, std::nullopt, [](const auto&, const auto& info) -> bool {
@@ -307,7 +307,7 @@ TEST(FeatureTracking, NDCBoundFill) {
 
 TEST(FeatureTracking, NDCBoundTilt) {
     const mapbox::geojson::feature_collection geom = {
-        {Geometry<double>{Point{0.02, 0.25}}, {{"name", "0"}}, "pt0"},
+        {Geometry<double>{Point<double>{0.02, 0.25}}, {{"name", "0"}}, "pt0"},
     };
 
     FeatureTrackingTest test(geom, CameraOptions().withZoom(10.0));
@@ -316,7 +316,7 @@ TEST(FeatureTracking, NDCBoundTilt) {
     EXPECT_EQ(0, test.map.getRenderedFeatureCount("pt0")); // out of view
 
     test.map.jumpTo(test.map.getCameraOptions().withPitch(60)); // tilt and the feature appears
-    test.run();
+    test.run({test.currentTestName()}, 0.01);
 
     test.map.getRenderedFeatures("pt0", std::nullopt, std::nullopt, [](const auto&, const auto& info) -> bool {
         EXPECT_GT(info.ndcBound.minX, 0.0);
@@ -337,7 +337,7 @@ TEST(FeatureTracking, Overlap) {
     ASSERT_EQ(0, test.map.getRenderedFeatureCount("pt0_overlap"));
     test.getSymbolLayer()->setIconAllowOverlap(true);
     test.getSymbolLayer()->setTextAllowOverlap(true);
-    test.run();
+    test.run({test.currentTestName()}, 0.01);
     ASSERT_EQ(1, test.map.getRenderedFeatureCount("pt0_overlap"));
 }
 
