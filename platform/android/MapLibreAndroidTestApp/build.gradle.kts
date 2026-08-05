@@ -146,6 +146,8 @@ dependencies {
 
     implementation(libs.maplibreJavaTurf)
 
+    implementation(libs.sentryAndroid)
+
     implementation(libs.supportRecyclerView)
     implementation(libs.supportPrint)
     implementation(libs.supportDesign)
