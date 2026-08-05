@@ -1,0 +1,15 @@
+{
+  "expression": ["join", "1+2+3", "+"],
+  "inputs": [[{}, {}]],
+  "expected": {
+    "compiled": {
+      "result": "error",
+      "errors": [
+        {
+          "key": "",
+          "error": "Expected arguments of type (array<string>, string), but found (string, string) instead."
+        }
+      ]
+    }
+  }
+}
