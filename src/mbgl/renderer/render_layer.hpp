@@ -290,7 +290,7 @@ protected:
 
     // To minimize the number of attributes needed, we encode a 4-component
     // color into a pair of floats (i.e. a vec2) as follows:
-    // [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.g * 255 ]
+    // [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.a * 255 ]
     static FloatQuad decode_color(const FloatPair& encoded);
     // Unpack a pair of paint values and interpolate between them.
     static FloatQuad unpack_mix_color(const FloatQuad& packedColors, const float t);

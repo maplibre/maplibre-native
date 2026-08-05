@@ -1258,9 +1258,6 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
         buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, sortKey);
     }
 
-    // BUG?: Index is recorded within the current segment, but which segment we're in isn't recorded.
-    // Seems like this can't possibly work when there are more than 64K vertices.
-
     // We're generating triangle fans, so we always start with the first
     // coordinate in this polygon.
     auto& segment = buffer.segments.back();

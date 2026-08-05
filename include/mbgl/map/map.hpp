@@ -234,7 +234,7 @@ public:
     bool isFeatureRendered(const std::optional<std::string>& featureId = std::nullopt,
                            const std::optional<std::string>& layerId = std::nullopt,
                            const std::optional<std::string>& sourceId = std::nullopt) const {
-        return 0 < getRenderedFeatureCount(featureId, sourceId, layerId, 1);
+        return 0 < getRenderedFeatureCount(featureId, layerId, sourceId, 1);
     }
 
 protected:

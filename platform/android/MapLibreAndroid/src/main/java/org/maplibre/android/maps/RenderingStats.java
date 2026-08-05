@@ -1,5 +1,7 @@
 package org.maplibre.android.maps;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,6 +133,29 @@ public class RenderingStats {
     public SourceLayerID(String sourceID, String layerID) {
       this.sourceID = sourceID;
       this.layerID = layerID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      SourceLayerID that = (SourceLayerID) o;
+      return sourceID.equals(that.sourceID) && layerID.equals(that.layerID);
+    }
+
+    @Override
+    public int hashCode() {
+      return 31 * sourceID.hashCode() + layerID.hashCode();
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+      return sourceID + '/' + layerID;
     }
   }
 }

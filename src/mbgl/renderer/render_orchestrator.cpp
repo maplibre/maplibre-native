@@ -993,10 +993,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         // Accumulate rendered feaures from each render layer, leaving each one empty.
         if (!renderLayer.stats.renderedFeatures.empty()) {
             const auto& sourceId = item.source ? item.source->getId() : std::string{};
-            const auto& [it, inserted] = allFeatures.insert(
-                {{.sourceID = sourceId, .layerID = layerId}, std::move(renderLayer.stats.renderedFeatures)});
-            if (!inserted) {
-                RenderLayer::Stats::merge(it->second, renderLayer.stats.renderedFeatures);
+
+            // don't use insert to eliminate the double-lookup because it doesn't
+            // guarantee that the source isn't moved when the item is not inserted.
+            if (const auto hit = allFeatures.find({sourceId, layerId}); hit != allFeatures.end()) {
+                RenderLayer::Stats::merge(hit->second, renderLayer.stats.renderedFeatures);
+            } else {
+                allFeatures.insert({{sourceId, layerId}, std::move(renderLayer.stats.renderedFeatures)});
             }
             renderLayer.stats.renderedFeatures.clear();
         }
