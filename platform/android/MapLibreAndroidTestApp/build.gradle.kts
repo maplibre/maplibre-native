@@ -19,12 +19,12 @@ fun obtainTestBuildType(): String {
 android {
     ndkVersion = Versions.ndkVersion
 
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "org.maplibre.android.testapp"
         minSdk = 23
-        targetSdk = 33
+        targetSdk = 35
         versionCode = 14
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
