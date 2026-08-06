@@ -11,6 +11,8 @@ endif()
 if(MLN_WEBGPU_EMDAWN)
     set(MLN_WEBGPU_EMDAWN_PORT "emdawnwebgpu"
         CACHE STRING "Emscripten port name or path used for emdawnwebgpu")
+    set(MLN_WEBGPU_EMDAWN_SUSPEND "-sASYNCIFY=1"
+        CACHE STRING "Emscripten suspension link option for emdawnwebgpu (-sASYNCIFY=1 or -sJSPI)")
 
     message(STATUS "Configuring emdawnwebgpu port: ${MLN_WEBGPU_EMDAWN_PORT}")
     add_library(mbgl-vendor-dawn INTERFACE)
@@ -26,7 +28,7 @@ if(MLN_WEBGPU_EMDAWN)
         mbgl-vendor-dawn
         INTERFACE
             "--use-port=${MLN_WEBGPU_EMDAWN_PORT}"
-            "-sASYNCIFY=1"
+            "${MLN_WEBGPU_EMDAWN_SUSPEND}"
     )
 
     set_target_properties(

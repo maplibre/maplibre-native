@@ -379,6 +379,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/custom_geometry_source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/custom_vector_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/image_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_dem_source.hpp
@@ -630,6 +631,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/renderer_state.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_custom_geometry_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_custom_geometry_source.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_custom_vector_source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_custom_vector_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_geojson_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_geojson_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/sources/render_image_source.cpp
@@ -701,6 +704,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/transition_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_vector_tile_loader.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_vector_tile_loader.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/assertion.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/at.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/boolean_operator.cpp
@@ -735,6 +740,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/parsing_context.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/step.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/utf8_op_helpers.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/utf8_op_helpers.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/value.cpp
@@ -817,6 +824,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/custom_geometry_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/custom_geometry_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/custom_geometry_source_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/custom_vector_source.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/custom_vector_source_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/custom_vector_source_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/geojson_source.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/geojson_source_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sources/geojson_source_impl.hpp
@@ -871,6 +881,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/tagged_string.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_geometry_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_geometry_tile.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_vector_tile.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/custom_vector_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/geojson_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/geojson_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/geojson_tile_data.hpp
