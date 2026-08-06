@@ -10,22 +10,23 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
-    @location(4) normal_ed: vec4<i32>,
+    @location(4) decimals_ed: vec2<u32>,
+    @location(5) normal2d: vec2<i32>,
 #ifndef HAS_UNIFORM_u_color
-    @location(5) color: vec4<f32>,
+    @location(6) color: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_base
-    @location(6) base: vec2<f32>,
+    @location(7) base: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_height
-    @location(7) height: vec2<f32>,
+    @location(8) height: vec2<f32>,
 #endif
 };
 
@@ -88,11 +89,13 @@ fn main(in: VertexInput) -> VertexOutput {
     let heightValue = max(props.height, 0.0);
 #endif
 
-    let normal_i = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));
-    let t = glMod(normal_i.x, 2.0);
-    let z = select(baseValue, heightValue, t != 0.0);
+    let normal = vec3<f32>(vec2<f32>(in.normal2d) / 16384.0, select(0.0, 1.0, in.normal2d.x == 0 && in.normal2d.y == 0));
 
-    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), z, 1.0);
+    let t = glMod(f32(in.decimals_ed.x), 2.0);
+    let z = select(baseValue, heightValue, t > 0.0);
+    let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
+
+    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
 
 #ifdef OVERDRAW_INSPECTOR
     out.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -107,13 +110,12 @@ fn main(in: VertexInput) -> VertexOutput {
     color = color + min(vec4<f32>(0.03, 0.03, 0.03, 1.0), vec4<f32>(1.0));
 
     let luminance = dot(color.rgb, vec3<f32>(0.2126, 0.7152, 0.0722));
-    let unitNormal = normal_i / 16384.0;
-    let directionalFraction = clamp(dot(unitNormal, props.light_position_base.xyz), 0.0, 1.0);
+    let directionalFraction = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     let minDirectional = 1.0 - props.light_intensity;
     let maxDirectional = max(1.0 - luminance + props.light_intensity, 1.0);
     var directional = mix(minDirectional, maxDirectional, directionalFraction);
 
-    if (normal_i.y != 0.0) {
+    if (normal.z == 0.0) {
         let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
         directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
@@ -146,25 +148,26 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionPatternShader";
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
-    @location(4) normal_ed: vec4<i32>,
+    @location(4) decimals_ed: vec2<u32>,
+    @location(5) normal2d: vec2<i32>,
 #ifndef HAS_UNIFORM_u_base
-    @location(5) base: vec2<f32>,
+    @location(6) base: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_height
-    @location(6) height: vec2<f32>,
+    @location(7) height: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(7) pattern_from: vec4<u32>,
+    @location(8) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(8) pattern_to: vec4<u32>,
+    @location(9) pattern_to: vec4<u32>,
 #endif
 };
 
@@ -250,16 +253,18 @@ fn main(in: VertexInput) -> VertexOutput {
     let heightValue = max(props.height, 0.0);
 #endif
 
-    let normal_i = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));
-    let edgedistance = f32(in.normal_ed.w);
-    let t = glMod(normal_i.x, 2.0);
-    let z = select(baseValue, heightValue, t != 0.0);
+    let normal = vec3<f32>(vec2<f32>(in.normal2d) / 16384.0, select(0.0, 1.0, in.normal2d.x == 0 && in.normal2d.y == 0));
+    let edgedistance = f32(in.decimals_ed.y);
 
-    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), z, 1.0);
+    let t = glMod(f32(in.decimals_ed.x), 2.0);
+    let z = select(baseValue, heightValue, t > 0.0);
+    let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
+
+    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
 
     var patternPos: vec2<f32>;
-    if (normal_i.x == 1.0 && normal_i.y == 0.0 && normal_i.z == 16384.0) {
-        patternPos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    if (normal.z == 1.0) {
+        patternPos = vec2<f32>(in.position);
     } else {
         patternPos = vec2<f32>(edgedistance, z * drawable.height_factor);
     }
@@ -294,10 +299,10 @@ fn main(in: VertexInput) -> VertexOutput {
                                    (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     var lighting = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-    var directional = clamp(dot(normal_i / 16383.0, props.light_position_base.xyz), 0.0, 1.0);
+    var directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix(1.0 - props.light_intensity, max(0.5 + props.light_intensity, 1.0), directional);
 
-    if (normal_i.y != 0.0) {
+    if (normal.z == 0.0) {
         let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
         directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;

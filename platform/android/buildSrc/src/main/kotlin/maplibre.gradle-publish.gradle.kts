@@ -22,6 +22,8 @@ androidLibrary.publishing {
     singleVariant("vulkanDebug")
     singleVariant("openglRelease")
     singleVariant("openglDebug")
+    singleVariant("multiBackendRelease")
+    singleVariant("multiBackendDebug")
 }
 
 afterEvaluate {
@@ -143,6 +145,8 @@ afterEvaluate {
     // OpenGL ES with this artifact ID if that happens.
     configureMavenPublication("opengl", "openglrelease", "-opengl", " (OpenGL ES)")
     configureMavenPublication("opengl", "opengldebug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
+    configureMavenPublication("multiBackend", "multibackendrelease", "-vulkan-opengl", " (Vulkan + OpenGL ES)")
+    configureMavenPublication("multiBackend", "multibackenddebug", "-vulkan-opengl-debug", " (Vulkan + OpenGL ES, Debug)", "Debug")
 }
 
 // Wire per-variant compile classpaths into the Javadoc task.

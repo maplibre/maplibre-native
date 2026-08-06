@@ -8,6 +8,40 @@ if(NOT MLN_WITH_WEBGPU)
     return()
 endif()
 
+if(MLN_WEBGPU_EMDAWN)
+    set(MLN_WEBGPU_EMDAWN_PORT "emdawnwebgpu"
+        CACHE STRING "Emscripten port name or path used for emdawnwebgpu")
+    set(MLN_WEBGPU_EMDAWN_SUSPEND "-sASYNCIFY=1"
+        CACHE STRING "Emscripten suspension link option for emdawnwebgpu (-sASYNCIFY=1 or -sJSPI)")
+
+    message(STATUS "Configuring emdawnwebgpu port: ${MLN_WEBGPU_EMDAWN_PORT}")
+    add_library(mbgl-vendor-dawn INTERFACE)
+
+    # The port provides the WebGPU headers during compilation and its C++/JS
+    # implementation during linking. Asyncify lets synchronous APIs such as
+    # readStillImage() wait for browser WebGPU promises to resolve.
+    target_compile_options(
+        mbgl-vendor-dawn
+        INTERFACE "--use-port=${MLN_WEBGPU_EMDAWN_PORT}"
+    )
+    target_link_options(
+        mbgl-vendor-dawn
+        INTERFACE
+            "--use-port=${MLN_WEBGPU_EMDAWN_PORT}"
+            "${MLN_WEBGPU_EMDAWN_SUSPEND}"
+    )
+
+    set_target_properties(
+        mbgl-vendor-dawn
+        PROPERTIES
+            INTERFACE_MAPLIBRE_NAME "emdawnwebgpu"
+            INTERFACE_MAPLIBRE_URL "https://dawn.googlesource.com/dawn"
+            INTERFACE_MAPLIBRE_AUTHOR "Chromium Dawn Team"
+            INTERFACE_MAPLIBRE_LICENSE "${PROJECT_SOURCE_DIR}/vendor/emdawnwebgpu.LICENSE"
+    )
+    return()
+endif()
+
 if(POLICY CMP0169)
     cmake_policy(SET CMP0169 OLD)
 endif()

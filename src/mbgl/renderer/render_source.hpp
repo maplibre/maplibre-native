@@ -33,6 +33,7 @@ class Tile;
 class TileParameters;
 class TransformParameters;
 class TransformState;
+class UpdateParameters;
 
 namespace gfx {
 class UploadPass;
@@ -103,7 +104,9 @@ public:
                                     const std::optional<std::string>&,
                                     const std::optional<std::string>&) {}
 
-    virtual void setCacheEnabled(bool) {};
+    virtual void setCacheEnabled(bool) {}
+
+    virtual void setFastPFOREnabled(bool) {}
 
     virtual void reduceMemoryUse() = 0;
 

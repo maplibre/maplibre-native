@@ -1,4 +1,4 @@
-import java.net.URL
+import java.net.URI
 
 
 /**
@@ -26,39 +26,55 @@ if (extra.has("vvl_version")) {
 // Declare variables for the Vulkan Validation Layers download and extraction paths.
 val vvlSite = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
 val vvlLibRoot = projectDir // Set project root or change to rootDir if needed
-val vvlJniLibDir = "$vvlLibRoot/src/vulkanDebug/jniLibs"
+val vvlJniLibDirs = arrayOf(
+    "$vvlLibRoot/src/vulkanDebug/jniLibs",
+    "$vvlLibRoot/src/multiBackendDebug/jniLibs" // multiBackend flavor also uses Vulkan rendering engine
+)
 val vvlSoName = "libVkLayer_khronos_validation.so"
 
-// Download the release zip file to ${vvlLibRoot}/
-val download = tasks.register("download") {
-    val vvlZipName = "releases/download/vulkan-sdk-$vvlVersion/android-binaries-$vvlVersion.zip"
-    val zipFile = file("$vvlLibRoot/android-binaries-$vvlVersion.zip")
+abstract class Download : DefaultTask() {
+    @get:Input
+    abstract val url: Property<String>
 
-    mkdir(vvlLibRoot)
+    @get:OutputFile
+    abstract val file: RegularFileProperty
 
-    doLast {
-        // Download the zip file from the Vulkan Validation Layers GitHub repo.
-        URL("$vvlSite/$vvlZipName").openStream().use { inputStream ->
-            zipFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
+    @TaskAction
+    fun download() {
+        URI.create(url.get()).toURL().openStream().use { inputStream ->
+            file.get().asFile
+                .outputStream()
+                .use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
         }
     }
 }
 
-val unzip = tasks.register<Copy>("unzip") {
+val download = tasks.register<Download>("download") {
+    // Download the zip file from the Vulkan Validation Layers GitHub repo.
+    url = "$vvlSite/releases/download/vulkan-sdk-$vvlVersion/android-binaries-$vvlVersion.zip"
+    // Download the release zip file to ${vvlLibRoot}/
+    file = file("$vvlLibRoot/android-binaries-$vvlVersion.zip")
+}
+
+val unzip = tasks.register("unzip") {
     dependsOn(download)
 
-    from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip"))) {
-        eachFile {
-            path = path.substringAfter("/")
-        }
-        includeEmptyDirs = false // Optional: Exclude empty directories if not needed
-    }
-    into(file(vvlJniLibDir))
+    doLast {
+        vvlJniLibDirs.forEach { vvlJniLibDir ->
+            mkdir(vvlJniLibDir)
 
-    doFirst {
-        mkdir(vvlJniLibDir)
+            copy {
+                from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip"))) {
+                    eachFile {
+                        path = path.substringAfter("/")
+                    }
+                    includeEmptyDirs = false // Optional: Exclude empty directories if not needed
+                }
+                into(file(vvlJniLibDir))
+            }
+        }
     }
 }
 
