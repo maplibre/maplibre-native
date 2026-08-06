@@ -105,7 +105,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState&,
                                       const std::shared_ptr<UpdateParameters>&,
-                                      [[maybe_unused]] const PaintParameters &paintParameters,
+                                      [[maybe_unused]] const PaintParameters& paintParameters,
                                       const RenderTree&,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {

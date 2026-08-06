@@ -950,7 +950,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
-                                      const PaintParameters &paintParameters,
+                                      const PaintParameters& paintParameters,
                                       const RenderTree& renderTree) {
     MLN_TRACE_FUNC();
 

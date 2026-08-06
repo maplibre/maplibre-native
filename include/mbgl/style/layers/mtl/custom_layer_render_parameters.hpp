@@ -26,7 +26,7 @@ struct CustomLayerRenderParameters : mbgl::style::CustomLayerRenderParameters {
     mbgl::mtl::MTLCommandBufferPtr commandBuffer;
     mbgl::mtl::MTLRenderPassDescriptorPtr renderPassDesc;
 
-    CustomLayerRenderParameters(const PaintParameters&);
+    CustomLayerRenderParameters(const PaintParameters &);
 };
 
 } // namespace mtl

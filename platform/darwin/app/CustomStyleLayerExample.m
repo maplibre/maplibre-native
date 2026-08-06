@@ -137,7 +137,7 @@
 
 - (void)preDrawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
     id<MTLCommandBuffer> commandBuffer = self.commandBuffer;
-    
+
     id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
     [blitEncoder endEncoding];
 }
@@ -185,7 +185,7 @@
         [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0
                           vertexCount:3];
-    }    
+    }
 }
 
 - (void)willMoveFromMapView:(MLNMapView *)mapView {

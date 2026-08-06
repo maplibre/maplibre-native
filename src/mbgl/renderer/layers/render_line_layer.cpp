@@ -226,7 +226,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState&,
                              [[maybe_unused]] const std::shared_ptr<UpdateParameters>& parameters,
-                             [[maybe_unused]] const PaintParameters &paintParameters,
+                             [[maybe_unused]] const PaintParameters& paintParameters,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {

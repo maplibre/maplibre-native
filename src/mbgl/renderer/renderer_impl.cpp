@@ -253,8 +253,12 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // - LAYER GROUP UPDATE ------------------------------------------------------------------------
     // Updates all layer groups and process changes
     if (staticData && staticData->shaders) {
-        orchestrator.updateLayers(
-            *staticData->shaders, context, renderTreeParameters.transformParams.state, updateParameters, parameters, renderTree);
+        orchestrator.updateLayers(*staticData->shaders,
+                                  context,
+                                  renderTreeParameters.transformParams.state,
+                                  updateParameters,
+                                  parameters,
+                                  renderTree);
     }
 
     orchestrator.processChanges();

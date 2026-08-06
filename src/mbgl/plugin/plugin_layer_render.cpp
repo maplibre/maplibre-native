@@ -80,7 +80,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
                                [[maybe_unused]] gfx::Context& context,
                                [[maybe_unused]] const TransformState& transformState,
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
-                               [[maybe_unused]] const PaintParameters &paintParameters,
+                               [[maybe_unused]] const PaintParameters& paintParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
