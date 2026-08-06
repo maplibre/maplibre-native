@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://www.maplibre.org/maplibre-native/android/examples/styling/feature-state/">
+        <link rel="canonical" href="https://www.maplibre.org/maplibre-native/android/examples/data/rendering-engine/">
       
       
-        <link rel="prev" href="../draggable-marker/">
+        <link rel="prev" href="../PMTiles/">
       
       
-        <link rel="next" href="../live-realtime-data/">
+        <link rel="next" href="../../observability/action-journal/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Feature State - MapLibre Android Examples</title>
+        <title>Rendering Engine (OpenGL ES / Vulkan) - MapLibre Android Examples</title>
       
     
     
@@ -63,17 +63,17 @@
     
   
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Feature State - MapLibre Android Examples" />
+<meta property="og:title" content="Rendering Engine (OpenGL ES / Vulkan) - MapLibre Android Examples" />
 <meta property="og:description" content="MapLibre Android Examples" />
-<meta property="og:image" content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/styling/feature-state.png" />
+<meta property="og:image" content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/data/rendering-engine.png" />
 <meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://www.maplibre.org/maplibre-native/android/examples/styling/feature-state/" />
+<meta property="og:url" content="https://www.maplibre.org/maplibre-native/android/examples/data/rendering-engine/" />
 <meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:title" content="Feature State - MapLibre Android Examples" />
+<meta property="twitter:title" content="Rendering Engine (OpenGL ES / Vulkan) - MapLibre Android Examples" />
 <meta property="twitter:description" content="MapLibre Android Examples" />
-<meta property="twitter:image" content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/styling/feature-state.png" />
+<meta property="twitter:image" content="https://www.maplibre.org/maplibre-native/android/examples/assets/images/social/data/rendering-engine.png" />
 </head>
   
   
@@ -93,7 +93,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#feature-state" class="md-skip">
+        <a href="#rendering-engine-opengl-es-vulkan" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Feature State
+              Rendering Engine (OpenGL ES / Vulkan)
             
           </span>
         </div>
@@ -844,8 +844,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -856,11 +858,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
@@ -881,7 +883,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
@@ -899,7 +901,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/MVT/" class="md-nav__link">
+      <a href="../MVT/" class="md-nav__link">
         
   
   
@@ -927,7 +929,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data/PMTiles/" class="md-nav__link">
+      <a href="../PMTiles/" class="md-nav__link">
         
   
   
@@ -952,10 +954,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../data/rendering-engine/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rendering Engine (OpenGL ES / Vulkan)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -971,6 +1000,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adding-the-dependency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding the dependency
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#selecting-a-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Selecting a backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-active-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get active backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opengl-es-vs-vulkan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OpenGL ES vs. Vulkan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#see-also" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        See Also
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1102,8 +1206,6 @@
       
   
   
-    
-  
   
   
     
@@ -1116,11 +1218,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
         
           
           <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="">
@@ -1141,7 +1243,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1159,7 +1261,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../animated-image-source/" class="md-nav__link">
+      <a href="../../styling/animated-image-source/" class="md-nav__link">
         
   
   
@@ -1187,7 +1289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../animated-symbol-layer/" class="md-nav__link">
+      <a href="../../styling/animated-symbol-layer/" class="md-nav__link">
         
   
   
@@ -1215,7 +1317,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../building-layer/" class="md-nav__link">
+      <a href="../../styling/building-layer/" class="md-nav__link">
         
   
   
@@ -1243,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../circle-layer/" class="md-nav__link">
+      <a href="../../styling/circle-layer/" class="md-nav__link">
         
   
   
@@ -1271,7 +1373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../custom-sprite/" class="md-nav__link">
+      <a href="../../styling/custom-sprite/" class="md-nav__link">
         
   
   
@@ -1299,7 +1401,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../data-driven-style/" class="md-nav__link">
+      <a href="../../styling/data-driven-style/" class="md-nav__link">
         
   
   
@@ -1327,7 +1429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../distance-expression/" class="md-nav__link">
+      <a href="../../styling/distance-expression/" class="md-nav__link">
         
   
   
@@ -1355,7 +1457,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../draggable-marker/" class="md-nav__link">
+      <a href="../../styling/draggable-marker/" class="md-nav__link">
         
   
   
@@ -1380,37 +1482,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Feature State
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../styling/feature-state/" class="md-nav__link">
         
   
   
@@ -1426,70 +1501,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#load-us-states-from-a-remote-geojson-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Load US states from a remote GeoJSON source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#style-layers-with-feature-state-expressions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Style layers with feature-state expressions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#toggle-selection-on-tap" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Toggle selection on tap
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Notes
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1502,7 +1513,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../live-realtime-data/" class="md-nav__link">
+      <a href="../../styling/live-realtime-data/" class="md-nav__link">
         
   
   
@@ -1547,7 +1558,7 @@
 
 
   
-    <a href="https://github.com/maplibre/maplibre-native/edit/main/platform/android/docs/styling/feature-state.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/maplibre/maplibre-native/edit/main/platform/android/docs/data/rendering-engine.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1555,105 +1566,97 @@
   
 
 
-<h1 id="feature-state">Feature State</h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>You can find the full source code of this example in <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/feature/FeatureStateActivity.kt"><code>FeatureStateActivity.kt</code></a> of the MapLibreAndroidTestApp.</p>
-</div>
-<p>This example shows how to use <a href="https://maplibre.org/maplibre-style-spec/expressions/#feature-state"><code>feature-state</code></a> for interactive styling on Android.</p>
-<p>Feature state lets you attach runtime JSON values to individual features, then read those values back inside style expressions. This is useful for interaction-driven UI such as selection, highlighting, or temporary analysis state.</p>
-<h2 id="load-us-states-from-a-remote-geojson-source">Load US states from a remote GeoJSON source</h2>
-<p>The example loads the same US states GeoJSON used by the GLFW and iOS demos:</p>
-<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">addStatesLayer</span><span class="p">(</span><span class="n">style</span><span class="p">:</span><span class="w"> </span><span class="n">Style</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">source</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GeoJsonSource</span><span class="p">(</span><span class="n">STATES_SOURCE_ID</span><span class="p">,</span><span class="w"> </span><span class="n">URI</span><span class="p">(</span><span class="n">STATES_URL</span><span class="p">))</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">style</span><span class="p">.</span><span class="na">addSource</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">statesSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">source</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">selectedFill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Color</span><span class="p">.</span><span class="na">parseColor</span><span class="p">(</span><span class="s">&quot;#d94d41&quot;</span><span class="p">)</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">defaultFill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Color</span><span class="p">.</span><span class="na">parseColor</span><span class="p">(</span><span class="s">&quot;#2f7de1&quot;</span><span class="p">)</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">selectedBorder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Color</span><span class="p">.</span><span class="na">parseColor</span><span class="p">(</span><span class="s">&quot;#8f241f&quot;</span><span class="p">)</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">defaultBorder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Color</span><span class="p">.</span><span class="na">parseColor</span><span class="p">(</span><span class="s">&quot;#2f7de1&quot;</span><span class="p">)</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="n">FillLayer</span><span class="p">(</span><span class="n">FILL_LAYER_ID</span><span class="p">,</span><span class="w"> </span><span class="n">STATES_SOURCE_ID</span><span class="p">).</span><span class="na">withProperties</span><span class="p">(</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">            </span><span class="n">fillColor</span><span class="p">(</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                </span><span class="n">switchCase</span><span class="p">(</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">                    </span><span class="n">toBool</span><span class="p">(</span><span class="n">featureState</span><span class="p">(</span><span class="s">&quot;selected&quot;</span><span class="p">)),</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">                    </span><span class="n">color</span><span class="p">(</span><span class="n">selectedFill</span><span class="p">),</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">                    </span><span class="n">color</span><span class="p">(</span><span class="n">defaultFill</span><span class="p">)</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">                </span><span class="p">)</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">            </span><span class="p">),</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">            </span><span class="n">fillOpacity</span><span class="p">(</span>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">                </span><span class="n">switchCase</span><span class="p">(</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">                    </span><span class="n">toBool</span><span class="p">(</span><span class="n">featureState</span><span class="p">(</span><span class="s">&quot;selected&quot;</span><span class="p">)),</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">                    </span><span class="n">literal</span><span class="p">(</span><span class="m">0.7f</span><span class="p">),</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">                    </span><span class="n">literal</span><span class="p">(</span><span class="m">0.5f</span><span class="p">)</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">                </span><span class="p">)</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">            </span><span class="p">)</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">        </span><span class="p">)</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="p">)</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">        </span><span class="n">LineLayer</span><span class="p">(</span><span class="n">LINE_LAYER_ID</span><span class="p">,</span><span class="w"> </span><span class="n">STATES_SOURCE_ID</span><span class="p">).</span><span class="na">withProperties</span><span class="p">(</span>
-</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">            </span><span class="n">lineColor</span><span class="p">(</span>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">                </span><span class="n">switchCase</span><span class="p">(</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">                    </span><span class="n">toBool</span><span class="p">(</span><span class="n">featureState</span><span class="p">(</span><span class="s">&quot;selected&quot;</span><span class="p">)),</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">                    </span><span class="n">color</span><span class="p">(</span><span class="n">selectedBorder</span><span class="p">),</span>
-</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">                    </span><span class="n">color</span><span class="p">(</span><span class="n">defaultBorder</span><span class="p">)</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">                </span><span class="p">)</span>
-</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">            </span><span class="p">),</span>
-</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">            </span><span class="n">lineWidth</span><span class="p">(</span>
-</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">                </span><span class="n">switchCase</span><span class="p">(</span>
-</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">                    </span><span class="n">toBool</span><span class="p">(</span><span class="n">featureState</span><span class="p">(</span><span class="s">&quot;selected&quot;</span><span class="p">)),</span>
-</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">                    </span><span class="n">literal</span><span class="p">(</span><span class="m">2.0f</span><span class="p">),</span>
-</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">                    </span><span class="n">literal</span><span class="p">(</span><span class="m">1.0f</span><span class="p">)</span>
-</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">                </span><span class="p">)</span>
-</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">            </span><span class="p">)</span>
-</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">        </span><span class="p">)</span>
-</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a><span class="w">    </span><span class="p">)</span>
-</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="p">}</span>
+<h1 id="rendering-engine-opengl-es-vulkan">Rendering Engine (OpenGL ES / Vulkan)</h1>
+<p>MapLibre Android is published as several artifacts on Maven Central, each built with a different rendering backend:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Backend</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>org.maplibre.gl:android-sdk</code></td>
+<td>Vulkan (the current default)</td>
+</tr>
+<tr>
+<td><code>org.maplibre.gl:android-sdk-opengl</code></td>
+<td>OpenGL ES</td>
+</tr>
+<tr>
+<td><code>org.maplibre.gl:android-sdk-vulkan</code></td>
+<td>Vulkan</td>
+</tr>
+<tr>
+<td><code>org.maplibre.gl:android-sdk-vulkan-opengl</code></td>
+<td>Both, selected at runtime</td>
+</tr>
+</tbody>
+</table>
+<p>Most apps should use the default configuration: <code>org.maplibre.gl:android-sdk</code></p>
+<p>If you'd like to use Vulkan but still want to have the OpenGL fallback option, then use should use <code>org.maplibre.gl:android-sdk-vulkan-opengl</code> artifact. It packs both backends into a single AAR and picks between them at runtime rather than at build time.</p>
+<p>PS: Since <code>org.maplibre.gl:android-sdk-vulkan-opengl</code> artifact carries multiple native libraries, it's larger than a single-backend build by the size of the second library which is ~10 MB.</p>
+<h2 id="adding-the-dependency">Adding the dependency</h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>dependencies {
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    implementation &#39;org.maplibre.gl:android-sdk-vulkan-opengl:&lt;version&gt;&#39;
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>}
 </span></code></pre></div>
-<h2 id="style-layers-with-feature-state-expressions">Style layers with feature-state expressions</h2>
-<p>The fill color/opacity and border color/width respond to a <code>selected</code> boolean stored in feature state:</p>
-<ul>
-<li><strong>Selected</strong> — red fill, higher opacity, thicker red border</li>
-<li><strong>Default</strong> — blue fill, semi-transparent, thin blue border</li>
-</ul>
-<h2 id="toggle-selection-on-tap">Toggle selection on tap</h2>
-<p>Tapping a state toggles its <code>selected</code> feature-state key and shows a toast:</p>
-<div class="language-kotlin highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">fun</span><span class="w"> </span><span class="nf">handleMapClick</span><span class="p">(</span><span class="n">point</span><span class="p">:</span><span class="w"> </span><span class="n">LatLng</span><span class="p">):</span><span class="w"> </span><span class="kt">Boolean</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">screenPoint</span><span class="p">:</span><span class="w"> </span><span class="n">PointF</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">maplibreMap</span><span class="p">.</span><span class="na">projection</span><span class="p">.</span><span class="na">toScreenLocation</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">features</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">maplibreMap</span><span class="p">.</span><span class="na">queryRenderedFeatures</span><span class="p">(</span><span class="n">screenPoint</span><span class="p">,</span><span class="w"> </span><span class="n">FILL_LAYER_ID</span><span class="p">)</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">feature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">features</span><span class="p">.</span><span class="na">firstOrNull</span><span class="p">()</span><span class="w"> </span><span class="o">?:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">featureId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">feature</span><span class="p">.</span><span class="na">id</span><span class="p">()</span><span class="w"> </span><span class="o">?:</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span>
+<p>Replace <code>&lt;version&gt;</code> with the <a href="https://github.com/maplibre/maplibre-native/releases?q=android&amp;expanded=true">latest MapLibre Android version</a>.</p>
+<h2 id="selecting-a-backend">Selecting a backend</h2>
+<p>Pass a <code>RenderingEngine.Type</code> to <code>MapLibre.getInstance()</code>:</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Explicit selection</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">MapLibre</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">apiKey</span><span class="p">,</span><span class="w"> </span><span class="n">tileServer</span><span class="p">,</span><span class="w"> </span><span class="n">RenderingEngine</span><span class="p">.</span><span class="na">Type</span><span class="p">.</span><span class="na">VULKAN</span><span class="p">);</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// Auto-detect</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">MapLibre</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">apiKey</span><span class="p">,</span><span class="w"> </span><span class="n">tileServer</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span>
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">currentState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statesSource</span><span class="p">.</span><span class="na">getFeatureState</span><span class="p">(</span><span class="n">featureId</span><span class="p">)</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">isSelected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">currentState</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="o">?.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;selected&quot;</span><span class="p">)</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="o">?.</span><span class="na">takeUnless</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">it</span><span class="p">.</span><span class="na">isJsonNull</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="o">?.</span><span class="na">asBoolean</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">        </span><span class="o">?:</span><span class="w"> </span><span class="kc">false</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">nextState</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">JsonObject</span><span class="p">().</span><span class="na">apply</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">addProperty</span><span class="p">(</span><span class="s">&quot;selected&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">isSelected</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="n">statesSource</span><span class="p">.</span><span class="na">setFeatureState</span><span class="p">(</span><span class="n">featureId</span><span class="p">,</span><span class="w"> </span><span class="n">nextState</span><span class="p">)</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="nv">stateName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">feature</span><span class="p">.</span><span class="na">getStringProperty</span><span class="p">(</span><span class="s">&quot;STATE_NAME&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">?:</span><span class="w"> </span><span class="s">&quot;Unknown&quot;</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="n">Toast</span><span class="p">.</span><span class="na">makeText</span><span class="p">(</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">        </span><span class="k">this</span><span class="p">,</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">        </span><span class="s">&quot;</span><span class="si">$</span><span class="n">stateName</span><span class="s"> </span><span class="si">${</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">isSelected</span><span class="p">)</span><span class="w"> </span><span class="s">&quot;</span><span class="n">selected</span><span class="s">&quot;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s">&quot;</span><span class="n">deselected</span><span class="s">&quot;</span><span class="si">}</span><span class="s">&quot;</span><span class="p">,</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">        </span><span class="n">Toast</span><span class="p">.</span><span class="na">LENGTH_SHORT</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1">// Auto-detect</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">MapLibre</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">apiKey</span><span class="p">,</span><span class="w"> </span><span class="n">tileServer</span><span class="p">);</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1">// Auto-detect</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">MapLibre</span><span class="p">.</span><span class="na">getInstance</span><span class="p">(</span><span class="n">context</span><span class="p">);</span>
 </span></code></pre></div>
-<h2 id="notes">Notes</h2>
+<p>Auto-detection is enabled by default. Every <code>MapLibre.getInstance()</code> overload that does not take a <code>RenderingEngine.Type</code> automatically detects backend.</p>
+<p>Auto-detection selects Vulkan when the device runs Android 7.0 (API 24) or later and reports Vulkan 1.0 hardware support through <code>PackageManager.FEATURE_VULKAN_HARDWARE_VERSION</code> feature. Everything else gets OpenGL ES.</p>
+<p>PS: <code>RenderingEngine</code> ships in every artifact. If you try to set unsupported <code>RenderingEngine</code> backend in single-backend build, then <code>MapLibre.getInstance()</code> throws <code>UnsupportedOperationException</code> exception.</p>
+<h2 id="get-active-backend">Get active backend</h2>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Active backend</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">RenderingEngine</span><span class="p">.</span><span class="na">Type</span><span class="w"> </span><span class="n">active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RenderingEngine</span><span class="p">.</span><span class="na">getCurrentType</span><span class="p">();</span>
+</span></code></pre></div>
+<p><code>RenderingEngine.getCurrentType()</code> reports the active backend once <code>MapLibre.getInstance()</code> has resolved it.</p>
+<p>The first <code>MapLibre.getInstance()</code> call loads the native library for the selected backend, then the backend is fixed for the lifetime of the process. Any subsequent <code>MapLibre.getInstance()</code> calls with a different <code>RenderingEngine.Type</code> will be ignored. The process restart is required to apply a different rendering backend.</p>
+<h2 id="opengl-es-vs-vulkan">OpenGL ES vs. Vulkan</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>OpenGL ES</th>
+<th>Vulkan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Device compatibility</td>
+<td>Any device</td>
+<td>Vulkan 1.0 hardware, Android 7.0 (API 24)+</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Baseline</td>
+<td>Better on modern devices</td>
+</tr>
+<tr>
+<td>Maturity</td>
+<td>Longest track record</td>
+<td>Newer, some open issues remain</td>
+</tr>
+</tbody>
+</table>
+<h2 id="see-also">See Also</h2>
 <ul>
-<li>Use <code>GeoJsonSource.setFeatureState()</code> or <code>VectorSource.setFeatureState()</code> to merge new keys into a feature's state.</li>
-<li>Use <code>getFeatureState()</code> on the source to inspect the current state for one feature.</li>
-<li>Use <code>removeFeatureState()</code> or <code>resetFeatureStates()</code> on the source to clear state.</li>
-<li>For <code>VectorSource</code>, all feature-state methods require a <code>sourceLayerId</code> parameter.</li>
-<li>Feature-state expressions update paint properties, including symbol paint properties such as <code>icon-color</code>, <code>icon-opacity</code>, <code>text-color</code>, and <code>text-opacity</code>.</li>
-<li>Feature-state expressions are not supported in layout properties such as <code>icon-image</code> or <code>text-field</code>.</li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/">MapLibre Android API Documentation</a></li>
+<li><a href="https://maplibre.org/maplibre-native/docs/book/platforms/android/android-rendering-backends.html">Rendering Backends (developer docs)</a></li>
 </ul>
 
 
