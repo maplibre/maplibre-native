@@ -53,23 +53,7 @@ public final class MapLibre {
   @UiThread
   @NonNull
   public static synchronized MapLibre getInstance(@NonNull Context context) {
-    ThreadUtils.init(context);
-    ThreadUtils.checkThread(TAG);
-    if (INSTANCE == null) {
-      Context appContext = context.getApplicationContext();
-      FileSource.initializeFileDirsPaths(appContext);
-      INSTANCE = new MapLibre(appContext, null);
-      ConnectivityReceiver.instance(appContext);
-    }
-
-    TileServerOptions tileServerOptions = TileServerOptions.get(WellKnownTileServer.MapLibre);
-    INSTANCE.tileServerOptions = tileServerOptions;
-    INSTANCE.apiKey = null;
-    FileSource fileSource = FileSource.getInstance(context);
-    fileSource.setTileServerOptions(tileServerOptions);
-    fileSource.setApiKey(null);
-
-    return INSTANCE;
+    return getInstance(context, null, WellKnownTileServer.MapLibre);
   }
 
   /**
@@ -89,12 +73,42 @@ public final class MapLibre {
   @UiThread
   @NonNull
   public static synchronized MapLibre getInstance(@NonNull Context context, @Nullable String apiKey,
-                                                  WellKnownTileServer tileServer) {
+                                                  @NonNull WellKnownTileServer tileServer) {
+    return getInstance(context, apiKey, tileServer, null);
+  }
+
+  /**
+   * Get an instance of MapLibre, explicitly picking the rendering engine to use.
+   * <p>
+   * This class manages the API key, application context, and connectivity state.
+   * </p>
+   *
+   * @param context Android context which holds or is an application context
+   * @param apiKey api key
+   * @param tileServer the tile server whose predefined configuration will be used to
+   *                   bootstrap the SDK. The predefined configuration includes
+   *                   rules for converting resource URLs between normal and canonical forms
+   *                   and set of predefined styles available on the server.
+   * @param type the rendering engine to use; ignored if MapLibre has already been
+   *             initialized in this process. If null, the default rendering engine will be used.
+   * @return the single instance of MapLibre
+   * @throws UnsupportedOperationException if {@code type} isn't supported by this
+   *     build of the SDK (single-backend flavors only support their compiled-in backend).
+   */
+  @UiThread
+  @NonNull
+  public static synchronized MapLibre getInstance(@NonNull Context context, @Nullable String apiKey,
+                                                  @NonNull WellKnownTileServer tileServer,
+                                                  @Nullable RenderingEngine.Type type) {
     ThreadUtils.init(context);
     ThreadUtils.checkThread(TAG);
     if (INSTANCE == null) {
       Timber.plant();
       Context appContext = context.getApplicationContext();
+      if (type == null) {
+        type = RenderingEngine.getDefaultRenderingEngine(appContext);
+      }
+      RenderingEngine.setCurrentType(type);
       FileSource.initializeFileDirsPaths(appContext);
       INSTANCE = new MapLibre(appContext, apiKey);
       ConnectivityReceiver.instance(appContext);
