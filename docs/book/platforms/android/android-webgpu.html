@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-23a6bdae.js";
+            window.path_to_searchindex_js = "../../searchindex-07167a6c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-24c1b73c.js"></script>
@@ -213,7 +213,7 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="webgpu-on-android"><a class="header" href="#webgpu-on-android">WebGPU on Android</a></h1>
-<p>Two WebGPU implementations are supported: <strong>Dawn</strong> (Google, C++) and <strong>wgpu-native</strong> (Rust). Both use Vulkan internally on Android. The Gradle product flavors are <code>webgpuDawn</code> and <code>webgpuWgpu</code>, sharing the <code>src/webgpu/</code> Java source set.</p>
+<p>Two WebGPU implementations are supported: <strong>Dawn</strong> (Google, C++) and <strong>wgpu-native</strong> (Rust). Both use Vulkan internally on Android. The Gradle product flavors are <code>webgpuDawn</code> and <code>webgpuWgpu</code>, sharing the <code>src/vulkan/</code> and <code>src/sharedRenderer/vulkan/</code> Java source sets.</p>
 <h2 id="building-with-dawn"><a class="header" href="#building-with-dawn">Building with Dawn</a></h2>
 <p>Dawn is fetched and built from source via CMake <code>FetchContent</code>, so no extra setup is needed. First build is slow (~20 min) because of Dawn’s dependencies (abseil, SPIRV-Tools, Tint, etc.).</p>
 <p><strong>Android Studio:</strong> Open the <strong>Build Variants</strong> panel (View &gt; Tool Windows &gt; Build Variants) and select <code>webgpuDawnDebug</code> for both <code>:MapLibreAndroid</code> and <code>:MapLibreAndroidTestApp</code>, then run normally.</p>

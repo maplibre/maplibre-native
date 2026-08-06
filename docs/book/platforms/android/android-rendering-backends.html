@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-23a6bdae.js";
+            window.path_to_searchindex_js = "../../searchindex-07167a6c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-24c1b73c.js"></script>
@@ -218,16 +218,18 @@
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th>Flavor</th><th>Backend</th><th>Status</th><th>Notes</th></tr>
+<tr><th>Flavor</th><th>Backend</th><th>Status</th><th>Maven Central artifact</th><th>Notes</th></tr>
 </thead>
 <tbody>
-<tr><td><code>opengl</code></td><td>OpenGL ES</td><td>Stable</td><td>Default, widest device compatibility</td></tr>
-<tr><td><code>vulkan</code></td><td>Vulkan</td><td>Stable</td><td>Better performance on modern devices</td></tr>
-<tr><td><code>webgpuDawn</code></td><td>WebGPU (Dawn)</td><td>Experimental</td><td>Uses Vulkan internally, see <a href="./android-webgpu.html">WebGPU</a></td></tr>
-<tr><td><code>webgpuWgpu</code></td><td>WebGPU (wgpu-native)</td><td>Experimental</td><td>Uses Vulkan internally, arm64-v8a only, see <a href="./android-webgpu.html">WebGPU</a></td></tr>
+<tr><td><code>opengl</code></td><td>OpenGL ES</td><td>Stable</td><td><code>org.maplibre.gl:android-sdk-opengl</code></td><td>Default, widest device compatibility</td></tr>
+<tr><td><code>vulkan</code></td><td>Vulkan</td><td>Stable</td><td><code>org.maplibre.gl:android-sdk-vulkan</code></td><td>Better performance on modern devices</td></tr>
+<tr><td><code>webgpuDawn</code></td><td>WebGPU (Dawn)</td><td>Experimental</td><td>not published</td><td>Uses Vulkan internally, see <a href="./android-webgpu.html">WebGPU</a></td></tr>
+<tr><td><code>webgpuWgpu</code></td><td>WebGPU (wgpu-native)</td><td>Experimental</td><td>not published</td><td>Uses Vulkan internally, arm64-v8a only, see <a href="./android-webgpu.html">WebGPU</a></td></tr>
+<tr><td><code>multiBackend</code></td><td>OpenGL ES + Vulkan</td><td>Experimental</td><td><code>org.maplibre.gl:android-sdk-vulkan-opengl</code></td><td>Both backends in one AAR, chosen at runtime</td></tr>
 </tbody>
 </table>
 </div>
+<p><code>org.maplibre.gl:android-sdk</code> is also published and currently maps to the <code>vulkan</code> flavor’s release build. <code>-debug</code> suffixed artifact (e.g. <code>android-sdk-vulkan-debug</code>) is published for each flavor as well.</p>
 <h2 id="building-with-a-specific-backend"><a class="header" href="#building-with-a-specific-backend">Building with a specific backend</a></h2>
 <p>The flavor name is part of the Gradle task. For the test app:</p>
 <pre><code class="language-bash">cd platform/android
@@ -243,6 +245,9 @@
 
 # WebGPU (wgpu-native)
 ./gradlew :MapLibreAndroidTestApp:installWebgpuWgpuDebug
+
+# Both OpenGL ES and Vulkan, backend chosen at runtime
+./gradlew :MapLibreAndroidTestApp:installMultiBackendDebug
 </code></pre>
 <p>The same pattern applies to the library module (<code>MapLibreAndroid</code>):</p>
 <pre><code class="language-bash">./gradlew :MapLibreAndroid:assembleVulkanRelease
@@ -256,8 +261,10 @@
 <li><code>vulkan</code>: <code>-DMLN_WITH_VULKAN=ON</code></li>
 <li><code>webgpuDawn</code>: <code>-DMLN_WITH_WEBGPU=ON</code>, <code>-DMLN_WEBGPU_IMPL_DAWN=ON</code></li>
 <li><code>webgpuWgpu</code>: <code>-DMLN_WITH_WEBGPU=ON</code>, <code>-DMLN_WEBGPU_IMPL_WGPU=ON</code></li>
+<li><code>multiBackend</code>: <code>-DMLN_ANDROID_MULTI_BACKEND=ON</code></li>
 </ul>
-<p>Only one backend is active per build. Renderer-specific Java code lives in <code>src/opengl/</code>, <code>src/vulkan/</code>, or <code>src/webgpu/</code> source sets.</p>
+<p>For <code>opengl</code>, <code>vulkan</code>, and the WebGPU flavors, only one backend is compiled in and it’s fixed for the lifetime of the app. <code>multiBackend</code> is the exception - it ships both the OpenGL ES and Vulkan native libraries and picks one at runtime.</p>
+<p>Renderer-specific Java code is split between flavor-specific source sets (<code>src/opengl/</code>, <code>src/vulkan/</code>, <code>src/multiBackend/</code>) and shared per-backend code in <code>src/sharedRenderer/opengl/</code> and <code>src/sharedRenderer/vulkan/</code>.</p>
 
                     </main>
 
