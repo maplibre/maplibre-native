@@ -115,6 +115,15 @@ android {
                 }
             }
         }
+        create("multiBackend") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_ANDROID_MULTI_BACKEND=ON")
+                    targets("maplibre-opengl", "maplibre-vulkan")
+                }
+            }
+        }
     }
 
     buildFeatures {
