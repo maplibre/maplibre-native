@@ -107,10 +107,10 @@ void RenderPass::popDebugGroup() {
     }
 }
 
-void RenderPass::addDebugSignpost(const char* name) {
+void RenderPass::addDebugSignpost(const char* theName) {
     assert(encoder);
     if (encoder) {
-        encoder->insertDebugSignpost(toNSString(name));
+        encoder->insertDebugSignpost(toNSString(theName));
     }
 }
 
