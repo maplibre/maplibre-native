@@ -40,6 +40,26 @@ double _normalizeAngle(double angle, double anchorAngle) {
 
     return angle;
 }
+
+// Keep the viewport-center path straight while padding changes.
+struct FocalPath {
+    ScreenCoordinate anchor;
+    Point<double> start;
+    Point<double> end;
+    Point<double> requestedCenter;
+};
+
+FocalPath buildFocalPath(const TransformState& state,
+                         const ScreenCoordinate& anchor,
+                         const LatLng& startFocal,
+                         const LatLng& endFocal,
+                         const LatLng& finalCenter) {
+    const double scale = state.getScale();
+    return {anchor,
+            Projection::project(startFocal, scale),
+            Projection::project(endFocal, scale),
+            Projection::project(finalCenter, scale)};
+}
 } // namespace
 
 Transform::Transform(TransformObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
@@ -108,9 +128,11 @@ void Transform::jumpTo(const CameraOptions& camera) {
  */
 void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animation) {
     CameraOptions camera = inputCamera;
+    // Check whether the map is unbounded (the default)
+    const bool isUnbounded = state.getLatLngBounds() == LatLngBounds();
 
     Duration duration = animation.duration.value_or(Duration::zero());
-    if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
+    if (isUnbounded && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
         flyTo(camera, animation, true);
         return;
@@ -122,7 +144,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     LatLng startLatLng = getLatLng(LatLng::Unwrapped);
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
-    const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
+    const LatLng& latLng = isUnbounded ? unwrappedLatLng.wrapped() : unwrappedLatLng;
 
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
@@ -137,7 +159,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
         return;
     }
 
-    if (state.getLatLngBounds() == LatLngBounds()) {
+    if (isUnbounded) {
         if (isGestureInProgress()) {
             // If gesture in progress, we transfer the wrap rounds from the end
             // longitude into start, so the "scroll effect" of rounding the
@@ -151,9 +173,6 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
         }
     }
     const double startCenterAlt = state.getCenterAltitude();
-
-    const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
-    const Point<double> endPoint = Projection::project(latLng, state.getScale());
 
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
@@ -175,21 +194,48 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
                             .withRotatingInProgress(bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
+    // Precompute the focal endpoints from the start and end camera states.
+    const ScreenCoordinate anchor{0.5 * state.getSize().width, 0.5 * state.getSize().height};
+    const double finalPitch = std::min(getMaxPitchForEdgeInsets(padding), pitch);
+    TransformState finalState(state);
+    finalState.setLatLngZoom(latLng, zoom);
+    finalState.setEdgeInsets(padding);
+    finalState.setBearing(bearing);
+    finalState.setPitch(finalPitch);
+    finalState.setRoll(roll);
+    finalState.setFieldOfView(fov);
+    finalState.setCenterAltitude(centerAlt);
+    LatLng endFocal = finalState.screenCoordinateToLatLng(anchor, LatLng::Unwrapped);
+
+    LatLng startFocal = state.screenCoordinateToLatLng(anchor, LatLng::Unwrapped);
+    if (isUnbounded) {
+        // Match the center path's antimeridian handling.
+        if (isGestureInProgress()) {
+            const double wrap = unwrappedLatLng.longitude() - latLng.longitude();
+            startFocal = LatLng(startFocal.latitude(), startFocal.longitude() - wrap);
+        } else {
+            startFocal.unwrapForShortestPath(endFocal);
+        }
+    }
+
+    const FocalPath path = buildFocalPath(state, anchor, startFocal, endFocal, latLng);
+    const double startScale = state.zoomScale(startZoom);
+
     startTransition(
         camera,
         animation,
         [=, this](double t) {
-            Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
-            LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
-            double frameZoom = util::interpolate(startZoom, zoom, t);
-            state.setLatLngZoom(frameLatLng, frameZoom);
+            const double frameZoom = util::interpolate(startZoom, zoom, t);
+            const LatLng frameFocal = Projection::unproject(util::interpolate(path.start, path.end, t), startScale);
+            const bool finalFrame = t == 1.0;
+            state.setLatLngZoom(finalFrame ? Projection::unproject(path.requestedCenter, startScale) : frameFocal,
+                                frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
             }
             if (padding != startEdgeInsets) {
                 // Interpolate edge insets
-                EdgeInsets edgeInsets;
                 state.setEdgeInsets({util::interpolate(startEdgeInsets.top(), padding.top(), t),
                                      util::interpolate(startEdgeInsets.left(), padding.left(), t),
                                      util::interpolate(startEdgeInsets.bottom(), padding.bottom(), t),
@@ -204,6 +250,9 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             }
             if (fov != startFov) {
                 state.setFieldOfView(util::interpolate(startFov, fov, t));
+            }
+            if (!finalFrame) {
+                state.moveLatLng(frameFocal, path.anchor);
             }
         },
         duration);
@@ -241,13 +290,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
         return;
     }
 
-    // Determine endpoints.
-    LatLng startLatLng = getLatLng(LatLng::Unwrapped).wrapped();
-    startLatLng.unwrapForShortestPath(latLng);
     const double startCenterAlt = state.getCenterAltitude();
-
-    const Point<double> startPoint = Projection::project(startLatLng, state.getScale());
-    const Point<double> endPoint = Projection::project(latLng, state.getScale());
 
     // Constrain camera options.
     zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
@@ -263,6 +306,22 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     const double startRoll = state.getRoll();
     const double startFov = state.getFieldOfView();
 
+    // Precompute the focal endpoints from the start and end camera states.
+    const ScreenCoordinate anchor{0.5 * state.getSize().width, 0.5 * state.getSize().height};
+    TransformState finalState(state);
+    finalState.setLatLngZoom(latLng, zoom);
+    finalState.setEdgeInsets(padding);
+    finalState.setBearing(bearing);
+    finalState.setPitch(pitch);
+    finalState.setRoll(roll);
+    finalState.setFieldOfView(fov);
+    finalState.setCenterAltitude(centerAlt);
+    LatLng endFocal = finalState.screenCoordinateToLatLng(anchor, LatLng::Unwrapped);
+    LatLng startFocal = state.screenCoordinateToLatLng(anchor, LatLng::Wrapped);
+    startFocal.unwrapForShortestPath(endFocal);
+
+    const FocalPath path = buildFocalPath(state, anchor, startFocal, endFocal, latLng);
+
     /// w₀: Initial visible span, measured in pixels at the initial scale.
     /// Known henceforth as a <i>screenful</i>.
 
@@ -271,9 +330,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     /// w₁: Final visible span, measured in pixels with respect to the initial
     /// scale.
     double w1 = w0 / state.zoomScale(zoom - startZoom);
-    /// Length of the flight path as projected onto the ground plane, measured
-    /// in pixels from the world image origin at the initial scale.
-    double u1 = ::hypot((endPoint - startPoint).x, (endPoint - startPoint).y);
+    /// Length of the anchored flight path in pixels at the initial scale.
+    double u1 = ::hypot((path.end - path.start).x, (path.end - path.start).y);
 
     /** ρ: The relative amount of zooming that takes place along the flight
         path. A high value maximizes zooming for an exaggerated animation, while
@@ -362,8 +420,6 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             double s = k * S;
             double us = k == 1.0 ? 1.0 : u(s);
 
-            // Calculate the current point and zoom level along the flight path.
-            Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
             double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
                                                        : startZoom + state.scaleZoom(1 / w(s));
 
@@ -373,8 +429,10 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             }
 
             // Convert to geographic coordinates and set the new viewpoint.
-            LatLng frameLatLng = Projection::unproject(framePoint, startScale);
-            state.setLatLngZoom(frameLatLng, frameZoom);
+            const LatLng frameFocal = Projection::unproject(util::interpolate(path.start, path.end, us), startScale);
+            const bool finalFrame = k == 1.0;
+            state.setLatLngZoom(finalFrame ? Projection::unproject(path.requestedCenter, startScale) : frameFocal,
+                                frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
@@ -392,10 +450,13 @@ void Transform::flyTo(const CameraOptions& inputCamera,
                 state.setPitch(util::interpolate(startPitch, pitch, k));
             }
             if (roll != startRoll) {
-                state.setPitch(util::interpolate(startRoll, roll, k));
+                state.setRoll(util::interpolate(startRoll, roll, k));
             }
             if (fov != startFov) {
                 state.setFieldOfView(util::interpolate(startFov, fov, k));
+            }
+            if (!finalFrame) {
+                state.moveLatLng(frameFocal, path.anchor);
             }
         },
         duration);
