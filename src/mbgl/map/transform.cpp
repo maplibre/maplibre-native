@@ -230,7 +230,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             const bool finalFrame = t == 1.0;
             state.setLatLngZoom(finalFrame ? Projection::unproject(path.requestedCenter, startScale) : frameFocal,
                                 frameZoom);
-            state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
+            const double frameCenterAlt = util::interpolate(startCenterAlt, centerAlt, t);
+            state.setCenterAltitude(frameCenterAlt);
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
             }
@@ -253,6 +254,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
             }
             if (!finalFrame) {
                 state.moveLatLng(frameFocal, path.anchor);
+                state.setCenterAltitude(frameCenterAlt);
             }
         },
         duration);
@@ -433,7 +435,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             const bool finalFrame = k == 1.0;
             state.setLatLngZoom(finalFrame ? Projection::unproject(path.requestedCenter, startScale) : frameFocal,
                                 frameZoom);
-            state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
+            const double frameCenterAlt = util::interpolate(startCenterAlt, centerAlt, us);
+            state.setCenterAltitude(frameCenterAlt);
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
             }
@@ -457,6 +460,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             }
             if (!finalFrame) {
                 state.moveLatLng(frameFocal, path.anchor);
+                state.setCenterAltitude(frameCenterAlt);
             }
         },
         duration);

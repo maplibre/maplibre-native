@@ -354,14 +354,15 @@ TEST(Transform, Padding) {
 TEST(Transform, AsymmetricPaddingKeepsViewportCenterPathStraight) {
     const ScreenCoordinate viewportCenter{500.0, 500.0};
     const EdgeInsets padding{0.0, 0.0, 400.0, 0.0};
-    const CameraOptions target = CameraOptions().withCenter(LatLng{-10.0, -80.0}).withZoom(12.0).withPadding(padding);
+    const CameraOptions target =
+        CameraOptions().withCenter(LatLng{-10.0, -80.0}).withCenterAltitude(1000.0).withZoom(12.0).withPadding(padding);
 
     for (const bool fly : {false, true}) {
         SCOPED_TRACE(fly ? "flyTo" : "easeTo");
 
         Transform transform;
         transform.resize({1000, 1000});
-        transform.jumpTo(CameraOptions().withCenter(LatLng{10.0, -100.0}).withZoom(12.0));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10.0, -100.0}).withCenterAltitude(1000.0).withZoom(12.0));
 
         const double scale = transform.getState().getScale();
         const Point<double> start = Projection::project(transform.screenCoordinateToLatLng(viewportCenter), scale);
@@ -383,6 +384,7 @@ TEST(Transform, AsymmetricPaddingKeepsViewportCenterPathStraight) {
             const Point<double> point = Projection::project(transform.screenCoordinateToLatLng(viewportCenter), scale);
             // Perpendicular distance from the start-end line.
             EXPECT_LT(std::abs((point.x - start.x) * dy - (point.y - start.y) * dx) / length, 0.1);
+            EXPECT_NEAR(1000.0, transform.getState().getCenterAltitude(), 1e-8);
         }
 
         transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
