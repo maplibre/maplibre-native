@@ -70,7 +70,6 @@ private:
     void popDebugGroup() override;
 
 private:
-    std::string name;
     gfx::RenderPassDescriptor descriptor;
     mtl::CommandEncoder& commandEncoder;
     MTLCommandBufferPtr commandBuffer;

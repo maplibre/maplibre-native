@@ -21,8 +21,8 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParame
         commandBuffer = buffer_;
     }
     if (paintParameters.renderPass) {
-        const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
-        encoder = renderPass.getMetalEncoder();
+        const mbgl::mtl::RenderPass& metalRenderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+        encoder = metalRenderPass.getMetalEncoder();
     }
 }
 
