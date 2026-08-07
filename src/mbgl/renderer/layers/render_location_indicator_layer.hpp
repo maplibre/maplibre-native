@@ -30,7 +30,7 @@ public:
                 gfx::Context &,
                 const TransformState &,
                 const std::shared_ptr<UpdateParameters> &,
-                const PaintParameters &paintParameters,
+                const PaintParameters &,
                 const RenderTree &,
                 UniqueChangeRequestVec &) override;
 #endif
