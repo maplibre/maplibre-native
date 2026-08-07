@@ -93,10 +93,10 @@ NS::String* toNSString(const char* str) {
 }
 } // namespace
 
-void RenderPass::pushDebugGroup(const char* name) {
+void RenderPass::pushDebugGroup(const char* theName) {
     assert(encoder);
     if (encoder) {
-        encoder->pushDebugGroup(toNSString(name));
+        encoder->pushDebugGroup(toNSString(theName));
     }
 }
 
