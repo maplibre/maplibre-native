@@ -519,7 +519,7 @@ Value LocationIndicatorLayer::serialize() const {
 
 std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
     const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
+    if (it == layerProperties.end()) return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 
     auto property = static_cast<Property>(it->second);
 
@@ -678,7 +678,7 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
         return std::nullopt;
     }
 
-    return Error{"layer doesn't support this property"};
+    return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 }
 
 StyleProperty LocationIndicatorLayer::getProperty(const std::string& name) const {

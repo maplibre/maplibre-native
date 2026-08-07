@@ -231,6 +231,8 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
 }
 
 MLNMapViewWebGPUImpl::~MLNMapViewWebGPUImpl() {
+  context.reset();
+
   if (!impl) return;
 
   if (impl->currentTextureView) {

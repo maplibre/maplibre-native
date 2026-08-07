@@ -32,7 +32,7 @@ const FillExtrusionLayer::Impl& FillExtrusionLayerProperties::layerImpl() const 
 }
 
 expression::Dependency FillExtrusionLayerProperties::getDependencies() const noexcept {
-    return layerImpl().paint.getDependencies();
+    return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
 }
 
 } // namespace style

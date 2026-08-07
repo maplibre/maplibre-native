@@ -13,9 +13,7 @@ Observe frame rendering statistics with ``MLNMapViewDelegate/mapViewDidFinishRen
 <!-- include-example(ObserverExampleRenderingStats) -->
 
 ```swift
-func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered: Bool, renderingStats: MLNRenderingStats) {
-
-    }
+func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
 ```
 
 See also: ``MLNMapViewDelegate/mapViewDidFinishRenderingFrame:fullyRendered:`` and ``MLNMapViewDelegate/mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:``

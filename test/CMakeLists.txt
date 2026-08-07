@@ -58,6 +58,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/expression.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/util.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/expression/utf8_op_helpers.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/filter.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/properties.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/property_expression.test.cpp
