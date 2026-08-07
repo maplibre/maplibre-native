@@ -109,10 +109,10 @@ struct RenderingStats {
     };
 
     struct FeatureInfo {
-        // The bounding box for this feature in NDC coordinates
+        // The bounding box for this feature
         NDCBound ndcBound;
 
-        // The tiles in which this item was rendered
+        // The tiles in which this item was rendered (including overdraw)
         mbgl::unordered_set<OverscaledTileID> tileIDs;
 
         void mergeFrom(const NDCBound& bound, const mbgl::unordered_set<OverscaledTileID>& ids) {

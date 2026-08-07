@@ -1,14 +1,13 @@
 #pragma once
 
-#include <cstdint>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
-
 #include <mbgl/util/identity.hpp>
 
 #include <atomic>
+#include <cstdint>
 
 namespace mbgl {
 

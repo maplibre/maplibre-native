@@ -491,7 +491,7 @@ TEST(ActionJournal, RenderingStats) {
     };
 
     // accumulate frames in the journal
-    for (auto& frameStats : testStats) {
+    for (const auto& frameStats : testStats) {
         std::this_thread::sleep_for(
             std::chrono::milliseconds(test.options.renderingStatsReportInterval() * 1000 / 2 / testStats.size()));
         test.map->getImpl().onDidFinishRenderingFrame(

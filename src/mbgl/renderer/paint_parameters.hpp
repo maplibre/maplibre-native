@@ -12,11 +12,7 @@
 #include <mbgl/util/mat4.hpp>
 
 #include <array>
-#include <functional>
-#include <iterator>
 #include <map>
-#include <set>
-#include <vector>
 
 namespace mbgl {
 
@@ -158,9 +154,7 @@ public:
 
     gfx::ScissorRect scissorRect;
 
-#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     bool captureRenderedFeatures = false;
-#endif // MLN_DRAWABLE_LOCATION_INDICATOR
 };
 
 } // namespace mbgl

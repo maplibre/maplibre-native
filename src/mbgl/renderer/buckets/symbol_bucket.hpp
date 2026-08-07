@@ -209,7 +209,6 @@ public:
     // Reference to placed icon, only applicable for text symbols.
     std::optional<size_t> placedIconIndex;
 
-    // Reference to the feature ID
     std::optional<std::string> featureId;
 };
 

@@ -57,7 +57,7 @@ void multiply(mat4& out, const mat4& a, const mat4& b);
 void transformMat4(vec4& out, const vec4& a, const mat4& m);
 
 // Transform a 4D vector by a 4x4 matrix
-// a * m if m is row-major (C++), m * a if m is column-major (OpenGL).
+// a * m if m is row-major, m * a if m is column-major (OpenGL style).
 inline vec4 transformMat4(const vec4& a, const mat4& m) {
     vec4 result;
     transformMat4(result, a, m);
