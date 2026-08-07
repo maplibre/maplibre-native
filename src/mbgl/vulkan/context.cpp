@@ -776,9 +776,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 
     auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
 
-#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
-    // GPU assisted validation crashes when using a pipeline without descriptors.
-    // Use a compatible layout with the general pipeline when enabled
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
@@ -787,7 +784,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     };
 
     layoutInfo.setSetLayouts(layouts);
-#endif
 
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
         layoutInfo, nullptr, backend.getDispatcher());
