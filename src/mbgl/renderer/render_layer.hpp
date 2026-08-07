@@ -32,6 +32,8 @@ class TransformState;
 class TransitionParameters;
 class UpdateParameters;
 class UploadParameters;
+class FileSource;
+class RendererObserver;
 
 class ChangeRequest;
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
@@ -160,6 +162,9 @@ public:
 
     /// Invoke registered extensions immediately before this layer's group.
     void renderPluginsBefore(PaintParameters&);
+
+    /// Supply runtime services used by plugin callbacks.
+    void updatePluginEnvironment(std::shared_ptr<FileSource>, RendererObserver*);
 
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;

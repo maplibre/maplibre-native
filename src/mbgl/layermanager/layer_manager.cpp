@@ -5,9 +5,13 @@
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/renderer/layers/render_plugin_style_layer.hpp>
+#include <mbgl/plugin/plugin_registry.hpp>
 #include <mbgl/style/layer.hpp>
+#include <mbgl/style/layers/plugin_style_layer.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+
 
 namespace mbgl {
 
@@ -25,6 +29,9 @@ std::unique_ptr<style::Layer> LayerManager::createLayer(const std::string& type,
         }
         return layer;
     } else {
+        if (auto registration = plugin::PluginRegistry::get().findLayerType(type)) {
+            return std::make_unique<style::PluginStyleLayer>(id, std::move(*registration));
+        }
         error.message = "Null factory for type: " + type;
     }
     error.message = "Unsupported layer type! " + error.message;
@@ -51,9 +58,14 @@ std::unique_ptr<Layout> LayerManager::createLayout(const LayoutParameters& param
 }
 
 std::unique_ptr<RenderLayer> LayerManager::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
+    if (impl->isPluginStyleLayer()) {
+        return std::make_unique<RenderPluginStyleLayer>(
+            staticImmutableCast<style::PluginStyleLayer::Impl>(std::move(impl)));
+    }
     LayerFactory* factory = getFactory(impl->getTypeInfo());
-    assert(factory);
-    return factory->createRenderLayer(std::move(impl));
+    if (factory) return factory->createRenderLayer(std::move(impl));
+    assert(false && "No layer factory for registered style layer");
+    return nullptr;
 }
 
 } // namespace mbgl

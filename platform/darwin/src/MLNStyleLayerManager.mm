@@ -88,7 +88,10 @@ MLNStyleLayer* LayerManagerDarwin::createPeer(style::Layer* layer) {
   if (auto* factory = getPeerFactory(layer->getTypeInfo())) {
     return factory->createPeer(layer);
   }
-  return nullptr;
+  // Plugin-defined layer types do not have generated Objective-C subclasses.
+  // Still provide the common layer API so MLNStyle.layers and
+  // -layerWithIdentifier: remain safe and preserve object identity.
+  return [[MLNStyleLayer alloc] initWithRawLayer:layer];
 }
 
 void LayerManagerDarwin::addLayerType(std::unique_ptr<LayerPeerFactory> factory) {

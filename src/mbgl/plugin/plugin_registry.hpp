@@ -34,6 +34,20 @@ struct LayerExtension {
     mln_plugin_context_lost_fn contextLost = nullptr;
 };
 
+struct LayerType {
+    std::string pluginID;
+    std::string pluginVersion;
+    std::string type;
+    uint32_t backendMask = 0;
+    mln_plugin_render_stage renderStage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
+    bool requires3D = false;
+    mln_plugin_create_instance_fn createInstance = nullptr;
+    mln_plugin_destroy_instance_fn destroyInstance = nullptr;
+    mln_plugin_prepare_frame_fn prepareFrame = nullptr;
+    mln_plugin_render_before_layer_fn renderLayer = nullptr;
+    mln_plugin_context_lost_fn contextLost = nullptr;
+};
+
 class PluginRegistry final {
 public:
     static PluginRegistry& get();
@@ -42,6 +56,7 @@ public:
     std::optional<PropertyDefinition> findProperty(const std::string& layerType, const std::string& name) const;
     std::vector<PropertyDefinition> propertiesForLayer(const std::string& layerType) const;
     std::vector<LayerExtension> extensionsForLayer(const std::string& layerType) const;
+    std::optional<LayerType> findLayerType(const std::string& layerType) const;
     bool isRegistered(const std::string& pluginID) const;
     std::vector<std::string> pluginIDs() const;
 
@@ -51,12 +66,14 @@ public:
         std::string version;
         std::vector<PropertyDefinition> properties;
         std::vector<LayerExtension> extensions;
+        std::vector<LayerType> layerTypes;
     };
 
 private:
     mutable std::mutex mutex;
     std::map<std::string, PluginRecord> plugins;
     std::map<std::pair<std::string, std::string>, PropertyDefinition> properties;
+    std::map<std::string, LayerType> layerTypes;
 };
 
 } // namespace plugin

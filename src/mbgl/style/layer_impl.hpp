@@ -46,6 +46,8 @@ public:
     // Returns pointer to the statically allocated layer type info structure.
     virtual const LayerTypeInfo* getTypeInfo() const noexcept = 0;
 
+    virtual bool isPluginStyleLayer() const noexcept { return false; }
+
     // Populates the given \a fontStack with fonts being used by the layer.
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 

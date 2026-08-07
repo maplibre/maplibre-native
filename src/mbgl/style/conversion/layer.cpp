@@ -29,7 +29,9 @@ std::optional<Error> setPaintProperties(Layer& layer, const Convertible& value) 
     if (!isObject(*paintValue)) {
         return {{"paint must be an object"}};
     }
-    return eachMember(*paintValue, [&](const std::string& k, const Convertible& v) { return layer.setProperty(k, v); });
+    return eachMember(*paintValue, [&](const std::string& k, const Convertible& v) {
+        return layer.setProperty(k, v, Layer::PropertyScope::Paint);
+    });
 }
 
 std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operator()(const Convertible& value,
@@ -80,7 +82,9 @@ std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operato
             return std::nullopt;
         }
         auto error_ = eachMember(*layoutValue,
-                                 [&](const std::string& k, const Convertible& v) { return layer->setProperty(k, v); });
+                                 [&](const std::string& k, const Convertible& v) {
+                                     return layer->setProperty(k, v, Layer::PropertyScope::Layout);
+                                 });
         if (error_) {
             error = *error_;
             return std::nullopt;

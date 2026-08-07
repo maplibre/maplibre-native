@@ -2,10 +2,15 @@
 
 #include <mbgl/plugin/plugin_api.h>
 #include <mbgl/plugin/plugin_registry.hpp>
+#include <mbgl/layermanager/layer_manager.hpp>
+#include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer.hpp>
 #include <mbgl/style/rapidjson_conversion.hpp>
+#include <mbgl/style/style_impl.hpp>
+#include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/stub_layer_observer.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 #include <algorithm>
 #include <array>
@@ -58,7 +63,9 @@ struct Descriptor {
                       MLN_PLUGIN_ABI_VERSION_1,
                       MLN_PLUGIN_ABI_VERSION_1,
                       &extension,
-                      1};
+                      1,
+                      nullptr,
+                      0};
     }
 
     const char* propertyName;
@@ -66,6 +73,58 @@ struct Descriptor {
     mln_plugin_value defaultValue{};
     mln_plugin_property_descriptor_v1 property{};
     mln_plugin_layer_extension_v1 extension{};
+    mln_plugin_descriptor_v1 descriptor{};
+};
+
+struct LayerTypeDescriptor {
+    LayerTypeDescriptor() {
+        defaultURI.struct_size = sizeof(defaultURI);
+        defaultURI.type = MLN_PLUGIN_VALUE_STRING;
+        defaultURI.data.string_value = {"", 0};
+        property = {sizeof(property),
+                    cString("test-model-uri"),
+                    MLN_PLUGIN_VALUE_STRING,
+                    MLN_PLUGIN_PROPERTY_LAYOUT,
+                    defaultURI};
+        defaultPosition.struct_size = sizeof(defaultPosition);
+        defaultPosition.type = MLN_PLUGIN_VALUE_FLOAT2;
+        defaultPosition.data.float2_value = {0.0f, 0.0f};
+        positionProperty = {sizeof(positionProperty),
+                            cString("test-model-position"),
+                            MLN_PLUGIN_VALUE_FLOAT2,
+                            MLN_PLUGIN_PROPERTY_LAYOUT,
+                            defaultPosition};
+        properties = {property, positionProperty};
+        layerType = {sizeof(layerType),
+                     cString("test-plugin-layer"),
+                     MLN_PLUGIN_BACKEND_METAL,
+                     MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT,
+                     1,
+                     properties.data(),
+                     properties.size(),
+                     createInstance,
+                     destroyInstance,
+                     callback,
+                     callback,
+                     nullptr};
+        descriptor = {sizeof(descriptor),
+                      MLN_PLUGIN_ABI_VERSION_1,
+                      cString("org.maplibre.test.layer-type"),
+                      cString("1.0.0"),
+                      MLN_PLUGIN_ABI_VERSION_1,
+                      MLN_PLUGIN_ABI_VERSION_1,
+                      nullptr,
+                      0,
+                      &layerType,
+                      1};
+    }
+
+    mln_plugin_value defaultURI{};
+    mln_plugin_value defaultPosition{};
+    mln_plugin_property_descriptor_v1 property{};
+    mln_plugin_property_descriptor_v1 positionProperty{};
+    std::array<mln_plugin_property_descriptor_v1, 2> properties{};
+    mln_plugin_layer_type_v1 layerType{};
     mln_plugin_descriptor_v1 descriptor{};
 };
 
@@ -125,6 +184,69 @@ TEST(PluginRegistry, OrdersExtensionsByPriorityThenID) {
     ASSERT_NE(extensions.end(), earlierIt);
     ASSERT_NE(extensions.end(), laterIt);
     EXPECT_LT(earlierIt, laterIt);
+}
+
+TEST(PluginRegistry, RegistersSourceLessLayerTypeAndScopedProperties) {
+    LayerTypeDescriptor custom;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&custom.descriptor, nullptr, 0));
+    const auto registration = plugin::PluginRegistry::get().findLayerType("test-plugin-layer");
+    ASSERT_TRUE(registration);
+    EXPECT_TRUE(registration->requires3D);
+
+    JSDocument empty;
+    empty.Parse("{}");
+    const JSValue* emptyValue = &empty;
+    conversion::Error error;
+    auto layer = LayerManager::get()->createLayer(
+        "test-plugin-layer", "model", conversion::Convertible(emptyValue), error);
+    ASSERT_TRUE(layer) << error.message;
+    EXPECT_STREQ("test-plugin-layer", layer->getTypeInfo()->type);
+    auto renderLayer = LayerManager::get()->createRenderLayer(layer->baseImpl);
+    ASSERT_TRUE(renderLayer);
+    EXPECT_TRUE(renderLayer->needsRendering());
+
+    const JSValue uri("https://example.test/model.glb");
+    EXPECT_FALSE(layer->setProperty(
+        "test-model-uri", conversion::Convertible(&uri), Layer::PropertyScope::Layout));
+    EXPECT_TRUE(layer->setProperty(
+        "test-model-uri", conversion::Convertible(&uri), Layer::PropertyScope::Paint));
+    const auto serialized = layer->serialize();
+    EXPECT_EQ("https://example.test/model.glb",
+              *serialized.getObject()->at("layout").getObject()->at("test-model-uri").getString());
+
+    JSDocument position;
+    position.Parse("[2.2945, 48.8584]");
+    const JSValue* positionValue = &position;
+    EXPECT_FALSE(layer->setProperty(
+        "test-model-position", conversion::Convertible(positionValue), Layer::PropertyScope::Layout));
+    const auto serializedPosition = layer->serialize();
+    const auto* positionArray = serializedPosition.getObject()
+                                    ->at("layout")
+                                    .getObject()->at("test-model-position")
+                                    .getArray();
+    ASSERT_NE(nullptr, positionArray);
+    ASSERT_EQ(2u, positionArray->size());
+    EXPECT_DOUBLE_EQ(2.2945, *positionArray->at(0).getDouble());
+
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"JSON({
+      "version": 8,
+      "sources": {},
+      "layers": [{
+        "id": "model-from-json",
+        "type": "test-plugin-layer",
+        "layout": {
+          "test-model-uri": "https://example.test/from-style.glb",
+          "test-model-position": [2.2945, 48.8584]
+        }
+      }]
+    })JSON");
+    const auto* parsedLayer = style.getLayer("model-from-json");
+    ASSERT_NE(nullptr, parsedLayer);
+    EXPECT_EQ("https://example.test/from-style.glb",
+              *parsedLayer->serialize().getObject()->at("layout").getObject()->at("test-model-uri").getString());
 }
 
 TEST(PluginStyleProperty, DefaultSetCloneAndSerialize) {

@@ -153,6 +153,7 @@ typedef struct mln_plugin_backend_context_v1 {
     void* resolver_context;
     mln_plugin_proc (*get_proc_address)(void* resolver_context, const char* name);
     const mln_plugin_metal_context_v1* metal;
+    float screen_pre_rotation_radians_clockwise;
 } mln_plugin_backend_context_v1;
 
 /* Backend objects are opaque and valid only for the duration of a callback. */
@@ -192,12 +193,52 @@ typedef struct mln_plugin_frame_context_v1 {
     size_t property_count;
     const mln_plugin_draw_packet_v1* fill_extrusion_packets;
     size_t fill_extrusion_packet_count;
+    const struct mln_plugin_camera_context_v1* camera;
 } mln_plugin_frame_context_v1;
+
+/*
+ * Camera values and matrices are immutable and valid only for the duration of
+ * the render callback. Matrices are column-major. Geographic positions can be
+ * converted to normalized Web Mercator coordinates by the plugin; the
+ * projection matrices accept those coordinates directly.
+ */
+typedef struct mln_plugin_camera_context_v1 {
+    uint32_t struct_size;
+    double latitude;
+    double longitude;
+    double zoom;
+    double bearing;
+    double pitch;
+    double field_of_view;
+    float pixel_ratio;
+    double projection_matrix[16];
+    double near_clipped_projection_matrix[16];
+} mln_plugin_camera_context_v1;
+
+typedef struct mln_plugin_resource_response_v1 {
+    uint32_t struct_size;
+    uint64_t request_id;
+    const uint8_t* data;
+    size_t data_size;
+    mln_plugin_string error_message;
+} mln_plugin_resource_response_v1;
+
+/* Response bytes and strings are borrowed and valid only during the callback. */
+typedef void (*mln_plugin_resource_callback_fn)(void* callback_context,
+                                                const mln_plugin_resource_response_v1* response);
 
 typedef struct mln_plugin_host_api_v1 {
     uint32_t struct_size;
     uint32_t abi_version;
     void (*log)(int32_t severity, mln_plugin_string message);
+    void* context;
+    mln_plugin_status (*request_resource)(void* context,
+                                          mln_plugin_string url,
+                                          mln_plugin_resource_callback_fn callback,
+                                          void* callback_context,
+                                          uint64_t* request_id);
+    void (*cancel_resource_request)(void* context, uint64_t request_id);
+    void (*request_repaint)(void* context);
 } mln_plugin_host_api_v1;
 
 typedef mln_plugin_status (*mln_plugin_create_instance_fn)(const mln_plugin_host_api_v1* host,
@@ -223,6 +264,26 @@ typedef struct mln_plugin_layer_extension_v1 {
     mln_plugin_context_lost_fn context_lost;
 } mln_plugin_layer_extension_v1;
 
+/*
+ * A source-less style layer type implemented entirely by a plugin. The host
+ * owns style parsing, property storage, ordering, visibility and zoom ranges;
+ * the plugin owns its renderer and GPU resources.
+ */
+typedef struct mln_plugin_layer_type_v1 {
+    uint32_t struct_size;
+    mln_plugin_string layer_type;
+    uint32_t backend_mask;
+    mln_plugin_render_stage render_stage;
+    uint8_t requires_3d;
+    const mln_plugin_property_descriptor_v1* properties;
+    size_t property_count;
+    mln_plugin_create_instance_fn create_instance;
+    mln_plugin_destroy_instance_fn destroy_instance;
+    mln_plugin_prepare_frame_fn prepare_frame;
+    mln_plugin_render_before_layer_fn render_layer;
+    mln_plugin_context_lost_fn context_lost;
+} mln_plugin_layer_type_v1;
+
 typedef struct mln_plugin_descriptor_v1 {
     uint32_t struct_size;
     uint32_t abi_version;
@@ -232,6 +293,8 @@ typedef struct mln_plugin_descriptor_v1 {
     uint32_t maximum_host_abi;
     const mln_plugin_layer_extension_v1* layer_extensions;
     size_t layer_extension_count;
+    const mln_plugin_layer_type_v1* layer_types;
+    size_t layer_type_count;
 } mln_plugin_descriptor_v1;
 
 typedef mln_plugin_status (*mln_plugin_register_function_v1)(const mln_plugin_descriptor_v1* descriptor,

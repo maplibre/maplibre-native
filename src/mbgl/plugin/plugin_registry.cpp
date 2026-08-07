@@ -39,9 +39,10 @@ bool validString(const mln_plugin_string& value) {
 bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
                       const std::string& version,
                       const std::vector<PropertyDefinition>& properties,
-                      const std::vector<LayerExtension>& extensions) {
+                      const std::vector<LayerExtension>& extensions,
+                      const std::vector<LayerType>& layerTypes) {
     if (existing.version != version || existing.properties.size() != properties.size() ||
-        existing.extensions.size() != extensions.size()) {
+        existing.extensions.size() != extensions.size() || existing.layerTypes.size() != layerTypes.size()) {
         return false;
     }
     for (size_t i = 0; i < properties.size(); ++i) {
@@ -62,6 +63,59 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
             return false;
         }
     }
+    for (size_t i = 0; i < layerTypes.size(); ++i) {
+        const auto& lhs = existing.layerTypes[i];
+        const auto& rhs = layerTypes[i];
+        if (lhs.type != rhs.type || lhs.backendMask != rhs.backendMask || lhs.renderStage != rhs.renderStage ||
+            lhs.requires3D != rhs.requires3D || lhs.createInstance != rhs.createInstance ||
+            lhs.destroyInstance != rhs.destroyInstance || lhs.prepareFrame != rhs.prepareFrame ||
+            lhs.renderLayer != rhs.renderLayer || lhs.contextLost != rhs.contextLost) {
+            return false;
+        }
+    }
+    return true;
+}
+
+constexpr uint32_t supportedBackends =
+    MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
+
+bool validBackendMask(uint32_t mask) {
+    return (mask & supportedBackends) != 0 && (mask & ~supportedBackends) == 0;
+}
+
+bool appendProperties(const std::string& pluginID,
+                      const std::string& targetLayerType,
+                      const mln_plugin_property_descriptor_v1* properties,
+                      size_t propertyCount,
+                      std::set<std::pair<std::string, std::string>>& propertyKeys,
+                      std::vector<PropertyDefinition>& output,
+                      std::string& error) {
+    if (propertyCount && !properties) {
+        error = "plugin property array is missing";
+        return false;
+    }
+    for (size_t p = 0; p < propertyCount; ++p) {
+        const auto& property = properties[p];
+        if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
+            property.default_value.struct_size < sizeof(mln_plugin_value) ||
+            property.default_value.type != property.type ||
+            (property.scope != MLN_PLUGIN_PROPERTY_PAINT && property.scope != MLN_PLUGIN_PROPERTY_LAYOUT)) {
+            error = "plugin property descriptor is malformed";
+            return false;
+        }
+        auto defaultValue = copyValue(property.default_value);
+        if (!PluginRegistry::valueMatches(property.type, defaultValue)) {
+            error = "plugin property default value has the wrong type";
+            return false;
+        }
+        const auto propertyName = copyString(property.name);
+        if (!propertyKeys.emplace(targetLayerType, propertyName).second) {
+            error = "plugin descriptor contains duplicate property names";
+            return false;
+        }
+        output.push_back(PropertyDefinition{
+            pluginID, targetLayerType, propertyName, property.type, property.scope, std::move(defaultValue)});
+    }
     return true;
 }
 
@@ -79,9 +133,11 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         error = "plugin ABI is not compatible with host ABI 1";
         return MLN_PLUGIN_STATUS_UNSUPPORTED_ABI;
     }
-    if (!validString(descriptor.plugin_id) || !validString(descriptor.plugin_version) || !descriptor.layer_extensions ||
-        descriptor.layer_extension_count == 0) {
-        error = "plugin descriptor is missing an id, version, or layer extension";
+    if (!validString(descriptor.plugin_id) || !validString(descriptor.plugin_version) ||
+        (descriptor.layer_extension_count && !descriptor.layer_extensions) ||
+        (descriptor.layer_type_count && !descriptor.layer_types) ||
+        (descriptor.layer_extension_count == 0 && descriptor.layer_type_count == 0)) {
+        error = "plugin descriptor is missing an id, version, or layer registration";
         return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     }
 
@@ -89,19 +145,17 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
     const auto pluginVersion = copyString(descriptor.plugin_version);
     std::vector<PropertyDefinition> newProperties;
     std::vector<LayerExtension> newExtensions;
+    std::vector<LayerType> newLayerTypes;
     std::set<std::pair<std::string, int32_t>> extensionKeys;
     std::set<std::pair<std::string, std::string>> propertyKeys;
 
     for (size_t i = 0; i < descriptor.layer_extension_count; ++i) {
         const auto& extension = descriptor.layer_extensions[i];
         if (extension.struct_size < sizeof(mln_plugin_layer_extension_v1) ||
-            !validString(extension.target_layer_type) || (extension.property_count && !extension.properties) ||
+            !validString(extension.target_layer_type) ||
             !extension.create_instance || !extension.destroy_instance ||
             (!extension.prepare_frame && !extension.render_before_layer) ||
-            (extension.backend_mask &
-             ~(MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL)) != 0 ||
-            (extension.backend_mask &
-             (MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL)) == 0) {
+            !validBackendMask(extension.backend_mask)) {
             error = "layer extension is malformed or has no supported backend";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
@@ -122,31 +176,67 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                                                extension.context_lost});
 
         for (size_t p = 0; p < extension.property_count; ++p) {
-            const auto& property = extension.properties[p];
-            if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
-                property.default_value.struct_size < sizeof(mln_plugin_value) ||
-                property.default_value.type != property.type || property.scope != MLN_PLUGIN_PROPERTY_PAINT) {
-                error = "plugin property descriptor is malformed";
+            if (extension.properties[p].scope != MLN_PLUGIN_PROPERTY_PAINT) {
+                error = "existing-layer extension properties must be paint properties";
                 return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
             }
-            auto defaultValue = copyValue(property.default_value);
-            if (!valueMatches(property.type, defaultValue)) {
-                error = "plugin property default value has the wrong type";
-                return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
-            }
-            const auto propertyName = copyString(property.name);
-            if (!propertyKeys.emplace(targetLayerType, propertyName).second) {
-                error = "plugin descriptor contains duplicate property names";
-                return MLN_PLUGIN_STATUS_CONFLICT;
-            }
-            newProperties.push_back(PropertyDefinition{
-                pluginID, targetLayerType, propertyName, property.type, property.scope, std::move(defaultValue)});
+        }
+
+        if (!appendProperties(pluginID,
+                              targetLayerType,
+                              extension.properties,
+                              extension.property_count,
+                              propertyKeys,
+                              newProperties,
+                              error)) {
+            return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
+                                                                : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+    }
+
+    std::set<std::string> layerTypeKeys;
+    for (size_t i = 0; i < descriptor.layer_type_count; ++i) {
+        const auto& layerType = descriptor.layer_types[i];
+        if (layerType.struct_size < sizeof(mln_plugin_layer_type_v1) || !validString(layerType.layer_type) ||
+            !validBackendMask(layerType.backend_mask) || !layerType.create_instance || !layerType.destroy_instance ||
+            !layerType.render_layer ||
+            (layerType.render_stage != MLN_PLUGIN_RENDER_STAGE_PASS_3D &&
+             layerType.render_stage != MLN_PLUGIN_RENDER_STAGE_OPAQUE &&
+             layerType.render_stage != MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT)) {
+            error = "plugin layer type is malformed or has no supported backend";
+            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+        const auto type = copyString(layerType.layer_type);
+        if (!layerTypeKeys.emplace(type).second) {
+            error = "plugin descriptor contains duplicate layer types";
+            return MLN_PLUGIN_STATUS_CONFLICT;
+        }
+        newLayerTypes.push_back(LayerType{pluginID,
+                                          pluginVersion,
+                                          type,
+                                          layerType.backend_mask,
+                                          layerType.render_stage,
+                                          layerType.requires_3d != 0,
+                                          layerType.create_instance,
+                                          layerType.destroy_instance,
+                                          layerType.prepare_frame,
+                                          layerType.render_layer,
+                                          layerType.context_lost});
+        if (!appendProperties(pluginID,
+                              type,
+                              layerType.properties,
+                              layerType.property_count,
+                              propertyKeys,
+                              newProperties,
+                              error)) {
+            return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
+                                                                : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
     }
 
     std::lock_guard<std::mutex> lock(mutex);
     if (const auto existing = plugins.find(pluginID); existing != plugins.end()) {
-        if (descriptorEquals(existing->second, pluginVersion, newProperties, newExtensions)) {
+        if (descriptorEquals(existing->second, pluginVersion, newProperties, newExtensions, newLayerTypes)) {
             return MLN_PLUGIN_STATUS_ALREADY_REGISTERED;
         }
         error = "plugin id is already registered with a different descriptor";
@@ -161,13 +251,28 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             return MLN_PLUGIN_STATUS_CONFLICT;
         }
     }
+    for (const auto& layerType : newLayerTypes) {
+        if (layerTypes.find(layerType.type) != layerTypes.end()) {
+            error = "layer type '" + layerType.type + "' is already registered";
+            return MLN_PLUGIN_STATUS_CONFLICT;
+        }
+    }
 
-    PluginRecord record{pluginVersion, newProperties, newExtensions};
+    PluginRecord record{pluginVersion, newProperties, newExtensions, newLayerTypes};
     for (const auto& property : newProperties) {
         properties.emplace(std::make_pair(property.targetLayerType, property.name), property);
     }
+    for (const auto& layerType : newLayerTypes) {
+        layerTypes.emplace(layerType.type, layerType);
+    }
     plugins.emplace(pluginID, std::move(record));
     return MLN_PLUGIN_STATUS_OK;
+}
+
+std::optional<LayerType> PluginRegistry::findLayerType(const std::string& layerType) const {
+    std::lock_guard<std::mutex> lock(mutex);
+    const auto it = layerTypes.find(layerType);
+    return it == layerTypes.end() ? std::nullopt : std::optional<LayerType>{it->second};
 }
 
 std::optional<PropertyDefinition> PluginRegistry::findProperty(const std::string& layerType,

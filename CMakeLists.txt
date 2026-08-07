@@ -989,6 +989,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_host.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_registry.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_registry.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/plugin_style_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/plugin_style_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_plugin_style_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_plugin_style_layer.cpp
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)

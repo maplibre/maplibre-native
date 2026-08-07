@@ -241,11 +241,31 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     return error;
 }
 
+std::optional<conversion::Error> Layer::setProperty(const std::string& name,
+                                                    const conversion::Convertible& value,
+                                                    PropertyScope scope) {
+    using namespace conversion;
+    std::optional<Error> error = setPropertyInternal(name, value);
+    if (!error) return error;
+    if (plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name)) {
+        return setPluginProperty(name, value, scope);
+    }
+    return setProperty(name, value);
+}
+
 std::optional<conversion::Error> Layer::setPluginProperty(const std::string& name,
-                                                          const conversion::Convertible& value) {
+                                                          const conversion::Convertible& value,
+                                                          std::optional<PropertyScope> scope) {
     using namespace conversion;
     const auto definition = plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name);
     if (!definition) return Error{"layer doesn't support this property"};
+    if (scope) {
+        const auto expected = definition->scope == MLN_PLUGIN_PROPERTY_PAINT ? PropertyScope::Paint
+                                                                             : PropertyScope::Layout;
+        if (*scope != expected) {
+            return Error{"plugin property '" + name + "' is in the wrong style section"};
+        }
+    }
 
     auto impl_ = mutableBaseImpl();
     if (isUndefined(value)) {
@@ -256,7 +276,35 @@ std::optional<conversion::Error> Layer::setPluginProperty(const std::string& nam
         return std::nullopt;
     }
 
-    const auto converted = toValue(value);
+    std::optional<Value> converted;
+    switch (definition->type) {
+        case MLN_PLUGIN_VALUE_BOOLEAN:
+            if (const auto typed = toBool(value)) converted = Value{*typed};
+            break;
+        case MLN_PLUGIN_VALUE_FLOAT:
+            if (const auto typed = toDouble(value)) converted = Value{*typed};
+            break;
+        case MLN_PLUGIN_VALUE_STRING:
+            if (const auto typed = toString(value)) converted = Value{*typed};
+            break;
+        case MLN_PLUGIN_VALUE_FLOAT2:
+        case MLN_PLUGIN_VALUE_COLOR: {
+            const std::size_t expectedSize = definition->type == MLN_PLUGIN_VALUE_FLOAT2 ? 2 : 4;
+            if (!isArray(value) || arrayLength(value) != expectedSize) break;
+            mapbox::base::ValueArray items;
+            items.reserve(expectedSize);
+            for (std::size_t i = 0; i < expectedSize; ++i) {
+                const auto item = toDouble(arrayMember(value, i));
+                if (!item) {
+                    items.clear();
+                    break;
+                }
+                items.emplace_back(*item);
+            }
+            if (items.size() == expectedSize) converted = Value{std::move(items)};
+            break;
+        }
+    }
     if (!converted || !plugin::PluginRegistry::valueMatches(definition->type, *converted)) {
         return Error{"plugin property '" + name + "' has the wrong constant type"};
     }

@@ -11,6 +11,8 @@
 namespace mbgl {
 
 class PaintParameters;
+class FileSource;
+class RendererObserver;
 
 namespace plugin {
 
@@ -30,6 +32,7 @@ public:
 
     bool empty() const noexcept;
     void updateLayer(Immutable<style::Layer::Impl>);
+    void updateEnvironment(std::shared_ptr<FileSource>, RendererObserver*);
     void prepareFrame(PaintParameters&, const std::vector<mln_plugin_draw_packet_v1>&);
     void renderBeforeLayer(PaintParameters&, const std::vector<mln_plugin_draw_packet_v1>&);
     void contextLost();

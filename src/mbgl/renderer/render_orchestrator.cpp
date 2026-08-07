@@ -305,6 +305,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
         MLN_TRACE_ZONE(update layer);
+        layer.updatePluginEnvironment(updateParameters->fileSource, observer);
         const std::string& id = layer.getID();
         const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;

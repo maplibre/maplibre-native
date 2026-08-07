@@ -140,7 +140,11 @@ public:
     void setMaxZoom(float);
 
     // Dynamic properties
+    enum class PropertyScope { Paint, Layout };
     std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
+    std::optional<conversion::Error> setProperty(const std::string& name,
+                                                 const conversion::Convertible& value,
+                                                 PropertyScope scope);
 
     virtual StyleProperty getProperty(const std::string&) const = 0;
     virtual Value serialize() const;
@@ -175,7 +179,8 @@ public:
 
 private:
     std::optional<conversion::Error> setPluginProperty(const std::string& name,
-                                                       const conversion::Convertible& value);
+                                                       const conversion::Convertible& value,
+                                                       std::optional<PropertyScope> scope = std::nullopt);
     std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);
     std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
     std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);

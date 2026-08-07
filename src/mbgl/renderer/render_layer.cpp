@@ -14,6 +14,7 @@
 
 #include <mbgl/renderer/layer_group.hpp>
 
+
 namespace mbgl {
 
 using namespace style;
@@ -119,6 +120,12 @@ void RenderLayer::preparePlugins(PaintParameters& parameters) {
 void RenderLayer::renderPluginsBefore(PaintParameters& parameters) {
     if (pluginHost && needsRendering() && hasRenderPass(parameters.pass)) {
         pluginHost->renderBeforeLayer(parameters, pluginDrawPackets);
+    }
+}
+
+void RenderLayer::updatePluginEnvironment(std::shared_ptr<FileSource> fileSource, RendererObserver* observer) {
+    if (pluginHost) {
+        pluginHost->updateEnvironment(std::move(fileSource), observer);
     }
 }
 
