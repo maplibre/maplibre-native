@@ -579,6 +579,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         clipping.pipelineInfo.stencilPass = vk::StencilOp::eReplace;
         clipping.pipelineInfo.dynamicValues.stencilWriteMask = 0b11111111;
         clipping.pipelineInfo.dynamicValues.stencilRef = 0b11111111;
+        clipping.pipelineInfo.dynamicValues.stencilCompareMask = 0xFF;
 
         clipping.pipelineInfo.inputBindings.push_back(
             vk::VertexInputBindingDescription()
@@ -591,6 +592,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                 .setBinding(0)
                 .setLocation(static_cast<uint32_t>(ShaderClass::attributes[0].index))
                 .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
+
+        clipping.pipelineInfo.updateVertexInputHash();
     }
 
     const auto& dispatcher = backend.getDispatcher();
