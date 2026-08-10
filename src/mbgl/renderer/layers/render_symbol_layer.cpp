@@ -762,11 +762,13 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_USE_SYMBOL_INSTANCING
         if (!buffer.vertices().elements()) {
-#else
-        if (!buffer.sharedTriangles->elements())
-#endif
             continue;
         }
+#else
+        if (!buffer.sharedTriangles->elements()) {
+            continue;
+        }
+#endif
 
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         auto& bucketPaintProperties = bucket.paintProperties.at(getID());

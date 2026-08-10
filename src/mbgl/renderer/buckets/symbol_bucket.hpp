@@ -397,8 +397,10 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
+#if MLN_USE_SYMBOL_INSTANCING
     using InstanceVector = gfx::VertexVector<SymbolInstanceVertex>;
     using InstanceBuffer = gfx::VertexBuffer<SymbolInstanceVertex>;
+#endif
     using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
     using VertexBuffer = gfx::VertexBuffer<SymbolLayoutVertex>;
     using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;

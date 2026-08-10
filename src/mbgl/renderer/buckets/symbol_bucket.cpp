@@ -169,7 +169,7 @@ void addPlacedSymbol(SymbolBucket::InstanceVector& instances, const PlacedSymbol
     }
 }
 #else
-void addPlacedSymbol(SymbolBucket::TriangleIndexVector& triangles, const PlacedSymbol& placedSymbol) {
+void addPlacedSymbol(SymbolBucket::Buffer::TriangleIndexVector& triangles, const PlacedSymbol& placedSymbol) {
     auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
     for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
         triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),

@@ -1280,7 +1280,7 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     if (buffer.segments.empty() ||
         buffer.segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max() ||
         std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
-        buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, sortKey);
+        buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, 0ul, 1ul, sortKey);
     }
 
     // We're generating triangle fans, so we always start with the first
