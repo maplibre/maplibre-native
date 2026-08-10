@@ -1242,10 +1242,10 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
         buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, sortKey);
     }*/
 
-    if (buffer.segments.empty() ||
-        buffer.segments.back().instanceCount + instanceCount > std::numeric_limits<uint16_t>::max() ||
+    const uint16_t baseInstance = buffer.segments.empty() ? 0 : buffer.segments.back().instanceCount;
+    if (buffer.segments.empty() || baseInstance + instanceCount > std::numeric_limits<uint16_t>::max() ||
         std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
-        buffer.segments.emplace_back(0, 0, 4, 6, buffer.instances().elements(), 0, sortKey);
+        buffer.segments.emplace_back(0, 0, 4, 6, baseInstance, 0, sortKey);
     }
 
     // We're generating triangle fans, so we always start with the first
@@ -1318,8 +1318,8 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     segment.vertexLength += vertexLength;
     segment.indexLength += 6;*/
 
-    auto instanceVertex = SymbolBucket::instanceVertex(index);
-    buffer.instances().emplace_back(instanceVertex);
+    //auto instanceVertex = SymbolBucket::instanceVertex(index);
+    //buffer.instances().emplace_back(instanceVertex);
     segment.instanceCount += instanceCount;
 
     placedSymbol.glyphOffsets.push_back(symbol.glyphOffset.x);

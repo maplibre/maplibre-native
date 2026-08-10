@@ -90,7 +90,10 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     float2 pos [[attribute(0)]];
+
+#if !defined(HAS_UNIFORM_u_instance)
     ushort instance [[attribute(1)]];
+#endif
 
     //float4 pos_scale [[attribute(1)]];
     //float4 offset_tltr [[attribute(2)]];
@@ -152,11 +155,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
                                 device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
 
+#if defined(HAS_UNIFORM_u_instance)
+    const uint instance = instanceID;
+#else
+    const uint instance = vertx.instance;
+#endif
+
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
-    device const SymbolInstance& symbol = symbolInstances[vertx.instance];
-    device const DynamicInstance& dynamic = dynamicInstances[vertx.instance];
-    device const OpacityInstance& opacity = opacityInstances[vertx.instance];
-    device const DataInstance& data = dataInstances[vertx.instance];
+    device const SymbolInstance& symbol = symbolInstances[instance];
+    device const DynamicInstance& dynamic = dynamicInstances[instance];
+    device const OpacityInstance& opacity = opacityInstances[instance];
+    device const DataInstance& data = dataInstances[instance];
 
     const float2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
@@ -297,7 +306,10 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     float2 pos [[attribute(0)]];
+
+#if !defined(HAS_UNIFORM_u_instance)
     ushort instance [[attribute(1)]];
+#endif
 
     //float4 pos_scale [[attribute(1)]];
     //float4 offset_tltr [[attribute(2)]];
@@ -396,11 +408,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
                                 device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
 
+#if defined(HAS_UNIFORM_u_instance)
+    const uint instance = instanceID;
+#else
+    const uint instance = vertx.instance;
+#endif
+
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
-    device const SymbolInstance& symbol = symbolInstances[vertx.instance];
-    device const DynamicInstance& dynamic = dynamicInstances[vertx.instance];
-    device const OpacityInstance& opacity = opacityInstances[vertx.instance];
-    device const DataInstance& data = dataInstances[vertx.instance];
+    device const SymbolInstance& symbol = symbolInstances[instance];
+    device const DynamicInstance& dynamic = dynamicInstances[instance];
+    device const OpacityInstance& opacity = opacityInstances[instance];
+    device const DataInstance& data = dataInstances[instance];
 
     const float2 fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
@@ -596,7 +614,10 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 
 struct VertexStage {
     float2 pos [[attribute(0)]];
+
+#if !defined(HAS_UNIFORM_u_instance)
     ushort instance [[attribute(1)]];
+#endif
 
     //float4 pos_scale [[attribute(1)]];
     //float4 offset_tltr [[attribute(2)]];
@@ -697,11 +718,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
                                 device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
 
+#if defined(HAS_UNIFORM_u_instance)
+    const uint instance = instanceID;
+#else
+    const uint instance = vertx.instance;
+#endif
+
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
-    device const SymbolInstance& symbol = symbolInstances[vertx.instance];
-    device const DynamicInstance& dynamic = dynamicInstances[vertx.instance];
-    device const OpacityInstance& opacity = opacityInstances[vertx.instance];
-    device const DataInstance& data = dataInstances[vertx.instance];
+    device const SymbolInstance& symbol = symbolInstances[instance];
+    device const DynamicInstance& dynamic = dynamicInstances[instance];
+    device const OpacityInstance& opacity = opacityInstances[instance];
+    device const DataInstance& data = dataInstances[instance];
 
     const float2 fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;

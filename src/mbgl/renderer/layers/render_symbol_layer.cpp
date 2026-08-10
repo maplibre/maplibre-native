@@ -245,13 +245,6 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
                           StringIDSetsPair* propertiesAsUniforms) {
-    if (const auto& attr = attribs.set(idSymbolInstanceAttribute)) {
-        attr->setSharedRawData(buffer.sharedInstances,
-                               offsetof(SymbolInstanceVertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolInstanceVertex),
-                               gfx::AttributeDataType::UShort);
-    }
     if (const auto& attr = attribs.set(idSymbolPosScaleAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -318,6 +311,19 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
     } else {
         attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
             paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
+    }
+    
+    if (!buffer.instances().empty()) {
+        if (const auto& attr = attribs.set(idSymbolInstanceAttribute)) {
+            attr->setSharedRawData(buffer.sharedInstances,
+                                   offsetof(SymbolInstanceVertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(SymbolInstanceVertex),
+                                   gfx::AttributeDataType::UShort);
+        }
+    } else if (propertiesAsUniforms) {
+        propertiesAsUniforms->first.emplace("instance");
+        propertiesAsUniforms->second.emplace(idSymbolInstanceAttribute);
     }
 }
 
