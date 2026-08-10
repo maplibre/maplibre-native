@@ -1318,8 +1318,8 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     segment.vertexLength += vertexLength;
     segment.indexLength += 6;*/
 
-    //auto instanceVertex = SymbolBucket::instanceVertex(index);
-    //buffer.instances().emplace_back(instanceVertex);
+    // auto instanceVertex = SymbolBucket::instanceVertex(index);
+    // buffer.instances().emplace_back(instanceVertex);
     segment.instanceCount += instanceCount;
 
     placedSymbol.glyphOffsets.push_back(symbol.glyphOffset.x);

@@ -312,7 +312,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
         attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
             paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
     }
-    
+
     if (!buffer.instances().empty()) {
         if (const auto& attr = attribs.set(idSymbolInstanceAttribute)) {
             attr->setSharedRawData(buffer.sharedInstances,
