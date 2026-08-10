@@ -54,7 +54,8 @@ using SymbolLayoutVertex = gfx::Vertex<TypeList<attributes::pos_scale,
                                                 attributes::pixeloffset,
                                                 attributes::size_sdf>>;
 #else
-using SymbolLayoutVertex = gfx::Vertex<TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>>;
+using SymbolLayoutVertex =
+    gfx::Vertex<TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>>;
 #endif
 
 using SymbolDynamicLayoutAttributes = TypeList<attributes::projected_pos>;
@@ -296,7 +297,7 @@ public:
 
 #if MLN_USE_SYMBOL_INSTANCING
     static SymbolInstanceVertex instanceVertex(uint16_t instance) { return {instance}; }
-    
+
     static SymbolLayoutVertex layoutVertex(const SymbolQuad& symbol,
                                            const Anchor& labelAnchor,
                                            const Range<float>& sizeData) {
@@ -327,7 +328,8 @@ public:
                  static_cast<int16_t>(symbol.pixelOffsetBR.x * 16),
                  static_cast<int16_t>(symbol.pixelOffsetBR.y * 16)},
 
-                {aSizeMin, aSizeMax}};
+                { aSizeMin,
+                  aSizeMax }};
     }
 #else
     static SymbolLayoutVertex layoutVertex(Point<float> labelAnchor,
@@ -427,7 +429,7 @@ public:
         std::shared_ptr<InstanceVector> sharedInstances = std::make_shared<InstanceVector>();
         InstanceVector& instances() { return *sharedInstances; }
         const InstanceVector& instances() const { return *sharedInstances; }
-        
+
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }
@@ -435,7 +437,7 @@ public:
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }
-        
+
         using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
         const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
         TriangleIndexVector& triangles = *sharedTriangles;

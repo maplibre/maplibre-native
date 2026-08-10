@@ -202,7 +202,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         triangleSegment.vertexLength += totalVertices;
         triangleSegment.indexLength += nIndices;
-        
+
         if (instanceSegments.empty()) {
             instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
         }

@@ -369,7 +369,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
-    
+
 #if MLN_USE_SYMBOL_INSTANCING
     if (auto& instanceAttribs = drawable.getInstanceAttributes()) {
         updateTileAttributes(buffer, isText, paintProps, evaluated, *instanceAttribs, nullptr);
@@ -533,7 +533,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     if (!collisionCircleGroup) {
         collisionCircleGroup = shaders.getShaderGroup(std::string(CollisionCircleShaderName));
     }
-    
+
 #if MLN_USE_SYMBOL_INSTANCING
     if (!staticDataVertices) {
         staticDataVertices = std::make_shared<SymbolVertexVector>(RenderStaticData::symbolVertices());
@@ -782,10 +782,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& tileInfo = tileCache[tile.id];
-        
+
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
-        
+
 #if MLN_USE_SYMBOL_INSTANCING
         auto vertexAttribs = context.createVertexAttributeArray();
         if (const auto& attr = vertexAttribs->set(idSymbolPosVertexAttribute)) {
@@ -799,10 +799,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto instanceAttribs = context.createVertexAttributeArray();
         updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
 #else
-        auto vertexAttribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
+    auto vertexAttribs = context.createVertexAttributeArray();
+    updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
 #endif
-        
+
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
         const auto textFill = evaluated.get<style::TextColor>().constantOr(Color::black()).a > 0.0f;
@@ -869,16 +869,16 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
             builder->setDrawableName(layerPrefix + std::string(suffix));
             builder->setVertexAttributes(vertexAttribs);
-            
+
 #if MLN_USE_SYMBOL_INSTANCING
             builder->setInstanceAttributes(instanceAttribs);
             builder->setRawVertices({}, staticDataVertices->elements(), gfx::AttributeDataType::Short2);
-            
+
             auto& triangleIndices = staticDataIndices;
 #else
-            builder->setRawVertices({}, buffer.vertices().elements(), gfx::AttributeDataType::Short4);
-            
-            auto& triangleIndices = buffer.sharedTriangles;
+        builder->setRawVertices({}, buffer.vertices().elements(), gfx::AttributeDataType::Short4);
+
+        auto& triangleIndices = buffer.sharedTriangles;
 #endif
 
             if (segments.empty()) {

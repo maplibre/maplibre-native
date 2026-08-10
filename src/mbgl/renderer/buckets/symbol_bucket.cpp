@@ -213,7 +213,7 @@ void SymbolBucket::sortFeatures(const float angle) {
     auto& iconVector = icon.triangles;
     auto& sdfIconVector = sdfIcon.triangles;
 #endif
-    
+
     textVector.clear();
     iconVector.clear();
     sdfIconVector.clear();

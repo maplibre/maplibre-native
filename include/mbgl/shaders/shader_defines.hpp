@@ -537,7 +537,7 @@ enum {
     idSymbolDataVertexAttribute,
     idSymbolPixelOffsetVertexAttribute,
 #endif
-    
+
     idSymbolProjectedPosVertexAttribute,
     idSymbolFadeOpacityVertexAttribute,
 
