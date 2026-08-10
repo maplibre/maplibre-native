@@ -801,8 +801,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto instanceAttribs = context.createVertexAttributeArray();
         updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
 #else
-    auto vertexAttribs = context.createVertexAttributeArray();
-    updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
+        auto vertexAttribs = context.createVertexAttributeArray();
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
 #endif
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
@@ -878,9 +878,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             auto& triangleIndices = staticDataIndices;
 #else
-        builder->setRawVertices({}, buffer.vertices().elements(), gfx::AttributeDataType::Short4);
+            builder->setRawVertices({}, buffer.vertices().elements(), gfx::AttributeDataType::Short4);
 
-        auto& triangleIndices = buffer.sharedTriangles;
+            auto& triangleIndices = buffer.sharedTriangles;
 #endif
 
             if (segments.empty()) {
