@@ -2,6 +2,7 @@
 #include <mbgl/renderer/bucket_parameters.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_extrusion_layer.hpp>
+#include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/constants.hpp>
@@ -201,6 +202,11 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         triangleSegment.vertexLength += totalVertices;
         triangleSegment.indexLength += nIndices;
+        
+        if (instanceSegments.empty()) {
+            instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
+        }
+        instanceSegments.back().instanceCount += totalVertices;
     }
 
     for (auto& pair : paintPropertyBinders) {

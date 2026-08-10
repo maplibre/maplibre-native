@@ -103,12 +103,13 @@ private:
 
     LayerTweakerPtr collisionLayerTweaker;
 
+#if MLN_USE_SYMBOL_INSTANCING
     using SymbolVertexVector = gfx::VertexVector<SymbolStaticVertex>;
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
 
     std::shared_ptr<SymbolVertexVector> staticDataVertices;
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
-    // std::shared_ptr<SegmentVector> staticDataSegments;
+#endif
 };
 
 } // namespace mbgl

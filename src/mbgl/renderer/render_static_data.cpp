@@ -125,16 +125,12 @@ SegmentVector RenderStaticData::heatmapTextureSegments() {
     return segments;
 }
 
-SegmentVector RenderStaticData::fillExtrusionSegments() {
-    SegmentVector segments;
-    segments.emplace_back(0, 0, 4, 6);
-    return segments;
+SegmentBase RenderStaticData::fillExtrusionSegment() {
+    return SegmentBase(0, 0, 4, 6, 0, 0);
 }
 
-SegmentVector RenderStaticData::symbolSegments() {
-    SegmentVector segments;
-    segments.emplace_back(0, 0, 4, 6);
-    return segments;
+SegmentBase RenderStaticData::symbolSegment(std::size_t baseInstance, float sortKey) {
+    return SegmentBase(0, 0, 4, 6, baseInstance, 0, sortKey);
 }
 
 } // namespace mbgl

@@ -183,15 +183,22 @@ void addDynamicAttributes(const Point<float>& anchorPoint,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
     auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(anchorPoint, angle);
     dynamicVertexArray.emplace_back(dynamicVertex);
-    // dynamicVertexArray.emplace_back(dynamicVertex);
-    // dynamicVertexArray.emplace_back(dynamicVertex);
-    // dynamicVertexArray.emplace_back(dynamicVertex);
+#if !MLN_USE_SYMBOL_INSTANCING
+    dynamicVertexArray.emplace_back(dynamicVertex);
+    dynamicVertexArray.emplace_back(dynamicVertex);
+    dynamicVertexArray.emplace_back(dynamicVertex);
+#endif
 }
 
 void hideGlyphs(size_t numGlyphs, gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
+#if MLN_USE_SYMBOL_INSTANCING
+    const size_t count = 1;
+#else
+    const size_t count = 4;
+#endif
     const Point<float> offscreenPoint = {-INFINITY, -INFINITY};
     if (dynamicVertexArray.empty()) {
-        dynamicVertexArray.reserve(1 * numGlyphs);
+        dynamicVertexArray.reserve(count * numGlyphs);
     }
     for (size_t i = 0; i < numGlyphs; i++) {
         addDynamicAttributes(offscreenPoint, 0, dynamicVertexArray);

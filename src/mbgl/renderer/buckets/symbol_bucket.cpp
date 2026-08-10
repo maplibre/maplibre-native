@@ -160,21 +160,27 @@ bool SymbolBucket::hasTextCollisionCircleData() const {
     return textCollisionCircle && !textCollisionCircle->segments.empty();
 }
 
-void addPlacedSymbol(gfx::VertexVector<SymbolInstanceVertex>& instances, const PlacedSymbol& placedSymbol) {
+#if MLN_USE_SYMBOL_INSTANCING
+void addPlacedSymbol(SymbolBucket::InstanceVector& instances, const PlacedSymbol& placedSymbol) {
     auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 1;
     for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 1) {
         auto instanceVertex = SymbolBucket::instanceVertex(vertexIndex);
         instances.emplace_back(instanceVertex);
     }
-    /*for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
+}
+#else
+void addPlacedSymbol(SymbolBucket::TriangleIndexVector& triangles, const PlacedSymbol& placedSymbol) {
+    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
+    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
         triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),
                                static_cast<uint16_t>(vertexIndex + 1),
                                static_cast<uint16_t>(vertexIndex + 2));
         triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 1),
                                static_cast<uint16_t>(vertexIndex + 2),
                                static_cast<uint16_t>(vertexIndex + 3));
-    }*/
+    }
 }
+#endif
 
 void SymbolBucket::sortFeatures(const float angle) {
     if (!sortFeaturesByY) {
@@ -198,9 +204,19 @@ void SymbolBucket::sortFeatures(const float angle) {
     sortUploaded = false;
     uploaded = false;
 
-    text.instances().clear();
-    icon.instances().clear();
-    sdfIcon.instances().clear();
+#if MLN_USE_SYMBOL_INSTANCING
+    auto& textVector = text.instances();
+    auto& iconVector = icon.instances();
+    auto& sdfIconVector = sdfIcon.instances();
+#else
+    auto& textVector = text.triangles;
+    auto& iconVector = icon.triangles;
+    auto& sdfIconVector = sdfIcon.triangles;
+#endif
+    
+    textVector.clear();
+    iconVector.clear();
+    sdfIconVector.clear();
 
     auto symbolsSortOrder = std::make_unique<std::vector<size_t>>();
     symbolsSortOrder->reserve(symbolInstances.size());
@@ -217,29 +233,29 @@ void SymbolBucket::sortFeatures(const float angle) {
         symbolsSortOrder->push_back(symbolInstance.getDataFeatureIndex());
 
         if (symbolInstance.getPlacedRightTextIndex()) {
-            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()]);
+            addPlacedSymbol(textVector, text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()]);
         }
 
         if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
-            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()]);
+            addPlacedSymbol(textVector, text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()]);
         }
 
         if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
-            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()]);
+            addPlacedSymbol(textVector, text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()]);
         }
 
         if (symbolInstance.getPlacedVerticalTextIndex()) {
-            addPlacedSymbol(text.instances(), text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()]);
+            addPlacedSymbol(textVector, text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()]);
         }
 
         auto& iconBuffer = symbolInstance.hasSdfIcon() ? sdfIcon : icon;
+        auto& iconVectorBuffer = symbolInstance.hasSdfIcon() ? sdfIconVector : iconVector;
         if (symbolInstance.getPlacedIconIndex()) {
-            addPlacedSymbol(iconBuffer.instances(), iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()]);
+            addPlacedSymbol(iconVectorBuffer, iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()]);
         }
 
         if (symbolInstance.getPlacedVerticalIconIndex()) {
-            addPlacedSymbol(iconBuffer.instances(),
-                            iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()]);
+            addPlacedSymbol(iconVectorBuffer, iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()]);
         }
     }
 

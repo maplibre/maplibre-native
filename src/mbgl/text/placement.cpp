@@ -1014,7 +1014,11 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                                              SYM_GUARD_LOC))
                 return;
         }
-        auto count = 1;
+#if MLN_USE_SYMBOL_INSTANCING
+        const size_t count = 1;
+#else
+        const size_t count = 4;
+#endif
         if (symbolInstance.hasText()) {
             size_t textOpacityVerticesSize = 0u;
             const auto& opacityVertex = SymbolBucket::opacityVertex(opacityState.text.placed,

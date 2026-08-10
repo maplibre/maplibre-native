@@ -42,8 +42,8 @@ public:
     static SegmentVector tileBorderSegments();
     static SegmentVector rasterSegments();
     static SegmentVector heatmapTextureSegments();
-    static SegmentVector fillExtrusionSegments();
-    static SegmentVector symbolSegments();
+    static SegmentBase fillExtrusionSegment();
+    static SegmentBase symbolSegment(std::size_t baseInstance, float sortKey);
 
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;

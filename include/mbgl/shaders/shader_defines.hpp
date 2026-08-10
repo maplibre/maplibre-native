@@ -521,6 +521,7 @@ enum {
 };
 
 enum {
+#if MLN_USE_SYMBOL_INSTANCING
     idSymbolPosVertexAttribute,
 
     idSymbolInstanceAttribute,
@@ -531,7 +532,12 @@ enum {
     idSymbolTextureRectAttribute,
     idSymbolPixelOffsetAttribute,
     idSymbolSizeSdfAttribute,
-
+#else
+    idSymbolPosOffsetVertexAttribute,
+    idSymbolDataVertexAttribute,
+    idSymbolPixelOffsetVertexAttribute,
+#endif
+    
     idSymbolProjectedPosVertexAttribute,
     idSymbolFadeOpacityVertexAttribute,
 
