@@ -133,15 +133,15 @@ void SymbolBucket::update(const FeatureStates& states,
 }
 
 bool SymbolBucket::hasTextData() const {
-    return !text.vertices().empty();
+    return !text.segments.empty();
 }
 
 bool SymbolBucket::hasIconData() const {
-    return !icon.vertices().empty();
+    return !icon.segments.empty();
 }
 
 bool SymbolBucket::hasSdfIconData() const {
-    return !sdfIcon.vertices().empty();
+    return !sdfIcon.segments.empty();
 }
 
 bool SymbolBucket::hasIconCollisionBoxData() const {
