@@ -32,6 +32,7 @@ void VectorSource::setTilesetOverrides(Tileset& tileset) {
     if (minZoom) {
         tileset.zoomRange.min = static_cast<uint8_t>(*minZoom);
     }
+    tileset.vectorEncoding = encoding;
 }
 
 const std::vector<std::string> VectorSource::getTiles() const {
