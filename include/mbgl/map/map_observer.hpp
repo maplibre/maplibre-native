@@ -92,6 +92,10 @@ public:
 
     // Renderer
     virtual void onRenderError(std::exception_ptr) {}
+
+    /// Called with a description of a corrupted symbol detected by the symbol guard checks
+    /// (see `MLN_SYMBOL_GUARDS`), on the thread which detected it.
+    virtual void onSymbolError(const std::string&) {}
 };
 
 } // namespace mbgl

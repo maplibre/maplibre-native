@@ -62,7 +62,7 @@ public:
 
     virtual std::unique_ptr<TileRenderData> createRenderData() = 0;
 
-    void setObserver(TileObserver* observer);
+    virtual void setObserver(TileObserver* observer);
 
     virtual void setNecessity(TileNecessity) {}
 

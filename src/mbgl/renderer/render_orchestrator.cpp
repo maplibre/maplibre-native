@@ -1068,6 +1068,10 @@ void RenderOrchestrator::onTileAction(RenderSource&,
     observer->onTileAction(op, id, sourceID);
 }
 
+void RenderOrchestrator::onSymbolError(RenderSource&, const std::string& message) {
+    observer->onSymbolError(message);
+}
+
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
     MLN_TRACE_FUNC();
 
