@@ -206,10 +206,8 @@ TEST(PluginRegistry, RegistersSourceLessLayerTypeAndScopedProperties) {
     EXPECT_TRUE(renderLayer->needsRendering());
 
     const JSValue uri("https://example.test/model.glb");
-    EXPECT_FALSE(layer->setProperty(
-        "test-model-uri", conversion::Convertible(&uri), Layer::PropertyScope::Layout));
-    EXPECT_TRUE(layer->setProperty(
-        "test-model-uri", conversion::Convertible(&uri), Layer::PropertyScope::Paint));
+    EXPECT_FALSE(layer->setProperty("test-model-uri", conversion::Convertible(&uri), Layer::PropertyScope::Layout));
+    EXPECT_TRUE(layer->setProperty("test-model-uri", conversion::Convertible(&uri), Layer::PropertyScope::Paint));
     const auto serialized = layer->serialize();
     EXPECT_EQ("https://example.test/model.glb",
               *serialized.getObject()->at("layout").getObject()->at("test-model-uri").getString());
@@ -220,10 +218,8 @@ TEST(PluginRegistry, RegistersSourceLessLayerTypeAndScopedProperties) {
     EXPECT_FALSE(layer->setProperty(
         "test-model-position", conversion::Convertible(positionValue), Layer::PropertyScope::Layout));
     const auto serializedPosition = layer->serialize();
-    const auto* positionArray = serializedPosition.getObject()
-                                    ->at("layout")
-                                    .getObject()->at("test-model-position")
-                                    .getArray();
+    const auto* positionArray =
+        serializedPosition.getObject()->at("layout").getObject()->at("test-model-position").getArray();
     ASSERT_NE(nullptr, positionArray);
     ASSERT_EQ(2u, positionArray->size());
     EXPECT_DOUBLE_EQ(2.2945, *positionArray->at(0).getDouble());

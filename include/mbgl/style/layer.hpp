@@ -140,7 +140,10 @@ public:
     void setMaxZoom(float);
 
     // Dynamic properties
-    enum class PropertyScope { Paint, Layout };
+    enum class PropertyScope {
+        Paint,
+        Layout
+    };
     std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
     std::optional<conversion::Error> setProperty(const std::string& name,
                                                  const conversion::Convertible& value,

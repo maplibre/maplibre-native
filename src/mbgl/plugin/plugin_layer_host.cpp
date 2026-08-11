@@ -140,22 +140,21 @@ struct PluginLayerHost::Instance {
         const uint64_t id = self->nextRequestID++;
         *requestID = id;
         const std::string resourceURL(url.data, url.size);
-        auto request = self->fileSource->request(Resource(Resource::Kind::Unknown, resourceURL),
-                                                 [self, id, callback, callbackContext](Response response) {
-                                                     std::string error;
-                                                     if (response.error) error = response.error->message;
-                                                     mln_plugin_resource_response_v1 result{};
-                                                     result.struct_size = sizeof(result);
-                                                     result.request_id = id;
-                                                     if (response.data) {
-                                                         result.data = reinterpret_cast<const uint8_t*>(
-                                                             response.data->data());
-                                                         result.data_size = response.data->size();
-                                                     }
-                                                     result.error_message = {error.data(), error.size()};
-                                                     callback(callbackContext, &result);
-                                                     requestRepaint(self);
-                                                 });
+        auto request = self->fileSource->request(
+            Resource(Resource::Kind::Unknown, resourceURL), [self, id, callback, callbackContext](Response response) {
+                std::string error;
+                if (response.error) error = response.error->message;
+                mln_plugin_resource_response_v1 result{};
+                result.struct_size = sizeof(result);
+                result.request_id = id;
+                if (response.data) {
+                    result.data = reinterpret_cast<const uint8_t*>(response.data->data());
+                    result.data_size = response.data->size();
+                }
+                result.error_message = {error.data(), error.size()};
+                callback(callbackContext, &result);
+                requestRepaint(self);
+            });
         if (!request) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
         self->requests.emplace(id, std::move(request));
         return MLN_PLUGIN_STATUS_OK;
@@ -379,7 +378,8 @@ void PluginLayerHost::invoke(Instance& instance,
             backend.command_buffer = reinterpret_cast<uint64_t>(
                 static_cast<VkCommandBuffer>(encoder.getCommandBuffer().get()));
             backend.render_pass = reinterpret_cast<uint64_t>(static_cast<VkRenderPass>(resource.getRenderPass().get()));
-            backend.framebuffer = reinterpret_cast<uint64_t>(static_cast<VkFramebuffer>(resource.getFramebuffer().get()));
+            backend.framebuffer = reinterpret_cast<uint64_t>(
+                static_cast<VkFramebuffer>(resource.getFramebuffer().get()));
             backend.screen_pre_rotation_radians_clockwise = resource.getRotation();
         } else {
             backend.command_buffer = reinterpret_cast<uint64_t>(
@@ -398,9 +398,8 @@ void PluginLayerHost::invoke(Instance& instance,
     camera.pitch = cameraParameters.pitch;
     camera.field_of_view = cameraParameters.fieldOfView;
     camera.pixel_ratio = parameters.pixelRatio;
-    std::copy(cameraParameters.projectionMatrix.begin(),
-              cameraParameters.projectionMatrix.end(),
-              camera.projection_matrix);
+    std::copy(
+        cameraParameters.projectionMatrix.begin(), cameraParameters.projectionMatrix.end(), camera.projection_matrix);
     std::copy(cameraParameters.nearClippedProjectionMatrix.begin(),
               cameraParameters.nearClippedProjectionMatrix.end(),
               camera.near_clipped_projection_matrix);

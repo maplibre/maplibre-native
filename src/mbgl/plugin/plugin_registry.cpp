@@ -76,8 +76,7 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
     return true;
 }
 
-constexpr uint32_t supportedBackends =
-    MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
+constexpr uint32_t supportedBackends = MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
 
 bool validBackendMask(uint32_t mask) {
     return (mask & supportedBackends) != 0 && (mask & ~supportedBackends) == 0;
@@ -152,10 +151,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
     for (size_t i = 0; i < descriptor.layer_extension_count; ++i) {
         const auto& extension = descriptor.layer_extensions[i];
         if (extension.struct_size < sizeof(mln_plugin_layer_extension_v1) ||
-            !validString(extension.target_layer_type) ||
-            !extension.create_instance || !extension.destroy_instance ||
-            (!extension.prepare_frame && !extension.render_before_layer) ||
-            !validBackendMask(extension.backend_mask)) {
+            !validString(extension.target_layer_type) || !extension.create_instance || !extension.destroy_instance ||
+            (!extension.prepare_frame && !extension.render_before_layer) || !validBackendMask(extension.backend_mask)) {
             error = "layer extension is malformed or has no supported backend";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
@@ -222,13 +219,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                                           layerType.prepare_frame,
                                           layerType.render_layer,
                                           layerType.context_lost});
-        if (!appendProperties(pluginID,
-                              type,
-                              layerType.properties,
-                              layerType.property_count,
-                              propertyKeys,
-                              newProperties,
-                              error)) {
+        if (!appendProperties(
+                pluginID, type, layerType.properties, layerType.property_count, propertyKeys, newProperties, error)) {
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }

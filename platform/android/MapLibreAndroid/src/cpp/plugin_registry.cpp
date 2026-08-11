@@ -32,15 +32,15 @@ jni::jlong PluginRegistry::registrationFunctionAddress(jni::JNIEnv&, const jni::
 
 void PluginRegistry::registerNative(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<PluginRegistry>::Singleton(env);
-    jni::RegisterNatives(env,
-                         *javaClass,
-                         jni::MakeNativeMethod<decltype(&PluginRegistry::isRegistered), &PluginRegistry::isRegistered>(
-                             "nativeIsRegistered"),
-                         jni::MakeNativeMethod<decltype(&PluginRegistry::count), &PluginRegistry::count>("nativeCount"),
-                         jni::MakeNativeMethod<decltype(&PluginRegistry::idAt), &PluginRegistry::idAt>("nativeIdAt"),
-                         jni::MakeNativeMethod<decltype(&PluginRegistry::registrationFunctionAddress),
-                                               &PluginRegistry::registrationFunctionAddress>(
-                             "nativeRegistrationFunctionAddress"));
+    jni::RegisterNatives(
+        env,
+        *javaClass,
+        jni::MakeNativeMethod<decltype(&PluginRegistry::isRegistered), &PluginRegistry::isRegistered>(
+            "nativeIsRegistered"),
+        jni::MakeNativeMethod<decltype(&PluginRegistry::count), &PluginRegistry::count>("nativeCount"),
+        jni::MakeNativeMethod<decltype(&PluginRegistry::idAt), &PluginRegistry::idAt>("nativeIdAt"),
+        jni::MakeNativeMethod<decltype(&PluginRegistry::registrationFunctionAddress),
+                              &PluginRegistry::registrationFunctionAddress>("nativeRegistrationFunctionAddress"));
 }
 
 } // namespace android

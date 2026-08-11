@@ -53,7 +53,7 @@ Mutable<PluginStyleLayer::Impl> PluginStyleLayer::mutableImpl() const {
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPropertyInternal(const std::string&,
-                                                                        const conversion::Convertible&) {
+                                                                       const conversion::Convertible&) {
     return conversion::Error{"layer doesn't support this property"};
 }
 

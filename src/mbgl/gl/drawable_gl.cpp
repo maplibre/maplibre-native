@@ -82,11 +82,9 @@ void DrawableGL::collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>
         packet.index_count = static_cast<uint32_t>(segment.indexLength);
         packet.instance_count = 1;
         packet.base_vertex = 0;
-        packet.wall_vertex =
-            pluginBinding(impl->attributeBindings, metadata->wallVertexLocation, segment.vertexOffset);
+        packet.wall_vertex = pluginBinding(impl->attributeBindings, metadata->wallVertexLocation, segment.vertexOffset);
         packet.position = pluginBinding(impl->attributeBindings, metadata->positionLocation, segment.vertexOffset);
-        packet.decimals_edge =
-            pluginBinding(impl->attributeBindings, metadata->decimalsLocation, segment.vertexOffset);
+        packet.decimals_edge = pluginBinding(impl->attributeBindings, metadata->decimalsLocation, segment.vertexOffset);
         packet.normal = pluginBinding(impl->attributeBindings, metadata->normalLocation, segment.vertexOffset);
         packet.base = pluginBinding(impl->attributeBindings, metadata->baseLocation, segment.vertexOffset);
         packet.height = pluginBinding(impl->attributeBindings, metadata->heightLocation, segment.vertexOffset);

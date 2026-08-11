@@ -108,8 +108,7 @@ void Drawable::collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>& 
         const auto& segment = drawSegment->getSegment();
         if (!segment.indexLength) continue;
         auto packet = metadata->packet;
-        packet.index_buffer =
-            reinterpret_cast<uint64_t>(static_cast<VkBuffer>(resource.getVulkanBuffer()));
+        packet.index_buffer = reinterpret_cast<uint64_t>(static_cast<VkBuffer>(resource.getVulkanBuffer()));
         packet.index_offset = resource.getVulkanBufferOffset() + segment.indexOffset * sizeof(std::uint16_t);
         packet.index_count = static_cast<uint32_t>(segment.indexLength);
         packet.instance_count = static_cast<uint32_t>(instances);

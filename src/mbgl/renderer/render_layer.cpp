@@ -14,7 +14,6 @@
 
 #include <mbgl/renderer/layer_group.hpp>
 
-
 namespace mbgl {
 
 using namespace style;
@@ -23,8 +22,7 @@ RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
       baseImpl(evaluatedProperties->baseImpl),
       renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {
-    auto host = std::make_unique<plugin::PluginLayerHost>(
-        baseImpl->id, baseImpl->getTypeInfo()->type, baseImpl);
+    auto host = std::make_unique<plugin::PluginLayerHost>(baseImpl->id, baseImpl->getTypeInfo()->type, baseImpl);
     if (!host->empty()) {
         pluginHost = std::move(host);
     }

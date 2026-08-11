@@ -12,7 +12,6 @@
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-
 namespace mbgl {
 
 void LayerManager::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) {}

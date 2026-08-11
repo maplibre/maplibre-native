@@ -403,15 +403,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                     const int8_t baseLocation = hasPattern ? 2 : 3;
                     const int8_t heightLocation = hasPattern ? 3 : 4;
 #endif
-                    auto data = std::make_unique<gfx::PluginDrawableData>(
-                        MLN_PLUGIN_DRAW_PACKET_TRIANGLES,
-                        false,
-                        -1,
-                        0,
-                        1,
-                        normalLocation,
-                        baseLocation,
-                        heightLocation);
+                    auto data = std::make_unique<gfx::PluginDrawableData>(MLN_PLUGIN_DRAW_PACKET_TRIANGLES,
+                                                                          false,
+                                                                          -1,
+                                                                          0,
+                                                                          1,
+                                                                          normalLocation,
+                                                                          baseLocation,
+                                                                          heightLocation);
                     data->packet.base_is_attribute =
                         propertiesAsUniforms.second.contains(idFillExtrusionBaseVertexAttribute) ? 0 : 1;
                     data->packet.height_is_attribute =
@@ -513,14 +512,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                     const int8_t baseLocation = hasPattern ? 3 : 4;
                     const int8_t heightLocation = hasPattern ? 4 : 5;
                     auto data = std::make_unique<gfx::PluginDrawableData>(
-                        MLN_PLUGIN_DRAW_PACKET_INSTANCED_WALLS,
-                        true,
-                        0,
-                        1,
-                        2,
-                        -1,
-                        baseLocation,
-                        heightLocation);
+                        MLN_PLUGIN_DRAW_PACKET_INSTANCED_WALLS, true, 0, 1, 2, -1, baseLocation, heightLocation);
                     data->packet.base_is_attribute =
                         instancePropertiesAsUniforms.second.contains(idFillExtrusionBaseVertexAttribute) ? 0 : 1;
                     data->packet.height_is_attribute =

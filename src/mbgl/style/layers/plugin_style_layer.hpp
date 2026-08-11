@@ -21,8 +21,7 @@ public:
 private:
     explicit PluginStyleLayer(Immutable<Impl>);
 
-    std::optional<conversion::Error> setPropertyInternal(const std::string&,
-                                                         const conversion::Convertible&) final;
+    std::optional<conversion::Error> setPropertyInternal(const std::string&, const conversion::Convertible&) final;
     StyleProperty getProperty(const std::string&) const final;
     std::unique_ptr<Layer> cloneRef(const std::string& id) const final;
     Mutable<Layer::Impl> mutableBaseImpl() const final;

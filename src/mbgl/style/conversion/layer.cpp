@@ -81,10 +81,9 @@ std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operato
             error.message = "layout must be an object";
             return std::nullopt;
         }
-        auto error_ = eachMember(*layoutValue,
-                                 [&](const std::string& k, const Convertible& v) {
-                                     return layer->setProperty(k, v, Layer::PropertyScope::Layout);
-                                 });
+        auto error_ = eachMember(*layoutValue, [&](const std::string& k, const Convertible& v) {
+            return layer->setProperty(k, v, Layer::PropertyScope::Layout);
+        });
         if (error_) {
             error = *error_;
             return std::nullopt;
