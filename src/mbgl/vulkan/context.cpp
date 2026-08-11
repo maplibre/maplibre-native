@@ -588,6 +588,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         clipping.pipelineInfo.stencilPass = vk::StencilOp::eReplace;
         clipping.pipelineInfo.dynamicValues.stencilWriteMask = 0b11111111;
         clipping.pipelineInfo.dynamicValues.stencilRef = 0b11111111;
+        clipping.pipelineInfo.dynamicValues.stencilCompareMask = 0xFF;
 
         clipping.pipelineInfo.inputBindings.push_back(
             vk::VertexInputBindingDescription()
@@ -600,6 +601,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                 .setBinding(0)
                 .setLocation(static_cast<uint32_t>(ShaderClass::attributes[0].index))
                 .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
+
+        clipping.pipelineInfo.updateVertexInputHash();
     }
 
     const auto& dispatcher = backend.getDispatcher();
@@ -782,9 +785,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 
     auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
 
-#ifdef ENABLE_VULKAN_VALIDATION_FEATURES
-    // GPU assisted validation crashes when using a pipeline without descriptors.
-    // Use a compatible layout with the general pipeline when enabled
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
@@ -793,7 +793,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     };
 
     layoutInfo.setSetLayouts(layouts);
-#endif
 
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
         layoutInfo, nullptr, backend.getDispatcher());

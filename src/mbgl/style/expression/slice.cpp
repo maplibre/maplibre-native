@@ -2,6 +2,7 @@
 #include <limits>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/slice.hpp>
+#include <mbgl/style/expression/utf8_op_helpers.hpp>
 #include <mbgl/util/string.hpp>
 
 namespace mbgl {
@@ -89,17 +90,24 @@ EvaluationResult Slice::evaluateForArrayInput(const std::vector<Value> &array,
 }
 
 EvaluationResult Slice::evaluateForStringInput(const std::string &string, int fromIndexValue, int toIndexValue) const {
-    int length = static_cast<int>(string.size());
-    if (toIndexValue == std::numeric_limits<int>::max()) {
-        toIndexValue = length;
-    }
-    fromIndexValue = normalizeIndex(fromIndexValue, length);
-    toIndexValue = normalizeIndex(toIndexValue, length);
-    if (fromIndexValue >= length) {
+    size_t lengthBytes = string.size();
+    int length = static_cast<int>(unicodeLengthOnValidatedUtf8(string));
+    size_t toIndexValueBytes = ([&]() {
+        if (toIndexValue == std::numeric_limits<int>::max()) {
+            return lengthBytes;
+        } else {
+            int toIndexValueChars = normalizeIndex(toIndexValue, length);
+            return getUnicodeCharacterOffsetOnValidatedUtf8(string, toIndexValueChars);
+        }
+    })();
+    int fromIndexValueChars = normalizeIndex(fromIndexValue, length);
+    size_t fromIndexValueBytes = getUnicodeCharacterOffsetOnValidatedUtf8(string, fromIndexValueChars);
+
+    if ((fromIndexValueBytes >= lengthBytes) || (fromIndexValueBytes >= toIndexValueBytes)) {
         return std::string{};
     }
 
-    return string.substr(fromIndexValue, toIndexValue - fromIndexValue);
+    return string.substr(fromIndexValueBytes, toIndexValueBytes - fromIndexValueBytes);
 }
 
 void Slice::eachChild(const std::function<void(const Expression &)> &visit) const {
