@@ -175,8 +175,9 @@ public:
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) {
         interleavedVertexBuffer = &buffer;
 
-        if (vertexOffset == 0) {
-            vertexOffset = interleavedVertexBuffer->extendVertexFormat<VertexFormat>();
+        auto newVertexOffset = interleavedVertexBuffer->extendVertexFormat<VertexFormat>();
+        if (vertexOffset == std::numeric_limits<size_t>::max()) {
+            vertexOffset = newVertexOffset;
         }
     }
 
@@ -184,7 +185,7 @@ public:
 
     PaintPropertyStatistics<T> statistics;
     InterleavedVertexBuffer* interleavedVertexBuffer = nullptr;
-    std::size_t vertexOffset = 0;
+    std::size_t vertexOffset = std::numeric_limits<size_t>::max();
 };
 
 namespace detail {
