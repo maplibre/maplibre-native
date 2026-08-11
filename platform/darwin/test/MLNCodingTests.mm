@@ -398,8 +398,11 @@
   MLNPolygon *outerPolygonSquare = [MLNPolygon polygonWithCoordinates:outerSquare
                                                                 count:outerCoordinatesCount
                                                      interiorPolygons:@[ innerPolygonSquare ]];
+  // innerPolygonSquare has no holes, so its pole of inaccessibility is its centre (100.5, 0.5).
+  // outerPolygonSquare has a central hole, so its pole is not the centre; put innerPolygonSquare
+  // first so that MLNMultiPolygon.coordinate is taken from the hole-free polygon.
   MLNMultiPolygon *squares =
-      [MLNMultiPolygon multiPolygonWithPolygons:@[ outerPolygonSquare, innerPolygonSquare ]];
+      [MLNMultiPolygon multiPolygonWithPolygons:@[ innerPolygonSquare, outerPolygonSquare ]];
   CLLocationCoordinate2D squareCenter = CLLocationCoordinate2DMake(100.5, 0.5);
 
   XCTAssertEqual([squares coordinate].latitude, squareCenter.latitude);
