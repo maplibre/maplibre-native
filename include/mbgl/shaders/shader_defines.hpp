@@ -163,15 +163,26 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
 
 enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
-    idFillExtrusionInstanced = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
+    idFillExtrusionInstancedDrawableUBO = getEnumValue(fillExtrusionLayerUBOCount, drawableSSBOStartId),
 #endif
     fillExtrusionDrawableSSBOCount
 };
 
+enum {
+#if MLN_USE_SYMBOL_INSTANCING
+    idSymbolInstancedDrawableUBO = getEnumValue(symbolLayerUBOCount, drawableSSBOStartId),
+    idSymbolDynamicInstancedDrawableUBO,
+    idSymbolOpacityInstancedDrawableUBO,
+    idSymbolDataInstancedDrawableUBO,
+#endif
+    symbolDrawableSSBOCount
+};
+
 // drawable UBOs
 
-static constexpr uint32_t drawableUBOStartId = std::max(
-    {static_cast<uint32_t>(drawableSSBOStartId), static_cast<uint32_t>(fillExtrusionDrawableSSBOCount)});
+static constexpr uint32_t drawableUBOStartId = std::max({static_cast<uint32_t>(drawableSSBOStartId),
+                                                         static_cast<uint32_t>(fillExtrusionDrawableSSBOCount),
+                                                         static_cast<uint32_t>(symbolDrawableSSBOCount)});
 
 enum {
     backgroundUBOCount = getEnumValue(backgroundLayerUBOCount, drawableUBOStartId)
