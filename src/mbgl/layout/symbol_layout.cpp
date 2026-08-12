@@ -1065,7 +1065,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
                                        ? pi_v<float> / 2
                                        : 0.0f;
-                iconSymbol.vertexStartIndex = addSymbols(
+                iconSymbol.startIndex = addSymbols(
                     iconBuffer, sizeData, iconQuads, symbolInstance.getAnchor(), iconSymbol, feature.sortKey);
             };
 
@@ -1080,7 +1080,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
 
             for (auto& pair : bucket->paintProperties) {
                 pair.second.iconBinders.populateVertexVectors(
-                    feature, iconBuffer.vertices().elements(), symbolInstance.getDataFeatureIndex(), {}, {}, canonical);
+                    feature, iconBuffer.attributeData().elements(), symbolInstance.getDataFeatureIndex(), {}, {}, canonical);
             }
         }
 
@@ -1170,7 +1170,7 @@ void SymbolLayout::updatePaintPropertiesForSection(SymbolBucket& bucket,
     const auto& formattedSection = sectionOptionsToValue((*feature.formattedText).sectionAt(sectionIndex));
     for (auto& pair : bucket.paintProperties) {
         pair.second.textBinders.populateVertexVectors(
-            feature, bucket.text.vertices().elements(), feature.index, {}, {}, canonical, formattedSection);
+            feature, bucket.text.attributeData().elements(), feature.index, {}, {}, canonical, formattedSection);
     }
 }
 
@@ -1210,7 +1210,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
         const std::size_t index = addSymbol(
             bucket.text, sizeData, symbolQuad, symbolInstance.getAnchor(), placedSymbol, feature.sortKey);
         if (firstSymbol) {
-            placedSymbol.vertexStartIndex = index;
+            placedSymbol.startIndex = index;
             firstSymbol = false;
         }
     }
@@ -1233,25 +1233,17 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
         buffer.segments.emplace_back(RenderStaticData::symbolSegment(baseInstance, sortKey));
     }
 
-    // We're generating triangle fans, so we always start with the first
-    // coordinate in this polygon.
     auto& segment = buffer.segments.back();
-    // assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
-    // auto index = static_cast<uint16_t>(segment.vertexLength);
     auto index = static_cast<uint16_t>(segment.baseInstance + segment.instanceCount);
 
-    // coordinates (2 triangles)
-    auto& vertices = buffer.vertices();
-    vertices.emplace_back(SymbolBucket::layoutVertex(symbol, labelAnchor, sizeData));
+    auto attributes = SymbolBucket::layoutAttributes(symbol, labelAnchor, sizeData);
+    buffer.attributeData().emplace_back(attributes);
 
-    // Dynamic/Opacity vertices are initialized so that the vertex count always
-    // agrees with the layout vertex buffer, but they will always be updated
-    // before rendering happens
-    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(labelAnchor.point, 0);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    auto dynamicAttributes = SymbolBucket::dynamicLayoutAttributes(labelAnchor.point, 0);
+    buffer.dynamicAttributeData().emplace_back(dynamicAttributes);
 
-    auto opacityVertex = SymbolBucket::opacityVertex(true, 1.0);
-    buffer.opacityVertices().emplace_back(opacityVertex);
+    auto opacityAttributes = SymbolBucket::opacityAttributes(true, 1.0);
+    buffer.opacityAttributeData().emplace_back(opacityAttributes);
 
     segment.instanceCount += instanceCount;
 
@@ -1281,7 +1273,7 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
         buffer.segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max() ||
         std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
         buffer.segments.emplace_back(
-            buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, 0ul, 1ul, sortKey);
+            buffer.attributeData().elements(), buffer.triangles.elements(), 0ul, 0ul, 0ul, 1ul, sortKey);
     }
 
     // We're generating triangle fans, so we always start with the first
@@ -1291,58 +1283,58 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     auto index = static_cast<uint16_t>(segment.vertexLength);
 
     // coordinates (2 triangles)
-    auto& vertices = buffer.vertices();
-    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
-                                                     tl,
-                                                     symbol.glyphOffset.y,
-                                                     tex.x,
-                                                     tex.y,
-                                                     sizeData,
-                                                     symbol.isSDF,
-                                                     pixelOffsetTL,
-                                                     minFontScale));
-    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
-                                                     tr,
-                                                     symbol.glyphOffset.y,
-                                                     tex.x + tex.w,
-                                                     tex.y,
-                                                     sizeData,
-                                                     symbol.isSDF,
-                                                     {pixelOffsetBR.x, pixelOffsetTL.y},
-                                                     minFontScale));
-    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
-                                                     bl,
-                                                     symbol.glyphOffset.y,
-                                                     tex.x,
-                                                     tex.y + tex.h,
-                                                     sizeData,
-                                                     symbol.isSDF,
-                                                     {pixelOffsetTL.x, pixelOffsetBR.y},
-                                                     minFontScale));
-    vertices.emplace_back(SymbolBucket::layoutVertex(labelAnchor.point,
-                                                     br,
-                                                     symbol.glyphOffset.y,
-                                                     tex.x + tex.w,
-                                                     tex.y + tex.h,
-                                                     sizeData,
-                                                     symbol.isSDF,
-                                                     pixelOffsetBR,
-                                                     minFontScale));
+    auto& attributeData = buffer.attributeData();
+    attributeData.emplace_back(SymbolBucket::layoutAttributes(labelAnchor.point,
+                                                              tl,
+                                                              symbol.glyphOffset.y,
+                                                              tex.x,
+                                                              tex.y,
+                                                              sizeData,
+                                                              symbol.isSDF,
+                                                              pixelOffsetTL,
+                                                              minFontScale));
+    attributeData.emplace_back(SymbolBucket::layoutAttributes(labelAnchor.point,
+                                                              tr,
+                                                              symbol.glyphOffset.y,
+                                                              tex.x + tex.w,
+                                                              tex.y,
+                                                              sizeData,
+                                                              symbol.isSDF,
+                                                              {pixelOffsetBR.x, pixelOffsetTL.y},
+                                                              minFontScale));
+    attributeData.emplace_back(SymbolBucket::layoutAttributes(labelAnchor.point,
+                                                              bl,
+                                                              symbol.glyphOffset.y,
+                                                              tex.x,
+                                                              tex.y + tex.h,
+                                                              sizeData,
+                                                              symbol.isSDF,
+                                                              {pixelOffsetTL.x, pixelOffsetBR.y},
+                                                              minFontScale));
+    attributeData.emplace_back(SymbolBucket::layoutAttributes(labelAnchor.point,
+                                                              br,
+                                                              symbol.glyphOffset.y,
+                                                              tex.x + tex.w,
+                                                              tex.y + tex.h,
+                                                              sizeData,
+                                                              symbol.isSDF,
+                                                              pixelOffsetBR,
+                                                              minFontScale));
 
     // Dynamic/Opacity vertices are initialized so that the vertex count always
     // agrees with the layout vertex buffer, but they will always be updated
     // before rendering happens
-    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(labelAnchor.point, 0);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    auto dynamicAttributes = SymbolBucket::dynamicLayoutAttributes(labelAnchor.point, 0);
+    buffer.dynamicAttributeData().emplace_back(dynamicAttributes);
+    buffer.dynamicAttributeData().emplace_back(dynamicAttributes);
+    buffer.dynamicAttributeData().emplace_back(dynamicAttributes);
+    buffer.dynamicAttributeData().emplace_back(dynamicAttributes);
 
-    auto opacityVertex = SymbolBucket::opacityVertex(true, 1.0);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
+    auto opacityAttributes = SymbolBucket::opacityAttributes(true, 1.0);
+    buffer.opacityAttributeData().emplace_back(opacityAttributes);
+    buffer.opacityAttributeData().emplace_back(opacityAttributes);
+    buffer.opacityAttributeData().emplace_back(opacityAttributes);
+    buffer.opacityAttributeData().emplace_back(opacityAttributes);
 
     // add the two triangles, referencing the four coordinates we just inserted.
     buffer.triangles.emplace_back(index + 0, index + 1, index + 2);

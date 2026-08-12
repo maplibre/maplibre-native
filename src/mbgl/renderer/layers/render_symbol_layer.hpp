@@ -104,7 +104,7 @@ private:
     LayerTweakerPtr collisionLayerTweaker;
 
 #if MLN_USE_SYMBOL_INSTANCING
-    using SymbolVertexVector = gfx::VertexVector<SymbolStaticVertex>;
+    using SymbolVertexVector = gfx::VertexVector<SymbolStaticVertexAttributes>;
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
 
     std::shared_ptr<SymbolVertexVector> staticDataVertices;

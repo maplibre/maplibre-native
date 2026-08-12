@@ -91,21 +91,8 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     float2 pos [[attribute(0)]];
 
-#if !defined(HAS_UNIFORM_u_instance)
-    ushort instance [[attribute(1)]];
-#endif
-
-    //float4 pos_scale [[attribute(1)]];
-    //float4 offset_tltr [[attribute(2)]];
-    //float4 offset_blbr [[attribute(3)]];
-    //float4 texture_rect [[attribute(4)]];
-    //float4 pixeloffset [[attribute(5)]];
-    //float2 size_sdf [[attribute(6)]];
-    //float3 projected_pos [[attribute(7)]];
-    //float fade_opacity [[attribute(8)]];
-
-#if !defined(HAS_UNIFORM_u_opacity)
-    //float2 opacity [[attribute(9)]];
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+    ushort sorted_instance [[attribute(1)]];
 #endif
 };
 
@@ -155,10 +142,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
                                 device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
 
-#if defined(HAS_UNIFORM_u_instance)
+#if defined(HAS_UNIFORM_u_sorted_instance)
     const uint instance = instanceID;
 #else
-    const uint instance = vertx.instance;
+    const uint instance = vertx.sorted_instance;
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
@@ -187,28 +174,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             };
         }
 
-    const float2 a_pos = float2(symbol.pos_scale[0].xy);
-    float2 a_offset;
-    if (vertx.pos.x == 0) {
-        if (vertx.pos.y == 0) {
-            a_offset = float2(symbol.offset_tltr[0].xy); //tl
-        } else {
-            a_offset = float2(symbol.offset_blbr[0].xy); //bl
-        }
-    } else {
-        if (vertx.pos.y == 0) {
-            a_offset = float2(symbol.offset_tltr[1].xy); //tr
-        } else {
-            a_offset = float2(symbol.offset_blbr[1].xy); //br
-        }
-    }
-
-    const float2 a_tex = float2(symbol.texture_rect[0].xy) + vertx.pos * float2(symbol.texture_rect[1].xy);
+    const float2 a_pos = float2(symbol.pos_scale[0]);
+    const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
+    const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
     const float2 a_size = float2(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const float2 a_pxoffset = float2(symbol.pixeloffset[0].xy) + vertx.pos * float2(symbol.pixeloffset[1].xy - symbol.pixeloffset[0].xy);
-    const float2 a_minFontScale = float2(symbol.pos_scale[1].xy) / 256.0;
+    const float2 a_pxoffset = float2(symbol.pixeloffset[0]) + vertx.pos * float2(symbol.pixeloffset[1] - symbol.pixeloffset[0]);
+    const float2 a_minFontScale = float2(symbol.pos_scale[1]) / 256.0;
 
     const float segment_angle = -dynamic.projected_pos[2];
 
@@ -307,33 +280,8 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     float2 pos [[attribute(0)]];
 
-#if !defined(HAS_UNIFORM_u_instance)
-    ushort instance [[attribute(1)]];
-#endif
-
-    //float4 pos_scale [[attribute(1)]];
-    //float4 offset_tltr [[attribute(2)]];
-    //float4 offset_blbr [[attribute(3)]];
-    //float4 texture_rect [[attribute(4)]];
-    //float4 pixeloffset [[attribute(5)]];
-    //float2 size_sdf [[attribute(6)]];
-    //float3 projected_pos [[attribute(7)]];
-    //float fade_opacity [[attribute(8)]];
-
-#if !defined(HAS_UNIFORM_u_opacity)
-    //float2 opacity [[attribute(9)]];
-#endif
-#if !defined(HAS_UNIFORM_u_fill_color)
-    //float4 fill_color [[attribute(10)]];
-#endif
-#if !defined(HAS_UNIFORM_u_halo_color)
-    //float4 halo_color [[attribute(11)]];
-#endif
-#if !defined(HAS_UNIFORM_u_halo_width)
-    //float2 halo_width [[attribute(12)]];
-#endif
-#if !defined(HAS_UNIFORM_u_halo_blur)
-    //float2 halo_blur [[attribute(13)]];
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+    ushort sorted_instance [[attribute(1)]];
 #endif
 };
 
@@ -408,10 +356,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
                                 device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
 
-#if defined(HAS_UNIFORM_u_instance)
+#if defined(HAS_UNIFORM_u_sorted_instance)
     const uint instance = instanceID;
 #else
-    const uint instance = vertx.instance;
+    const uint instance = vertx.sorted_instance;
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
@@ -434,27 +382,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
-    const float2 a_pos = float2(symbol.pos_scale[0].xy);
-    float2 a_offset;
-    if (vertx.pos.x == 0) {
-        if (vertx.pos.y == 0) {
-            a_offset = float2(symbol.offset_tltr[0].xy); //tl
-        } else {
-            a_offset = float2(symbol.offset_blbr[0].xy); //bl
-        }
-    } else {
-        if (vertx.pos.y == 0) {
-            a_offset = float2(symbol.offset_tltr[1].xy); //tr
-        } else {
-            a_offset = float2(symbol.offset_blbr[1].xy); //br
-        }
-    }
-
-    const float2 a_tex = float2(symbol.texture_rect[0].xy) + vertx.pos * float2(symbol.texture_rect[1].xy);
+    const float2 a_pos = float2(symbol.pos_scale[0]);
+    const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
+    const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
     const float2 a_size = float2(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const float2 a_pxoffset = float2(symbol.pixeloffset[0].xy) + vertx.pos * float2(symbol.pixeloffset[1].xy - symbol.pixeloffset[0].xy);
+    const float2 a_pxoffset = float2(symbol.pixeloffset[0]) + vertx.pos * float2(symbol.pixeloffset[1] - symbol.pixeloffset[0]);
 
     const float segment_angle = -dynamic.projected_pos[2];
 
@@ -615,33 +549,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 struct VertexStage {
     float2 pos [[attribute(0)]];
 
-#if !defined(HAS_UNIFORM_u_instance)
-    ushort instance [[attribute(1)]];
-#endif
-
-    //float4 pos_scale [[attribute(1)]];
-    //float4 offset_tltr [[attribute(2)]];
-    //float4 offset_blbr [[attribute(3)]];
-    //float4 texture_rect [[attribute(4)]];
-    //float4 pixeloffset [[attribute(5)]];
-    //float2 size_sdf [[attribute(6)]];
-    //float3 projected_pos [[attribute(7)]];
-    //float fade_opacity [[attribute(8)]];
-
-#if !defined(HAS_UNIFORM_u_opacity)
-    //float2 opacity [[attribute(9)]];
-#endif
-#if !defined(HAS_UNIFORM_u_fill_color)
-    //float4 fill_color [[attribute(10)]];
-#endif
-#if !defined(HAS_UNIFORM_u_halo_color)
-    //float4 halo_color [[attribute(11)]];
-#endif
-#if !defined(HAS_UNIFORM_u_halo_width)
-    //float2 halo_width [[attribute(12)]];
-#endif
-#if !defined(HAS_UNIFORM_u_halo_blur)
-    //float2 halo_blur [[attribute(13)]];
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+    ushort sorted_instance [[attribute(1)]];
 #endif
 };
 
@@ -718,10 +627,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
                                 device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
 
-#if defined(HAS_UNIFORM_u_instance)
+#if defined(HAS_UNIFORM_u_sorted_instance)
     const uint instance = instanceID;
 #else
-    const uint instance = vertx.instance;
+    const uint instance = vertx.sorted_instance;
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
@@ -744,23 +653,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
-    const float2 a_pos = float2(symbol.pos_scale[0].xy);
-    float2 a_offset;
-    if (vertx.pos.x == 0) {
-        if (vertx.pos.y == 0) {
-            a_offset = float2(symbol.offset_tltr[0].xy); //tl
-        } else {
-            a_offset = float2(symbol.offset_blbr[0].xy); //bl
-        }
-    } else {
-        if (vertx.pos.y == 0) {
-            a_offset = float2(symbol.offset_tltr[1].xy); //tr
-        } else {
-            a_offset = float2(symbol.offset_blbr[1].xy); //br
-        }
-    }
-
-    const float2 a_tex = float2(symbol.texture_rect[0].xy) + vertx.pos * float2(symbol.texture_rect[1].xy);
+    const float2 a_pos = float2(symbol.pos_scale[0]);
+    const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
+    const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
     const float2 a_size = float2(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);

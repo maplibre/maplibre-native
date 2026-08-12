@@ -43,26 +43,26 @@ class CrossTileSymbolLayerIndex;
 
 using SymbolIconBinders = PaintPropertyBinders<style::IconPaintProperties::DataDrivenProperties>;
 using SymbolTextBinders = PaintPropertyBinders<style::TextPaintProperties::DataDrivenProperties>;
-using SymbolStaticVertex = gfx::Vertex<TypeList<attributes::pos>>;
+using SymbolStaticVertexAttributes = gfx::Vertex<TypeList<attributes::pos>>;
 
 #if MLN_USE_SYMBOL_INSTANCING
-using SymbolInstanceVertex = gfx::Vertex<TypeList<attributes::instance>>;
-using SymbolLayoutVertex = gfx::Vertex<TypeList<attributes::pos_scale,
-                                                attributes::offset_tltr,
-                                                attributes::offset_blbr,
-                                                attributes::texture_rect,
-                                                attributes::pixeloffset,
-                                                attributes::size_sdf>>;
+using SymbolSortedInstance = gfx::Vertex<TypeList<attributes::sorted_instance>>;
+using SymbolLayoutAttributes = gfx::Vertex<TypeList<attributes::pos_scale,
+                                                    attributes::offset_tltr,
+                                                    attributes::offset_blbr,
+                                                    attributes::texture_rect,
+                                                    attributes::pixeloffset,
+                                                    attributes::size_sdf>>;
 #else
-using SymbolLayoutVertex =
+using SymbolLayoutAttributes =
     gfx::Vertex<TypeList<attributes::pos_offset, attributes::data<uint16_t, 4>, attributes::pixeloffset>>;
 #endif
 
-using SymbolDynamicLayoutAttributes = TypeList<attributes::projected_pos>;
-using SymbolOpacityAttributes = TypeList<attributes::fade_opacity>;
+using SymbolDynamicLayoutAttributes = gfx::Vertex<TypeList<attributes::projected_pos>>;
+using SymbolOpacityAttributes = gfx::Vertex<TypeList<attributes::fade_opacity>>;
 
-using CollisionBoxLayoutAttributes = TypeList<attributes::pos, attributes::anchor_pos, attributes::extrude>;
-using CollisionBoxDynamicAttributes = TypeList<attributes::placed, attributes::shift>;
+using CollisionBoxLayoutVertexAttributes = gfx::Vertex<TypeList<attributes::pos, attributes::anchor_pos, attributes::extrude>>;
+using CollisionBoxDynamicVertexAttributes = gfx::Vertex<TypeList<attributes::placed, attributes::shift>>;
 
 const uint16_t MAX_GLYPH_ICON_SIZE = 255;
 const uint16_t SIZE_PACK_FACTOR = 128;
@@ -219,7 +219,7 @@ public:
           line(std::move(line_)),
           tileDistances(std::move(tileDistances_)),
           hidden(false),
-          vertexStartIndex(0),
+          startIndex(0),
           placedIconIndex(std::move(placedIconIndex_)) {}
     Point<float> anchorPoint;
     std::size_t segment;
@@ -231,7 +231,7 @@ public:
     std::vector<float> tileDistances;
     std::vector<float> glyphOffsets;
     bool hidden;
-    size_t vertexStartIndex;
+    size_t startIndex;
     // The crossTileID is only filled/used on the foreground for variable text anchors
     uint32_t crossTileID = 0u;
     // The placedOrientation is only used when symbol layer's property is set to
@@ -296,11 +296,9 @@ public:
 #endif
 
 #if MLN_USE_SYMBOL_INSTANCING
-    static SymbolInstanceVertex instanceVertex(uint16_t instance) { return {instance}; }
-
-    static SymbolLayoutVertex layoutVertex(const SymbolQuad& symbol,
-                                           const Anchor& labelAnchor,
-                                           const Range<float>& sizeData) {
+    static SymbolLayoutAttributes layoutAttributes(const SymbolQuad& symbol,
+                                                   const Anchor& labelAnchor,
+                                                   const Range<float>& sizeData) {
         const uint16_t aSizeMin = (std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.min * SIZE_PACK_FACTOR))
                                    << 1) +
                                   uint16_t(symbol.isSDF);
@@ -332,15 +330,15 @@ public:
                   aSizeMax }};
     }
 #else
-    static SymbolLayoutVertex layoutVertex(Point<float> labelAnchor,
-                                           Point<float> o,
-                                           float glyphOffsetY,
-                                           uint16_t tx,
-                                           uint16_t ty,
-                                           const Range<float>& sizeData,
-                                           bool isSDF,
-                                           Point<float> pixelOffset,
-                                           Point<float> minFontScale) {
+    static SymbolLayoutAttributes layoutAttributes(Point<float> labelAnchor,
+                                                   Point<float> o,
+                                                   float glyphOffsetY,
+                                                   uint16_t tx,
+                                                   uint16_t ty,
+                                                   const Range<float>& sizeData,
+                                                   bool isSDF,
+                                                   Point<float> pixelOffset,
+                                                   Point<float> minFontScale) {
         const uint16_t aSizeMin = (std::min(MAX_PACKED_SIZE, static_cast<uint16_t>(sizeData.min * SIZE_PACK_FACTOR))
                                    << 1) +
                                   uint16_t(isSDF);
@@ -361,11 +359,11 @@ public:
     }
 #endif
 
-    static gfx::Vertex<SymbolDynamicLayoutAttributes> dynamicLayoutVertex(Point<float> anchorPoint, float labelAngle) {
+    static SymbolDynamicLayoutAttributes dynamicLayoutAttributes(Point<float> anchorPoint, float labelAngle) {
         return {{{anchorPoint.x, anchorPoint.y, labelAngle}}};
     }
 
-    static gfx::Vertex<SymbolOpacityAttributes> opacityVertex(bool placed, float opacity) {
+    static SymbolOpacityAttributes opacityAttributes(bool placed, float opacity) {
         return {{{static_cast<float>((static_cast<uint8_t>(opacity * 127) << 1) | static_cast<uint8_t>(placed))}}};
     }
 
@@ -397,62 +395,64 @@ public:
 
     std::unique_ptr<SymbolSizeBinder> textSizeBinder;
 
+    using AttributeVector = gfx::VertexVector<SymbolLayoutAttributes>;
+    using DynamicAttributeVector = gfx::VertexVector<SymbolDynamicLayoutAttributes>;
+    using OpacityAttributeVector = gfx::VertexVector<SymbolOpacityAttributes>;
+    
 #if MLN_USE_SYMBOL_INSTANCING
-    using InstanceVector = gfx::VertexVector<SymbolInstanceVertex>;
-    using InstanceBuffer = gfx::VertexBuffer<SymbolInstanceVertex>;
+    using SortedInstanceVector = gfx::VertexVector<SymbolSortedInstance>;
+#else
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
 #endif
-    using VertexVector = gfx::VertexVector<SymbolLayoutVertex>;
-    using VertexBuffer = gfx::VertexBuffer<SymbolLayoutVertex>;
-    using DynamicVertexVector = gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
-    using DynamicVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolDynamicLayoutAttributes>>;
-    using OpacityVertexVector = gfx::VertexVector<gfx::Vertex<SymbolOpacityAttributes>>;
-    using OpacityVertexBuffer = gfx::VertexBuffer<gfx::Vertex<SymbolOpacityAttributes>>;
-
+    
     struct Buffer final {
         ~Buffer() {
-            sharedVertices->release();
-            sharedDynamicVertices->release();
-            sharedOpacityVertices->release();
+            sharedAttributeData->release();
+            sharedDynamicAttributeData->release();
+            sharedOpacityAttributeData->release();
+#if MLN_USE_SYMBOL_INSTANCING
+            sharedSortedInstances->release();
+#endif
         }
 
         void updateModified() {
-            if (sharedVertices) {
-                sharedVertices->updateModified();
+            if (sharedAttributeData) {
+                sharedAttributeData->updateModified();
             }
-            if (sharedDynamicVertices) {
-                sharedDynamicVertices->updateModified();
+            if (sharedDynamicAttributeData) {
+                sharedDynamicAttributeData->updateModified();
             }
-            if (sharedOpacityVertices) {
-                sharedOpacityVertices->updateModified();
+            if (sharedOpacityAttributeData) {
+                sharedOpacityAttributeData->updateModified();
             }
+#if MLN_USE_SYMBOL_INSTANCING
+            if (sharedSortedInstances) {
+                sharedSortedInstances->updateModified();
+            }
+#endif
         }
 
+        std::shared_ptr<AttributeVector> sharedAttributeData = std::make_shared<AttributeVector>();
+        AttributeVector& attributeData() { return *sharedAttributeData; }
+        const AttributeVector& attributeData() const { return *sharedAttributeData; }
+
+        std::shared_ptr<DynamicAttributeVector> sharedDynamicAttributeData = std::make_shared<DynamicAttributeVector>();
+        DynamicAttributeVector& dynamicAttributeData() { return *sharedDynamicAttributeData; }
+        const DynamicAttributeVector& dynamicAttributeData() const { return *sharedDynamicAttributeData; }
+
+        std::shared_ptr<OpacityAttributeVector> sharedOpacityAttributeData = std::make_shared<OpacityAttributeVector>();
+        OpacityAttributeVector& opacityAttributeData() { return *sharedOpacityAttributeData; }
+        const OpacityAttributeVector& opacityAttributeData() const { return *sharedOpacityAttributeData; }
+
 #if MLN_USE_SYMBOL_INSTANCING
-        std::shared_ptr<InstanceVector> sharedInstances = std::make_shared<InstanceVector>();
-        InstanceVector& instances() { return *sharedInstances; }
-        const InstanceVector& instances() const { return *sharedInstances; }
-
-        std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
-        VertexVector& vertices() { return *sharedVertices; }
-        const VertexVector& vertices() const { return *sharedVertices; }
+        std::shared_ptr<SortedInstanceVector> sharedSortedInstances = std::make_shared<SortedInstanceVector>();
+        SortedInstanceVector& sortedInstances() { return *sharedSortedInstances; }
+        const SortedInstanceVector& sortedInstances() const { return *sharedSortedInstances; }
 #else
-        std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
-        VertexVector& vertices() { return *sharedVertices; }
-        const VertexVector& vertices() const { return *sharedVertices; }
-
-        using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
         const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
         TriangleIndexVector& triangles = *sharedTriangles;
 #endif
-
-        std::shared_ptr<DynamicVertexVector> sharedDynamicVertices = std::make_shared<DynamicVertexVector>();
-        DynamicVertexVector& dynamicVertices() { return *sharedDynamicVertices; }
-        const DynamicVertexVector& dynamicVertices() const { return *sharedDynamicVertices; }
-
-        std::shared_ptr<OpacityVertexVector> sharedOpacityVertices = std::make_shared<OpacityVertexVector>();
-        OpacityVertexVector& opacityVertices() { return *sharedOpacityVertices; }
-        const OpacityVertexVector& opacityVertices() const { return *sharedOpacityVertices; }
-
+        
         SegmentVector segments;
         std::vector<PlacedSymbol> placedSymbols;
     } text;
@@ -462,8 +462,8 @@ public:
     Buffer icon;
     Buffer sdfIcon;
 
-    using CollisionVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>>;
-    using CollisionDynamicVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>>;
+    using CollisionVertexVector = gfx::VertexVector<CollisionBoxLayoutVertexAttributes>;
+    using CollisionDynamicVertexVector = gfx::VertexVector<CollisionBoxDynamicVertexAttributes>;
 
     struct CollisionBuffer {
         std::shared_ptr<CollisionVertexVector> sharedVertices = std::make_shared<CollisionVertexVector>();
@@ -514,17 +514,17 @@ public:
         return *textCollisionCircle;
     }
 
-    static gfx::Vertex<CollisionBoxLayoutAttributes> collisionLayoutVertex(Point<float> a,
-                                                                           Point<float> anchor,
-                                                                           Point<float> o) {
+    static CollisionBoxLayoutVertexAttributes collisionLayoutVertex(Point<float> a,
+                                                                    Point<float> anchor,
+                                                                    Point<float> o) {
         return {{{static_cast<int16_t>(a.x), static_cast<int16_t>(a.y)}},
                 {{static_cast<int16_t>(anchor.x), static_cast<int16_t>(anchor.y)}},
                 {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
-    static gfx::Vertex<CollisionBoxDynamicAttributes> collisionDynamicVertex(bool placed,
-                                                                             bool notUsed,
-                                                                             Point<float> shift) {
+    static CollisionBoxDynamicVertexAttributes collisionDynamicVertex(bool placed,
+                                                                      bool notUsed,
+                                                                      Point<float> shift) {
         return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
     }
 

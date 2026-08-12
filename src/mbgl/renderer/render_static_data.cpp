@@ -56,7 +56,7 @@ gfx::VertexVector<FillExtrusionStaticVertex> RenderStaticData::fillExtrusionVert
     return vertices;
 }
 
-gfx::VertexVector<SymbolStaticVertex> RenderStaticData::symbolVertices() {
+gfx::VertexVector<SymbolStaticVertexAttributes> RenderStaticData::symbolVertices() {
     gfx::VertexVector<HeatmapTextureLayoutVertex> vertices;
     vertices.emplace_back(FillExtrusionStaticVertex{0, 0});
     vertices.emplace_back(FillExtrusionStaticVertex{1, 0});

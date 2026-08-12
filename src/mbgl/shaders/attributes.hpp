@@ -26,7 +26,7 @@ MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, decimals_ed);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
 
 #if MLN_USE_SYMBOL_INSTANCING
-MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, instance);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, sorted_instance);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, pos_scale);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_tltr);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_blbr);

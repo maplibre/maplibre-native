@@ -238,6 +238,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 namespace {
 const SegmentVector emptySegmentVector;
 constexpr auto posOffsetAttribName = "a_pos_offset";
+constexpr auto sortedInstanceUniformName = "sorted_instance";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
@@ -245,112 +246,107 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
                           StringIDSetsPair* propertiesAsUniforms) {
-#if MLN_USE_SYMBOL_INSTANCING
-    if (const auto& attr = attribs.set(idSymbolPosScaleAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-    if (const auto& attr = attribs.set(idSymbolOffsetTlTrAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a2),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-    if (const auto& attr = attribs.set(idSymbolOffsetBlBrAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a3),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-    if (const auto& attr = attribs.set(idSymbolTextureRectAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a4),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::UShort4);
-    }
-    if (const auto& attr = attribs.set(idSymbolPixelOffsetAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a5),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-    if (const auto& attr = attribs.set(idSymbolSizeSdfAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a6),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::UShort2);
-    }
-#else
-    if (const auto& attr = attribs.set(idSymbolPosOffsetVertexAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-    if (const auto& attr = attribs.set(idSymbolDataVertexAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a2),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::UShort4);
-    }
-    if (const auto& attr = attribs.set(idSymbolPixelOffsetVertexAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a3),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-#endif
-
-    if (const auto& attr = attribs.set(idSymbolProjectedPosVertexAttribute)) {
-        using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
-        attr->setSharedRawData(buffer.sharedDynamicVertices,
-                               offsetof(Vertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(Vertex),
-                               gfx::AttributeDataType::Float3);
-    }
-    if (const auto& attr = attribs.set(idSymbolFadeOpacityVertexAttribute)) {
-        using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
-        attr->setSharedRawData(buffer.sharedOpacityVertices,
-                               offsetof(Vertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(Vertex),
-                               gfx::AttributeDataType::Float);
-    }
-
     if (isText) {
         attribs.readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(
-            paintProps.textBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
+            paintProps.textBinders, evaluated, propertiesAsUniforms, idSymbolOpacityAttribute);
     } else {
         attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
-            paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
+            paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityAttribute);
     }
-
+    
 #if MLN_USE_SYMBOL_INSTANCING
-    if (!buffer.instances().empty()) {
-        if (const auto& attr = attribs.set(idSymbolInstanceAttribute)) {
-            attr->setSharedRawData(buffer.sharedInstances,
-                                   offsetof(SymbolInstanceVertex, a1),
+    if (!buffer.sortedInstances().empty()) {
+        if (const auto& attr = attribs.set(idSymbolSortedInstanceAttribute)) {
+            attr->setSharedRawData(buffer.sharedSortedInstances,
+                                   offsetof(SymbolSortedInstance, a1),
                                    /*vertexOffset=*/0,
-                                   sizeof(SymbolInstanceVertex),
+                                   sizeof(SymbolSortedInstance),
                                    gfx::AttributeDataType::UShort);
         }
     } else if (propertiesAsUniforms) {
-        propertiesAsUniforms->first.emplace("instance");
-        propertiesAsUniforms->second.emplace(idSymbolInstanceAttribute);
+        propertiesAsUniforms->first.emplace(sortedInstanceUniformName);
+        propertiesAsUniforms->second.emplace(idSymbolSortedInstanceAttribute);
+    }
+    if (const auto& attr = attribs.set(idSymbolPosScaleAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolOffsetTlTrAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolOffsetBlBrAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a3),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolTextureRectAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a4),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::UShort4);
+    }
+    if (const auto& attr = attribs.set(idSymbolPixelOffsetAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a5),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolSizeSdfAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a6),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::UShort2);
+    }
+#else
+    if (const auto& attr = attribs.set(idSymbolPosOffsetAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolDataAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::UShort4);
+    }
+    if (const auto& attr = attribs.set(idSymbolPixelOffsetAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a3),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
     }
 #endif
+
+    if (const auto& attr = attribs.set(idSymbolProjectedPosAttribute)) {
+        attr->setSharedRawData(buffer.sharedDynamicAttributeData,
+                               offsetof(SymbolDynamicLayoutAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolDynamicLayoutAttributes),
+                               gfx::AttributeDataType::Float3);
+    }
+    if (const auto& attr = attribs.set(idSymbolFadeOpacityAttribute)) {
+        attr->setSharedRawData(buffer.sharedOpacityAttributeData,
+                               offsetof(SymbolOpacityAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolOpacityAttributes),
+                               gfx::AttributeDataType::Float);
+    }
 }
 
 void updateTileDrawable(gfx::Drawable& drawable,
@@ -379,7 +375,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawable.setVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
     // TODO: detect whether anything has actually changed
-    // See `Placement::updateBucketDynamicVertices`
+    // See `Placement::updateBucketDynamicAttributeData`
 
     if (auto& attribs = drawable.getVertexAttributes()) {
         updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, nullptr);
@@ -390,44 +386,41 @@ void updateTileDrawable(gfx::Drawable& drawable,
 gfx::VertexAttributeArrayPtr getCollisionVertexAttributes(gfx::Context& context,
                                                           const SymbolBucket::CollisionBuffer& buffer) {
     auto vertexAttrs = context.createVertexAttributeArray();
-    using LayoutVertex = gfx::Vertex<CollisionBoxLayoutAttributes>;
 
     if (const auto& attr = vertexAttrs->set(idCollisionPosVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(LayoutVertex, a1),
+                               offsetof(CollisionBoxLayoutVertexAttributes, a1),
                                /*vertexOffset=*/0,
-                               sizeof(LayoutVertex),
+                               sizeof(CollisionBoxLayoutVertexAttributes),
                                gfx::AttributeDataType::Short2);
     }
     if (const auto& attr = vertexAttrs->set(idCollisionAnchorPosVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(LayoutVertex, a2),
+                               offsetof(CollisionBoxLayoutVertexAttributes, a2),
                                /*vertexOffset=*/0,
-                               sizeof(LayoutVertex),
+                               sizeof(CollisionBoxLayoutVertexAttributes),
                                gfx::AttributeDataType::Short2);
     }
     if (const auto& attr = vertexAttrs->set(idCollisionExtrudeVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(LayoutVertex, a3),
+                               offsetof(CollisionBoxLayoutVertexAttributes, a3),
                                /*vertexOffset=*/0,
-                               sizeof(LayoutVertex),
+                               sizeof(CollisionBoxLayoutVertexAttributes),
                                gfx::AttributeDataType::Short2);
     }
 
-    using DynamicVertex = gfx::Vertex<CollisionBoxDynamicAttributes>;
-
     if (const auto& attr = vertexAttrs->set(idCollisionPlacedVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedDynamicVertices,
-                               offsetof(DynamicVertex, a1),
+                               offsetof(CollisionBoxDynamicVertexAttributes, a1),
                                /*vertexOffset=*/0,
-                               sizeof(DynamicVertex),
+                               sizeof(CollisionBoxDynamicVertexAttributes),
                                gfx::AttributeDataType::UShort2);
     }
     if (const auto& attr = vertexAttrs->set(idCollisionShiftVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedDynamicVertices,
-                               offsetof(DynamicVertex, a2),
+                               offsetof(CollisionBoxDynamicVertexAttributes, a2),
                                /*vertexOffset=*/0,
-                               sizeof(DynamicVertex),
+                               sizeof(CollisionBoxDynamicVertexAttributes),
                                gfx::AttributeDataType::Float2);
     }
 
@@ -700,9 +693,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 // Features need to be rendered in a specific order, so we add each segment individually
                 for (const auto& segment : buffer.segments) {
 #if MLN_USE_SYMBOL_INSTANCING
-                    assert(segment.baseInstance + segment.instanceCount <= buffer.vertices().elements());
+                    assert(segment.baseInstance + segment.instanceCount <= buffer.attributeData().elements());
 #else
-                    assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices().elements());
+                    assert(segment.vertexOffset + segment.vertexLength <= buffer.attributeData().elements());
 #endif
                     renderableSegments.emplace(SegmentGroup{
                         .renderable = {segment, tile, renderData, bucketPaintProperties, segment.sortKey, type},
@@ -761,7 +754,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
 #if MLN_USE_SYMBOL_INSTANCING
-        if (!buffer.vertices().elements()) {
+        if (!buffer.attributeData().elements()) {
             continue;
         }
 #else
@@ -790,11 +783,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_USE_SYMBOL_INSTANCING
         auto vertexAttribs = context.createVertexAttributeArray();
-        if (const auto& attr = vertexAttribs->set(idSymbolPosVertexAttribute)) {
+        if (const auto& attr = vertexAttribs->set(idSymbolPosAttribute)) {
             attr->setSharedRawData(staticDataVertices,
-                                   offsetof(SymbolStaticVertex, a1),
+                                   offsetof(SymbolStaticVertexAttributes, a1),
                                    /*vertexOffset=*/0,
-                                   sizeof(SymbolStaticVertex),
+                                   sizeof(SymbolStaticVertexAttributes),
                                    gfx::AttributeDataType::Short2);
         }
 

@@ -522,9 +522,9 @@ enum {
 
 enum {
 #if MLN_USE_SYMBOL_INSTANCING
-    idSymbolPosVertexAttribute,
+    idSymbolPosAttribute,
 
-    idSymbolInstanceAttribute,
+    idSymbolSortedInstanceAttribute,
 
     idSymbolPosScaleAttribute,
     idSymbolOffsetTlTrAttribute,
@@ -533,22 +533,22 @@ enum {
     idSymbolPixelOffsetAttribute,
     idSymbolSizeSdfAttribute,
 #else
-    idSymbolPosOffsetVertexAttribute,
-    idSymbolDataVertexAttribute,
-    idSymbolPixelOffsetVertexAttribute,
+    idSymbolPosOffsetAttribute,
+    idSymbolDataAttribute,
+    idSymbolPixelOffsetAttribute,
 #endif
 
-    idSymbolProjectedPosVertexAttribute,
-    idSymbolFadeOpacityVertexAttribute,
+    idSymbolProjectedPosAttribute,
+    idSymbolFadeOpacityAttribute,
 
     // Data driven
-    idSymbolOpacityVertexAttribute,
-    idSymbolColorVertexAttribute,
-    idSymbolHaloColorVertexAttribute,
-    idSymbolHaloWidthVertexAttribute,
-    idSymbolHaloBlurVertexAttribute,
+    idSymbolOpacityAttribute,
+    idSymbolColorAttribute,
+    idSymbolHaloColorAttribute,
+    idSymbolHaloWidthAttribute,
+    idSymbolHaloBlurAttribute,
 
-    symbolVertexAttributeCount
+    symbolAttributeCount
 };
 
 enum {
@@ -568,7 +568,7 @@ enum {
     wideVectorInstanceAttributeCount
 };
 
-static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
+static constexpr uint32_t maxAttributeCountPerShader = std::max({
     static_cast<uint32_t>(backgroundVertexAttributeCount),
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),
@@ -584,7 +584,7 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
     static_cast<uint32_t>(lineVertexAttributeCount),
     static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
-    static_cast<uint32_t>(symbolVertexAttributeCount),
+    static_cast<uint32_t>(symbolAttributeCount),
     static_cast<uint32_t>(wideVectorAttributeCount),
     static_cast<uint32_t>(wideVectorInstanceAttributeCount),
 });

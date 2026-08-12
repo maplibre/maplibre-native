@@ -161,17 +161,16 @@ bool SymbolBucket::hasTextCollisionCircleData() const {
 }
 
 #if MLN_USE_SYMBOL_INSTANCING
-void addPlacedSymbol(SymbolBucket::InstanceVector& instances, const PlacedSymbol& placedSymbol) {
-    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 1;
-    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 1) {
-        auto instanceVertex = SymbolBucket::instanceVertex(vertexIndex);
-        instances.emplace_back(instanceVertex);
+void addPlacedSymbol(SymbolBucket::SortedInstanceVector& sortedInstances, const PlacedSymbol& placedSymbol) {
+    auto endIndex = placedSymbol.startIndex + placedSymbol.glyphOffsets.size() * 1;
+    for (auto instanceIndex = placedSymbol.startIndex; instanceIndex < endIndex; instanceIndex += 1) {
+        sortedInstances.emplace_back(SymbolSortedInstance{static_cast<uint16_t>(instanceIndex)});
     }
 }
 #else
-void addPlacedSymbol(SymbolBucket::Buffer::TriangleIndexVector& triangles, const PlacedSymbol& placedSymbol) {
-    auto endIndex = placedSymbol.vertexStartIndex + placedSymbol.glyphOffsets.size() * 4;
-    for (auto vertexIndex = placedSymbol.vertexStartIndex; vertexIndex < endIndex; vertexIndex += 4) {
+void addPlacedSymbol(SymbolBucket::TriangleIndexVector& triangles, const PlacedSymbol& placedSymbol) {
+    auto endIndex = placedSymbol.startIndex + placedSymbol.glyphOffsets.size() * 4;
+    for (auto vertexIndex = placedSymbol.startIndex; vertexIndex < endIndex; vertexIndex += 4) {
         triangles.emplace_back(static_cast<uint16_t>(vertexIndex + 0),
                                static_cast<uint16_t>(vertexIndex + 1),
                                static_cast<uint16_t>(vertexIndex + 2));
@@ -205,9 +204,9 @@ void SymbolBucket::sortFeatures(const float angle) {
     uploaded = false;
 
 #if MLN_USE_SYMBOL_INSTANCING
-    auto& textVector = text.instances();
-    auto& iconVector = icon.instances();
-    auto& sdfIconVector = sdfIcon.instances();
+    auto& textVector = text.sortedInstances();
+    auto& iconVector = icon.sortedInstances();
+    auto& sdfIconVector = sdfIcon.sortedInstances();
 #else
     auto& textVector = text.triangles;
     auto& iconVector = icon.triangles;
@@ -292,12 +291,12 @@ SymbolInstanceReferences SymbolBucket::getSymbols(const std::optional<SortKeyRan
 
 #if MLN_SYMBOL_GUARDS
 bool SymbolBucket::check(source_location source) {
-    if (text.vertices().elements() != text.dynamicVertices().elements() ||
-        text.vertices().elements() != text.opacityVertices().elements() ||
-        icon.vertices().elements() != icon.dynamicVertices().elements() ||
-        icon.vertices().elements() != icon.opacityVertices().elements() ||
-        sdfIcon.vertices().elements() != sdfIcon.dynamicVertices().elements() ||
-        sdfIcon.vertices().elements() != sdfIcon.opacityVertices().elements()) {
+    if (text.attributeData().elements() != text.dynamicAttributeData().elements() ||
+        text.attributeData().elements() != text.opacityAttributeData().elements() ||
+        icon.attributeData().elements() != icon.dynamicAttributeData().elements() ||
+        icon.attributeData().elements() != icon.opacityAttributeData().elements() ||
+        sdfIcon.attributeData().elements() != sdfIcon.dynamicAttributeData().elements() ||
+        sdfIcon.attributeData().elements() != sdfIcon.opacityAttributeData().elements()) {
         // This bucket was left in a partial state and it cannot be used
         return false;
     }
@@ -355,7 +354,7 @@ void SymbolBucket::updateVertices(const Placement& placement,
         uploaded = false;
     }
 
-    if (placement.updateBucketDynamicVertices(*this, state, tile)) {
+    if (placement.updateBucketDynamicAttributeData(*this, state, tile)) {
         dynamicUploaded = false;
         uploaded = false;
     }

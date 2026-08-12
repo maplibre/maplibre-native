@@ -31,7 +31,7 @@ public:
     static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
     static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
     static gfx::VertexVector<FillExtrusionStaticVertex> fillExtrusionVertices();
-    static gfx::VertexVector<SymbolStaticVertex> symbolVertices();
+    static gfx::VertexVector<SymbolStaticVertexAttributes> symbolVertices();
 
     static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
     static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices();
