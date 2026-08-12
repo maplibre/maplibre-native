@@ -5,12 +5,15 @@ genrule(
     name = "cpp_bindings",
     srcs = [
         "src/color.rs",
+        "src/mlt.rs",
     ],
     outs = [
         "cpp/include/rustutils/color.hpp",
+        "cpp/include/rustutils/mlt.hpp",
         "cpp/src/color.rs.cpp",
+        "cpp/src/mlt.rs.cpp",
     ],
-    cmd = "CXXBRIDGE_CMD=$(location @cxx.rs//:codegen) ./$(location :generate.sh) $(@D) $(SRCS)",
+    cmd = "CXXBRIDGE_CMD=$(location @cxx.rs//:codegen) bash ./$(location :generate.sh) $(@D) $(SRCS)",
     # Using the cxxbridge binary built by Bazel
     tools = [
         ":generate.sh",
@@ -23,12 +26,14 @@ rust_static_library(
     srcs = [
         "src/color.rs",
         "src/lib.rs",
+        "src/mlt.rs",
     ],
     crate_name = "rustutils",
     visibility = ["//visibility:public"],
     deps = [
         "@crates//:csscolorparser",
         "@crates//:cxx",
+        "@crates//:mlt_core",
     ],
 )
 

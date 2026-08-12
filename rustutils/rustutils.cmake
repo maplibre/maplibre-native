@@ -13,6 +13,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Corrosion)
 
 corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_LIST_DIR}/Cargo.toml)
+find_program(BASH_EXECUTABLE bash REQUIRED)
 
 # Define output directories for generated bindings
 set(RUSTUTILS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/rustutils_bindings")
@@ -25,6 +26,7 @@ file(MAKE_DIRECTORY ${RUSTUTILS_SRC_DIR})
 
 set(RUSTUTILS_RS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/src/color.rs
+    ${CMAKE_CURRENT_LIST_DIR}/src/mlt.rs
 )
 
 # Initialize variables for generated files
@@ -41,7 +43,8 @@ endforeach()
 add_custom_command(
     OUTPUT ${RUSTUTILS_GENERATED_SOURCES} ${RUSTUTILS_GENERATED_HEADERS}
     COMMAND ${CMAKE_COMMAND} -E env
-        ${CMAKE_CURRENT_LIST_DIR}/generate.sh ${RUSTUTILS_OUTPUT_DIR} ${RUSTUTILS_RS_FILES}
+        "CXXBRIDGE_CMD=$ENV{CXXBRIDGE_CMD}"
+        ${BASH_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/generate.sh ${RUSTUTILS_OUTPUT_DIR} ${RUSTUTILS_RS_FILES}
     DEPENDS ${CMAKE_CURRENT_LIST_DIR}/generate.sh ${RUSTUTILS_RS_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     COMMENT "Generating C++ bindings for Rust sources"

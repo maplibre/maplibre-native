@@ -10,17 +10,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdint>
-#include <exception>
 #include <iterator>
-#include <memory>
 #include <numeric>
-#include <optional>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <variant>
-#include <vector>
 
 namespace mbgl {
 namespace {

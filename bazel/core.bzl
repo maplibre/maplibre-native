@@ -540,7 +540,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/tile/vector_tile.hpp",
     "src/mbgl/tile/vector_mlt_tile.cpp",
     "src/mbgl/tile/vector_mlt_tile.hpp",
-    "src/mbgl/tile/vector_mlt_tile_data.cpp",
     "src/mbgl/tile/vector_mlt_tile_data.hpp",
     "src/mbgl/tile/vector_mvt_tile.cpp",
     "src/mbgl/tile/vector_mvt_tile.hpp",
@@ -628,9 +627,11 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/work_request.cpp",
 ] + select({
     "//:rust": [
+        "src/mbgl/tile/vector_mlt_tile_data.rs.cpp",
         "src/mbgl/util/color.rs.cpp",
     ],
     "//conditions:default": [
+        "src/mbgl/tile/vector_mlt_tile_data.cpp",
         "src/mbgl/util/color.cpp",
     ],
 })
