@@ -11,8 +11,6 @@
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/logging.hpp>
 
-
-
 namespace mapbox {
 namespace sqlite {
 
@@ -123,7 +121,7 @@ const int initialize = [] {
     sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
 #endif
 
-return 0; // Return value unused, but required as lambda must return something.
+    return 0; // Return value unused, but required as lambda must return something.
 }();
 // NOLINTEND(misc-use-anonymous-namespace)
 
