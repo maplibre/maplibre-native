@@ -3,6 +3,10 @@
 #include <mbgl/style/conversion/rotation.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/conversion.hpp>
+#include <mbgl/util/color.hpp>
+
+#include <type_traits>
+#include <vector>
 
 namespace mbgl {
 namespace style {
@@ -22,11 +26,27 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
     std::optional<PropertyExpression<T>> expression;
 
     if (isExpression(value)) {
-        ParsingContext ctx(valueTypeToExpressionType<T>());
-        ParseResult parsed = ctx.parseLayerPropertyExpression(value);
-        if (!parsed) {
-            error.message = ctx.getCombinedErrors();
-            return std::nullopt;
+        ParseResult parsed;
+        if constexpr (std::is_same_v<T, std::vector<Color>> || std::is_same_v<T, std::vector<float>>) {
+            using Element = typename T::value_type;
+            const auto scalarType = valueTypeToExpressionType<Element>();
+            ParsingContext scalarCtx(scalarType);
+            parsed = scalarCtx.parseLayerPropertyExpression(value);
+            if (!parsed) {
+                ParsingContext arrayCtx{type::Array(scalarType)};
+                parsed = arrayCtx.parseLayerPropertyExpression(value);
+                if (!parsed) {
+                    error.message = arrayCtx.getCombinedErrors();
+                    return std::nullopt;
+                }
+            }
+        } else {
+            ParsingContext ctx(valueTypeToExpressionType<T>());
+            parsed = ctx.parseLayerPropertyExpression(value);
+            if (!parsed) {
+                error.message = ctx.getCombinedErrors();
+                return std::nullopt;
+            }
         }
         expression = PropertyExpression<T>(std::move(*parsed));
     } else if (isObject(value)) {
