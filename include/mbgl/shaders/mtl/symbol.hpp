@@ -176,6 +176,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 a_pos = float2(symbol.pos_scale[0]);
     const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
+
     const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
     const float2 a_size = float2(symbol.size_sdf);
 
@@ -384,6 +385,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 a_pos = float2(symbol.pos_scale[0]);
     const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
+
     const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
     const float2 a_size = float2(symbol.size_sdf);
 
@@ -655,6 +657,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 a_pos = float2(symbol.pos_scale[0]);
     const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
+
     const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
     const float2 a_size = float2(symbol.size_sdf);
 

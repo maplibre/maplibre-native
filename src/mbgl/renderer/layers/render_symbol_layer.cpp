@@ -238,7 +238,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 namespace {
 const SegmentVector emptySegmentVector;
 constexpr auto posOffsetAttribName = "a_pos_offset";
-constexpr auto sortedInstanceUniformName = "sorted_instance";
+[[maybe_unused]] constexpr auto sortedInstanceUniformName = "sorted_instance";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
@@ -371,7 +371,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
         updateTileAttributes(buffer, isText, paintProps, evaluated, *instanceAttribs, nullptr);
     }
 #else
-    const auto vertexCount = buffer.vertices().elements();
+    const auto vertexCount = buffer.attributeData().elements();
     drawable.setVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
     // TODO: detect whether anything has actually changed
@@ -871,7 +871,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             auto& triangleIndices = staticDataIndices;
 #else
-            builder->setRawVertices({}, buffer.vertices().elements(), gfx::AttributeDataType::Short4);
+            builder->setRawVertices({}, buffer.attributeData().elements(), gfx::AttributeDataType::Short4);
 
             auto& triangleIndices = buffer.sharedTriangles;
 #endif
