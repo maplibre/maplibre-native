@@ -1079,8 +1079,12 @@ void SymbolLayout::createBucket(const ImagePositions&,
             }
 
             for (auto& pair : bucket->paintProperties) {
-                pair.second.iconBinders.populateVertexVectors(
-                    feature, iconBuffer.attributeData().elements(), symbolInstance.getDataFeatureIndex(), {}, {}, canonical);
+                pair.second.iconBinders.populateVertexVectors(feature,
+                                                              iconBuffer.attributeData().elements(),
+                                                              symbolInstance.getDataFeatureIndex(),
+                                                              {},
+                                                              {},
+                                                              canonical);
             }
         }
 

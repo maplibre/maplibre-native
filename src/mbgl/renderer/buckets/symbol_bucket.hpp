@@ -61,7 +61,8 @@ using SymbolLayoutAttributes =
 using SymbolDynamicLayoutAttributes = gfx::Vertex<TypeList<attributes::projected_pos>>;
 using SymbolOpacityAttributes = gfx::Vertex<TypeList<attributes::fade_opacity>>;
 
-using CollisionBoxLayoutVertexAttributes = gfx::Vertex<TypeList<attributes::pos, attributes::anchor_pos, attributes::extrude>>;
+using CollisionBoxLayoutVertexAttributes =
+    gfx::Vertex<TypeList<attributes::pos, attributes::anchor_pos, attributes::extrude>>;
 using CollisionBoxDynamicVertexAttributes = gfx::Vertex<TypeList<attributes::placed, attributes::shift>>;
 
 const uint16_t MAX_GLYPH_ICON_SIZE = 255;
@@ -398,13 +399,13 @@ public:
     using AttributeVector = gfx::VertexVector<SymbolLayoutAttributes>;
     using DynamicAttributeVector = gfx::VertexVector<SymbolDynamicLayoutAttributes>;
     using OpacityAttributeVector = gfx::VertexVector<SymbolOpacityAttributes>;
-    
+
 #if MLN_USE_SYMBOL_INSTANCING
     using SortedInstanceVector = gfx::VertexVector<SymbolSortedInstance>;
 #else
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
 #endif
-    
+
     struct Buffer final {
         ~Buffer() {
             sharedAttributeData->release();
@@ -452,7 +453,7 @@ public:
         const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
         TriangleIndexVector& triangles = *sharedTriangles;
 #endif
-        
+
         SegmentVector segments;
         std::vector<PlacedSymbol> placedSymbols;
     } text;
@@ -522,9 +523,7 @@ public:
                 {{static_cast<int16_t>(::round(o.x)), static_cast<int16_t>(::round(o.y))}}};
     }
 
-    static CollisionBoxDynamicVertexAttributes collisionDynamicVertex(bool placed,
-                                                                      bool notUsed,
-                                                                      Point<float> shift) {
+    static CollisionBoxDynamicVertexAttributes collisionDynamicVertex(bool placed, bool notUsed, Point<float> shift) {
         return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
     }
 

@@ -253,7 +253,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
         attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
             paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityAttribute);
     }
-    
+
 #if MLN_USE_SYMBOL_INSTANCING
     if (!buffer.sortedInstances().empty()) {
         if (const auto& attr = attribs.set(idSymbolSortedInstanceAttribute)) {
