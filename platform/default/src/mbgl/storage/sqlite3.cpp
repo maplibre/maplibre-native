@@ -11,15 +11,7 @@
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/logging.hpp>
 
-#define MBGL_CONSTRUCTOR(f) \
-    static void f(void);    \
-    struct f##_t_ {         \
-        f##_t_(void) {      \
-            f();            \
-        }                   \
-    };                      \
-    static f##_t_ f##_;     \
-    static void f(void)
+
 
 namespace mapbox {
 namespace sqlite {
@@ -114,7 +106,7 @@ void logSqlMessage(void*, const int err, const char* msg) {
 #endif
 
 // NOLINTBEGIN(misc-use-anonymous-namespace)
-MBGL_CONSTRUCTOR(initialize) {
+const int initialize = [] {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
         snprintf(message,
@@ -130,7 +122,9 @@ MBGL_CONSTRUCTOR(initialize) {
     // Enable SQLite logging before initializing the database.
     sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
 #endif
-}
+
+return 0; // Return value unused, but required as lambda must return something.
+}();
 // NOLINTEND(misc-use-anonymous-namespace)
 
 std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
