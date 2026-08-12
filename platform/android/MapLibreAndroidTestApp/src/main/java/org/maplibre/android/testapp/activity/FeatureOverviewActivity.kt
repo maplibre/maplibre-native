@@ -131,7 +131,7 @@ class FeatureOverviewActivity : AppCompatActivity() {
         val packageName = FeatureOverviewActivity::class.java.`package`!!.name
         val metaDataKey = getString(R.string.category)
         if (app != null) {
-            for (info in app.activities) {
+            for (info in app.activities!!) {
                 if (info.labelRes != 0 && info.name.startsWith(packageName) &&
                     info.name != FeatureOverviewActivity::class.java.name
                 ) {

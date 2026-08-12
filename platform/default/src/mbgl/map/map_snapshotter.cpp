@@ -49,6 +49,10 @@ public:
         delegate.invoke(&RendererObserver::onStyleImageMissing, image, cb);
     }
 
+    void onSymbolError(const std::string& message) override {
+        delegate.invoke(&RendererObserver::onSymbolError, message);
+    }
+
 private:
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<RendererObserver> delegate;
@@ -107,6 +111,8 @@ public:
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {
         rendererObserver->onStyleImageMissing(id, done);
     }
+
+    void onSymbolError(const std::string& message) override { rendererObserver->onSymbolError(message); }
 
     void setObserver(std::shared_ptr<RendererObserver> observer) {
         assert(observer);

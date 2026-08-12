@@ -86,6 +86,10 @@ void RenderSource::onTileAction(OverscaledTileID id, std::string sourceID, TileO
     observer->onTileAction(*this, op, id, sourceID);
 }
 
+void RenderSource::onSymbolError(const std::string& message) {
+    observer->onSymbolError(*this, message);
+}
+
 bool RenderSource::isEnabled() const {
     return enabled;
 }
