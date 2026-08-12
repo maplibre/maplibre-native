@@ -21,7 +21,7 @@
 
 #if !defined(NDEBUG) && !defined(__ANDROID__)
 #define ENABLE_VULKAN_VALIDATION
-// #define ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+// #define ENABLE_VULKAN_VALIDATION_FEATURES
 // #define ENABLE_VMA_DEBUG
 #endif
 

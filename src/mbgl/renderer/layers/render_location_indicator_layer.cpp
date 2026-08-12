@@ -867,9 +867,9 @@ protected:
 
     mapbox::cheap_ruler::CheapRuler ruler;
 
-    mbgl::mat4 translation;
-    mbgl::mat4 projectionCircle;
-    mbgl::mat4 projectionPuck;
+    mbgl::mat4 translation{};
+    mbgl::mat4 projectionCircle{};
+    mbgl::mat4 projectionPuck{};
 
     bool positionChanged = false;
     bool radiusChanged = false;
@@ -885,7 +885,7 @@ public:
         std::optional<std::reference_wrapper<gfx::Drawable>> drawable;
         std::array<vec2, 4> geometry;
         TextureInfo textureInfo;
-        bool dirty{false};
+        bool dirty{true};
 
         gfx::Drawable& getDrawable() { return drawable.value().get(); }
         void reset() { textureInfo.reset(); }
@@ -896,7 +896,7 @@ public:
         std::optional<std::reference_wrapper<gfx::Drawable>> outlineDrawable;
         std::array<vec2, 73> geometry;
         TextureInfo textureInfo;
-        bool dirty{false};
+        bool dirty{true};
 
         gfx::Drawable& getDrawable() { return drawable.value().get(); }
         void reset() { textureInfo.reset(); }
