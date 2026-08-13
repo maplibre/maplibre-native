@@ -46,7 +46,7 @@ public:
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
                        bool captureRenderedFeatures,
-                       TileObserver* observer);
+                       TileObserver*);
     ~GeometryTileWorker();
 
     void setObserver(TileObserver* observer);

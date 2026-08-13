@@ -23,7 +23,6 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
-#include <iterator>
 #include <utility>
 
 namespace mbgl {
@@ -41,7 +40,8 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
                                        const bool showCollisionBoxes_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
                                        std::shared_ptr<FontFaces> fontFaces_,
-                                       bool captureRenderedFeatures_)
+                                       bool captureRenderedFeatures_,
+                                       TileObserver* observer_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
