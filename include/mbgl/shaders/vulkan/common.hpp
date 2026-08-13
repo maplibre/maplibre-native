@@ -109,13 +109,17 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
 
 #ifdef USE_SURFACE_TRANSFORM
 layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
-    mat2 rotation;
+    vec4 surfaceRotation;
 } platformParams;
 #endif
 
 void applySurfaceTransform() {
 #ifdef USE_SURFACE_TRANSFORM
-    gl_Position.xy = platformParams.rotation * gl_Position.xy;
+    const mat2 rotation = {
+        platformParams.surfaceRotation.xy,
+        platformParams.surfaceRotation.zw
+    };
+    gl_Position.xy = rotation * gl_Position.xy;
 #endif
 
     gl_Position.y *= -1.0;

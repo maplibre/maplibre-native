@@ -953,6 +953,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
+                                      const PaintParameters& paintParameters,
                                       const RenderTree& renderTree) {
     MLN_TRACE_FUNC();
 
@@ -985,7 +986,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         }
 #endif
         try {
-            renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
+            renderLayer.update(shaders, context, state, updateParameters, paintParameters, renderTree, changes);
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
@@ -1088,6 +1089,10 @@ void RenderOrchestrator::onTileAction(RenderSource&,
                                       const OverscaledTileID& id,
                                       const std::string& sourceID) {
     observer->onTileAction(op, id, sourceID);
+}
+
+void RenderOrchestrator::onSymbolError(RenderSource&, const std::string& message) {
+    observer->onSymbolError(message);
 }
 
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {

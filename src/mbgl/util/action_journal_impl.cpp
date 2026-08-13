@@ -487,6 +487,26 @@ void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& 
     });
 }
 
+void ActionJournal::Impl::onRenderError(std::exception_ptr e) {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        ActionJournalEvent event("onRenderError", env);
+
+        event.addEvent("exception", toString(e));
+
+        log(event);
+    });
+}
+
+void ActionJournal::Impl::onSymbolError(const std::string& message) {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        ActionJournalEvent event("onSymbolError", env);
+
+        event.addEvent("message", message);
+
+        log(event);
+    });
+}
+
 void ActionJournal::Impl::onMapCreate() {
     scheduler->schedule(
         [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onMapCreate", env)); });

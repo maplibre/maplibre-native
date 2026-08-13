@@ -1122,6 +1122,19 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
+   * Set a callback that's invoked after a corrupted symbol is detected
+   *
+   * @param listener The callback that's invoked
+   */
+  public void addOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
+    mapChangeReceiver.addOnSymbolErrorListener(callback);
+  }
+
+  public void removeOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
+    mapChangeReceiver.removeOnSymbolErrorListener(callback);
+  }
+
+  /**
    * Interface definition for a callback to be invoked when the camera will change.
    * <p>
    * {@link MapView#addOnCameraWillChangeListener(OnCameraWillChangeListener)}
@@ -1547,6 +1560,19 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * Called when an error occurs while trying to render a layer or drawable.
      */
     void onRenderError();
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a corrupted symbol is detected
+   * <p>
+   * {@link MapView#addOnSymbolErrorListener(OnSymbolErrorListener)}
+   * </p>
+   */
+  public interface OnSymbolErrorListener {
+    /**
+     * Called when a corrupted symbol is detected.
+     */
+    void onSymbolError(@NonNull String message);
   }
 
   /**

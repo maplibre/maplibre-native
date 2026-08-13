@@ -7,6 +7,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/util/font_stack.hpp>
+#include <mbgl/util/symbol_error_observer.hpp>
 
 #include <cstdint>
 #include <exception>
@@ -19,9 +20,9 @@ namespace gfx {
 class ShaderRegistry;
 }
 
-class RendererObserver {
+class RendererObserver : public SymbolErrorObserver {
 public:
-    virtual ~RendererObserver() = default;
+    ~RendererObserver() override = default;
 
     enum class RenderMode : uint32_t {
         Partial,

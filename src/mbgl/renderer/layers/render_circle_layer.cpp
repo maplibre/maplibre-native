@@ -330,6 +330,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& transformState,
                                const std::shared_ptr<UpdateParameters>& updateParameters,
+                               const PaintParameters&,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     stats.renderedFeatures.clear();

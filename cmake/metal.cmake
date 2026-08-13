@@ -96,7 +96,4 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp
 )
 
-find_library(METAL_FRAMEWORK Metal)
-if (METAL_FRAMEWORK)
-    target_link_libraries(mbgl-core PRIVATE ${METAL_FRAMEWORK})
-endif()
+target_link_libraries(mbgl-core PRIVATE "-framework Metal")

@@ -187,6 +187,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
+                                      [[maybe_unused]] const PaintParameters& paintParameters,
                                       const RenderTree& renderTree,
                                       UniqueChangeRequestVec& changes) {
     stats.renderedFeatures.clear();

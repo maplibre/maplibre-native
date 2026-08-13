@@ -52,11 +52,10 @@ static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
 
 #if MLN_RENDER_BACKEND_VULKAN
 struct alignas(16) GlobalPlatformParamsUBO {
-    /*  0 */ alignas(16) std::array<float, 2> rotation0;
-    /* 16 */ alignas(16) std::array<float, 2> rotation1;
-    /* 32 */
+    /*  0 */ std::array<float, 4> surfaceRotation;
+    /* 16 */
 };
-static_assert(sizeof(GlobalPlatformParamsUBO) == 2 * 16);
+static_assert(sizeof(GlobalPlatformParamsUBO) == 16);
 #endif
 
 enum {

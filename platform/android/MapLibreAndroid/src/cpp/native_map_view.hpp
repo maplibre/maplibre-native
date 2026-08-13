@@ -367,6 +367,8 @@ public:
     // Renderer
     void onRenderError(std::exception_ptr) override;
 
+    void onSymbolError(const std::string&) override;
+
     int getRenderedFeatureCount(JNIEnv&,
                                 const jni::String& featureId,
                                 const jni::String& layerId,

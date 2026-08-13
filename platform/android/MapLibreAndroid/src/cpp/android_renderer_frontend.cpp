@@ -54,6 +54,10 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
+    void onSymbolError(const std::string& message) override {
+        delegate.invoke(&RendererObserver::onSymbolError, message);
+    }
+
     void onPreCompileShader(mbgl::shaders::BuiltIn id,
                             mbgl::gfx::Backend::Type type,
                             const std::string& additionalDefines) override {

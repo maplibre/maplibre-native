@@ -88,8 +88,20 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
 
         const auto intermediate = glslProgram.getIntermediate(language);
 
+        glslang::SpvOptions options;
+
+        options.disableOptimizer = false;
+        options.optimizeSize = true;
+
+#ifndef _NDEBUG
+        options.generateDebugInfo = true;
+        options.validate = true;
+#else
+        options.stripDebugInfo = true;
+#endif
+
         std::vector<uint32_t> spirv;
-        glslang::GlslangToSpv(*intermediate, spirv);
+        glslang::GlslangToSpv(*intermediate, spirv, &options);
 
         return spirv;
     };

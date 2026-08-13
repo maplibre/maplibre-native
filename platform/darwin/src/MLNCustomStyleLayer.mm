@@ -10,6 +10,7 @@
 #import <MetalKit/MetalKit.h>
 #endif
 
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/math/wrap.hpp>
 #include <mbgl/style/layers/custom_layer.hpp>
 
@@ -72,6 +73,9 @@ class MLNCustomLayerHost;
 - (void)willMoveFromMapView:(MLNMapView *)mapView {
 }
 
+- (void)preDrawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
+}
+
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
 }
 
@@ -99,10 +103,47 @@ public:
     }
   }
 
+  void preRender(const mbgl::gfx::Context &context,
+                 const mbgl::style::CustomLayerRenderParameters &parameters) override {
+    if (!layer) return;
+
+#if MLN_RENDER_BACKEND_METAL
+    auto renderPassDesc =
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .renderPassDesc.get();
+    MTL::CommandBuffer *cmdPtr =
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .commandBuffer.get();
+    id<MTLCommandBuffer> commandBuffer = (__bridge id<MTLCommandBuffer>)cmdPtr;
+    layer.commandBuffer = commandBuffer;
+    layer.renderPassDesc = (__bridge MTLRenderPassDescriptor *)renderPassDesc;
+
+#endif
+
+    MLNStyleLayerDrawingContext drawingContext = {
+        .size = CGSizeMake(parameters.width, parameters.height),
+        .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+        .zoomLevel = parameters.zoom,
+        .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+        .pitch = static_cast<CGFloat>(parameters.pitch),
+        .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+        .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
+        .nearClippedProjectionMatrix = MLNMatrix4Make(parameters.nearClippedProjectionMatrix)};
+
+    if (layer.mapView) {
+      [layer preDrawInMapView:layer.mapView withContext:drawingContext];
+    }
+  }
+
   void render(const mbgl::style::CustomLayerRenderParameters &parameters) override {
     if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
+    MTL::CommandBuffer *cmdPtr =
+        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+            .commandBuffer.get();
+    id<MTLCommandBuffer> commandBuffer = (__bridge id<MTLCommandBuffer>)cmdPtr;
+    layer.commandBuffer = commandBuffer;
     MTL::RenderCommandEncoder *ptr =
         static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
             .encoder.get();

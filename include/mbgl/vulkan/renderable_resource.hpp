@@ -49,7 +49,6 @@ protected:
     void setDepthFormat(vk::Format format);
 
     void copySurfaceToReadTexture();
-    void swap() override;
 
 public:
     virtual void createPlatformSurface() = 0;
@@ -78,6 +77,7 @@ public:
 
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
+    void swap() override;
 
     void queueSurfaceRead();
     std::shared_ptr<PremultipliedImage> readImage();

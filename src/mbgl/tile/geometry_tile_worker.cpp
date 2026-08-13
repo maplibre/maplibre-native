@@ -15,6 +15,7 @@
 #include <mbgl/tile/geometry_tile_worker.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/error_sink.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
@@ -52,7 +53,8 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
       captureRenderedFeatures(captureRenderedFeatures_),
       showCollisionBoxes(showCollisionBoxes_),
       dynamicTextureAtlas(dynamicTextureAtlas_),
-      fontFaces(fontFaces_) {}
+      fontFaces(fontFaces_),
+      observer(observer_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
@@ -408,12 +410,20 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
     }
 }
 
+void GeometryTileWorker::setObserver(TileObserver* observer_) {
+    observer = observer_;
+}
+
 void GeometryTileWorker::parse() {
     MLN_TRACE_FUNC();
 
     if (!data || !layers) {
         return;
     }
+
+    // The layouts created below check the symbols they build; report through the tile's observer,
+    // called on this worker thread.
+    const ErrorScope errorScope{observer};
 
     MBGL_TIMING_START(watch)
 
@@ -546,6 +556,10 @@ void GeometryTileWorker::finalizeLayout() {
     if (!data || !layers || !hasPendingParseResult() || hasPendingDependencies()) {
         return;
     }
+
+    // The layouts check the symbols they build below; report through the tile's observer,
+    // called on this worker thread.
+    const ErrorScope errorScope{observer};
 
     MBGL_TIMING_START(watch);
     gfx::ImageAtlas imageAtlas;

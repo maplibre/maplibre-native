@@ -63,17 +63,18 @@ public:
     ~RenderSymbolLayer() override;
 
     static style::IconPaintProperties::PossiblyEvaluated iconPaintProperties(
-        const style::SymbolPaintProperties::PossiblyEvaluated&);
+        const style::SymbolPaintProperties::PossiblyEvaluated &);
     static style::TextPaintProperties::PossiblyEvaluated textPaintProperties(
-        const style::SymbolPaintProperties::PossiblyEvaluated&);
+        const style::SymbolPaintProperties::PossiblyEvaluated &);
 
     /// Generate any changes needed by the layer
-    void update(gfx::ShaderRegistry&,
-                gfx::Context&,
-                const TransformState&,
-                const std::shared_ptr<UpdateParameters>&,
-                const RenderTree&,
-                UniqueChangeRequestVec&) override;
+    void update(gfx::ShaderRegistry &,
+                gfx::Context &,
+                const TransformState &,
+                const std::shared_ptr<UpdateParameters> &,
+                const PaintParameters &,
+                const RenderTree &,
+                UniqueChangeRequestVec &) override;
 
     /// Remove all the drawables for tiles
     std::size_t removeAllDrawables() override;
@@ -83,33 +84,33 @@ protected:
     /// This event is run to indicate if the layer should render or not for the current frame.
     /// @param willRender Indicates if this layer should render or not
     /// @param changes The collection of current pending change requests
-    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec &) override;
 
     /// @brief Called when the layer index changes
     /// This event is run when a layer is added or removed from the style.
     /// @param newLayerIndex The new layer index for this layer
     /// @param changes The collection of current pending change requests
-    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec &) override;
 
     /// Called when the style layer is removed
-    void layerRemoved(UniqueChangeRequestVec&) override;
+    void layerRemoved(UniqueChangeRequestVec &) override;
 
     /// Remove all drawables for the tile from the layer group
-    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
+    std::size_t removeTile(RenderPass, const OverscaledTileID &) override;
 
 private:
-    void transition(const TransitionParameters&) override;
-    void evaluate(const PropertyEvaluationParameters&) override;
+    void transition(const TransitionParameters &) override;
+    void evaluate(const PropertyEvaluationParameters &) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
 
-    void prepare(const LayerPrepareParameters&) override;
+    void prepare(const LayerPrepareParameters &) override;
 
-    void captureRenderedFeatures(const RenderTile&,
-                                 const SymbolBucket&,
-                                 const style::SymbolPaintProperties::PossiblyEvaluated&,
-                                 const TransformState&,
-                                 const TransformParameters&);
+    void captureRenderedFeatures(const RenderTile &,
+                                 const SymbolBucket &,
+                                 const style::SymbolPaintProperties::PossiblyEvaluated &,
+                                 const TransformState &,
+                                 const TransformParameters &);
 
 private:
     // Paint properties
