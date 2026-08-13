@@ -100,6 +100,7 @@ public class RenderingStats {
     public double getMidX() {
       return (minX + maxX) / 2.0;
     }
+
     public double getMidY() {
       return (minY + maxY) / 2.0;
     }
