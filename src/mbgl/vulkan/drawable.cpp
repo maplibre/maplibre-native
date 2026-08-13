@@ -357,13 +357,13 @@ void Drawable::draw(PaintParameters& parameters) const {
                                        static_cast<uint32_t>(segment.instanceCount),
                                        static_cast<uint32_t>(segment.indexOffset),
                                        static_cast<int32_t>(segment.vertexOffset),
-                                       static_cast<int32_t>(segment.baseInstance),
+                                       static_cast<uint32_t>(segment.baseInstance),
                                        dispatcher);
         } else {
             commandBuffer->draw(static_cast<uint32_t>(segment.vertexLength),
                                 static_cast<uint32_t>(segment.instanceCount),
                                 static_cast<uint32_t>(segment.vertexOffset),
-                                static_cast<int32_t>(segment.baseInstance),
+                                static_cast<uint32_t>(segment.baseInstance),
                                 dispatcher);
         }
 

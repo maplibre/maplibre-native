@@ -97,7 +97,7 @@ vec2 unpack_uint(uint value) {
 #define layerSSBOStartId                    0
 #define layerUBOStartId                     3
 #define drawableSSBOStartId                 0
-#define drawableUBOStartId                  1
+#define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
@@ -148,7 +148,7 @@ void applySurfaceTransform() {
 #define layerSSBOStartId                    0
 #define layerUBOStartId                     3
 #define drawableSSBOStartId                 0
-#define drawableUBOStartId                  1
+#define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
