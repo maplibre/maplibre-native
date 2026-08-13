@@ -1,5 +1,27 @@
 # Changelog MapLibre Native for Android
 
+## 13.5.0
+
+### 🐞 Bug fixes
+
+- fix(android): Workaround for Adreno `VK_ERROR_DEVICE_LOST` ([#4442](https://github.com/maplibre/maplibre-native/pull/4442)).
+- core: Use compatible descriptor set layout for tile clipping ([#4470](https://github.com/maplibre/maplibre-native/pull/4470)).
+- fix(android): Fix surface changed ANR ([#4439](https://github.com/maplibre/maplibre-native/pull/4439)).
+- fix(core): repaint feature-state-driven symbol paint properties ([#4445](https://github.com/maplibre/maplibre-native/pull/4445)).
+- fix(android): Add option to move symbol location indicator bearing down the image stack ([#4408](https://github.com/maplibre/maplibre-native/pull/4408)).
+- fix(core): Add action journal exception handling ([#4438](https://github.com/maplibre/maplibre-native/pull/4438)).
+- feat: specify layer/property that has a parse error when logging ([#4292](https://github.com/maplibre/maplibre-native/pull/4292)).
+
+### ✨ Features and improvements
+
+- fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
+- core: Add error reporting for corrupted symbols ([#4458](https://github.com/maplibre/maplibre-native/pull/4458)).
+- Add multiBackend Android flavor for runtime OpenGL/Vulkan switching ([#4288](https://github.com/maplibre/maplibre-native/pull/4288)).
+- core: add CustomVectorSource for binary tile data delivery ([#4377](https://github.com/maplibre/maplibre-native/pull/4377)).
+- Make string expressions operate on unicode ([#4344](https://github.com/maplibre/maplibre-native/pull/4344)).
+- Android: setOverrideSynchronousUpdate for existing sources ([#4366](https://github.com/maplibre/maplibre-native/pull/4366)).
+- feat: implement split and join expressions ([#4463](https://github.com/maplibre/maplibre-native/pull/4463)).
+
 ## 13.4.1
 
 ### 🐞 Bug fixes
