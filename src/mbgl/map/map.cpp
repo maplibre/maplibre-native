@@ -611,11 +611,12 @@ void Map::getRenderedFeatures(const std::optional<std::string>& featureId,
                               const std::optional<std::string>& layerId,
                               const std::optional<std::string>& sourceId,
                               const std::function<bool(const std::string&, const FeatureInfo&)>& result) const {
-    if (!impl->lastFrameStats) {
+    const auto stats = impl->lastFrameStats;
+    if (!stats || stats->frameRenderedFeatures.empty()) {
         return;
     }
 
-    const auto& features = impl->lastFrameStats->frameRenderedFeatures;
+    const auto& features = stats->frameRenderedFeatures;
 
     using LayerFeaturesMap = gfx::RenderingStats::LayerFeaturesMap;
     const auto searchFeatures = [&](const LayerFeaturesMap& features_) {
@@ -654,11 +655,8 @@ std::size_t Map::getRenderedFeatureCount(const std::optional<std::string>& featu
     return count;
 }
 
-namespace {
-Map::FrameRenderedFeaturesMap emptyFeatures{};
-} // namespace
-
 const Map::FrameRenderedFeaturesMap& Map::getRenderedFeatures() const {
+    static const Map::FrameRenderedFeaturesMap emptyFeatures{};
     return impl->lastFrameStats ? impl->lastFrameStats->frameRenderedFeatures : emptyFeatures;
 }
 

@@ -96,6 +96,13 @@ public class RenderingStats {
       this.minY = minY;
       this.maxY = maxY;
     }
+
+    public double getMidX() {
+      return (minX + maxX) / 2.0;
+    }
+    public double getMidY() {
+      return (minY + maxY) / 2.0;
+    }
   }
 
   public static class TileID {
