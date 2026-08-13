@@ -22,6 +22,8 @@ public:
 
   virtual CGLContextObj getCGLContextObj() { return nullptr; }
 
+  virtual void backingPropertiesChanged() {}
+
 #if MLN_RENDER_BACKEND_METAL
   // Returns the backend resource for Metal rendering in custom layers
   virtual MLNBackendResource* getObject() { return nullptr; }

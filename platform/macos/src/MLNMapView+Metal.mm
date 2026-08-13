@@ -129,6 +129,18 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
   [mapView addSubview:resource.mtlView positioned:NSWindowBelow relativeTo:nil];
 }
 
+void MLNMapViewMetalImpl::backingPropertiesChanged() {
+  auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+  const CGFloat scale = mapView.window.backingScaleFactor;
+  if (!resource.mtlView || scale <= 0) {
+    return;
+  }
+  resource.mtlView.layer.contentsScale = scale;
+  const CGSize bounds = resource.mtlView.bounds.size;
+  resource.mtlView.drawableSize =
+      CGSizeMake(std::round(bounds.width * scale), std::round(bounds.height * scale));
+}
+
 MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;
 
 void MLNMapViewMetalImpl::activate() {
