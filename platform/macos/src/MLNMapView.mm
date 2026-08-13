@@ -807,6 +807,10 @@ public:
     self.dormant = NO;
   }
 
+  if (window && _mbglView) {
+    _mbglView->backingPropertiesChanged();
+  }
+
   if (window && _mbglMap->getMapOptions().constrainMode() == mbgl::ConstrainMode::None) {
     _mbglMap->setConstrainMode(mbgl::ConstrainMode::HeightOnly);
   }
@@ -819,6 +823,13 @@ public:
            forKeyPath:@"titlebarAppearsTransparent"
               options:NSKeyValueObservingOptionInitial
               context:NULL];
+}
+
+- (void)viewDidChangeBackingProperties {
+  [super viewDidChangeBackingProperties];
+  if (_mbglView) {
+    _mbglView->backingPropertiesChanged();
+  }
 }
 
 - (BOOL)wantsLayer {
