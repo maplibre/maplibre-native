@@ -25,6 +25,7 @@
 }
 
 - (void)mtkView:(MTKView*)view drawableSizeWillChange:(CGSize)size {
+  _impl->drawableSizeChanged(size);
 }
 
 - (void)drawInMTKView:(MTKView*)view {
@@ -127,6 +128,11 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
   metalLayer.presentsWithTransaction = presentsWithTransaction;
 
   [mapView addSubview:resource.mtlView positioned:NSWindowBelow relativeTo:nil];
+  drawableSizeChanged(resource.mtlView.drawableSize);
+}
+
+void MLNMapViewMetalImpl::drawableSizeChanged(CGSize drawableSize) {
+  size = {static_cast<uint32_t>(drawableSize.width), static_cast<uint32_t>(drawableSize.height)};
 }
 
 MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;

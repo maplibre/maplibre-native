@@ -38,6 +38,8 @@ public:
   mbgl::PremultipliedImage readStillImage() override;
   MLNBackendResource* getObject() override;
 
+  void drawableSizeChanged(CGSize size);
+
 private:
   bool presentsWithTransaction = false;
 };
