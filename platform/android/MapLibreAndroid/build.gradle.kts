@@ -204,7 +204,7 @@ android {
     prefab {
         create("maplibre") {
             headers = "../prefab-headers"
-            libraryName = "libmaplibre"
+            headerOnly = true
         }
     }
 
