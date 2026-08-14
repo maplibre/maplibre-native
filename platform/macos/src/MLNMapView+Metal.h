@@ -37,7 +37,10 @@ public:
 
   mbgl::PremultipliedImage readStillImage() override;
   MLNBackendResource* getObject() override;
+  void display() override;
+
+  void drawableSizeChanged(CGSize size);
 
 private:
-  bool presentsWithTransaction = false;
+  bool presentsWithTransaction = true;
 };
