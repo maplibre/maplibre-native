@@ -212,6 +212,10 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return '@"%@", @[[MLNColor redColor], [MLNColor blueColor]]';
         case 'padding':
             return paddingTestValue();
+        case 'verticalGradient':
+            // A constant-value NSArray, matching what toMLNRawStyleValue returns. The `{...}`
+            // form would parse as an aggregate expression and fail the round-trip assertion.
+            return '@"%@", @[@0.5, @0]';
         case 'variableAnchorOffsetCollection':
             return `@"{"top": [1, 2]}"`;
         case 'array':
@@ -281,6 +285,8 @@ global.mbglTestValue = function (property, layerType) {
             return '{ { 1, 0, 0, 1 }, { 0, 0, 1, 1 } }';
         case 'padding':
             return '{ 1, 1, 1, 1 }';
+        case 'verticalGradient':
+            return 'mbgl::VerticalGradient(std::array<float, 2>{ 0.5, 0 })';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -550,6 +556,8 @@ global.describeType = function (property) {
             return '`UIColor` array';
         case 'padding':
             return '`UIEdgeInsets`';
+        case 'verticalGradient':
+            return 'an `NSArray` of `NSNumber` objects, or a Boolean';
         case 'array':
             switch (arrayType(property)) {
                 case 'padding':
@@ -656,6 +664,8 @@ global.describeValue = function (value, property, layerType) {
 
         case 'padding':
             return describePadding();
+        case 'verticalGradient':
+            return 'a Boolean, or an array of one or two numbers';
 
         case 'array':
             let units = property.units || '';
@@ -720,6 +730,8 @@ global.propertyType = function (property) {
             return 'NSArray<MLNColor *> *';
         case 'padding':
             return 'NSValue *';
+        case 'verticalGradient':
+            return 'NSArray<NSNumber *> *';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -776,6 +788,8 @@ global.valueTransformerArguments = function (property) {
             return ['std::vector<mln::Color>', objCType, 'mln::Color'];
         case 'padding':
             return ['mln::Padding', objCType];
+        case 'verticalGradient':
+            return ['mln::VerticalGradient', objCType];
         case 'variableAnchorOffsetCollection':
             return ['mln::VariableAnchorOffsetCollection', objCType];
         case 'array':
@@ -839,6 +853,8 @@ global.mbglType = function(property) {
             return 'std::vector<mln::Color>';
         case 'padding':
             return 'mln::Padding';
+        case 'verticalGradient':
+            return 'mln::VerticalGradient';
         case 'variableAnchorOffsetCollection':
             return 'mln::VariableAnchorOffsetCollection';
         case 'array':

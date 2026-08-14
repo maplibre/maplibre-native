@@ -99,6 +99,32 @@ EvaluationResult toPadding(const Value& paddingValue) {
         });
 }
 
+EvaluationResult toVerticalGradient(const Value& gradientValue) {
+    return gradientValue.match(
+        [](const VerticalGradient& gradient) -> EvaluationResult { return gradient; },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            const std::size_t len = components.size();
+            const bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+                return item.template is<double>();
+            });
+            if ((len >= 1 && len <= 2) && isNumeric) {
+                float componentsAsFloats[2];
+                for (std::size_t i = 0; i < len; i++) {
+                    componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
+                }
+                return VerticalGradient(std::span<float>(componentsAsFloats, len));
+            } else {
+                return EvaluationError{"Invalid vertical gradient value " + stringify(gradientValue) +
+                                       ": expected an array containing one or two "
+                                       "numeric values."};
+            }
+        },
+        [](const bool enabled) -> EvaluationResult { return VerticalGradient(enabled); },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse vertical gradient from value '" + stringify(gradientValue) + "'"};
+        });
+}
+
 EvaluationResult toVariableAnchorOffset(const Value& value) {
     return value.match(
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
@@ -159,6 +185,8 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
         return toColor;
     } else if (t.is<type::PaddingType>()) {
         return toPadding;
+    } else if (t.is<type::VerticalGradientType>()) {
+        return toVerticalGradient;
     } else if (t.is<type::VariableAnchorOffsetCollectionType>()) {
         return toVariableAnchorOffset;
     } else if (t.is<type::NumberType>()) {
@@ -209,6 +237,7 @@ std::string Coercion::getOperator() const {
         [](const type::BooleanType&) -> std::string_view { return "to-boolean"; },
         [](const type::ColorType&) -> std::string_view { return "to-color"; },
         [](const type::PaddingType&) -> std::string_view { return "to-padding"; },
+        [](const type::VerticalGradientType&) -> std::string_view { return "to-verticalgradient"; },
         [](const type::NumberType&) -> std::string_view { return "to-number"; },
         [](const type::StringType&) -> std::string_view { return "to-string"; },
         [](const type::VariableAnchorOffsetCollectionType&) -> std::string_view { return "to-variableanchoroffset"; },
@@ -225,6 +254,7 @@ ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
         {"to-boolean", type::Boolean},
         {"to-color", type::Color},
         {"to-padding", type::Padding},
+        {"to-verticalgradient", type::VerticalGradient},
         {"to-number", type::Number},
         {"to-string", type::String},
         {"to-variableanchoroffset", type::VariableAnchorOffsetCollection}};

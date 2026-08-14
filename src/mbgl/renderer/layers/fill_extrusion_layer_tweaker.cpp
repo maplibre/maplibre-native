@@ -39,6 +39,16 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    // `fill-extrusion-vertical-gradient` accepts either a boolean or a `[depth, referenceHeight]`
+    // array; both land here as a `VerticalGradient`, whose two floats map straight onto the UBO.
+    // `false` arrives as zero depth against a zero reference height, which the shader evaluates
+    // to an exact no-op, so there is no separate enable flag.
+    const VerticalGradient gradient = evaluated.get<FillExtrusionVerticalGradient>();
+
+    const float gradientReferenceHeightInv = gradient.referenceHeight > 0.0f
+                                                  ? 1.0f / gradient.referenceHeight
+                                                  : 0.0f;
+
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
     const FillExtrusionPropsUBO propsUBO = {
@@ -49,12 +59,12 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         .base = constOrDefault<FillExtrusionBase>(evaluated),
         .height = constOrDefault<FillExtrusionHeight>(evaluated),
         .light_intensity = FillExtrusionBucket::lightIntensity(parameters.evaluatedLight),
-        .vertical_gradient = evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
+        .gradient_depth = gradient.depth,
         .opacity = evaluated.get<FillExtrusionOpacity>(),
         .fade = crossfade.t,
         .from_scale = crossfade.fromScale,
         .to_scale = crossfade.toScale,
-        .pad2 = 0};
+        .gradient_reference_height_inv = gradientReferenceHeightInv};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 

@@ -51,12 +51,12 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 32 */ float4 light_position_base;
     /* 48 */ float height;
     /* 52 */ float light_intensity;
-    /* 56 */ float vertical_gradient;
+    /* 56 */ float gradient_depth;
     /* 60 */ float opacity;
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /* 76 */ float gradient_reference_height_inv;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
@@ -158,13 +158,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
-        // vertical gradient, and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
@@ -298,13 +302,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
-        // vertical gradient, and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex
+        //
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
@@ -446,13 +458,28 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
-        // and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex divide.
+        // Non-zero runs the legacy height-scaled gradient -- what
+        // `fill-extrusion-vertical-gradient: true` maps to (1/150m) -- which leaves shorter
+        // buildings almost unshaded because the height term never reaches 1. Zero runs the
+        // uniform ramp instead, shading every building the same regardless of height.
+        //
+        // `t` is 0 at a wall's bottom vertices and 1 at its top. Shading is per-vertex and
+        // walls have only these two vertical sample points, so the rasterizer interpolates
+        // linearly between them and the ramp is linear by construction -- a curve would need
+        // per-fragment evaluation or a subdivided wall mesh.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb), float3(1.0));
@@ -665,13 +692,28 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
-        // and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex divide.
+        // Non-zero runs the legacy height-scaled gradient -- what
+        // `fill-extrusion-vertical-gradient: true` maps to (1/150m) -- which leaves shorter
+        // buildings almost unshaded because the height term never reaches 1. Zero runs the
+        // uniform ramp instead, shading every building the same regardless of height.
+        //
+        // `t` is 0 at a wall's bottom vertices and 1 at its top. Shading is per-vertex and
+        // walls have only these two vertical sample points, so the rasterizer interpolates
+        // linearly between them and the ramp is linear by construction -- a curve would need
+        // per-fragment evaluation or a subdivided wall mesh.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb), float3(1.0));

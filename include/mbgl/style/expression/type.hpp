@@ -50,6 +50,12 @@ struct PaddingType {
     bool operator==(const PaddingType&) const { return true; }
 };
 
+struct VerticalGradientType {
+    constexpr VerticalGradientType() = default;
+    std::string getName() const { return "verticalGradient"; }
+    bool operator==(const VerticalGradientType&) const { return true; }
+};
+
 struct VariableAnchorOffsetCollectionType {
     constexpr VariableAnchorOffsetCollectionType() = default;
     std::string getName() const { return "variableAnchorOffsetCollection"; }
@@ -98,6 +104,7 @@ constexpr StringType String;
 constexpr BooleanType Boolean;
 constexpr ColorType Color;
 constexpr PaddingType Padding;
+constexpr VerticalGradientType VerticalGradient;
 constexpr VariableAnchorOffsetCollectionType VariableAnchorOffsetCollection;
 constexpr ValueType Value;
 constexpr ObjectType Object;
@@ -114,6 +121,7 @@ using Type = variant<NullType,
                      StringType,
                      ColorType,
                      PaddingType,
+                     VerticalGradientType,
                      VariableAnchorOffsetCollectionType,
                      ObjectType,
                      ValueType,

@@ -55,12 +55,12 @@ struct FillExtrusionPropsUBO {
     light_position_base: vec4<f32>,
     height: f32,
     light_intensity: f32,
-    vertical_gradient: f32,
+    gradient_depth: f32,
     opacity: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    gradient_reference_height_inv: f32,
 };
 
 struct GlobalIndexUBO {
@@ -116,9 +116,17 @@ fn main(in: VertexInput) -> VertexOutput {
     var directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     if (normal.z == 0.0) {
-        let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
+        // A positive `gradient_reference_height_inv` runs the legacy height-scaled gradient
+        // against it (what `fill-extrusion-vertical-gradient: true` maps to); zero runs the
+        // uniform ramp, shading every building regardless of height.
+        var factor: f32;
+        if (props.gradient_reference_height_inv > 0.0) {
+            let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + baseValue) * sqrt(heightValue * props.gradient_reference_height_inv), gradientMin, 1.0);
+        } else {
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     let lightColor = props.light_color_pad.xyz;
@@ -212,12 +220,12 @@ struct FillExtrusionPropsUBO {
     light_position_base: vec4<f32>,
     height: f32,
     light_intensity: f32,
-    vertical_gradient: f32,
+    gradient_depth: f32,
     opacity: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    gradient_reference_height_inv: f32,
 };
 
 struct GlobalPaintParamsUBO {
@@ -303,9 +311,17 @@ fn main(in: VertexInput) -> VertexOutput {
     directional = mix(1.0 - props.light_intensity, max(0.5 + props.light_intensity, 1.0), directional);
 
     if (normal.z == 0.0) {
-        let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
+        // A positive `gradient_reference_height_inv` runs the legacy height-scaled gradient
+        // against it (what `fill-extrusion-vertical-gradient: true` maps to); zero runs the
+        // uniform ramp, shading every building regardless of height.
+        var factor: f32;
+        if (props.gradient_reference_height_inv > 0.0) {
+            let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + baseValue) * sqrt(heightValue * props.gradient_reference_height_inv), gradientMin, 1.0);
+        } else {
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     let lightColor = props.light_color_pad.xyz;
@@ -358,12 +374,12 @@ struct FillExtrusionPropsUBO {
     light_position_base: vec4<f32>,
     height: f32,
     light_intensity: f32,
-    vertical_gradient: f32,
+    gradient_depth: f32,
     opacity: f32,
     fade: f32,
     from_scale: f32,
     to_scale: f32,
-    pad2: f32,
+    gradient_reference_height_inv: f32,
 };
 
 struct GlobalIndexUBO {

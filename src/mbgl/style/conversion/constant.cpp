@@ -160,6 +160,30 @@ std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, 
     return result;
 }
 
+std::optional<VerticalGradient> Converter<VerticalGradient>::operator()(const Convertible& value,
+                                                                        Error& error) const {
+    std::optional<VerticalGradient> result;
+    if (isArray(value)) {
+        const auto length = arrayLength(value);
+        if (length >= 1 && length <= 2) {
+            auto vector = Converter<std::vector<float>>{}(value, error);
+            if (vector) {
+                result = VerticalGradient(*vector);
+            }
+        }
+    } else {
+        std::optional<bool> enabled = toBool(value);
+        if (enabled) {
+            result = VerticalGradient(*enabled);
+        }
+    }
+
+    if (!result) {
+        error.message = "value must be a boolean or an array of numbers (between 1 and 2 elements)";
+    }
+    return result;
+}
+
 std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(
     const Convertible& value, Error& error) const {
     if (!isArray(value)) {

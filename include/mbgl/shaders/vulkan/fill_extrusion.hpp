@@ -70,12 +70,12 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     vec4 light_position_base;
     float height;
     float light_intensity;
-    float vertical_gradient;
+    float gradient_depth;
     float opacity;
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float gradient_reference_height_inv;
 } props;
 
 layout(location = 0) out mediump vec4 frag_color;
@@ -133,13 +133,20 @@ void main() {
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
-        // vertical gradient, and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex divide.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
@@ -218,12 +225,12 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     vec4 light_position_base;
     float height;
     float light_intensity;
-    float vertical_gradient;
+    float gradient_depth;
     float opacity;
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float gradient_reference_height_inv;
 } props;
 
 struct OutlineInstance {
@@ -306,13 +313,20 @@ void main() {
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
-        // vertical gradient, and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex divide.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     // Assign final color based on surface + ambient light color, diffuse light directional,
@@ -408,12 +422,12 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     vec4 light_position_base;
     float height;
     float light_intensity;
-    float vertical_gradient;
+    float gradient_depth;
     float opacity;
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float gradient_reference_height_inv;
 } props;
 
 layout(location = 0) out mediump vec4 frag_lighting;
@@ -495,13 +509,20 @@ void main() {
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
-        // vertical gradient, and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);    }
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex divide.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;    }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(vec3(0.0), vec3(0.3), 1.0 - props.light_color_pad.rgb), vec3(1.0));
     lighting *= props.opacity;
@@ -558,12 +579,12 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     vec4 light_position_base;
     float height;
     float light_intensity;
-    float vertical_gradient;
+    float gradient_depth;
     float opacity;
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float gradient_reference_height_inv;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
@@ -685,12 +706,12 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     vec4 light_position_base;
     float height;
     float light_intensity;
-    float vertical_gradient;
+    float gradient_depth;
     float opacity;
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float gradient_reference_height_inv;
 } props;
 
 layout(location = 0) out mediump vec4 frag_lighting;
@@ -787,13 +808,20 @@ void main() {
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no
-        // vertical gradient, and otherwise calculates the gradient based on base + height
-        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
-        //       the square root when height is a uniform.
-        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
-        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex divide.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        float factor;
+        if (props.gradient_reference_height_inv > 0.0) {
+            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+            factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
+            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
+            // how `false` is represented.
+            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+        }
+        directional *= factor;
     }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(vec3(0.0), vec3(0.3), 1.0 - props.light_color_pad.rgb), vec3(1.0));
@@ -851,12 +879,12 @@ layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExt
     vec4 light_position_base;
     float height;
     float light_intensity;
-    float vertical_gradient;
+    float gradient_depth;
     float opacity;
     float fade;
     float from_scale;
     float to_scale;
-    float pad2;
+    float gradient_reference_height_inv;
 } props;
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
