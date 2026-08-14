@@ -411,7 +411,7 @@ void Drawable::setSharedBuffers(const gfx::VertexAttributeArray& attribs, const 
         const auto& vkAttrib = static_cast<const VertexAttribute&>(attrib);
         int ubo = vkAttrib.getUBO();
 
-        if (ubo == -1 || impl->uniformBuffers.get(ubo) != nullptr) {
+        if (ubo == -1) {
             return;
         }
 
