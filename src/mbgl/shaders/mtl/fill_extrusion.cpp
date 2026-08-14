@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -87,4 +87,4 @@ const std::array<TextureInfo, 1> FillExtrusionPatternInstancedShaderSource::text
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

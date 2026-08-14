@@ -13,7 +13,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 Renderer::Renderer(gfx::RendererBackend& backend, float pixelRatio_, const std::optional<std::string>& localFontFamily_)
     : impl(std::make_unique<Impl>(backend, pixelRatio_, localFontFamily_)) {}
@@ -175,4 +175,4 @@ void Renderer::enableAndroidEmulatorGoldfishMitigation(bool enable) {
 }
 #endif
 
-} // namespace mbgl
+} // namespace mln

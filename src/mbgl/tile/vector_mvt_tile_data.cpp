@@ -8,7 +8,7 @@
 #include <mlt/decoder.hpp>
 #endif
 
-namespace mbgl {
+namespace mln {
 
 VectorMVTTileFeature::VectorMVTTileFeature(const mapbox::vector_tile::layer& layer, const protozero::data_view& view)
     : feature(view, layer) {}
@@ -107,4 +107,4 @@ std::vector<std::string> VectorMVTTileData::layerNames() const {
     return mapbox::vector_tile::buffer(*data).layerNames();
 }
 
-} // namespace mbgl
+} // namespace mln

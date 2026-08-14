@@ -4,7 +4,7 @@
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/longest_common_subsequence.hpp>
 
-namespace mbgl {
+namespace mln {
 
 template <class T, class Eq>
 StyleDifference<T> diff(const Immutable<std::vector<T>>& a, const Immutable<std::vector<T>>& b, const Eq& eq) {
@@ -68,4 +68,4 @@ bool hasLayoutDifference(const LayerDifference& layerDiff, const std::string& la
     return it->second.before->hasLayoutDifference(*it->second.after);
 }
 
-} // namespace mbgl
+} // namespace mln

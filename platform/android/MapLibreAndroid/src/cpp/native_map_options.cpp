@@ -1,6 +1,6 @@
 #include "native_map_options.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void NativeMapOptions::registerNative(jni::JNIEnv &env) {
@@ -54,4 +54,4 @@ bool NativeMapOptions::fastPFOREnabled(jni::JNIEnv &env, const jni::Object<Nativ
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

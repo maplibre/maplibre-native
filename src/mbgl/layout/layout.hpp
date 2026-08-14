@@ -7,7 +7,7 @@
 #include <mbgl/util/containers.hpp>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class Bucket;
 class BucketParameters;
@@ -22,7 +22,7 @@ public:
 
     virtual void createBucket(const ImagePositions&,
                               std::unique_ptr<FeatureIndex>&,
-                              mbgl::unordered_map<std::string, LayerRenderData>&,
+                              mln::unordered_map<std::string, LayerRenderData>&,
                               bool,
                               bool,
                               const CanonicalTileID&) = 0;
@@ -47,4 +47,4 @@ public:
     std::set<std::string>& availableImages;
 };
 
-} // namespace mbgl
+} // namespace mln

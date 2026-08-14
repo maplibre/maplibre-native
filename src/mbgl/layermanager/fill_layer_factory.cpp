@@ -5,7 +5,7 @@
 #include <mbgl/style/layers/fill_layer.hpp>
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* FillLayerFactory::getTypeInfo() const noexcept {
     return style::FillLayer::Impl::staticTypeInfo();
@@ -39,4 +39,4 @@ std::unique_ptr<RenderLayer> FillLayerFactory::createRenderLayer(Immutable<style
     return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderFillLayer(std::move(fillImpl)));
 }
 
-} // namespace mbgl
+} // namespace mln

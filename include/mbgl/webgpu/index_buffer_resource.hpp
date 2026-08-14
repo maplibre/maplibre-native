@@ -3,7 +3,7 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/webgpu/buffer_resource.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class IndexBufferResource : public gfx::IndexBufferResource {
@@ -30,4 +30,4 @@ protected:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

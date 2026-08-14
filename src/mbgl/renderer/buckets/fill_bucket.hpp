@@ -19,7 +19,7 @@
 #include <mbgl/renderer/buckets/line_bucket.hpp>
 #endif
 
-namespace mbgl {
+namespace mln {
 
 class BucketParameters;
 class RenderFillLayer;
@@ -39,7 +39,7 @@ public:
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
-                    const mbgl::ImagePositions&,
+                    const mln::ImagePositions&,
                     const PatternLayerMap&,
                     std::size_t,
                     const CanonicalTileID&) override;
@@ -85,4 +85,4 @@ public:
     std::map<std::string, FillBinders> paintPropertyBinders;
 };
 
-} // namespace mbgl
+} // namespace mln

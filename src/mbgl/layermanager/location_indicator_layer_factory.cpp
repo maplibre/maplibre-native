@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/location_indicator_layer.hpp>
 #include <mbgl/style/layers/location_indicator_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* LocationIndicatorLayerFactory::getTypeInfo() const noexcept {
     return style::LocationIndicatorLayer::Impl::staticTypeInfo();
@@ -22,4 +22,4 @@ std::unique_ptr<RenderLayer> LocationIndicatorLayerFactory::createRenderLayer(
         staticImmutableCast<style::LocationIndicatorLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

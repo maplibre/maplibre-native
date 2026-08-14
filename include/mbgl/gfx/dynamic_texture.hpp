@@ -9,7 +9,7 @@
 #include <optional>
 #include <mutex>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class Context;
@@ -75,4 +75,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

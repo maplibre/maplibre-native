@@ -4,7 +4,7 @@
 
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 template <typename T>
@@ -23,4 +23,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

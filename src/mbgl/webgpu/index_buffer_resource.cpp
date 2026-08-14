@@ -1,7 +1,7 @@
 #include <mbgl/webgpu/index_buffer_resource.hpp>
 #include <mbgl/webgpu/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 IndexBufferResource::IndexBufferResource(BufferResource&& buffer_) noexcept
@@ -22,4 +22,4 @@ IndexBufferResource::~IndexBufferResource() noexcept {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

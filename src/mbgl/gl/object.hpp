@@ -4,7 +4,7 @@
 
 #include <unique_resource.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -57,4 +57,4 @@ using UniqueFramebuffer = std_experimental::unique_resource<FramebufferID, detai
 using UniqueRenderbuffer = std_experimental::unique_resource<RenderbufferID, detail::RenderbufferDeleter>;
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

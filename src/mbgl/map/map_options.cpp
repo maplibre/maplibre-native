@@ -1,6 +1,6 @@
 #include <mbgl/map/map_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class MapOptions::Impl {
 public:
@@ -92,4 +92,4 @@ bool MapOptions::fastPFOREnabled() const {
     return impl_->fastPFOREnabled;
 }
 
-} // namespace mbgl
+} // namespace mln

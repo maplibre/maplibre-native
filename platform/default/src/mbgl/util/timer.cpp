@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class Timer::Impl {
@@ -75,4 +75,4 @@ void Timer::stop() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

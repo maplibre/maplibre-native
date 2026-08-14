@@ -4,7 +4,7 @@
 
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 
 class StubMapObserver : public MapObserver {
 public:
@@ -110,4 +110,4 @@ public:
     std::function<void(TileOperation, const OverscaledTileID&, const std::string&)> onTileActionCallback;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Context;
@@ -85,4 +85,4 @@ protected:
     LayerGroupMap layerGroupsByLayerIndex;
 };
 
-} // namespace mbgl
+} // namespace mln

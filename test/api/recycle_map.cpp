@@ -15,8 +15,8 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 TEST(API, RecycleMapUpdateImages) {
     util::RunLoop loop;

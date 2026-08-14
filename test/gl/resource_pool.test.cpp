@@ -8,7 +8,7 @@
 #include <mbgl/gl/headless_backend.hpp>
 #include <mbgl/gl/context.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

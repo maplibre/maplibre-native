@@ -9,7 +9,7 @@
 #include <type_traits>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 template <class Object>
 class EstablishedActor;
@@ -56,4 +56,4 @@ private:
     friend class Actor<Object>;
 };
 
-} // namespace mbgl
+} // namespace mln

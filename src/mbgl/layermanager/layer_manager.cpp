@@ -9,9 +9,9 @@
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
-void LayerManager::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) {}
+void LayerManager::addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>) {}
 
 std::unique_ptr<style::Layer> LayerManager::createLayer(const std::string& type,
                                                         const std::string& id,
@@ -56,4 +56,4 @@ std::unique_ptr<RenderLayer> LayerManager::createRenderLayer(Immutable<style::La
     return factory->createRenderLayer(std::move(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

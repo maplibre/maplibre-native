@@ -5,7 +5,7 @@
 
 #include <mbgl/layermanager/layer_manager.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -98,4 +98,4 @@ std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operato
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

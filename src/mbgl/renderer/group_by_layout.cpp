@@ -9,7 +9,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-namespace mbgl {
+namespace mln {
 
 bool LayoutGroupKey::operator==(const LayoutGroupKey& other) const {
     // Fast path: compare pointers and scalars first
@@ -61,11 +61,11 @@ GroupMap groupLayers(const std::vector<Immutable<style::LayerProperties>>& layer
     return groupMap;
 }
 
-} // namespace mbgl
+} // namespace mln
 
 // std::hash specialization (outside namespace)
-std::size_t std::hash<mbgl::LayoutGroupKey>::operator()(const mbgl::LayoutGroupKey& key) const noexcept {
-    using mbgl::util::hash_combine;
+std::size_t std::hash<mln::LayoutGroupKey>::operator()(const mln::LayoutGroupKey& key) const noexcept {
+    using mln::util::hash_combine;
 
     std::size_t seed = 0;
 

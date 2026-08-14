@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/background_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class BackgroundLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     BackgroundLayer(jni::JNIEnv&, jni::String&);
 
-    BackgroundLayer(mbgl::style::BackgroundLayer&);
+    BackgroundLayer(mln::style::BackgroundLayer&);
 
-    BackgroundLayer(std::unique_ptr<mbgl::style::BackgroundLayer>);
+    BackgroundLayer(std::unique_ptr<mln::style::BackgroundLayer>);
 
     ~BackgroundLayer();
 
@@ -40,13 +40,13 @@ public:
 
 }; // class BackgroundLayer
 
-class BackgroundJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::BackgroundLayerFactory {
+class BackgroundJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::BackgroundLayerFactory {
 public:
     ~BackgroundJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -55,4 +55,4 @@ public:
 }; // class BackgroundJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

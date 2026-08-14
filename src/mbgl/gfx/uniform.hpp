@@ -29,7 +29,7 @@
         }                                            \
     }
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <class>
@@ -46,4 +46,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

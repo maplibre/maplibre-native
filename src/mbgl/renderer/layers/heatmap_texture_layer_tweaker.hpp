@@ -2,7 +2,7 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Heatmap texture layer specific tweaker
@@ -18,4 +18,4 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 };
 
-} // namespace mbgl
+} // namespace mln

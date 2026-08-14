@@ -12,10 +12,10 @@
 class TestRunnerMapObserver;
 struct TestMetadata;
 
-class TestRunnerMapObserver : public mbgl::MapObserver {
+class TestRunnerMapObserver : public mln::MapObserver {
 public:
     TestRunnerMapObserver() = default;
-    void onDidFailLoadingMap(mbgl::MapLoadError, const std::string&) override { mapLoadFailure = true; }
+    void onDidFailLoadingMap(mln::MapLoadError, const std::string&) override { mapLoadFailure = true; }
 
     void onDidFinishRenderingMap(RenderMode mode) override final {
         if (!finishRenderingMap) finishRenderingMap = mode == RenderMode::Full;
@@ -53,23 +53,23 @@ public:
     void doShuffle(uint32_t seed);
 
 private:
-    mbgl::HeadlessFrontend::RenderResult runTest(TestMetadata& metadata, TestContext& ctx);
-    void checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
-                               std::vector<mbgl::Feature>&& features,
+    mln::HeadlessFrontend::RenderResult runTest(TestMetadata& metadata, TestContext& ctx);
+    void checkQueryTestResults(mln::PremultipliedImage&& actualImage,
+                               std::vector<mln::Feature>&& features,
                                TestMetadata&);
-    void checkRenderTestResults(mbgl::PremultipliedImage&& image, TestMetadata&);
+    void checkRenderTestResults(mln::PremultipliedImage&& image, TestMetadata&);
     void checkProbingResults(TestMetadata&);
     void appendLabelCutOffResults(TestMetadata&, const std::string&, const std::string&);
     void registerProxyFileSource();
 
     struct Impl {
-        Impl(const TestMetadata&, const mbgl::ResourceOptions&, const mbgl::ClientOptions&);
+        Impl(const TestMetadata&, const mln::ResourceOptions&, const mln::ClientOptions&);
         ~Impl();
 
         std::unique_ptr<TestRunnerMapObserver> observer;
-        mbgl::HeadlessFrontend frontend;
-        std::shared_ptr<mbgl::FileSource> fileSource;
-        mbgl::Map map;
+        mln::HeadlessFrontend frontend;
+        std::shared_ptr<mln::FileSource> fileSource;
+        mln::Map map;
     };
     std::unordered_map<std::string, std::unique_ptr<Impl>> maps;
     Manifest manifest;

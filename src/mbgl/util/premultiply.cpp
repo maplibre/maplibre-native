@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 PremultipliedImage premultiply(UnassociatedImage&& src) {
@@ -50,4 +50,4 @@ UnassociatedImage unpremultiply(PremultipliedImage&& src) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

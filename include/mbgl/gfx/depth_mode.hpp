@@ -3,7 +3,7 @@
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/range.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class DepthMode {
@@ -24,4 +24,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

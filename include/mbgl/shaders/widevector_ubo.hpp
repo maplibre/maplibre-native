@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) WideVectorUniformsUBO {
@@ -54,4 +54,4 @@ struct VertexTriWideVecInstance {
 static_assert(sizeof(VertexTriWideVecInstance) == 48);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

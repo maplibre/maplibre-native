@@ -3,7 +3,7 @@
 #include <locale>
 #include <codecvt>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 std::u16string convertUTF8ToUTF16(const std::string& str) {
@@ -21,4 +21,4 @@ std::string convertUTF16ToUTF8(const std::u16string& str) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

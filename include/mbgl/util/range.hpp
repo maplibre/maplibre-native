@@ -2,7 +2,7 @@
 
 #pragma once
 
-namespace mbgl {
+namespace mln {
 
 template <class T>
 class Range {
@@ -25,4 +25,4 @@ constexpr bool operator!=(const Range<T>& a, const Range<T>& b) {
     return !(a == b);
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mutex>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 class AsyncTask;
@@ -31,4 +31,4 @@ private:
     static std::unordered_set<util::AsyncTask*> observers;
 };
 
-} // namespace mbgl
+} // namespace mln

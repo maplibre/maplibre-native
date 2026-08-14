@@ -7,7 +7,7 @@
 
 struct GLFWwindow;
 
-class GLFWGLBackend final : public GLFWBackend, public mbgl::gl::RendererBackend, public mbgl::gfx::Renderable {
+class GLFWGLBackend final : public GLFWBackend, public mln::gl::RendererBackend, public mln::gfx::Renderable {
 public:
     GLFWGLBackend(GLFWwindow*, bool capFrameRate);
     ~GLFWGLBackend() override;
@@ -16,21 +16,21 @@ public:
 
     // GLFWRendererBackend implementation
 public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
-    mbgl::Size getSize() const override;
-    void setSize(mbgl::Size) override;
+    mln::gfx::RendererBackend& getRendererBackend() override { return *this; }
+    mln::Size getSize() const override;
+    void setSize(mln::Size) override;
 
-    // mbgl::gfx::RendererBackend implementation
+    // mln::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 protected:
     void activate() override;
     void deactivate() override;
 
-    // mbgl::gl::RendererBackend implementation
+    // mln::gl::RendererBackend implementation
 protected:
-    mbgl::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
+    mln::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
     void updateAssumedState() override;
 
 private:

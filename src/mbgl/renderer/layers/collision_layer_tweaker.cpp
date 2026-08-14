@@ -16,7 +16,7 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -71,4 +71,4 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     });
 }
 
-} // namespace mbgl
+} // namespace mln

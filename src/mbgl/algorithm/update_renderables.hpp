@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace algorithm {
 
 template <typename GetTileFn,
@@ -160,4 +160,4 @@ void updateRenderables(GetTileFn getTile,
 }
 
 } // namespace algorithm
-} // namespace mbgl
+} // namespace mln

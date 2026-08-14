@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class Conext;
@@ -99,4 +99,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -21,7 +21,7 @@
 @implementation MBGLBundleCanary
 @end
 
-namespace mbgl {
+namespace mln {
 
 // Data that is shared between the requesting thread and the thread running the completion handler.
 class HTTPRequestShared {
@@ -149,7 +149,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
   // Avoid %s here because it inserts hidden bidirectional markers on macOS when the system
   // language is set to a right-to-left language.
   [userAgentComponents addObject:[NSString stringWithFormat:@"MapLibreNative/0.0.0 (%@)",
-                                                            @(mbgl::version::revision)]];
+                                                            @(mln::version::revision)]];
 
   NSString *systemName = @"Darwin";
 #if TARGET_OS_IPHONE
@@ -267,7 +267,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource,
 
     [req addValue:impl->userAgent forHTTPHeaderField:@"User-Agent"];
 
-    const bool isTile = resource.kind == mbgl::Resource::Kind::Tile;
+    const bool isTile = resource.kind == mln::Resource::Kind::Tile;
 
     if (isTile) {
       [MLNNativeNetworkManager.sharedManager startDownloadEvent:url.relativePath type:@"tile"];
@@ -444,4 +444,4 @@ void HTTPFileSource::setClientOptions(ClientOptions options) {
 
 ClientOptions HTTPFileSource::getClientOptions() { return impl->getClientOptions(); }
 
-}  // namespace mbgl
+}  // namespace mln

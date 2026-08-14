@@ -8,7 +8,7 @@
 #include <QNetworkRequest>
 #include <QUrl>
 
-namespace mbgl {
+namespace mln {
 
 class Response;
 
@@ -30,4 +30,4 @@ private:
     bool m_handled = false;
 };
 
-} // namespace mbgl
+} // namespace mln

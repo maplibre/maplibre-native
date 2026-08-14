@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 
 template <class... Ts>
 struct TypeList {
@@ -62,4 +62,4 @@ using FilteredTypeList = typename detail::TypeFilter<TypeList, Predicate>::Type;
 template <class... Ts>
 using TypeListConcat = typename detail::TypeListConcat<Ts...>::Type;
 
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class VertexBufferResource;
 } // namespace gfx
@@ -73,4 +73,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/tile_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderVectorSource final : public RenderTileSetSource {
 public:
@@ -28,4 +28,4 @@ private:
     bool fastPFOREnabled = false;
 };
 
-} // namespace mbgl
+} // namespace mln

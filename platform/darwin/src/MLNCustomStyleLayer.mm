@@ -20,7 +20,7 @@
 class MLNCustomLayerHost;
 
 @interface MLNCustomStyleLayer ()
-@property (nonatomic, readonly) mbgl::style::CustomLayer *rawLayer;
+@property (nonatomic, readonly) mln::style::CustomLayer *rawLayer;
 @property (nonatomic, readonly, nullable) MLNMapView *mapView;
 @property (nonatomic, weak, readwrite) MLNStyle *style;
 @end
@@ -28,13 +28,13 @@ class MLNCustomLayerHost;
 @implementation MLNCustomStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
-  auto layer = std::make_unique<mbgl::style::CustomLayer>(
+  auto layer = std::make_unique<mln::style::CustomLayer>(
       identifier.UTF8String, std::make_unique<MLNCustomLayerHost>(self));
   return self = [super initWithPendingLayer:std::move(layer)];
 }
 
-- (mbgl::style::CustomLayer *)rawLayer {
-  return (mbgl::style::CustomLayer *)super.rawLayer;
+- (mln::style::CustomLayer *)rawLayer {
+  return (mln::style::CustomLayer *)super.rawLayer;
 }
 
 - (MLNMapView *)mapView {
@@ -81,14 +81,14 @@ class MLNCustomLayerHost;
 
 @end
 
-class MLNCustomLayerHost : public mbgl::style::CustomLayerHost {
+class MLNCustomLayerHost : public mln::style::CustomLayerHost {
 public:
   MLNCustomLayerHost(MLNCustomStyleLayer *styleLayer) {
     layerRef = styleLayer;
     layer = nil;
   }
 
-  void initialize(const mbgl::style::CustomLayerInitParameters &) override {
+  void initialize(const mln::style::CustomLayerInitParameters &) override {
     if (layerRef == nil)
       return;
     else if (layer == nil)
@@ -99,12 +99,12 @@ public:
     }
   }
 
-  void render(const mbgl::style::CustomLayerRenderParameters &parameters) override {
+  void render(const mln::style::CustomLayerRenderParameters &parameters) override {
     if (!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
     MTL::RenderCommandEncoder *ptr =
-        static_cast<const mbgl::style::mtl::CustomLayerRenderParameters &>(parameters)
+        static_cast<const mln::style::mtl::CustomLayerRenderParameters &>(parameters)
             .encoder.get();
     id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
     layer.renderEncoder = encoder;
@@ -114,7 +114,7 @@ public:
         .size = CGSizeMake(parameters.width, parameters.height),
         .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
         .zoomLevel = parameters.zoom,
-        .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+        .direction = mln::util::wrap(parameters.bearing, 0., 360.),
         .pitch = static_cast<CGFloat>(parameters.pitch),
         .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
         .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix),
@@ -142,10 +142,10 @@ private:
   MLNCustomStyleLayer *layer = nil;
 };
 
-namespace mbgl {
+namespace mln {
 
 MLNStyleLayer *CustomStyleLayerPeerFactory::createPeer(style::Layer *rawLayer) {
   return [[MLNCustomStyleLayer alloc] initWithRawLayer:rawLayer];
 }
 
-}  // namespace mbgl
+}  // namespace mln

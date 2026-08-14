@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 enum MapChange : uint8_t {
     MapChangeRegionWillChange = 0,
@@ -23,4 +23,4 @@ enum MapChange : uint8_t {
     MapChangeSourceDidChange = 15
 };
 
-} // namespace mbgl
+} // namespace mln

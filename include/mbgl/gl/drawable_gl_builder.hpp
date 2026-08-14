@@ -3,7 +3,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 /**
@@ -26,4 +26,4 @@ protected:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

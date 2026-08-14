@@ -11,7 +11,7 @@
 #pragma warning(pop)
 #endif
 
-namespace mbgl {
+namespace mln {
 
 template <typename... T>
 using variant = mapbox::util::variant<T...>;
@@ -25,4 +25,4 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
-} // namespace mbgl
+} // namespace mln

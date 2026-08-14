@@ -18,7 +18,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -143,7 +143,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         idealTiles = util::tileCover(tileCoverParameters, idealZoom, zoomRange, tileZoom);
         if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
             idealTiles.size() > 1) {
-            mbgl::Log::Warning(mbgl::Event::General,
+            mln::Log::Warning(mln::Event::General,
                                "Provided camera options returned " + std::to_string(idealTiles.size()) +
                                    " tiles, only " + util::toString(idealTiles[0]) + " is taken in Tile mode.");
             idealTiles = {idealTiles[0]};
@@ -456,4 +456,4 @@ void TilePyramid::updateFadingTiles() {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

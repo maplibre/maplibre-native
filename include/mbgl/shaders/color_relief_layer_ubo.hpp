@@ -1,7 +1,7 @@
 #pragma once
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) ColorReliefDrawableUBO {
@@ -29,4 +29,4 @@ struct alignas(16) ColorReliefEvaluatedPropsUBO {
 static_assert(sizeof(ColorReliefEvaluatedPropsUBO) == 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

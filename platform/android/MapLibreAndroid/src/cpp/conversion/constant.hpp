@@ -17,7 +17,7 @@
 #include <vector>
 #include <mbgl/style/rotation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
@@ -140,10 +140,10 @@ struct Converter<jni::Local<jni::Object<>>, style::expression::Image> {
 };
 
 template <>
-struct Converter<jni::Local<jni::Object<>>, mbgl::style::Rotation> {
-    Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const mbgl::style::Rotation& value) const;
+struct Converter<jni::Local<jni::Object<>>, mln::style::Rotation> {
+    Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const mln::style::Rotation& value) const;
 };
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

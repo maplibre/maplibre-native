@@ -67,7 +67,7 @@ static void startStderrToLogcat() {
 }
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 #if MLN_WEBGPU_IMPL_DAWN
@@ -113,7 +113,7 @@ public:
 
     void swap() override { backend.markNeedsPresent(); }
 
-    const mbgl::webgpu::RendererBackend& getBackend() const override { return backend; }
+    const mln::webgpu::RendererBackend& getBackend() const override { return backend; }
 
     const WGPUCommandEncoder& getCommandEncoder() const override {
         assert(false);
@@ -565,7 +565,7 @@ PremultipliedImage AndroidWebGPURendererBackend::readFramebuffer() {
         return {fbSize, std::move(data)};
     }
 
-    mbgl::Scoped scopedCleanup([stagingBuffer]() {
+    mln::Scoped scopedCleanup([stagingBuffer]() {
         wgpuBufferUnmap(stagingBuffer);
         wgpuBufferRelease(stagingBuffer);
     });
@@ -758,21 +758,21 @@ void* AndroidWebGPURendererBackend::getDepthStencilView() {
     return impl->depthStencilView;
 }
 
-mbgl::Size AndroidWebGPURendererBackend::getFramebufferSize() const {
+mln::Size AndroidWebGPURendererBackend::getFramebufferSize() const {
     return impl->framebufferSize;
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <>
-std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mbgl::gfx::Backend::Type::WebGPU>(
+std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mln::gfx::Backend::Type::WebGPU>(
     ANativeWindow* window) {
     return std::make_unique<android::AndroidWebGPURendererBackend>(window);
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -17,7 +17,7 @@ void dummyCallback(uv_async_t*) {}
 
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 struct Watch {
@@ -157,7 +157,7 @@ void RunLoop::updateTime() {
     uv_update_time(impl->loop);
 }
 
-void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
+void RunLoop::waitForEmpty([[maybe_unused]] const mln::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
@@ -243,4 +243,4 @@ void RunLoop::removeWatch(int fd) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

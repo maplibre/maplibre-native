@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/line_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 bool LineLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
@@ -11,4 +11,4 @@ bool LineLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

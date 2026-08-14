@@ -93,7 +93,7 @@
 
 */
 
-namespace mbgl {
+namespace mln {
 
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
@@ -211,4 +211,4 @@ std::string LanguageTag::toBCP47() const {
     }
     return bcp47.str();
 }
-} // end namespace mbgl
+} // end namespace mln

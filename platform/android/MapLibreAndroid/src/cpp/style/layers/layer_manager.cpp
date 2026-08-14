@@ -20,7 +20,7 @@
 #include "fill_extrusion_layer.hpp"
 #include "location_indicator_layer.hpp"
 
-namespace mbgl {
+namespace mln {
 
 namespace android {
 
@@ -87,7 +87,7 @@ LayerManagerAndroid::LayerManagerAndroid() {
 
 LayerManagerAndroid::~LayerManagerAndroid() = default;
 
-jni::Local<jni::Object<Layer>> LayerManagerAndroid::createJavaLayerPeer(jni::JNIEnv& env, mbgl::style::Layer& layer) {
+jni::Local<jni::Object<Layer>> LayerManagerAndroid::createJavaLayerPeer(jni::JNIEnv& env, mln::style::Layer& layer) {
     if (JavaLayerPeerFactory* factory = getPeerFactory(layer.getTypeInfo())) {
         return factory->createJavaLayerPeer(env, layer);
     }
@@ -95,7 +95,7 @@ jni::Local<jni::Object<Layer>> LayerManagerAndroid::createJavaLayerPeer(jni::JNI
 }
 
 jni::Local<jni::Object<Layer>> LayerManagerAndroid::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                        std::unique_ptr<mbgl::style::Layer> layer) {
+                                                                        std::unique_ptr<mln::style::Layer> layer) {
     if (JavaLayerPeerFactory* factory = getPeerFactory(layer->getTypeInfo())) {
         return factory->createJavaLayerPeer(env, std::move(layer));
     }
@@ -125,7 +125,7 @@ void LayerManagerAndroid::addLayerTypeCoreOnly(std::unique_ptr<LayerFactory> fac
     coreFactories.emplace_back(std::move(factory));
 }
 
-void LayerManagerAndroid::registerCoreFactory(mbgl::LayerFactory* factory) {
+void LayerManagerAndroid::registerCoreFactory(mln::LayerFactory* factory) {
     std::string type{factory->getTypeInfo()->type};
     if (!type.empty()) {
         assert(typeToFactory.find(type) == typeToFactory.end());
@@ -133,7 +133,7 @@ void LayerManagerAndroid::registerCoreFactory(mbgl::LayerFactory* factory) {
     }
 }
 
-JavaLayerPeerFactory* LayerManagerAndroid::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
+JavaLayerPeerFactory* LayerManagerAndroid::getPeerFactory(const mln::style::LayerTypeInfo* typeInfo) {
     assert(typeInfo);
     for (const auto& factory : peerFactories) {
         if (factory->getLayerFactory()->getTypeInfo() == typeInfo) {
@@ -148,7 +148,7 @@ LayerFactory* LayerManagerAndroid::getFactory(const std::string& type) noexcept 
     return (search != typeToFactory.end()) ? search->second : nullptr;
 }
 
-LayerFactory* LayerManagerAndroid::getFactory(const mbgl::style::LayerTypeInfo* info) noexcept {
+LayerFactory* LayerManagerAndroid::getFactory(const mln::style::LayerTypeInfo* info) noexcept {
     if (JavaLayerPeerFactory* peerFactory = getPeerFactory(info)) {
         return peerFactory->getLayerFactory();
     }
@@ -181,4 +181,4 @@ const bool LayerManager::annotationsEnabled = false;
 const bool LayerManager::annotationsEnabled = true;
 #endif
 
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) CustomSymbolIconDrawableUBO {
@@ -22,4 +22,4 @@ struct alignas(16) CustomSymbolIconDrawableUBO {
 static_assert(sizeof(CustomSymbolIconDrawableUBO) == 7 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

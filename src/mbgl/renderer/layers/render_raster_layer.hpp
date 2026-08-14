@@ -6,7 +6,7 @@
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ImageSourceRenderData;
 
@@ -65,4 +65,4 @@ private:
     SegmentVectorPtr staticDataSegments;
 };
 
-} // namespace mbgl
+} // namespace mln

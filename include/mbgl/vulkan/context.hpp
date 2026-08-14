@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 class RenderStaticData;
@@ -71,7 +71,7 @@ public:
                                       const std::string_view vertex,
                                       const std::string_view fragment,
                                       const ProgramParameters& programParameters,
-                                      const mbgl::unordered_map<std::string, std::string>& additionalDefines);
+                                      const mln::unordered_map<std::string, std::string>& additionalDefines);
 
     /// Called at the end of a frame.
     void performCleanup() override;
@@ -220,4 +220,4 @@ private:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

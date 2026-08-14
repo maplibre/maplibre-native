@@ -5,7 +5,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class BufferResource;
@@ -35,4 +35,4 @@ private:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

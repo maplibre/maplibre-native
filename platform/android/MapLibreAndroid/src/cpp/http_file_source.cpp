@@ -14,7 +14,7 @@
 #include <jni/jni.hpp>
 #include "attach_env.hpp"
 
-namespace mbgl {
+namespace mln {
 
 class HTTPFileSource::Impl {
 public:
@@ -241,4 +241,4 @@ ClientOptions HTTPFileSource::getClientOptions() {
     return impl->getClientOptions();
 }
 
-} // namespace mbgl
+} // namespace mln

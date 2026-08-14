@@ -1,8 +1,8 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/style/expression/util.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style::expression;
+using namespace mln;
+using namespace mln::style::expression;
 
 TEST(Expression, Util_rgba) {
     Result<Color> valid = rgba(0, 0, 0, 0);

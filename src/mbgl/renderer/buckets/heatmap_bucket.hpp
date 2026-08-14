@@ -9,7 +9,7 @@
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class BucketParameters;
 
@@ -64,4 +64,4 @@ public:
     const MapMode mode;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 bool SymbolLayer::Impl::hasFormatSectionOverrides() const {
@@ -48,4 +48,4 @@ void SymbolLayer::Impl::populateFontStack(std::set<FontStack>& fontStack) const 
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 class Collator {
@@ -22,4 +22,4 @@ private:
 };
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -73,10 +73,10 @@ std::vector<std::optional<Value>> Step::possibleOutputs() const {
 }
 
 Range<float> Step::getCoveringStops(const double lower, const double upper) const noexcept {
-    return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
+    return ::mln::style::expression::getCoveringStops(stops, lower, upper);
 }
 
-ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx) {
+ParseResult Step::parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
 
     auto length = arrayLength(value);
@@ -175,8 +175,8 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
     return ParseResult(std::make_unique<Step>(std::move(*outputType), std::move(*input), std::move(stops)));
 }
 
-mbgl::Value Step::serialize() const {
-    std::vector<mbgl::Value> serialized;
+mln::Value Step::serialize() const {
+    std::vector<mln::Value> serialized;
     serialized.emplace_back(getOperator());
     serialized.emplace_back(input->serialize());
     for (auto& entry : stops) {
@@ -190,4 +190,4 @@ mbgl::Value Step::serialize() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

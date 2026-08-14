@@ -85,7 +85,7 @@
 
 - [ios, macos] Allow specifying multiple fonts or font families for local font rendering ([#16253](https://github.com/mapbox/mapbox-gl-native/pull/16253))
 
-  By default, CJK characters are now set in the font specified by the `text-font` layout property. If the named font is not installed on the device or bundled with the application, the characters are set in one of the fallback fonts passed into the `localFontFamily` parameter of `mbgl::Renderer::Renderer()` and `mbgl::MapSnapshotter::MapSnapshotter()`. This parameter can now contain a list of font family names, font display names, and font PostScript names, each name separated by a newline.
+  By default, CJK characters are now set in the font specified by the `text-font` layout property. If the named font is not installed on the device or bundled with the application, the characters are set in one of the fallback fonts passed into the `localFontFamily` parameter of `mln::Renderer::Renderer()` and `mln::MapSnapshotter::MapSnapshotter()`. This parameter can now contain a list of font family names, font display names, and font PostScript names, each name separated by a newline.
 
 ### 🐞 Bug fixes
 
@@ -139,7 +139,7 @@
 
 - [core][tile mode] Fix variable placement for labels with the `icon-text-fit` property set ([#16382](https://github.com/mapbox/mapbox-gl-native/pull/16382))
 
-  The `symbolIntersectsTileEdges()` util in `mbgl::TilePlacement` now considers icon shift for the variable symbols with enabled icon-text-fit setting, thus providing more accurate results.
+  The `symbolIntersectsTileEdges()` util in `mln::TilePlacement` now considers icon shift for the variable symbols with enabled icon-text-fit setting, thus providing more accurate results.
 
 - [core] Correctly log a warning instead of crashing when a non-existent image is attempted to be removed. ([#16391](https://github.com/mapbox/mapbox-gl-native/pull/16391))
 
@@ -170,7 +170,7 @@
 - [android] Add jni binding for styleable snapshotter ([#16286](https://github.com/mapbox/mapbox-gl-native/pull/16286))
 
 - [core] Ability to set generic layer properties using setProperty method ([#16324](https://github.com/mapbox/mapbox-gl-native/pull/16324))
-  This change enables the following new keys for the `mbgl::Layer::setProperty()` API:
+  This change enables the following new keys for the `mln::Layer::setProperty()` API:
   - "filter" invokes `setFilter()`
   - "minzoom" invokes `setMinZoom()`
   - "maxzoom" invokes `setMaxZoom()`
@@ -252,7 +252,7 @@
 
  - Fixed using of the `in` expression as a layer filter ([#16272](https://github.com/mapbox/mapbox-gl-native/pull/16272))
 
-  The bug was caused by `mbgl::style::conversion::isExpression()` always returning `false` for the `in` expression.
+  The bug was caused by `mln::style::conversion::isExpression()` always returning `false` for the `in` expression.
 
 ### 🧩  Architectural changes
 
@@ -296,9 +296,9 @@
 
 ##### ⚠️  Breaking changes
 
-- Changes to `mbgl::FileSourceManager::getFileSource()` ([#16238](https://github.com/mapbox/mapbox-gl-native/pull/16238))
+- Changes to `mln::FileSourceManager::getFileSource()` ([#16238](https://github.com/mapbox/mapbox-gl-native/pull/16238))
 
-  It returns now `mbgl::PassRefPtr<FileSource>` (previously was `std::shared_ptr<FileSource>`) in order to enforce keeping the strong reference to the returned object.
+  It returns now `mln::PassRefPtr<FileSource>` (previously was `std::shared_ptr<FileSource>`) in order to enforce keeping the strong reference to the returned object.
 
   Breaking code example:
   `auto fs = FileSourceManager::getFileSource(); fs->..`
@@ -306,9 +306,9 @@
   Possible fix:
   `std::shared_ptr<FileSource> fs = `;
 
-- The `mbgl::OnlineFileSource` class cannot be used directly ([#16238](https://github.com/mapbox/mapbox-gl-native/pull/16238))
+- The `mln::OnlineFileSource` class cannot be used directly ([#16238](https://github.com/mapbox/mapbox-gl-native/pull/16238))
 
-  Clients must use the parent `mbgl::FileSource` interface instead.
+  Clients must use the parent `mln::FileSource` interface instead.
 
   Breaking code example:
   `std::shared_ptr<OnlineFileSource> onlineSource = std::static_pointer_cast<OnlineFileSource>(FileSourceManager::get()->getFileSource(..));`

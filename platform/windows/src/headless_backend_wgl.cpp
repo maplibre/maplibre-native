@@ -11,7 +11,7 @@
 
 #include "gl_functions_wgl.h"
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the
@@ -103,10 +103,10 @@ private:
     bool extensionSupportedWGL(const char* extension) {
         const char* extensions = NULL;
 
-        extensions = mbgl::platform::wglGetExtensionsStringARB(wglGetCurrentDC());
+        extensions = mln::platform::wglGetExtensionsStringARB(wglGetCurrentDC());
 
         if (!extensions || !StringInExtensionString(extension, extensions))
-            extensions = mbgl::platform::wglGetExtensionsStringEXT();
+            extensions = mln::platform::wglGetExtensionsStringEXT();
 
         if (!extensions || !StringInExtensionString(extension, extensions))
             extensions = (const char*)wgl_glGetString(GL_EXTENSIONS);
@@ -282,7 +282,7 @@ private:
             renderingWindowDeviceContext = GetDC(renderingWindowHandle);
         }
 
-        if (!mbgl::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
+        if (!mln::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
                                                      std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
                                                                                    GL_TRUE,
                                                                                    WGL_DOUBLE_BUFFER_ARB,
@@ -324,7 +324,7 @@ private:
         }
 
         if (wglDisplayConfig.ARB_create_context) {
-            renderingWindowRenderingContext = mbgl::platform::wglCreateContextAttribsARB(
+            renderingWindowRenderingContext = mln::platform::wglCreateContextAttribsARB(
                 renderingWindowDeviceContext,
                 NULL,
                 std::initializer_list<int>({WGL_CONTEXT_MAJOR_VERSION_ARB,
@@ -433,4 +433,4 @@ void HeadlessBackend::createImpl() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

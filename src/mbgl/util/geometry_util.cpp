@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 void updateBBox(GeometryBBox<T>& bbox, const Point<T>& p) noexcept {
@@ -170,4 +170,4 @@ template bool pointWithinPolygon(const Point<double>& point,
                                  const Polygon<double>& polygon,
                                  bool trueOnBoundary) noexcept;
 
-} // namespace mbgl
+} // namespace mln

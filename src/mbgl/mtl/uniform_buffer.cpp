@@ -6,7 +6,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 UniformBuffer::UniformBuffer(BufferResource&& buffer_)
@@ -59,4 +59,4 @@ void UniformBufferArray::bind(gfx::RenderPass& renderPass) {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

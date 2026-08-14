@@ -8,7 +8,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 
 class PlacedSymbol;
 
@@ -117,4 +117,4 @@ private:
     const float pitchFactor;
 };
 
-} // namespace mbgl
+} // namespace mln

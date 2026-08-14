@@ -23,7 +23,7 @@
 #include <set>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 Parser::~Parser() = default;
@@ -397,8 +397,8 @@ std::set<FontStack> Parser::fontStacks() const {
     for (const auto& layer : layers) {
         impls.emplace_back(layer->baseImpl);
     }
-    return mbgl::fontStacks(impls);
+    return mln::fontStacks(impls);
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

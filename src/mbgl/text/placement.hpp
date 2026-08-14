@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 class SymbolBucket;
 class SymbolInstance;
@@ -208,4 +208,4 @@ protected:
     std::unordered_map<const CollisionFeature*, std::vector<ProjectedCollisionBox>> collisionCircles;
 };
 
-} // namespace mbgl
+} // namespace mln

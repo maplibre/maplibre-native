@@ -5,7 +5,7 @@
 #include <mbgl/style/layers/heatmap_layer.hpp>
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* HeatmapLayerFactory::getTypeInfo() const noexcept {
     return style::HeatmapLayer::Impl::staticTypeInfo();
@@ -30,4 +30,4 @@ std::unique_ptr<RenderLayer> HeatmapLayerFactory::createRenderLayer(Immutable<st
     return std::make_unique<RenderHeatmapLayer>(staticImmutableCast<style::HeatmapLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

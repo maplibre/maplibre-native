@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
@@ -30,4 +30,4 @@ public:
 using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

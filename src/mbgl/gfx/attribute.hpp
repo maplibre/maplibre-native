@@ -13,7 +13,7 @@
 
 #define MBGL_DEFINE_ATTRIBUTE(type_, n_, name_)             \
     struct name_ {                                          \
-        using Type = ::mbgl::gfx::AttributeType<type_, n_>; \
+        using Type = ::mln::gfx::AttributeType<type_, n_>; \
         static constexpr auto name() {                      \
             return #name_;                                  \
         }                                                   \
@@ -25,7 +25,7 @@
 #define MBGL_VERTEX_ALIGN __attribute__((aligned(4)))
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <typename, std::size_t>
@@ -330,4 +330,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

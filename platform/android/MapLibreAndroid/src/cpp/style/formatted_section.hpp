@@ -4,10 +4,10 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class FormattedSection : private mbgl::util::noncopyable {
+class FormattedSection : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/types/FormattedSection"; };
 
@@ -15,4 +15,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

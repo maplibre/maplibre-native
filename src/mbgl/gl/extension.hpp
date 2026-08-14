@@ -4,7 +4,7 @@
 #include <utility>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using ProcAddress = void (*)();
@@ -27,4 +27,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

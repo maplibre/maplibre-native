@@ -4,7 +4,7 @@
 
 #include <mapbox/geojson.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -22,4 +22,4 @@ std::string stringifyGeoJSON(const GeoJSON& geojson) {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

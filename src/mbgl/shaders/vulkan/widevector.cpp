@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/widevector_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using WideVectorShaderSource = ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan>;
@@ -21,4 +21,4 @@ const std::array<AttributeInfo, 4> WideVectorShaderSource::instanceAttributes = 
 const std::array<TextureInfo, 0> WideVectorShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

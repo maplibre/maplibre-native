@@ -4,7 +4,7 @@
 #include <mbgl/util/mat3.hpp>
 #include <mbgl/util/mat4.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 enum class IntersectionResult : int {
@@ -65,4 +65,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

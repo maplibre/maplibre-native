@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class RasterTile;
 
@@ -19,4 +19,4 @@ private:
     ActorRef<RasterTile> parent;
 };
 
-} // namespace mbgl
+} // namespace mln

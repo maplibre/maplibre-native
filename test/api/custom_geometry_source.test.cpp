@@ -13,8 +13,8 @@
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 TEST(CustomGeometrySource, Grid) {
     util::RunLoop loop;
@@ -28,7 +28,7 @@ TEST(CustomGeometrySource, Grid) {
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
 
     CustomGeometrySource::Options options;
-    options.fetchTileFunction = [&map](const mbgl::CanonicalTileID& tileID) {
+    options.fetchTileFunction = [&map](const mln::CanonicalTileID& tileID) {
         double gridSpacing = 0.1;
         FeatureCollection features;
         const LatLngBounds bounds(tileID);

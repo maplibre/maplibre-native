@@ -2,7 +2,7 @@
 
 #include <mbgl/mtl/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 VertexBufferResource::VertexBufferResource(BufferResource&& ptr) noexcept
@@ -23,4 +23,4 @@ VertexBufferResource::~VertexBufferResource() noexcept {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

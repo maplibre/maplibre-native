@@ -21,7 +21,7 @@
 #include <mbgl/shaders/mtl/symbol.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -235,4 +235,4 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

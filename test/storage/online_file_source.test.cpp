@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 #ifdef WIN32
 // Windows doesn't fail immediately like other OS
@@ -309,7 +309,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChange)) {
 
     // After 50 milliseconds, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
-    reachableTimer.start(Milliseconds(50), Duration::zero(), []() { mbgl::NetworkStatus::Reachable(); });
+    reachableTimer.start(Milliseconds(50), Duration::zero(), []() { mln::NetworkStatus::Reachable(); });
 
     loop.run();
 }
@@ -357,7 +357,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(NetworkStatusChangePreempt)) {
     // After 400 milliseconds + connectionTimeout, we're going to trigger a NetworkStatus change.
     util::Timer reachableTimer;
     reachableTimer.start(Milliseconds(static_cast<int>(connectionTimeout * 1000) + 400), Duration::zero(), []() {
-        mbgl::NetworkStatus::Reachable();
+        mln::NetworkStatus::Reachable();
     });
 
     fs->resume();

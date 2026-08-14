@@ -15,7 +15,7 @@
 #include <map>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 class DatabaseFileSourceThread {
 public:
     DatabaseFileSourceThread(std::shared_ptr<FileSource> onlineFileSource_, const std::string& cachePath)
@@ -229,8 +229,8 @@ void DatabaseFileSource::forward(const Resource& res, const Response& response, 
 
 bool DatabaseFileSource::canRequest(const Resource& resource) const {
     return resource.hasLoadingMethod(Resource::LoadingMethod::Cache) &&
-           resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0) == std::string::npos &&
-           resource.url.rfind(mbgl::util::FILE_PROTOCOL, 0) == std::string::npos;
+           resource.url.rfind(mln::util::ASSET_PROTOCOL, 0) == std::string::npos &&
+           resource.url.rfind(mln::util::FILE_PROTOCOL, 0) == std::string::npos;
 }
 
 void DatabaseFileSource::setDatabasePath(const std::string& path, std::function<void()> callback) {
@@ -356,4 +356,4 @@ ClientOptions DatabaseFileSource::getClientOptions() {
     return impl->getClientOptions();
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace platform;
 
@@ -518,4 +518,4 @@ int32_t UniformBufferAllocator::getBufferID(size_t bufferIndex) const noexcept {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

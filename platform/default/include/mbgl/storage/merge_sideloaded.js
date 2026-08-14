@@ -4,7 +4,7 @@ fs.writeFileSync('platform/default/mbgl/storage/merge_sideloaded.hpp', `#pragma 
 // THIS IS A GENERATED FILE; EDIT merge_sideloaded.sql INSTEAD
 // To regenerate, run \`node platform/default/mbgl/storage/merge_sideloaded.js\`
 
-namespace mbgl {
+namespace mln {
 
 static constexpr const char* mergeSideloadedDatabaseSQL =
 ${fs.readFileSync('platform/default/mbgl/storage/merge_sideloaded.sql', 'utf8')
@@ -16,5 +16,5 @@ ${fs.readFileSync('platform/default/mbgl/storage/merge_sideloaded.sql', 'utf8')
 }
 ;
 
-} // namespace mbgl
+} // namespace mln
 `);

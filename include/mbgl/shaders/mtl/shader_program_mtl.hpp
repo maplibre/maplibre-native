@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class ShaderProgramMTL : public gfx::ShaderProgramBase {
@@ -24,4 +24,4 @@ protected:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

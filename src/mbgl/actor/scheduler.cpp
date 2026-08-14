@@ -3,7 +3,7 @@
 #include <mbgl/util/thread_pool.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-namespace mbgl {
+namespace mln {
 
 std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
     assert(fn);
@@ -67,4 +67,4 @@ std::shared_ptr<Scheduler> Scheduler::GetSequenced() {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

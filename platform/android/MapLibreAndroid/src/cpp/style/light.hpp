@@ -9,20 +9,20 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/property_value.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 using namespace style;
 
-class Light : private mbgl::util::noncopyable {
+class Light : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/light/Light"; };
 
     static void registerNative(jni::JNIEnv&);
 
-    static jni::Local<jni::Object<Light>> createJavaLightPeer(jni::JNIEnv&, mbgl::Map&, mbgl::style::Light&);
+    static jni::Local<jni::Object<Light>> createJavaLightPeer(jni::JNIEnv&, mln::Map&, mln::style::Light&);
 
-    Light(mbgl::Map&, mbgl::style::Light&);
+    Light(mln::Map&, mln::style::Light&);
 
     void setAnchor(jni::JNIEnv&, const jni::String&);
     jni::Local<jni::String> getAnchor(jni::JNIEnv&);
@@ -42,10 +42,10 @@ public:
 
 protected:
     // Raw reference to the light
-    mbgl::style::Light& light;
+    mln::style::Light& light;
 
     // Map is set when the light is retrieved
-    mbgl::Map* map;
+    mln::Map* map;
 };
 } // namespace android
-} // namespace mbgl
+} // namespace mln

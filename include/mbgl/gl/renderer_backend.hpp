@@ -5,7 +5,7 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/util.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 
@@ -59,4 +59,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

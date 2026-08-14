@@ -7,7 +7,7 @@
 
 #include <mbgl/util/geometry.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // TODO: split this file up into individual headers, following mbgl/math/*.hpp.
@@ -126,4 +126,4 @@ inline T division(const T dividend, const T divisor, const T nan) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

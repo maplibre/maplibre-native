@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/hillshade_layer.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class HillshadeLayer::Impl : public Layer::Impl {
@@ -20,4 +20,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

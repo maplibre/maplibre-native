@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gl {
 
@@ -83,4 +83,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

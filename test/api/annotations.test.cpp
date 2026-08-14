@@ -15,7 +15,7 @@
 
 #include <algorithm>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 
@@ -135,7 +135,7 @@ TEST(Annotations, AntimeridianAnnotationLarge) {
     AnnotationTest test;
 
     double antimeridian = 180;
-    test.map.jumpTo(CameraOptions().withCenter(mbgl::LatLng(0.0, antimeridian)).withZoom(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(mln::LatLng(0.0, antimeridian)).withZoom(0.0));
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
 
     LineString<double> line = {{{antimeridian, 20}, {antimeridian, -20}}};
@@ -397,7 +397,7 @@ TEST(Annotations, QueryFractionalZoomLevels) {
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
     test.map.addAnnotationImage(namedMarker("default_marker"));
 
-    std::vector<mbgl::AnnotationID> ids;
+    std::vector<mln::AnnotationID> ids;
     for (int longitude = 0; longitude < 10; longitude += 2) {
         for (int latitude = 0; latitude < 10; latitude += 2) {
             ids.push_back(
@@ -405,7 +405,7 @@ TEST(Annotations, QueryFractionalZoomLevels) {
         }
     }
 
-    test.map.jumpTo(CameraOptions().withCenter(mbgl::LatLng(5.0, 5.0)).withZoom(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(mln::LatLng(5.0, 5.0)).withZoom(0.0));
     for (uint16_t zoomSteps = 10; zoomSteps <= 20; ++zoomSteps) {
         test.map.jumpTo(CameraOptions().withZoom(zoomSteps / 10.0));
         test.frontend.render(test.map);
@@ -434,9 +434,9 @@ TEST(Annotations, VisibleFeatures) {
 
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
     test.map.addAnnotationImage(namedMarker("default_marker"));
-    test.map.jumpTo(CameraOptions().withCenter(mbgl::LatLng(5.0, 5.0)).withZoom(3.0));
+    test.map.jumpTo(CameraOptions().withCenter(mln::LatLng(5.0, 5.0)).withZoom(3.0));
 
-    std::vector<mbgl::AnnotationID> ids;
+    std::vector<mln::AnnotationID> ids;
     for (int longitude = 0; longitude < 10; longitude += 2) {
         for (int latitude = 0; latitude <= 10; latitude += 2) {
             ids.push_back(
@@ -515,7 +515,7 @@ TEST(Annotations, ViewFrustumCulling) {
 
     std::vector<LatLng> latLngs = {tl, bl, tr, br, center};
 
-    std::vector<mbgl::AnnotationID> ids;
+    std::vector<mln::AnnotationID> ids;
     for (auto latLng : latLngs) {
         ids.push_back(
             test.map.addAnnotation(SymbolAnnotation{{latLng.longitude(), latLng.latitude()}, "default_marker"}));

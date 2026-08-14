@@ -7,7 +7,7 @@
 #include <Metal/MTLBuffer.hpp>
 #include <Metal/MTLDevice.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class Context;
@@ -92,4 +92,4 @@ protected:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

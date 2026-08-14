@@ -6,7 +6,7 @@
 #include <atomic>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class AsyncTask::Impl : public RunLoop::Impl::Runnable {
@@ -59,4 +59,4 @@ void AsyncTask::send() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

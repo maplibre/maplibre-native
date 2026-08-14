@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Drawable;
@@ -49,4 +49,4 @@ private:
     gfx::ShaderProgramBasePtr patternShader;
 };
 
-} // namespace mbgl
+} // namespace mln

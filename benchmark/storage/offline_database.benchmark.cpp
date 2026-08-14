@@ -18,14 +18,14 @@ public:
 
         response.data = std::make_shared<std::string>(50 * 1024, 0);
         response.mustRevalidate = false;
-        response.expires = mbgl::util::now() + 1h;
+        response.expires = mln::util::now() + 1h;
 
         resetAmbientTiles();
         resetRegion();
     }
 
     void resetAmbientTiles() {
-        using namespace mbgl;
+        using namespace mln;
 
         db.clearAmbientCache();
 
@@ -37,7 +37,7 @@ public:
     }
 
     void resetRegion() {
-        using namespace mbgl;
+        using namespace mln;
 
         auto regions = db.listRegions().value();
         if (!regions.empty()) {
@@ -58,8 +58,8 @@ public:
         }
     }
 
-    mbgl::Response response;
-    mbgl::OfflineDatabase db{":memory:", mbgl::TileServerOptions::DefaultConfiguration()};
+    mln::Response response;
+    mln::OfflineDatabase db{":memory:", mln::TileServerOptions::DefaultConfiguration()};
 
     const unsigned tileCount = 100;
     int64_t regionID = 0;
@@ -78,7 +78,7 @@ BENCHMARK_F(OfflineDatabase, DeleteRegion)(benchmark::State& state) {
 }
 
 BENCHMARK_F(OfflineDatabase, InsertTileRegion)(benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     while (state.KeepRunning()) {
         const Resource offline = Resource::tile(
@@ -99,7 +99,7 @@ BENCHMARK_F(OfflineDatabase, ClearAmbientCache)(benchmark::State& state) {
 }
 
 BENCHMARK_F(OfflineDatabase, InsertTileCache)(benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     while (state.KeepRunning()) {
         const Resource ambient = Resource::tile(
@@ -109,7 +109,7 @@ BENCHMARK_F(OfflineDatabase, InsertTileCache)(benchmark::State& state) {
 }
 
 BENCHMARK_F(OfflineDatabase, InsertBigTileCache)(benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     Response big;
     big.data = std::make_shared<std::string>(util::DEFAULT_MAX_CACHE_SIZE / 100, 0);
@@ -122,7 +122,7 @@ BENCHMARK_F(OfflineDatabase, InsertBigTileCache)(benchmark::State& state) {
 }
 
 BENCHMARK_F(OfflineDatabase, GetTile)(benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -136,7 +136,7 @@ BENCHMARK_F(OfflineDatabase, GetTile)(benchmark::State& state) {
 }
 
 BENCHMARK_F(OfflineDatabase, AddTilesToFullDatabase)(benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     Log::setObserver(std::make_unique<Log::NullObserver>());
     db.setMaximumAmbientCacheSize(50 * 1024 * 5);
@@ -152,7 +152,7 @@ BENCHMARK_F(OfflineDatabase, AddTilesToFullDatabase)(benchmark::State& state) {
 
 BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)
 (benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     auto regions = db.listRegions().value();
     if (!regions.empty()) {
@@ -171,7 +171,7 @@ BENCHMARK_F(OfflineDatabase, AddTilesToDisabledDatabase)
 
 BENCHMARK_F(OfflineDatabase, GetTileFromDisabledDatabase)
 (benchmark::State& state) {
-    using namespace mbgl;
+    using namespace mln;
 
     auto regions = db.listRegions().value();
     if (!regions.empty()) {

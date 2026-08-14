@@ -3,7 +3,7 @@
 #include <mbgl/map/zoom_history.hpp>
 #include <mbgl/util/chrono.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class CrossfadeParameters {
 public:
@@ -48,4 +48,4 @@ public:
     bool hasCrossfade = true;
 };
 
-} // namespace mbgl
+} // namespace mln

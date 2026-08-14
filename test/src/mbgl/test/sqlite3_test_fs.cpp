@@ -238,7 +238,7 @@ static int sqlite3_test_fs_access(sqlite3_vfs* vfs, const char* zPath, int flags
     return os_fs->xAccess(os_fs, zPath, flags, pResOut);
 }
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 SQLite3TestFS::SQLite3TestFS() {
@@ -317,6 +317,6 @@ void SQLite3TestFS::reset() {
 }
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln
 
 #endif // __QT__

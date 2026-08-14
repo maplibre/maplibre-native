@@ -2,7 +2,7 @@
 
 #include <protozero/pbf_reader.hpp>
 
-namespace mbgl {
+namespace mln {
 
 std::vector<Glyph> parseGlyphPBF(const GlyphRange& glyphRange, const std::string& data) {
     std::vector<Glyph> result;
@@ -93,4 +93,4 @@ std::vector<Glyph> parseGlyphPBF(const GlyphRange& glyphRange, const std::string
     return result;
 }
 
-} // namespace mbgl
+} // namespace mln

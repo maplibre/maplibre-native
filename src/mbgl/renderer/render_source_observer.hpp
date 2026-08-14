@@ -4,7 +4,7 @@
 #include <string>
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 
 class RenderSource;
 class OverscaledTileID;
@@ -18,4 +18,4 @@ public:
     virtual void onTileAction(RenderSource&, TileOperation, const OverscaledTileID&, const std::string&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

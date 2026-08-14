@@ -14,7 +14,7 @@
 #include "android_renderer_backend.hpp"
 #include "attach_env.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 // Forwards RendererObserver signals to the given
@@ -54,33 +54,33 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
-    void onPreCompileShader(mbgl::shaders::BuiltIn id,
-                            mbgl::gfx::Backend::Type type,
+    void onPreCompileShader(mln::shaders::BuiltIn id,
+                            mln::gfx::Backend::Type type,
                             const std::string& additionalDefines) override {
         delegate.invoke(&RendererObserver::onPreCompileShader, id, type, additionalDefines);
     }
 
-    void onPostCompileShader(mbgl::shaders::BuiltIn id,
-                             mbgl::gfx::Backend::Type type,
+    void onPostCompileShader(mln::shaders::BuiltIn id,
+                             mln::gfx::Backend::Type type,
                              const std::string& additionalDefines) override {
         delegate.invoke(&RendererObserver::onPostCompileShader, id, type, additionalDefines);
     }
 
-    void onShaderCompileFailed(mbgl::shaders::BuiltIn id,
-                               mbgl::gfx::Backend::Type type,
+    void onShaderCompileFailed(mln::shaders::BuiltIn id,
+                               mln::gfx::Backend::Type type,
                                const std::string& additionalDefines) override {
         delegate.invoke(&RendererObserver::onShaderCompileFailed, id, type, additionalDefines);
     }
 
-    void onGlyphsLoaded(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+    void onGlyphsLoaded(const mln::FontStack& stack, const mln::GlyphRange& range) override {
         delegate.invoke(&RendererObserver::onGlyphsLoaded, stack, range);
     }
 
-    void onGlyphsError(const mbgl::FontStack& stack, const mbgl::GlyphRange& range, std::exception_ptr ex) override {
+    void onGlyphsError(const mln::FontStack& stack, const mln::GlyphRange& range, std::exception_ptr ex) override {
         delegate.invoke(&RendererObserver::onGlyphsError, stack, range, ex);
     }
 
-    void onGlyphsRequested(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+    void onGlyphsRequested(const mln::FontStack& stack, const mln::GlyphRange& range) override {
         delegate.invoke(&RendererObserver::onGlyphsRequested, stack, range);
     }
 
@@ -239,11 +239,11 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(
     const Feature& feature,
     const std::string& extension,
     const std::string& extensionField,
-    const std::optional<std::map<std::string, mbgl::Value>>& args) const {
+    const std::optional<std::map<std::string, mln::Value>>& args) const {
     return mapRenderer.actor()
         .ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args)
         .get();
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

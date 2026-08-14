@@ -4,7 +4,7 @@
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AsyncRequest;
 
@@ -29,7 +29,7 @@ public:
     /// @param tiles List of tile urls.
     void setTiles(const std::vector<std::string>& tiles);
 
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
     Tileset::VectorEncoding getEncoding() const noexcept { return encoding; }
 
@@ -48,4 +48,4 @@ inline bool Source::is<VectorSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

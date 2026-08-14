@@ -3,7 +3,7 @@
 #include <mbgl/tile/vector_mvt_tile_data.hpp>
 #include <mbgl/util/io.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 static void Parse_VectorTile(benchmark::State& state) {
     auto data = std::make_shared<std::string>(

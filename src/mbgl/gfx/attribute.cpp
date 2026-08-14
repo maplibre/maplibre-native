@@ -3,7 +3,7 @@
 #include <limits>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 std::optional<AttributeBinding> offsetAttributeBinding(const std::optional<AttributeBinding>& binding,
@@ -19,4 +19,4 @@ std::optional<AttributeBinding> offsetAttributeBinding(const std::optional<Attri
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

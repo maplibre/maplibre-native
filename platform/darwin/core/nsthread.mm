@@ -6,7 +6,7 @@
 
 #include <pthread.h>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string getCurrentThreadName() {
@@ -47,4 +47,4 @@ void attachThread() {}
 void detachThread() {}
 
 }  // namespace platform
-}  // namespace mbgl
+}  // namespace mln

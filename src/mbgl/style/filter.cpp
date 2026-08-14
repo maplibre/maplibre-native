@@ -1,7 +1,7 @@
 #include <mbgl/style/filter.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 bool Filter::operator()(const expression::EvaluationContext &context) const {
@@ -17,4 +17,4 @@ bool Filter::operator()(const expression::EvaluationContext &context) const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

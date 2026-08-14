@@ -3,7 +3,7 @@
 #include <mbgl/style/source_observer.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -86,4 +86,4 @@ void Source::dumpDebugLogs() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

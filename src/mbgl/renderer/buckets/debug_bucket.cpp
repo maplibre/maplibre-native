@@ -6,7 +6,7 @@
 #include <cmath>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 DebugBucket::DebugBucket(const OverscaledTileID& id,
                          const bool renderable_,
@@ -74,4 +74,4 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
 
 void DebugBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {}
 
-} // namespace mbgl
+} // namespace mln

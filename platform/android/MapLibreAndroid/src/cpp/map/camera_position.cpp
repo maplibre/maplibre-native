@@ -3,11 +3,11 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/math/angles.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
-                                                            mbgl::CameraOptions options,
+                                                            mln::CameraOptions options,
                                                             float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<jni::Object<LatLng>,
@@ -60,7 +60,7 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
                          padding);
 }
 
-mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
+mln::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
                                                      const jni::Object<CameraPosition>& position,
                                                      float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
@@ -76,7 +76,7 @@ mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
     auto padding = position.Get(env, paddingField);
     auto center = LatLng::getLatLng(env, position.Get(env, target));
 
-    return mbgl::CameraOptions{center,
+    return mln::CameraOptions{center,
                                position.Get(env, centerAltitude),
                                padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
                                                                                 padding.Get(env, 0) * pixelRatio,
@@ -96,4 +96,4 @@ void CameraPosition::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -7,8 +7,8 @@
 #include <mbgl/text/quads.hpp>
 #include <mbgl/text/shaping.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 // Atlas padding is not scaled with textureScale, so a 2x glyph quad is 1
 // logical pixel smaller than its 1x equivalent. GL JS-style fractional metrics

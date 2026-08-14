@@ -2,7 +2,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -39,4 +39,4 @@ std::optional<uint8_t> Source::Impl::getMaxOverscaleFactorForParentTiles() const
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

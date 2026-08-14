@@ -5,7 +5,7 @@
 #include <mbgl/style/custom_tile_loader.hpp>
 #include <mbgl/actor/actor_ref.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class CustomGeometrySource::Impl : public Source::Impl {
@@ -27,4 +27,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

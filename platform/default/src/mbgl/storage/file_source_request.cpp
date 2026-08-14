@@ -3,7 +3,7 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/scheduler.hpp>
 
-namespace mbgl {
+namespace mln {
 
 FileSourceRequest::FileSourceRequest(FileSource::Callback&& callback)
     : responseCallback(callback),
@@ -33,4 +33,4 @@ ActorRef<FileSourceRequest> FileSourceRequest::actor() {
     return ActorRef<FileSourceRequest>(*this, mailbox);
 }
 
-} // namespace mbgl
+} // namespace mln

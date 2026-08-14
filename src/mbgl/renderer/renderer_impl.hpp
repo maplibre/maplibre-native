@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class RendererObserver;
 class RenderStaticData;
@@ -71,4 +71,4 @@ private:
 #endif // MLN_RENDER_BACKEND_METAL
 };
 
-} // namespace mbgl
+} // namespace mln

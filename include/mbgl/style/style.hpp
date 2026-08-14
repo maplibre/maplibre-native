@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 
@@ -77,4 +77,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

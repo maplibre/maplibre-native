@@ -13,11 +13,11 @@
 
 namespace {
 bool acceptsURL(const std::string& url) {
-    return url.starts_with(mbgl::util::FILE_PROTOCOL);
+    return url.starts_with(mln::util::FILE_PROTOCOL);
 }
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 class LocalFileSource::Impl {
 public:
@@ -34,7 +34,7 @@ public:
         }
 
         // Cut off the protocol and prefix with path.
-        const auto path = mbgl::util::percentDecode(
+        const auto path = mln::util::percentDecode(
             resource.url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
         requestLocalFile(path, req, resource.dataRange);
     }
@@ -111,4 +111,4 @@ ClientOptions LocalFileSource::getClientOptions() {
     return impl->actor().ask(&Impl::getClientOptions).get();
 }
 
-} // namespace mbgl
+} // namespace mln

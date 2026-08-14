@@ -2,7 +2,7 @@
 #include <mbgl/renderer/layers/render_raster_layer.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -105,4 +105,4 @@ bool RasterBucket::hasData() const {
     return !!image;
 }
 
-} // namespace mbgl
+} // namespace mln

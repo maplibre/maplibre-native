@@ -6,7 +6,7 @@
 #include "attach_env.hpp"
 #include "collator_jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void Collator::registerNative(jni::JNIEnv& env) {
@@ -192,4 +192,4 @@ std::string Collator::resolvedLocale() const {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 namespace {
@@ -311,4 +311,4 @@ void SymbolBucket::updateVertices(const Placement& placement,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

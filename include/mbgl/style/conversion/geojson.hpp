@@ -6,7 +6,7 @@
 #include <optional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -15,7 +15,7 @@ std::optional<GeoJSON> parseGeoJSON(const std::string&, Error&);
 
 // Serialize a GeoJSON value back to a JSON string. This is the public
 // counterpart to parseGeoJSON: consumers that link the core through the
-// amalgam (which exports only mbgl::* symbols) cannot reach the bundled
+// amalgam (which exports only mln::* symbols) cannot reach the bundled
 // mapbox::geojson::stringify directly.
 std::string stringifyGeoJSON(const GeoJSON&);
 
@@ -27,4 +27,4 @@ public:
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

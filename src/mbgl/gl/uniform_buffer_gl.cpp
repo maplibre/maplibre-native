@@ -9,7 +9,7 @@
 #include <vector>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -183,4 +183,4 @@ void UniformBufferArrayGL::unbind() const {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

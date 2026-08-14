@@ -6,7 +6,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 Mailbox::Mailbox() = default;
 
@@ -167,4 +167,4 @@ void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) 
     }
 }
 
-} // namespace mbgl
+} // namespace mln

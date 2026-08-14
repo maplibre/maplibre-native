@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) RasterDrawableUBO {
@@ -30,4 +30,4 @@ struct alignas(16) RasterEvaluatedPropsUBO {
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 4 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -12,7 +12,7 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
-namespace mbgl {
+namespace mln {
 
 class AssetManagerFileSource::Impl {
 public:
@@ -26,7 +26,7 @@ public:
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
         // Note: AssetManager already prepends "assets" to the filename.
-        const std::string path = mbgl::util::percentDecode(url.substr(8));
+        const std::string path = mln::util::percentDecode(url.substr(8));
 
         Response response;
 
@@ -79,7 +79,7 @@ std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& re
 }
 
 bool AssetManagerFileSource::canRequest(const Resource& resource) const {
-    return 0 == resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
+    return 0 == resource.url.rfind(mln::util::ASSET_PROTOCOL, 0);
 }
 
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
@@ -98,4 +98,4 @@ ClientOptions AssetManagerFileSource::getClientOptions() {
     return impl->actor().ask(&Impl::getClientOptions).get();
 }
 
-} // namespace mbgl
+} // namespace mln

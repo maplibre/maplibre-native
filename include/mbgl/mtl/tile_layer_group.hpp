@@ -8,7 +8,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
@@ -19,7 +19,7 @@ class RenderPass;
 /**
  A layer group for tile-based drawables
  */
-class TileLayerGroup : public mbgl::TileLayerGroup {
+class TileLayerGroup : public mln::TileLayerGroup {
 public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~TileLayerGroup() override {}
@@ -41,4 +41,4 @@ protected:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

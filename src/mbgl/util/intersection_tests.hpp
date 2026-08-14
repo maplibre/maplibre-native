@@ -2,7 +2,7 @@
 
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 bool polygonIntersectsBufferedMultiPoint(const GeometryCoordinates&, const GeometryCollection&, float radius);
@@ -12,4 +12,4 @@ bool polygonIntersectsMultiPolygon(const GeometryCoordinates&, const GeometryCol
 bool polygonIntersectsBufferedPoint(const GeometryCoordinates& polygon, const GeometryCoordinate& point, float radius);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

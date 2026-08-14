@@ -4,7 +4,7 @@
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class RenderTile;
@@ -74,4 +74,4 @@ void addDynamicAttributes(const Point<float>& anchorPoint,
                           float angle,
                           gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray);
 
-} // end namespace mbgl
+} // end namespace mln

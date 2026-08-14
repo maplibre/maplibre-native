@@ -13,7 +13,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 /*
  * The maximum angle to use for the Mercator horizon. This must be less than 90
@@ -908,11 +908,11 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCame
         anchorOffset = latLngCoord - anchorCoord;
     }
 
-    mbgl::LatLngBounds currentBounds = getLatLngBounds();
-    mbgl::ScreenCoordinate neBounds = Projection::project(currentBounds.northeast(), requestedScale);
-    mbgl::ScreenCoordinate swBounds = Projection::project(currentBounds.southwest(), requestedScale);
-    mbgl::ScreenCoordinate center = Projection::project(centerLatLng, requestedScale);
-    mbgl::ScreenCoordinate currentCenter = Projection::project(getLatLng(), requestedScale);
+    mln::LatLngBounds currentBounds = getLatLngBounds();
+    mln::ScreenCoordinate neBounds = Projection::project(currentBounds.northeast(), requestedScale);
+    mln::ScreenCoordinate swBounds = Projection::project(currentBounds.southwest(), requestedScale);
+    mln::ScreenCoordinate center = Projection::project(centerLatLng, requestedScale);
+    mln::ScreenCoordinate currentCenter = Projection::project(getLatLng(), requestedScale);
 
     double minY = neBounds.y;
     double maxY = swBounds.y;
@@ -1071,4 +1071,4 @@ float TransformState::maxPitchScaleFactor() const {
     return static_cast<float>(topPoint[3]) / getCameraToCenterDistance();
 }
 
-} // namespace mbgl
+} // namespace mln

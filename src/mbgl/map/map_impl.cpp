@@ -10,7 +10,7 @@
 #include <mbgl/util/action_journal_impl.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
 
-namespace mbgl {
+namespace mln {
 
 #if !defined(NDEBUG)
 namespace {
@@ -178,13 +178,13 @@ void Map::Impl::onStyleError(std::exception_ptr error) {
 
     try {
         std::rethrow_exception(error);
-    } catch (const mbgl::util::StyleParseException& e) {
+    } catch (const mln::util::StyleParseException& e) {
         type = MapLoadError::StyleParseError;
         description = e.what();
-    } catch (const mbgl::util::StyleLoadException& e) {
+    } catch (const mln::util::StyleLoadException& e) {
         type = MapLoadError::StyleLoadError;
         description = e.what();
-    } catch (const mbgl::util::NotFoundException& e) {
+    } catch (const mln::util::NotFoundException& e) {
         type = MapLoadError::NotFoundError;
         description = e.what();
     } catch (const std::exception& e) {
@@ -434,4 +434,4 @@ void Map::Impl::onRenderError(std::exception_ptr error) {
     observer.onRenderError(error);
 }
 
-} // namespace mbgl
+} // namespace mln

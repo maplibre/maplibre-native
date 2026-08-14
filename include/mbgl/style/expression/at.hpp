@@ -4,7 +4,7 @@
 #include <mbgl/style/conversion.hpp>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -15,7 +15,7 @@ public:
           index(std::move(index_)),
           input(std::move(input_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
@@ -39,4 +39,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

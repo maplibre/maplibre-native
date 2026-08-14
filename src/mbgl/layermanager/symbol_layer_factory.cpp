@@ -5,7 +5,7 @@
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* SymbolLayerFactory::getTypeInfo() const noexcept {
     return style::SymbolLayer::Impl::staticTypeInfo();
@@ -29,4 +29,4 @@ std::unique_ptr<RenderLayer> SymbolLayerFactory::createRenderLayer(Immutable<sty
     return std::make_unique<RenderSymbolLayer>(staticImmutableCast<style::SymbolLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

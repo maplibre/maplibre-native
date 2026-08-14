@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 // Returns the current time. Abstracted because some platforms
@@ -10,4 +10,4 @@ namespace platform {
 std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> now();
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

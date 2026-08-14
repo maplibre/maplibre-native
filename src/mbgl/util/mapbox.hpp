@@ -4,7 +4,7 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/tile_server_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Tileset;
 
@@ -46,4 +46,4 @@ extern const uint64_t DEFAULT_OFFLINE_TILE_COUNT_LIMIT;
 
 } // namespace mapbox
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -19,7 +19,7 @@
 #include <limits>
 #include <numbers>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 namespace {
@@ -243,7 +243,7 @@ Value featureIdAsExpressionValue(const EvaluationContext& params) {
     assert(params.feature);
     auto id = params.feature->getID();
     if (id.is<NullValue>()) return Null;
-    return id.match([](const auto& idid) { return toExpressionValue(mbgl::Value(idid)); });
+    return id.match([](const auto& idid) { return toExpressionValue(mln::Value(idid)); });
 };
 
 std::optional<Value> featurePropertyAsExpressionValue(const EvaluationContext& params, const std::string& key) {
@@ -529,7 +529,7 @@ const auto& idCompoundExpression() {
             }
 
             auto id = params.feature->getID();
-            return id.match([](const auto& idValue) { return toExpressionValue(mbgl::Value(idValue)); });
+            return id.match([](const auto& idValue) { return toExpressionValue(mln::Value(idValue)); });
         },
         Dependency::Feature);
     return signature;
@@ -733,11 +733,11 @@ const auto& featureStateCompoundExpression() {
     static auto signature = detail::makeSignature(
         "feature-state",
         [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
-            mbgl::Value state;
+            mln::Value state;
             if (params.featureState != nullptr) {
                 auto it = params.featureState->find(key);
                 if (it != params.featureState->end()) {
-                    state = mbgl::Value(it->second);
+                    state = mln::Value(it->second);
                 }
             }
             return toExpressionValue(state);
@@ -1097,7 +1097,7 @@ constexpr const auto compoundExpressionRegistry =
 
 } // unnamed namespace
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 using DefinitionIterator = decltype(compoundExpressionRegistry)::const_iterator;
 using Definitions = std::pair<DefinitionIterator, DefinitionIterator>;
@@ -1310,4 +1310,4 @@ bool CompoundExpression::exists(const std::string& name) noexcept {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

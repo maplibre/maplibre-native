@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -20,4 +20,4 @@ std::optional<Position> Converter<Position>::operator()(const Convertible& value
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

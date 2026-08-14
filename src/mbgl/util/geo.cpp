@@ -10,7 +10,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 
@@ -139,4 +139,4 @@ ScreenCoordinate EdgeInsets::getCenter(uint16_t width, uint16_t height) const no
     };
 }
 
-} // end namespace mbgl
+} // end namespace mln

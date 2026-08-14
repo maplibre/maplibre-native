@@ -9,7 +9,7 @@
 #include <QNetworkReply>
 #include <QSslConfiguration>
 
-namespace mbgl {
+namespace mln {
 
 HTTPFileSource::Impl::Impl(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : m_manager(new QNetworkAccessManager(this)),
@@ -139,4 +139,4 @@ ClientOptions HTTPFileSource::getClientOptions() {
     return impl->getClientOptions();
 }
 
-} // namespace mbgl
+} // namespace mln

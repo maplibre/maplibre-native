@@ -3,7 +3,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
@@ -14,7 +14,7 @@ class Context;
 /**
  A layer group for non-tile-based drawables
  */
-class LayerGroup : public mbgl::LayerGroup {
+class LayerGroup : public mln::LayerGroup {
 public:
     LayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~LayerGroup() override {}
@@ -30,4 +30,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

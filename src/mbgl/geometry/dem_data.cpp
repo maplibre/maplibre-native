@@ -1,7 +1,7 @@
 #include <mbgl/geometry/dem_data.hpp>
 #include <mbgl/math/clamp.hpp>
 
-namespace mbgl {
+namespace mln {
 
 DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _encoding)
     : dim(_image.size.height),
@@ -102,4 +102,4 @@ const std::array<float, 4>& DEMData::getUnpackVector() const {
     return encoding == Tileset::RasterEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
 }
 
-} // namespace mbgl
+} // namespace mln

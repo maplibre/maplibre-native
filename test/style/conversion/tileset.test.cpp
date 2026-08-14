@@ -5,8 +5,8 @@
 
 #include <mbgl/util/logging.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style::conversion;
 
 TEST(Tileset, Empty) {
     Error error;

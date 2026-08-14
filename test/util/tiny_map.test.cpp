@@ -13,8 +13,8 @@
 #include <random>
 #include <unordered_map>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 
 template <typename TMapIter, typename TMap2>
 void testSetDiff(TMapIter beg, TMapIter end, TMap2& map2) {

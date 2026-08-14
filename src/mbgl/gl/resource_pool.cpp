@@ -10,7 +10,7 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -283,4 +283,4 @@ size_t Texture2DPool::storage(TextureID id) const {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

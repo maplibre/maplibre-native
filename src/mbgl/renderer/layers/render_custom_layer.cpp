@@ -22,7 +22,7 @@
 // TODO: platform agnostic error checks
 #define MBGL_CHECK_ERROR(cmd) (cmd)
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -36,7 +36,7 @@ inline const CustomLayer::Impl& impl(const Immutable<style::Layer::Impl>& impl) 
 void initializeHost(const std::shared_ptr<style::CustomLayerHost>& host, [[maybe_unused]] gfx::Context& context) {
 #if MLN_RENDER_BACKEND_VULKAN
     {
-        auto& vkBackend = static_cast<mbgl::vulkan::Context&>(context).getBackend();
+        auto& vkBackend = static_cast<mln::vulkan::Context&>(context).getBackend();
         style::vulkan::CustomLayerInitParameters params(
             vkBackend.getDispatcher(), vkBackend.getDevice().get(), vkBackend.getPhysicalDevice());
         host->initialize(params);
@@ -136,4 +136,4 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

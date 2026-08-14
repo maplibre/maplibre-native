@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Collision drawables' layer tweaker
@@ -20,4 +20,4 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 };
 
-} // namespace mbgl
+} // namespace mln

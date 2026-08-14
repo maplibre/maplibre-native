@@ -3,7 +3,7 @@
 #include <mbgl/style/conversion.hpp>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -11,4 +11,4 @@ std::string getJSONType(const Convertible& value);
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

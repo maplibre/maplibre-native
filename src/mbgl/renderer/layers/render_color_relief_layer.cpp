@@ -24,7 +24,7 @@
 #include <vector>
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -67,7 +67,7 @@ void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parame
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
     passes = (properties->evaluated.get<style::ColorReliefOpacity>() > 0) ? RenderPass::Translucent : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -109,14 +109,14 @@ void RenderColorReliefLayer::updateColorRamp() {
 
     // Get the expression from ColorRampPropertyValue
     // Note: getExpression() dereferences the internal pointer, so we must ensure isUndefined() is false first
-    const mbgl::style::expression::Expression* exprPtr = &colorValue.getExpression();
+    const mln::style::expression::Expression* exprPtr = &colorValue.getExpression();
     if (!exprPtr) {
         return;
     }
-    const mbgl::style::expression::Expression& expr = *exprPtr;
+    const mln::style::expression::Expression& expr = *exprPtr;
 
-    if (expr.getKind() == mbgl::style::expression::Kind::Interpolate) {
-        const auto* interpolate = static_cast<const mbgl::style::expression::Interpolate*>(&expr);
+    if (expr.getKind() == mln::style::expression::Kind::Interpolate) {
+        const auto* interpolate = static_cast<const mln::style::expression::Interpolate*>(&expr);
 
         size_t stopCount = interpolate->getStopCount();
 
@@ -124,7 +124,7 @@ void RenderColorReliefLayer::updateColorRamp() {
         colorStopsVector.reserve(stopCount);
 
         // Extract elevation values from stops
-        interpolate->eachStop([&](double elevation, const mbgl::style::expression::Expression& /*outputExpr*/) {
+        interpolate->eachStop([&](double elevation, const mln::style::expression::Expression& /*outputExpr*/) {
             elevationStopsVector.push_back(static_cast<float>(elevation));
         });
 
@@ -225,13 +225,13 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!colorReliefShader) {
-        mbgl::Log::Error(mbgl::Event::Render, "ColorRelief shader failed to load");
+        mln::Log::Error(mln::Event::Render, "ColorRelief shader failed to load");
         removeAllDrawables();
         return;
     }
 
     auto renderPass = RenderPass::Translucent;
-    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+    if (!(mln::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
@@ -385,7 +385,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         // Bind DEM texture
         auto demImagePtr = bucket.getDEMData().getImagePtr();
         if (!demImagePtr || !demImagePtr->valid()) {
-            mbgl::Log::Warning(mbgl::Event::Render, "ColorRelief: DEM image not valid for tile");
+            mln::Log::Warning(mln::Event::Render, "ColorRelief: DEM image not valid for tile");
             continue; // Skip this tile if DEM data is not ready
         }
 
@@ -448,4 +448,4 @@ bool RenderColorReliefLayer::queryIntersectsFeature(const GeometryCoordinates&,
     return false;
 }
 
-} // namespace mbgl
+} // namespace mln

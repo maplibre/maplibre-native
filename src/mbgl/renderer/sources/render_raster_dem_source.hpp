@@ -3,7 +3,7 @@
 #include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/sources/tile_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderRasterDEMSource final : public RenderTileSetSource {
 public:
@@ -32,4 +32,4 @@ private:
     void onTileChanged(Tile&) override;
 };
 
-} // namespace mbgl
+} // namespace mln

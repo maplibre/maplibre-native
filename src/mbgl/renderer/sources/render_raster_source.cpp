@@ -4,7 +4,7 @@
 #include <mbgl/algorithm/update_tile_masks.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -55,4 +55,4 @@ std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOp
     return {};
 }
 
-} // namespace mbgl
+} // namespace mln

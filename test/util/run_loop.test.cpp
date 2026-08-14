@@ -7,13 +7,13 @@
 #include <condition_variable>
 #include <thread>
 
-using namespace mbgl::util;
+using namespace mln::util;
 
 TEST(RunLoop, Stop) {
     RunLoop loop(RunLoop::Type::New);
 
     Timer timer;
-    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] { loop.stop(); });
+    timer.start(mln::Duration::zero(), mln::Duration::zero(), [&] { loop.stop(); });
 
     loop.run();
 }
@@ -22,7 +22,7 @@ TEST(RunLoop, MultipleStop) {
     RunLoop loop(RunLoop::Type::New);
 
     Timer timer;
-    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] {
+    timer.start(mln::Duration::zero(), mln::Duration::zero(), [&] {
         loop.stop();
         loop.stop();
         loop.stop();
@@ -36,12 +36,12 @@ TEST(RunLoop, MultipleRun) {
     RunLoop loop(RunLoop::Type::New);
 
     Timer timer;
-    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] { loop.stop(); });
+    timer.start(mln::Duration::zero(), mln::Duration::zero(), [&] { loop.stop(); });
 
     loop.run();
 
     bool secondTimeout = false;
-    timer.start(mbgl::Duration::zero(), mbgl::Duration::zero(), [&] {
+    timer.start(mln::Duration::zero(), mln::Duration::zero(), [&] {
         secondTimeout = true;
         loop.stop();
     });

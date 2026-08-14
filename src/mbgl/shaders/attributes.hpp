@@ -3,7 +3,7 @@
 #include <mbgl/gfx/attribute.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace attributes {
 
 // Layout attributes
@@ -58,4 +58,4 @@ MBGL_DEFINE_ATTRIBUTE(uint16_t, 4, pattern_from);
 
 using PositionOnlyLayoutAttributes = TypeList<attributes::pos>;
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class WorkTask;
 
@@ -18,4 +18,4 @@ private:
     std::shared_ptr<WorkTask> task;
 };
 
-} // namespace mbgl
+} // namespace mln

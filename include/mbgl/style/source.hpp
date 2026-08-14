@@ -11,7 +11,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 
@@ -118,7 +118,7 @@ public:
     std::optional<uint8_t> getMaxOverscaleFactorForParentTiles() const noexcept;
     void dumpDebugLogs() const;
 
-    virtual bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const = 0;
+    virtual bool supportsLayerType(const mln::style::LayerTypeInfo*) const = 0;
 
     bool loaded = false;
 
@@ -135,4 +135,4 @@ protected:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

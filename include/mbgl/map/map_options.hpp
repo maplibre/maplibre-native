@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Holds values for Map options.
@@ -33,7 +33,7 @@ public:
 
     /**
      * @brief Gets the previously set (or default) map mode.
-     * @return Returns a #mbgl::MapMode
+     * @return Returns a #mln::MapMode
      */
     MapMode mapMode() const;
 
@@ -154,4 +154,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace mbgl
+} // namespace mln

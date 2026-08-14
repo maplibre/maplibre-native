@@ -1,6 +1,6 @@
 #include <mbgl/util/client_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ClientOptions::Impl {
 public:
@@ -46,4 +46,4 @@ const std::string& ClientOptions::version() const {
     return impl_->version;
 }
 
-} // namespace mbgl
+} // namespace mln

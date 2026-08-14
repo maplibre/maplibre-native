@@ -10,7 +10,7 @@
 #include <string>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class AnnotationTileData;
 class CanonicalTileID;
@@ -31,10 +31,10 @@ public:
 };
 
 struct CloseShapeAnnotation {
-    ShapeAnnotationGeometry operator()(const mbgl::LineString<double> &geom) const { return geom; }
-    ShapeAnnotationGeometry operator()(const mbgl::MultiLineString<double> &geom) const { return geom; }
-    ShapeAnnotationGeometry operator()(const mbgl::Polygon<double> &geom) const {
-        mbgl::Polygon<double> closed = geom;
+    ShapeAnnotationGeometry operator()(const mln::LineString<double> &geom) const { return geom; }
+    ShapeAnnotationGeometry operator()(const mln::MultiLineString<double> &geom) const { return geom; }
+    ShapeAnnotationGeometry operator()(const mln::Polygon<double> &geom) const {
+        mln::Polygon<double> closed = geom;
         for (auto &ring : closed) {
             if (!ring.empty() && ring.front() != ring.back()) {
                 ring.emplace_back(ring.front());
@@ -42,8 +42,8 @@ struct CloseShapeAnnotation {
         }
         return closed;
     }
-    ShapeAnnotationGeometry operator()(const mbgl::MultiPolygon<double> &geom) const {
-        mbgl::MultiPolygon<double> closed = geom;
+    ShapeAnnotationGeometry operator()(const mln::MultiPolygon<double> &geom) const {
+        mln::MultiPolygon<double> closed = geom;
         for (auto &polygon : closed) {
             for (auto &ring : polygon) {
                 if (!ring.empty() && ring.front() != ring.back()) {
@@ -55,4 +55,4 @@ struct CloseShapeAnnotation {
     }
 };
 
-} // namespace mbgl
+} // namespace mln

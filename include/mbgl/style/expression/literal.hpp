@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -26,7 +26,7 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext&) const override { return value; }
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
+    static ParseResult parse(const mln::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const noexcept override {}
 
@@ -42,7 +42,7 @@ public:
 
     const Value& getValue() const noexcept { return value; }
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "literal"; }
 
 private:
@@ -51,4 +51,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

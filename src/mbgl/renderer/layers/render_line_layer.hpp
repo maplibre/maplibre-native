@@ -10,7 +10,7 @@
 #include <optional>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class ShaderGroup;
@@ -65,4 +65,4 @@ private:
     gfx::ShaderGroupPtr linePatternShaderGroup;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -67,4 +67,4 @@ void CircleBucket::update(const FeatureStates& states,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

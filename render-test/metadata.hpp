@@ -12,14 +12,14 @@
 #include <list>
 #include <map>
 
-namespace mbgl {
+namespace mln {
 
 class Map;
 class HeadlessFrontend;
 namespace gfx {
 struct RenderingStats;
 }
-} // namespace mbgl
+} // namespace mln
 
 class TestRunnerMapObserver;
 struct TestStatistics {
@@ -34,16 +34,16 @@ struct TestStatistics {
 
 struct TestPaths {
     TestPaths() = default;
-    TestPaths(mbgl::filesystem::path stylePath_,
-              std::vector<mbgl::filesystem::path> expectations_,
-              std::vector<mbgl::filesystem::path> expectedMetrics_)
+    TestPaths(mln::filesystem::path stylePath_,
+              std::vector<mln::filesystem::path> expectations_,
+              std::vector<mln::filesystem::path> expectedMetrics_)
         : stylePath(std::move(stylePath_)),
           expectations(std::move(expectations_)),
           expectedMetrics(std::move(expectedMetrics_)) {}
 
-    mbgl::filesystem::path stylePath;
-    std::vector<mbgl::filesystem::path> expectations;
-    std::vector<mbgl::filesystem::path> expectedMetrics;
+    mln::filesystem::path stylePath;
+    std::vector<mln::filesystem::path> expectations;
+    std::vector<mln::filesystem::path> expectedMetrics;
 
     std::string defaultExpectations() const {
         assert(!expectations.empty());
@@ -118,7 +118,7 @@ struct GfxProbe {
     };
 
     GfxProbe() = default;
-    GfxProbe(const mbgl::gfx::RenderingStats&, const GfxProbe&);
+    GfxProbe(const mln::gfx::RenderingStats&, const GfxProbe&);
 
     int numBuffers;
     int numDrawCalls;
@@ -144,7 +144,7 @@ struct TestMetadata {
     TestMetadata() = default;
 
     TestPaths paths;
-    mbgl::JSDocument document;
+    mln::JSDocument document;
     bool renderTest = true;
     bool outputsImage = true;
     bool ignoredTest = false;
@@ -154,20 +154,20 @@ struct TestMetadata {
     // to prevent the unit test fail, and just verify the render result.
     bool ignoreProbing = true;
 
-    mbgl::Size size{512u, 512u};
+    mln::Size size{512u, 512u};
     std::optional<float> maxPitch;
     float pixelRatio = 1.0f;
     double allowed = 0.00015; // diff
     std::string description;
-    mbgl::MapMode mapMode = mbgl::MapMode::Static;
-    mbgl::MapDebugOptions debug = mbgl::MapDebugOptions::NoDebug;
+    mln::MapMode mapMode = mln::MapMode::Static;
+    mln::MapDebugOptions debug = mln::MapDebugOptions::NoDebug;
     bool crossSourceCollisions = true;
     bool axonometric = false;
     double xSkew = 0.0;
     double ySkew = 1.0;
-    mbgl::ScreenCoordinate queryGeometry{0u, 0u};
-    mbgl::ScreenBox queryGeometryBox{{0u, 0u}, {0u, 0u}};
-    mbgl::RenderedQueryOptions queryOptions;
+    mln::ScreenCoordinate queryGeometry{0u, 0u};
+    mln::ScreenBox queryGeometryBox{{0u, 0u}, {0u, 0u}};
+    mln::RenderedQueryOptions queryOptions;
 
     // TODO
     uint32_t fadeDuration = 0;
@@ -200,9 +200,9 @@ struct TestMetadata {
 
 class TestContext {
 public:
-    virtual mbgl::HeadlessFrontend& getFrontend() = 0;
-    virtual mbgl::Map& getMap() = 0;
-    virtual mbgl::FileSource& getFileSource() = 0;
+    virtual mln::HeadlessFrontend& getFrontend() = 0;
+    virtual mln::Map& getMap() = 0;
+    virtual mln::FileSource& getFileSource() = 0;
     virtual TestRunnerMapObserver& getObserver() = 0;
     virtual TestMetadata& getMetadata() = 0;
 

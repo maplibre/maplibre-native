@@ -15,7 +15,7 @@
 #include <mbgl/util/variant.hpp>
 #include <mbgl/util/vectors.hpp>
 
-namespace mbgl {
+namespace mln {
 
 // Maps vertex range to feature index
 struct FeatureVertexRange {
@@ -781,4 +781,4 @@ private:
     Binders binders;
 };
 
-} // namespace mbgl
+} // namespace mln

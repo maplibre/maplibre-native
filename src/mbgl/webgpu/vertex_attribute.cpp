@@ -8,7 +8,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
@@ -40,4 +40,4 @@ bool VertexAttributeArray::isModifiedAfter(std::chrono::duration<double> time) c
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

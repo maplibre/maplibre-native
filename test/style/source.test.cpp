@@ -51,8 +51,8 @@
 
 #include <optional>
 
-using namespace mbgl;
-using SourceType = mbgl::style::SourceType;
+using namespace mln;
+using SourceType = mln::style::SourceType;
 
 class SourceTest {
 public:

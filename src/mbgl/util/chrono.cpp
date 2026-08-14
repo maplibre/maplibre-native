@@ -11,7 +11,7 @@
 #define _gmtime(t, i) gmtime_r(t, i)
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 namespace {
@@ -79,4 +79,4 @@ Timestamp parseTimestamp(const int32_t timestamp) {
 
 } // namespace util
 
-} // namespace mbgl
+} // namespace mln

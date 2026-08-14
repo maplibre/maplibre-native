@@ -3,7 +3,7 @@
 
 #include <mbgl/util/size.hpp>
 
-namespace mbgl {
+namespace mln {
 class Map;
 class Renderer;
 
@@ -11,7 +11,7 @@ namespace gfx {
 struct RenderingStats;
 }
 
-}  // namespace mbgl
+}  // namespace mln
 
 @class MLNSource;
 
@@ -35,7 +35,7 @@ struct RenderingStats;
 /// The map view’s OpenGL rendering context, if it is backed by an OpenGL based view.
 @property (readonly, nonatomic, nullable) CGLContextObj context;
 
-- (mbgl::Size)framebufferSize;
+- (mln::Size)framebufferSize;
 
 /// Map observers
 - (void)cameraWillChangeAnimated:(BOOL)animated;
@@ -46,7 +46,7 @@ struct RenderingStats;
 - (void)mapViewDidFailLoadingMapWithError:(nonnull NSError *)error;
 - (void)mapViewWillStartRenderingFrame;
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats;
+                                     renderingStats:(const mln::gfx::RenderingStats &)stats;
 - (void)mapViewWillStartRenderingMap;
 - (void)mapViewDidFinishRenderingMapFullyRendered:(BOOL)fullyRendered;
 - (void)mapViewDidBecomeIdle;
@@ -85,6 +85,6 @@ struct RenderingStats;
 
 - (BOOL)isTargetingInterfaceBuilder;
 
-- (nonnull mbgl::Renderer *)renderer;
+- (nonnull mln::Renderer *)renderer;
 
 @end

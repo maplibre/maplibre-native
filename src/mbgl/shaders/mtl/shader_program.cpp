@@ -20,7 +20,7 @@
 
 using namespace std::string_literals;
 
-namespace mbgl {
+namespace mln {
 
 namespace mtl {
 namespace {
@@ -214,4 +214,4 @@ void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

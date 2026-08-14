@@ -4,7 +4,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/shaders/segment.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 struct Drawable::DrawSegment {
@@ -25,4 +25,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

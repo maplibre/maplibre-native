@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstddef>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 
@@ -90,4 +90,4 @@ extern const bool shapingWarning;
 
 } // namespace debug
 
-} // namespace mbgl
+} // namespace mln

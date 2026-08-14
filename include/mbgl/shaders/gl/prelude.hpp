@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -107,4 +107,4 @@ out highp vec4 fragColor;
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

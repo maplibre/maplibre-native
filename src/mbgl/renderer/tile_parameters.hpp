@@ -8,7 +8,7 @@
 
 #include <mapbox/std/weak.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class FileSource;
@@ -42,4 +42,4 @@ public:
     bool isUpdateSynchronous = false;
 };
 
-} // namespace mbgl
+} // namespace mln

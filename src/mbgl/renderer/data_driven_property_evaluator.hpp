@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T, bool useIntegerZoom_ = false>
 class DataDrivenPropertyEvaluator {
@@ -79,4 +79,4 @@ private:
     T defaultValue;
 };
 
-} // namespace mbgl
+} // namespace mln

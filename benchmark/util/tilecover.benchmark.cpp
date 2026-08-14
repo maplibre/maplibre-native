@@ -5,7 +5,7 @@
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/map/transform.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 static const LatLngBounds sanFrancisco = LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204});
 

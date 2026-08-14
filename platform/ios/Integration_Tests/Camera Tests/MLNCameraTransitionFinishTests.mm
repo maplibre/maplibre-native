@@ -83,7 +83,7 @@
 // MARK: - camera transitions with NaN values
 
 @interface MLNMapView (MLNCameraTransitionFinishNaNTests)
-- (mbgl::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
+- (mln::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
                                                    edgePadding:(UIEdgeInsets)insets;
 @end
 
@@ -91,9 +91,9 @@
 @end
 
 @implementation MLNCameraTransitionNaNZoomMapView
-- (mbgl::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
+- (mln::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
                                                    edgePadding:(UIEdgeInsets)insets {
-  mbgl::CameraOptions options = [super cameraOptionsObjectForAnimatingToCamera:camera
+  mln::CameraOptions options = [super cameraOptionsObjectForAnimatingToCamera:camera
                                                                    edgePadding:insets];
   options.zoom = NAN;
   return options;

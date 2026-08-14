@@ -32,7 +32,7 @@
 
 #include <set>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -174,7 +174,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
               (evaluated.get<style::TextOpacity>().constantOr(1) > 0 && hasTextOpacity && textSize > 0))
                  ? RenderPass::Translucent
                  : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     // The symbol tweaker supports updating properties.
@@ -689,7 +689,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         gfx::DrawableTweakerPtr textTweaker, iconTweaker;
     };
 
-    mbgl::unordered_map<UnwrappedTileID, TileInfo> tileCache;
+    mln::unordered_map<UnwrappedTileID, TileInfo> tileCache;
     tileCache.reserve(renderTiles->size());
 
     for (auto& group : renderableSegments) {
@@ -781,7 +781,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                 builder->setColorMode(
-                    ((mbgl::underlying_type(passes) & mbgl::underlying_type(RenderPass::Translucent)) != 0)
+                    ((mln::underlying_type(passes) & mln::underlying_type(RenderPass::Translucent)) != 0)
                         ? gfx::ColorMode::alphaBlended()
                         : gfx::ColorMode::unblended());
             }
@@ -866,4 +866,4 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

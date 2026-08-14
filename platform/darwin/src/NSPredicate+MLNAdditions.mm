@@ -8,23 +8,23 @@
 
 @implementation NSPredicate (MLNPrivateAdditions)
 
-- (mbgl::style::Filter)mgl_filter {
-  mbgl::style::conversion::Error valueError;
+- (mln::style::Filter)mgl_filter {
+  mln::style::conversion::Error valueError;
   NSArray *jsonObject = self.mgl_jsonExpressionObject;
-  auto value = mbgl::style::conversion::convert<mbgl::style::Filter>(
-      mbgl::style::conversion::makeConvertible(jsonObject), valueError);
+  auto value = mln::style::conversion::convert<mln::style::Filter>(
+      mln::style::conversion::makeConvertible(jsonObject), valueError);
 
   if (!value) {
     [NSException raise:NSInvalidArgumentException
                 format:@"Invalid filter value: %@", @(valueError.message.c_str())];
     return {};
   }
-  mbgl::style::Filter filter = std::move(*value);
+  mln::style::Filter filter = std::move(*value);
 
   return filter;
 }
 
-+ (instancetype)mgl_predicateWithFilter:(mbgl::style::Filter)filter {
++ (instancetype)mgl_predicateWithFilter:(mln::style::Filter)filter {
   if (filter.expression) {
     id jsonObject = MLNJSONObjectFromMBGLExpression(**filter.expression);
     return [NSPredicate predicateWithMLNJSONObject:jsonObject];

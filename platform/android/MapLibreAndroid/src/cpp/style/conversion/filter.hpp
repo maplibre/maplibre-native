@@ -4,12 +4,12 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
-std::optional<mbgl::style::Filter> toFilter(jni::JNIEnv&, const jni::Array<jni::Object<>>&);
+std::optional<mln::style::Filter> toFilter(jni::JNIEnv&, const jni::Array<jni::Object<>>&);
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

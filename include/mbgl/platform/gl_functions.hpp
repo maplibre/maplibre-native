@@ -11,7 +11,7 @@
     ([&]() {                                                            \
         struct __MBGL_CHECK_ERROR {                                     \
             ~__MBGL_CHECK_ERROR() noexcept(false) {                     \
-                mbgl::platform::glCheckError(#cmd, __FILE__, __LINE__); \
+                mln::platform::glCheckError(#cmd, __FILE__, __LINE__); \
             }                                                           \
         } __MBGL_CHECK_ERROR;                                           \
         return cmd;                                                     \
@@ -22,7 +22,7 @@
 
 struct __GLsync;
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 using GLbitfield = unsigned int;
@@ -557,4 +557,4 @@ void glCheckError(const char* cmd, const char* file, int line);
 #endif
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

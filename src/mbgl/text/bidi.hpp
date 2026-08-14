@@ -8,7 +8,7 @@
 
 #include <mbgl/util/noncopyable.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class BiDi;
 class BiDiImpl;
@@ -41,4 +41,4 @@ private:
     std::unique_ptr<BiDiImpl> impl;
 };
 
-} // end namespace mbgl
+} // end namespace mln

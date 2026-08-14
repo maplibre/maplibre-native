@@ -13,7 +13,7 @@
 
 struct ALooper;
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 using WatchCallback = std::function<void(int, RunLoop::Event)>;
@@ -64,4 +64,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

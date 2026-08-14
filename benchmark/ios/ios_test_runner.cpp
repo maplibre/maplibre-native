@@ -22,13 +22,13 @@ bool TestRunner::startTest(const std::string& basePath) {
     argv.push_back(nullptr);
 
     if (chdir(basePath.c_str())) {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to " + basePath);
+        mln::Log::Error(mln::Event::General, "Failed to change the directory to " + basePath);
         return false;
     }
 
-    mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
-    int status = mbgl::runBenchmark(static_cast<uint32_t>(argv.size()), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '%d'", status);
+    mln::Log::Info(mln::Event::General, "Start BenchmarkRunner");
+    int status = mln::runBenchmark(static_cast<uint32_t>(argv.size()), argv.data());
+    mln::Log::Info(mln::Event::General, "BenchmarkRunner finished with status: '%d'", status);
 
     return status == 0;
 }

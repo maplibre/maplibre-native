@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 struct CollisionDrawableData : public DrawableData {
@@ -21,4 +21,4 @@ struct CollisionDrawableData : public DrawableData {
 using UniqueCollisionDrawableData = std::unique_ptr<CollisionDrawableData>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

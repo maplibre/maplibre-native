@@ -10,7 +10,7 @@
 #include <memory>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 class AsyncRequest;
 class Scheduler;
@@ -30,8 +30,8 @@ struct GeoJSONOptions {
     uint16_t clusterRadius = 50;
     uint8_t clusterMaxZoom = 17;
     size_t clusterMinPoints = 2;
-    using ClusterExpression = std::pair<std::shared_ptr<mbgl::style::expression::Expression>,
-                                        std::shared_ptr<mbgl::style::expression::Expression>>;
+    using ClusterExpression = std::pair<std::shared_ptr<mln::style::expression::Expression>,
+                                        std::shared_ptr<mln::style::expression::Expression>>;
     using ClusterProperties = std::map<std::string, ClusterExpression>;
     ClusterProperties clusterProperties;
 
@@ -75,7 +75,7 @@ public:
 
     void loadDescription(FileSource&) final;
 
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
@@ -99,4 +99,4 @@ inline bool Source::is<GeoJSONSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -14,7 +14,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -345,4 +345,4 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
 
     return quads;
 }
-} // namespace mbgl
+} // namespace mln

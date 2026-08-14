@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace http {
 
 Duration errorRetryTimeout(Response::Error::Reason failedRequestReason,
@@ -15,4 +15,4 @@ Duration errorRetryTimeout(Response::Error::Reason failedRequestReason,
 Duration expirationTimeout(std::optional<Timestamp> expires, uint32_t expiredRequests);
 
 } // namespace http
-} // namespace mbgl
+} // namespace mln

@@ -7,7 +7,7 @@
 #include <mutex>
 #include <iostream>
 
-namespace mbgl {
+namespace mln {
 
 class FixtureLog {
 public:
@@ -64,4 +64,4 @@ private:
 
 using FixtureLogObserver = FixtureLog::Observer;
 
-} // namespace mbgl
+} // namespace mln

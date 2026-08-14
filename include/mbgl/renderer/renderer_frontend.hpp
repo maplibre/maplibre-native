@@ -5,7 +5,7 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/actor/scheduler.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RendererObserver;
 class UpdateParameters;
@@ -34,4 +34,4 @@ public:
 protected:
 };
 
-} // namespace mbgl
+} // namespace mln

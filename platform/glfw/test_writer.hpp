@@ -15,9 +15,9 @@ public:
     TestWriter();
     ~TestWriter();
 
-    TestWriter& withCameraOptions(const mbgl::CameraOptions&);
-    TestWriter& withStyle(const mbgl::style::Style&);
-    TestWriter& withInitialSize(const mbgl::Size&);
+    TestWriter& withCameraOptions(const mln::CameraOptions&);
+    TestWriter& withStyle(const mln::style::Style&);
+    TestWriter& withInitialSize(const mln::Size&);
 
     bool write(const std::string& dir) const;
 

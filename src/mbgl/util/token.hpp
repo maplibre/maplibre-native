@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 const static std::string tokenReservedChars = "{}";
@@ -46,4 +46,4 @@ std::string replaceTokens(const std::string &source, const Lookup &lookup) {
 }
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

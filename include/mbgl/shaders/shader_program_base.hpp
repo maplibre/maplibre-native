@@ -7,7 +7,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class ShaderProgramBase : public gfx::Shader {
@@ -44,4 +44,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -24,7 +24,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Layer::Impl& layerImpl) {
     MLN_TRACE_FUNC();
@@ -608,4 +608,4 @@ void GeometryTile::setFeatureState(const LayerFeatureStates& states) {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

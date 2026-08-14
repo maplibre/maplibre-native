@@ -6,7 +6,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 
 TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
                                std::vector<SymbolInstance>& symbolInstances,
@@ -269,4 +269,4 @@ void CrossTileSymbolIndex::reset() {
     layerIndexes.clear();
 }
 
-} // namespace mbgl
+} // namespace mln

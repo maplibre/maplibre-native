@@ -4,7 +4,7 @@
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/util/mat4.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct ClipUBO {
@@ -44,4 +44,4 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

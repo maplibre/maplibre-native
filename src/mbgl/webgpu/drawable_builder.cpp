@@ -6,7 +6,7 @@
 #include <mbgl/webgpu/context.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
@@ -25,7 +25,7 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 
 void DrawableBuilder::init() {
     if (!currentDrawable) {
-        mbgl::Log::Warning(mbgl::Event::Render, "DrawableBuilder::init called with no current drawable");
+        mln::Log::Warning(mln::Event::Render, "DrawableBuilder::init called with no current drawable");
         return;
     }
 
@@ -73,7 +73,7 @@ void DrawableBuilder::init() {
     if (impl->sharedIndexes && impl->sharedIndexes->elements()) {
         drawable.setIndexData(impl->sharedIndexes, std::move(impl->segments));
     } else {
-        mbgl::Log::Warning(mbgl::Event::Render, "  No index data to set!");
+        mln::Log::Warning(mln::Event::Render, "  No index data to set!");
     }
 
     // Flush texture bindings so the shared builder doesn't leak the previous tile's
@@ -85,4 +85,4 @@ void DrawableBuilder::init() {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

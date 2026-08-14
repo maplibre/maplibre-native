@@ -224,7 +224,7 @@
 ## 3.4.0 - November 2, 2016
 
 - Fixes Bitrise configuration to automatically publish macOS binaries ([#6789](https://github.com/mapbox/mapbox-gl-native/pull/6789))
-- Switches from using individual thread pools for each `mbgl::Map` object to sharing the built-in Node.js thread pool for NodeMap implementations ([#6687](https://github.com/mapbox/mapbox-gl-native/pull/6687))
+- Switches from using individual thread pools for each `mln::Map` object to sharing the built-in Node.js thread pool for NodeMap implementations ([#6687](https://github.com/mapbox/mapbox-gl-native/pull/6687))
 
 ## 3.3.3 - September 6, 2016
 
@@ -340,7 +340,7 @@
 
 ## 1.1.3 - June 25, 2015
 
-- Removes deprecated mbgl::Environment from NodeLogObserver.
+- Removes deprecated mln::Environment from NodeLogObserver.
 
 ## 1.1.2 - June 22, 2015
 
@@ -366,7 +366,7 @@
   should be handled through `NodeFileSource` now.
 - Updates build scripts and Travis CI configuration.
 - Logs Environment ID and thread name when in an Environment scope.
-- Refactors NodeLog to implement mbgl::Log::Observer.
+- Refactors NodeLog to implement mln::Log::Observer.
 - Fixes uncaught exception from missing sprites.
 - Fixes Unicode glyph range end.
 
@@ -382,7 +382,7 @@
 
 ## 1.0.1 - March 19, 2015
 
-- Adapts NodeFileSource around mbgl::Environment additions.
+- Adapts NodeFileSource around mln::Environment additions.
 - Adapts to minor changes in mapbox-gl-test-suite.
 - Adds tests for gzipped vector tile handling.
 - Cleans up documentation.

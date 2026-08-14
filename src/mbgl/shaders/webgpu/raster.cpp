@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/raster_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using RasterShaderSource = ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::WebGPU>;
@@ -15,4 +15,4 @@ const std::array<TextureInfo, 2> RasterShaderSource::textures = {TextureInfo{0, 
                                                                  TextureInfo{1, idRasterImage1Texture}};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

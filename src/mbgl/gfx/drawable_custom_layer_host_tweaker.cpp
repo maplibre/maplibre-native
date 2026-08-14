@@ -16,11 +16,11 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& drawable,
-                                             mbgl::PaintParameters& paintParameters) {
+                                             mln::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
@@ -48,4 +48,4 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

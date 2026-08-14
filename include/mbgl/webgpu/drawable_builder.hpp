@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Context;
@@ -26,4 +26,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

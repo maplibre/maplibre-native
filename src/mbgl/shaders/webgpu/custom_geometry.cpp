@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/custom_geometry_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using CustomGeometryShaderSource = ShaderSource<BuiltIn::CustomGeometryShader, gfx::Backend::Type::WebGPU>;
@@ -16,4 +16,4 @@ const std::array<TextureInfo, 1> CustomGeometryShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

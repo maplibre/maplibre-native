@@ -3,7 +3,7 @@
 #include <mbgl/map/mode.hpp>
 #include <mbgl/tile/tile_id.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 struct LayerTypeInfo;
 } // namespace style
@@ -16,4 +16,4 @@ public:
     const style::LayerTypeInfo* layerType;
 };
 
-} // namespace mbgl
+} // namespace mln

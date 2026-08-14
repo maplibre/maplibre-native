@@ -1,6 +1,6 @@
 #include <mbgl/math/log2.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // From http://stackoverflow.com/questions/3272424/compute-fast-log-base-2-ceiling
@@ -25,4 +25,4 @@ uint32_t ceil_log2(uint64_t x) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

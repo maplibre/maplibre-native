@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -16,4 +16,4 @@ struct Converter<style::Rotation> {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

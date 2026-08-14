@@ -31,7 +31,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -655,7 +655,7 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
 
     queryRenderedSymbols(resultsByLayer, geometry, filteredLayers, options);
 
-    mbgl::DynamicFeatureIndex dynamicIndex;
+    mln::DynamicFeatureIndex dynamicIndex;
     for (const auto& pair : filteredLayers) {
         const RenderLayer* layer = pair.second;
         layer->populateDynamicRenderFeatureIndex(dynamicIndex);
@@ -1080,4 +1080,4 @@ void RenderOrchestrator::onRemoveUnusedStyleImages(const std::vector<std::string
     observer->onRemoveUnusedStyleImages(unusedImageIDs);
 }
 
-} // namespace mbgl
+} // namespace mln

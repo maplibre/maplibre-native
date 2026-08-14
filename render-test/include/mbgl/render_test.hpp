@@ -2,7 +2,7 @@
 
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 
 struct TestStatus {
     size_t completed;
@@ -11,4 +11,4 @@ struct TestStatus {
 
 int runRenderTests(int argc, char* argv[], std::function<void(TestStatus)>);
 
-} // namespace mbgl
+} // namespace mln

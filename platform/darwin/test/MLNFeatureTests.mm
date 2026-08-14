@@ -12,18 +12,18 @@
 @implementation MLNFeatureTests
 
 - (void)testGeometryConversion {
-  std::vector<mbgl::Feature> features;
+  std::vector<mln::Feature> features;
 
-  mbgl::Point<double> point = {-90.066667, 29.95};
-  features.push_back(mbgl::Feature{point});
+  mln::Point<double> point = {-90.066667, 29.95};
+  features.push_back(mln::Feature{point});
 
-  mbgl::LineString<double> lineString = {
+  mln::LineString<double> lineString = {
       {-84.516667, 39.1},
       {-90.066667, 29.95},
   };
-  features.push_back(mbgl::Feature{lineString});
+  features.push_back(mln::Feature{lineString});
 
-  mbgl::Polygon<double> polygon = {
+  mln::Polygon<double> polygon = {
       {
           {1, 1},
           {4, 1},
@@ -37,7 +37,7 @@
           {2, 3},
       },
   };
-  features.push_back(mbgl::Feature{polygon});
+  features.push_back(mln::Feature{polygon});
 
   NSArray<MLNShape<MLNFeature> *> *shapes = MLNFeaturesFromMBGLFeatures(features);
   XCTAssertEqual(shapes.count, 3UL, @"All features should be converted into shapes");
@@ -91,8 +91,8 @@
 }
 
 - (void)testClusterGeometryConversion {
-  mbgl::Point<double> point = {-90.066667, 29.95};
-  mbgl::Feature pointFeature{point};
+  mln::Point<double> point = {-90.066667, 29.95};
+  mln::Feature pointFeature{point};
   pointFeature.id = {UINT64_MAX};
   pointFeature.properties["cluster"] = true;
   pointFeature.properties["cluster_id"] = 1ULL;
@@ -111,10 +111,10 @@
 }
 
 - (void)testPropertyConversion {
-  std::vector<mbgl::Feature> features;
+  std::vector<mln::Feature> features;
 
-  mbgl::Point<double> point = {-90.066667, 29.95};
-  mbgl::Feature pointFeature{point};
+  mln::Point<double> point = {-90.066667, 29.95};
+  mln::Feature pointFeature{point};
   pointFeature.id = {UINT64_MAX};
   pointFeature.properties["null"] = mapbox::feature::null_value;
   pointFeature.properties["bool"] = true;

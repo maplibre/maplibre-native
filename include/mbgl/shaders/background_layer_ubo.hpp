@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -68,4 +68,4 @@ union BackgroundDrawableUnionUBO {
 #endif
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

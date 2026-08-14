@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
@@ -47,4 +47,4 @@ Result<T> convert(jni::JNIEnv& env, const V& value, Args&&... args) {
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

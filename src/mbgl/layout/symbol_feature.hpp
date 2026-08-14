@@ -7,7 +7,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class SymbolFeature : public GeometryTileFeature {
 public:
@@ -32,4 +32,4 @@ public:
     std::size_t index = 0;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -15,7 +15,7 @@
 #include <optional>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class GeometryTileFeature;
 
@@ -37,7 +37,7 @@ public:
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_) noexcept
         : zoom(zoom_),
           feature(feature_) {}
-    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_) noexcept(false)
+    EvaluationContext(std::optional<mln::Value> accumulated_, GeometryTileFeature const* feature_) noexcept(false)
         : accumulated(std::move(accumulated_)),
           feature(feature_) {}
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_) noexcept
@@ -75,7 +75,7 @@ public:
         return *this;
     };
 
-    EvaluationContext& withCanonicalTileID(const mbgl::CanonicalTileID* canonical_) noexcept {
+    EvaluationContext& withCanonicalTileID(const mln::CanonicalTileID* canonical_) noexcept {
         canonical = canonical_;
         return *this;
     };
@@ -86,7 +86,7 @@ public:
     };
 
     std::optional<float> zoom;
-    std::optional<mbgl::Value> accumulated;
+    std::optional<mln::Value> accumulated;
     GeometryTileFeature const* feature = nullptr;
     std::optional<double> colorRampParameter;
     std::optional<float> elevation;
@@ -94,7 +94,7 @@ public:
     const Value* formattedSection = nullptr;
     const FeatureState* featureState = nullptr;
     const std::set<std::string>* availableImages = nullptr;
-    const mbgl::CanonicalTileID* canonical = nullptr;
+    const mln::CanonicalTileID* canonical = nullptr;
 };
 
 template <typename T>
@@ -166,7 +166,7 @@ public:
  CompoundExpression implements the majority of expressions in the spec by
  inferring the argument and output from a simple function (const T0& arg0,
  const T1& arg1, ...) -> Result<U> where T0, T1, ..., U are member types of
- mbgl::style::expression::Value.
+ mln::style::expression::Value.
 
  The other Expression subclasses (Let, Curve, Match, etc.) exist in order to
  implement expressions that need specialized parsing, type checking, or
@@ -257,7 +257,7 @@ public:
                               std::optional<double> colorRampParameter,
                               const std::set<std::string>& availableImages,
                               const CanonicalTileID& canonical) const;
-    EvaluationResult evaluate(std::optional<mbgl::Value> accumulated, const Feature& feature) const;
+    EvaluationResult evaluate(std::optional<mln::Value> accumulated, const Feature& feature) const;
 
     /**
      * Statically analyze the expression, attempting to enumerate possible
@@ -267,8 +267,8 @@ public:
      */
     virtual std::vector<std::optional<Value>> possibleOutputs() const = 0;
 
-    virtual mbgl::Value serialize() const {
-        std::vector<mbgl::Value> serialized;
+    virtual mln::Value serialize() const {
+        std::vector<mln::Value> serialized;
         serialized.emplace_back(getOperator());
         eachChild([&](const Expression& child) { serialized.emplace_back(child.serialize()); });
         return serialized;
@@ -382,4 +382,4 @@ std::string toString(style::expression::Dependency);
 
 std::ostream& operator<<(std::ostream&, style::expression::Dependency);
 
-} // namespace mbgl
+} // namespace mln

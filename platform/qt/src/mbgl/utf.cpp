@@ -2,7 +2,7 @@
 
 #include <QString>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 std::u16string convertUTF8ToUTF16(std::string const& utf8) {
@@ -14,4 +14,4 @@ std::u16string convertUTF8ToUTF16(std::string const& utf8) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -14,7 +14,7 @@
 #define MBGL_FOPEN_MODE_WBE "wb"
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 IOException::IOException(int err, const std::string &msg)
@@ -91,4 +91,4 @@ void copyFile(const std::string &destination, const std::string &source) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #import "NSCoder+MLNAdditions.h"
 
 @implementation MLNMultiPoint {
-  std::optional<mbgl::LatLngBounds> _bounds;
+  std::optional<mln::LatLngBounds> _bounds;
   std::vector<CLLocationCoordinate2D> _coordinates;
 }
 
@@ -168,10 +168,10 @@
 
 - (MLNCoordinateBounds)overlayBounds {
   if (!_bounds) {
-    mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+    mln::LatLngBounds bounds = mln::LatLngBounds::empty();
     for (auto coordinate : _coordinates) {
       if (!MLNLocationCoordinate2DIsValid(coordinate)) {
-        bounds = mbgl::LatLngBounds::empty();
+        bounds = mln::LatLngBounds::empty();
         break;
       }
       bounds.extend(MLNLatLngFromLocationCoordinate2D(coordinate));
@@ -185,10 +185,10 @@
   return MLNCoordinateBoundsIntersectsCoordinateBounds(self.overlayBounds, overlayBounds);
 }
 
-- (mbgl::Annotation)annotationObjectWithDelegate:(__unused id<MLNMultiPointDelegate>)delegate {
+- (mln::Annotation)annotationObjectWithDelegate:(__unused id<MLNMultiPointDelegate>)delegate {
   MLNAssert(NO, @"Cannot add an annotation from an instance of %@",
             NSStringFromClass([self class]));
-  return mbgl::SymbolAnnotation(mbgl::Point<double>());
+  return mln::SymbolAnnotation(mln::Point<double>());
 }
 
 - (NSString *)description {

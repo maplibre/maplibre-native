@@ -5,7 +5,7 @@
 #include <memory>
 #include <map>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -16,4 +16,4 @@ Range<float> getCoveringStops(const std::map<double, std::unique_ptr<Expression>
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

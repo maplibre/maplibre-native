@@ -3,7 +3,7 @@
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/util/async_request.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class PMTilesFileSource::Impl {
 public:
@@ -35,4 +35,4 @@ ClientOptions PMTilesFileSource::getClientOptions() {
     return {};
 }
 
-} // namespace mbgl
+} // namespace mln

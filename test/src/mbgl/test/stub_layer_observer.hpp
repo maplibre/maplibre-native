@@ -2,8 +2,8 @@
 
 #include <mbgl/style/layer_observer.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 /**
  * An implementation of style::LayerObserver that forwards all methods to

@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -57,8 +57,8 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 },
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
-                [&](const Padding& p) { mbgl::style::conversion::stringify(writer, p); },
-                [&](const VariableAnchorOffsetCollection& v) { mbgl::style::conversion::stringify(writer, v); },
+                [&](const Padding& p) { mln::style::conversion::stringify(writer, p); },
+                [&](const VariableAnchorOffsetCollection& v) { mln::style::conversion::stringify(writer, v); },
                 [&](const Collator&) {
                     // Collators are excluded from constant folding and there's no Literal parser
                     // for them so there shouldn't be any way to serialize this value.
@@ -68,9 +68,9 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                     // `stringify` in turns calls ValueConverter::fromExpressionValue
                     // below Serialization strategy for Formatted objects is to return
                     // the constant expression that would generate them.
-                    mbgl::style::conversion::stringify(writer, f);
+                    mln::style::conversion::stringify(writer, f);
                 },
-                [&](const Image& i) { mbgl::style::conversion::stringify(writer, i); },
+                [&](const Image& i) { mln::style::conversion::stringify(writer, i); },
                 [&](const std::vector<Value>& arr) {
                     writer.StartArray();
                     for (const auto& item : arr) {
@@ -96,7 +96,7 @@ std::string stringify(const Value& value) {
 }
 
 struct FromMBGLValue {
-    Value operator()(const std::vector<mbgl::Value>& v) {
+    Value operator()(const std::vector<mln::Value>& v) {
         std::vector<Value> result;
         result.reserve(v.size());
         for (const auto& item : v) {
@@ -105,7 +105,7 @@ struct FromMBGLValue {
         return result;
     }
 
-    Value operator()(const std::unordered_map<std::string, mbgl::Value>& v) {
+    Value operator()(const std::unordered_map<std::string, mln::Value>& v) {
         std::unordered_map<std::string, Value> result;
         result.reserve(v.size());
         for (const auto& entry : v) {
@@ -122,46 +122,46 @@ struct FromMBGLValue {
     Value operator()(const int64_t& v) noexcept { return static_cast<double>(v); }
 };
 
-Value ValueConverter<mbgl::Value>::toExpressionValue(const mbgl::Value& value) {
-    return mbgl::Value::visit(value, FromMBGLValue());
+Value ValueConverter<mln::Value>::toExpressionValue(const mln::Value& value) {
+    return mln::Value::visit(value, FromMBGLValue());
 }
 
-mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value) {
+mln::Value ValueConverter<mln::Value>::fromExpressionValue(const Value& value) {
     return value.match(
-        [&](const Color& color) -> mbgl::Value { return color.serialize(); },
-        [&](const Padding& padding) -> mbgl::Value { return padding.serialize(); },
-        [&](const VariableAnchorOffsetCollection& anchorOffset) -> mbgl::Value { return anchorOffset.serialize(); },
-        [&](const Collator&) -> mbgl::Value {
+        [&](const Color& color) -> mln::Value { return color.serialize(); },
+        [&](const Padding& padding) -> mln::Value { return padding.serialize(); },
+        [&](const VariableAnchorOffsetCollection& anchorOffset) -> mln::Value { return anchorOffset.serialize(); },
+        [&](const Collator&) -> mln::Value {
             // fromExpressionValue can't be used for Collator values,
-            // because they have no meaningful representation as an mbgl::Value
+            // because they have no meaningful representation as an mln::Value
             assert(false);
-            return mbgl::Value();
+            return mln::Value();
         },
-        [&](const Formatted& formatted) -> mbgl::Value {
+        [&](const Formatted& formatted) -> mln::Value {
             // Serialization strategy for Formatted objects is to return the
             // constant expression that would generate them.
-            std::vector<mbgl::Value> serialized;
+            std::vector<mln::Value> serialized;
             static std::string formatOperator("format");
             serialized.emplace_back(formatOperator);
             for (const auto& section : formatted.sections) {
                 if (section.image) {
-                    serialized.emplace_back(std::vector<mbgl::Value>{std::string("image"), section.image->id()});
+                    serialized.emplace_back(std::vector<mln::Value>{std::string("image"), section.image->id()});
                     continue;
                 }
 
                 serialized.emplace_back(section.text);
-                std::unordered_map<std::string, mbgl::Value> options;
+                std::unordered_map<std::string, mln::Value> options;
 
                 if (section.fontScale) {
                     options.emplace("font-scale", *section.fontScale);
                 }
 
                 if (section.fontStack) {
-                    std::vector<mbgl::Value> fontStack;
+                    std::vector<mln::Value> fontStack;
                     for (const auto& font : *section.fontStack) {
                         fontStack.emplace_back(font);
                     }
-                    options.emplace("text-font", std::vector<mbgl::Value>{std::string("literal"), fontStack});
+                    options.emplace("text-font", std::vector<mln::Value>{std::string("literal"), fontStack});
                 }
 
                 if (section.textColor) {
@@ -172,24 +172,24 @@ mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value)
             }
             return serialized;
         },
-        [&](const Image& i) -> mbgl::Value { return i.toValue(); },
-        [&](const std::vector<Value>& values) -> mbgl::Value {
-            std::vector<mbgl::Value> converted;
+        [&](const Image& i) -> mln::Value { return i.toValue(); },
+        [&](const std::vector<Value>& values) -> mln::Value {
+            std::vector<mln::Value> converted;
             converted.reserve(values.size());
             for (const Value& v : values) {
                 converted.emplace_back(fromExpressionValue(v));
             }
             return converted;
         },
-        [&](const std::unordered_map<std::string, Value>& values) -> mbgl::Value {
-            std::unordered_map<std::string, mbgl::Value> converted;
+        [&](const std::unordered_map<std::string, Value>& values) -> mln::Value {
+            std::unordered_map<std::string, mln::Value> converted;
             converted.reserve(values.size());
             for (const auto& entry : values) {
                 converted.emplace(entry.first, fromExpressionValue(entry.second));
             }
             return converted;
         },
-        [&](const auto& a) -> mbgl::Value { return a; });
+        [&](const auto& a) -> mln::Value { return a; });
 }
 
 Value ValueConverter<float>::toExpressionValue(const float value) {
@@ -258,7 +258,7 @@ std::optional<std::vector<T>> ValueConverter<std::vector<T>>::fromExpressionValu
         [&](const auto&) { return std::optional<std::vector<T>>(); });
 }
 
-Value ValueConverter<Position>::toExpressionValue(const mbgl::style::Position& value) {
+Value ValueConverter<Position>::toExpressionValue(const mln::style::Position& value) {
     return ValueConverter<std::array<float, 3>>::toExpressionValue(value.getSpherical());
 }
 
@@ -267,7 +267,7 @@ std::optional<Position> ValueConverter<Position>::fromExpressionValue(const Valu
     return pos ? std::optional<Position>(Position(*pos)) : std::optional<Position>();
 }
 
-Value ValueConverter<Rotation>::toExpressionValue(const mbgl::style::Rotation& value) {
+Value ValueConverter<Rotation>::toExpressionValue(const mln::style::Rotation& value) {
     return ValueConverter<float>::toExpressionValue(static_cast<float>(value.getAngle()));
 }
 
@@ -426,4 +426,4 @@ template struct ValueConverter<std::vector<TextWritingModeType>>;
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

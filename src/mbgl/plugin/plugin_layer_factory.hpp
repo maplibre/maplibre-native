@@ -5,7 +5,7 @@
 #include <string>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 // Forward
@@ -16,14 +16,14 @@ class PluginLayer;
 class PluginLayerFactory : public LayerFactory {
 public:
     PluginLayerFactory(std::string& layerType,
-                       mbgl::style::LayerTypeInfo::Source source,
-                       mbgl::style::LayerTypeInfo::Pass3D pass3D,
-                       mbgl::style::LayerTypeInfo::Layout layout,
-                       mbgl::style::LayerTypeInfo::FadingTiles fadingTiles,
-                       mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
-                       mbgl::style::LayerTypeInfo::TileKind tileKind);
+                       mln::style::LayerTypeInfo::Source source,
+                       mln::style::LayerTypeInfo::Pass3D pass3D,
+                       mln::style::LayerTypeInfo::Layout layout,
+                       mln::style::LayerTypeInfo::FadingTiles fadingTiles,
+                       mln::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
+                       mln::style::LayerTypeInfo::TileKind tileKind);
 
-    using OnLayerCreatedEvent = std::function<void(mbgl::style::PluginLayer* pluginLayer)>;
+    using OnLayerCreatedEvent = std::function<void(mln::style::PluginLayer* pluginLayer)>;
     void setOnLayerCreatedEvent(OnLayerCreatedEvent onLayerCreated) { _onLayerCreated = onLayerCreated; }
 
 protected:
@@ -42,4 +42,4 @@ private:
     OnLayerCreatedEvent _onLayerCreated;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace {
 
 vec3 toVec3(const vec4& v) noexcept {
@@ -259,4 +259,4 @@ IntersectionResult Frustum::intersectsPrecise(const AABB& aabb, bool edgeCasesOn
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

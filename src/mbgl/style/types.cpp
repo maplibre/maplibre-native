@@ -1,7 +1,7 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -124,4 +124,4 @@ MBGL_DEFINE_ENUM(IconTextFitType,
 
 MBGL_DEFINE_ENUM(LightAnchorType, {{LightAnchorType::Map, "map"}, {LightAnchorType::Viewport, "viewport"}});
 
-} // namespace mbgl
+} // namespace mln
