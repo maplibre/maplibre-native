@@ -203,6 +203,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/math/log2.cpp",
     "src/mbgl/platform/settings.cpp",
     "src/mbgl/renderer/backend_scope.cpp",
+    "src/mbgl/renderer/bucket.cpp",
     "src/mbgl/renderer/bucket.hpp",
     "src/mbgl/renderer/bucket_parameters.cpp",
     "src/mbgl/renderer/bucket_parameters.hpp",

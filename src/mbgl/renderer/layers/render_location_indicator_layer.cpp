@@ -1056,7 +1056,7 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures() {
     };
 
     if (const auto bound = computeFeatureNDCBound(geom.size(), proj, getVertex)) {
-        constexpr auto locationID = "maplibre::LocationIndicator";
+        constexpr auto locationID = "maplibre:LocationIndicator";
         stats.addRenderedFeature(locationID, *bound, {/* no tile */});
     }
 }

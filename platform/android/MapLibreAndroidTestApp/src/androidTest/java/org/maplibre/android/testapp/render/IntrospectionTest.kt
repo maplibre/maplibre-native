@@ -1,9 +1,12 @@
 package org.maplibre.android.testapp.render
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.RectF
-import android.os.Handler
+import android.location.Location
+import android.location.LocationManager
 import android.os.Looper
+import android.os.SystemClock
 import android.view.View
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingPolicies
@@ -20,6 +23,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.LocationComponentActivationOptions
+import org.maplibre.android.location.modes.CameraMode
+import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonOptions
@@ -28,41 +34,12 @@ import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.maplibre.android.testapp.utils.FeatureMatchIdleResource
 import org.maplibre.android.testapp.utils.MapIdleResource
+import org.maplibre.android.testapp.utils.MockLocationEngine
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class IntrospectionTest : EspressoTest() {
-    @Before
-    fun setup() {
-        validateTestSetup()
-
-        // This ensures that the map is "idle" before a check is made, so that, e.g.,
-        // after changing the camera, the map is rendered before we query for features.
-        mapIdleResource = MapIdleResource(mapView)
-        IdlingRegistry.getInstance().register(mapIdleResource)
-
-        // This allows us to wait for a specific feature/layer/source to be rendered
-        featureIdleResource = FeatureMatchIdleResource(mapView)
-        IdlingRegistry.getInstance().register(featureIdleResource)
-
-        IdlingPolicies.setIdlingResourceTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-    }
-
-    @After
-    fun teardown() {
-        mapIdleResource?.let {
-            Assert.assertTrue(IdlingRegistry.getInstance().unregister(it))
-            it.unregister()
-        }
-        mapIdleResource = null
-        featureIdleResource?.let {
-            Assert.assertTrue(IdlingRegistry.getInstance().unregister(it))
-            it.unregister()
-        }
-        featureIdleResource = null
-    }
-
     @Test
     fun testPOIMarkers() {
         val onView = Espresso.onView(ViewMatchers.withId(R.id.mapView))
@@ -104,8 +81,8 @@ class IntrospectionTest : EspressoTest() {
             style.addSource(source)
             style.addLayer(
                 FillLayer(highlightLayerName, highlightSourceName).withProperties(
-                        PropertyFactory.fillColor(Color.RED), PropertyFactory.fillOpacity(0.75f)
-                    )
+                    PropertyFactory.fillColor(Color.RED), PropertyFactory.fillOpacity(0.75f)
+                )
             )
 
             // Wait for map idle after this action
@@ -144,7 +121,11 @@ class IntrospectionTest : EspressoTest() {
             })
 
             onView.perform(SimpleViewAction { uiController, _ ->
-                maplibreMap.getRenderedFeatureCount(feature.id(), highlightLayerName, highlightSourceName).let { count ->
+                maplibreMap.getRenderedFeatureCount(
+                    feature.id(),
+                    highlightLayerName,
+                    highlightSourceName
+                ).let { count ->
                     Assert.assertEquals(1, count)
                 }
                 // Wait very briefly so you can see something happening on the device.
@@ -158,13 +139,78 @@ class IntrospectionTest : EspressoTest() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             action()
         } else {
-            val latch = java.util.concurrent.CountDownLatch(1)
-            Handler(Looper.getMainLooper()).post {
-                action()
-                latch.countDown()
-            }
-            latch.await()
+            rule.runOnUiThread(action)
         }
+    }
+
+    @Test
+    fun testLocationPuck() {
+        val onView = Espresso.onView(ViewMatchers.withId(R.id.mapView))
+        onView.perform(SimpleViewAction { _, _ ->
+            // The location puck is rendered in several layers for the background, foreground, shadow, accuracy circle, etc.
+            featureIdleResource!!.addAllMatch(
+                "maplibre:location-component", null, "mapbox-location-source", 5
+            )
+
+            onMainThreadSync {
+                maplibreMap.cameraPosition =
+                    CameraPosition.Builder(maplibreMap.cameraPosition).zoom(18.0).build()
+
+                maplibreMap.locationComponent.activateLocationComponent(
+                    LocationComponentActivationOptions.builder(
+                        context, maplibreMap.style!!
+                    ).locationEngine(locationEngine).build()
+                )
+                maplibreMap.locationComponent.cameraMode = CameraMode.TRACKING
+                maplibreMap.locationComponent.renderMode = RenderMode.COMPASS
+                maplibreMap.locationComponent.zoomWhileTracking(18.0)
+                locationEngine.setLocation(
+                    Location(LocationManager.FUSED_PROVIDER).apply {
+                        latitude = 53.1668374
+                        longitude = -1.0599500
+                        accuracy = 1.0f
+                        time = System.currentTimeMillis()
+                        elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                    })
+                maplibreMap.locationComponent.isLocationComponentEnabled = true
+            }
+
+            // wait for the location puck to be rendered via idle resource...
+        })
+
+        onView.perform(SimpleViewAction { uiController, _ ->
+            uiController.loopMainThreadForAtLeast(100)
+        })
+    }
+
+    @Before
+    fun setup() {
+        validateTestSetup()
+
+        // This ensures that the map is "idle" before a check is made, so that, e.g.,
+        // after changing the camera, the map is rendered before we query for features.
+        mapIdleResource = MapIdleResource(mapView)
+        IdlingRegistry.getInstance().register(mapIdleResource)
+
+        // This allows us to wait for a specific feature/layer/source to be rendered
+        featureIdleResource = FeatureMatchIdleResource(mapView)
+        IdlingRegistry.getInstance().register(featureIdleResource)
+
+        IdlingPolicies.setIdlingResourceTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+    }
+
+    @After
+    fun teardown() {
+        mapIdleResource?.let {
+            Assert.assertTrue(IdlingRegistry.getInstance().unregister(it))
+            it.unregister()
+        }
+        mapIdleResource = null
+        featureIdleResource?.let {
+            Assert.assertTrue(IdlingRegistry.getInstance().unregister(it))
+            it.unregister()
+        }
+        featureIdleResource = null
     }
 
     class SimpleViewAction(private val action: (uiController: UiController, view: View) -> Unit) :
@@ -182,7 +228,10 @@ class IntrospectionTest : EspressoTest() {
             action(uiController, view)
         }
     }
-
+    private val locationManager by lazy {
+        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    }
+    private val locationEngine by lazy { MockLocationEngine() }
     private val domkerk = LatLng(52.090864, 5.122452)
     private var mapIdleResource: MapIdleResource? = null
     private var featureIdleResource: FeatureMatchIdleResource? = null

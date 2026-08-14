@@ -551,6 +551,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/backend_scope.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/bucket.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/bucket.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/bucket_parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/bucket_parameters.hpp

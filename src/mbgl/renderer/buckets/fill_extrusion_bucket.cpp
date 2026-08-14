@@ -219,10 +219,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
     if (retainFeaturesById) {
         const auto vertexCount = vertices.elements() - vertexOffset;
         if (vertexCount > 0) {
-            if (auto idStr = featureIDtoString(feature.getID()); idStr && !idStr->empty()) {
-                retainedFeatures.emplace_back(RetainedFeature{
-                    .featureId = std::move(*idStr), .vertexOffset = vertexOffset, .vertexCount = vertexCount});
-            }
+            retainFeature(feature, vertexOffset, vertexCount);
         }
     }
 }

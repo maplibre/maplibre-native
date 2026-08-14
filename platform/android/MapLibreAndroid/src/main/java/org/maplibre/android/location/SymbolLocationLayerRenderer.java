@@ -46,8 +46,6 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import org.maplibre.geojson.Feature;
-import org.maplibre.geojson.Point;
 
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.location.modes.RenderMode;
@@ -56,6 +54,8 @@ import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.SymbolLayer;
 import org.maplibre.android.style.sources.GeoJsonSource;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Point;
 
 import java.util.Set;
 
@@ -67,8 +67,7 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   private Feature locationFeature;
   private GeoJsonSource locationSource;
 
-  SymbolLocationLayerRenderer(LayerSourceProvider layerSourceProvider,
-                              LayerFeatureProvider featureProvider,
+  SymbolLocationLayerRenderer(LayerSourceProvider layerSourceProvider, LayerFeatureProvider featureProvider,
                               boolean isStale) {
     this.layerSourceProvider = layerSourceProvider;
     this.layerSet = layerSourceProvider.getEmptyLayerSet();
@@ -197,9 +196,7 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
     for (String layerId : layerSet) {
       Layer layer = style.getLayer(layerId);
       if (layer instanceof SymbolLayer) {
-        layer.setProperties(
-          iconSize(scaleExpression)
-        );
+        layer.setProperties(iconSize(scaleExpression));
       }
     }
   }
@@ -226,8 +223,8 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
 
   @Override
   public void addBitmaps(@RenderMode.Mode int renderMode, @Nullable Bitmap shadowBitmap, Bitmap backgroundBitmap,
-                         Bitmap backgroundStaleBitmap, Bitmap bearingBitmap,
-                         Bitmap foregroundBitmap, Bitmap foregroundBitmapStale) {
+                         Bitmap backgroundStaleBitmap, Bitmap bearingBitmap, Bitmap foregroundBitmap,
+                         Bitmap foregroundBitmapStale) {
     if (shadowBitmap != null) {
       style.addImage(SHADOW_ICON, shadowBitmap);
     } else {
@@ -287,12 +284,10 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   public void stylePulsingCircle(LocationComponentOptions options) {
     if (style.getLayer(PULSING_CIRCLE_LAYER) != null) {
       setLayerVisibility(PULSING_CIRCLE_LAYER, true);
-      style.getLayer(PULSING_CIRCLE_LAYER).setProperties(
-          circleRadius(get(PROPERTY_PULSING_RADIUS)),
-          circleColor(options.pulseColor()),
-          circleStrokeColor(options.pulseColor()),
-          circleOpacity(get(PROPERTY_PULSING_OPACITY))
-      );
+      style
+        .getLayer(PULSING_CIRCLE_LAYER)
+        .setProperties(circleRadius(get(PROPERTY_PULSING_RADIUS)), circleColor(options.pulseColor()),
+          circleStrokeColor(options.pulseColor()), circleOpacity(get(PROPERTY_PULSING_OPACITY)));
     }
   }
 
@@ -351,7 +346,7 @@ final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
   private void setLocationPoint(Point locationPoint) {
     JsonObject properties = locationFeature.properties();
     if (properties != null) {
-      locationFeature = Feature.fromGeometry(locationPoint, properties);
+      locationFeature = Feature.fromGeometry(locationPoint, properties, LayerFeatureProvider.featureId, null);
       refreshSource();
     }
   }

@@ -804,8 +804,6 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                                                   ? SymbolPlacementType::Point
                                                   : layout->get<SymbolPlacement>();
 
-    const auto featureId = retainFeaturesById ? featureIDtoString(feature.getID()) : std::nullopt;
-
     const float textRepeatDistance = symbolSpacing / 2;
     const auto evaluatedLayoutProperties = layout->evaluate(zoom, feature);
     IndexedSubfeature indexedFeature(feature.index, sourceLayer->getName(), bucketLeaderID, symbolInstances.size());
@@ -1052,8 +1050,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
         const bool singleLine = symbolInstance.getSingleLine();
 
         const auto& feature = features.at(symbolInstance.getLayoutFeatureIndex());
-        const auto featureId = (retainFeaturesById && feature.feature) ? featureIDtoString(feature.getID())
-                                                                       : std::nullopt;
+        const auto retainFeatureId = (retainFeaturesById && feature.feature) ? Bucket::getRetainFeatureID(feature)
+                                                                             : std::optional<std::string>{};
 
         // Insert final placement into collision tree and add glyphs/icons to buffers
 
@@ -1072,7 +1070,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                       writingMode,
                                                       symbolInstance.line(),
                                                       std::vector<float>(),
-                                                      featureId);
+                                                      retainFeatureId);
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)

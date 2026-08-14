@@ -81,19 +81,17 @@ public:
     void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
 
     void setRetainFeaturesById(bool value) { retainFeaturesById = value; }
-    void retainFeature(std::string featureId, std::size_t vertexOffset, std::size_t vertexCount) {
-        retainedFeatures.emplace_back(RetainedFeature{
-            .featureId = std::move(featureId), .vertexOffset = vertexOffset, .vertexCount = vertexCount});
-    }
     void retainFeature(const GeometryTileFeature& feature, std::size_t vertexOffset, std::size_t vertexCount) {
-        if (auto idStr = featureIDtoString(feature.getID()); idStr && !idStr->empty()) {
-            retainFeature(std::move(*idStr), vertexOffset, vertexCount);
-        }
+        retainedFeatures.emplace_back(RetainedFeature{
+            .featureId = getRetainFeatureID(feature), .vertexOffset = vertexOffset, .vertexCount = vertexCount});
     }
     const auto& getRetainedFeatures() const { return retainedFeatures; }
 
+    static std::string getRetainFeatureID(const GeometryTileFeature&);
+
 protected:
     Bucket() = default;
+
     std::atomic<bool> uploaded{false};
 
     util::SimpleIdentity bucketID;

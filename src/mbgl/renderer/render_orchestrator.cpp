@@ -991,7 +991,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
             observer->onRenderError(std::current_exception());
         }
 
-        // Accumulate rendered feaures from each render layer, leaving each one empty.
+        // Accumulate rendered features from each render layer, leaving each one empty.
         if (!renderLayer.stats.renderedFeatures.empty()) {
             const auto& sourceId = item.source ? item.source->getId() : std::string{};
 
