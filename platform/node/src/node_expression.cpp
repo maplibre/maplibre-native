@@ -228,6 +228,12 @@ struct ToValue {
                                              static_cast<double>(padding.left)});
     }
 
+    v8::Local<v8::Value> operator()(const mln::VerticalGradient& gradient) {
+        // Matches VerticalGradient::serialize(): the `[depth, referenceHeight]` array form.
+        return operator()(std::vector<Value>{static_cast<double>(gradient.depth),
+                                             static_cast<double>(gradient.referenceHeight)});
+    }
+
     v8::Local<v8::Value> operator()(const std::unordered_map<std::string, Value>& map) {
         Nan::EscapableHandleScope scope;
         v8::Local<v8::Object> result = Nan::New<v8::Object>();
