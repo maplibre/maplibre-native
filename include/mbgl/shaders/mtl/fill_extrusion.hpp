@@ -158,6 +158,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
+        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
+        // of the reference height so this stays a multiply rather than a per-vertex
+        //
         // Zero runs the uniform ramp instead, shading every building the same regardless of height.
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
@@ -459,16 +462,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     if (normal.z == 0.0) {
         // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
-        // of the reference height so this stays a multiply rather than a per-vertex divide.
-        // Non-zero runs the legacy height-scaled gradient -- what
-        // `fill-extrusion-vertical-gradient: true` maps to (1/150m) -- which leaves shorter
-        // buildings almost unshaded because the height term never reaches 1. Zero runs the
-        // uniform ramp instead, shading every building the same regardless of height.
+        // of the reference height so this stays a multiply rather than a per-vertex
         //
-        // `t` is 0 at a wall's bottom vertices and 1 at its top. Shading is per-vertex and
-        // walls have only these two vertical sample points, so the rasterizer interpolates
-        // linearly between them and the ramp is linear by construction -- a curve would need
-        // per-fragment evaluation or a subdivided wall mesh.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
             const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
@@ -693,16 +689,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     if (normal.z == 0.0) {
         // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
-        // of the reference height so this stays a multiply rather than a per-vertex divide.
-        // Non-zero runs the legacy height-scaled gradient -- what
-        // `fill-extrusion-vertical-gradient: true` maps to (1/150m) -- which leaves shorter
-        // buildings almost unshaded because the height term never reaches 1. Zero runs the
-        // uniform ramp instead, shading every building the same regardless of height.
+        // of the reference height so this stays a multiply rather than a per-vertex
         //
-        // `t` is 0 at a wall's bottom vertices and 1 at its top. Shading is per-vertex and
-        // walls have only these two vertical sample points, so the rasterizer interpolates
-        // linearly between them and the ramp is linear by construction -- a curve would need
-        // per-fragment evaluation or a subdivided wall mesh.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
             const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
