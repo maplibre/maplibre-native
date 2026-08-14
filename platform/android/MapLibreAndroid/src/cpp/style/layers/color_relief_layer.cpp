@@ -21,7 +21,7 @@ inline mln::style::ColorReliefLayer& toColorReliefLayer(mln::style::Layer& layer
  */
 ColorReliefLayer::ColorReliefLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
     : Layer(std::make_unique<mln::style::ColorReliefLayer>(jni::Make<std::string>(env, layerId),
-                                                            jni::Make<std::string>(env, sourceId))) {}
+                                                           jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)

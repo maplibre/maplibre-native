@@ -31,16 +31,15 @@ TEST(Mapbox, SourceURL) {
         "user.map.json?access_token=key&secure&style=mapbox://styles/mapbox/"
         "streets-v9@0",
         mln::util::mapbox::normalizeSourceURL(mapboxFixture::mapboxTileServerOptions,
-                                               "mapbox://user.map?style=mapbox://styles/mapbox/streets-v9@0",
-                                               "key"));
+                                              "mapbox://user.map?style=mapbox://styles/mapbox/streets-v9@0",
+                                              "key"));
     EXPECT_EQ(
         "https://api.mapbox.com/v4/user.map.json?access_token=key&secure",
         mln::util::mapbox::normalizeSourceURL(mapboxFixture::mapboxTileServerOptions, "mapbox://user.map?", "key"));
     EXPECT_EQ("http://path",
               mln::util::mapbox::normalizeSourceURL(mapboxFixture::mapboxTileServerOptions, "http://path", "key"));
-    EXPECT_THROW(
-        mln::util::mapbox::normalizeSourceURL(mapboxFixture::mapboxTileServerOptions, "mapbox://user.map", ""),
-        std::runtime_error);
+    EXPECT_THROW(mln::util::mapbox::normalizeSourceURL(mapboxFixture::mapboxTileServerOptions, "mapbox://user.map", ""),
+                 std::runtime_error);
 }
 
 TEST(Mapbox, GlyphsURL) {
@@ -138,9 +137,9 @@ TEST(Mapbox, TileURL) {
         "https://api.mapbox.com/v4/a.b/0/0/"
         "0.pbf?access_token=key&style=mapbox://styles/mapbox/streets-v9@0",
         mln::util::mapbox::normalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                             "mapbox://tiles/a.b/0/0/0.pbf?style=mapbox://styles/mapbox/"
-                                             "streets-v9@0",
-                                             "key"));
+                                            "mapbox://tiles/a.b/0/0/0.pbf?style=mapbox://styles/mapbox/"
+                                            "streets-v9@0",
+                                            "key"));
     EXPECT_EQ("https://api.mapbox.com/v4/a.b/0/0/0.pbf?access_token=key",
               mln::util::mapbox::normalizeTileURL(
                   mapboxFixture::mapboxTileServerOptions, "mapbox://tiles/a.b/0/0/0.pbf?", "key"));
@@ -165,97 +164,97 @@ TEST(Mapbox, TileURL) {
 TEST(Mapbox, CanonicalURL) {
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/{y}.vector.pbf",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/{y}.vector.pbf",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://b.tiles.mapbox.com/v4/a.b/{z}/{x}/{y}.vector.pbf",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://b.tiles.mapbox.com/v4/a.b/{z}/{x}/{y}.vector.pbf",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.vector.pbf",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.vector.pbf",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/"
-                                                      "{y}.vector.pbf?access_token=key",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/"
+                                                     "{y}.vector.pbf?access_token=key",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "https://api.mapbox.cn/v4/a.b/{z}/{x}/"
-                                                      "{y}.vector.pbf?access_token=key",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "https://api.mapbox.cn/v4/a.b/{z}/{x}/"
+                                                     "{y}.vector.pbf?access_token=key",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b,c.d/{z}/{x}/{y}.vector.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b,c.d/{z}/{x}/"
-                                                      "{y}.vector.pbf?access_token=key",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b,c.d/{z}/{x}/"
+                                                     "{y}.vector.pbf?access_token=key",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf?custom=parameter",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/"
-                                                      "{y}.vector.pbf?access_token=key&custom=parameter",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/"
+                                                     "{y}.vector.pbf?access_token=key&custom=parameter",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}.vector.pbf?custom=parameter",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/"
-                                                      "{y}.vector.pbf?custom=parameter&access_token=key",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/"
+                                                     "{y}.vector.pbf?custom=parameter&access_token=key",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ(
         "mapbox://tiles/a.b/{z}/{x}/"
         "{y}.vector.pbf?custom=parameter&second=param",
         mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/"
-                                                "{y}.vector.pbf?custom=parameter&access_token=key&second=param",
-                                                SourceType::Vector,
-                                                512));
+                                               "http://a.tiles.mapbox.com/v4/a.b/{z}/{x}/"
+                                               "{y}.vector.pbf?custom=parameter&access_token=key&second=param",
+                                               SourceType::Vector,
+                                               512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}{ratio}.jpg",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg?access_token=key",
-                                                      SourceType::Raster,
-                                                      256));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg?access_token=key",
+                                                     SourceType::Raster,
+                                                     256));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}{ratio}.jpg70",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg70?access_token=key",
-                                                      SourceType::Raster,
-                                                      256));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg70?access_token=key",
+                                                     SourceType::Raster,
+                                                     256));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}@2x.jpg",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg?access_token=key",
-                                                      SourceType::Raster,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg?access_token=key",
+                                                     SourceType::Raster,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}@2x.jpg70",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg70?access_token=key",
-                                                      SourceType::Raster,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.jpg70?access_token=key",
+                                                     SourceType::Raster,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}{ratio}.png",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png",
-                                                      SourceType::Raster,
-                                                      256));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png",
+                                                     SourceType::Raster,
+                                                     256));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}{ratio}.png",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png?access_token=key",
-                                                      SourceType::Raster,
-                                                      256));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png?access_token=key",
+                                                     SourceType::Raster,
+                                                     256));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}@2x.png",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png",
-                                                      SourceType::Raster,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png",
+                                                     SourceType::Raster,
+                                                     512));
     EXPECT_EQ("mapbox://tiles/a.b/{z}/{x}/{y}@2x.png",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png?access_token=key",
-                                                      SourceType::Raster,
-                                                      512));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.png?access_token=key",
+                                                     SourceType::Raster,
+                                                     512));
 
     // We don't ever expect to see these inputs, but be safe anyway.
     EXPECT_EQ(
@@ -269,14 +268,14 @@ TEST(Mapbox, CanonicalURL) {
                   mapboxFixture::mapboxTileServerOptions, "http://api.mapbox.com/v4/", SourceType::Raster, 256));
     EXPECT_EQ("http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.",
-                                                      SourceType::Raster,
-                                                      256));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}.",
+                                                     SourceType::Raster,
+                                                     256));
     EXPECT_EQ("http://api.mapbox.com/v4/a.b/{z}/{x}/{y}/.",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapboxTileServerOptions,
-                                                      "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}/.",
-                                                      SourceType::Raster,
-                                                      256));
+                                                     "http://api.mapbox.com/v4/a.b/{z}/{x}/{y}/.",
+                                                     SourceType::Raster,
+                                                     256));
 }
 
 TEST(Mapbox, CanonicalizeRasterTileset) {
@@ -317,9 +316,9 @@ TEST(MapLibre, CanonicalURL) {
 
     EXPECT_EQ("maplibre://tiles/tiles/{z}/{x}/{y}.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapLibreTileServerOptions,
-                                                      "https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf",
+                                                     SourceType::Vector,
+                                                     512));
 }
 
 // MapTiler tests
@@ -348,20 +347,19 @@ TEST(MapTiler, SourceURL) {
         "https://api.maptiler.com/tiles/7ac429c7-c96e-46dd-8c3e-13d48988986a/"
         "tiles.json?key=abcdef",
         mln::util::mapbox::normalizeSourceURL(mapboxFixture::mapTilerTileServerOptions,
-                                               "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a",
-                                               "abcdef"));
+                                              "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a",
+                                              "abcdef"));
 
     EXPECT_EQ("maptiler://sources/v3",
               mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions,
-                                                        "https://api.maptiler.com/tiles/v3/tiles.json?key=abcdef"));
-    EXPECT_EQ(
-        "maptiler://sources/outdoor",
-        mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions,
-                                                  "https://api.maptiler.com/tiles/outdoor/tiles.json?key=abcdef"));
+                                                       "https://api.maptiler.com/tiles/v3/tiles.json?key=abcdef"));
+    EXPECT_EQ("maptiler://sources/outdoor",
+              mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions,
+                                                       "https://api.maptiler.com/tiles/outdoor/tiles.json?key=abcdef"));
     EXPECT_EQ("maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a",
               mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions,
-                                                        "https://api.maptiler.com/tiles/"
-                                                        "7ac429c7-c96e-46dd-8c3e-13d48988986a/tiles.json?key=abcdef"));
+                                                       "https://api.maptiler.com/tiles/"
+                                                       "7ac429c7-c96e-46dd-8c3e-13d48988986a/tiles.json?key=abcdef"));
 }
 
 TEST(MapTiler, SourceURLPassThrough) {
@@ -375,7 +373,7 @@ TEST(MapTiler, SourceURLPassThrough) {
               mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, "http://dummy"));
     EXPECT_EQ("https://api.tileserver.com/map?key=1234",
               mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions,
-                                                        "https://api.tileserver.com/map?key=1234"));
+                                                       "https://api.tileserver.com/map?key=1234"));
     EXPECT_EQ("", mln::util::mapbox::canonicalizeSourceURL(mapboxFixture::mapTilerTileServerOptions, ""));
 }
 
@@ -390,11 +388,11 @@ TEST(MapTiler, GlyphsURL) {
 
     EXPECT_EQ("maptiler://fonts/{fontstack}/{range}.pbf",
               mln::util::mapbox::canonicalizeGlyphURL(mapboxFixture::mapTilerTileServerOptions,
-                                                       "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf"));
+                                                      "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf"));
     EXPECT_EQ("maptiler://fonts/{fontstack}/{range}.pbf",
               mln::util::mapbox::canonicalizeGlyphURL(mapboxFixture::mapTilerTileServerOptions,
-                                                       "https://api.maptiler.com/fonts/{fontstack}/"
-                                                       "{range}.pbf?key=abcdef"));
+                                                      "https://api.maptiler.com/fonts/{fontstack}/"
+                                                      "{range}.pbf?key=abcdef"));
 }
 
 TEST(MapTiler, GlyphsURLPassThrough) {
@@ -408,7 +406,7 @@ TEST(MapTiler, GlyphsURLPassThrough) {
               mln::util::mapbox::canonicalizeGlyphURL(mapboxFixture::mapTilerTileServerOptions, "http://dummy"));
     EXPECT_EQ("https://api.tileserver.com/map?key=1234",
               mln::util::mapbox::canonicalizeGlyphURL(mapboxFixture::mapTilerTileServerOptions,
-                                                       "https://api.tileserver.com/map?key=1234"));
+                                                      "https://api.tileserver.com/map?key=1234"));
     EXPECT_EQ("", mln::util::mapbox::canonicalizeGlyphURL(mapboxFixture::mapTilerTileServerOptions, ""));
 }
 
@@ -420,7 +418,7 @@ TEST(MapTiler, Sprites) {
     // Sprites
     EXPECT_EQ("maptiler://sprites/streets/sprite",
               mln::util::mapbox::canonicalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions,
-                                                        "https://api.maptiler.com/maps/streets/sprite"));
+                                                       "https://api.maptiler.com/maps/streets/sprite"));
 }
 
 TEST(MapTiler, SpritesURLPassThrough) {
@@ -434,7 +432,7 @@ TEST(MapTiler, SpritesURLPassThrough) {
               mln::util::mapbox::canonicalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions, "http://dummy"));
     EXPECT_EQ("https://api.tileserver.com/map?key=1234",
               mln::util::mapbox::canonicalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions,
-                                                        "https://api.tileserver.com/map?key=1234"));
+                                                       "https://api.tileserver.com/map?key=1234"));
     EXPECT_EQ("", mln::util::mapbox::canonicalizeSpriteURL(mapboxFixture::mapTilerTileServerOptions, ""));
 }
 
@@ -449,10 +447,10 @@ TEST(MapTiler, Tiles) {
                   mapboxFixture::mapTilerTileServerOptions, "maptiler://tiles/tiles/v3/{z}/{x}/{y}.pbf", "abcdef"));
     EXPECT_EQ("maptiler://tiles/tiles/contours/{z}/{x}/{y}.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapTilerTileServerOptions,
-                                                      "https://api.maptiler.com/tiles/contours/{z}/{x}/"
-                                                      "{y}.pbf?key=abcdef",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "https://api.maptiler.com/tiles/contours/{z}/{x}/"
+                                                     "{y}.pbf?key=abcdef",
+                                                     SourceType::Vector,
+                                                     512));
 }
 
 TEST(MapTiler, TilesURLPassThrough) {
@@ -467,9 +465,9 @@ TEST(MapTiler, TilesURLPassThrough) {
                   mapboxFixture::mapTilerTileServerOptions, "http://dummy", SourceType::Vector, 512));
     EXPECT_EQ("https://api.tileserver.com/map?key=1234",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapTilerTileServerOptions,
-                                                      "https://api.tileserver.com/map?key=1234",
-                                                      SourceType::Vector,
-                                                      512));
+                                                     "https://api.tileserver.com/map?key=1234",
+                                                     SourceType::Vector,
+                                                     512));
     EXPECT_EQ(
         "",
         mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapTilerTileServerOptions, "", SourceType::Vector, 512));

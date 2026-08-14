@@ -140,8 +140,7 @@ void MLNMapViewImpl::onShaderCompileFailed(mln::shaders::BuiltIn shaderID,
                         defines:definesCopy];
 }
 
-void MLNMapViewImpl::onGlyphsLoaded(const mln::FontStack& fontStack,
-                                    const mln::GlyphRange& range) {
+void MLNMapViewImpl::onGlyphsLoaded(const mln::FontStack& fontStack, const mln::GlyphRange& range) {
   NSMutableArray* fontStackCopy = [[NSMutableArray alloc] init];
   std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
     [fontStackCopy addObject:[NSString stringWithUTF8String:str.c_str()]];

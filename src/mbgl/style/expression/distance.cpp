@@ -123,8 +123,8 @@ bool isPolygonValid(const mapbox::geometry::polygon<double>& polygon) noexcept {
     for (const auto& ring : polygon) {
         if (ring.size() < 3) {
             mln::Log::Error(mln::Event::Style,
-                             "Invalid Polygon with ring having fewer than 3 "
-                             "geometry points");
+                            "Invalid Polygon with ring having fewer than 3 "
+                            "geometry points");
             return false;
         }
     }
@@ -850,8 +850,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
     return std::nullopt;
 }
 
-std::optional<Feature::geometry_type> getGeometry(const Feature& feature,
-                                                  mln::style::expression::ParsingContext& ctx) {
+std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mln::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), feature.geometry);
     if (type == FeatureType::Point || type == FeatureType::LineString || type == FeatureType::Polygon) {
         return feature.geometry;
@@ -973,8 +972,8 @@ mln::Value Distance::serialize() const {
         }
     } else {
         mln::Log::Error(mln::Event::Style,
-                         "Failed to serialize 'distance' expression, converted rapidJSON is "
-                         "not an object");
+                        "Failed to serialize 'distance' expression, converted rapidJSON is "
+                        "not an object");
     }
     return std::vector<mln::Value>{{getOperator(), serialized}};
 }

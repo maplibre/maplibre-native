@@ -323,7 +323,7 @@ public:
       config.localFontFamilyName ? std::optional(std::string(config.localFontFamilyName.UTF8String))
                                  : std::nullopt;
   auto renderer = std::make_unique<mln::Renderer>(_mbglView->getRendererBackend(),
-                                                   config.scaleFactor, localFontFamilyName);
+                                                  config.scaleFactor, localFontFamilyName);
   BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
   _rendererFrontend = std::make_unique<MLNRenderFrontend>(std::move(renderer), self,
                                                           _mbglView->getRendererBackend(), true);
@@ -350,8 +350,8 @@ public:
 
   const mln::util::ActionJournalOptions &actionJournalOptions =
       [mlnMapoptions.actionJournalOptions getCoreOptions];
-  _mbglMap = std::make_unique<mln::Map>(*_rendererFrontend, *_mbglView, mapOptions,
-                                         resourceOptions, clientOptions, actionJournalOptions);
+  _mbglMap = std::make_unique<mln::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions,
+                                        clientOptions, actionJournalOptions);
 
   // Notify map object when network reachability status changes.
   _reachability = [MLNReachability reachabilityForInternetConnection];
@@ -1530,7 +1530,7 @@ public:
   [self willChangeValueForKey:@"camera"];
   _mbglMap->cancelTransitions();
   mln::CameraOptions cameraOptions = [self cameraOptionsObjectForAnimatingToCamera:camera
-                                                                        edgePadding:edgePadding];
+                                                                       edgePadding:edgePadding];
   _mbglMap->easeTo(cameraOptions, animationOptions);
   [self didChangeValueForKey:@"camera"];
 }
@@ -1597,7 +1597,7 @@ public:
 /// Returns a CameraOptions object that specifies parameters for animating to
 /// the given camera.
 - (mln::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
-                                                   edgePadding:(NSEdgeInsets)edgePadding {
+                                                  edgePadding:(NSEdgeInsets)edgePadding {
   mln::CameraOptions options;
   options.center = MLNLatLngFromLocationCoordinate2D(camera.centerCoordinate);
   options.padding = MLNEdgeInsetsFromNSEdgeInsets(edgePadding);

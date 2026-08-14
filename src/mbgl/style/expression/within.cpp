@@ -177,7 +177,7 @@ bool featureWithinPolygons(const GeometryTileFeature& feature,
 }
 
 std::optional<mln::GeoJSON> parseValue(const mln::style::conversion::Convertible& value_,
-                                        mln::style::expression::ParsingContext& ctx) {
+                                       mln::style::expression::ParsingContext& ctx) {
     if (isObject(value_)) {
         mln::style::conversion::Error error;
         auto geojson = toGeoJSON(value_, error);
@@ -228,8 +228,8 @@ EvaluationResult Within::evaluate(const EvaluationContext& params) const {
         return featureWithinPolygons(*params.feature, *params.canonical, geometries);
     }
     mln::Log::Warning(mln::Event::General,
-                       "within expression currently only support Point/LineString geometry "
-                       "type.");
+                      "within expression currently only support Point/LineString geometry "
+                      "type.");
 
     return false;
 }
@@ -323,8 +323,8 @@ mln::Value Within::serialize() const {
         }
     } else {
         mln::Log::Error(mln::Event::General,
-                         "Failed to serialize 'within' expression, converted rapidJSON is "
-                         "not an object");
+                        "Failed to serialize 'within' expression, converted rapidJSON is "
+                        "not an object");
     }
     return std::vector<mln::Value>{{getOperator(), serialized}};
 }

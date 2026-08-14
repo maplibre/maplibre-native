@@ -13,7 +13,7 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     static mln::OfflineRegionDefinition getDefinition(JNIEnv& env,
-                                                       const jni::Object<OfflineRegionDefinition>& jDefinition);
+                                                      const jni::Object<OfflineRegionDefinition>& jDefinition);
 };
 
 class OfflineTilePyramidRegionDefinition {
@@ -42,7 +42,7 @@ public:
                                                                 const mln::OfflineGeometryRegionDefinition&);
 
     static mln::OfflineGeometryRegionDefinition getDefinition(jni::JNIEnv&,
-                                                               const jni::Object<OfflineGeometryRegionDefinition>&);
+                                                              const jni::Object<OfflineGeometryRegionDefinition>&);
 
     static void registerNative(jni::JNIEnv&);
 };

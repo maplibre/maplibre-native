@@ -43,10 +43,10 @@
 
 #define VMA_HEAVY_ASSERT(expr) VMA_ASSERT(expr)
 
-#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
-    {                                                 \
-        char buffer[4096];                            \
-        sprintf(buffer, format, __VA_ARGS__);         \
+#define VMA_DEBUG_LOG_FORMAT(format, ...)           \
+    {                                               \
+        char buffer[4096];                          \
+        sprintf(buffer, format, __VA_ARGS__);       \
         mln::Log::Info(mln::Event::Render, buffer); \
     }
 

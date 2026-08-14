@@ -113,7 +113,7 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
     mln::filesystem::path manifestPath = args::get(testPathValue);
     if (!mln::filesystem::exists(manifestPath) || !manifestPath.has_filename()) {
         mln::Log::Error(mln::Event::General,
-                         "Provided test manifest file path '" + manifestPath.string() + "' does not exist");
+                        "Provided test manifest file path '" + manifestPath.string() + "' does not exist");
         exit(3);
     }
 
@@ -348,8 +348,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
         printf(ANSI_COLOR_YELLOW "%u passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.ignorePassedTests,
                100.0 * stats.ignorePassedTests / count);
-        mln::Log::Info(mln::Event::General,
-                        std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
+        mln::Log::Info(mln::Event::General, std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
     }
     if (stats.ignoreFailedTests) {
         printf(ANSI_COLOR_LIGHT_GRAY "%u ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",

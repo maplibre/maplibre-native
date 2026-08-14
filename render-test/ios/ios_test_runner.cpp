@@ -20,16 +20,16 @@ bool TestRunner::startTest(const std::string& manifestBasePath) {
 
         std::function<void(mln::TestStatus)> testStatus = [&](mln::TestStatus status) {
             mln::Log::Info(mln::Event::General,
-                            "Current finished tests number is '" + std::to_string(status.completed) + "/" +
-                                std::to_string(status.total) + "' ");
+                           "Current finished tests number is '" + std::to_string(status.completed) + "/" +
+                               std::to_string(status.total) + "' ");
         };
         mln::Log::Info(mln::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "' ");
 
         auto result = mln::runRenderTests(static_cast<int>(argv.size() - 1), argv.data(), testStatus);
 
         mln::Log::Info(mln::Event::General,
-                        "End running RenderTestRunner with manifest: '" + manifest + "' with result value " +
-                            std::to_string(result));
+                       "End running RenderTestRunner with manifest: '" + manifest + "' with result value " +
+                           std::to_string(result));
         return result == 0;
     };
 

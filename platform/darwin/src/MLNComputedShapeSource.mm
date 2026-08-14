@@ -217,8 +217,7 @@ mln::style::CustomGeometrySource::Options MBGLCustomGeometrySourceOptionsFromDic
                   y:(NSUInteger)y
           zoomLevel:(NSUInteger)zoomLevel {
   MLNAssertStyleSourceIsValid();
-  mln::CanonicalTileID tileID =
-      mln::CanonicalTileID((uint8_t)zoomLevel, (uint32_t)x, (uint32_t)y);
+  mln::CanonicalTileID tileID = mln::CanonicalTileID((uint8_t)zoomLevel, (uint32_t)x, (uint32_t)y);
   mln::FeatureCollection featureCollection;
   featureCollection.reserve(features.count);
   for (MLNShape<MLNFeature> *feature in features) {

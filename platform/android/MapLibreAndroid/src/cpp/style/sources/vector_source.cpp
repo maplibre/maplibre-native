@@ -23,7 +23,7 @@ namespace android {
 VectorSource::VectorSource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& urlOrTileSet)
     : Source(env,
              std::make_unique<mln::style::VectorSource>(jni::Make<std::string>(env, sourceId),
-                                                         convertURLOrTileset(Value(env, urlOrTileSet)))) {}
+                                                        convertURLOrTileset(Value(env, urlOrTileSet)))) {}
 
 VectorSource::VectorSource(jni::JNIEnv& env, mln::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}

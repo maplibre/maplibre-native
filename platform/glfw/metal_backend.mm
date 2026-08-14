@@ -31,7 +31,7 @@ public:
   void bind() override {
     surface = NS::TransferPtr(swapchain->nextDrawable());
     auto texSize = mln::Size{static_cast<uint32_t>(swapchain->drawableSize().width),
-                              static_cast<uint32_t>(swapchain->drawableSize().height)};
+                             static_cast<uint32_t>(swapchain->drawableSize().height)};
 
     commandBuffer = NS::TransferPtr(commandQueue->commandBuffer());
     renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
@@ -115,8 +115,7 @@ private:
 
 MetalBackend::MetalBackend(NSWindow* window)
     : mln::mtl::RendererBackend(mln::gfx::ContextMode::Unique),
-      mln::gfx::Renderable(mln::Size{0, 0},
-                            std::make_unique<mln::MetalRenderableResource>(*this)) {
+      mln::gfx::Renderable(mln::Size{0, 0}, std::make_unique<mln::MetalRenderableResource>(*this)) {
   window.contentView.layer = (__bridge CALayer*)getDefaultRenderable()
                                  .getResource<mln::MetalRenderableResource>()
                                  .getSwapchain()

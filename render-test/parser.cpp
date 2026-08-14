@@ -488,7 +488,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             metadata.mapMode = mln::MapMode::Static;
         else {
             mln::Log::Warning(mln::Event::ParseStyle,
-                               "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
+                              "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
             metadata.mapMode = mln::MapMode::Static;
         }
     }

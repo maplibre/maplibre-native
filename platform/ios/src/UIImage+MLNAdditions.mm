@@ -83,8 +83,8 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
 
   BOOL isTemplate = self.renderingMode == UIImageRenderingModeAlwaysTemplate;
   return std::make_unique<mln::style::Image>([identifier UTF8String], self.mgl_premultipliedImage,
-                                              static_cast<float>(self.scale), isTemplate, stretchX,
-                                              stretchY, imageContent);
+                                             static_cast<float>(self.scale), isTemplate, stretchX,
+                                             stretchY, imageContent);
 }
 
 - (mln::PremultipliedImage)mgl_premultipliedImage {

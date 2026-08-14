@@ -93,10 +93,7 @@ private:
 
     mln::Color makeRandomColor() const;
     mln::Point<double> makeRandomPoint() const;
-    static std::unique_ptr<mln::style::Image> makeImage(const std::string &id,
-                                                         int width,
-                                                         int height,
-                                                         float pixelRatio);
+    static std::unique_ptr<mln::style::Image> makeImage(const std::string &id, int width, int height, float pixelRatio);
 
     void nextOrientation();
 

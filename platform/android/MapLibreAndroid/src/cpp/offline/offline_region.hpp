@@ -92,9 +92,7 @@ public:
                                      const jni::Array<jni::jbyte>&,
                                      const jni::Object<OfflineRegionUpdateMetadataCallback>&);
 
-    static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&,
-                                                      const jni::Object<FileSource>&,
-                                                      mln::OfflineRegion);
+    static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&, const jni::Object<FileSource>&, mln::OfflineRegion);
 
     static jni::Local<jni::Array<jni::jbyte>> metadata(jni::JNIEnv&, mln::OfflineRegionMetadata);
 

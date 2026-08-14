@@ -93,7 +93,7 @@ void CustomVectorSource::setTileError(
     jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::String& message) {
     auto msg = jni::Make<std::string>(env, message);
     source.as<mln::style::CustomVectorSource>()->setTileError(CanonicalTileID(z, x, y),
-                                                               std::make_exception_ptr(std::runtime_error(msg)));
+                                                              std::make_exception_ptr(std::runtime_error(msg)));
 }
 
 void CustomVectorSource::invalidateTile(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y) {

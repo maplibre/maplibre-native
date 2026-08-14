@@ -699,7 +699,7 @@ public:
           ? std::optional<std::string>(std::string(config.localFontFamilyName.UTF8String))
           : std::nullopt;
   auto renderer = std::make_unique<mln::Renderer>(_mbglView->getRendererBackend(),
-                                                   config.scaleFactor, localFontFamilyName);
+                                                  config.scaleFactor, localFontFamilyName);
   BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
   _rendererFrontend = std::make_unique<MLNRenderFrontend>(std::move(renderer), self,
                                                           _mbglView->getRendererBackend());
@@ -730,8 +730,8 @@ public:
       [mlnMapoptions.actionJournalOptions getCoreOptions];
 
   NSAssert(!_mbglMap, @"_mbglMap should be NULL");
-  _mbglMap = std::make_unique<mln::Map>(*_rendererFrontend, *_mbglView, mapOptions,
-                                         resourceOptions, clientOptions, actionJournalOptions);
+  _mbglMap = std::make_unique<mln::Map>(*_rendererFrontend, *_mbglView, mapOptions, resourceOptions,
+                                        clientOptions, actionJournalOptions);
 
   // start paused if launch into the background
   if (background) {
@@ -4330,7 +4330,7 @@ static void *windowScreenContext = &windowScreenContext;
   self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
   mln::CameraOptions cameraOptions = [self cameraOptionsObjectForAnimatingToCamera:camera
-                                                                        edgePadding:edgePadding];
+                                                                       edgePadding:edgePadding];
   self.mbglMap.easeTo(cameraOptions, animationOptions);
   [self didChangeValueForKey:@"camera"];
 }
@@ -4428,7 +4428,7 @@ static void *windowScreenContext = &windowScreenContext;
   self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
   mln::CameraOptions cameraOptions = [self cameraOptionsObjectForAnimatingToCamera:camera
-                                                                        edgePadding:insets];
+                                                                       edgePadding:insets];
   self.mbglMap.flyTo(cameraOptions, animationOptions);
   [self didChangeValueForKey:@"camera"];
 }
@@ -4544,7 +4544,7 @@ static void *windowScreenContext = &windowScreenContext;
 /// Returns a CameraOptions object that specifies parameters for animating to
 /// the given camera.
 - (mln::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
-                                                   edgePadding:(UIEdgeInsets)insets {
+                                                  edgePadding:(UIEdgeInsets)insets {
   mln::CameraOptions options;
   if (CLLocationCoordinate2DIsValid(camera.centerCoordinate)) {
     options.center = MLNLatLngFromLocationCoordinate2D(camera.centerCoordinate);

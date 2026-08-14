@@ -28,11 +28,11 @@ protected:
                    Interface::GeometryOptions& options);
 
     mln::gfx::Texture2DPtr createCheckerboardTexture(Interface& interface,
-                                                      uint16_t wb,
-                                                      uint16_t hb,
-                                                      uint16_t blockSize,
-                                                      const std::array<uint8_t, 4>& color1,
-                                                      const std::array<uint8_t, 4>& color2);
+                                                     uint16_t wb,
+                                                     uint16_t hb,
+                                                     uint16_t blockSize,
+                                                     const std::array<uint8_t, 4>& color1,
+                                                     const std::array<uint8_t, 4>& color2);
 
 protected:
     const std::string assetsPath;

@@ -273,7 +273,7 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
 
     // Get leaves for cluster 1, with limit 3, offset 3.
     const std::map<std::string, mln::Value> offsetOpts = {{"limit"s, static_cast<uint64_t>(3u)},
-                                                           {"offset"s, static_cast<uint64_t>(3u)}};
+                                                          {"offset"s, static_cast<uint64_t>(3u)}};
     auto queryClusterLeavesOffset3 = test.frontend.getRenderer()->queryFeatureExtensions(
         "cluster_source"s, topClusterFeature[0], "supercluster"s, "leaves"s, offsetOpts);
     auto offsetLeaves3 = queryClusterLeavesOffset3.get<FeatureCollection>();

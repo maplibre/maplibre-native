@@ -84,7 +84,7 @@
 
 @interface MLNMapView (MLNCameraTransitionFinishNaNTests)
 - (mln::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
-                                                   edgePadding:(UIEdgeInsets)insets;
+                                                  edgePadding:(UIEdgeInsets)insets;
 @end
 
 @interface MLNCameraTransitionNaNZoomMapView : MLNMapView
@@ -92,9 +92,9 @@
 
 @implementation MLNCameraTransitionNaNZoomMapView
 - (mln::CameraOptions)cameraOptionsObjectForAnimatingToCamera:(MLNMapCamera *)camera
-                                                   edgePadding:(UIEdgeInsets)insets {
+                                                  edgePadding:(UIEdgeInsets)insets {
   mln::CameraOptions options = [super cameraOptionsObjectForAnimatingToCamera:camera
-                                                                   edgePadding:insets];
+                                                                  edgePadding:insets];
   options.zoom = NAN;
   return options;
 }

@@ -144,7 +144,7 @@ void CustomGeometrySource::setTileData(
     // Update the core source if not cancelled
     if (!isCancelled(z, x, y)) {
         source.as<mln::style::CustomGeometrySource>()->CustomGeometrySource::setTileData(CanonicalTileID(z, x, y),
-                                                                                          GeoJSON(geometry));
+                                                                                         GeoJSON(geometry));
     }
 }
 

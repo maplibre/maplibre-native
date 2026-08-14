@@ -26,12 +26,12 @@ int main(int argc, char* argv[]) {
     args::ValueFlag<unsigned long> modifiedValue(p, "modified", "Modified date, will use 'now' otherwise", {'m'});
 
     std::unordered_map<std::string, mln::Resource::Kind> typeMap{{"glyphs", mln::Resource::Glyphs},
-                                                                  {"image", mln::Resource::Image},
-                                                                  {"source", mln::Resource::Source},
-                                                                  {"sprite-image", mln::Resource::SpriteImage},
-                                                                  {"sprite-json", mln::Resource::SpriteJSON},
-                                                                  {"style", mln::Resource::Style},
-                                                                  {"tile", mln::Resource::Tile}};
+                                                                 {"image", mln::Resource::Image},
+                                                                 {"source", mln::Resource::Source},
+                                                                 {"sprite-image", mln::Resource::SpriteImage},
+                                                                 {"sprite-json", mln::Resource::SpriteJSON},
+                                                                 {"style", mln::Resource::Style},
+                                                                 {"tile", mln::Resource::Tile}};
 
     std::string typeHelp("One of the following (required):");
     for (const auto& key : typeMap) {

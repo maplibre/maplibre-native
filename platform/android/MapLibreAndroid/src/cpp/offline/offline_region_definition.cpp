@@ -61,11 +61,11 @@ mln::OfflineTilePyramidRegionDefinition OfflineTilePyramidRegionDefinition::getD
     static auto includeIdeographsF = javaClass.GetField<jni::jboolean>(env, "includeIdeographs");
 
     return mln::OfflineTilePyramidRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
-                                                    LatLngBounds::getLatLngBounds(env, jDefinition.Get(env, boundsF)),
-                                                    jDefinition.Get(env, minZoomF),
-                                                    jDefinition.Get(env, maxZoomF),
-                                                    jDefinition.Get(env, pixelRatioF),
-                                                    jDefinition.Get(env, includeIdeographsF));
+                                                   LatLngBounds::getLatLngBounds(env, jDefinition.Get(env, boundsF)),
+                                                   jDefinition.Get(env, minZoomF),
+                                                   jDefinition.Get(env, maxZoomF),
+                                                   jDefinition.Get(env, pixelRatioF),
+                                                   jDefinition.Get(env, includeIdeographsF));
 }
 
 void OfflineTilePyramidRegionDefinition::registerNative(jni::JNIEnv& env) {
@@ -106,11 +106,11 @@ mln::OfflineGeometryRegionDefinition OfflineGeometryRegionDefinition::getDefinit
     static auto includeIdeographsF = javaClass.GetField<jni::jboolean>(env, "includeIdeographs");
 
     return mln::OfflineGeometryRegionDefinition(jni::Make<std::string>(env, jDefinition.Get(env, styleURLF)),
-                                                 geojson::Geometry::convert(env, jDefinition.Get(env, geometryF)),
-                                                 jDefinition.Get(env, minZoomF),
-                                                 jDefinition.Get(env, maxZoomF),
-                                                 jDefinition.Get(env, pixelRatioF),
-                                                 jDefinition.Get(env, includeIdeographsF));
+                                                geojson::Geometry::convert(env, jDefinition.Get(env, geometryF)),
+                                                jDefinition.Get(env, minZoomF),
+                                                jDefinition.Get(env, maxZoomF),
+                                                jDefinition.Get(env, pixelRatioF),
+                                                jDefinition.Get(env, includeIdeographsF));
 }
 
 void OfflineGeometryRegionDefinition::registerNative(jni::JNIEnv& env) {

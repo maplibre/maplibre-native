@@ -76,8 +76,8 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
   }
 
   return std::make_unique<mln::style::Image>([identifier UTF8String],
-                                              std::move(cPremultipliedImage), scale,
-                                              [self isTemplate], stretchX, stretchY, imageContent);
+                                             std::move(cPremultipliedImage), scale,
+                                             [self isTemplate], stretchX, stretchY, imageContent);
 }
 
 - (mln::PremultipliedImage)mgl_premultipliedImage {

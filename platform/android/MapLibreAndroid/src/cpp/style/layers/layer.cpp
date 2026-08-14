@@ -79,10 +79,10 @@ void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::O
 
     // Convert and set property
     std::optional<mln::style::conversion::Error> error = layer->setProperty(jni::Make<std::string>(env, jname),
-                                                                             Value(env, jvalue));
+                                                                            Value(env, jvalue));
     if (error) {
         mln::Log::Error(mln::Event::JNI,
-                         "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
+                        "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
         return;
     }
 }

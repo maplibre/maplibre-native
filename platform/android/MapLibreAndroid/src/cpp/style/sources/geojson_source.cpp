@@ -48,7 +48,7 @@ static Immutable<style::GeoJSONOptions> convertGeoJSONOptions(jni::JNIEnv& env, 
 GeoJSONSource::GeoJSONSource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& options)
     : Source(env,
              std::make_unique<mln::style::GeoJSONSource>(jni::Make<std::string>(env, sourceId),
-                                                          convertGeoJSONOptions(env, options))),
+                                                         convertGeoJSONOptions(env, options))),
       converter(
           std::make_unique<OptionalActor<FeatureConverter>>(source.as<style::GeoJSONSource>()->isUpdateSynchronous(),
                                                             Scheduler::GetBackground(),
@@ -134,7 +134,7 @@ jni::Local<jni::Array<jni::Object<geojson::Feature>>> GeoJSONSource::getClusterL
         mln::Feature _feature = Feature::convert(env, feature);
         _feature.properties["cluster_id"] = static_cast<uint64_t>(_feature.properties["cluster_id"].get<double>());
         const std::map<std::string, mln::Value> options = {{"limit", static_cast<uint64_t>(limit)},
-                                                            {"offset", static_cast<uint64_t>(offset)}};
+                                                           {"offset", static_cast<uint64_t>(offset)}};
         auto featureExtension = rendererFrontend->queryFeatureExtensions(
             source.getID(), _feature, "supercluster", "leaves", options);
         if (featureExtension.is<mln::FeatureCollection>()) {

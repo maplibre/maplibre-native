@@ -32,7 +32,7 @@ void android_main(struct android_app* app) {
     struct android_poll_source* source = nullptr;
     if (!copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
         mln::Log::Error(mln::Event::General,
-                         "Failed to copy zip File '" + zipFile + "' to external storage for upzipping");
+                        "Failed to copy zip File '" + zipFile + "' to external storage for upzipping");
     } else {
         unZipFile(env, zipFile, storagePath);
 
@@ -57,8 +57,8 @@ void android_main(struct android_app* app) {
                 }
 
                 mln::Log::Info(mln::Event::General,
-                                "Current finished tests number is '" + std::to_string(status.completed) + "/" +
-                                    std::to_string(status.total) + "'");
+                               "Current finished tests number is '" + std::to_string(status.completed) + "/" +
+                                   std::to_string(status.total) + "'");
                 updateProgress(env, app, static_cast<int>(status.completed), static_cast<int>(status.total));
             };
             mln::Log::Info(mln::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "'");

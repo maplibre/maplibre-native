@@ -26,7 +26,7 @@ MLNMapViewOpenGLImpl::MLNMapViewOpenGLImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
       mln::gl::RendererBackend(mln::gfx::ContextMode::Unique),
       mln::gfx::Renderable(mapView.framebufferSize,
-                            std::make_unique<MLNMapViewOpenGLRenderableResource>(*this)) {
+                           std::make_unique<MLNMapViewOpenGLRenderableResource>(*this)) {
   // Install the OpenGL layer. Interface Builder’s synchronous drawing means
   // we can’t display a map, so don’t even bother to have a map layer.
   mapView.layer = mapView.isTargetingInterfaceBuilder ? [CALayer layer] : [MLNOpenGLLayer layer];

@@ -560,7 +560,7 @@ MLNShape *MLNShapeFromGeoJSON(const mapbox::geojson::geojson &geojson) {
 }
 
 mln::GeoJSONFeature mbglFeature(mln::GeoJSONFeature feature, id identifier,
-                                 NSDictionary *attributes) {
+                                NSDictionary *attributes) {
   if (identifier) {
     NSExpression *identifierExpression = [NSExpression expressionForConstantValue:identifier];
     feature.id = [identifierExpression mgl_featureIdentifier];

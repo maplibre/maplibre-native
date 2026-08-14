@@ -21,7 +21,7 @@ inline mln::style::FillLayer& toFillLayer(mln::style::Layer& layer) {
  */
 FillLayer::FillLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
     : Layer(std::make_unique<mln::style::FillLayer>(jni::Make<std::string>(env, layerId),
-                                                     jni::Make<std::string>(env, sourceId))) {}
+                                                    jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -234,8 +234,8 @@ jni::Local<jni::Object<Layer>> FillJavaLayerPeerFactory::createJavaLayerPeer(jni
     return createJavaPeer(env, new FillLayer(toFillLayer(layer)));
 }
 
-jni::Local<jni::Object<Layer>> FillJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
+jni::Local<jni::Object<Layer>> FillJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                             std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(
         env,

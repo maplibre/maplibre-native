@@ -197,7 +197,7 @@ FileSource* FileSource::getNativePeer(jni::JNIEnv& env, const jni::Object<FileSo
 }
 
 mln::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
-                                                           const jni::Object<FileSource>& jFileSource) {
+                                                          const jni::Object<FileSource>& jFileSource) {
     FileSource* fileSource = FileSource::getNativePeer(env, jFileSource);
     // Core could be compiled without support for any sources.
     if (fileSource) {

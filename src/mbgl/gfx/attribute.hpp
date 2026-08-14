@@ -11,12 +11,12 @@
 #include <cstddef>
 #include <optional>
 
-#define MBGL_DEFINE_ATTRIBUTE(type_, n_, name_)             \
-    struct name_ {                                          \
+#define MBGL_DEFINE_ATTRIBUTE(type_, n_, name_)            \
+    struct name_ {                                         \
         using Type = ::mln::gfx::AttributeType<type_, n_>; \
-        static constexpr auto name() {                      \
-            return #name_;                                  \
-        }                                                   \
+        static constexpr auto name() {                     \
+            return #name_;                                 \
+        }                                                  \
     }
 
 #if defined(_MSC_VER) && !defined(__clang__)

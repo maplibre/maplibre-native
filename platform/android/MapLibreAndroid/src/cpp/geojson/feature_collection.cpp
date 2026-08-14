@@ -6,8 +6,7 @@ namespace mln {
 namespace android {
 namespace geojson {
 
-mln::FeatureCollection FeatureCollection::convert(jni::JNIEnv& env,
-                                                   const jni::Object<FeatureCollection>& jCollection) {
+mln::FeatureCollection FeatureCollection::convert(jni::JNIEnv& env, const jni::Object<FeatureCollection>& jCollection) {
     auto collection = mln::FeatureCollection();
 
     if (jCollection) {

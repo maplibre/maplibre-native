@@ -132,8 +132,8 @@ int main(int argc, char* argv[]) {
             mln::Log::Warning(mln::Event::Setup, "Application is offline. Press `O` to toggle online status.");
         } else {
             mln::Log::Warning(mln::Event::Setup,
-                               "Network resource provider is not available, only local "
-                               "requests are supported.");
+                              "Network resource provider is not available, only local "
+                              "requests are supported.");
         }
     }
 
@@ -149,11 +149,11 @@ int main(int argc, char* argv[]) {
     }
 
     mln::Map map(rendererFrontend,
-                  *view,
-                  mln::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
-                  resourceOptions,
-                  clientOptions,
-                  actionJournalOptions);
+                 *view,
+                 mln::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
+                 resourceOptions,
+                 clientOptions,
+                 actionJournalOptions);
 
     map.setBounds(mln::BoundOptions().withMaxPitch(settings.maxPitch));
 
@@ -178,15 +178,15 @@ int main(int argc, char* argv[]) {
     view->setOnlineStatusCallback([&settings, onlineFileSource]() {
         if (!onlineFileSource) {
             mln::Log::Warning(mln::Event::Setup,
-                               "Cannot change online status. Network resource provider is not "
-                               "available.");
+                              "Cannot change online status. Network resource provider is not "
+                              "available.");
             return;
         }
         settings.online = !settings.online;
         onlineFileSource->setProperty("online-status", settings.online);
         mln::Log::Info(mln::Event::Setup,
-                        std::string("Application is ") + (settings.online ? "online" : "offline") +
-                            ". Press `O` to toggle online status.");
+                       std::string("Application is ") + (settings.online ? "online" : "offline") +
+                           ". Press `O` to toggle online status.");
     });
 
     view->setChangeStyleCallback([&map, &orderedStyles]() {
@@ -259,12 +259,12 @@ int main(int argc, char* argv[]) {
     settings.debug = mln::EnumType(map.getDebug());
     settings.save();
     mln::Log::Info(mln::Event::General,
-                    "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
-                        std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
-                        "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
-                        std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
-                        "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
-                        std::to_string(settings.maxPitch) + "\"");
+                   "Exit location: --lat=\"" + std::to_string(settings.latitude) + "\" --lon=\"" +
+                       std::to_string(settings.longitude) + "\" --alt=\"" + std::to_string(settings.altitude) +
+                       "\" --zoom=\"" + std::to_string(settings.zoom) + "\" --bearing=\"" +
+                       std::to_string(settings.bearing) + "\" --roll=\"" + std::to_string(settings.roll) +
+                       "\" --fov=\"" + std::to_string(settings.fov) + "\" --maxPitch=\"" +
+                       std::to_string(settings.maxPitch) + "\"");
 
     view = nullptr;
 

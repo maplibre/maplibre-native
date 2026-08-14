@@ -187,7 +187,7 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
 
                 if (!success) {
                     mln::Log::Warning(mln::Event::General,
-                                       "Failed to create folder entry " + fileNameStr + " from zip");
+                                      "Failed to create folder entry " + fileNameStr + " from zip");
                 }
             }
         } else if (!(env->CallBooleanMethod(f, fileExists))) {

@@ -283,28 +283,28 @@ private:
         }
 
         if (!mln::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
-                                                     std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
-                                                                                   GL_TRUE,
-                                                                                   WGL_DOUBLE_BUFFER_ARB,
-                                                                                   GL_TRUE,
-                                                                                   WGL_ACCELERATION_ARB,
-                                                                                   WGL_FULL_ACCELERATION_ARB,
-                                                                                   WGL_PIXEL_TYPE_ARB,
-                                                                                   WGL_TYPE_RGBA_ARB,
-                                                                                   WGL_COLOR_BITS_ARB,
-                                                                                   24,
-                                                                                   WGL_ALPHA_BITS_ARB,
-                                                                                   8,
-                                                                                   WGL_DEPTH_BITS_ARB,
-                                                                                   24,
-                                                                                   WGL_STENCIL_BITS_ARB,
-                                                                                   8,
-                                                                                   NULL})
-                                                         .begin(),
-                                                     NULL,
-                                                     1,
-                                                     &pixelFormat,
-                                                     &numFormats)) {
+                                                    std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
+                                                                                  GL_TRUE,
+                                                                                  WGL_DOUBLE_BUFFER_ARB,
+                                                                                  GL_TRUE,
+                                                                                  WGL_ACCELERATION_ARB,
+                                                                                  WGL_FULL_ACCELERATION_ARB,
+                                                                                  WGL_PIXEL_TYPE_ARB,
+                                                                                  WGL_TYPE_RGBA_ARB,
+                                                                                  WGL_COLOR_BITS_ARB,
+                                                                                  24,
+                                                                                  WGL_ALPHA_BITS_ARB,
+                                                                                  8,
+                                                                                  WGL_DEPTH_BITS_ARB,
+                                                                                  24,
+                                                                                  WGL_STENCIL_BITS_ARB,
+                                                                                  8,
+                                                                                  NULL})
+                                                        .begin(),
+                                                    NULL,
+                                                    1,
+                                                    &pixelFormat,
+                                                    &numFormats)) {
             Log::Error(Event::OpenGL, "Failed to choose pixel format for context");
             throw std::runtime_error("Failed to choose pixel format for context");
         }

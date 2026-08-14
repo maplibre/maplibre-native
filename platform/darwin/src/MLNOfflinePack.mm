@@ -111,13 +111,13 @@ private:
 
   return std::visit(
       mln::overloaded{[&](const mln::OfflineTilePyramidRegionDefinition def) {
-                         return (id<MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc]
-                             initWithOfflineRegionDefinition:def];
-                       },
-                       [&](const mln::OfflineGeometryRegionDefinition &def) {
-                         return (id<MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc]
-                             initWithOfflineRegionDefinition:def];
-                       }},
+                        return (id<MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc]
+                            initWithOfflineRegionDefinition:def];
+                      },
+                      [&](const mln::OfflineGeometryRegionDefinition &def) {
+                        return (id<MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc]
+                            initWithOfflineRegionDefinition:def];
+                      }},
       regionDefinition);
 }
 
@@ -139,8 +139,8 @@ private:
   __weak MLNOfflinePack *weakSelf = self;
   _mbglDatabaseFileSource->updateOfflineMetadata(
       _mbglOfflineRegion->getID(), metadata,
-      [&, completion, weakSelf](mln::expected<mln::OfflineRegionMetadata, std::exception_ptr>
-                                    mbglOfflineRegionMetadata) {
+      [&, completion, weakSelf](
+          mln::expected<mln::OfflineRegionMetadata, std::exception_ptr> mbglOfflineRegionMetadata) {
         NSError *error;
         if (!mbglOfflineRegionMetadata) {
           NSString *errorDescription =
@@ -200,8 +200,8 @@ private:
     _isSuspending = YES;
   }
 
-  _mbglDatabaseFileSource->setOfflineRegionDownloadState(
-      *_mbglOfflineRegion, mln::OfflineRegionDownloadState::Inactive);
+  _mbglDatabaseFileSource->setOfflineRegionDownloadState(*_mbglOfflineRegion,
+                                                         mln::OfflineRegionDownloadState::Inactive);
 }
 
 - (void)invalidate {

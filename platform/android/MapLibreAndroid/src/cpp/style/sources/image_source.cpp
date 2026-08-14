@@ -20,7 +20,7 @@ ImageSource::ImageSource(jni::JNIEnv& env,
                          const jni::Object<LatLngQuad>& coordinatesObject)
     : Source(env,
              std::make_unique<mln::style::ImageSource>(jni::Make<std::string>(env, sourceId),
-                                                        LatLngQuad::getLatLngArray(env, coordinatesObject))) {}
+                                                       LatLngQuad::getLatLngArray(env, coordinatesObject))) {}
 
 ImageSource::ImageSource(jni::JNIEnv& env, mln::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}

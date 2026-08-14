@@ -296,7 +296,7 @@ void visitLayerGroupDrawables(mln::LayerGroupBase& layerGroup, Func dg) {
         default: {
 #ifndef NDEBUG
             mln::Log::Error(mln::Event::Render,
-                             "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
+                            "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
 #endif
             break;
         }
@@ -315,7 +315,7 @@ std::size_t removeLayerGroupDrawablesIf(mln::LayerGroupBase& layerGroup, Func dg
         default: {
 #ifndef NDEBUG
             mln::Log::Error(mln::Event::Render,
-                             "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
+                            "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
 #endif
             return 0;
         }

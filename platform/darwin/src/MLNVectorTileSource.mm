@@ -35,7 +35,7 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 - (instancetype)initWithIdentifier:(NSString *)identifier
             configurationURLString:(NSString *)configurationURLString {
   auto source = std::make_unique<mln::style::VectorSource>(identifier.UTF8String,
-                                                            configurationURLString.UTF8String);
+                                                           configurationURLString.UTF8String);
 
   return self = [super initWithPendingSource:std::move(source)];
 }

@@ -216,7 +216,7 @@ TileServerOptions TileServerOptions::DefaultConfiguration() {
 
 TileServerOptions TileServerOptions::MapLibreConfiguration() {
     std::vector<mln::util::DefaultStyle> styles{// https://demotiles.maplibre.org/style.json
-                                                 mln::util::DefaultStyle("maplibre://maps/style", "Basic", 1)};
+                                                mln::util::DefaultStyle("maplibre://maps/style", "Basic", 1)};
 
     TileServerOptions options = TileServerOptions()
                                     .withBaseURL("https://demotiles.maplibre.org")

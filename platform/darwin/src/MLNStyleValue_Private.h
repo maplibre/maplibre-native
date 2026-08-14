@@ -49,7 +49,7 @@ NS_INLINE MLNTransition MLNTransitionFromOptions(const mln::style::TransitionOpt
 
 NS_INLINE mln::style::TransitionOptions MLNOptionsFromTransition(MLNTransition transition) {
   mln::style::TransitionOptions options{{MLNDurationFromTimeInterval(transition.duration)},
-                                         {MLNDurationFromTimeInterval(transition.delay)}};
+                                        {MLNDurationFromTimeInterval(transition.delay)}};
   return options;
 }
 

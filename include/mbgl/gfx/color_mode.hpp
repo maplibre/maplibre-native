@@ -70,14 +70,14 @@ public:
 
     std::size_t hash() const {
         return mln::util::hash(blendFunction.which(),
-                                blendColor.r,
-                                blendColor.g,
-                                blendColor.b,
-                                blendColor.a,
-                                mask.r,
-                                mask.g,
-                                mask.b,
-                                mask.a);
+                               blendColor.r,
+                               blendColor.g,
+                               blendColor.b,
+                               blendColor.a,
+                               mask.r,
+                               mask.g,
+                               mask.b,
+                               mask.a);
     }
 };
 

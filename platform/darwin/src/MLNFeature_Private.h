@@ -42,7 +42,7 @@ MLNShape *MLNShapeFromGeoJSON(const mapbox::geojson::geojson &geojson);
  `mln::PropertyMap` properties.
  */
 mln::GeoJSONFeature mbglFeature(mln::GeoJSONFeature feature, id identifier,
-                                 NSDictionary *attributes);
+                                NSDictionary *attributes);
 
 /**
  Returns an `NSDictionary` representation of an ``MLNFeature``.

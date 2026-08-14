@@ -33,7 +33,7 @@ public:
     static jni::Local<jni::Array<jni::Object<DefaultStyle>>> NewStyles(jni::JNIEnv& env,
                                                                        const std::vector<mln::util::DefaultStyle>&);
     static std::vector<mln::util::DefaultStyle> getDefaultStyles(jni::JNIEnv& env,
-                                                                  const jni::Array<jni::Object<DefaultStyle>>& styles_);
+                                                                 const jni::Array<jni::Object<DefaultStyle>>& styles_);
 };
 
 } // namespace android

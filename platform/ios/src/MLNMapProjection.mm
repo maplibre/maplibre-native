@@ -97,7 +97,7 @@
 - (CLLocationDistance)metersPerPoint {
   mln::CameraOptions cameraOptions = _mbglProjection->getCamera();
   return mln::Projection::getMetersPerPixelAtLatitude(cameraOptions.center->latitude(),
-                                                       *cameraOptions.zoom);
+                                                      *cameraOptions.zoom);
 }
 
 @end

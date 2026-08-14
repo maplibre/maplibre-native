@@ -21,7 +21,7 @@ inline mln::style::LineLayer& toLineLayer(mln::style::Layer& layer) {
  */
 LineLayer::LineLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
     : Layer(std::make_unique<mln::style::LineLayer>(jni::Make<std::string>(env, layerId),
-                                                     jni::Make<std::string>(env, sourceId))) {}
+                                                    jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
@@ -390,8 +390,8 @@ jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(jni
     return createJavaPeer(env, new LineLayer(toLineLayer(layer)));
 }
 
-jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
+jni::Local<jni::Object<Layer>> LineJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
+                                                                             std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(
         env,

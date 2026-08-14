@@ -281,7 +281,7 @@ public:
             }
         } else {
             mln::Log::Error(mln::Event::Render,
-                             "WebGPU: Buffer mapping failed with status: " + std::to_string(mapContext.status));
+                            "WebGPU: Buffer mapping failed with status: " + std::to_string(mapContext.status));
         }
 
         wgpuBufferUnmap(stagingBuffer);

@@ -19,8 +19,8 @@
 
 namespace {
 mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
-                                      const mln::TransformState& state,
-                                      mln::LatLng::WrapMode wrapMode = mln::LatLng::Wrapped) {
+                                     const mln::TransformState& state,
+                                     mln::LatLng::WrapMode wrapMode = mln::LatLng::Wrapped) {
     point.y = state.getSize().height - point.y;
     return state.screenCoordinateToLatLng(point, wrapMode);
 }

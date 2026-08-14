@@ -85,7 +85,7 @@ void NodeRequest::HandleCallback(const Nan::FunctionCallbackInfo<v8::Value>& inf
         }
     } else if (info[0]->IsString()) {
         response.error = std::make_unique<mln::Response::Error>(mln::Response::Error::Reason::Other,
-                                                                 *Nan::Utf8String(info[0]));
+                                                                *Nan::Utf8String(info[0]));
     } else if (info.Length() < 2 || !info[1]->IsObject()) {
         request->unrefRequest();
         return Nan::ThrowTypeError("Second argument must be a response object");

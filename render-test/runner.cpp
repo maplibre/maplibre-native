@@ -752,9 +752,8 @@ void TestRunner::run(TestMetadata& metadata) {
         }
     }
 
-    std::string key = mln::util::toString(uint32_t(metadata.mapMode)) + "/" +
-                      mln::util::toString(metadata.pixelRatio) + "/" +
-                      mln::util::toString(uint32_t(metadata.crossSourceCollisions));
+    std::string key = mln::util::toString(uint32_t(metadata.mapMode)) + "/" + mln::util::toString(metadata.pixelRatio) +
+                      "/" + mln::util::toString(uint32_t(metadata.crossSourceCollisions));
 
     if (maps.find(key) == maps.end()) {
         maps[key] = std::make_unique<TestRunner::Impl>(

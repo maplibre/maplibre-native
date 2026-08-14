@@ -76,8 +76,8 @@ std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<
 // testId: Test case id that used for composing expectation path
 // expectatedPaths: absolute paths that contain possible expected.png/metrics.json files for result checking
 std::vector<mln::filesystem::path> getTestExpectations(const mln::filesystem::path& defaultExpectationPath,
-                                                        const std::string& testId,
-                                                        std::vector<mln::filesystem::path> expectatedPaths) {
+                                                       const std::string& testId,
+                                                       std::vector<mln::filesystem::path> expectatedPaths) {
     std::vector<mln::filesystem::path> expectations{defaultExpectationPath};
     for (const auto& expectedPath : expectatedPaths) {
         expectations.emplace_back(expectedPath / testId);
@@ -108,7 +108,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     auto contents = readJson(filePath);
     if (!contents.is<mln::JSDocument>()) {
         mln::Log::Error(mln::Event::General,
-                         "Provided manifest file: " + filePath.generic_string() + " is not a valid json");
+                        "Provided manifest file: " + filePath.generic_string() + " is not a valid json");
         return std::nullopt;
     }
 
@@ -116,9 +116,8 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     if (document.HasMember("result_path")) {
         const auto& resultPathValue = document["result_path"];
         if (!resultPathValue.IsString()) {
-            mln::Log::Warning(
-                mln::Event::General,
-                "Invalid result_path is provided inside the manifest file: " + filePath.generic_string());
+            mln::Log::Warning(mln::Event::General,
+                              "Invalid result_path is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
         manifest.resultPath = (getValidPath(manifest.manifestPath, resultPathValue.GetString()) / "").generic_string();
@@ -130,7 +129,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         const auto& cachePathValue = document["cache_path"];
         if (!cachePathValue.IsString()) {
             mln::Log::Warning(mln::Event::General,
-                               "Invalid cache_path is provided inside the manifest file: " + filePath.generic_string());
+                              "Invalid cache_path is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
         manifest.cachePath = (getValidPath(manifest.manifestPath, ".") / cachePathValue.GetString()).generic_string();
@@ -157,9 +156,9 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         const auto& testPathValue = document["base_test_path"];
         if (!testPathValue.IsString()) {
             mln::Log::Warning(mln::Event::General,
-                               "Invalid base_test_path is provided inside the manifest "
-                               "file: " +
-                                   filePath.generic_string());
+                              "Invalid base_test_path is provided inside the manifest "
+                              "file: " +
+                                  filePath.generic_string());
             return std::nullopt;
         }
         baseTestPath = getValidPath(manifest.manifestPath, testPathValue.GetString());
@@ -171,9 +170,8 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     if (document.HasMember("metric_path")) {
         const auto& metricPathValue = document["metric_path"];
         if (!metricPathValue.IsString()) {
-            mln::Log::Warning(
-                mln::Event::General,
-                "Invalid metric_path is provided inside the manifest file: " + filePath.generic_string());
+            mln::Log::Warning(mln::Event::General,
+                              "Invalid metric_path is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
         expectedMetricPath = getValidPath(manifest.manifestPath, metricPathValue.GetString());
@@ -186,17 +184,17 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         const auto& expectationPathValue = document["expectation_paths"];
         if (!expectationPathValue.IsArray()) {
             mln::Log::Warning(mln::Event::General,
-                               "Provided expectation_paths inside the manifest file: %s is "
-                               "not a valid array" +
-                                   filePath.generic_string());
+                              "Provided expectation_paths inside the manifest file: %s is "
+                              "not a valid array" +
+                                  filePath.generic_string());
             return std::nullopt;
         }
         for (const auto& value : expectationPathValue.GetArray()) {
             if (!value.IsString()) {
                 mln::Log::Warning(mln::Event::General,
-                                   "Invalid expectation path item is provided inside the "
-                                   "manifest file: " +
-                                       filePath.generic_string());
+                                  "Invalid expectation path item is provided inside the "
+                                  "manifest file: " +
+                                      filePath.generic_string());
                 return std::nullopt;
             }
             expectationPaths.emplace_back(getValidPath(manifest.manifestPath, value.GetString()));
@@ -210,16 +208,16 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         const auto& ignorePathValue = document["ignore_paths"];
         if (!ignorePathValue.IsArray()) {
             mln::Log::Warning(mln::Event::General,
-                               "Provided ignore_paths inside the manifest file: " + filePath.generic_string() +
-                                   " is not a valid array");
+                              "Provided ignore_paths inside the manifest file: " + filePath.generic_string() +
+                                  " is not a valid array");
             return std::nullopt;
         }
         for (const auto& value : ignorePathValue.GetArray()) {
             if (!value.IsString()) {
                 mln::Log::Warning(mln::Event::General,
-                                   "Invalid ignore path item is provided inside the manifest "
-                                   "file: " +
-                                       filePath.generic_string());
+                                  "Invalid ignore path item is provided inside the manifest "
+                                  "file: " +
+                                      filePath.generic_string());
                 return std::nullopt;
             }
             ignorePaths.emplace_back(getValidPath(manifest.manifestPath, value.GetString()));
@@ -241,9 +239,9 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         for (const auto& value : probesValue.GetArray()) {
             if (!value.IsString()) {
                 mln::Log::Warning(mln::Event::General,
-                                   "Invalid probe type is provided inside the manifest "
-                                   "file: " +
-                                       filePath.generic_string());
+                                  "Invalid probe type is provided inside the manifest "
+                                  "file: " +
+                                      filePath.generic_string());
                 return std::nullopt;
             }
             manifest.probes.emplace(value.GetString());
@@ -254,7 +252,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         const auto& filterValue = document["filter"];
         if (!filterValue.IsString()) {
             mln::Log::Warning(mln::Event::General,
-                               "Invalid filter is provided inside the manifest file: " + filePath.generic_string());
+                              "Invalid filter is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
 

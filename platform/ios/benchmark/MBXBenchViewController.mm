@@ -97,7 +97,7 @@ protected:
   [self.view addSubview:self.imageView];
 
   mln::Size viewSize = {static_cast<uint32_t>(self.view.bounds.size.width),
-                         static_cast<uint32_t>(self.view.bounds.size.height)};
+                        static_cast<uint32_t>(self.view.bounds.size.height)};
   auto pixelRatio = [[UIScreen mainScreen] scale];
 
   observer = std::make_unique<BenchMapObserver>(self);

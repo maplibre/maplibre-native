@@ -198,8 +198,8 @@ mln::Immutable<mln::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
                                URL:(NSURL *)url
                            options:(NSDictionary<NSString *, id> *)options {
   auto geoJSONOptions = MLNGeoJSONOptionsFromDictionary(options);
-  auto source = std::make_unique<mln::style::GeoJSONSource>(identifier.UTF8String,
-                                                             std::move(geoJSONOptions));
+  auto source =
+      std::make_unique<mln::style::GeoJSONSource>(identifier.UTF8String, std::move(geoJSONOptions));
   if (self = [super initWithPendingSource:std::move(source)]) {
     self.URL = url;
   }
@@ -210,8 +210,8 @@ mln::Immutable<mln::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
                              shape:(nullable MLNShape *)shape
                            options:(NSDictionary<MLNShapeSourceOption, id> *)options {
   auto geoJSONOptions = MLNGeoJSONOptionsFromDictionary(options);
-  auto source = std::make_unique<mln::style::GeoJSONSource>(identifier.UTF8String,
-                                                             std::move(geoJSONOptions));
+  auto source =
+      std::make_unique<mln::style::GeoJSONSource>(identifier.UTF8String, std::move(geoJSONOptions));
   if (self = [super initWithPendingSource:std::move(source)]) {
     if ([shape isMemberOfClass:[MLNShapeCollection class]]) {
       static dispatch_once_t onceToken;
@@ -337,7 +337,7 @@ mln::Immutable<mln::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
                                       offset:(NSUInteger)offset
                                        limit:(NSUInteger)limit {
   const std::map<std::string, mln::Value> options = {{"limit", static_cast<uint64_t>(limit)},
-                                                      {"offset", static_cast<uint64_t>(offset)}};
+                                                     {"offset", static_cast<uint64_t>(offset)}};
 
   auto featureExtension = [self featureExtensionValueOfCluster:cluster
                                                      extension:"leaves"

@@ -128,8 +128,8 @@ void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*b
 }
 
 mln::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
-                                                                       const LineString<double>& coordinates,
-                                                                       const gfx::PolylineGeneratorOptions& options) {
+                                                                      const LineString<double>& coordinates,
+                                                                      const gfx::PolylineGeneratorOptions& options) {
     constexpr int32_t zoom = 0;
 
     // get center

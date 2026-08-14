@@ -228,10 +228,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(
-            renderable,
-            impl->vertexDesc,
-            getColorMode(),
-            mln::util::hash(getColorMode().hash(), impl->vertexDescHash));
+            renderable, impl->vertexDesc, getColorMode(), mln::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
     if (impl->pipelineState) {
         renderPass.setRenderPipelineState(impl->pipelineState);
@@ -639,11 +636,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                     }
 
                     mln::util::hash_combine(hash,
-                                             mln::util::hash(index,
-                                                              binding->attribute.offset,
-                                                              binding->attribute.dataType,
-                                                              binding->vertexStride,
-                                                              static_cast<bool>(binding->vertexBufferResource)));
+                                            mln::util::hash(index,
+                                                            binding->attribute.offset,
+                                                            binding->attribute.dataType,
+                                                            binding->vertexStride,
+                                                            static_cast<bool>(binding->vertexBufferResource)));
 
                     index += 1;
                 }

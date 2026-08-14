@@ -165,8 +165,7 @@
   if (options.defaultStyles) {
     for (MLNDefaultStyle *objCStyle in options.defaultStyles) {
       mln::util::DefaultStyle cppStyle(std::string([objCStyle.url.absoluteString UTF8String]),
-                                        std::string([objCStyle.name UTF8String]),
-                                        objCStyle.version);
+                                       std::string([objCStyle.name UTF8String]), objCStyle.version);
       defaultStyles.push_back(cppStyle);
     }
   }

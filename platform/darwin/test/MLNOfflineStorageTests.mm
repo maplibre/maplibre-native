@@ -869,8 +869,7 @@
         XCTAssertEqual(styleURL, url, @"Preloaded resource url is invalid");
 
         auto fs = os.mbglDatabaseFileSource;
-        const mln::Resource resource{mln::Resource::Unknown,
-                                      "https://api.mapbox.com/some/thing1"};
+        const mln::Resource resource{mln::Resource::Unknown, "https://api.mapbox.com/some/thing1"};
         req = fs->request(resource, [&, tNow = now.timeIntervalSince1970,
                                      tFuture = future.timeIntervalSince1970](mln::Response res) {
           XCTAssertFalse(res.error.get(), @"Request should not return an error");

@@ -201,13 +201,13 @@ void addFillExtrusionLayer(mln::style::Style &style, bool visible) {
     extrusionLayer->setMinZoom(15.0f);
     extrusionLayer->setFilter(Filter(eq(get("extrude"), literal("true"))));
     extrusionLayer->setFillExtrusionColor(PropertyExpression<mln::Color>(interpolate(linear(),
-                                                                                      number(get("height")),
-                                                                                      0.f,
-                                                                                      toColor(literal("#160e23")),
-                                                                                      50.f,
-                                                                                      toColor(literal("#00615f")),
-                                                                                      100.f,
-                                                                                      toColor(literal("#55e9ff")))));
+                                                                                     number(get("height")),
+                                                                                     0.f,
+                                                                                     toColor(literal("#160e23")),
+                                                                                     50.f,
+                                                                                     toColor(literal("#00615f")),
+                                                                                     100.f,
+                                                                                     toColor(literal("#55e9ff")))));
     extrusionLayer->setFillExtrusionOpacity(0.6f);
     extrusionLayer->setFillExtrusionHeight(PropertyExpression<float>(get("height")));
     extrusionLayer->setFillExtrusionBase(PropertyExpression<float>(get("min_height")));
@@ -449,7 +449,7 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 printf("visible point annotations: %zu\n", result.size());
                 auto features = view->rendererFrontend->getRenderer()->queryRenderedFeatures(
                     mln::ScreenBox{{view->getSize().width * 0.5, view->getSize().height * 0.5},
-                                    {view->getSize().width * 0.5 + 1.0, view->getSize().height * 0.5 + 1}},
+                                   {view->getSize().width * 0.5 + 1.0, view->getSize().height * 0.5 + 1}},
                     {});
                 printf("Rendered features at the center of the screen: %zu\n", features.size());
             } break;
@@ -624,8 +624,8 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                     mln::Log::Info(mln::Event::General, "Render test created!");
                 } else {
                     mln::Log::Error(mln::Event::General,
-                                     "Fail to create render test! Base directory does not "
-                                     "exist or permission denied.");
+                                    "Fail to create render test! Base directory does not "
+                                    "exist or permission denied.");
                 }
             } break;
             case GLFW_KEY_U: {
@@ -770,10 +770,7 @@ mln::Point<double> GLFWView::makeRandomPoint() const {
     return {latLng.longitude(), latLng.latitude()};
 }
 
-std::unique_ptr<mln::style::Image> GLFWView::makeImage(const std::string &id,
-                                                        int width,
-                                                        int height,
-                                                        float pixelRatio) {
+std::unique_ptr<mln::style::Image> GLFWView::makeImage(const std::string &id, int width, int height, float pixelRatio) {
     MLN_TRACE_FUNC();
 
     const int r = static_cast<int>(255 * (static_cast<double>(std::rand()) / RAND_MAX));
@@ -951,10 +948,10 @@ void GLFWView::makeSnapshot(bool withOverlay) {
 
     if (!snapshotter || snapshotter->getStyleURL() != map->getStyle().getURL()) {
         snapshotter = std::make_unique<mln::MapSnapshotter>(map->getMapOptions().size(),
-                                                             map->getMapOptions().pixelRatio(),
-                                                             mapResourceOptions,
-                                                             mapClientOptions,
-                                                             *snapshotterObserver);
+                                                            map->getMapOptions().pixelRatio(),
+                                                            mapResourceOptions,
+                                                            mapClientOptions,
+                                                            *snapshotterObserver);
         snapshotter->setStyleURL(map->getStyle().getURL());
     }
 
@@ -1378,9 +1375,9 @@ void GLFWView::toggleLocationIndicatorLayer() {
 
         puckLayer->setLocationTransition(
             mln::style::TransitionOptions(mln::Duration::zero(),
-                                           mln::Duration::zero())); // Note: This is used here for demo purpose.
-                                                                     // SDKs should not use this, or else the location
-                                                                     // will "jump" to positions.
+                                          mln::Duration::zero())); // Note: This is used here for demo purpose.
+                                                                   // SDKs should not use this, or else the location
+                                                                   // will "jump" to positions.
         puckLayer->setLocation(toArray(puckLocation));
         puckLayer->setAccuracyRadius(50);
         puckLayer->setAccuracyRadiusColor(

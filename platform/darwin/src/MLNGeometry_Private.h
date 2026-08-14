@@ -67,7 +67,7 @@ NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsFromLatLngBounds(mln::LatLngBou
 NS_INLINE mln::LatLngBounds MLNLatLngBoundsFromCoordinateBounds(
     MLNCoordinateBounds coordinateBounds) {
   return mln::LatLngBounds::hull(MLNLatLngFromLocationCoordinate2D(coordinateBounds.sw),
-                                  MLNLatLngFromLocationCoordinate2D(coordinateBounds.ne));
+                                 MLNLatLngFromLocationCoordinate2D(coordinateBounds.ne));
 }
 
 NS_INLINE std::array<mln::LatLng, 4> MLNLatLngArrayFromCoordinateQuad(MLNCoordinateQuad quad) {

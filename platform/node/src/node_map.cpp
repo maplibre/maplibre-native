@@ -688,14 +688,14 @@ void NodeMap::cancel() {
 
     frontend = std::make_unique<mln::HeadlessFrontend>(mln::Size{512, 512}, pixelRatio);
     map = std::make_unique<mln::Map>(*frontend,
-                                      mapObserver,
-                                      mln::MapOptions()
-                                          .withSize(frontend->getSize())
-                                          .withPixelRatio(pixelRatio)
-                                          .withMapMode(mode)
-                                          .withCrossSourceCollisions(crossSourceCollisions),
-                                      mln::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
-                                      mln::ClientOptions());
+                                     mapObserver,
+                                     mln::MapOptions()
+                                         .withSize(frontend->getSize())
+                                         .withPixelRatio(pixelRatio)
+                                         .withMapMode(mode)
+                                         .withCrossSourceCollisions(crossSourceCollisions),
+                                     mln::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
+                                     mln::ClientOptions());
 
     // FIXME: Reload the style after recreating the map. We need to find
     // a better way of canceling an ongoing rendering on the core level
@@ -1460,15 +1460,15 @@ void NodeMap::QueryRenderedFeatures(const Nan::FunctionCallbackInfo<v8::Value>& 
 
             optional = nodeMap->frontend->getRenderer()->queryRenderedFeatures(
                 mln::ScreenBox{{Nan::To<double>(Nan::Get(pos0, 0).ToLocalChecked()).ToChecked(),
-                                 Nan::To<double>(Nan::Get(pos0, 1).ToLocalChecked()).ToChecked()},
-                                {Nan::To<double>(Nan::Get(pos1, 0).ToLocalChecked()).ToChecked(),
-                                 Nan::To<double>(Nan::Get(pos1, 1).ToLocalChecked()).ToChecked()}},
+                                Nan::To<double>(Nan::Get(pos0, 1).ToLocalChecked()).ToChecked()},
+                               {Nan::To<double>(Nan::Get(pos1, 0).ToLocalChecked()).ToChecked(),
+                                Nan::To<double>(Nan::Get(pos1, 1).ToLocalChecked()).ToChecked()}},
                 queryOptions);
 
         } else {
             optional = nodeMap->frontend->getRenderer()->queryRenderedFeatures(
                 mln::ScreenCoordinate{Nan::To<double>(Nan::Get(posOrBox, 0).ToLocalChecked()).ToChecked(),
-                                       Nan::To<double>(Nan::Get(posOrBox, 1).ToLocalChecked()).ToChecked()},
+                                      Nan::To<double>(Nan::Get(posOrBox, 1).ToLocalChecked()).ToChecked()},
                 queryOptions);
         }
 
@@ -1512,14 +1512,14 @@ NodeMap::NodeMap(v8::Local<v8::Object> options)
       mapObserver(NodeMapObserver()),
       frontend(std::make_unique<mln::HeadlessFrontend>(mln::Size{512, 512}, pixelRatio)),
       map(std::make_unique<mln::Map>(*frontend,
-                                      mapObserver,
-                                      mln::MapOptions()
-                                          .withSize(frontend->getSize())
-                                          .withPixelRatio(pixelRatio)
-                                          .withMapMode(mode)
-                                          .withCrossSourceCollisions(crossSourceCollisions),
-                                      mln::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
-                                      mln::ClientOptions())),
+                                     mapObserver,
+                                     mln::MapOptions()
+                                         .withSize(frontend->getSize())
+                                         .withPixelRatio(pixelRatio)
+                                         .withMapMode(mode)
+                                         .withCrossSourceCollisions(crossSourceCollisions),
+                                     mln::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
+                                     mln::ClientOptions())),
       async(new uv_async_t) {
     async->data = this;
     uv_async_init(
@@ -1538,7 +1538,7 @@ NodeMap::~NodeMap() {
 }
 
 std::unique_ptr<mln::AsyncRequest> NodeFileSource::request(const mln::Resource& resource,
-                                                            mln::FileSource::Callback callback_) {
+                                                           mln::FileSource::Callback callback_) {
     assert(nodeMap);
 
     Nan::HandleScope scope;

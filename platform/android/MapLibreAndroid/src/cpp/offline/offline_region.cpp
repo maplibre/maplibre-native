@@ -21,8 +21,8 @@ OfflineRegion::OfflineRegion(jni::JNIEnv& env, jni::jlong offlineRegionPtr, cons
     : region(reinterpret_cast<mln::OfflineRegion*>(offlineRegionPtr)),
       fileSource(std::static_pointer_cast<mln::DatabaseFileSource>(std::shared_ptr<mln::FileSource>(
           mln::FileSourceManager::get()->getFileSource(mln::FileSourceType::Database,
-                                                        FileSource::getSharedResourceOptions(env, jFileSource),
-                                                        FileSource::getSharedClientOptions(env, jFileSource))))) {
+                                                       FileSource::getSharedResourceOptions(env, jFileSource),
+                                                       FileSource::getSharedClientOptions(env, jFileSource))))) {
     if (!fileSource) {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Offline functionality is disabled.");
     }
@@ -54,7 +54,7 @@ void OfflineRegion::setOfflineRegionObserver(jni::JNIEnv& env_,
 
             static auto& javaClass = jni::Class<OfflineRegion::OfflineRegionObserver>::Singleton(*env);
             static auto method = javaClass.GetMethod<void(jni::Object<mln::android::OfflineRegionError>)>(*env,
-                                                                                                           "onError");
+                                                                                                          "onError");
 
             callback.Call(*env, method, OfflineRegionError::New(*env, error));
         }

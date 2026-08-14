@@ -5,9 +5,7 @@
 #include <mbgl/gl/renderer_backend.hpp>
 
 /// Adapter responsible for bridging calls from mbgl to MLNMapView and Cocoa.
-class MLNMapViewOpenGLImpl final : public MLNMapViewImpl,
-                                   public mln::gl::RendererBackend,
-                                   public mln::gfx::Renderable {
+class MLNMapViewOpenGLImpl final : public MLNMapViewImpl, public mln::gl::RendererBackend, public mln::gfx::Renderable {
 public:
     MLNMapViewOpenGLImpl(MLNMapView*);
     ~MLNMapViewOpenGLImpl() override = default;

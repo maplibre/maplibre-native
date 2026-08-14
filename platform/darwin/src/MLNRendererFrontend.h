@@ -34,9 +34,7 @@ public:
     }
   }
 
-  const mln::TaggedScheduler& getThreadPool() const override {
-    return mbglBackend.getThreadPool();
-  }
+  const mln::TaggedScheduler& getThreadPool() const override { return mbglBackend.getThreadPool(); }
 
   void setObserver(mln::RendererObserver& observer) override {
     if (!renderer) return;

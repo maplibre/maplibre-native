@@ -34,7 +34,7 @@ private:
     std::uint_least32_t lineNumber;
 };
 #define MLN_CURRENT_SOURCE_LOCATION  \
-    ::mln::source_location {        \
+    ::mln::source_location {         \
         __FILE__, __func__, __LINE__ \
     }
 #endif

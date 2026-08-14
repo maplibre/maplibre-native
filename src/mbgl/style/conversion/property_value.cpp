@@ -133,9 +133,9 @@ template std::optional<PropertyValue<TranslateAnchorType>> Converter<PropertyVal
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<mln::style::expression::Formatted>>
 Converter<PropertyValue<mln::style::expression::Formatted>>::operator()(conversion::Convertible const&,
-                                                                         conversion::Error&,
-                                                                         bool,
-                                                                         bool) const;
+                                                                        conversion::Error&,
+                                                                        bool,
+                                                                        bool) const;
 template std::optional<PropertyValue<std::vector<TextWritingModeType>>>
 Converter<PropertyValue<std::vector<TextWritingModeType>>>::operator()(conversion::Convertible const&,
                                                                        conversion::Error&,
@@ -143,15 +143,15 @@ Converter<PropertyValue<std::vector<TextWritingModeType>>>::operator()(conversio
                                                                        bool) const;
 template std::optional<PropertyValue<mln::style::expression::Image>>
 Converter<PropertyValue<mln::style::expression::Image>>::operator()(conversion::Convertible const&,
-                                                                     conversion::Error&,
-                                                                     bool,
-                                                                     bool) const;
+                                                                    conversion::Error&,
+                                                                    bool,
+                                                                    bool) const;
 
 std::optional<PropertyValue<std::array<double, 3>>>
 mln::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::operator()(const Convertible& value,
-                                                                                           Error& error,
-                                                                                           bool,
-                                                                                           bool) const {
+                                                                                          Error& error,
+                                                                                          bool,
+                                                                                          bool) const {
     std::optional<std::array<double, 3>> a = convert<std::array<double, 3>>(value, error);
 
     if (!a) {

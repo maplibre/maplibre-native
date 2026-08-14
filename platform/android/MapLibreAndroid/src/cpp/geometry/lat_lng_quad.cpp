@@ -25,9 +25,9 @@ std::array<mln::LatLng, 4> LatLngQuad::getLatLngArray(jni::JNIEnv& env, const jn
     static auto bottomLeftField = javaClass.GetField<jni::Object<LatLng>>(env, "bottomLeft");
 
     return std::array<mln::LatLng, 4>{{LatLng::getLatLng(env, quad.Get(env, topLeftField)),
-                                        LatLng::getLatLng(env, quad.Get(env, topRightField)),
-                                        LatLng::getLatLng(env, quad.Get(env, bottomRightField)),
-                                        LatLng::getLatLng(env, quad.Get(env, bottomLeftField))}};
+                                       LatLng::getLatLng(env, quad.Get(env, topRightField)),
+                                       LatLng::getLatLng(env, quad.Get(env, bottomRightField)),
+                                       LatLng::getLatLng(env, quad.Get(env, bottomLeftField))}};
 }
 
 void LatLngQuad::registerNative(jni::JNIEnv& env) {

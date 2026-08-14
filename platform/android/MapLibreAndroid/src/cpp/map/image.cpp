@@ -55,12 +55,12 @@ mln::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& im
         const style::ImageContent imageContent = style::ImageContent{
             content.Get(env, 0), content.Get(env, 1), content.Get(env, 2), content.Get(env, 3)};
         return mln::style::Image{name,
-                                  std::move(premultipliedImage),
-                                  pixelRatio,
-                                  sdf,
-                                  imageStretchesX,
-                                  imageStretchesY,
-                                  std::move(imageContent)};
+                                 std::move(premultipliedImage),
+                                 pixelRatio,
+                                 sdf,
+                                 imageStretchesX,
+                                 imageStretchesY,
+                                 std::move(imageContent)};
     }
 
     return mln::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf, imageStretchesX, imageStretchesY};

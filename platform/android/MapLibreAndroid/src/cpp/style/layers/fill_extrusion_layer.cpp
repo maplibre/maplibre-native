@@ -21,7 +21,7 @@ inline mln::style::FillExtrusionLayer& toFillExtrusionLayer(mln::style::Layer& l
  */
 FillExtrusionLayer::FillExtrusionLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
     : Layer(std::make_unique<mln::style::FillExtrusionLayer>(jni::Make<std::string>(env, layerId),
-                                                              jni::Make<std::string>(env, sourceId))) {}
+                                                             jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)

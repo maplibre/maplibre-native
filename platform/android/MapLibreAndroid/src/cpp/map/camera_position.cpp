@@ -61,8 +61,8 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
 }
 
 mln::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
-                                                     const jni::Object<CameraPosition>& position,
-                                                     float pixelRatio) {
+                                                    const jni::Object<CameraPosition>& position,
+                                                    float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
     static auto bearing = javaClass.GetField<jni::jdouble>(env, "bearing");
     static auto target = javaClass.GetField<jni::Object<LatLng>>(env, "target");
@@ -77,18 +77,18 @@ mln::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
     auto center = LatLng::getLatLng(env, position.Get(env, target));
 
     return mln::CameraOptions{center,
-                               position.Get(env, centerAltitude),
-                               padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
-                                                                                padding.Get(env, 0) * pixelRatio,
-                                                                                padding.Get(env, 3) * pixelRatio,
-                                                                                padding.Get(env, 2) * pixelRatio}
-                                                                   : (EdgeInsets){},
-                               {},
-                               position.Get(env, zoom),
-                               position.Get(env, bearing),
-                               position.Get(env, tilt),
-                               position.Get(env, roll),
-                               position.Get(env, fov)};
+                              position.Get(env, centerAltitude),
+                              padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
+                                                                               padding.Get(env, 0) * pixelRatio,
+                                                                               padding.Get(env, 3) * pixelRatio,
+                                                                               padding.Get(env, 2) * pixelRatio}
+                                                                  : (EdgeInsets){},
+                              {},
+                              position.Get(env, zoom),
+                              position.Get(env, bearing),
+                              position.Get(env, tilt),
+                              position.Get(env, roll),
+                              position.Get(env, fov)};
 }
 
 void CameraPosition::registerNative(jni::JNIEnv& env) {

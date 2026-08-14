@@ -145,8 +145,7 @@ public:
     id<MTLCommandBuffer> commandBuffer = (__bridge id<MTLCommandBuffer>)cmdPtr;
     layer.commandBuffer = commandBuffer;
     MTL::RenderCommandEncoder *ptr =
-        static_cast<const mln::style::mtl::CustomLayerRenderParameters &>(parameters)
-            .encoder.get();
+        static_cast<const mln::style::mtl::CustomLayerRenderParameters &>(parameters).encoder.get();
     id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
     layer.renderEncoder = encoder;
 #endif

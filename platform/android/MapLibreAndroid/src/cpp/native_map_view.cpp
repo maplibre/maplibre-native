@@ -91,13 +91,12 @@ NativeMapView::NativeMapView(jni::JNIEnv& _env,
         .withFastPFOREnabled(NativeMapOptions::fastPFOREnabled(_env, jNativeMapOptions));
 
     // Create the core map
-    map = std::make_unique<mln::Map>(
-        *rendererFrontend,
-        *this,
-        options,
-        mln::android::FileSource::getSharedResourceOptions(_env, jFileSource),
-        mln::android::FileSource::getSharedClientOptions(_env, jFileSource),
-        mln::android::NativeMapOptions::getActionJournalOptions(_env, jNativeMapOptions));
+    map = std::make_unique<mln::Map>(*rendererFrontend,
+                                     *this,
+                                     options,
+                                     mln::android::FileSource::getSharedResourceOptions(_env, jFileSource),
+                                     mln::android::FileSource::getSharedClientOptions(_env, jFileSource),
+                                     mln::android::NativeMapOptions::getActionJournalOptions(_env, jNativeMapOptions));
 }
 
 /**
@@ -600,9 +599,9 @@ void NativeMapView::setVisibleCoordinateBounds(JNIEnv& env,
     }
 
     mln::EdgeInsets mbglInsets = {RectF::getTop(env, padding),
-                                   RectF::getLeft(env, padding),
-                                   RectF::getBottom(env, padding),
-                                   RectF::getRight(env, padding)};
+                                  RectF::getLeft(env, padding),
+                                  RectF::getBottom(env, padding),
+                                  RectF::getRight(env, padding)};
     mln::CameraOptions cameraOptions = map->cameraForLatLngs(latLngs, mbglInsets);
     if (direction >= 0) {
         cameraOptions.bearing = direction;
@@ -757,8 +756,7 @@ jni::jdouble NativeMapView::getMetersPerPixelAtLatitude(JNIEnv&, jni::jdouble la
 jni::Local<jni::Object<ProjectedMeters>> NativeMapView::projectedMetersForLatLng(JNIEnv& env,
                                                                                  jni::jdouble latitude,
                                                                                  jni::jdouble longitude) {
-    mln::ProjectedMeters projectedMeters = mln::Projection::projectedMetersForLatLng(
-        mln::LatLng(latitude, longitude));
+    mln::ProjectedMeters projectedMeters = mln::Projection::projectedMetersForLatLng(mln::LatLng(latitude, longitude));
     return ProjectedMeters::New(env, projectedMeters.northing(), projectedMeters.easting());
 }
 
@@ -1388,9 +1386,9 @@ void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
 
 void NativeMapView::setFrustumOffset(JNIEnv& env, const jni::Object<RectF>& padding) {
     mln::EdgeInsets offset = {RectF::getTop(env, padding),
-                               RectF::getLeft(env, padding),
-                               RectF::getBottom(env, padding),
-                               RectF::getRight(env, padding)};
+                              RectF::getLeft(env, padding),
+                              RectF::getBottom(env, padding),
+                              RectF::getRight(env, padding)};
     map->setFrustumOffset(offset);
 }
 

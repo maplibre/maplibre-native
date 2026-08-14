@@ -61,8 +61,8 @@ public:
         const int error = sqlite3_extended_result_codes(db, true);
         if (error != SQLITE_OK) {
             mln::Log::Warning(mln::Event::Database,
-                               error,
-                               std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db));
+                              error,
+                              std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db));
         }
     }
 

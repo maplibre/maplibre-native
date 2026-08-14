@@ -42,10 +42,10 @@ TEST(StyleConversion, Light) {
 
         mln::JSValue::AllocatorType allocator;
         const mln::JSValue positionValue(std::move(mln::JSValue(rapidjson::kArrayType)
-                                                        .PushBack(1.f, allocator)
-                                                        .PushBack(2.f, allocator)
-                                                        .PushBack(3.f, allocator)
-                                                        .Move()));
+                                                       .PushBack(1.f, allocator)
+                                                       .PushBack(2.f, allocator)
+                                                       .PushBack(3.f, allocator)
+                                                       .Move()));
         light->setProperty("position", &positionValue);
         ASSERT_FALSE(light->getPosition().isUndefined());
         ASSERT_TRUE(light->getPosition().isConstant());

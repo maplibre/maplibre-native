@@ -93,7 +93,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (!drawable.getShader()) {
             mln::Log::Warning(mln::Event::Render,
-                               "Drawable " + drawable.getName() + " in " + getName() + " missing shader; skipping");
+                              "Drawable " + drawable.getName() + " in " + getName() + " missing shader; skipping");
             return;
         }
 

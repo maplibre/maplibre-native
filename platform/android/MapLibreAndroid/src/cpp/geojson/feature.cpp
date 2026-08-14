@@ -21,8 +21,8 @@ mln::GeoJSONFeature Feature::convert(jni::JNIEnv& env, const jni::Object<Feature
     using mbid = mapbox::feature::identifier;
 
     return mln::GeoJSONFeature{Geometry::convert(env, jFeature.Call(env, geometry)),
-                                JsonObject::convert(env, jFeature.Call(env, properties)),
-                                jId ? mbid{jni::Make<std::string>(env, jId)} : mbid{mapbox::feature::null_value}};
+                               JsonObject::convert(env, jFeature.Call(env, properties)),
+                               jId ? mbid{jni::Make<std::string>(env, jId)} : mbid{mapbox::feature::null_value}};
 }
 
 /**
@@ -48,13 +48,12 @@ jni::Local<jni::Object<Feature>> convertFeature(jni::JNIEnv& env, const mln::Geo
         javaClass.GetStaticMethod<jni::Object<Feature>(jni::Object<Geometry>, jni::Object<JsonObject>, jni::String)>(
             env, "fromGeometry");
 
-    return javaClass.Call(
-        env,
-        method,
-        Geometry::New(env, value.geometry),
-        JsonObject::New(env, value.properties),
-        jni::Make<jni::String>(env,
-                               value.id.is<mln::NullValue>() ? std::string{} : value.id.match(FeatureIdVisitor())));
+    return javaClass.Call(env,
+                          method,
+                          Geometry::New(env, value.geometry),
+                          JsonObject::New(env, value.properties),
+                          jni::Make<jni::String>(
+                              env, value.id.is<mln::NullValue>() ? std::string{} : value.id.match(FeatureIdVisitor())));
 }
 
 jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(jni::JNIEnv& env,

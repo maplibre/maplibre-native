@@ -66,8 +66,8 @@ public:
                                     const gfx::PolylineGeneratorOptions& options);
 
     mln::Point<double> addWideVectorPolylineGlobal(gfx::DrawableBuilder& builder,
-                                                    const LineString<double>& coordinates,
-                                                    const gfx::PolylineGeneratorOptions& options);
+                                                   const LineString<double>& coordinates,
+                                                   const gfx::PolylineGeneratorOptions& options);
 
     void setupForWideVectors(gfx::Context&, gfx::DrawableBuilder&);
 

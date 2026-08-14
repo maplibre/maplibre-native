@@ -96,7 +96,7 @@ jni::Local<jni::Object<TileServerOptions>> TileServerOptions::MapLibreConfigurat
 }
 
 mln::TileServerOptions TileServerOptions::getTileServerOptions(jni::JNIEnv& env,
-                                                                const jni::Object<TileServerOptions>& options) {
+                                                               const jni::Object<TileServerOptions>& options) {
     auto opts = mln::TileServerOptions();
     static auto& javaClass = jni::Class<TileServerOptions>::Singleton(env);
 
