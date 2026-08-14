@@ -23,6 +23,8 @@ MLNMapViewImpl::MLNMapViewImpl(MLNMapView* nativeView_) : mapView(nativeView_) {
 
 void MLNMapViewImpl::render() { [mapView renderSync]; }
 
+void MLNMapViewImpl::display() { [mapView.layer setNeedsDisplay]; }
+
 void MLNMapViewImpl::onCameraWillChange(mln::MapObserver::CameraChangeMode mode) {
   bool animated = mode == mln::MapObserver::CameraChangeMode::Animated;
   [mapView cameraWillChangeAnimated:animated];

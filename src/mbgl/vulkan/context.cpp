@@ -36,9 +36,9 @@ namespace vulkan {
 // this can be queried at runtime (VkPhysicalDeviceLimits.maxVertexInputBindings)
 constexpr uint32_t maximumVertexBindingCount = 16;
 
-constexpr uint32_t globalDescriptorPoolSize = 3 * 4;
-constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
-constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
+constexpr uint32_t globalDescriptorPoolSize = 2 * 1;
+constexpr uint32_t layerDescriptorPoolSize = 2 * 256;
+constexpr uint32_t drawableUniformDescriptorPoolSize = 2 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
 namespace {
@@ -236,7 +236,7 @@ void Context::requestSurfaceUpdate(bool useDelay) {
     surfaceUpdateLatency = useDelay ? backend.getMaxFrames() * 3 : 0;
 }
 
-void Context::waitFrame() const {
+bool Context::waitFrame() const {
     MLN_TRACE_FUNC();
     MBGL_VERIFY_THREAD(tid);
 
@@ -249,7 +249,10 @@ void Context::waitFrame() const {
         1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
         mln::Log::Error(mln::Event::Render, "Wait fence failed");
+        return false;
     }
+
+    return true;
 }
 
 void Context::beginFrame() {
@@ -304,7 +307,9 @@ void Context::beginFrame() {
     auto& frame = frameResources[frameResourceIndex];
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
-    waitFrame();
+    if (!waitFrame()) {
+        return;
+    }
 
     frame.runDeletionQueue(*this);
 
@@ -323,6 +328,10 @@ void Context::beginFrame() {
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
                 requestSurfaceUpdate();
+            } else {
+                mln::Log::Error(
+                    mln::Event::Render,
+                    "acquireNextImageKHR result: " + std::to_string(static_cast<int>(acquireImageResult.result)));
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -521,11 +530,11 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
     if (renderableResource.hasSurfaceTransformSupport()) {
-        float surfaceRotation = renderableResource.getRotation();
+        const float surfaceRotation = renderableResource.getRotation();
+        const float sinRot = std::sin(surfaceRotation);
+        const float cosRot = std::cos(surfaceRotation);
 
-        const shaders::GlobalPlatformParamsUBO platformUBO = {
-            /* .rotation0 = */ {cosf(surfaceRotation), -sinf(surfaceRotation)},
-            /* .rotation1 = */ {sinf(surfaceRotation), cosf(surfaceRotation)}};
+        const shaders::GlobalPlatformParamsUBO platformUBO = {.surfaceRotation = {cosRot, -sinRot, sinRot, cosRot}};
         context.globalUniformBuffers.createOrUpdate(
             shaders::idGlobalPlatformParamsUBO, &platformUBO, sizeof(platformUBO), context);
     }
@@ -579,6 +588,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         clipping.pipelineInfo.stencilPass = vk::StencilOp::eReplace;
         clipping.pipelineInfo.dynamicValues.stencilWriteMask = 0b11111111;
         clipping.pipelineInfo.dynamicValues.stencilRef = 0b11111111;
+        clipping.pipelineInfo.dynamicValues.stencilCompareMask = 0xFF;
 
         clipping.pipelineInfo.inputBindings.push_back(
             vk::VertexInputBindingDescription()
@@ -591,6 +601,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                 .setBinding(0)
                 .setLocation(static_cast<uint32_t>(ShaderClass::attributes[0].index))
                 .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
+
+        clipping.pipelineInfo.updateVertexInputHash();
     }
 
     const auto& dispatcher = backend.getDispatcher();
@@ -773,9 +785,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
 
     auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
 
-#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
-    // GPU assisted validation crashes when using a pipeline without descriptors.
-    // Use a compatible layout with the general pipeline when enabled
     const std::vector<vk::DescriptorSetLayout> layouts = {
         globalUniformDescriptorSetLayout.get(),
         layerUniformDescriptorSetLayout.get(),
@@ -784,7 +793,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     };
 
     layoutInfo.setSetLayouts(layouts);
-#endif
 
     pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
         layoutInfo, nullptr, backend.getDispatcher());

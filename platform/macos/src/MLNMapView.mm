@@ -939,7 +939,10 @@ public:
 - (void)setNeedsRerender {
   MLNAssertIsMainThread();
 
-  [self.layer setNeedsDisplay];
+  if (!_mbglView) {
+    return;
+  }
+  _mbglView->display();
 }
 
 - (void)cameraWillChangeAnimated:(BOOL)animated {

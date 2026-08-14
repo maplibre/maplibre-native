@@ -20,6 +20,7 @@ public:
                 gfx::Context&,
                 const TransformState&,
                 const std::shared_ptr<UpdateParameters>&,
+                const PaintParameters&,
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 

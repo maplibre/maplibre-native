@@ -69,8 +69,8 @@ std::unique_ptr<Layer> CustomDrawableLayer::cloneRef(const std::string&) const {
 
 using namespace conversion;
 
-std::optional<Error> CustomDrawableLayer::setPropertyInternal(const std::string&, const Convertible&) {
-    return Error{"layer doesn't support this property"};
+std::optional<Error> CustomDrawableLayer::setPropertyInternal(const std::string& name, const Convertible&) {
+    return Error{"layer '" + getID() + "' doesn't support property '" + name + "'"};
 }
 
 StyleProperty CustomDrawableLayer::getProperty(const std::string&) const {

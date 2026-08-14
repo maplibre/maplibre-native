@@ -217,6 +217,10 @@ jboolean GeoJSONSource::isUpdateSynchronous(jni::JNIEnv&) {
     return source.as<style::GeoJSONSource>()->isUpdateSynchronous();
 }
 
+void GeoJSONSource::setOverrideSynchronousUpdate(jni::JNIEnv&, jni::jboolean newOverride) {
+    source.as<style::GeoJSONSource>()->setOverrideSynchronousUpdate(newOverride);
+}
+
 void GeoJSONSource::registerNative(jni::JNIEnv& env) {
     // Lookup the class
     static auto& javaClass = jni::Class<GeoJSONSource>::Singleton(env);
@@ -241,7 +245,8 @@ void GeoJSONSource::registerNative(jni::JNIEnv& env) {
         METHOD(&GeoJSONSource::getClusterChildren, "nativeGetClusterChildren"),
         METHOD(&GeoJSONSource::getClusterLeaves, "nativeGetClusterLeaves"),
         METHOD(&GeoJSONSource::getClusterExpansionZoom, "nativeGetClusterExpansionZoom"),
-        METHOD(&GeoJSONSource::isUpdateSynchronous, "nativeIsUpdateSynchronous"));
+        METHOD(&GeoJSONSource::isUpdateSynchronous, "nativeIsUpdateSynchronous"),
+        METHOD(&GeoJSONSource::setOverrideSynchronousUpdate, "nativeSetOverrideSynchronousUpdate"));
 }
 
 void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<GeoJSONDataCallback> callback) {

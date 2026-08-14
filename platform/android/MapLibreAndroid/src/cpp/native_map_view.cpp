@@ -1737,5 +1737,17 @@ void NativeMapView::onRenderError(std::exception_ptr) {
     }
 }
 
+void NativeMapView::onSymbolError(const std::string& message) {
+    assert(vm != nullptr);
+
+    android::UniqueEnv _env = android::AttachEnv();
+    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+    static auto onSymbolError = javaClass.GetMethod<void(jni::String)>(*_env, "onSymbolError");
+    auto weakReference = javaPeer.get(*_env);
+    if (weakReference) {
+        weakReference.Call(*_env, onSymbolError, jni::Make<jni::String>(*_env, message));
+    }
+}
+
 } // namespace android
 } // namespace mln

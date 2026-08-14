@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/util/error_sink.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
 #include <algorithm>
@@ -35,6 +36,11 @@ void Renderer::setObserver(RendererObserver* observer) {
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC();
     assert(updateParameters);
+
+    // Route the errors detected on the render thread to the renderer observer for the duration of the frame (see
+    // `SymbolErrorObserver`).
+    const ErrorScope errorScope{impl->observer};
+
     const bool styleChanged = impl->styleLoaded && !updateParameters->styleLoaded;
     impl->styleLoaded = updateParameters->styleLoaded;
     if (!impl->dynamicTextureAtlas || styleChanged) {

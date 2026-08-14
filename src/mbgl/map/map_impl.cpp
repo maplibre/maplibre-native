@@ -432,6 +432,18 @@ void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const
 
 void Map::Impl::onRenderError(std::exception_ptr error) {
     observer.onRenderError(error);
+
+    if (actionJournal) {
+        actionJournal->impl->onRenderError(error);
+    }
+}
+
+void Map::Impl::onSymbolError(const std::string& message) {
+    observer.onSymbolError(message);
+
+    if (actionJournal) {
+        actionJournal->impl->onSymbolError(message);
+    }
 }
 
 } // namespace mln

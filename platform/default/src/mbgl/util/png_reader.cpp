@@ -21,7 +21,7 @@ std::string sprintf(const char* msg, Args... args) {
 
 const static bool png_version_check [[maybe_unused]] = []() {
     const png_uint_32 version = png_access_version_number();
-    if (version != PNG_LIBPNG_VER) {
+    if (version / 100 != PNG_LIBPNG_VER / 100) {
         throw std::runtime_error(
             sprintf<96>("libpng version mismatch: headers report %d.%d.%d, but library "
                         "reports %d.%d.%d",

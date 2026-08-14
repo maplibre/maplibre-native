@@ -54,6 +54,10 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
+    void onSymbolError(const std::string& message) override {
+        delegate.invoke(&RendererObserver::onSymbolError, message);
+    }
+
     void onPreCompileShader(mln::shaders::BuiltIn id,
                             mln::gfx::Backend::Type type,
                             const std::string& additionalDefines) override {

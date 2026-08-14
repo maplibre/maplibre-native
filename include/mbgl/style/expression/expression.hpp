@@ -155,6 +155,9 @@ public:
     EvaluationResult(const std::array<double, 4>& arr)
         : Result(toExpressionValue(arr)) {}
 
+    EvaluationResult(const std::vector<std::string>& values)
+        : Result(toExpressionValue(values)) {}
+
     // used only for the special (private) "error" expression
     EvaluationResult(const type::ErrorType&) noexcept { assert(false); }
 };

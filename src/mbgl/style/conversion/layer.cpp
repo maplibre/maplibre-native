@@ -27,7 +27,7 @@ std::optional<Error> setPaintProperties(Layer& layer, const Convertible& value) 
         return std::nullopt;
     }
     if (!isObject(*paintValue)) {
-        return {{"paint must be an object"}};
+        return {{"layer '" + layer.getID() + "': paint must be an object"}};
     }
     return eachMember(*paintValue, [&](const std::string& k, const Convertible& v) { return layer.setProperty(k, v); });
 }
@@ -76,7 +76,7 @@ std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operato
     auto layoutValue = objectMember(value, "layout");
     if (layoutValue) {
         if (!isObject(*layoutValue)) {
-            error.message = "layout must be an object";
+            error.message = "layer '" + *id + "': layout must be an object";
             return std::nullopt;
         }
         auto error_ = eachMember(*layoutValue,

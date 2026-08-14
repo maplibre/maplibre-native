@@ -367,6 +367,8 @@ public:
     // Renderer
     void onRenderError(std::exception_ptr) override;
 
+    void onSymbolError(const std::string&) override;
+
 private:
     std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 

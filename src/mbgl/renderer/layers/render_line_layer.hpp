@@ -28,32 +28,33 @@ public:
     ~RenderLineLayer() override;
 
     /// Generate any changes needed by the layer
-    void update(gfx::ShaderRegistry&,
-                gfx::Context&,
-                const TransformState&,
-                const std::shared_ptr<UpdateParameters>&,
-                const RenderTree&,
-                UniqueChangeRequestVec&) override;
+    void update(gfx::ShaderRegistry &,
+                gfx::Context &,
+                const TransformState &,
+                const std::shared_ptr<UpdateParameters> &,
+                const PaintParameters &,
+                const RenderTree &,
+                UniqueChangeRequestVec &) override;
 
 private:
-    void transition(const TransitionParameters&) override;
-    void evaluate(const PropertyEvaluationParameters&) override;
+    void transition(const TransitionParameters &) override;
+    void evaluate(const PropertyEvaluationParameters &) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
-    void prepare(const LayerPrepareParameters&) override;
+    void prepare(const LayerPrepareParameters &) override;
 
-    bool queryIntersectsFeature(const GeometryCoordinates&,
-                                const GeometryTileFeature&,
+    bool queryIntersectsFeature(const GeometryCoordinates &,
+                                const GeometryTileFeature &,
                                 float,
-                                const TransformState&,
+                                const TransformState &,
                                 float,
-                                const mat4&,
-                                const FeatureState&) const override;
+                                const mat4 &,
+                                const FeatureState &) const override;
 
     // Paint properties
     style::LinePaintProperties::Unevaluated unevaluated;
 
-    float getLineWidth(const GeometryTileFeature&, float, const FeatureState&) const;
+    float getLineWidth(const GeometryTileFeature &, float, const FeatureState &) const;
     void updateColorRamp();
 
     std::shared_ptr<PremultipliedImage> colorRamp;

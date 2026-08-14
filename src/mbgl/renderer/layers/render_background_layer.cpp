@@ -116,6 +116,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
                                    const std::shared_ptr<UpdateParameters>& updateParameters,
+                                   [[maybe_unused]] const PaintParameters& paintParameters,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     assert(updateParameters);
