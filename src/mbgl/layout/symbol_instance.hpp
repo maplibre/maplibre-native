@@ -26,7 +26,7 @@
     }
 #endif
 
-namespace mbgl {
+namespace mln {
 
 class Anchor;
 class IndexedSubfeature;
@@ -260,4 +260,4 @@ private:
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
 
-} // namespace mbgl
+} // namespace mln

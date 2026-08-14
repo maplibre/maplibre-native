@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class BucketParameters;
 class Anchor;
@@ -44,7 +44,7 @@ public:
 
     void createBucket(const ImagePositions&,
                       std::unique_ptr<FeatureIndex>&,
-                      mbgl::unordered_map<std::string, LayerRenderData>&,
+                      mln::unordered_map<std::string, LayerRenderData>&,
                       bool firstLoad,
                       bool showCollisionBoxes,
                       const CanonicalTileID& canonical) override;
@@ -155,4 +155,4 @@ private:
     bool retainFeaturesById = false;
 };
 
-} // namespace mbgl
+} // namespace mln

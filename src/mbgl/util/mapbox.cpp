@@ -11,7 +11,7 @@
 #include <cstring>
 #include <regex>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 namespace mapbox {
 
@@ -417,4 +417,4 @@ const uint64_t DEFAULT_OFFLINE_TILE_COUNT_LIMIT = 6000;
 
 } // end namespace mapbox
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

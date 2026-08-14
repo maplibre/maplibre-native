@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/line_layer_properties.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class BucketParameters;
 class RenderLineLayer;
@@ -28,7 +28,7 @@ public:
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
-                    const mbgl::ImagePositions& patternPositions,
+                    const mln::ImagePositions& patternPositions,
                     const PatternLayerMap&,
                     std::size_t index,
                     const CanonicalTileID&) override;
@@ -102,4 +102,4 @@ private:
     const uint32_t overscaling;
 };
 
-} // namespace mbgl
+} // namespace mln

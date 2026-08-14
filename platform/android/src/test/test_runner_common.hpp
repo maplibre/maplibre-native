@@ -6,7 +6,7 @@
 
 #include "jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 int severityToPriority(EventSeverity severity);
@@ -20,4 +20,4 @@ bool copyFile(JNIEnv* env,
 void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& destinationPath);
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

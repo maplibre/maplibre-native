@@ -8,7 +8,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -29,4 +29,4 @@ std::optional<PropertyExpression<T>> convertFunctionToExpression(const Convertib
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <array>
 #include <span>
 
-namespace mbgl {
+namespace mln {
 
 // A set of four numbers representing padding around a box.
 struct Padding {
@@ -62,11 +62,11 @@ struct Padding {
     std::array<float, 4> toArray() const;
 
     // Used by ValueFactory<Padding>::make()
-    mbgl::Value serialize() const;
+    mln::Value serialize() const;
 };
 
 inline Padding operator*(const Padding& padding, float scale) {
     return {padding.top * scale, padding.right * scale, padding.bottom * scale, padding.left * scale};
 }
 
-} // namespace mbgl
+} // namespace mln

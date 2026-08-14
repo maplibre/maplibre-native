@@ -3,7 +3,7 @@
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/util/image.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class Texture;
@@ -26,4 +26,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

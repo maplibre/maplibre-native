@@ -1,7 +1,7 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/util/exception.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -64,4 +64,4 @@ Image::Impl::Impl(std::string id_,
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

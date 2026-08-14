@@ -5,7 +5,7 @@
 #include <mbgl/shaders/uniforms.hpp>
 #include <mbgl/style/properties.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ClippingMaskProgram final : public Program<ClippingMaskProgram,
                                                  shaders::BuiltIn::ClippingMaskProgram,
@@ -23,4 +23,4 @@ public:
 using ClippingMaskLayoutVertex = ClippingMaskProgram::LayoutVertex;
 using ClippingMaskAttributes = ClippingMaskProgram::AttributeList;
 
-} // namespace mbgl
+} // namespace mln

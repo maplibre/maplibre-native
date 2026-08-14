@@ -5,7 +5,7 @@
 #include <memory>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class Texture2D;
@@ -41,4 +41,4 @@ private:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

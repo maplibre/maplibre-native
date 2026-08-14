@@ -3,7 +3,7 @@
 #include <mbgl/style/conversion.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -14,4 +14,4 @@ struct Converter<CustomGeometrySource::Options> {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

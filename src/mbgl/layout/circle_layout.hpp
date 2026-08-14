@@ -7,7 +7,7 @@
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/util/containers.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class CircleLayout final : public Layout {
 public:
@@ -58,7 +58,7 @@ public:
 
     void createBucket(const ImagePositions&,
                       std::unique_ptr<FeatureIndex>& featureIndex,
-                      mbgl::unordered_map<std::string, LayerRenderData>& renderData,
+                      mln::unordered_map<std::string, LayerRenderData>& renderData,
                       const bool,
                       const bool,
                       const CanonicalTileID& canonical) override {
@@ -174,4 +174,4 @@ private:
     bool retainFeaturesById = false;
 };
 
-} // namespace mbgl
+} // namespace mln

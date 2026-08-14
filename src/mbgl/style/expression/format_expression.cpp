@@ -2,7 +2,7 @@
 #include <mbgl/style/expression/format_expression.hpp>
 #include <mbgl/style/expression/formatted.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -29,7 +29,7 @@ FormatExpression::FormatExpression(std::vector<FormatExpressionSection> sections
     : Expression(Kind::FormatExpression, type::Formatted, collectDependencies(sections_, &depsOfSection)),
       sections(std::move(sections_)) {}
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 ParseResult FormatExpression::parse(const Convertible& value, ParsingContext& ctx) {
     std::size_t argsLength = arrayLength(value);
@@ -140,11 +140,11 @@ bool FormatExpression::operator==(const Expression& e) const noexcept {
     return false;
 }
 
-mbgl::Value FormatExpression::serialize() const {
-    std::vector<mbgl::Value> serialized{{getOperator()}};
+mln::Value FormatExpression::serialize() const {
+    std::vector<mln::Value> serialized{{getOperator()}};
     for (const auto& section : sections) {
         serialized.push_back(section.content->serialize());
-        std::unordered_map<std::string, mbgl::Value> options;
+        std::unordered_map<std::string, mln::Value> options;
         if (section.fontScale) {
             options.emplace(kFormattedSectionFontScale, section.fontScale->serialize());
         }
@@ -228,4 +228,4 @@ EvaluationResult FormatExpression::evaluate(const EvaluationContext& params) con
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

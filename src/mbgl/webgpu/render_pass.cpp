@@ -17,7 +17,7 @@
 #include <cstring> // for strlen
 #include <cstdlib> // for std::getenv
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class RenderPass::Impl {
@@ -44,14 +44,14 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     impl->commandEncoder = commandEncoder_.getEncoder();
 
     if (!impl->commandEncoder) {
-        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Command encoder unavailable");
+        mln::Log::Error(mln::Event::Render, "WebGPU: Command encoder unavailable");
         return;
     }
 
     // Access the renderable resource associated with this pass
     // Check if resource exists before accessing it
     if (!descriptor.renderable.hasResource()) {
-        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: No renderable resource available");
+        mln::Log::Error(mln::Event::Render, "WebGPU: No renderable resource available");
         return;
     }
 
@@ -73,7 +73,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     }
 
     if (!colorViewHandle) {
-        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to acquire color attachment view");
+        mln::Log::Error(mln::Event::Render, "WebGPU: Failed to acquire color attachment view");
         return;
     }
 
@@ -184,7 +184,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
             impl->encoder, 0.0f, 0.0f, static_cast<float>(size.width), static_cast<float>(size.height), 0.0f, 1.0f);
         wgpuRenderPassEncoderSetScissorRect(impl->encoder, 0, 0, size.width, size.height);
     } else {
-        mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to begin render pass");
+        mln::Log::Error(mln::Event::Render, "WebGPU: Failed to begin render pass");
 #if MLN_WEBGPU_IMPL_WGPU
         wgpuTextureViewRelease(impl->colorView);
         wgpuTextureViewRelease(impl->depthStencilView);
@@ -200,7 +200,7 @@ RenderPass::~RenderPass() {
         try {
             wgpuRenderPassEncoderEnd(impl->encoder);
         } catch (...) {
-            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to end render pass");
+            mln::Log::Error(mln::Event::Render, "WebGPU: Failed to end render pass");
         }
         wgpuRenderPassEncoderRelease(impl->encoder);
     }
@@ -266,4 +266,4 @@ const gfx::UniformBufferArray* RenderPass::getGlobalUniformBuffers() const {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class Programs {
 public:
@@ -19,4 +19,4 @@ private:
     ProgramParameters programParameters;
 };
 
-} // namespace mbgl
+} // namespace mln

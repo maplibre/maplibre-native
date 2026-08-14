@@ -4,7 +4,7 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 
 void SourceFeatureState::updateState(const std::optional<std::string>& sourceLayerID,
                                      const std::string& featureID,
@@ -136,4 +136,4 @@ void SourceFeatureState::removeState(const std::optional<std::string>& sourceLay
     }
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 class Style;
@@ -113,9 +113,9 @@ struct RenderingStats {
         NDCBound ndcBound;
 
         // The tiles in which this item was rendered (including overdraw)
-        mbgl::unordered_set<OverscaledTileID> tileIDs;
+        mln::unordered_set<OverscaledTileID> tileIDs;
 
-        void mergeFrom(const NDCBound& bound, const mbgl::unordered_set<OverscaledTileID>& ids) {
+        void mergeFrom(const NDCBound& bound, const mln::unordered_set<OverscaledTileID>& ids) {
             ndcBound.include(bound);
             tileIDs.insert(ids.begin(), ids.end());
         }
@@ -133,13 +133,13 @@ struct RenderingStats {
     };
     struct SourceLayerIDHash {
         std::size_t operator()(const SourceLayerID& id) const noexcept {
-            return mbgl::util::hash(id.sourceID, id.layerID);
+            return mln::util::hash(id.sourceID, id.layerID);
         }
     };
 
     /// Collected feature information by layer, if enabled via `MapOptions::withRenderedFeatureInfo()`
-    using LayerFeaturesMap = mbgl::unordered_map<std::string, FeatureInfo>;
-    using FrameRenderedFeaturesMap = mbgl::unordered_map<SourceLayerID, LayerFeaturesMap, SourceLayerIDHash>;
+    using LayerFeaturesMap = mln::unordered_map<std::string, FeatureInfo>;
+    using FrameRenderedFeaturesMap = mln::unordered_map<SourceLayerID, LayerFeaturesMap, SourceLayerIDHash>;
     FrameRenderedFeaturesMap frameRenderedFeatures{};
 
     RenderingStats& operator+=(const RenderingStats&);
@@ -166,7 +166,7 @@ public:
     void create(style::Style& style);
     void destroy(style::Style& style);
 
-    mbgl::style::SymbolLayer* getLayer(style::Style& style);
+    mln::style::SymbolLayer* getLayer(style::Style& style);
 
     void update(style::Style& style, const gfx::RenderingStats& stats);
 
@@ -183,4 +183,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

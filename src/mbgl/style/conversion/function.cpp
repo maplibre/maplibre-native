@@ -16,7 +16,7 @@
 #include <cassert>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -1029,4 +1029,4 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

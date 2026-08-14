@@ -25,7 +25,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -609,4 +609,4 @@ void GeometryTileWorker::finalizeLayout() {
     parent.invoke(&GeometryTile::onLayout, std::move(layoutResult), correlationID);
 }
 
-} // namespace mbgl
+} // namespace mln

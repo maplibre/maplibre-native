@@ -12,7 +12,7 @@
 #include <variant>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 /// A 2 by 2 matrix
 using mat2 = std::array<double, 2 * 2>;
@@ -455,4 +455,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class ImageManagerObserver {
 public:
@@ -15,4 +15,4 @@ public:
     virtual void onRemoveUnusedStyleImages(const std::vector<std::string>&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

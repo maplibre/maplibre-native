@@ -4,7 +4,7 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class PluginLayerProperties final : public LayerProperties {
@@ -18,4 +18,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

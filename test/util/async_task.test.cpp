@@ -9,8 +9,8 @@
 #include <future>
 #include <vector>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 
 namespace {
 
@@ -128,7 +128,7 @@ TEST(AsyncTask, RequestCoalescingMultithreaded) {
 
 TEST(AsyncTask, ThreadSafety) {
     RunLoop loop;
-    mbgl::util::SimpleIdentity id;
+    mln::util::SimpleIdentity id;
 
     unsigned count = 0, numThreads = 25;
     std::atomic_uint completed(numThreads);

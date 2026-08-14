@@ -7,7 +7,7 @@
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/buckets/line_bucket.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 /// Generate fill buffers, without outline
@@ -45,4 +45,4 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   SegmentVector& basicLineSegments);
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

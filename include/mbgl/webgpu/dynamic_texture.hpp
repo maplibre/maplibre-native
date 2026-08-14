@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/dynamic_texture.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Context;
@@ -27,4 +27,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

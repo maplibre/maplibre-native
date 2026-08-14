@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 struct LayoutGroupKey {
     // Direct comparable fields (fast path)
@@ -28,13 +28,13 @@ struct LayoutGroupKey {
     bool operator==(const LayoutGroupKey& other) const;
 };
 
-using GroupMap = mbgl::unordered_map<LayoutGroupKey, std::vector<Immutable<style::LayerProperties>>>;
+using GroupMap = mln::unordered_map<LayoutGroupKey, std::vector<Immutable<style::LayerProperties>>>;
 
 GroupMap groupLayers(const std::vector<Immutable<style::LayerProperties>>&);
 
-} // namespace mbgl
+} // namespace mln
 
 template <>
-struct std::hash<mbgl::LayoutGroupKey> {
-    std::size_t operator()(const mbgl::LayoutGroupKey& key) const noexcept;
+struct std::hash<mln::LayoutGroupKey> {
+    std::size_t operator()(const mln::LayoutGroupKey& key) const noexcept;
 };

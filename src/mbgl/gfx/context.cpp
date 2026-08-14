@@ -1,5 +1,5 @@
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl::gfx {
+namespace mln::gfx {
 gfx::ContextObserver Context::nullObserver;
-} // namespace mbgl::gfx
+} // namespace mln::gfx

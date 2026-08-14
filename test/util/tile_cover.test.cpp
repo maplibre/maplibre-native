@@ -8,7 +8,7 @@
 #include <ctime>   /* time */
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 const Range<uint8_t> zoomRange(0, 14);
 

@@ -2,7 +2,7 @@
 #include <mbgl/tile/custom_geometry_tile.hpp>
 #include <mbgl/util/tile_range.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomTileLoader::CustomTileLoader(const TileFunction& fetchTileFn, const TileFunction& cancelTileFn) {
@@ -119,4 +119,4 @@ void CustomTileLoader::invokeTileCancel(const CanonicalTileID& tileID) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

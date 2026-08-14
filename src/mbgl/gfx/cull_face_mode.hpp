@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/types.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class CullFaceMode {
@@ -21,4 +21,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

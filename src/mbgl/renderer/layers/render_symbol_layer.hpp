@@ -6,7 +6,7 @@
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 
@@ -132,4 +132,4 @@ private:
     LayerTweakerPtr collisionLayerTweaker;
 };
 
-} // namespace mbgl
+} // namespace mln

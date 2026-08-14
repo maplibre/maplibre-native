@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 Faded<T> CrossFadedPropertyEvaluator<T>::operator()(const style::Undefined&) const {
@@ -32,4 +32,4 @@ Faded<T> CrossFadedPropertyEvaluator<T>::calculate(const T& min, const T& mid, c
 template class CrossFadedPropertyEvaluator<style::expression::Image>;
 template class CrossFadedPropertyEvaluator<std::vector<float>>;
 
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/tile_server_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ResourceOptions::Impl {
 public:
@@ -10,7 +10,7 @@ public:
     TileServerOptions tileServerOptions;
     std::string cachePath = ":memory:";
     std::string assetPath = ".";
-    uint64_t maximumSize = mbgl::util::DEFAULT_MAX_CACHE_SIZE;
+    uint64_t maximumSize = mln::util::DEFAULT_MAX_CACHE_SIZE;
     void* platformContext = nullptr;
 };
 
@@ -94,4 +94,4 @@ ResourceOptions ResourceOptions::Default() {
     return resourceOptions;
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -15,7 +15,7 @@
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/geojson.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -26,7 +26,7 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
+    static ParseResult parse(const mln::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const noexcept override {}
 
@@ -34,7 +34,7 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "distance"; }
 
 private:
@@ -44,4 +44,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

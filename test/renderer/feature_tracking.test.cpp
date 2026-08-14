@@ -25,10 +25,10 @@
 #include <memory>
 #include <optional>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::expression;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::expression;
+using namespace mln::util;
 
 struct FeatureTrackingTest {
     util::RunLoop loop;

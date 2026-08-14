@@ -20,7 +20,7 @@
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -59,7 +59,7 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
                evaluated.get<style::CircleStrokeOpacity>().constantOr(1) > 0))
                  ? RenderPass::Translucent
                  : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -224,7 +224,7 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
     constexpr bool is3d = false;
     constexpr bool enableDepth = true;
     constexpr std::int32_t subLayerIndex = 0;
-    constexpr std::optional<mbgl::Point<double>> origin = std::nullopt;
+    constexpr std::optional<mln::Point<double>> origin = std::nullopt;
 
     const auto zoom = state.getZoom();
     const auto zoomFraction = state.getZoomFraction();
@@ -282,8 +282,8 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             const auto& [strokeAlphaVertex] = strokeAlphaBinder->getVertexValue(vertexOffset);
             const auto interpAlpha = alphaIsConstant ? std::array<float, 2>{1, 1} : alphaVertex.a1;
             const auto interpStrokeAlpha = strokeAlphaIsConstant ? std::array<float, 2>{1, 1} : strokeAlphaVertex.a1;
-            if (mbgl::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0 &&
-                mbgl::util::interpolate(interpStrokeAlpha[0], interpStrokeAlpha[1], zoomFraction) == 0) {
+            if (mln::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0 &&
+                mln::util::interpolate(interpStrokeAlpha[0], interpStrokeAlpha[1], zoomFraction) == 0) {
                 continue;
             }
         }
@@ -365,7 +365,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
 
-    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+    if (!(mln::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
@@ -465,4 +465,4 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

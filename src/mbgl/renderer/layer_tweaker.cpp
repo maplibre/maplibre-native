@@ -8,7 +8,7 @@
 #include <mbgl/util/containers.hpp>
 #include <mbgl/util/mat4.hpp>
 
-namespace mbgl {
+namespace mln {
 
 LayerTweaker::LayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
     : id(std::move(id_)),
@@ -49,7 +49,7 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  const uint32_t currentLayerIndex,
                                  const std::array<float, 2>& translation,
                                  const style::TranslateAnchorType anchor,
-                                 const std::optional<mbgl::Point<double>>& origin,
+                                 const std::optional<mln::Point<double>>& origin,
                                  bool is3d,
                                  bool useDepth,
                                  std::int32_t subLayerIndex,
@@ -117,4 +117,4 @@ void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
     matrix::multiply(matrix, projMatrixRef, matrix);
 }
 
-} // namespace mbgl
+} // namespace mln

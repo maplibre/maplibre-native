@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/location_indicator_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class LocationIndicatorLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     LocationIndicatorLayer(jni::JNIEnv&, jni::String&);
 
-    LocationIndicatorLayer(mbgl::style::LocationIndicatorLayer&);
+    LocationIndicatorLayer(mln::style::LocationIndicatorLayer&);
 
-    LocationIndicatorLayer(std::unique_ptr<mbgl::style::LocationIndicatorLayer>);
+    LocationIndicatorLayer(std::unique_ptr<mln::style::LocationIndicatorLayer>);
 
     ~LocationIndicatorLayer();
 
@@ -71,13 +71,13 @@ public:
 }; // class LocationIndicatorLayer
 
 class LocationIndicatorJavaLayerPeerFactory final : public JavaLayerPeerFactory,
-                                                    public mbgl::LocationIndicatorLayerFactory {
+                                                    public mln::LocationIndicatorLayerFactory {
 public:
     ~LocationIndicatorJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -86,4 +86,4 @@ public:
 }; // class LocationIndicatorJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

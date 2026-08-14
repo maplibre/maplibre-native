@@ -14,7 +14,7 @@
 #include <functional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class ShaderRegistry;
@@ -93,4 +93,4 @@ public:
     virtual void onRenderError(std::exception_ptr) {}
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gl/object.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class IndexBufferResource : public gfx::IndexBufferResource {
@@ -16,4 +16,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

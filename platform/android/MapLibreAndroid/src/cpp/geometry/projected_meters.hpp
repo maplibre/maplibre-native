@@ -5,10 +5,10 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class ProjectedMeters : private mbgl::util::noncopyable {
+class ProjectedMeters : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/geometry/ProjectedMeters"; };
 
@@ -18,4 +18,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 static double _signedArea(const GeometryCoordinates& ring) {
     double sum = 0;

@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 #if !defined(MBGL_USE_BUILTIN_ICU)
@@ -45,4 +45,4 @@ std::string formatNumber(double number, const std::string&, const std::string&, 
 #endif
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

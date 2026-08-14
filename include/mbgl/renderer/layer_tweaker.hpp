@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Drawable;
@@ -66,7 +66,7 @@ public:
                               const uint32_t currentLayerIndex,
                               const std::array<float, 2>& translation,
                               style::TranslateAnchorType anchor,
-                              const std::optional<mbgl::Point<double>>& origin,
+                              const std::optional<mln::Point<double>>& origin,
                               bool is3d,
                               bool useDepth,
                               std::int32_t subLayerIndex,
@@ -100,4 +100,4 @@ protected:
     bool propertiesUpdated = true;
 };
 
-} // namespace mbgl
+} // namespace mln

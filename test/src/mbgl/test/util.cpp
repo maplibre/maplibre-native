@@ -19,7 +19,7 @@
 
 using namespace ::testing;
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 void checkImage(const std::string& base,
@@ -84,4 +84,4 @@ double getImageDiff(const std::string& base, const PremultipliedImage& actual, d
 }
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln

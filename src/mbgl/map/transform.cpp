@@ -18,7 +18,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 /** Converts the given angle (in radians) to be numerically close to the anchor
  * angle, allowing it to be interpolated properly without sudden jumps. */
@@ -75,7 +75,7 @@ void Transform::resize(const Size size) {
 
         // It also turns out that state.setProperties isn't enough if you change the center, you need to set Cc and Bc
         // too, which setLatLngZoom does.
-        state.setLatLngZoom(mbgl::LatLng{lat, lon}, state.scaleZoom(scale));
+        state.setLatLngZoom(mln::LatLng{lat, lon}, state.scaleZoom(scale));
         observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
 
         return;
@@ -542,7 +542,7 @@ NorthOrientation Transform::getNorthOrientation() const {
 
 // MARK: - Constrain mode
 
-void Transform::setConstrainMode(mbgl::ConstrainMode mode) {
+void Transform::setConstrainMode(mln::ConstrainMode mode) {
     state.setConstrainMode(mode);
     double scale{state.getScale()};
     double x{state.getX()};
@@ -558,7 +558,7 @@ ConstrainMode Transform::getConstrainMode() const {
 
 // MARK: - Viewport mode
 
-void Transform::setViewportMode(mbgl::ViewportMode mode) {
+void Transform::setViewportMode(mln::ViewportMode mode) {
     state.setViewportMode(mode);
 }
 
@@ -751,4 +751,4 @@ void Transform::setFreeCameraOptions(const FreeCameraOptions& options) {
     state.setFreeCameraOptions(options);
 }
 
-} // namespace mbgl
+} // namespace mln

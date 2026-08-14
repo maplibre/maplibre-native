@@ -5,7 +5,7 @@
 #include <mbgl/style/layers/fill_extrusion_layer.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* FillExtrusionLayerFactory::getTypeInfo() const noexcept {
     return style::FillExtrusionLayer::Impl::staticTypeInfo();
@@ -36,4 +36,4 @@ std::unique_ptr<RenderLayer> FillExtrusionLayerFactory::createRenderLayer(Immuta
     return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderFillExtrusionLayer(std::move(renderImpl)));
 }
 
-} // namespace mbgl
+} // namespace mln

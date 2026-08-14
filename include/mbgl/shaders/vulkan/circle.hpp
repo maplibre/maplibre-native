@@ -3,7 +3,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 constexpr auto circleShaderPrelude = R"(
@@ -307,4 +307,4 @@ void main() {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

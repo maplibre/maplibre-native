@@ -2,7 +2,7 @@
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 IndexBufferResource::IndexBufferResource(UniqueBuffer&& buffer_, int byteSize_)
@@ -35,4 +35,4 @@ IndexBufferResource::~IndexBufferResource() noexcept {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

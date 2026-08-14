@@ -4,7 +4,7 @@
 
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 template <typename T>
@@ -13,4 +13,4 @@ auto clamp(std::enable_if_t<std::is_scalar_v<T>, T> value, T min_, T max_) noexc
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

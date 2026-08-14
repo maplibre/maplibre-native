@@ -4,8 +4,7 @@
 #include <mutex>
 #include <shared_mutex>
 
-namespace mbgl {
-namespace gfx {
+namespace mln::gfx {
 
 bool ShaderGroup::isShader(const std::string& shaderName) const noexcept {
     std::shared_lock<std::shared_mutex> readerLock(programLock);
@@ -50,5 +49,4 @@ bool ShaderGroup::registerShader(std::shared_ptr<Shader>&& shader, const std::st
     return true;
 }
 
-} // namespace gfx
-} // namespace mbgl
+} // namespace mln::gfx

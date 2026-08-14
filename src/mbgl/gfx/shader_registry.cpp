@@ -4,8 +4,7 @@
 #include <mutex>
 #include <shared_mutex>
 
-namespace mbgl {
-namespace gfx {
+namespace mln::gfx {
 
 ShaderRegistry::ShaderRegistry()
     : legacyGroup() {}
@@ -49,5 +48,4 @@ bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, const std::str
     return true;
 }
 
-} // namespace gfx
-} // namespace mbgl
+} // namespace mln::gfx

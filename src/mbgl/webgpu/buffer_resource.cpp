@@ -5,7 +5,7 @@
 #include <cstring>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 BufferResource::BufferResource(
@@ -146,4 +146,4 @@ bool BufferResource::needReBind(VersionType otherVersion) const noexcept {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

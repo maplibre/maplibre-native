@@ -14,7 +14,7 @@
 #include <array>
 #include <map>
 
-namespace mbgl {
+namespace mln {
 
 class UpdateParameters;
 class RenderStaticData;
@@ -157,4 +157,4 @@ public:
     bool captureRenderedFeatures = false;
 };
 
-} // namespace mbgl
+} // namespace mln

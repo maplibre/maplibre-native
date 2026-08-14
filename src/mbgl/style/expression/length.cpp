@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/utf8_op_helpers.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -39,7 +39,7 @@ std::vector<std::optional<Value>> Length::possibleOutputs() const {
     return {std::nullopt};
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult Length::parse(const Convertible& value, ParsingContext& ctx) {
     std::size_t length = arrayLength(value);
 
@@ -62,4 +62,4 @@ ParseResult Length::parse(const Convertible& value, ParsingContext& ctx) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

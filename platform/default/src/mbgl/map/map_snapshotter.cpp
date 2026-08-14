@@ -18,7 +18,7 @@
 #include <memory>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 // static
 MapSnapshotterObserver& MapSnapshotterObserver::nullObserver() {
@@ -175,7 +175,7 @@ public:
 
     PremultipliedImage takeImage() { return renderer->actor().ask(&SnapshotterRenderer::takeImage).get(); }
 
-    const mbgl::TaggedScheduler& getThreadPool() const override {
+    const mln::TaggedScheduler& getThreadPool() const override {
         return renderer->actor().ask(&SnapshotterRenderer::getThreadPool).get();
     }
 
@@ -208,7 +208,7 @@ public:
         map.jumpTo(map.cameraForLatLngs(latLngs, regionInsets));
     }
 
-    void setPadding(const mbgl::EdgeInsets& insets) {
+    void setPadding(const mln::EdgeInsets& insets) {
         regionInsets = insets;
         if (!region.isEmpty()) {
             std::vector<LatLng> latLngs = {region.southwest(), region.northeast()};
@@ -216,7 +216,7 @@ public:
         }
     }
 
-    mbgl::EdgeInsets getPadding() const { return regionInsets; }
+    mln::EdgeInsets getPadding() const { return regionInsets; }
 
     void addAnnotationImage(std::unique_ptr<style::Image> image) { map.addAnnotationImage(std::move(image)); }
 
@@ -304,7 +304,7 @@ private:
     SnapshotterRendererFrontend frontend;
     Map map;
     LatLngBounds region;
-    mbgl::EdgeInsets regionInsets;
+    mln::EdgeInsets regionInsets;
 };
 
 MapSnapshotter::MapSnapshotter(Size size,
@@ -370,11 +370,11 @@ LatLngBounds MapSnapshotter::getRegion() const {
     return impl->getMap().latLngBoundsForCamera(impl->getMap().getCameraOptions(getPadding()));
 }
 
-void MapSnapshotter::setPadding(const mbgl::EdgeInsets& insets) {
+void MapSnapshotter::setPadding(const mln::EdgeInsets& insets) {
     impl->setPadding(insets);
 }
 
-mbgl::EdgeInsets MapSnapshotter::getPadding() const {
+mln::EdgeInsets MapSnapshotter::getPadding() const {
     return impl->getPadding();
 }
 
@@ -402,4 +402,4 @@ void MapSnapshotter::cancel() {
     impl->cancel();
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -39,7 +39,7 @@
 #include <mapbox/eternal.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -82,7 +82,7 @@ bool isConstant(const Expression& expression) {
 }
 } // namespace
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 ParseResult ParsingContext::parse(const Convertible& value,
                                   std::size_t index_,
@@ -304,4 +304,4 @@ std::optional<std::string> ParsingContext::checkType(const type::Type& t) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

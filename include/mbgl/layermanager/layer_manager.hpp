@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 class LayerProperties;
 } // namespace style
@@ -74,7 +74,7 @@ public:
      * in order to save binary size (the corresponding SDK layer wrappers
      * should be excluded from the project build).
      */
-    virtual void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>);
+    virtual void addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>);
 
 protected:
     virtual ~LayerManager() = default;
@@ -82,4 +82,4 @@ protected:
     virtual LayerFactory* getFactory(const style::LayerTypeInfo*) noexcept = 0;
 };
 
-} // namespace mbgl
+} // namespace mln

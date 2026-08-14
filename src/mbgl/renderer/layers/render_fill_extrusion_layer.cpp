@@ -26,7 +26,7 @@
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -71,7 +71,7 @@ void RenderFillExtrusionLayer::captureRenderedFeatures(
     const auto translationAnchor = evaluated.get<FillExtrusionTranslateAnchor>();
     const auto base = constOrDefault<FillExtrusionBase>(evaluated);
     const auto height = constOrDefault<FillExtrusionHeight>(evaluated);
-    const std::optional<mbgl::Point<double>> origin = std::nullopt;
+    const std::optional<mln::Point<double>> origin = std::nullopt;
     const auto zoomFraction = state.getZoomFraction();
     std::optional<mat4> tileMatrix;
 
@@ -144,7 +144,7 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
 
     passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0) ? RenderPass::Translucent
                                                                             : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -585,4 +585,4 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

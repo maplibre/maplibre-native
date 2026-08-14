@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using HeatmapTextureShaderSource = ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::WebGPU>;
@@ -14,4 +14,4 @@ const std::array<TextureInfo, 2> HeatmapTextureShaderSource::textures = {Texture
                                                                          TextureInfo{1, idHeatmapColorRampTexture}};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

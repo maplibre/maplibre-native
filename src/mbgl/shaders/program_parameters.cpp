@@ -6,7 +6,7 @@
 #include <string_view>
 #include <stdexcept>
 
-namespace mbgl {
+namespace mln {
 
 ProgramParameters::ProgramParameters(const float pixelRatio, const bool overdraw)
     : defines(2),
@@ -79,4 +79,4 @@ const std::string& ProgramParameters::fragmentSource(gfx::Backend::Type backend)
     }
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -7,7 +7,7 @@
 // reach.reachableBlock = ^(Reachability* reach) { NetworkStatus::Reachable();
 // }; [reach startNotifier];
 
-namespace mbgl {
+namespace mln {
 
 std::atomic<bool> NetworkStatus::online(true);
 std::mutex NetworkStatus::mtx;
@@ -51,4 +51,4 @@ void NetworkStatus::Reachable() {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

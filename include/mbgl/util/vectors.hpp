@@ -7,7 +7,7 @@
 #include <utility>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 
 using vec2 = std::array<double, 2>;
 using vec2f = std::array<float, 2>;
@@ -114,4 +114,4 @@ inline vec2 max(const vec2& a, const vec2& b) {
 }
 
 } // namespace vector
-} // namespace mbgl
+} // namespace mln

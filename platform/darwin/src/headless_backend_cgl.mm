@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the pixel format used for
@@ -124,4 +124,4 @@ void HeadlessBackend::createImpl() {
 }
 
 }  // namespace gl
-}  // namespace mbgl
+}  // namespace mln

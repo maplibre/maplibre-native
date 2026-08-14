@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/debug.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using DebugShaderSource = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>;
@@ -14,4 +14,4 @@ const std::array<TextureInfo, 1> DebugShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

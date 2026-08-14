@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class Anchor;
 class PositionedIcon;
@@ -69,4 +69,4 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                           const ImageMap& imageMap,
                           bool allowVerticalPlacement);
 
-} // namespace mbgl
+} // namespace mln

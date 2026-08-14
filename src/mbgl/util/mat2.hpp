@@ -26,7 +26,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 
 using mat2 = std::array<double, 4>;
 
@@ -45,4 +45,4 @@ inline vec2 operator*(const mat2& m, const vec2& a) {
 }
 
 } // namespace matrix
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <mbgl/gfx/drawable_data.hpp>
 #include <mbgl/shaders/color_relief_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 /**
@@ -23,4 +23,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

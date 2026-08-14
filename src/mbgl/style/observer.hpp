@@ -6,7 +6,7 @@
 #include <exception>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Observer : public SourceObserver {
@@ -23,4 +23,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

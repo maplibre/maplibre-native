@@ -8,17 +8,17 @@
 #include <mbgl/util/geometry.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
-using namespace mbgl::style::expression;
+using namespace mln::style::expression;
 
 namespace {
 bool isExpression(const Convertible& filter);
 }
 ParseResult convertLegacyFilter(const Convertible& values, Error& error);
-std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values);
+std::optional<mln::Value> serializeLegacyFilter(const Convertible& values);
 
 std::optional<Filter> Converter<Filter>::operator()(const Convertible& value, Error& error) const {
     if (isExpression(value)) {
@@ -244,11 +244,11 @@ ParseResult convertLegacyFilter(const Convertible& values, Error& error) {
     }
 }
 
-std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values) {
+std::optional<mln::Value> serializeLegacyFilter(const Convertible& values) {
     if (isUndefined(values)) {
         return std::nullopt;
     } else if (isArray(values)) {
-        std::vector<mbgl::Value> result;
+        std::vector<mln::Value> result;
         result.reserve(arrayLength(values));
         for (std::size_t i = 0; i < arrayLength(values); ++i) {
             auto arrayValue = serializeLegacyFilter(arrayMember(values, i));
@@ -258,11 +258,11 @@ std::optional<mbgl::Value> serializeLegacyFilter(const Convertible& values) {
                 result.emplace_back(NullValue());
             }
         }
-        return mbgl::Value(result);
+        return mln::Value(result);
     }
     return toValue(values);
 }
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

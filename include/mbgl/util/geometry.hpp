@@ -6,7 +6,7 @@
 #include <mapbox/geometry/point_arithmetic.hpp>
 #include <mapbox/geometry/for_each_point.hpp>
 
-namespace mbgl {
+namespace mln {
 
 enum class FeatureType : uint8_t {
     Unknown = 0,
@@ -83,4 +83,4 @@ auto forEachPoint(const Geometry<T> &g, F f) {
     mapbox::geometry::for_each_point(g, f);
 }
 
-} // namespace mbgl
+} // namespace mln

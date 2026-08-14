@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/widevector.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using WideVectorShaderSource = ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal>;
@@ -20,4 +20,4 @@ const std::array<AttributeInfo, 4> WideVectorShaderSource::instanceAttributes = 
 const std::array<TextureInfo, 0> WideVectorShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

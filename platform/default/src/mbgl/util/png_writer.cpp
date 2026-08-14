@@ -31,7 +31,7 @@ void addChunk(std::string& png, const char* type, const char* data = "", const u
 
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 // Encode PNGs without libpng.
 std::string encodePNG(const PremultipliedImage& pre) {
@@ -72,4 +72,4 @@ std::string encodePNG(const PremultipliedImage& pre) {
     return png;
 }
 
-} // namespace mbgl
+} // namespace mln

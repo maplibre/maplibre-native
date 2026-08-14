@@ -6,7 +6,7 @@
 #include "attach_env.hpp"
 #include "number_format_jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void NumberFormat::registerNative(jni::JNIEnv& env) {
@@ -85,4 +85,4 @@ std::string formatNumber(double number,
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #include <cassert>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 std::string toString(int32_t t) {
@@ -94,4 +94,4 @@ std::string toHex(uint64_t value) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

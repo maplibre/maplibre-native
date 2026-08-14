@@ -24,7 +24,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 namespace matrix {
 
@@ -416,4 +416,4 @@ void diffsplit(matf4& outValue, matf4& outDiff, const mat4& source) {
 
 } // namespace matrix
 
-} // namespace mbgl
+} // namespace mln

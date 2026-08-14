@@ -3,7 +3,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/mtl/buffer_resource.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class RenderPass;
@@ -52,4 +52,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

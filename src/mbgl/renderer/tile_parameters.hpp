@@ -8,7 +8,7 @@
 
 #include <mapbox/std/weak.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class FileSource;
@@ -43,4 +43,4 @@ public:
     bool captureRenderedFeatures = false;
 };
 
-} // namespace mbgl
+} // namespace mln

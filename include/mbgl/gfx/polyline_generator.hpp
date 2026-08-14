@@ -14,7 +14,7 @@
 #include <functional>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class PolylineGeneratorDistances {
@@ -52,7 +52,7 @@ public:
     using LayoutVertexFunc = std::function<PolylineLayoutVertex(
         Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar /*= 0*/)>;
     using CreateSegmentFunc = std::function<PolylineSegment(std::size_t vertexOffset, std::size_t indexOffset)>;
-    using GetSegmentFunc = std::function<mbgl::SegmentBase&(PolylineSegment& segment)>;
+    using GetSegmentFunc = std::function<mln::SegmentBase&(PolylineSegment& segment)>;
     using Indexes = gfx::IndexVector<gfx::Triangles>;
 
 public:
@@ -100,4 +100,4 @@ private:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

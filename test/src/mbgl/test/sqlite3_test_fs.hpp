@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 class SQLite3TestFS {
@@ -37,4 +37,4 @@ public:
 };
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln

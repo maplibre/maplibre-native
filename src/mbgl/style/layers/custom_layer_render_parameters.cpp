@@ -2,10 +2,10 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
-CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParameters& paintParameters) {
+CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParameters& paintParameters) {
     const TransformState& state = paintParameters.state;
     width = state.getSize().width;
     height = state.getSize().height;
@@ -22,4 +22,4 @@ CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParame
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

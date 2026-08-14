@@ -6,7 +6,7 @@
 
 #include <mbgl/layermanager/layer_manager.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -60,4 +60,4 @@ std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQue
     return {};
 }
 
-} // namespace mbgl
+} // namespace mln

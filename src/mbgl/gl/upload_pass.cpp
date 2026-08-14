@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -286,4 +286,4 @@ const gfx::Context& UploadPass::getContext() const {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

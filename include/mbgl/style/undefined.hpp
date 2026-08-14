@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Undefined {};
@@ -13,4 +13,4 @@ inline bool operator!=(const Undefined&, const Undefined&) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

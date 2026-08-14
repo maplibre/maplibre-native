@@ -3,7 +3,7 @@
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/actor/optional_actor_ref.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TaggedScheduler;
 
@@ -79,4 +79,4 @@ private:
     OptionalActorRef<Object> selfRef;
 };
 
-} // namespace mbgl
+} // namespace mln

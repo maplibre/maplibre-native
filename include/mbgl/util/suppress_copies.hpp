@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /// Wrapper that doesn't participate in copying.
@@ -31,4 +31,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

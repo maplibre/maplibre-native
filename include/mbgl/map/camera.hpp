@@ -9,7 +9,7 @@
 
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 
 /** Various options for describing the viewpoint of a map. All fields are
     optional.
@@ -115,7 +115,7 @@ struct AnimationOptions {
     std::optional<double> minZoom;
 
     /** The easing timing curve of the transition. */
-    std::optional<mbgl::util::UnitBezier> easing;
+    std::optional<mln::util::UnitBezier> easing;
 
     /** A function that is called on each frame of the transition, just before a
         screen update, except on the last frame. The first parameter indicates
@@ -177,4 +177,4 @@ struct FreeCameraOptions {
     void setRollPitchBearing(double roll, double pitch, double bearing) noexcept;
 };
 
-} // namespace mbgl
+} // namespace mln

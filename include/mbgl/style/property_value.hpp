@@ -4,7 +4,7 @@
 #include <mbgl/style/undefined.hpp>
 #include <mbgl/style/property_expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 template <class T>
@@ -75,4 +75,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

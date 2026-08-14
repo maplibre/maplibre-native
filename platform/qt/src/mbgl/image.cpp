@@ -4,7 +4,7 @@
 #include <QByteArray>
 #include <QImage>
 
-namespace mbgl {
+namespace mln {
 
 std::string encodePNG(const PremultipliedImage& pre) {
     QImage image(pre.data.get(), pre.size.width, pre.size.height, QImage::Format_ARGB32_Premultiplied);
@@ -48,4 +48,4 @@ PremultipliedImage decodeImage(const std::string& string) {
 
     return {{static_cast<uint32_t>(image.width()), static_cast<uint32_t>(image.height())}, std::move(img)};
 }
-} // namespace mbgl
+} // namespace mln

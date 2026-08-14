@@ -11,7 +11,7 @@
 #include <QNetworkReply>
 #include <QPair>
 
-namespace mbgl {
+namespace mln {
 
 HTTPRequest::HTTPRequest(HTTPFileSource::Impl* context, const Resource& resource, FileSource::Callback callback)
     : m_context(context),
@@ -71,7 +71,7 @@ void HTTPRequest::handleNetworkReply(QNetworkReply* reply, const QByteArray& dat
     // Calling `callback` may result in deleting `this`.
     // Copy data to temporaries first.
     auto callback = m_callback;
-    mbgl::Response response;
+    mln::Response response;
 
     using Error = Response::Error;
 
@@ -155,4 +155,4 @@ void HTTPRequest::handleNetworkReply(QNetworkReply* reply, const QByteArray& dat
     callback(response);
 }
 
-} // namespace mbgl
+} // namespace mln

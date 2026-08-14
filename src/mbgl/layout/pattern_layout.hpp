@@ -8,7 +8,7 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/util/containers.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class PatternDependency {
 public:
@@ -17,7 +17,7 @@ public:
     std::string max;
 };
 
-using PatternLayerMap = mbgl::unordered_map<std::string, PatternDependency>;
+using PatternLayerMap = mln::unordered_map<std::string, PatternDependency>;
 
 class PatternFeature {
 public:
@@ -183,7 +183,7 @@ public:
 
     void createBucket(const ImagePositions& patternPositions,
                       std::unique_ptr<FeatureIndex>& featureIndex,
-                      mbgl::unordered_map<std::string, LayerRenderData>& renderData,
+                      mln::unordered_map<std::string, LayerRenderData>& renderData,
                       const bool /*firstLoad*/,
                       const bool /*showCollisionBoxes*/,
                       const CanonicalTileID& canonical) override {
@@ -222,4 +222,4 @@ protected:
     bool retainFeaturesById = false;
 };
 
-} // namespace mbgl
+} // namespace mln

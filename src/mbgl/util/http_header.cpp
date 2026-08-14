@@ -17,7 +17,7 @@
 #pragma warning(pop)
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace http {
 
 CacheControl CacheControl::parse(const std::string& value) {
@@ -64,4 +64,4 @@ std::optional<Timestamp> parseRetryHeaders(const std::optional<std::string>& ret
 }
 
 } // namespace http
-} // namespace mbgl
+} // namespace mln

@@ -1,6 +1,6 @@
 #include <chrono>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> now() {
@@ -8,4 +8,4 @@ std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds> now() {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

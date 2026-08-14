@@ -5,7 +5,7 @@
 #include <jni.h>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 struct RenderingStats {
@@ -18,4 +18,4 @@ struct RenderingStats {
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 template <class T>
 class StyleChange {
@@ -45,4 +45,4 @@ LayerDifference diffLayers(const Immutable<std::vector<ImmutableLayer>>&,
 
 bool hasLayoutDifference(const LayerDifference&, const std::string& layerID);
 
-} // namespace mbgl
+} // namespace mln

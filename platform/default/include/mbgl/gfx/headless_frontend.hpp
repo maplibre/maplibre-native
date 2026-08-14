@@ -10,7 +10,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class Renderer;
 class Map;
@@ -75,4 +75,4 @@ private:
     std::shared_ptr<UpdateParameters> updateParameters;
 };
 
-} // namespace mbgl
+} // namespace mln

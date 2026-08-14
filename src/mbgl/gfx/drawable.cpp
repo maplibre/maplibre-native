@@ -8,7 +8,7 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 struct Drawable::Impl {
@@ -24,7 +24,7 @@ struct Drawable::Impl {
 
 Drawable::Drawable(std::string name_)
     : name(name_),
-      renderPass(mbgl::RenderPass::Opaque),
+      renderPass(mln::RenderPass::Opaque),
       depthType(DepthMaskType::ReadOnly),
       impl(std::make_unique<Impl>()) {}
 
@@ -91,4 +91,4 @@ void Drawable::setRenderTile(Immutable<std::vector<RenderTile>> renderTiles_, co
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

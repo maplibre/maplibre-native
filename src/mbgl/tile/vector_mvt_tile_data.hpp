@@ -15,7 +15,7 @@
 
 #include <protozero/pbf_reader.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class VectorMVTTileFeature : public GeometryTileFeature {
 public:
@@ -61,4 +61,4 @@ private:
     mutable std::map<std::string, const protozero::data_view> layers;
 };
 
-} // namespace mbgl
+} // namespace mln

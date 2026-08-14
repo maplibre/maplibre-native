@@ -1,7 +1,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 
 struct StubGeometryTileFeature : public GeometryTileFeature {
     StubGeometryTileFeature(PropertyMap properties_)
@@ -34,4 +34,4 @@ struct StubGeometryTileFeature : public GeometryTileFeature {
     GeometryCollection geometry;
 };
 
-} // namespace mbgl
+} // namespace mln

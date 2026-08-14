@@ -29,7 +29,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -78,7 +78,7 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
               evaluated.get<style::LineWidth>().constantOr(1.0) > 0)
                  ? RenderPass::Translucent
                  : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
@@ -178,7 +178,7 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
     constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<LineTranslate>();
     const auto translationAnchor = evaluated.get<LineTranslateAnchor>();
-    const std::optional<mbgl::Point<double>> origin = std::nullopt;
+    const std::optional<mln::Point<double>> origin = std::nullopt;
     const auto zoomFraction = state.getZoomFraction();
     std::optional<mat4> tileMatrix;
 
@@ -195,7 +195,7 @@ void RenderLineLayer::captureRenderedFeatures(const LineBucket& bucket,
 
         if (!alphaIsConstant) {
             const auto& [vertex] = alphaBinder->getVertexValue(vertexOffset);
-            if (mbgl::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
+            if (mln::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
                 continue;
             }
         }
@@ -342,7 +342,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
-                                                          ~mbgl::underlying_type(RenderPass::Opaque));
+                                                          ~mln::underlying_type(RenderPass::Opaque));
 
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
@@ -438,7 +438,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto addDrawable = [&](std::unique_ptr<gfx::Drawable>&& drawable, LineLayerTweaker::LineType type) {
             drawable->setTileID(tileID);
-            drawable->setType(mbgl::underlying_type(type));
+            drawable->setType(mln::underlying_type(type));
             drawable->setLayerTweaker(layerTweaker);
             drawable->setRenderTile(renderTilesOwner, &tile);
             drawable->setBinders(renderData->bucket, &paintPropertyBinders);
@@ -597,4 +597,4 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

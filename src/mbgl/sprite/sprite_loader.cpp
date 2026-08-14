@@ -15,7 +15,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 SpriteLoaderObserver nullObserver;
@@ -122,4 +122,4 @@ void SpriteLoader::setObserver(SpriteLoaderObserver* observer_) {
     observer = observer_;
 }
 
-} // namespace mbgl
+} // namespace mln

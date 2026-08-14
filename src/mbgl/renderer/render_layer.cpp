@@ -12,7 +12,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -283,10 +283,10 @@ FloatQuad RenderLayer::decode_color(const FloatPair& encoded) {
 FloatQuad RenderLayer::unpack_mix_color(const FloatQuad& packed, const float t) {
     const auto c1 = decode_color({packed[0], packed[1]});
     const auto c2 = decode_color({packed[2], packed[3]});
-    return mbgl::util::interpolate(c1, c2, t);
+    return mln::util::interpolate(c1, c2, t);
 }
 float RenderLayer::unpack_mix_alpha(const FloatQuad& packed, const float t) {
-    return mbgl::util::interpolate(decode_alpha(packed[1]), decode_alpha(packed[3]), t);
+    return mln::util::interpolate(decode_alpha(packed[1]), decode_alpha(packed[3]), t);
 }
 
 namespace {
@@ -361,4 +361,4 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(
     return std::nullopt;
 }
 
-} // namespace mbgl
+} // namespace mln

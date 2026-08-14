@@ -2,7 +2,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 // Implements a simple in-memory Tile type that holds GeoJSON values. A GeoJSON
 // tile can only have one layer, and it is always returned regardless of which
@@ -80,4 +80,4 @@ private:
     std::shared_ptr<const mapbox::feature::feature_collection<int16_t>> features;
 };
 
-} // namespace mbgl
+} // namespace mln

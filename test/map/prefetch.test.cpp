@@ -14,8 +14,8 @@
 #include <string>
 #include <vector>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 using namespace std::literals::string_literals;
 using namespace std::chrono_literals;
 

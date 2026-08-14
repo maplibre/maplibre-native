@@ -3,10 +3,10 @@
 
 #include <QDebug>
 
-namespace mbgl {
+namespace mln {
 
 void Log::platformRecord(EventSeverity severity, const std::string &msg) {
     qWarning() << "[" << Enum<EventSeverity>::toString(severity) << "] " << QString::fromStdString(msg);
 }
 
-} // namespace mbgl
+} // namespace mln

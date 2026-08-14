@@ -7,7 +7,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(HTTPFileSource, TEST_REQUIRES_SERVER(Cancel)) {
     util::RunLoop loop;

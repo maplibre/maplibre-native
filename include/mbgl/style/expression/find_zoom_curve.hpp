@@ -7,7 +7,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -26,4 +26,4 @@ ZoomCurvePtr findZoomCurveChecked(const expression::Expression& expr);
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

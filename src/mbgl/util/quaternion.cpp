@@ -2,7 +2,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 Quaternion Quaternion::identity = Quaternion(0.0, 0.0, 0.0, 1.0);
 
@@ -97,4 +97,4 @@ bool operator==(const Quaternion& a, const Quaternion& b) noexcept {
     return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
 }
 
-} // namespace mbgl
+} // namespace mln

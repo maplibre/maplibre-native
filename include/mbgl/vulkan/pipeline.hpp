@@ -8,7 +8,7 @@
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/scissor_rect.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class PipelineInfo final {
@@ -95,4 +95,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

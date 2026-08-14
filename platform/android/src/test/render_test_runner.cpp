@@ -1,8 +1,8 @@
 #include <mbgl/render_test.hpp>
 #include "test_runner_common.hpp"
 
-using namespace mbgl;
-using namespace mbgl::android;
+using namespace mln;
+using namespace mln::android;
 
 void updateProgress(JNIEnv* env, struct android_app* app, int completed, int total) {
     jobject nativeActivity = app->activity->clazz;
@@ -20,7 +20,7 @@ void updateProgress(JNIEnv* env, struct android_app* app, int completed, int tot
 }
 
 void android_main(struct android_app* app) {
-    mbgl::android::theJVM = app->activity->vm;
+    mln::android::theJVM = app->activity->vm;
     JNIEnv* env = nullptr;
     app->activity->vm->AttachCurrentThread(&env, NULL);
 
@@ -31,8 +31,8 @@ void android_main(struct android_app* app) {
     int outFd, outEvents;
     struct android_poll_source* source = nullptr;
     if (!copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
-        mbgl::Log::Error(mbgl::Event::General,
-                         "Failed to copy zip File '" + zipFile + "' to external storage for upzipping");
+        mln::Log::Error(mln::Event::General,
+                        "Failed to copy zip File '" + zipFile + "' to external storage for upzipping");
     } else {
         unZipFile(env, zipFile, storagePath);
 
@@ -46,7 +46,7 @@ void android_main(struct android_app* app) {
             }
             argv.push_back(nullptr);
 
-            std::function<void(mbgl::TestStatus)> testStatus = [&](mbgl::TestStatus status) {
+            std::function<void(mln::TestStatus)> testStatus = [&](mln::TestStatus status) {
                 auto result = ALooper_pollOnce(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
                 if (result == ALOOPER_POLL_ERROR) {
                     throw std::runtime_error("ALooper_pollOnce returned an error");
@@ -56,14 +56,14 @@ void android_main(struct android_app* app) {
                     source->process(app, source);
                 }
 
-                mbgl::Log::Info(mbgl::Event::General,
-                                "Current finished tests number is '" + std::to_string(status.completed) + "/" +
-                                    std::to_string(status.total) + "'");
+                mln::Log::Info(mln::Event::General,
+                               "Current finished tests number is '" + std::to_string(status.completed) + "/" +
+                                   std::to_string(status.total) + "'");
                 updateProgress(env, app, static_cast<int>(status.completed), static_cast<int>(status.total));
             };
-            mbgl::Log::Info(mbgl::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "'");
-            bool result = mbgl::runRenderTests(argv.size() - 1, argv.data(), testStatus) == 0;
-            mbgl::Log::Info(mbgl::Event::General, "End running RenderTestRunner with manifest: '" + manifest + "'");
+            mln::Log::Info(mln::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "'");
+            bool result = mln::runRenderTests(argv.size() - 1, argv.data(), testStatus) == 0;
+            mln::Log::Info(mln::Event::General, "End running RenderTestRunner with manifest: '" + manifest + "'");
             return result;
         };
 
@@ -74,7 +74,7 @@ void android_main(struct android_app* app) {
         auto result = runTestWithManifest("/metrics/android-render-test-runner-metrics.json");
         result = runTestWithManifest("/metrics/android-render-test-runner-style.json") && result;
 #endif
-        mbgl::Log::Info(mbgl::Event::General, "All tests are finished!");
+        mln::Log::Info(mln::Event::General, "All tests are finished!");
         changeState(env, app, result);
     }
     while (true) {
@@ -88,7 +88,7 @@ void android_main(struct android_app* app) {
         }
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
-            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
+            mln::Log::Info(mln::Event::General, "Close the App!");
             return;
         }
     }

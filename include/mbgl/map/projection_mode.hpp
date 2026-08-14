@@ -2,7 +2,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Holds values for Axonometric rendering. All fields are
@@ -38,4 +38,4 @@ struct ProjectionMode {
     std::optional<double> ySkew;
 };
 
-} // namespace mbgl
+} // namespace mln

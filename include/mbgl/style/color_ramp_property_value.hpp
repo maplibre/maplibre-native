@@ -4,7 +4,7 @@
 #include <mbgl/style/undefined.hpp>
 #include <mbgl/style/expression/expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 /**
@@ -51,4 +51,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

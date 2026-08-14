@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -120,4 +120,4 @@ highp float weight = u_weight;
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

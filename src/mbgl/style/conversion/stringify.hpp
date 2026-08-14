@@ -15,7 +15,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -166,15 +166,15 @@ void stringify(Writer& writer, const Filter& filter) {
 
 template <class Writer>
 void stringify(Writer& writer, const expression::Formatted& v) {
-    // Convert to mbgl::Value and then use the existing stringify
+    // Convert to mln::Value and then use the existing stringify
     // Serialization strategy for Formatted objects is to return the constant
     // expression that would generate them.
-    stringify(writer, expression::ValueConverter<mbgl::Value>::fromExpressionValue(v));
+    stringify(writer, expression::ValueConverter<mln::Value>::fromExpressionValue(v));
 }
 
 template <class Writer>
 void stringify(Writer& writer, const expression::Image& v) {
-    stringify(writer, expression::ValueConverter<mbgl::Value>::fromExpressionValue(v));
+    stringify(writer, expression::ValueConverter<mln::Value>::fromExpressionValue(v));
 }
 
 template <class Writer>
@@ -203,4 +203,4 @@ void stringify(Writer& writer, const PropertyValue<T>& value) {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

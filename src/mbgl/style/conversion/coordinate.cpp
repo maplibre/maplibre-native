@@ -1,7 +1,7 @@
 #include <mbgl/style/conversion/coordinate.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -31,4 +31,4 @@ std::optional<LatLng> Converter<LatLng>::operator()(const Convertible& value, Er
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

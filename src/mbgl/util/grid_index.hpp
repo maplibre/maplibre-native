@@ -13,7 +13,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 namespace geometry {
 
@@ -413,4 +413,4 @@ bool GridIndex<T>::empty() const {
     return boxElements.empty() && circleElements.empty();
 }
 
-} // namespace mbgl
+} // namespace mln

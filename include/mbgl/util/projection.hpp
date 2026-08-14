@@ -8,7 +8,7 @@
 
 #include <numbers>
 
-namespace mbgl {
+namespace mln {
 
 class ProjectedMeters {
 private:
@@ -100,4 +100,4 @@ private:
     }
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/tile/tile_id.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 struct LayerTypeInfo;
 } // namespace style
@@ -18,4 +18,4 @@ public:
     const bool retainFeaturesById = false;
 };
 
-} // namespace mbgl
+} // namespace mln

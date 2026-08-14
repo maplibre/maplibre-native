@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 /// Color blending equation type
@@ -142,4 +142,4 @@ enum class RenderbufferPixelType : uint8_t {
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

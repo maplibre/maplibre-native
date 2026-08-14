@@ -2,7 +2,7 @@
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/util/exception.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 Image::Image(std::string id,
@@ -62,4 +62,4 @@ const std::optional<TextFit>& Image::getTextFitHeight() const {
     return baseImpl->textFitHeight;
 }
 } // namespace style
-} // namespace mbgl
+} // namespace mln

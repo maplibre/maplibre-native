@@ -6,7 +6,7 @@
 #include <optional>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -18,4 +18,4 @@ public:
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

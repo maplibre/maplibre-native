@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/gfx/backend.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 /// @brief This enum is used with the ShaderSource template to select
@@ -63,4 +63,4 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

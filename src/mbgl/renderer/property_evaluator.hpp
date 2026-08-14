@@ -3,7 +3,7 @@
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 class PropertyEvaluator {
@@ -24,4 +24,4 @@ private:
     T defaultValue;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -1,6 +1,6 @@
 #include "native_map_options.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void NativeMapOptions::registerNative(jni::JNIEnv &env) {
@@ -60,4 +60,4 @@ bool NativeMapOptions::featureInfoEnabled(jni::JNIEnv &env, const jni::Object<Na
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

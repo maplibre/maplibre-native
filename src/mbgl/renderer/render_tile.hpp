@@ -10,7 +10,7 @@
 #include <array>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Texture2D;
@@ -88,4 +88,4 @@ private:
     bool needsRendering = false;
 };
 
-} // namespace mbgl
+} // namespace mln

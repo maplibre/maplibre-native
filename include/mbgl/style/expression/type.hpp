@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 namespace type {
@@ -155,4 +155,4 @@ std::string toString(const T& type) {
 } // namespace type
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

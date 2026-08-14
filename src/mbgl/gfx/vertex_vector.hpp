@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 struct VertexBufferBase {
@@ -129,4 +129,4 @@ template <typename T>
 using VertexVectorPtr = std::shared_ptr<VertexVector<T>>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

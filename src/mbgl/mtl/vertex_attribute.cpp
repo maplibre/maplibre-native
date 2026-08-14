@@ -9,7 +9,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
@@ -47,4 +47,4 @@ const std::unique_ptr<gfx::VertexAttribute>& VertexAttributeArray::set(const siz
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

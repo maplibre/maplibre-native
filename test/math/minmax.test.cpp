@@ -3,7 +3,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/math/minmax.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Math, MinMaxFloatingPoint) {
     double minimumValue = std::numeric_limits<double>::min();

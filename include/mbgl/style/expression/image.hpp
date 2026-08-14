@@ -7,7 +7,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -18,7 +18,7 @@ public:
     Image(std::string imageID);
     explicit Image(std::string imageID, bool available);
     bool operator==(const Image&) const;
-    mbgl::Value toValue() const;
+    mln::Value toValue() const;
     const std::string& id() const;
     bool isAvailable() const;
     bool empty() const;
@@ -46,4 +46,4 @@ struct ValueFactory<expression::Image> {
 } // namespace conversion
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

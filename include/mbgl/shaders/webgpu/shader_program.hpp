@@ -12,7 +12,7 @@
 #include <array>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 struct UniformBlockInfo {
     constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
@@ -167,4 +167,4 @@ protected:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

@@ -31,7 +31,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/std.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -85,7 +85,7 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
         // Supply both - evaluated based on opaquePassCutoff in render().
         passes |= RenderPass::Opaque;
     }
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -147,7 +147,7 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
     constexpr std::int32_t subLayerIndex = 1;
     const auto translation = evaluated.get<FillTranslate>();
     const auto translationAnchor = evaluated.get<FillTranslateAnchor>();
-    const std::optional<mbgl::Point<double>> origin = std::nullopt;
+    const std::optional<mln::Point<double>> origin = std::nullopt;
     const auto zoomFraction = state.getZoomFraction();
     std::optional<mat4> tileMatrix;
 
@@ -164,7 +164,7 @@ void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
 
         if (!alphaIsConstant) {
             const auto& [vertex] = alphaBinder->getVertexValue(vertexOffset);
-            if (mbgl::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
+            if (mln::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
                 continue;
             }
         }
@@ -633,4 +633,4 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

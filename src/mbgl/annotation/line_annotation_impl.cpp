@@ -3,7 +3,7 @@
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/style/layers/line_layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -34,4 +34,4 @@ const ShapeAnnotationGeometry& LineAnnotationImpl::geometry() const {
     return annotation.geometry;
 }
 
-} // namespace mbgl
+} // namespace mln

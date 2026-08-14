@@ -29,7 +29,7 @@ inline char toLowerHex(char c) {
 
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 std::string percentEncode(const std::string& input) {
@@ -163,4 +163,4 @@ std::string transformURL(const std::string& tpl, const std::string& str, const U
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

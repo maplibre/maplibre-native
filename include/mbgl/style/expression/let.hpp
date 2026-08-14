@@ -8,7 +8,7 @@
 #include <map>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -22,7 +22,7 @@ public:
           bindings(std::move(bindings_)),
           result(std::move(result_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
+    static ParseResult parse(const mln::style::conversion::Convertible&, ParsingContext&);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
@@ -39,7 +39,7 @@ public:
 
     Expression* getResult() const noexcept { return result.get(); }
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "let"; }
 
 private:
@@ -54,7 +54,7 @@ public:
           name(std::move(name_)),
           value(std::move(value_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
+    static ParseResult parse(const mln::style::conversion::Convertible&, ParsingContext&);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
@@ -69,7 +69,7 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "var"; }
 
     const std::shared_ptr<Expression>& getBoundExpression() const noexcept { return value; }
@@ -81,4 +81,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

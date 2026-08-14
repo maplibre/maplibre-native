@@ -16,7 +16,7 @@
 #include <optional>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 class RenderStaticData;
@@ -71,7 +71,7 @@ public:
                                       std::string_view vertexName,
                                       std::string_view fragmentName,
                                       const ProgramParameters& programParameters,
-                                      const mbgl::unordered_map<std::string, std::string>& additionalDefines);
+                                      const mln::unordered_map<std::string, std::string>& additionalDefines);
 
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
@@ -178,4 +178,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

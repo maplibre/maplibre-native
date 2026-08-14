@@ -8,7 +8,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class Resource {
 public:
@@ -109,4 +109,4 @@ inline bool Resource::hasLoadingMethod(Resource::LoadingMethod method) const {
     return (loadingMethod & method);
 }
 
-} // namespace mbgl
+} // namespace mln

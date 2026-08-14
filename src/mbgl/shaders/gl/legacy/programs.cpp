@@ -3,7 +3,7 @@
 #include <mbgl/util/logging.hpp>
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 
 Programs::Programs(const ProgramParameters& programParameters_)
     : programParameters(programParameters_) {}
@@ -36,4 +36,4 @@ void Programs::registerWith(gfx::ShaderRegistry& registry) {
     registerTypes<ClippingMaskProgram>(registry, programParameters);
 }
 
-} // namespace mbgl
+} // namespace mln

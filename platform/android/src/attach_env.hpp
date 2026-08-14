@@ -2,7 +2,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class JNIEnvDeleter {
@@ -29,4 +29,4 @@ using UniqueEnv = std::unique_ptr<jni::JNIEnv, JNIEnvDeleter>;
 UniqueEnv AttachEnv();
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

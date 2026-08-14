@@ -8,7 +8,7 @@
 #include <map>
 #include <mutex>
 
-namespace mbgl {
+namespace mln {
 
 class CustomGeometryTile;
 
@@ -45,4 +45,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

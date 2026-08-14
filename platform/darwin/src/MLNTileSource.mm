@@ -53,10 +53,10 @@ const MLNTileSourceOption MLNTileSourceOptionTileCoordinateSystem =
 
 @end
 
-mbgl::Tileset MLNTileSetFromTileURLTemplates(
+mln::Tileset MLNTileSetFromTileURLTemplates(
     NSArray<NSString *> *tileURLTemplates,
     NSDictionary<MLNTileSourceOption, id> *_Nullable options) {
-  mbgl::Tileset tileSet;
+  mln::Tileset tileSet;
 
   for (NSString *tileURLTemplate in tileURLTemplates) {
     tileSet.tiles.push_back(tileURLTemplate.UTF8String);
@@ -138,10 +138,10 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(
     [tileCoordinateSystemNumber getValue:&tileCoordinateSystem];
     switch (tileCoordinateSystem) {
       case MLNTileCoordinateSystemXYZ:
-        tileSet.scheme = mbgl::Tileset::Scheme::XYZ;
+        tileSet.scheme = mln::Tileset::Scheme::XYZ;
         break;
       case MLNTileCoordinateSystemTMS:
-        tileSet.scheme = mbgl::Tileset::Scheme::TMS;
+        tileSet.scheme = mln::Tileset::Scheme::TMS;
         break;
     }
   }
@@ -156,10 +156,10 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(
     [encodingNumber getValue:&encoding];
     switch (encoding) {
       case MLNDEMEncodingMapbox:
-        tileSet.rasterEncoding = mbgl::Tileset::RasterEncoding::Mapbox;
+        tileSet.rasterEncoding = mln::Tileset::RasterEncoding::Mapbox;
         break;
       case MLNDEMEncodingTerrarium:
-        tileSet.rasterEncoding = mbgl::Tileset::RasterEncoding::Terrarium;
+        tileSet.rasterEncoding = mln::Tileset::RasterEncoding::Terrarium;
         break;
     }
   }
@@ -175,10 +175,10 @@ mbgl::Tileset MLNTileSetFromTileURLTemplates(
     [encodingNumber getValue:&encoding];
     switch (encoding) {
       case MLNVectorTileSourceEncodingMapbox:
-        tileSet.vectorEncoding = mbgl::Tileset::VectorEncoding::Mapbox;
+        tileSet.vectorEncoding = mln::Tileset::VectorEncoding::Mapbox;
         break;
       case MLNVectorTileSourceEncodingMLT:
-        tileSet.vectorEncoding = mbgl::Tileset::VectorEncoding::MLT;
+        tileSet.vectorEncoding = mln::Tileset::VectorEncoding::MLT;
         break;
     }
   }

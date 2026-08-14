@@ -12,7 +12,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 namespace {
@@ -260,4 +260,4 @@ void FreeCameraOptions::setRollPitchBearing(double roll, double pitch, double be
         util::orientationFromRollPitchBearing(util::deg2rad(roll), util::deg2rad(pitch), util::deg2rad(bearing)).m;
 }
 
-} // namespace mbgl
+} // namespace mln

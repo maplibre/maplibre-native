@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 std::shared_ptr<UniformBuffer> UniformBufferArray::nullref = nullptr;
@@ -53,4 +53,4 @@ void UniformBufferArray::createOrUpdate(
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

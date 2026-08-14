@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/color_relief_layer.hpp>
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* ColorReliefLayerFactory::getTypeInfo() const noexcept {
     return style::ColorReliefLayer::Impl::staticTypeInfo();
@@ -24,4 +24,4 @@ std::unique_ptr<RenderLayer> ColorReliefLayerFactory::createRenderLayer(Immutabl
     return std::make_unique<RenderColorReliefLayer>(staticImmutableCast<style::ColorReliefLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

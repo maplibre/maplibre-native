@@ -4,19 +4,19 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class PointF : private mbgl::util::noncopyable {
+class PointF : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "android/graphics/PointF"; };
 
     static jni::Local<jni::Object<PointF>> New(jni::JNIEnv&, float, float);
 
-    static mbgl::ScreenCoordinate getScreenCoordinate(jni::JNIEnv&, const jni::Object<PointF>&);
+    static mln::ScreenCoordinate getScreenCoordinate(jni::JNIEnv&, const jni::Object<PointF>&);
 
     static void registerNative(jni::JNIEnv&);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

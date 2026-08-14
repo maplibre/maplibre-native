@@ -46,21 +46,21 @@ const CGPoint MLNLogoImagePosition = CGPointMake(8, 8);
 const CGFloat MLNSnapshotterMinimumPixelSize = 64;
 NSString *const MLNSnapshotterAnnotationSpritePrefix = @"org.maplibre.sprites.";
 
-MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions, MLNImage *mglImage,
-                                mbgl::MapSnapshotter::PointForFn pointForFn,
-                                mbgl::MapSnapshotter::LatLngForFn latLngForFn,
+MLNImage *MLNAttributedSnapshot(mln::MapSnapshotter::Attributions attributions, MLNImage *mglImage,
+                                mln::MapSnapshotter::PointForFn pointForFn,
+                                mln::MapSnapshotter::LatLngForFn latLngForFn,
                                 MLNMapSnapshotOptions *options,
                                 MLNMapSnapshotOverlayHandler overlayHandler);
 MLNMapSnapshot *MLNSnapshotWithDecoratedImage(MLNImage *mglImage, MLNMapSnapshotOptions *options,
-                                              mbgl::MapSnapshotter::Attributions attributions,
-                                              mbgl::MapSnapshotter::PointForFn pointForFn,
-                                              mbgl::MapSnapshotter::LatLngForFn latLngForFn,
+                                              mln::MapSnapshotter::Attributions attributions,
+                                              mln::MapSnapshotter::PointForFn pointForFn,
+                                              mln::MapSnapshotter::LatLngForFn latLngForFn,
                                               MLNMapSnapshotOverlayHandler overlayHandler,
                                               NSError *_Nullable *outError);
 NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
-    mbgl::MapSnapshotter::Attributions attributions);
+    mln::MapSnapshotter::Attributions attributions);
 
-class MLNMapSnapshotterDelegateHost : public mbgl::MapSnapshotterObserver {
+class MLNMapSnapshotterDelegateHost : public mln::MapSnapshotterObserver {
 public:
   MLNMapSnapshotterDelegateHost(MLNMapSnapshotter *snapshotter_) : snapshotter(snapshotter_) {}
 
@@ -109,20 +109,20 @@ private:
 @property (nonatomic, assign) CGFloat scale;
 - (instancetype)initWithContext:(CGContextRef)context
                           scale:(CGFloat)scale
-                     pointForFn:(mbgl::MapSnapshotter::PointForFn)pointForFn
-                    latLngForFn:(mbgl::MapSnapshotter::LatLngForFn)latLngForFn;
+                     pointForFn:(mln::MapSnapshotter::PointForFn)pointForFn
+                    latLngForFn:(mln::MapSnapshotter::LatLngForFn)latLngForFn;
 
 @end
 
 @implementation MLNMapSnapshotOverlay {
-  mbgl::MapSnapshotter::PointForFn _pointForFn;
-  mbgl::MapSnapshotter::LatLngForFn _latLngForFn;
+  mln::MapSnapshotter::PointForFn _pointForFn;
+  mln::MapSnapshotter::LatLngForFn _latLngForFn;
 }
 
 - (instancetype)initWithContext:(CGContextRef)context
                           scale:(CGFloat)scale
-                     pointForFn:(mbgl::MapSnapshotter::PointForFn)pointForFn
-                    latLngForFn:(mbgl::MapSnapshotter::LatLngForFn)latLngForFn {
+                     pointForFn:(mln::MapSnapshotter::PointForFn)pointForFn
+                    latLngForFn:(mln::MapSnapshotter::LatLngForFn)latLngForFn {
   self = [super init];
   if (self) {
     _context = context;
@@ -137,27 +137,27 @@ private:
 #if TARGET_OS_IPHONE
 
 - (CGPoint)pointForCoordinate:(CLLocationCoordinate2D)coordinate {
-  mbgl::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
+  mln::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
   return CGPointMake(sc.x, sc.y);
 }
 
 - (CLLocationCoordinate2D)coordinateForPoint:(CGPoint)point {
-  mbgl::LatLng latLng = _latLngForFn(mbgl::ScreenCoordinate(point.x, point.y));
+  mln::LatLng latLng = _latLngForFn(mln::ScreenCoordinate(point.x, point.y));
   return MLNLocationCoordinate2DFromLatLng(latLng);
 }
 
 #else
 
 - (NSPoint)pointForCoordinate:(CLLocationCoordinate2D)coordinate {
-  mbgl::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
+  mln::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
   CGFloat height = ((CGFloat)CGBitmapContextGetHeight(self.context)) / self.scale;
   return NSMakePoint(sc.x, height - sc.y);
 }
 
 - (CLLocationCoordinate2D)coordinateForPoint:(NSPoint)point {
   CGFloat height = ((CGFloat)CGBitmapContextGetHeight(self.context)) / self.scale;
-  auto screenCoord = mbgl::ScreenCoordinate(point.x, height - point.y);
-  mbgl::LatLng latLng = _latLngForFn(screenCoord);
+  auto screenCoord = mln::ScreenCoordinate(point.x, height - point.y);
+  mln::LatLng latLng = _latLngForFn(screenCoord);
   return MLNLocationCoordinate2DFromLatLng(latLng);
 }
 
@@ -207,21 +207,21 @@ private:
 @interface MLNMapSnapshot () <MLNMapSnapshotProtocol>
 - (instancetype)initWithImage:(nullable MLNImage *)image
                         scale:(CGFloat)scale
-                   pointForFn:(mbgl::MapSnapshotter::PointForFn)pointForFn
-                  latLngForFn:(mbgl::MapSnapshotter::LatLngForFn)latLngForFn;
+                   pointForFn:(mln::MapSnapshotter::PointForFn)pointForFn
+                  latLngForFn:(mln::MapSnapshotter::LatLngForFn)latLngForFn;
 
 @property (nonatomic) CGFloat scale;
 @end
 
 @implementation MLNMapSnapshot {
-  mbgl::MapSnapshotter::PointForFn _pointForFn;
-  mbgl::MapSnapshotter::LatLngForFn _latLngForFn;
+  mln::MapSnapshotter::PointForFn _pointForFn;
+  mln::MapSnapshotter::LatLngForFn _latLngForFn;
 }
 
 - (instancetype)initWithImage:(nullable MLNImage *)image
                         scale:(CGFloat)scale
-                   pointForFn:(mbgl::MapSnapshotter::PointForFn)pointForFn
-                  latLngForFn:(mbgl::MapSnapshotter::LatLngForFn)latLngForFn {
+                   pointForFn:(mln::MapSnapshotter::PointForFn)pointForFn
+                  latLngForFn:(mln::MapSnapshotter::LatLngForFn)latLngForFn {
   self = [super init];
   if (self) {
     _pointForFn = pointForFn;
@@ -235,25 +235,25 @@ private:
 #if TARGET_OS_IPHONE
 
 - (CGPoint)pointForCoordinate:(CLLocationCoordinate2D)coordinate {
-  mbgl::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
+  mln::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
   return CGPointMake(sc.x, sc.y);
 }
 
 - (CLLocationCoordinate2D)coordinateForPoint:(CGPoint)point {
-  mbgl::LatLng latLng = _latLngForFn(mbgl::ScreenCoordinate(point.x, point.y));
+  mln::LatLng latLng = _latLngForFn(mln::ScreenCoordinate(point.x, point.y));
   return MLNLocationCoordinate2DFromLatLng(latLng);
 }
 
 #else
 
 - (NSPoint)pointForCoordinate:(CLLocationCoordinate2D)coordinate {
-  mbgl::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
+  mln::ScreenCoordinate sc = _pointForFn(MLNLatLngFromLocationCoordinate2D(coordinate));
   return NSMakePoint(sc.x, self.image.size.height - sc.y);
 }
 
 - (CLLocationCoordinate2D)coordinateForPoint:(NSPoint)point {
-  auto screenCoord = mbgl::ScreenCoordinate(point.x, self.image.size.height - point.y);
-  mbgl::LatLng latLng = _latLngForFn(screenCoord);
+  auto screenCoord = mln::ScreenCoordinate(point.x, self.image.size.height - point.y);
+  mln::LatLng latLng = _latLngForFn(screenCoord);
   return MLNLocationCoordinate2DFromLatLng(latLng);
 }
 
@@ -267,7 +267,7 @@ private:
 @end
 
 @implementation MLNMapSnapshotter {
-  std::unique_ptr<mbgl::MapSnapshotter> _mbglMapSnapshotter;
+  std::unique_ptr<mln::MapSnapshotter> _mbglMapSnapshotter;
   std::unique_ptr<MLNMapSnapshotterDelegateHost> _delegateHost;
   NSMutableArray<id<MLNAnnotation>> *_annotationsToInstall;
   NSMutableSet<NSString *> *_installedImages;
@@ -365,7 +365,7 @@ private:
 
       [self installAnnotationImage:annotationImage];
 
-      _mbglMapSnapshotter->addAnnotation(mbgl::SymbolAnnotation{
+      _mbglMapSnapshotter->addAnnotation(mln::SymbolAnnotation{
           MLNPointFromLocationCoordinate2D(annotation.coordinate), symbolName.UTF8String});
     }
   }
@@ -439,12 +439,12 @@ private:
   // the snapshot block below, causing the only remaining references to the snapshotter to go out of
   // scope.
   __block MLNMapSnapshotter *strongSelf = self;
-  _mbglMapSnapshotter->snapshot(^(std::exception_ptr mbglError, mbgl::PremultipliedImage image,
-                                  mbgl::MapSnapshotter::Attributions attributions,
-                                  mbgl::MapSnapshotter::PointForFn pointForFn,
-                                  mbgl::MapSnapshotter::LatLngForFn latLngForFn) {
+  _mbglMapSnapshotter->snapshot(^(std::exception_ptr mbglError, mln::PremultipliedImage image,
+                                  mln::MapSnapshotter::Attributions attributions,
+                                  mln::MapSnapshotter::PointForFn pointForFn,
+                                  mln::MapSnapshotter::LatLngForFn latLngForFn) {
     if (mbglError) {
-      NSString *description = @(mbgl::util::toString(mbglError).c_str());
+      NSString *description = @(mln::util::toString(mbglError).c_str());
       NSDictionary *userInfo = @{NSLocalizedDescriptionKey : description};
       NSError *error = [NSError errorWithDomain:MLNErrorDomain
                                            code:MLNErrorCodeSnapshotFailed
@@ -485,7 +485,7 @@ private:
   });
 }
 
-MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions, MLNImage *mglImage,
+MLNImage *MLNAttributedSnapshot(mln::MapSnapshotter::Attributions attributions, MLNImage *mglImage,
                                 MLNMapSnapshotOptions *options, void (^overlayHandler)()) {
   NSArray<MLNAttributionInfo *> *attributionInfo =
       MLNAttributionInfosFromAttributions(attributions);
@@ -663,9 +663,9 @@ MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
 }
 
 MLNMapSnapshot *MLNSnapshotWithDecoratedImage(MLNImage *mglImage, MLNMapSnapshotOptions *options,
-                                              mbgl::MapSnapshotter::Attributions attributions,
-                                              mbgl::MapSnapshotter::PointForFn pointForFn,
-                                              mbgl::MapSnapshotter::LatLngForFn latLngForFn,
+                                              mln::MapSnapshotter::Attributions attributions,
+                                              mln::MapSnapshotter::PointForFn pointForFn,
+                                              mln::MapSnapshotter::LatLngForFn latLngForFn,
                                               MLNMapSnapshotOverlayHandler overlayHandler,
                                               NSError *_Nullable *outError) {
   MLNImage *compositedImage = MLNAttributedSnapshot(attributions, mglImage, options, ^{
@@ -718,7 +718,7 @@ MLNMapSnapshot *MLNSnapshotWithDecoratedImage(MLNImage *mglImage, MLNMapSnapshot
 }
 
 NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
-    mbgl::MapSnapshotter::Attributions attributions) {
+    mln::MapSnapshotter::Attributions attributions) {
   NSMutableArray *infos = [NSMutableArray array];
 
 #if TARGET_OS_IPHONE
@@ -872,7 +872,7 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
 
   // Size; taking into account the minimum texture size for OpenGL ES
   // For non retina screens the ratio is 1:1 MLNSnapshotterMinimumPixelSize
-  mbgl::Size size = {
+  mln::Size size = {
       static_cast<uint32_t>(MAX(options.size.width, MLNSnapshotterMinimumPixelSize)),
       static_cast<uint32_t>(MAX(options.size.height, MLNSnapshotterMinimumPixelSize))};
 
@@ -882,11 +882,11 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
   MLNRendererConfiguration *config = [MLNRendererConfiguration currentConfiguration];
 
   auto tileServerOptions = [[MLNSettings sharedSettings] tileServerOptionsInternal];
-  mbgl::ResourceOptions resourceOptions;
+  mln::ResourceOptions resourceOptions;
   resourceOptions.withTileServerOptions(*tileServerOptions)
       .withCachePath(MLNOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
       .withAssetPath(NSBundle.mainBundle.resourceURL.path.UTF8String);
-  mbgl::ClientOptions clientOptions;
+  mln::ClientOptions clientOptions;
 
   auto apiKey = [[MLNSettings sharedSettings] apiKey];
   if (apiKey) {
@@ -898,13 +898,13 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
       config.localFontFamilyName ? std::optional(std::string(config.localFontFamilyName.UTF8String))
                                  : std::nullopt;
   _delegateHost = std::make_unique<MLNMapSnapshotterDelegateHost>(self);
-  _mbglMapSnapshotter = std::make_unique<mbgl::MapSnapshotter>(
+  _mbglMapSnapshotter = std::make_unique<mln::MapSnapshotter>(
       size, pixelRatio, resourceOptions, clientOptions, *_delegateHost, localFontFamilyName);
 
   _mbglMapSnapshotter->setStyleURL(std::string(options.styleURL.absoluteString.UTF8String));
 
   // Camera options
-  mbgl::CameraOptions cameraOptions;
+  mln::CameraOptions cameraOptions;
   if (CLLocationCoordinate2DIsValid(options.camera.centerCoordinate)) {
     cameraOptions.center = MLNLatLngFromLocationCoordinate2D(options.camera.centerCoordinate);
   }
@@ -920,7 +920,7 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
   if (options.camera.roll != 0) {
     cameraOptions.roll = options.camera.roll;
   }
-  if (cameraOptions != mbgl::CameraOptions()) {
+  if (cameraOptions != mln::CameraOptions()) {
     _mbglMapSnapshotter->setCameraOptions(cameraOptions);
   }
 
@@ -949,21 +949,21 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(
   return 1.0;
 }
 
-- (mbgl::Color)strokeColorForShapeAnnotation:(MLNShape *)annotation {
+- (mln::Color)strokeColorForShapeAnnotation:(MLNShape *)annotation {
   if ([self.delegate respondsToSelector:@selector(mapSnapshotter:strokeColorForShapeAnnotation:)]) {
     MLNColor *color = [self.delegate mapSnapshotter:self strokeColorForShapeAnnotation:annotation];
     return color.mgl_color;
   }
 
-  return mbgl::Color::white();
+  return mln::Color::white();
 }
 
-- (mbgl::Color)fillColorForPolygonAnnotation:(MLNPolygon *)annotation {
+- (mln::Color)fillColorForPolygonAnnotation:(MLNPolygon *)annotation {
   if ([self.delegate respondsToSelector:@selector(mapSnapshotter:fillColorForPolygonAnnotation:)]) {
     MLNColor *color = [self.delegate mapSnapshotter:self fillColorForPolygonAnnotation:annotation];
     return color.mgl_color;
   }
-  return mbgl::Color::white();
+  return mln::Color::white();
 }
 
 - (CGFloat)lineWidthForPolylineAnnotation:(MLNPolyline *)annotation {

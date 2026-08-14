@@ -231,7 +231,7 @@ class IntrospectionTest : EspressoTest() {
     private val locationManager by lazy {
         context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
-    private val locationEngine by lazy { MockLocationEngine() }
+    private val locationEngine: MockLocationEngine by lazy { MockLocationEngine() }
     private val domkerk = LatLng(52.090864, 5.122452)
     private var mapIdleResource: MapIdleResource? = null
     private var featureIdleResource: FeatureMatchIdleResource? = null

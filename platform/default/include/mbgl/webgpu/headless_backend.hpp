@@ -5,7 +5,7 @@
 #include "mbgl/gfx/offscreen_texture.hpp"
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class HeadlessBackend final : public webgpu::RendererBackend, public gfx::HeadlessBackend {
@@ -28,7 +28,7 @@ public:
     // Override WebGPU-specific methods
     void* getCurrentTextureView() override;
     void* getDepthStencilView() override;
-    mbgl::Size getFramebufferSize() const override;
+    mln::Size getFramebufferSize() const override;
 
 private:
     void activate() override;
@@ -42,4 +42,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

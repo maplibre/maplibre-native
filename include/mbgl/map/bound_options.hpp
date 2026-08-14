@@ -4,7 +4,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Holds options to limit what parts of a map are visible. All fields are
@@ -55,4 +55,4 @@ struct BoundOptions {
     std::optional<double> minPitch;
 };
 
-} // namespace mbgl
+} // namespace mln

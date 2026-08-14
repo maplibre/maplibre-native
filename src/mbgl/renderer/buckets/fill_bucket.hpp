@@ -19,7 +19,7 @@
 #include <mbgl/renderer/buckets/line_bucket.hpp>
 #endif
 
-namespace mbgl {
+namespace mln {
 
 class BucketParameters;
 class RenderFillLayer;
@@ -93,4 +93,4 @@ private:
                          const CanonicalTileID&);
 };
 
-} // namespace mbgl
+} // namespace mln

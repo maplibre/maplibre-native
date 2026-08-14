@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/heatmap.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using HeatmapShaderSource = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
@@ -16,4 +16,4 @@ const std::array<AttributeInfo, 3> HeatmapShaderSource::attributes = {
 const std::array<TextureInfo, 0> HeatmapShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

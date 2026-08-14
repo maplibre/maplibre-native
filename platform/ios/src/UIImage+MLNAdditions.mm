@@ -14,7 +14,7 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
 
 @implementation UIImage (MLNAdditions)
 
-- (nullable instancetype)initWithMLNStyleImage:(const mbgl::style::Image &)styleImage {
+- (nullable instancetype)initWithMLNStyleImage:(const mln::style::Image &)styleImage {
   CGImageRef image = CGImageCreateWithMLNPremultipliedImage(styleImage.getImage().clone());
   if (!image) {
     return nil;
@@ -45,7 +45,7 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
   return self;
 }
 
-- (nullable instancetype)initWithMLNPremultipliedImage:(const mbgl::PremultipliedImage &&)mbglImage
+- (nullable instancetype)initWithMLNPremultipliedImage:(const mln::PremultipliedImage &&)mbglImage
                                                  scale:(CGFloat)scale {
   CGImageRef image = CGImageCreateWithMLNPremultipliedImage(mbglImage.clone());
   if (!image) {
@@ -58,8 +58,8 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
   return self;
 }
 
-- (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
-  mbgl::style::ImageStretches stretchX, stretchY;
+- (std::unique_ptr<mln::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
+  mln::style::ImageStretches stretchX, stretchY;
   if (self.resizingMode == UIImageResizingModeStretch) {
     stretchX.push_back({
         self.capInsets.left * self.scale,
@@ -71,9 +71,9 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
     });
   }
 
-  std::optional<mbgl::style::ImageContent> imageContent;
+  std::optional<mln::style::ImageContent> imageContent;
   if (!MLNEdgeInsetsIsZero(self.capInsets)) {
-    imageContent = (mbgl::style::ImageContent){
+    imageContent = (mln::style::ImageContent){
         .left = static_cast<float>(self.capInsets.left * self.scale),
         .top = static_cast<float>(self.capInsets.top * self.scale),
         .right = static_cast<float>((self.size.width - self.capInsets.right) * self.scale),
@@ -82,12 +82,12 @@ BOOL MLNEdgeInsetsIsZero(UIEdgeInsets edgeInsets) {
   }
 
   BOOL isTemplate = self.renderingMode == UIImageRenderingModeAlwaysTemplate;
-  return std::make_unique<mbgl::style::Image>([identifier UTF8String], self.mgl_premultipliedImage,
-                                              static_cast<float>(self.scale), isTemplate, stretchX,
-                                              stretchY, imageContent);
+  return std::make_unique<mln::style::Image>([identifier UTF8String], self.mgl_premultipliedImage,
+                                             static_cast<float>(self.scale), isTemplate, stretchX,
+                                             stretchY, imageContent);
 }
 
-- (mbgl::PremultipliedImage)mgl_premultipliedImage {
+- (mln::PremultipliedImage)mgl_premultipliedImage {
   return MLNPremultipliedImageFromCGImage(self.CGImage);
 }
 

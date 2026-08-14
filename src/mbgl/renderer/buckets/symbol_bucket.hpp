@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class CrossTileSymbolLayerIndex;
 
@@ -449,4 +449,4 @@ public:
     FeatureSortOrder featureSortOrder;
 };
 
-} // namespace mbgl
+} // namespace mln

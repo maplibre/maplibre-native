@@ -21,7 +21,7 @@
 
 using namespace std::string_literals;
 
-namespace mbgl {
+namespace mln {
 
 namespace vulkan {
 
@@ -30,7 +30,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
                              const std::string_view& vertex,
                              const std::string_view& fragment,
                              const ProgramParameters& programParameters,
-                             const mbgl::unordered_map<std::string, std::string>& additionalDefines,
+                             const mln::unordered_map<std::string, std::string>& additionalDefines,
                              RendererBackend& backend_,
                              gfx::ContextObserver& observer)
     : ShaderProgramBase(),
@@ -72,7 +72,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         glslShader.setEntryPoint("main");
 
         if (!glslShader.parse(defaultResources, defaultVersion, ENoProfile, false, true, messages)) {
-            mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
+            mln::Log::Error(mln::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
             observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
@@ -81,7 +81,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         glslProgram.addShader(&glslShader);
 
         if (!glslProgram.link(messages)) {
-            mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
+            mln::Log::Error(mln::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
             observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
@@ -295,4 +295,4 @@ void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 
 @implementation MLNOverscaledTileID
-- (instancetype)initWithTileID:(const mbgl::OverscaledTileID&)tileID {
+- (instancetype)initWithTileID:(const mln::OverscaledTileID&)tileID {
   if (self = [super init]) {
     _tileZ = tileID.canonical.z;
     _tileX = tileID.canonical.x;
@@ -16,7 +16,7 @@
 @end
 
 @implementation MLNSourceLayerID
-- (instancetype)initWithID:(const mbgl::gfx::RenderingStats::SourceLayerID&)id_ {
+- (instancetype)initWithID:(const mln::gfx::RenderingStats::SourceLayerID&)id_ {
   if (self = [super init]) {
     _sourceID = [NSString stringWithUTF8String:id_.sourceID.c_str()];
     _layerID = [NSString stringWithUTF8String:id_.layerID.c_str()];
@@ -35,7 +35,7 @@
 
 @implementation MLNFeatureInfo
 - (instancetype)initWithFeatureId:(const std::string&)id_
-                      FeatureInfo:(const mbgl::gfx::RenderingStats::FeatureInfo&)info {
+                      FeatureInfo:(const mln::gfx::RenderingStats::FeatureInfo&)info {
   if (self = [super init]) {
     _featureID = [NSString stringWithUTF8String:id_.c_str()];
     _ndcBound = CGRectMake(static_cast<CGFloat>(info.ndcBound.minX),
@@ -55,7 +55,7 @@
 
 @implementation MLNRenderingStats
 
-- (void)setCoreData:(const mbgl::gfx::RenderingStats&)stats {
+- (void)setCoreData:(const mln::gfx::RenderingStats&)stats {
   _encodingTime = stats.encodingTime;
   _renderingTime = stats.renderingTime;
   _numFrames = stats.numFrames;
@@ -87,7 +87,7 @@
   _stencilUpdates = stats.stencilUpdates;
 }
 
-- (void)setFeatureInfo:(const mbgl::gfx::RenderingStats&)stats {
+- (void)setFeatureInfo:(const mln::gfx::RenderingStats&)stats {
   NSMutableDictionary<MLNSourceLayerID*, NSArray<MLNFeatureInfo*>*>* frameRenderedFeatures =
       [NSMutableDictionary dictionary];
   for (const auto& [sourceLayerID, layerFeatures] : stats.frameRenderedFeatures) {

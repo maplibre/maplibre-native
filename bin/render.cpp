@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     const double lon = lonValue ? args::get(lonValue) : 0;
     const double alt = altValue ? args::get(altValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
-    const double fov = fovValue ? args::get(fovValue) : mbgl::util::rad2deg(mbgl::util::DEFAULT_FOV);
+    const double fov = fovValue ? args::get(fovValue) : mln::util::rad2deg(mln::util::DEFAULT_FOV);
     const double bearing = bearingValue ? args::get(bearingValue) : 0;
     const double pitch = pitchValue ? args::get(pitchValue) : 0;
     const double roll = rollValue ? args::get(rollValue) : 0;
@@ -87,9 +87,9 @@ int main(int argc, char* argv[]) {
 
     const bool debug = debugFlag ? args::get(debugFlag) : false;
 
-    using namespace mbgl;
+    using namespace mln;
 
-    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
+    auto mapTilerConfiguration = mln::TileServerOptions::MapTilerConfiguration();
     std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
 
     util::RunLoop loop;
@@ -136,8 +136,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (debug) {
-        map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus
-                           : mbgl::MapDebugOptions::NoDebug);
+        map.setDebug(debug ? mln::MapDebugOptions::TileBorders | mln::MapDebugOptions::ParseStatus
+                           : mln::MapDebugOptions::NoDebug);
     }
 
     try {

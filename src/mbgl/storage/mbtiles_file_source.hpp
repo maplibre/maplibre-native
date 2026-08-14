@@ -5,7 +5,7 @@
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/thread.hpp>
 
-namespace mbgl {
+namespace mln {
 // File source for supporting .mbtiles maps.
 // can only load resource URLS that are absolute paths to local files
 class MBTilesFileSource : public FileSource {
@@ -27,4 +27,4 @@ private:
     std::unique_ptr<util::Thread<Impl>> thread; // impl
 };
 
-} // namespace mbgl
+} // namespace mln

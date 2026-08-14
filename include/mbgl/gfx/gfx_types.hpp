@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 /// Graphic primitive type enumeration
@@ -65,4 +65,4 @@ enum class AttributeDataType : uint8_t {
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

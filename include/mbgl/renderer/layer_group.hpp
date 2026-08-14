@@ -13,7 +13,7 @@
 #include <set>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 class LayerGroupBase;
 class PaintParameters;
 class RenderOrchestrator;
@@ -129,10 +129,10 @@ public:
     ~TileLayerGroup() override;
 
     std::size_t getDrawableCount() const override;
-    std::size_t getDrawableCount(mbgl::RenderPass, const OverscaledTileID&) const;
+    std::size_t getDrawableCount(mln::RenderPass, const OverscaledTileID&) const;
 
-    std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass, const OverscaledTileID&);
-    void addDrawable(mbgl::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
+    std::vector<gfx::UniqueDrawable> removeDrawables(mln::RenderPass, const OverscaledTileID&);
+    void addDrawable(mln::RenderPass, const OverscaledTileID&, gfx::UniqueDrawable&&);
 
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(Func f) {
@@ -172,7 +172,7 @@ public:
 
     /// Call the provided function for each drawable for the given tile
     template <typename Func /* void(gfx::Drawable&) */>
-    std::size_t visitDrawables(mbgl::RenderPass pass, const OverscaledTileID& tileID, Func f) {
+    std::size_t visitDrawables(mln::RenderPass pass, const OverscaledTileID& tileID, Func f) {
         assert(drawablesByTile.size() == sortedDrawables.size());
         unordered_set<gfx::Drawable*> drawablesFailed;
         auto range = drawablesByTile.equal_range({pass, tileID});
@@ -203,14 +203,14 @@ protected:
     RenderTiles stencilTiles;
 
     struct TileLayerGroupTileKey {
-        mbgl::RenderPass renderPass;
+        mln::RenderPass renderPass;
         OverscaledTileID tileID;
         bool operator==(const TileLayerGroupTileKey& other) const {
             return renderPass == other.renderPass && tileID == other.tileID;
         }
         struct hash {
             size_t operator()(const TileLayerGroupTileKey& k) const {
-                return (std::hash<mbgl::RenderPass>()(k.renderPass) ^ std::hash<OverscaledTileID>()(k.tileID) << 1);
+                return (std::hash<mln::RenderPass>()(k.renderPass) ^ std::hash<OverscaledTileID>()(k.tileID) << 1);
             }
         };
     };
@@ -232,9 +232,9 @@ public:
     ~LayerGroup() override;
 
     std::size_t getDrawableCount() const override;
-    std::size_t getDrawableCount(mbgl::RenderPass) const;
+    std::size_t getDrawableCount(mln::RenderPass) const;
 
-    std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass);
+    std::vector<gfx::UniqueDrawable> removeDrawables(mln::RenderPass);
     void addDrawable(gfx::UniqueDrawable&&);
 
     template <typename Func /* void(gfx::Drawable&) */>
@@ -283,7 +283,7 @@ protected:
 };
 
 template <typename Func /* void(gfx::Drawable&) */>
-void visitLayerGroupDrawables(mbgl::LayerGroupBase& layerGroup, Func dg) {
+void visitLayerGroupDrawables(mln::LayerGroupBase& layerGroup, Func dg) {
     switch (layerGroup.getType()) {
         case LayerGroupBase::Type::LayerGroup: {
             static_cast<LayerGroup&>(layerGroup).visitDrawables(dg);
@@ -295,8 +295,8 @@ void visitLayerGroupDrawables(mbgl::LayerGroupBase& layerGroup, Func dg) {
         }
         default: {
 #ifndef NDEBUG
-            mbgl::Log::Error(mbgl::Event::Render,
-                             "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
+            mln::Log::Error(mln::Event::Render,
+                            "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
 #endif
             break;
         }
@@ -304,7 +304,7 @@ void visitLayerGroupDrawables(mbgl::LayerGroupBase& layerGroup, Func dg) {
 }
 
 template <typename Func /* bool(gfx::Drawable&) */>
-std::size_t removeLayerGroupDrawablesIf(mbgl::LayerGroupBase& layerGroup, Func dg) {
+std::size_t removeLayerGroupDrawablesIf(mln::LayerGroupBase& layerGroup, Func dg) {
     switch (layerGroup.getType()) {
         case LayerGroupBase::Type::LayerGroup: {
             return static_cast<LayerGroup&>(layerGroup).removeDrawablesIf(dg);
@@ -314,12 +314,12 @@ std::size_t removeLayerGroupDrawablesIf(mbgl::LayerGroupBase& layerGroup, Func d
         }
         default: {
 #ifndef NDEBUG
-            mbgl::Log::Error(mbgl::Event::Render,
-                             "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
+            mln::Log::Error(mln::Event::Render,
+                            "Unknown layer group type: " + std::to_string(static_cast<uint8_t>(layerGroup.getType())));
 #endif
             return 0;
         }
     }
 }
 
-} // namespace mbgl
+} // namespace mln

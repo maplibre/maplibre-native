@@ -2,7 +2,7 @@
 
 #include <numbers>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /**
@@ -46,4 +46,4 @@ constexpr float rad2degf(float rad) noexcept {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

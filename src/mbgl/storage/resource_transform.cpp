@@ -1,6 +1,6 @@
 #include <mbgl/storage/resource_transform.hpp>
 
-namespace mbgl {
+namespace mln {
 
 ResourceTransform::ResourceTransform(TransformCallback callback)
     : transformCallback(std::move(callback)) {}
@@ -11,4 +11,4 @@ void ResourceTransform::transform(Resource::Kind kind, const std::string& url, F
     transformCallback(kind, url, std::move(finished));
 }
 
-} // namespace mbgl
+} // namespace mln

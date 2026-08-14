@@ -2,7 +2,7 @@
 
 #include <mbgl/test/util.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(GridIndex, IndexesFeatures) {
     GridIndex<int16_t> grid(100, 100, 10);

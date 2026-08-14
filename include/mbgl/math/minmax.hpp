@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 template <typename T>
@@ -50,4 +50,4 @@ T min(T a, T b, Ts... args)
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

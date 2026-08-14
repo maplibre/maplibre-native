@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 GlyphRange::GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_)
     : first((uint16_t)first_),
@@ -40,8 +40,8 @@ GlyphIDType genNewGlyphIDType(const std::string &url,
 
     std::size_t hash = 0;
     for (auto &pair : pairs) {
-        mbgl::util::hash_combine(hash, pair.first);
-        mbgl::util::hash_combine(hash, pair.second);
+        mln::util::hash_combine(hash, pair.first);
+        mln::util::hash_combine(hash, pair.second);
     }
 
     auto family = fontStackToString(fontStack);
@@ -64,4 +64,4 @@ GlyphRange getGlyphRange(GlyphID glyph) {
     return {start, end, glyph.complex.type};
 }
 
-} // namespace mbgl
+} // namespace mln

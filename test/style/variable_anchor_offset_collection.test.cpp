@@ -9,9 +9,9 @@
 
 #include <array>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(VariableAnchorOffsetCollection, Calculations) {
     auto parseJson = [&](const std::string& src) {
@@ -19,7 +19,7 @@ TEST(VariableAnchorOffsetCollection, Calculations) {
         return convertJSON<VariableAnchorOffsetCollection>(src, error);
     };
 
-    mbgl::util::Interpolator<VariableAnchorOffsetCollection> interpolator;
+    mln::util::Interpolator<VariableAnchorOffsetCollection> interpolator;
 
     // valid value
     {

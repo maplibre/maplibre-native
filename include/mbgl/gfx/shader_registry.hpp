@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 using ShaderGroupPtr = std::shared_ptr<gfx::ShaderGroup>;
@@ -65,4 +65,4 @@ private:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

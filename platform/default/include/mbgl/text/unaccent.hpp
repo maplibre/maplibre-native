@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 // Non-locale-aware diacritic folding based on nunicode
@@ -10,4 +10,4 @@ namespace platform {
 std::string unaccent(const std::string &string);
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 
 #include <hb-ft.h>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 hb_language_t getDefaultLanguage() {
@@ -108,4 +108,4 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

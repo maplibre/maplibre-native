@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 bool FillExtrusionLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
@@ -10,4 +10,4 @@ bool FillExtrusionLayer::Impl::hasLayoutDifference(const Layer::Impl& other) con
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

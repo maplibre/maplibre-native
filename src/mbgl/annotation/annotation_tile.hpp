@@ -4,7 +4,7 @@
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AnnotationManager;
 class TileParameters;
@@ -64,4 +64,4 @@ private:
     std::unordered_map<std::string, std::shared_ptr<AnnotationTileLayerData>> layers;
 };
 
-} // namespace mbgl
+} // namespace mln

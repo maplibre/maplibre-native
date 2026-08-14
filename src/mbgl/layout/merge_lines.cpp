@@ -4,11 +4,11 @@
 #include <mbgl/util/containers.hpp>
 #include <mbgl/util/hash.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // Map of key -> index into features
-using Index = mbgl::unordered_map<size_t, size_t>;
+using Index = mln::unordered_map<size_t, size_t>;
 namespace {
 size_t mergeFromRight(std::vector<SymbolFeature>& features,
                       Index& rightIndex,
@@ -91,4 +91,4 @@ void mergeLines(std::vector<SymbolFeature>& features) {
 }
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

@@ -13,7 +13,7 @@
 #include "../../platform/glfw/glfw_webgpu_backend.hpp"
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 CommandEncoder::CommandEncoder(Context& ctx)
@@ -117,4 +117,4 @@ void CommandEncoder::forgetUploadPass(UploadPass* uploadPass) {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

@@ -29,7 +29,7 @@
 #include <cstring>
 #include <iterator>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -615,7 +615,7 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
     return std::make_shared<VertexAttributeArrayGL>();
 }
 
-void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
+void Context::clear(std::optional<mln::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
 
@@ -883,4 +883,4 @@ Texture2DPool& Context::getTexturePool() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

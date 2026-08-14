@@ -3,7 +3,7 @@
 #include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/sources/custom_vector_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderCustomVectorSource final : public RenderTileSource {
 public:
@@ -19,4 +19,4 @@ private:
     const style::CustomVectorSource::Impl& impl() const;
 };
 
-} // namespace mbgl
+} // namespace mln

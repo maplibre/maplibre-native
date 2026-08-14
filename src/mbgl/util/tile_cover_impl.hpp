@@ -7,7 +7,7 @@
 #include <map>
 #include <queue>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class LatLngBounds;
@@ -101,4 +101,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -25,7 +25,7 @@
 // #define ENABLE_VMA_DEBUG
 #endif
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 
@@ -130,4 +130,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 
 #include <atomic>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 stopwatch::stopwatch(Event event_)
@@ -47,6 +47,6 @@ stopwatch::~stopwatch() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln
 
 #endif

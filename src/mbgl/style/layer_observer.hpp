@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Layer;
@@ -13,4 +13,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

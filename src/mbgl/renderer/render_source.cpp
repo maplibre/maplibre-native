@@ -18,7 +18,7 @@
 #include <memory>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -107,4 +107,4 @@ Immutable<std::vector<RenderTile>> RenderSource::getRawRenderTiles() const {
     return makeMutable<std::vector<RenderTile>>();
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 /**
@@ -13,4 +13,4 @@ struct CustomLayerInitParameters {
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

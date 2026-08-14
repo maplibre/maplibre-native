@@ -4,7 +4,7 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/tile/tile_id.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LatLng, InvalidLatLng) {
     try {

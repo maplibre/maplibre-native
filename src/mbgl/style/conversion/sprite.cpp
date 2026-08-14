@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -30,4 +30,4 @@ std::optional<Sprite> Converter<Sprite>::operator()(const Convertible& value, Er
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

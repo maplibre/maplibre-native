@@ -12,7 +12,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Texture2D;
@@ -56,4 +56,4 @@ public:
     SegmentVector segments;
 };
 
-} // namespace mbgl
+} // namespace mln

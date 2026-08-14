@@ -6,7 +6,7 @@
 #include <mbgl/util/hash.hpp>
 #include <mbgl/util/font_stack.hpp>
 
-namespace mbgl {
+namespace mln {
 
 enum GlyphIDType : uint16_t {
     FontPBF = 0x00,
@@ -35,13 +35,13 @@ constexpr uint32_t GLYPH_RANGES_PER_FONT_STACK = 256;
 // i18n.GlyphRangeLocalGenerationCountMatchesConstant.
 constexpr uint32_t NON_IDEOGRAPH_GLYPH_RANGES_PER_FONT_STACK = 97;
 
-} // end namespace mbgl
+} // end namespace mln
 
 namespace std {
 
 template <>
-struct hash<mbgl::GlyphRange> {
-    std::size_t operator()(const mbgl::GlyphRange &range) const { return mbgl::util::hash(range.first, range.second); }
+struct hash<mln::GlyphRange> {
+    std::size_t operator()(const mln::GlyphRange &range) const { return mln::util::hash(range.first, range.second); }
 };
 
 } // namespace std

@@ -9,7 +9,7 @@
 #include <mapbox/std/weak.hpp>
 #include <mbgl/actor/scheduler.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Scheduler;
 class Message;
@@ -61,4 +61,4 @@ private:
     std::queue<std::unique_ptr<Message>> queue;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class LayerManagerDarwin : public LayerManager {
 public:
@@ -26,7 +26,7 @@ public:
      * in order to save binary size (the corresponding SDK layer wrappers
      * should be excluded from the project build).
      */
-    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) override;
+    void addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>) override;
 
     /**
      * Enables a layer type for both JSON style and runtime API.
@@ -38,13 +38,13 @@ private:
 
     void registerCoreFactory(LayerFactory*);
     LayerPeerFactory* getPeerFactory(const style::LayerTypeInfo* typeInfo);
-    // mbgl::LayerManager overrides.
+    // mln::LayerManager overrides.
     LayerFactory* getFactory(const std::string& type) noexcept final;
-    LayerFactory* getFactory(const mbgl::style::LayerTypeInfo* info) noexcept final;
+    LayerFactory* getFactory(const mln::style::LayerTypeInfo* info) noexcept final;
 
     std::vector<std::unique_ptr<LayerPeerFactory>> peerFactories;
     std::vector<std::unique_ptr<LayerFactory>> coreFactories;
     std::map<std::string, LayerFactory*> typeToFactory;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 class GeoJSONData;
 } // namespace style
@@ -29,4 +29,4 @@ private:
     // Do not add members here, see `WeakPtrFactory`
 };
 
-} // namespace mbgl
+} // namespace mln

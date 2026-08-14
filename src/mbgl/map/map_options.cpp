@@ -1,6 +1,6 @@
 #include <mbgl/map/map_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class MapOptions::Impl {
 public:
@@ -102,4 +102,4 @@ bool MapOptions::renderedFeatureInfo() const {
     return impl_->captureRenderedFeatures;
 }
 
-} // namespace mbgl
+} // namespace mln

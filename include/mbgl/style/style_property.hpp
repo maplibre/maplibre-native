@@ -2,7 +2,7 @@
 
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 /**
@@ -30,4 +30,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -7,15 +7,15 @@
 
 namespace {
 
-mbgl::util::ThreadLocal<mbgl::gfx::BackendScope>& currentScope() {
-    static mbgl::util::ThreadLocal<mbgl::gfx::BackendScope> backendScope;
+mln::util::ThreadLocal<mln::gfx::BackendScope>& currentScope() {
+    static mln::util::ThreadLocal<mln::gfx::BackendScope> backendScope;
 
     return backendScope;
 }
 
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 BackendScope::BackendScope(RendererBackend& backend_, ScopeType scopeType_)
@@ -78,4 +78,4 @@ bool BackendScope::exists() {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

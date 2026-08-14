@@ -9,7 +9,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class Drawable;
@@ -38,4 +38,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 CommandEncoder::CommandEncoder(Context& context_)
@@ -87,4 +87,4 @@ void CommandEncoder::forgetUploadPass(UploadPass* pass) {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 // Forward declare WebGPU types
 typedef struct WGPUBindGroupLayoutImpl* WGPUBindGroupLayout;
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class UploadPass;
 class DepthMode;
@@ -61,4 +61,4 @@ public:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

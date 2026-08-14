@@ -2,7 +2,7 @@
 
 #include <mbgl/storage/file_source.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ClientOptions;
 class ResourceOptions;
@@ -50,4 +50,4 @@ protected:
     virtual ~FileSourceManager();
 };
 
-} // namespace mbgl
+} // namespace mln

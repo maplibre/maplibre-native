@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using HillshadeShaderSource = ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal>;
@@ -15,4 +15,4 @@ const std::array<TextureInfo, 1> HillshadeShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

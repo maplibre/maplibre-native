@@ -4,7 +4,7 @@
 #include <mbgl/text/glyph.hpp>
 #include <mbgl/style/image_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 
@@ -47,4 +47,4 @@ private:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

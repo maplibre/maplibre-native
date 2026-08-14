@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class FillLayerTweaker;
 using FillLayerTweakerPtr = std::shared_ptr<FillLayerTweaker>;
@@ -71,4 +71,4 @@ private:
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 };
 
-} // namespace mbgl
+} // namespace mln

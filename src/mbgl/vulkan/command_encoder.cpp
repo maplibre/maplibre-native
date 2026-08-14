@@ -6,7 +6,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 CommandEncoder::CommandEncoder(Context& context_, const vk::UniqueCommandBuffer& buffer_)
@@ -41,4 +41,4 @@ void CommandEncoder::popDebugGroup() {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

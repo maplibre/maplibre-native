@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace vulkan {
 
@@ -18,7 +18,7 @@ namespace vulkan {
  * CustomLayerRenderParameters during the first render() call if needed
  * for pipeline creation.
  */
-struct CustomLayerInitParameters : mbgl::style::CustomLayerInitParameters {
+struct CustomLayerInitParameters : mln::style::CustomLayerInitParameters {
     /// Dynamic dispatcher for Vulkan function calls.
     const vk::detail::DispatchLoaderDynamic& dispatcher;
     /// Logical device handle.
@@ -36,4 +36,4 @@ struct CustomLayerInitParameters : mbgl::style::CustomLayerInitParameters {
 
 } // namespace vulkan
 } // namespace style
-} // namespace mbgl
+} // namespace mln

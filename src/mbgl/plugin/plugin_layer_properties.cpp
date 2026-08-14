@@ -2,7 +2,7 @@
 #include <mbgl/plugin/plugin_layer_properties.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 PluginLayerProperties::PluginLayerProperties(Immutable<PluginLayer::Impl> impl_)
@@ -19,4 +19,4 @@ expression::Dependency PluginLayerProperties::getDependencies() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

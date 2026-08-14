@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 namespace i18n {
 
@@ -87,4 +87,4 @@ bool isVariationSelector1(char16_t chr);
 
 } // namespace i18n
 } // namespace util
-} // namespace mbgl
+} // namespace mln

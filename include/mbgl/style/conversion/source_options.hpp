@@ -3,7 +3,7 @@
 #include <mbgl/style/sources/raster_dem_source.hpp>
 #include <mbgl/style/conversion.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -14,4 +14,4 @@ struct Converter<SourceOptions> {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

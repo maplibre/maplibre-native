@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/background_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 BackgroundLayer::Impl::Impl(const Impl& other)
@@ -12,4 +12,4 @@ bool BackgroundLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

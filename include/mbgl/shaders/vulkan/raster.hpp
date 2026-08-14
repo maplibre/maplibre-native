@@ -10,7 +10,7 @@ constexpr auto rasterShaderPrelude = R"(
 
 )";
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -141,4 +141,4 @@ void main() {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

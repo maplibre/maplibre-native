@@ -6,7 +6,7 @@
 #include <functional>
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace algorithm {
 
 template <typename T>
@@ -140,4 +140,4 @@ void updateTileMasks(RenderableTilesMap& renderables) {
 }
 
 } // namespace algorithm
-} // namespace mbgl
+} // namespace mln

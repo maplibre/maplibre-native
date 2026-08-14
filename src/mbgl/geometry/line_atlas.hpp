@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class UploadPass;
@@ -80,4 +80,4 @@ private:
     std::vector<size_t> needsUpload;
 };
 
-} // namespace mbgl
+} // namespace mln

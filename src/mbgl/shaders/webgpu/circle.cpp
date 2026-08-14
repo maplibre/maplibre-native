@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using CircleShaderSource = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::WebGPU>;
@@ -20,4 +20,4 @@ const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
 const std::array<TextureInfo, 0> CircleShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #include <mapbox/geojson.hpp>
 #include <mapbox/geojson/rapidjson.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -111,4 +111,4 @@ std::optional<T> convert(const JSValue& value, Error& error, Args&&... args) {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

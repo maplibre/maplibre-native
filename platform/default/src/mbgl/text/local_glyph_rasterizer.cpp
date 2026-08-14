@@ -1,6 +1,6 @@
 #include <mbgl/text/local_glyph_rasterizer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class LocalGlyphRasterizer::Impl {};
 
@@ -16,4 +16,4 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID) {
     return Glyph();
 }
 
-} // namespace mbgl
+} // namespace mln

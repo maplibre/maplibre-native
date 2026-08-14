@@ -11,7 +11,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 
@@ -399,4 +399,4 @@ bool TileCover::hasNext() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -4,10 +4,10 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class Position : private mbgl::util::noncopyable {
+class Position : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/light/Position"; };
 
@@ -21,4 +21,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

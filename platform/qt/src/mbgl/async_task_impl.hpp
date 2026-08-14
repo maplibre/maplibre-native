@@ -7,7 +7,7 @@
 #include <functional>
 #include <atomic>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class RunLoop;
@@ -34,4 +34,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

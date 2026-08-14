@@ -8,7 +8,7 @@ char16_t PUAbegin = u'\uE000';
 char16_t PUAend = u'\uF8FF';
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 void TaggedString::addTextSection(const std::u16string &sectionText,
                                   double scale,
@@ -140,4 +140,4 @@ bool TaggedString::allowsVerticalWritingMode() {
     return *supportsVerticalWritingMode;
 }
 
-} // namespace mbgl
+} // namespace mln

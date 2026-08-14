@@ -4,11 +4,11 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl::android::java::util {
+namespace mln::android::java::util {
 
 using UntypedArray_t = jni::Array<jni::Object<>>;
 
-struct List : private mbgl::util::noncopyable {
+struct List : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/List"; };
 
     template <class T, typename TypedArray_t = jni::Array<jni::Object<T>>>
@@ -18,7 +18,7 @@ struct List : private mbgl::util::noncopyable {
     };
 };
 
-struct Arrays : private mbgl::util::noncopyable {
+struct Arrays : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/Arrays"; };
 
     template <class T>
@@ -30,7 +30,7 @@ struct Arrays : private mbgl::util::noncopyable {
     }
 };
 
-struct Set : private mbgl::util::noncopyable {
+struct Set : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/Set"; };
 
     template <class T, typename TypedArray_t = jni::Array<jni::Object<T>>>
@@ -40,10 +40,10 @@ struct Set : private mbgl::util::noncopyable {
     };
 };
 
-struct Map : private mbgl::util::noncopyable {
+struct Map : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/Map"; };
 
-    struct Entry : private mbgl::util::noncopyable {
+    struct Entry : private mln::util::noncopyable {
         static constexpr auto Name() { return "java/util/Map$Entry"; };
 
         template <class T>
@@ -60,7 +60,7 @@ struct Map : private mbgl::util::noncopyable {
     };
 };
 
-struct ArrayList : private mbgl::util::noncopyable {
+struct ArrayList : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/ArrayList"; };
 
     static auto New(jni::JNIEnv& env) {
@@ -84,7 +84,7 @@ struct ArrayList : private mbgl::util::noncopyable {
     }
 };
 
-struct HashSet : private mbgl::util::noncopyable {
+struct HashSet : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/HashSet"; };
 
     static auto New(jni::JNIEnv& env) {
@@ -108,7 +108,7 @@ struct HashSet : private mbgl::util::noncopyable {
     }
 };
 
-struct HashMap : private mbgl::util::noncopyable {
+struct HashMap : private mln::util::noncopyable {
     static constexpr auto Name() { return "java/util/HashMap"; };
 
     static auto New(jni::JNIEnv& env) {
@@ -143,4 +143,4 @@ struct HashMap : private mbgl::util::noncopyable {
 
 void registerNative(jni::JNIEnv&);
 
-} // namespace mbgl::android::java::util
+} // namespace mln::android::java::util

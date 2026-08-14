@@ -19,7 +19,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Drawable::Impl final {
@@ -76,4 +76,4 @@ public:
 using DrawSegment = gfx::Drawable::DrawSegment;
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

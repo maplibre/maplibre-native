@@ -9,7 +9,7 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
 
 @implementation NSImage (MLNAdditions)
 
-- (nullable instancetype)initWithMLNPremultipliedImage:(mbgl::PremultipliedImage &&)src {
+- (nullable instancetype)initWithMLNPremultipliedImage:(mln::PremultipliedImage &&)src {
   CGImageRef image = CGImageCreateWithMLNPremultipliedImage(std::move(src));
   if (!image) {
     return nil;
@@ -20,7 +20,7 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
   return self;
 }
 
-- (nullable instancetype)initWithMLNStyleImage:(const mbgl::style::Image &)styleImage {
+- (nullable instancetype)initWithMLNStyleImage:(const mln::style::Image &)styleImage {
   CGImageRef image = CGImageCreateWithMLNPremultipliedImage(styleImage.getImage().clone());
   if (!image) {
     return nil;
@@ -48,12 +48,12 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
   return self;
 }
 
-- (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
-  mbgl::PremultipliedImage cPremultipliedImage = self.mgl_premultipliedImage;
+- (std::unique_ptr<mln::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier {
+  mln::PremultipliedImage cPremultipliedImage = self.mgl_premultipliedImage;
   auto imageWidth = cPremultipliedImage.size.width;
 
   float scale = static_cast<float>(imageWidth) / self.size.width;
-  mbgl::style::ImageStretches stretchX, stretchY;
+  mln::style::ImageStretches stretchX, stretchY;
   if (self.resizingMode == NSImageResizingModeStretch) {
     stretchX.push_back({
         self.capInsets.left * scale,
@@ -65,9 +65,9 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
     });
   }
 
-  std::optional<mbgl::style::ImageContent> imageContent;
+  std::optional<mln::style::ImageContent> imageContent;
   if (!MLNEdgeInsetsIsZero(self.capInsets)) {
-    imageContent = (mbgl::style::ImageContent){
+    imageContent = (mln::style::ImageContent){
         .left = static_cast<float>(self.capInsets.left * scale),
         .top = static_cast<float>(self.capInsets.top * scale),
         .right = static_cast<float>((self.size.width - self.capInsets.right) * scale),
@@ -75,12 +75,12 @@ BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
     };
   }
 
-  return std::make_unique<mbgl::style::Image>([identifier UTF8String],
-                                              std::move(cPremultipliedImage), scale,
-                                              [self isTemplate], stretchX, stretchY, imageContent);
+  return std::make_unique<mln::style::Image>([identifier UTF8String],
+                                             std::move(cPremultipliedImage), scale,
+                                             [self isTemplate], stretchX, stretchY, imageContent);
 }
 
-- (mbgl::PremultipliedImage)mgl_premultipliedImage {
+- (mln::PremultipliedImage)mgl_premultipliedImage {
   CGImageRef ref = [self CGImageForProposedRect:nullptr context:nullptr hints:nullptr];
   return MLNPremultipliedImageFromCGImage(ref);
 }

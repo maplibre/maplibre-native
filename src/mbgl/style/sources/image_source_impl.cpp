@@ -1,6 +1,6 @@
 #include <mbgl/style/sources/image_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 ImageSource::Impl::Impl(std::string id_, std::array<LatLng, 4> coords_)
@@ -32,4 +32,4 @@ std::optional<std::string> ImageSource::Impl::getAttribution() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 DynamicTexture::DynamicTexture(Size size, TexturePixelType pixelType)
@@ -76,4 +76,4 @@ bool DynamicTexture::removeTexture(const TextureHandle& texHandle) {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -10,7 +10,7 @@ struct hb_buffer_t;
 using hb_font_t = hb_font_t;
 using hb_buffer_t = hb_buffer_t;
 
-namespace mbgl {
+namespace mln {
 
 class HBShaper::Impl {
 public:
@@ -33,4 +33,4 @@ private:
     hb_buffer_t *buffer;
 };
 
-} // namespace mbgl
+} // namespace mln

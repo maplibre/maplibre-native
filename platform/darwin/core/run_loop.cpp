@@ -6,7 +6,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class RunLoop::Impl {
@@ -64,4 +64,4 @@ void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

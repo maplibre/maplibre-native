@@ -4,7 +4,7 @@
 #include <mbgl/style/sources/custom_vector_source.hpp>
 #include <mbgl/actor/mailbox.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TileParameters;
 
@@ -34,4 +34,4 @@ private:
     ActorRef<CustomVectorTile> actorRef;
 };
 
-} // namespace mbgl
+} // namespace mln

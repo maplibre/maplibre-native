@@ -3,7 +3,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -22,7 +22,7 @@ std::vector<std::optional<Value>> Let::possibleOutputs() const {
     return result->possibleOutputs();
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 ParseResult Let::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
@@ -68,8 +68,8 @@ ParseResult Let::parse(const Convertible& value, ParsingContext& ctx) {
     return ParseResult(std::make_unique<Let>(std::move(bindings_), std::move(*result_)));
 }
 
-mbgl::Value Let::serialize() const {
-    std::vector<mbgl::Value> serialized;
+mln::Value Let::serialize() const {
+    std::vector<mln::Value> serialized;
     serialized.emplace_back(getOperator());
     for (const auto& entry : bindings) {
         serialized.emplace_back(entry.first);
@@ -110,10 +110,10 @@ ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
     return ParseResult(std::make_unique<Var>(std::move(name_), std::move(*bindingValue)));
 }
 
-mbgl::Value Var::serialize() const {
-    return std::vector<mbgl::Value>{{getOperator(), name}};
+mln::Value Var::serialize() const {
+    return std::vector<mln::Value>{{getOperator(), name}};
 }
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

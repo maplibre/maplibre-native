@@ -2,7 +2,7 @@
 
 #include <limits>
 
-namespace mbgl {
+namespace mln {
 
 namespace debug {
 
@@ -30,4 +30,4 @@ const bool shapingWarning = false;
 
 } // namespace debug
 
-} // namespace mbgl
+} // namespace mln

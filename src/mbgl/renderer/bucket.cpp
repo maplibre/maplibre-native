@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 std::atomic<std::size_t> unidentifiedFeatureIndex = 0;
@@ -16,4 +16,4 @@ std::string Bucket::getRetainFeatureID(const GeometryTileFeature& feature) {
     return "maplibre:" + std::to_string(unidentifiedFeatureIndex++);
 }
 
-} // namespace mbgl
+} // namespace mln

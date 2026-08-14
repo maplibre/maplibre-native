@@ -6,7 +6,7 @@
 
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 
 class GlyphManagerObserver {
 public:
@@ -17,4 +17,4 @@ public:
     virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

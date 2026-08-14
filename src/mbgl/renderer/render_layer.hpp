@@ -16,7 +16,7 @@
 #include <optional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 class Bucket;
 class DynamicFeatureIndex;
 class LineAtlas;
@@ -354,7 +354,7 @@ public:
         /// Add an entry or merge with an existing one
         void addRenderedFeature(std::string featureID,
                                 const gfx::RenderingStats::NDCBound& bound,
-                                mbgl::unordered_set<OverscaledTileID> tileIDs) {
+                                mln::unordered_set<OverscaledTileID> tileIDs) {
             // don't use insert to eliminate the double-lookup because it doesn't
             // guarantee that the source isn't moved when the item is not inserted.
             if (const auto hit = renderedFeatures.find(featureID); hit != renderedFeatures.end()) {
@@ -410,4 +410,4 @@ private:
 
 using RenderLayerReferences = std::vector<std::reference_wrapper<RenderLayer>>;
 
-} // namespace mbgl
+} // namespace mln

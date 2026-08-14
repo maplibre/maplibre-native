@@ -4,7 +4,7 @@
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/geometry/dem_data.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 auto fakeImage = [](Size s) {
     PremultipliedImage img = PremultipliedImage(s);

@@ -8,7 +8,7 @@
 #include <android/api-level.h>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /// Computes the log2(x) rounded up to the next integer.
@@ -27,7 +27,7 @@ T log2(T x) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln
 
 // log2 is not available on Android before API 18.
 #if defined(__ANDROID__) && defined(__GNUC__) && defined(__ANDROID_API__) && __ANDROID_API__ < 18

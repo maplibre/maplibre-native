@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QTimer>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class Timer::Impl : public QObject {
@@ -28,4 +28,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

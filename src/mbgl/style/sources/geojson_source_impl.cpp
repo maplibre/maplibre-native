@@ -20,7 +20,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class GeoJSONVTData final : public GeoJSONData {
@@ -170,4 +170,4 @@ void GeoJSONSource::Impl::setOverrideSynchronousUpdate(bool newOverride) const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

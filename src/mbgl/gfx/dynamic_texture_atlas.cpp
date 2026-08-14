@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 constexpr const uint16_t extraPadding = 1;
@@ -260,4 +260,4 @@ void DynamicTextureAtlas::removeUnusedDynamicTextures() {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

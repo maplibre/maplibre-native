@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
-using SourceType = mbgl::style::SourceType;
+using namespace mln;
+using SourceType = mln::style::SourceType;
 
 TEST(OfflineTilePyramidRegionDefinition, EncodeDecode) {
     OfflineTilePyramidRegionDefinition region(

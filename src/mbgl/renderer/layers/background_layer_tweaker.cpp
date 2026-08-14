@@ -10,7 +10,7 @@
 #include <mbgl/style/layers/background_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -159,4 +159,4 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

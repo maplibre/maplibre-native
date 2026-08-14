@@ -1,7 +1,7 @@
 #include <mbgl/style/conversion/transition_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -39,4 +39,4 @@ std::optional<TransitionOptions> Converter<TransitionOptions>::operator()(const 
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

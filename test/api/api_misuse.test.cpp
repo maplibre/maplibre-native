@@ -11,7 +11,7 @@
 
 #include <future>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(API, RenderWithoutCallback) {
     FixtureLog log;

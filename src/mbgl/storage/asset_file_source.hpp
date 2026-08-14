@@ -4,7 +4,7 @@
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/util/client_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 template <typename T>
@@ -32,4 +32,4 @@ private:
     std::unique_ptr<util::Thread<Impl>> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

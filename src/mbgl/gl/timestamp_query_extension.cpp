@@ -4,7 +4,7 @@
 #include <cassert>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 namespace extension {
 
@@ -119,4 +119,4 @@ void loadTimeStampQueryExtension(const GlContexsLoader &loadExtension) {
 
 } // namespace extension
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

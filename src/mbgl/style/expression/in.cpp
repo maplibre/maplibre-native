@@ -5,7 +5,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -83,7 +83,7 @@ void In::eachChild(const std::function<void(const Expression&)>& visit) const {
     visit(*haystack);
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult In::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
 
@@ -134,4 +134,4 @@ std::vector<std::optional<Value>> In::possibleOutputs() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

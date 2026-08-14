@@ -26,7 +26,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 
 using mat4 = std::array<double, 16>;
 using matf4 = std::array<float, 16>;
@@ -71,4 +71,4 @@ inline vec4 operator*(const mat4& m, const vec4& a) {
 void diffsplit(matf4& outValue, matf4& outDiff, const mat4& source);
 
 } // namespace matrix
-} // namespace mbgl
+} // namespace mln

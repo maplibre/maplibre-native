@@ -3,7 +3,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_operation.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Tile;
 
@@ -14,4 +14,4 @@ public:
     virtual void onTileAction(TileOperation) {}
 };
 
-} // namespace mbgl
+} // namespace mln

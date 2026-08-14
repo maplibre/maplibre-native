@@ -6,7 +6,7 @@
 
 #include <mbgl/algorithm/update_renderables.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 enum LookupResult : bool {
     NotFound = false,

@@ -5,7 +5,7 @@
 #include <mbgl/gfx/rendering_stats.hpp>
 #include <mbgl/util/containers.hpp>
 
-namespace mbgl::android {
+namespace mln::android {
 
 using namespace jni;
 using namespace java::util;
@@ -58,7 +58,7 @@ struct FeatureInfoTag {
     }
 
 protected:
-    static auto makeTileSet(JNIEnv& env, const mbgl::unordered_set<OverscaledTileID>& tileIDs) -> Local<Object<Set>> {
+    static auto makeTileSet(JNIEnv& env, const mln::unordered_set<OverscaledTileID>& tileIDs) -> Local<Object<Set>> {
         const auto tileIDsSetObj = HashSet::New(env, static_cast<jint>(tileIDs.size()));
         for (const auto& tileID : tileIDs) {
             HashSet::add(env, tileIDsSetObj, TileIDTag::New(env, tileID));
@@ -144,4 +144,4 @@ void RenderingStats::Update(JNIEnv& env, Object<RenderingStats>& renderingStatsO
                           makeFeatureInfoMap(env, stats.frameRenderedFeatures));
 }
 
-} // namespace mbgl::android
+} // namespace mln::android

@@ -1,6 +1,6 @@
 #include <mbgl/style/sources/custom_vector_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomVectorSource::Impl::Impl(std::string id_, const CustomVectorSource::Options& options)
@@ -30,4 +30,4 @@ std::optional<ActorRef<CustomVectorTileLoader>> CustomVectorSource::Impl::getTil
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

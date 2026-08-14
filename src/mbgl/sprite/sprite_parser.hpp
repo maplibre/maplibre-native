@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 // Extracts an individual image from a spritesheet from the given location.
 std::unique_ptr<style::Image> createStyleImage(const std::string& id,
@@ -26,4 +26,4 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
                                                        const std::string& image,
                                                        const std::string& json);
 
-} // namespace mbgl
+} // namespace mln

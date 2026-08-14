@@ -8,11 +8,11 @@
 #endif
 #endif
 
-namespace mbgl {
+namespace mln {
 
 #if defined(__cpp_lib_source_location) && __cpp_lib_source_location >= 201907L
 using source_location = std::source_location;
-#define MLN_CURRENT_SOURCE_LOCATION ::mbgl::source_location::current()
+#define MLN_CURRENT_SOURCE_LOCATION ::mln::source_location::current()
 #else
 class source_location final {
 public:
@@ -34,9 +34,9 @@ private:
     std::uint_least32_t lineNumber;
 };
 #define MLN_CURRENT_SOURCE_LOCATION  \
-    ::mbgl::source_location {        \
+    ::mln::source_location {         \
         __FILE__, __func__, __LINE__ \
     }
 #endif
 
-} // namespace mbgl
+} // namespace mln

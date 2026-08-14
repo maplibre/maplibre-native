@@ -5,11 +5,11 @@
 #include <jni/jni.hpp>
 #include <mbgl/style/expression/formatted.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 using SuperTag = jni::ObjectTag;
-class Formatted : private mbgl::util::noncopyable {
+class Formatted : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/types/Formatted"; };
 
@@ -19,4 +19,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

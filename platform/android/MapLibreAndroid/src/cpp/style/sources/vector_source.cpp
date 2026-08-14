@@ -17,30 +17,30 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 VectorSource::VectorSource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& urlOrTileSet)
     : Source(env,
-             std::make_unique<mbgl::style::VectorSource>(jni::Make<std::string>(env, sourceId),
-                                                         convertURLOrTileset(Value(env, urlOrTileSet)))) {}
+             std::make_unique<mln::style::VectorSource>(jni::Make<std::string>(env, sourceId),
+                                                        convertURLOrTileset(Value(env, urlOrTileSet)))) {}
 
-VectorSource::VectorSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
+VectorSource::VectorSource(jni::JNIEnv& env, mln::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
 
 VectorSource::~VectorSource() = default;
 
 jni::Local<jni::String> VectorSource::getURL(jni::JNIEnv& env) {
-    std::optional<std::string> url = source.as<mbgl::style::VectorSource>()->VectorSource::getURL();
+    std::optional<std::string> url = source.as<mln::style::VectorSource>()->VectorSource::getURL();
     return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> VectorSource::querySourceFeatures(
     jni::JNIEnv& env, const jni::Array<jni::String>& jSourceLayerIds, const jni::Array<jni::Object<>>& jfilter) {
-    using namespace mbgl::android::conversion;
-    using namespace mbgl::android::geojson;
+    using namespace mln::android::conversion;
+    using namespace mln::android::geojson;
 
-    std::vector<mbgl::Feature> features;
+    std::vector<mln::Feature> features;
     if (rendererFrontend) {
         features = rendererFrontend->querySourceFeatures(source.getID(),
                                                          {toVector(env, jSourceLayerIds), toFilter(env, jfilter)});
@@ -72,4 +72,4 @@ void VectorSource::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

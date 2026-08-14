@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * `Mutable<T>` is a non-nullable uniquely owning reference to a `T`. It can be
@@ -135,4 +135,4 @@ void mutate(Immutable<T>& immutable, Fn&& fn) {
     immutable = std::move(mut);
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <memory>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class IndexBufferResource {
@@ -33,4 +33,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

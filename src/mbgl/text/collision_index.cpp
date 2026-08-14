@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 // When a symbol crosses the edge that causes it to be included in
@@ -402,7 +402,7 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
                     std::make_move_iterator(ignoredFeatures.begin()),
                     std::make_move_iterator(ignoredFeatures.end()));
 
-    mbgl::unordered_map<uint32_t, mbgl::unordered_set<size_t>> seenBuckets;
+    mln::unordered_map<uint32_t, mln::unordered_set<size_t>> seenBuckets;
     for (auto& queryResult : features) {
         auto& feature = queryResult.first;
         auto& bbox = queryResult.second;
@@ -464,4 +464,4 @@ CollisionBoundaries CollisionIndex::getProjectedCollisionBoundaries(const mat4& 
     }};
 }
 
-} // namespace mbgl
+} // namespace mln

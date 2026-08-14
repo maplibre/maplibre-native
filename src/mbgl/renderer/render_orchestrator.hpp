@@ -22,7 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 class ChangeRequest;
 class RendererObserver;
 class RenderSource;
@@ -254,4 +254,4 @@ private:
     gfx::RenderingStats::FrameRenderedFeaturesMap frameRenderedFeatures;
 };
 
-} // namespace mbgl
+} // namespace mln

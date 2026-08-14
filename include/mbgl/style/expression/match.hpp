@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -33,7 +33,7 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "match"; }
 
 private:
@@ -42,8 +42,8 @@ private:
     std::unique_ptr<Expression> otherwise;
 };
 
-ParseResult parseMatch(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+ParseResult parseMatch(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -13,7 +13,7 @@
 
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 
 class GeometryTileFeature;
 
@@ -455,4 +455,4 @@ auto constOrDefault(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& evalua
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

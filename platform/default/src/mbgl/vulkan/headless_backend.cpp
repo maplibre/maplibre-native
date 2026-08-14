@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class HeadlessRenderableResource final : public vulkan::SurfaceRenderableResource {
@@ -34,8 +34,8 @@ public:
 HeadlessBackend::HeadlessBackend(const Size size_,
                                  gfx::HeadlessBackend::SwapBehaviour,
                                  const gfx::ContextMode contextMode_)
-    : mbgl::vulkan::RendererBackend(contextMode_),
-      mbgl::gfx::HeadlessBackend(size_) {
+    : mln::vulkan::RendererBackend(contextMode_),
+      mln::gfx::HeadlessBackend(size_) {
     init();
 }
 
@@ -104,4 +104,4 @@ std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::Vulkan
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

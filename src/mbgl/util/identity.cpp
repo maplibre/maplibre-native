@@ -7,7 +7,7 @@ namespace {
 std::atomic<std::int64_t> nextId = 1;
 } // anonymous namespace
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 const SimpleIdentity SimpleIdentity::Empty = {emptyID};
@@ -16,4 +16,4 @@ SimpleIdentity::SimpleIdentity() noexcept
     : uniqueID(nextId++) {}
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class CollisionIndex;
 class ImageManager;
@@ -132,4 +132,4 @@ protected:
     void onSymbolError(const std::string&) override;
 };
 
-} // namespace mbgl
+} // namespace mln

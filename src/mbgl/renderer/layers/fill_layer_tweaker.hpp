@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Fill layer specific tweaker
@@ -28,4 +28,4 @@ private:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

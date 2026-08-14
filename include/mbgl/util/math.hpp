@@ -7,8 +7,7 @@
 #include <limits>
 #include <numbers>
 
-namespace mbgl {
-namespace util {
+namespace mln::util {
 
 // TODO: split this file up into individual headers, following mbgl/math/*.hpp.
 
@@ -132,5 +131,4 @@ inline auto gl_fmod(TDividend x, TDivisor y) {
     return x - y * std::floor(x / y);
 }
 
-} // namespace util
-} // namespace mbgl
+} // namespace mln::util

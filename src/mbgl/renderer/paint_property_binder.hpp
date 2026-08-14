@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <variant>
 
-namespace mbgl {
+namespace mln {
 
 namespace detail {
 
@@ -182,7 +182,7 @@ public:
 
     template <typename TAttribute, typename TVertexAttribute>
     void applyPaintProperty(const std::size_t attrIndex, TVertexAttribute& attrib) const {
-        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+        using Type = typename TAttribute::Type; // ::mln::gfx::AttributeType<type_, n_>
         using InterpType = ZoomInterpolatedAttributeType<Type>;
 
         if (interleavedVertexBuffer) {
@@ -819,4 +819,4 @@ private:
     Binders binders;
 };
 
-} // namespace mbgl
+} // namespace mln
