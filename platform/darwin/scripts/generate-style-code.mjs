@@ -286,7 +286,7 @@ global.mbglTestValue = function (property, layerType) {
         case 'padding':
             return '{ 1, 1, 1, 1 }';
         case 'verticalGradient':
-            return 'mbgl::VerticalGradient(std::array<float, 2>{ 0.5, 0 })';
+            return 'mln::VerticalGradient(std::array<float, 2>{ 0.5, 0 })';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':

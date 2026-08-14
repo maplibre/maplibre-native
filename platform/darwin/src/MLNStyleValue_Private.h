@@ -240,7 +240,7 @@ private:  // Private utilities for converting from mgl to mbgl values
   // VerticalGradient type (supports Booleans and float arrays w/ sizes 1 to 2).
   // NSNumber covers both cases, so check for the array first; a bare NSNumber is treated as
   // the Boolean form, matching `fill-extrusion-vertical-gradient`'s original type.
-  void getMBGLValue(id rawValue, mbgl::VerticalGradient &mbglValue) {
+  void getMBGLValue(id rawValue, mln::VerticalGradient &mbglValue) {
     if ([rawValue isKindOfClass:[NSArray class]]) {
       NSArray *array = (NSArray *)rawValue;
       if (array.count < 1 || array.count > 2) {
@@ -251,10 +251,10 @@ private:  // Private utilities for converting from mgl to mbgl values
       for (size_t i = 0; i < array.count; ++i) {
         getMBGLValue(array[i], values[i]);
       }
-      mbglValue = mbgl::VerticalGradient(std::span<float>(values.begin(), array.count));
+      mbglValue = mln::VerticalGradient(std::span<float>(values.begin(), array.count));
     } else if ([rawValue isKindOfClass:[NSNumber class]]) {
       NSNumber *number = (NSNumber *)rawValue;
-      mbglValue = mbgl::VerticalGradient(number.boolValue);
+      mbglValue = mln::VerticalGradient(number.boolValue);
     }
   }
 
@@ -366,7 +366,7 @@ private:  // Private utilities for converting from mbgl to mgl values
   // VerticalGradient type. Always reported as the two-element array form rather than a
   // Boolean: `true` round-trips to `[depth, 150]`, which selects the same legacy shading
   // model, and `false` to a zero depth, which the shader treats as a no-op.
-  static NSArray<NSNumber *> *toMLNRawStyleValue(const mbgl::VerticalGradient &mbglStopValue) {
+  static NSArray<NSNumber *> *toMLNRawStyleValue(const mln::VerticalGradient &mbglStopValue) {
     const auto values = mbglStopValue.toArray();
     return @[ @(values[0]), @(values[1]) ];
   }

@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace mbgl {
+namespace mln {
 
 VerticalGradient::VerticalGradient(bool enabled) {
     if (!enabled) {
@@ -24,8 +24,8 @@ std::array<float, 2> VerticalGradient::toArray() const {
     return {{depth, referenceHeight}};
 }
 
-mbgl::Value VerticalGradient::serialize() const {
-    return std::vector<mbgl::Value>{depth, referenceHeight};
+mln::Value VerticalGradient::serialize() const {
+    return std::vector<mln::Value>{depth, referenceHeight};
 }
 
-} // namespace mbgl
+} // namespace mln

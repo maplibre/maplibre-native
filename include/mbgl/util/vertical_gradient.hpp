@@ -5,7 +5,7 @@
 #include <array>
 #include <span>
 
-namespace mbgl {
+namespace mln {
 
 /// Configuration for the vertical shading applied to the sides of fill-extrusion
 /// geometry.
@@ -41,7 +41,7 @@ struct VerticalGradient {
     std::array<float, 2> toArray() const;
 
     // Used by ValueFactory<VerticalGradient>::make()
-    mbgl::Value serialize() const;
+    mln::Value serialize() const;
 };
 
-} // namespace mbgl
+} // namespace mln

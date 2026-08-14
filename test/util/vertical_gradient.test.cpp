@@ -9,8 +9,8 @@
 #include <stdexcept>
 #include <vector>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 namespace {
 
@@ -62,9 +62,9 @@ TEST(VerticalGradient, ToArrayOrder) {
 }
 
 TEST(VerticalGradient, Serialize) {
-    EXPECT_EQ(mbgl::Value(std::vector<mbgl::Value>{0.25f, 80.0f}), fromArray({0.25f, 80.0f}).serialize());
+    EXPECT_EQ(mln::Value(std::vector<mln::Value>{0.25f, 80.0f}), fromArray({0.25f, 80.0f}).serialize());
 
-    EXPECT_EQ(mbgl::Value(std::vector<mbgl::Value>{0.0f, 0.0f}), VerticalGradient(false).serialize());
+    EXPECT_EQ(mln::Value(std::vector<mln::Value>{0.0f, 0.0f}), VerticalGradient(false).serialize());
 }
 
 TEST(VerticalGradient, InterpolateExpressionIsRejected) {
