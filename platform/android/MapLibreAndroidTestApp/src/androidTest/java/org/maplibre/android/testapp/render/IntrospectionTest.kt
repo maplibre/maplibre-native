@@ -144,6 +144,9 @@ class IntrospectionTest : EspressoTest() {
             })
 
             onView.perform(SimpleViewAction { uiController, _ ->
+                maplibreMap.getRenderedFeatureCount(feature.id(), highlightLayerName, highlightSourceName).let { count ->
+                    Assert.assertEquals(1, count)
+                }
                 // Wait very briefly so you can see something happening on the device.
                 // This is not necessary for the test to pass.
                 uiController.loopMainThreadForAtLeast(100)
