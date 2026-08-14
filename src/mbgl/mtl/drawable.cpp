@@ -558,11 +558,11 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
-        
+
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<VertexAttributeArray>();
         }
-        
+
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         auto attributeBindings_ = uploadPass.buildAttributeBindings(impl->vertexCount,
@@ -574,14 +574,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     usage,
                                                                     attributeUpdateTime,
                                                                     vertexBuffers);
-        
+
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
-        
+
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
         }
     }
-    
+
     const bool buildInstanceAttribs = instanceAttributes && (!attributeUpdateTime ||
                                                              instanceAttributes->isModifiedAfter(*attributeUpdateTime));
 
@@ -589,23 +589,23 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         // Build instance attribute buffers
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
         auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMinCount(),
-                                                              /*vertexType*/ gfx::AttributeDataType::Byte,
-                                                              /*vertexAttributeIndex=*/-1,
-                                                              /*vertexData=*/{},
-                                                              shader->getInstanceAttributes(),
-                                                              *instanceAttributes,
-                                                              usage,
-                                                              attributeUpdateTime,
-                                                              instanceBuffers);
-        
+                                                                   /*vertexType*/ gfx::AttributeDataType::Byte,
+                                                                   /*vertexAttributeIndex=*/-1,
+                                                                   /*vertexData=*/{},
+                                                                   shader->getInstanceAttributes(),
+                                                                   *instanceAttributes,
+                                                                   usage,
+                                                                   attributeUpdateTime,
+                                                                   instanceBuffers);
+
         // clear dirty flag
         instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
-        
+
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
         }
     }
-    
+
     if (buildVertexAttribs || buildInstanceAttribs) {
         // hash
         std::size_t hash{0};
