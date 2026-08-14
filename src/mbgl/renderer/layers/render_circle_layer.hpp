@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class CircleLayerTweaker;
 using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
@@ -44,4 +44,4 @@ private:
     gfx::ShaderGroupPtr circleShaderGroup;
 };
 
-} // namespace mbgl
+} // namespace mln

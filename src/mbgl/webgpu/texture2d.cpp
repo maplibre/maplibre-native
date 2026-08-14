@@ -17,7 +17,7 @@ struct UploadCopyData {
     std::vector<uint8_t> staging;
 };
 
-UploadCopyData prepareCopyData(const void* pixelData, const mbgl::Size& regionSize, size_t pixelStride) {
+UploadCopyData prepareCopyData(const void* pixelData, const mln::Size& regionSize, size_t pixelStride) {
     UploadCopyData copyData;
 
     if (!pixelData || regionSize.width == 0 || regionSize.height == 0) {
@@ -51,7 +51,7 @@ UploadCopyData prepareCopyData(const void* pixelData, const mbgl::Size& regionSi
 }
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 Texture2D::Texture2D(Context& context_)
@@ -421,4 +421,4 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

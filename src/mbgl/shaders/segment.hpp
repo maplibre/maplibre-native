@@ -7,7 +7,7 @@
 #include <map>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class SegmentBase {
 public:
@@ -56,4 +56,4 @@ public:
 
 using SegmentVector = std::vector<SegmentBase>;
 
-} // namespace mbgl
+} // namespace mln

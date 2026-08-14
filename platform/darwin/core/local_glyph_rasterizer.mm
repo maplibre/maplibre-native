@@ -18,7 +18,7 @@
 /// Enables local glyph rasterization for all writing systems, not just CJK.
 #define MBGL_DARWIN_NO_REMOTE_FONTS 0
 
-namespace mbgl {
+namespace mln {
 
 // 2x bitmap with 1x logical metrics.
 constexpr uint32_t kLocalGlyphTextureScale = 2;
@@ -349,4 +349,4 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack &fontStack, GlyphID g
   return manufacturedGlyph;
 }
 
-}  // namespace mbgl
+}  // namespace mln

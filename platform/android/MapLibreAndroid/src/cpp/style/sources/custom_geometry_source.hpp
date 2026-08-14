@@ -10,7 +10,7 @@
 #include "../../geometry/lat_lng_bounds.hpp"
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class CustomGeometrySource : public Source {
@@ -21,14 +21,14 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     CustomGeometrySource(jni::JNIEnv&, const jni::String&, const jni::Object<>&);
-    CustomGeometrySource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend*);
+    CustomGeometrySource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
     ~CustomGeometrySource();
 
-    bool removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map&) override;
-    void addToMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map&, AndroidRendererFrontend&) override;
+    bool removeFromMap(JNIEnv&, const jni::Object<Source>&, mln::Map&) override;
+    void addToMap(JNIEnv&, const jni::Object<Source>&, mln::Map&, AndroidRendererFrontend&) override;
 
-    void fetchTile(const mbgl::CanonicalTileID& tileID);
-    void cancelTile(const mbgl::CanonicalTileID& tileID);
+    void fetchTile(const mln::CanonicalTileID& tileID);
+    void cancelTile(const mln::CanonicalTileID& tileID);
     bool isCancelled(jni::jint z, jni::jint x, jni::jint y);
     void startThreads();
     void releaseThreads();
@@ -48,4 +48,4 @@ private:
 }; // class CustomGeometrySource
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

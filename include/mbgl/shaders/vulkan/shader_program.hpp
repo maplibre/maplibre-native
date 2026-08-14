@@ -9,7 +9,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct AttributeInfo {
@@ -46,7 +46,7 @@ public:
                   const std::string_view& vertex,
                   const std::string_view& fragment,
                   const ProgramParameters& programParameters,
-                  const mbgl::unordered_map<std::string, std::string>& additionalDefines,
+                  const mln::unordered_map<std::string, std::string>& additionalDefines,
                   RendererBackend& backend,
                   gfx::ContextObserver& observer);
     ~ShaderProgram() noexcept override;
@@ -81,4 +81,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

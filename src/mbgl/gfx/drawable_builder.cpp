@@ -7,13 +7,13 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/gfx/gfx_types.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
       vertexAttrId(0),
-      renderPass(mbgl::RenderPass::Opaque),
+      renderPass(mln::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
 DrawableBuilder::~DrawableBuilder() = default;
@@ -312,4 +312,4 @@ void DrawableBuilder::addWideVectorPolylineGlobal(const LineString<double>& coor
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 // idFillExtrusionInstancedDrawableUBO is shared between instanced and non-instanced drawables
@@ -90,4 +90,4 @@ const std::array<TextureInfo, 1> FillExtrusionPatternInstancedShaderSource::text
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

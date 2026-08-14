@@ -4,7 +4,7 @@
 #include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(calculateTileDistances, Point) {
     const GeometryCoordinates line = {Point<int16_t>{1, 1}};

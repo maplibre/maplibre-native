@@ -9,7 +9,7 @@
 #include <vector>
 #include <filesystem>
 
-using namespace mbgl;
+using namespace mln;
 
 struct Input {
     Input(std::optional<float> zoom_,

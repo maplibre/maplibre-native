@@ -48,8 +48,8 @@
 
 #include <atomic>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 using namespace std::literals::string_literals;
 
 template <class FileSource = StubFileSource, class Frontend = HeadlessFrontend>
@@ -168,19 +168,19 @@ TEST(Plugin, PluginLayer) {
     std::string layerType = "plugin-layer-test";
     auto pluginLayerFactory = std::make_unique<PluginLayerFactory>(
         layerType,
-        mbgl::style::LayerTypeInfo::Source::NotRequired,
-        mbgl::style::LayerTypeInfo::Pass3D::NotRequired,
-        mbgl::style::LayerTypeInfo::Layout::NotRequired,
-        mbgl::style::LayerTypeInfo::FadingTiles::NotRequired,
-        mbgl::style::LayerTypeInfo::CrossTileIndex::NotRequired,
-        mbgl::style::LayerTypeInfo::TileKind::NotRequired);
+        mln::style::LayerTypeInfo::Source::NotRequired,
+        mln::style::LayerTypeInfo::Pass3D::NotRequired,
+        mln::style::LayerTypeInfo::Layout::NotRequired,
+        mln::style::LayerTypeInfo::FadingTiles::NotRequired,
+        mln::style::LayerTypeInfo::CrossTileIndex::NotRequired,
+        mln::style::LayerTypeInfo::TileKind::NotRequired);
     pluginLayerFactory->setOnLayerCreatedEvent(
         [&_layerRendered, &_layerCreated, &_initialPropertiesFound, &_paintPropertiesFound](
-            mbgl::style::PluginLayer* pluginLayer) {
+            mln::style::PluginLayer* pluginLayer) {
             //            std::cout << "On Layer Created\n";
             _layerCreated = true;
 
-            auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
+            auto pluginLayerImpl = (mln::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
             auto& pm = pluginLayerImpl->_propertyManager;
             PluginLayerProperty* p = new PluginLayerProperty();
             p->_propertyName = "scale";

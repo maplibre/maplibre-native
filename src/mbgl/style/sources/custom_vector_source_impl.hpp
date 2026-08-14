@@ -5,7 +5,7 @@
 #include <mbgl/style/custom_vector_tile_loader.hpp>
 #include <mbgl/actor/actor_ref.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class CustomVectorSource::Impl : public Source::Impl {
@@ -25,4 +25,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

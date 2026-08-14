@@ -4,7 +4,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 constexpr auto wideVectorShaderPrelude = R"(
@@ -582,4 +582,4 @@ fragment float4 fragmentTri_wideVecPerf(
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

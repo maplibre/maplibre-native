@@ -14,7 +14,7 @@
 #include <functional>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class TransformObserver {
 public:
@@ -156,4 +156,4 @@ private:
     std::function<void()> transitionFinishFn;
 };
 
-} // namespace mbgl
+} // namespace mln

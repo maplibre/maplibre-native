@@ -4,7 +4,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -77,4 +77,4 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

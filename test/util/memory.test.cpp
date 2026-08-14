@@ -27,7 +27,7 @@
 #include <unistd.h>
 #endif
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::literals::string_literals;
 
 class MemoryTest {
@@ -173,26 +173,26 @@ TEST(Memory, Footprint) {
     std::vector<std::unique_ptr<FrontendAndMap>> maps;
     unsigned runs = 15;
 
-    size_t vectorInitialRSS = mbgl::test::getCurrentRSS();
+    size_t vectorInitialRSS = mln::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
         maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://maps/streets"));
     }
 
-    double vectorFootprint = (mbgl::test::getCurrentRSS() - vectorInitialRSS) / double(runs);
+    double vectorFootprint = (mln::test::getCurrentRSS() - vectorInitialRSS) / double(runs);
 
-    size_t rasterInitialRSS = mbgl::test::getCurrentRSS();
+    size_t rasterInitialRSS = mln::test::getCurrentRSS();
     for (unsigned i = 0; i < runs; ++i) {
         maps.emplace_back(std::make_unique<FrontendAndMap>(test, "maptiler://maps/hybrid"));
     }
 
-    double rasterFootprint = (mbgl::test::getCurrentRSS() - rasterInitialRSS) / double(runs);
+    double rasterFootprint = (mln::test::getCurrentRSS() - rasterInitialRSS) / double(runs);
 
     RecordProperty("vectorFootprint", static_cast<int>(vectorFootprint));
     RecordProperty("rasterFootprint", static_cast<int>(rasterFootprint));
 
     ASSERT_LT(vectorFootprint, 40 * 1024 * 1024) << "\
-        mbgl::Map footprint over 65.2MB for vector styles.";
+        mln::Map footprint over 65.2MB for vector styles.";
 
     ASSERT_LT(rasterFootprint, 25 * 1024 * 1024) << "\
-        mbgl::Map footprint over 25MB for raster styles.";
+        mln::Map footprint over 25MB for raster styles.";
 }

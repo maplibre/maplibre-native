@@ -6,7 +6,7 @@
 #include <memory>
 #include <mutex>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 class Map;
@@ -52,7 +52,7 @@ public:
 
     /// One-time shader initialization
     virtual void initShaders(gfx::ShaderRegistry&, const ProgramParameters&) = 0;
-    const mbgl::util::SimpleIdentity uniqueID;
+    const mln::util::SimpleIdentity uniqueID;
 
 protected:
     virtual std::unique_ptr<Context> createContext() = 0;
@@ -85,4 +85,4 @@ constexpr bool operator==(const RendererBackend& a, const RendererBackend& b) {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

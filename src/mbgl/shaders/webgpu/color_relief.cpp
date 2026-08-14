@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/color_relief_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using ColorReliefShaderSource = ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::WebGPU>;
@@ -19,4 +19,4 @@ const std::array<TextureInfo, 3> ColorReliefShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

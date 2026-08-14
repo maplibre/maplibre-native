@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 // Simple non-thread-safe LRU cache
 template <typename Item, typename Hash = std::hash<Item>>
@@ -57,4 +57,4 @@ private:
     std::unordered_map<Item, typename std::list<Item>::iterator, Hash> map;
 };
 
-} // namespace mbgl
+} // namespace mln

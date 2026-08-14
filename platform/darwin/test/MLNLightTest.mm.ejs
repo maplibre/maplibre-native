@@ -25,12 +25,12 @@
 
     MLNTransition defaultTransition = MLNTransitionMake(0, 0);
     MLNTransition transition = MLNTransitionMake(6, 3);
-    mbgl::style::TransitionOptions transitionOptions { { MLNDurationFromTimeInterval(6) }, { MLNDurationFromTimeInterval(3) } };
+    mln::style::TransitionOptions transitionOptions { { MLNDurationFromTimeInterval(6) }, { MLNDurationFromTimeInterval(3) } };
 
 <% for (const property of properties) { -%>
     // <%- property.name %>
     {
-        mbgl::style::Light light;
+        mln::style::Light light;
         MLNLight *mglLight = [[MLNLight alloc] initWithMBGLLight:&light];
         auto lightFromMLNLight = mglLight.mbglLight;
 
@@ -48,10 +48,10 @@
 <% } -%>
 <% if (property.type == "array") { -%>
         std::array<float, 3> positionArray = { { 6, 180, 90 } };
-        mbgl::style::Position position = { positionArray };
-        mbgl::style::PropertyValue<mbgl::style::Position> propertyValue = { position };
+        mln::style::Position position = { positionArray };
+        mln::style::PropertyValue<mln::style::Position> propertyValue = { position };
 <% } else { -%>
-        mbgl::style::PropertyValue<<%- mbglType(property) %>> propertyValue = { <%- mbglTestValue(property, type) %> };
+        mln::style::PropertyValue<<%- mbglType(property) %>> propertyValue = { <%- mbglTestValue(property, type) %> };
 <% } -%>
         light.set<%- camelize(property.name) -%>(propertyValue);
 <% if (property.transition) { -%>

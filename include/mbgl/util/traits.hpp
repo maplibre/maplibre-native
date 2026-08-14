@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 constexpr auto underlying_type(T t) -> typename std::underlying_type_t<T> {
@@ -42,4 +42,4 @@ struct is_linear_container<std::array<T, N>> : std::true_type {};
 template <typename... Ts>
 struct is_linear_container<std::vector<Ts...>> : std::true_type {};
 
-} // namespace mbgl
+} // namespace mln

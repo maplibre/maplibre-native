@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 struct Exception : std::runtime_error {
@@ -48,4 +48,4 @@ struct NotFoundException : Exception {
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Circle layer specific tweaker
@@ -26,4 +26,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

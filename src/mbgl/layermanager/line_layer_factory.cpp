@@ -5,7 +5,7 @@
 #include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layers/line_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* LineLayerFactory::getTypeInfo() const noexcept {
     return style::LineLayer::Impl::staticTypeInfo();
@@ -40,4 +40,4 @@ std::unique_ptr<RenderLayer> LineLayerFactory::createRenderLayer(Immutable<style
     return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderLineLayer(std::move(lineImpl)));
 }
 
-} // namespace mbgl
+} // namespace mln

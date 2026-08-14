@@ -4,7 +4,7 @@
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 constexpr auto backgroundShaderPrelude = R"(
@@ -187,4 +187,4 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

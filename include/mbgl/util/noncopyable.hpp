@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 namespace non_copyable_ {
@@ -19,4 +19,4 @@ protected:
 using noncopyable = non_copyable_::noncopyable;
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

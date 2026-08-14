@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 FillExtrusionLayerProperties::FillExtrusionLayerProperties(
@@ -36,6 +36,6 @@ expression::Dependency FillExtrusionLayerProperties::getDependencies() const noe
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

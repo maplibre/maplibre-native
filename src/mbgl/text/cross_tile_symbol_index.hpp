@@ -14,7 +14,7 @@
 #include <thread>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 class SymbolInstance;
 class RenderLayer;
@@ -84,4 +84,4 @@ private:
     uint32_t maxCrossTileID = 0;
 };
 
-} // namespace mbgl
+} // namespace mln

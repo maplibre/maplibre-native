@@ -1,28 +1,28 @@
 #include "tile_operation.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-jni::Local<jni::Object<TileOperation>> TileOperation::Create(jni::JNIEnv& env, mbgl::TileOperation op) {
-    static auto& _class = jni::Class<mbgl::android::TileOperation>::Singleton(env);
+jni::Local<jni::Object<TileOperation>> TileOperation::Create(jni::JNIEnv& env, mln::TileOperation op) {
+    static auto& _class = jni::Class<mln::android::TileOperation>::Singleton(env);
     switch (op) {
-        case mbgl::TileOperation::RequestedFromNetwork:
+        case mln::TileOperation::RequestedFromNetwork:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "RequestedFromNetwork"));
-        case mbgl::TileOperation::RequestedFromCache:
+        case mln::TileOperation::RequestedFromCache:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "RequestedFromCache"));
-        case mbgl::TileOperation::LoadFromCache:
+        case mln::TileOperation::LoadFromCache:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "LoadFromCache"));
-        case mbgl::TileOperation::LoadFromNetwork:
+        case mln::TileOperation::LoadFromNetwork:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "LoadFromNetwork"));
-        case mbgl::TileOperation::StartParse:
+        case mln::TileOperation::StartParse:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "StartParse"));
-        case mbgl::TileOperation::EndParse:
+        case mln::TileOperation::EndParse:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "EndParse"));
-        case mbgl::TileOperation::Error:
+        case mln::TileOperation::Error:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "Error"));
-        case mbgl::TileOperation::Cancelled:
+        case mln::TileOperation::Cancelled:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "Cancelled"));
-        case mbgl::TileOperation::NullOp:
+        case mln::TileOperation::NullOp:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "NullOp"));
     }
 }
@@ -32,4 +32,4 @@ void TileOperation::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

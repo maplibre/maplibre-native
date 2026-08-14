@@ -13,7 +13,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
@@ -229,4 +229,4 @@ const gfx::Context& UploadPass::getContext() const {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

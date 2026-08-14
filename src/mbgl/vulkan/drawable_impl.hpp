@@ -16,7 +16,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 using namespace platform;
@@ -58,4 +58,4 @@ public:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

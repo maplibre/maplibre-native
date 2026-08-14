@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using DebugShaderSource = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan>;
@@ -15,4 +15,4 @@ const std::array<TextureInfo, 1> DebugShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

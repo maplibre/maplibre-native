@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class DefaultStyle {
@@ -20,4 +20,4 @@ private:
 };
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

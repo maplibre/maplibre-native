@@ -6,7 +6,7 @@
 
 #include <Metal/Metal.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class OffscreenTextureResource final : public RenderableResource {
@@ -150,4 +150,4 @@ const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

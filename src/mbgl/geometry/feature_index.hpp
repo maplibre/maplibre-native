@@ -12,7 +12,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 class RenderedQueryOptions;
 class RenderLayer;
@@ -90,7 +90,7 @@ class DynamicFeatureIndex {
 public:
     ~DynamicFeatureIndex();
     void query(std::unordered_map<std::string, std::vector<Feature>>& result,
-               const mbgl::ScreenLineString& queryGeometry,
+               const mln::ScreenLineString& queryGeometry,
                const TransformState& state) const;
 
     void insert(std::shared_ptr<Feature> feature, std::shared_ptr<mapbox::geometry::polygon<int64_t>> envelope);
@@ -160,7 +160,7 @@ private:
     GridIndex<RefIndexedSubfeature> grid;
     unsigned int sortIndex = 0;
 
-    // mbgl::unordered_* cannot be used here, as we rely on holding references to elements:
+    // mln::unordered_* cannot be used here, as we rely on holding references to elements:
     //     22.2.7 Unordered associative containers [unord.req]
     //     The insert and emplace members shall not affect the validity of references to
     //     container elements, but may invalidate all iterators to the container.
@@ -168,4 +168,4 @@ private:
     std::unordered_set<std::string> uniqueLayerIDs;
     std::unique_ptr<const GeometryTileData> tileData;
 };
-} // namespace mbgl
+} // namespace mln

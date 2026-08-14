@@ -10,7 +10,7 @@
 #include <cstring>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 namespace {
@@ -186,4 +186,4 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

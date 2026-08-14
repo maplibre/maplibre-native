@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CircleLayerProperties::CircleLayerProperties(
@@ -34,6 +34,6 @@ expression::Dependency CircleLayerProperties::getDependencies() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

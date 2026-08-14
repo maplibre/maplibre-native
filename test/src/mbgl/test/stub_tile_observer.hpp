@@ -2,7 +2,7 @@
 
 #include <mbgl/tile/tile_observer.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 /**
  * An implementation of TileObserver that forwards all methods to

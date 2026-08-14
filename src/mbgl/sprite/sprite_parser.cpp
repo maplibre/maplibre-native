@@ -15,7 +15,7 @@
 #include <sstream>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 std::unique_ptr<style::Image> createStyleImage(const std::string& id,
                                                const PremultipliedImage& image,
@@ -263,4 +263,4 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
     return images;
 }
 
-} // namespace mbgl
+} // namespace mln

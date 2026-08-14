@@ -3,7 +3,7 @@
 #include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/style/layer_observer.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -54,4 +54,4 @@ const LayerTypeInfo* CustomLayer::Impl::staticTypeInfo() noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

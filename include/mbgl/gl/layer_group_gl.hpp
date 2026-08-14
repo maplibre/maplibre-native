@@ -3,7 +3,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
@@ -48,4 +48,4 @@ protected:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

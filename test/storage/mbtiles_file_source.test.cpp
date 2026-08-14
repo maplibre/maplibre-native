@@ -18,7 +18,7 @@ std::string toAbsoluteURL(const std::string &fileName) {
 
 } // namespace
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(MBTilesFileSource, AcceptsURL) {
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());

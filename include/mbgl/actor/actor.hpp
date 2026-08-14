@@ -12,7 +12,7 @@
 #include <type_traits>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 class TaggedScheduler;
 
@@ -83,4 +83,4 @@ private:
     EstablishedActor<Object> target;
 };
 
-} // namespace mbgl
+} // namespace mln

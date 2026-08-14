@@ -2,7 +2,7 @@
 #include <mbgl/gl/renderbuffer_resource.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 RenderbufferResource::~RenderbufferResource() noexcept {
@@ -10,4 +10,4 @@ RenderbufferResource::~RenderbufferResource() noexcept {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

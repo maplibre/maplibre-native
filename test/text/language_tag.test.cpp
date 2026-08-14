@@ -2,7 +2,7 @@
 
 #include <mbgl/text/language_tag.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LanguageTag, Parsing) {
     LanguageTag bareLanguage = LanguageTag::fromBCP47("de");

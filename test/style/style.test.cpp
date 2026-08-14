@@ -18,8 +18,8 @@
 #include <Windows.h>
 #endif
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 TEST(Style, Properties) {
     util::RunLoop loop;

@@ -11,7 +11,7 @@
 #include <sstream>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class VertexAttributeArrayGL;
@@ -182,4 +182,4 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute&
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

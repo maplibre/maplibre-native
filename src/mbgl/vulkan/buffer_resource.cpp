@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 bool BufferAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::BufferCreateInfo& bufferInfo) {
@@ -95,7 +95,7 @@ BufferResource::BufferResource(
 
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
+        mln::Log::Error(mln::Event::Render, "Vulkan buffer allocation failed");
         throw std::bad_alloc();
     }
 
@@ -281,4 +281,4 @@ void BufferResource::updateVulkanBuffer(const int8_t destination, const uint8_t 
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

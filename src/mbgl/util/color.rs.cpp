@@ -9,7 +9,7 @@
 
 #include <rustutils/color.hpp>
 
-namespace mbgl {
+namespace mln {
 
 std::optional<Color> Color::parse(const std::string& s) {
     const auto css_color = rustutils::parse_css_color(s);
@@ -39,7 +39,7 @@ std::array<double, 4> Color::toArray() const {
     }
 }
 
-mbgl::Value Color::toObject() const {
+mln::Value Color::toObject() const {
     // Return object format for evaluation output
     return mapbox::base::ValueObject{{"r", static_cast<double>(r)},
                                      {"g", static_cast<double>(g)},
@@ -47,11 +47,11 @@ mbgl::Value Color::toObject() const {
                                      {"a", static_cast<double>(a)}};
 }
 
-mbgl::Value Color::serialize() const {
+mln::Value Color::serialize() const {
     // Emit as an rgba expression array for expression serialization to avoid
     // "Bare objects invalid" parse errors in expression roundtrips.
     const auto array = toArray();
-    return std::vector<mbgl::Value>{
+    return std::vector<mln::Value>{
         std::string("rgba"),
         array[0],
         array[1],
@@ -60,4 +60,4 @@ mbgl::Value Color::serialize() const {
     };
 }
 
-} // namespace mbgl
+} // namespace mln

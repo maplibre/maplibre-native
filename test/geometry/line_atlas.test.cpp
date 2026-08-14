@@ -4,7 +4,7 @@
 
 #include <random>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LineAtlas, Random) {
     std::mt19937 generator(42); // Use the same seed for reproducible tests.

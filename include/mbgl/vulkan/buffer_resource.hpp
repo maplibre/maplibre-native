@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class Context;
@@ -89,4 +89,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LRU, LRU) {
     LRU<int> lru;

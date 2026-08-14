@@ -5,7 +5,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -25,4 +25,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

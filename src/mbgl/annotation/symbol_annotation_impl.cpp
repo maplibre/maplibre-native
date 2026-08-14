@@ -4,7 +4,7 @@
 #include <mbgl/math/clamp.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 
-namespace mbgl {
+namespace mln {
 
 SymbolAnnotationImpl::SymbolAnnotationImpl(AnnotationID id_, SymbolAnnotation annotation_)
     : id(id_),
@@ -20,4 +20,4 @@ void SymbolAnnotationImpl::updateLayer(const CanonicalTileID& tileID, Annotation
     layer.addFeature(id, FeatureType::Point, GeometryCollection{{{{tilePoint}}}}, featureProperties);
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomDrawableLayer::Impl::Impl(const std::string& id_, std::unique_ptr<CustomDrawableLayerHost> host_)
@@ -15,4 +15,4 @@ bool CustomDrawableLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 void CustomDrawableLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {}
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

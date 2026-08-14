@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 // Common headless backend interface, provides HeadlessBackend backend factory
@@ -38,4 +38,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

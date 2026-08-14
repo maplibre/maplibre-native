@@ -36,7 +36,7 @@ CGFloat contentScaleFactor() {
 }
 }  // namespace
 
-class MLNMapViewOpenGLRenderableResource final : public mbgl::gl::RenderableResource {
+class MLNMapViewOpenGLRenderableResource final : public mln::gl::RenderableResource {
 public:
   MLNMapViewOpenGLRenderableResource(MLNMapViewOpenGLImpl& backend_)
       : backend(backend_),
@@ -46,7 +46,7 @@ public:
 
   void bind() override { backend.restoreFramebufferBinding(); }
 
-  mbgl::Size framebufferSize() {
+  mln::Size framebufferSize() {
     assert(glView);
     return {static_cast<uint32_t>(glView.drawableWidth),
             static_cast<uint32_t>(glView.drawableHeight)};
@@ -68,8 +68,8 @@ public:
 
 MLNMapViewOpenGLImpl::MLNMapViewOpenGLImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
-      mbgl::gl::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable({0, 0}, std::make_unique<MLNMapViewOpenGLRenderableResource>(*this)) {}
+      mln::gl::RendererBackend(mln::gfx::ContextMode::Unique),
+      mln::gfx::Renderable({0, 0}, std::make_unique<MLNMapViewOpenGLRenderableResource>(*this)) {}
 
 MLNMapViewOpenGLImpl::~MLNMapViewOpenGLImpl() {
   auto& resource = getResource<MLNMapViewOpenGLRenderableResource>();
@@ -182,13 +182,13 @@ void MLNMapViewOpenGLImpl::emergencyRecreateGL() {
 }
 #endif
 
-mbgl::gl::ProcAddress MLNMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
+mln::gl::ProcAddress MLNMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
   static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
   if (!framework) {
     throw std::runtime_error("Failed to load OpenGL framework.");
   }
 
-  return reinterpret_cast<mbgl::gl::ProcAddress>(CFBundleGetFunctionPointerForName(
+  return reinterpret_cast<mln::gl::ProcAddress>(CFBundleGetFunctionPointerForName(
       framework, (__bridge CFStringRef)[NSString stringWithUTF8String:name]));
 }
 

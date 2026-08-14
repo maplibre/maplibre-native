@@ -2,7 +2,7 @@
 
 #include <mbgl/layermanager/layer_factory.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class HeatmapLayerFactory : public LayerFactory {
 protected:
@@ -14,4 +14,4 @@ protected:
     std::unique_ptr<RenderLayer> createRenderLayer(Immutable<style::Layer::Impl>) noexcept final;
 };
 
-} // namespace mbgl
+} // namespace mln

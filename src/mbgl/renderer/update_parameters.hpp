@@ -15,7 +15,7 @@
 
 #include <mapbox/std/weak.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AnnotationManager;
 class FileSource;
@@ -57,4 +57,4 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
 };
 
-} // namespace mbgl
+} // namespace mln

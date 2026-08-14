@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 using namespace shaders;
@@ -127,9 +127,9 @@ void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*b
     }
 }
 
-mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
-                                                                       const LineString<double>& coordinates,
-                                                                       const gfx::PolylineGeneratorOptions& options) {
+mln::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
+                                                                      const LineString<double>& coordinates,
+                                                                      const gfx::PolylineGeneratorOptions& options) {
     constexpr int32_t zoom = 0;
 
     // get center
@@ -138,7 +138,7 @@ mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::Draw
     Point<double> minPoint{maxd, maxd}, maxPoint{mind, mind};
     for (const auto& coord : coordinates) {
         auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
-        Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
+        Point<double> pSource{merc.x * mln::util::EXTENT, merc.y * mln::util::EXTENT};
         minPoint.x = std::min(pSource.x, minPoint.x);
         minPoint.y = std::min(pSource.y, minPoint.y);
         maxPoint.x = std::max(pSource.x, maxPoint.x);
@@ -152,7 +152,7 @@ mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::Draw
     int index = 0;
     for (const auto& coord : coordinates) {
         auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
-        Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
+        Point<double> pSource{merc.x * mln::util::EXTENT, merc.y * mln::util::EXTENT};
         pSource.x -= pCenter.x;
         pSource.y -= pCenter.y;
         VertexTriWideVecInstance data;
@@ -294,8 +294,8 @@ bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
                     return "Unknown"; // Handle unknown enum values if needed
             }
         };
-        mbgl::Log::Error(
-            mbgl::Event::General,
+        mln::Log::Error(
+            mln::Event::General,
             "DrawableBuilder mode mismatch. Target is "s + to_string(target) + ", current is " + to_string(mode));
 
         // the builder is building in a different mode
@@ -308,4 +308,4 @@ bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

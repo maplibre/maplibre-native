@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 enum class SymbolType : uint8_t;
 } // namespace style
@@ -44,4 +44,4 @@ struct SymbolDrawableData : public DrawableData {
 using UniqueSymbolDrawableData = std::unique_ptr<SymbolDrawableData>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

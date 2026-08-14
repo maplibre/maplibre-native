@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) CircleDrawableUBO {
@@ -41,4 +41,4 @@ struct alignas(16) CircleEvaluatedPropsUBO {
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 RasterDEMSource::RasterDEMSource(jni::JNIEnv& env,
@@ -17,16 +17,16 @@ RasterDEMSource::RasterDEMSource(jni::JNIEnv& env,
                                  const jni::Object<>& urlOrTileSet,
                                  jni::jint tileSize)
     : Source(env,
-             std::make_unique<mbgl::style::RasterDEMSource>(
+             std::make_unique<mln::style::RasterDEMSource>(
                  jni::Make<std::string>(env, sourceId), convertURLOrTileset(Value(env, urlOrTileSet)), tileSize)) {}
 
-RasterDEMSource::RasterDEMSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
+RasterDEMSource::RasterDEMSource(jni::JNIEnv& env, mln::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
 
 RasterDEMSource::~RasterDEMSource() = default;
 
 jni::Local<jni::String> RasterDEMSource::getURL(jni::JNIEnv& env) {
-    std::optional<std::string> url = source.as<mbgl::style::RasterDEMSource>()->RasterDEMSource::getURL();
+    std::optional<std::string> url = source.as<mln::style::RasterDEMSource>()->RasterDEMSource::getURL();
     return url ? jni::Make<jni::String>(env, *url) : jni::Local<jni::String>();
 }
 
@@ -54,4 +54,4 @@ void RasterDEMSource::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

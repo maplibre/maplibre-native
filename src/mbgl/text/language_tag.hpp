@@ -27,7 +27,7 @@
    information is overkill for us, we just want language/script/region.
  */
 
-namespace mbgl {
+namespace mln {
 
 struct LanguageTag {
     LanguageTag() = default;
@@ -43,4 +43,4 @@ struct LanguageTag {
     std::optional<std::string> region;   // ISO 3316-1 || UN M.49
 };
 
-} // end namespace mbgl
+} // end namespace mln

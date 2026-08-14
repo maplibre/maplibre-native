@@ -58,7 +58,7 @@
 <% } -%>
     XCTAssertNotEqual(layer.rawLayer, nullptr);
     XCTAssertEqualObjects(@(layer.rawLayer->getTypeInfo()->type), @"<%- type %>");
-    auto rawLayer = static_cast<mbgl::style::<%- camelize(type) %>Layer*>(layer.rawLayer);
+    auto rawLayer = static_cast<mln::style::<%- camelize(type) %>Layer*>(layer.rawLayer);
 
     MLNTransition transitionTest = MLNTransitionMake(5, 4);
 
@@ -79,7 +79,7 @@
         NSExpression *constantExpression = [NSExpression expressionWithFormat:<%- objCTestValue(property, type, true, 3) %>];
 <% } -%>
         layer.<%- objCName(property) %> = constantExpression;
-        mbgl::style::PropertyValue<<%- mbglType(property) %>> propertyValue = { <%- mbglTestValue(property, type) %> };
+        mln::style::PropertyValue<<%- mbglType(property) %>> propertyValue = { <%- mbglTestValue(property, type) %> };
         XCTAssertEqual(rawLayer->get<%- camelize(originalPropertyName(property)) %>(), propertyValue,
                        @"Setting <%- objCName(property) %> to a constant value expression should update <%- originalPropertyName(property) %>.");
         XCTAssertEqualObjects(layer.<%- objCName(property) %>, constantExpression,
@@ -97,8 +97,8 @@
         layer.<%- objCName(property) %> = functionExpression;
 
         {
-            using namespace mbgl::style::expression::dsl;
-            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+            using namespace mln::style::expression::dsl;
+            propertyValue = mln::style::PropertyExpression<<%- mbglType(property) %>>(
 <% if (property.type === 'formatted') { -%>
                 step(zoom(), format(<%- mbglExpressionTestValue(property, type) %>), 18.0, format(<%- mbglExpressionTestValue(property, type) %>))
 <% } else if (property.type === 'resolvedImage') { -%>
@@ -119,8 +119,8 @@
         layer.<%- objCName(property) %> = functionExpression;
 
         {
-            using namespace mbgl::style::expression::dsl;
-            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+            using namespace mln::style::expression::dsl;
+            propertyValue = mln::style::PropertyExpression<<%- mbglType(property) %>>(
                 interpolate(linear(), number(get("keyName")), 18.0, literal(<%- mbglExpressionTestValue(property, type) %>))
             );
         }
@@ -135,8 +135,8 @@
         layer.<%- objCName(property) %> = functionExpression;
 
         {
-            using namespace mbgl::style::expression::dsl;
-            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+            using namespace mln::style::expression::dsl;
+            propertyValue = mln::style::PropertyExpression<<%- mbglType(property) %>>(
                 interpolate(linear(), zoom(), 10.0, interpolate(linear(), number(get("keyName")), 18.0, literal(<%- mbglExpressionTestValue(property, type) %>)))
             );
         }
@@ -180,8 +180,8 @@
         layer.<%- objCName(property) %> = [NSExpression expressionForConstantValue:@"{token}"];
 
         {
-            using namespace mbgl::style::expression::dsl;
-            propertyValue = mbgl::style::PropertyExpression<<%- mbglType(property) %>>(
+            using namespace mln::style::expression::dsl;
+            propertyValue = mln::style::PropertyExpression<<%- mbglType(property) %>>(
 <% if (property.type === 'formatted') { -%>
                 format(toString(get(literal("token"))))
 <% } else if (property.type === 'resolvedImage') { -%>

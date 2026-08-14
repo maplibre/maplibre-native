@@ -7,7 +7,7 @@
 #include <cstring>
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 namespace {
@@ -106,4 +106,4 @@ void UniformBufferArray::bindWebgpu(RenderPass& renderPass) const noexcept {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

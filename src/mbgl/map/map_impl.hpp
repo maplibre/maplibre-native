@@ -16,7 +16,7 @@
 
 #include <numbers>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 class ResourceTransform;
@@ -122,4 +122,4 @@ CameraOptions cameraForLatLngs(const std::vector<LatLng>& latLngs,
                                const Transform& transform,
                                const EdgeInsets& padding);
 
-} // namespace mbgl
+} // namespace mln

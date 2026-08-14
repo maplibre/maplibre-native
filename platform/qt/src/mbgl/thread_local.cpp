@@ -5,7 +5,7 @@
 
 #include <QThreadStorage>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 namespace impl {
 
@@ -37,4 +37,4 @@ void ThreadLocalBase::set(void* ptr) {
 
 } // namespace impl
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class OnlineFileSource : public FileSource {
 public:
@@ -31,4 +31,4 @@ private:
     const std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

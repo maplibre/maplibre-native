@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class CustomVectorTile;
 
@@ -49,4 +49,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

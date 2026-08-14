@@ -9,7 +9,7 @@
 
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 ImageManagerObserver nullObserver;
@@ -322,4 +322,4 @@ ImageRequestor::~ImageRequestor() {
     imageManager->removeRequestor(*this);
 }
 
-} // namespace mbgl
+} // namespace mln

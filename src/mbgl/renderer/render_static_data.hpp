@@ -12,7 +12,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class Context;
 class UploadPass;
@@ -55,4 +55,4 @@ public:
     const SegmentVector clippingMaskSegments;
 };
 
-} // namespace mbgl
+} // namespace mln

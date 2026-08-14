@@ -13,7 +13,7 @@
 
 #include "harfbuzz.hpp"
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 class AsyncRequest;
@@ -113,4 +113,4 @@ private:
     std::recursive_mutex rwLock;
 };
 
-} // namespace mbgl
+} // namespace mln

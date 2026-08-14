@@ -3,7 +3,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/webgpu/uniform_buffer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
@@ -12,7 +12,7 @@ namespace webgpu {
 /**
  * A layer group for tile-based drawables
  */
-class TileLayerGroup : public mbgl::TileLayerGroup {
+class TileLayerGroup : public mln::TileLayerGroup {
 public:
     TileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name);
     ~TileLayerGroup() override {}
@@ -28,4 +28,4 @@ protected:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

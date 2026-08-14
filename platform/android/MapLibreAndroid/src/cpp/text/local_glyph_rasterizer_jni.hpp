@@ -10,11 +10,11 @@
     android::LocalGlyphRasterizer is the JNI wrapper of
     org/maplibre/android/text/LocalGlyphRasterizer
 
-    mbgl::LocalGlyphRasterizer is the portable interface
+    mln::LocalGlyphRasterizer is the portable interface
     Both implementations are in local_glyph_rasterizer.cpp
  */
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class LocalGlyphRasterizer {
@@ -33,4 +33,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

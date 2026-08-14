@@ -6,7 +6,7 @@
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/util/containers.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 template <shaders::BuiltIn ShaderID>
@@ -27,8 +27,8 @@ public:
         // We could cache these by key here to avoid creating a string key each time, but we
         // would need another mutex.  We could also push string IDs down into `ShaderGroup`.
         std::size_t seed = 0;
-        mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
-        mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
+        mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
+        mln::util::hash_combine(seed, programParameters.getDefinesHash());
         const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<gl::ShaderProgramGL>(shaderName);
@@ -72,4 +72,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

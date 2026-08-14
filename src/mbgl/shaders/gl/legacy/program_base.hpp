@@ -19,7 +19,7 @@
 #include <set>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 template <class Name>
@@ -145,4 +145,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

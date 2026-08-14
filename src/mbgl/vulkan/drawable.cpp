@@ -25,7 +25,7 @@
 #include <sstream>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 struct IndexBuffer : public gfx::IndexBufferBase {
@@ -33,7 +33,7 @@ struct IndexBuffer : public gfx::IndexBufferBase {
         : buffer(std::move(buffer_)) {}
     ~IndexBuffer() override = default;
 
-    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+    std::unique_ptr<mln::gfx::IndexBuffer> buffer;
 };
 
 #if !defined(NDEBUG)
@@ -238,7 +238,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
 
-            const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+            const auto& shaderImpl = static_cast<const mln::vulkan::ShaderProgram&>(*shader);
             setSharedBuffers(shaderImpl.getVertexAttributes(), impl->attributeBindings);
         }
     }
@@ -266,7 +266,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
 
-            const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+            const auto& shaderImpl = static_cast<const mln::vulkan::ShaderProgram&>(*shader);
             setSharedBuffers(shaderImpl.getInstanceAttributes(), impl->instanceBindings);
         }
     }
@@ -298,7 +298,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     auto& encoder = renderPass_.getEncoder();
     auto& commandBuffer = encoder.getCommandBuffer();
 
-    auto& shaderImpl = static_cast<mbgl::vulkan::ShaderProgram&>(*shader);
+    auto& shaderImpl = static_cast<mln::vulkan::ShaderProgram&>(*shader);
 
     if (!bindAttributes(encoder)) return;
     if (!bindDescriptors(encoder)) return;
@@ -508,7 +508,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const {
     // bind uniforms
     impl->uniformBuffers.bindDescriptorSets(encoder);
 
-    const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+    const auto& shaderImpl = static_cast<const mln::vulkan::ShaderProgram&>(*shader);
     if (shaderImpl.hasTextures()) {
         // update image set
         if (!impl->imageDescriptorSet) {
@@ -545,4 +545,4 @@ void Drawable::uploadTextures(UploadPass&) const {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

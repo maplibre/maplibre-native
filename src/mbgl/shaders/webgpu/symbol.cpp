@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 // Symbol Icon
@@ -62,4 +62,4 @@ const std::array<TextureInfo, 2> SymbolTextAndIconShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

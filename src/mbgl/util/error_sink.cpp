@@ -1,7 +1,7 @@
 #include <mbgl/util/error_sink.hpp>
 #include <mbgl/util/symbol_error_observer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 SymbolErrorObserver*& ErrorSink::current() {
     static thread_local SymbolErrorObserver* observer = nullptr;
@@ -23,4 +23,4 @@ ErrorScope::~ErrorScope() {
     ErrorSink::current() = previous;
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #include <mbgl/style/expression/utf8_op_helpers.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -118,7 +118,7 @@ void Slice::eachChild(const std::function<void(const Expression &)> &visit) cons
     }
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult Slice::parse(const Convertible &value, ParsingContext &ctx) {
     assert(isArray(value));
 
@@ -157,4 +157,4 @@ std::vector<std::optional<Value>> Slice::possibleOutputs() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

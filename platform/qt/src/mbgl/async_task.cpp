@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 AsyncTask::Impl::Impl(std::function<void()>&& fn)
@@ -37,4 +37,4 @@ void AsyncTask::send() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

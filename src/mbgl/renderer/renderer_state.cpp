@@ -5,7 +5,7 @@
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/style/source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 CameraOptions RendererState::getCameraOptions(const UpdateParameters& updateParameters, const EdgeInsets& padding) {
     return updateParameters.transformState.getCameraOptions(padding);
@@ -54,4 +54,4 @@ LatLng RendererState::latLngForPixel(const UpdateParameters& updateParameters, c
     return updateParameters.transformState.screenCoordinateToLatLng(flippedPoint);
 }
 
-} // namespace mbgl
+} // namespace mln

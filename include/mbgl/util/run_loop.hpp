@@ -12,7 +12,7 @@
 #include <queue>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 using LOOP_HANDLE = void*;
@@ -147,6 +147,6 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln
 
 #include <mbgl/util/work_task_impl.hpp>

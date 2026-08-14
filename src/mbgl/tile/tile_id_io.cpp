@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace mbgl {
+namespace mln {
 
 ::std::ostream& operator<<(::std::ostream& os, const CanonicalTileID& rhs) {
     // Uncomment this to create code instead of shorthands.
@@ -40,4 +40,4 @@ std::string toString(const UnwrappedTileID& rhs) {
 }
 } // namespace util
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 class LayerProperties;
@@ -44,4 +44,4 @@ protected:
     std::optional<std::string> getSource(const style::conversion::Convertible& value) const noexcept;
 };
 
-} // namespace mbgl
+} // namespace mln

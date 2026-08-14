@@ -1,7 +1,7 @@
 #include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 MBGL_DEFINE_ENUM(TileOperation,
                  {
@@ -15,4 +15,4 @@ MBGL_DEFINE_ENUM(TileOperation,
                      {TileOperation::Cancelled, "Cancelled"},
                      {TileOperation::NullOp, "NullOp"},
                  });
-} // namespace mbgl
+} // namespace mln

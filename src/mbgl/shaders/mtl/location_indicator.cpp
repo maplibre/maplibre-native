@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/location_indicator.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using LocationIndicatorShaderSource = ShaderSource<BuiltIn::LocationIndicatorShader, gfx::Backend::Type::Metal>;
@@ -24,4 +24,4 @@ const std::array<TextureInfo, 1> LocationIndicatorTexturedShaderSource::textures
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

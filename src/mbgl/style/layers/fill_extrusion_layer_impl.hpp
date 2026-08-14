@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/fill_extrusion_layer.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class FillExtrusionLayer::Impl : public Layer::Impl {
@@ -21,4 +21,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

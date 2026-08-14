@@ -9,7 +9,7 @@
 #include <sstream>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 #ifdef MBGL_TIMING
@@ -54,4 +54,4 @@ class stopwatch {
 };
 #endif
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 #include <memory>
 #include <deque>
 
-namespace mbgl {
+namespace mln {
 
 class OfflineDatabase;
 class FileSource;
@@ -69,4 +69,4 @@ private:
     void markPendingUsedResources();
 };
 
-} // namespace mbgl
+} // namespace mln

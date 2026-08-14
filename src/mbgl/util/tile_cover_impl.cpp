@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 using PointList = std::vector<Point<double>>;
@@ -363,4 +363,4 @@ std::optional<UnwrappedTileID> TileCover::Impl::next() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

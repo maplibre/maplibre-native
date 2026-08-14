@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class TileAtlasTextures;
 using TileAtlasTexturesPtr = std::shared_ptr<TileAtlasTextures>;
@@ -61,4 +61,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

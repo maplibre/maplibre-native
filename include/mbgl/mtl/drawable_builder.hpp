@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/drawable_builder.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 /**
@@ -25,4 +25,4 @@ protected:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

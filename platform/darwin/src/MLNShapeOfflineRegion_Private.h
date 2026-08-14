@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
     offline region.
  */
 - (instancetype)initWithOfflineRegionDefinition:
-    (const mbgl::OfflineGeometryRegionDefinition &)definition;
+    (const mln::OfflineGeometryRegionDefinition &)definition;
 
 @end
 

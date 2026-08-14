@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 
@@ -70,4 +70,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

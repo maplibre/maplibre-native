@@ -11,7 +11,7 @@
 
 #include <mbgl/style/layers/<%- type.replace(/-/g, '_') %>_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 <%- camelize(type) %>LayerProperties::<%- camelize(type) %>LayerProperties(
@@ -45,6 +45,6 @@ expression::Dependency <%- camelize(type) %>LayerProperties::getDependencies() c
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

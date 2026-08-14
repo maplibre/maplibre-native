@@ -1,7 +1,7 @@
 #include <mbgl/style/expression/util.hpp>
 #include <mbgl/style/expression/value.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -25,4 +25,4 @@ Result<Color> rgba(double r, double g, double b, double a) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

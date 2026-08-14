@@ -4,10 +4,10 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class TransitionOptions : private mbgl::util::noncopyable {
+class TransitionOptions : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/layers/TransitionOptions"; };
 
@@ -26,4 +26,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

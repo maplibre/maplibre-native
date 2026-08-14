@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using ColorReliefShaderSource = ShaderSource<BuiltIn::ColorReliefShader, gfx::Backend::Type::Metal>;
@@ -18,4 +18,4 @@ const std::array<TextureInfo, 3> ColorReliefShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

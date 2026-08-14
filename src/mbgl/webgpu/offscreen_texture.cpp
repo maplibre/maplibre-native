@@ -15,7 +15,7 @@ namespace {
 constexpr uint32_t bytesPerRowAlignment = 256u;
 }
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class OffscreenTextureResource final : public webgpu::RenderableResource {
@@ -68,8 +68,8 @@ public:
         // Offscreen targets do not present to a surface.
     }
 
-    const mbgl::webgpu::RendererBackend& getBackend() const override {
-        return static_cast<const mbgl::webgpu::RendererBackend&>(context.getBackend());
+    const mln::webgpu::RendererBackend& getBackend() const override {
+        return static_cast<const mln::webgpu::RendererBackend&>(context.getBackend());
     }
 
     const WGPUCommandEncoder& getCommandEncoder() const override {
@@ -135,7 +135,7 @@ public:
         auto device = static_cast<WGPUDevice>(backend.getDevice());
         auto queue = static_cast<WGPUQueue>(backend.getQueue());
         if (!device || !queue) {
-            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: No device or queue available for readback");
+            mln::Log::Error(mln::Event::Render, "WebGPU: No device or queue available for readback");
             return {size, std::move(data)};
         }
 
@@ -153,7 +153,7 @@ public:
 
         WGPUBuffer stagingBuffer = wgpuDeviceCreateBuffer(device, &bufferDesc);
         if (!stagingBuffer) {
-            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create staging buffer");
+            mln::Log::Error(mln::Event::Render, "WebGPU: Failed to create staging buffer");
             return {size, std::move(data)};
         }
 
@@ -184,11 +184,11 @@ public:
                 wgpuQueueSubmit(queue, 1, &commands);
                 wgpuCommandBufferRelease(commands);
             } else {
-                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Color texture is null");
+                mln::Log::Error(mln::Event::Render, "WebGPU: Color texture is null");
             }
             wgpuCommandEncoderRelease(encoder);
         } else {
-            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to create command encoder");
+            mln::Log::Error(mln::Event::Render, "WebGPU: Failed to create command encoder");
         }
 
         // Map buffer and read data (blocking)
@@ -225,7 +225,7 @@ public:
             WGPUWaitStatus waitStatus = wgpuInstanceWaitAny(instance, 1, &waitInfo, UINT64_MAX);
 
             if (waitStatus != WGPUWaitStatus_Success || !waitInfo.completed) {
-                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Buffer mapping wait failed");
+                mln::Log::Error(mln::Event::Render, "WebGPU: Buffer mapping wait failed");
             }
         }
 #elif MLN_WEBGPU_IMPL_WGPU
@@ -257,7 +257,7 @@ public:
         }
 
         if (!mapContext.completed) {
-            mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Buffer mapping timeout after polling");
+            mln::Log::Error(mln::Event::Render, "WebGPU: Buffer mapping timeout after polling");
         }
 #endif
 
@@ -277,11 +277,11 @@ public:
                     }
                 }
             } else {
-                mbgl::Log::Error(mbgl::Event::Render, "WebGPU: Failed to get mapped range");
+                mln::Log::Error(mln::Event::Render, "WebGPU: Failed to get mapped range");
             }
         } else {
-            mbgl::Log::Error(mbgl::Event::Render,
-                             "WebGPU: Buffer mapping failed with status: " + std::to_string(mapContext.status));
+            mln::Log::Error(mln::Event::Render,
+                            "WebGPU: Buffer mapping failed with status: " + std::to_string(mapContext.status));
         }
 
         wgpuBufferUnmap(stagingBuffer);
@@ -380,4 +380,4 @@ gfx::Texture2DPtr OffscreenTexture::takeTexture() {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

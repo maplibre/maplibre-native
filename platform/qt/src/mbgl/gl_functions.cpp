@@ -4,7 +4,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 /* OpenGL ES 2.0 */
@@ -907,4 +907,4 @@ void (*const glGetInternalformativ)(GLenum, GLenum, GLenum, GLsizei, GLint*) = [
 };
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

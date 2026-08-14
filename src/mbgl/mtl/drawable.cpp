@@ -29,7 +29,7 @@
 #include <sstream>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 struct IndexBuffer : public gfx::IndexBufferBase {
@@ -37,7 +37,7 @@ struct IndexBuffer : public gfx::IndexBufferBase {
         : buffer(std::move(buffer_)) {}
     ~IndexBuffer() override = default;
 
-    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+    std::unique_ptr<mln::gfx::IndexBuffer> buffer;
 };
 
 Drawable::Drawable(std::string name_)
@@ -228,10 +228,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(
-            renderable,
-            impl->vertexDesc,
-            getColorMode(),
-            mbgl::util::hash(getColorMode().hash(), impl->vertexDescHash));
+            renderable, impl->vertexDesc, getColorMode(), mln::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
     if (impl->pipelineState) {
         renderPass.setRenderPipelineState(impl->pipelineState);
@@ -646,12 +643,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                     assert(layoutDesc->stepRate() == (binding->vertexBufferResource ? 1 : 0));
                 }
 
-                mbgl::util::hash_combine(hash,
-                                         mbgl::util::hash(index,
-                                                          binding->attribute.offset,
-                                                          binding->attribute.dataType,
-                                                          binding->vertexStride,
-                                                          static_cast<bool>(binding->vertexBufferResource)));
+                mln::util::hash_combine(hash,
+                                        mln::util::hash(index,
+                                                        binding->attribute.offset,
+                                                        binding->attribute.dataType,
+                                                        binding->vertexStride,
+                                                        static_cast<bool>(binding->vertexBufferResource)));
 
                 index += 1;
             }
@@ -676,4 +673,4 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 
 #include <string_view>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -11,4 +11,4 @@ size_t getUnicodeCharacterOffsetOnValidatedUtf8(std::string_view str, size_t cha
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

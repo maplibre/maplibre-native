@@ -22,7 +22,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 using namespace platform;
@@ -74,4 +74,4 @@ protected:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

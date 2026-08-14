@@ -3,14 +3,14 @@
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #include <vulkan/vulkan.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
 namespace style {
 namespace vulkan {
 
-struct CustomLayerRenderParameters : mbgl::style::CustomLayerRenderParameters {
+struct CustomLayerRenderParameters : mln::style::CustomLayerRenderParameters {
     /// Dynamic dispatcher.
     const vk::detail::DispatchLoaderDynamic& dispatcher;
 
@@ -45,4 +45,4 @@ struct CustomLayerRenderParameters : mbgl::style::CustomLayerRenderParameters {
 
 } // namespace vulkan
 } // namespace style
-} // namespace mbgl
+} // namespace mln

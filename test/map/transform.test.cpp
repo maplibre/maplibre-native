@@ -10,7 +10,7 @@
 #include <numbers>
 
 using namespace std::numbers;
-using namespace mbgl;
+using namespace mln;
 
 TEST(Transform, InvalidZoom) {
     Transform transform;
@@ -136,7 +136,7 @@ TEST(Transform, PerspectiveProjection) {
     ASSERT_NEAR(point.x, 1000.0, 1e-5);
     ASSERT_NEAR(point.y, 0.0, 1e-4);
 
-    mbgl::vec4 p;
+    mln::vec4 p;
     point = transform.getState().latLngToScreenCoordinate({37.692872969426375, -76.75823239205641}, p);
     ASSERT_NEAR(point.x, 1000.0, 1e-5);
     ASSERT_NEAR(point.y, 0.0, 1e-4);
@@ -567,7 +567,7 @@ TEST(Transform, IsPanning) {
 }
 
 TEST(Transform, DefaultTransform) {
-    struct TransformObserver : public mbgl::TransformObserver {
+    struct TransformObserver : public mln::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode) final { cameraWillChangeCallback(); };
 
         void onCameraDidChange(MapObserver::CameraChangeMode) final { cameraDidChangeCallback(); };
@@ -767,7 +767,7 @@ TEST(Transform, LatLngBounds) {
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
 
     // Simulate swipe to the left.
-    mbgl::AnimationOptions easeOptions(mbgl::Seconds(1));
+    mln::AnimationOptions easeOptions(mln::Seconds(1));
     easeOptions.transitionFrameFn = [&](double /* t */) {
         ASSERT_NEAR(transform.getLatLng().longitude(), 120.0, 1e-4);
     };

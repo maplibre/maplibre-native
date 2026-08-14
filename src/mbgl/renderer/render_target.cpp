@@ -8,7 +8,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 
-namespace mbgl {
+namespace mln {
 
 RenderTarget::RenderTarget(gfx::Context& context_, const Size size, const gfx::TextureChannelDataType type)
     : context(context_) {
@@ -115,4 +115,4 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     parameters.scissorRect = prevScissorRect;
 }
 
-} // namespace mbgl
+} // namespace mln

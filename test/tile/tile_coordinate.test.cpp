@@ -8,11 +8,11 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TileCoordinate, FromLatLng) {
     size_t changeCount = 0;
-    struct TransformObserver : public mbgl::TransformObserver {
+    struct TransformObserver : public mln::TransformObserver {
         void onCameraWillChange(MapObserver::CameraChangeMode mode) final {
             if (mode == MapObserver::CameraChangeMode::Immediate && cameraWillChangeImmediateCallback) {
                 cameraWillChangeImmediateCallback();

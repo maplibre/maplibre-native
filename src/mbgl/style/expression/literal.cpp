@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -15,7 +15,7 @@ std::optional<Value> checkNumber(T n) {
     }
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
     if (isUndefined(value)) return {Null};
     if (isObject(value)) {
@@ -23,7 +23,7 @@ std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
         bool error = false;
         eachMember(value,
                    [&](const std::string& k,
-                       const mbgl::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
+                       const mln::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
                        if (!error) {
                            std::optional<Value> memberValue = parseValue(v, ctx);
                            if (memberValue) {
@@ -51,9 +51,9 @@ std::optional<Value> parseValue(const Convertible& value, ParsingContext& ctx) {
         return std::optional<Value>(result);
     }
 
-    std::optional<mbgl::Value> v = toValue(value);
+    std::optional<mln::Value> v = toValue(value);
     // since value represents a JSON value, if it's not undefined, object, or
-    // array, it must be convertible to mbgl::Value
+    // array, it must be convertible to mln::Value
     assert(v);
 
     return v->match([&](uint64_t n) { return checkNumber(n); },
@@ -99,14 +99,14 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
     }
 }
 
-mbgl::Value Literal::serialize() const {
+mln::Value Literal::serialize() const {
     if (getType().is<type::Array>() || getType().is<type::ObjectType>()) {
-        return std::vector<mbgl::Value>{{getOperator(), *fromExpressionValue<mbgl::Value>(value)}};
+        return std::vector<mln::Value>{{getOperator(), *fromExpressionValue<mln::Value>(value)}};
     } else {
-        return *fromExpressionValue<mbgl::Value>(value);
+        return *fromExpressionValue<mln::Value>(value);
     }
 }
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 std::vector<Glyph> parseGlyphPBF(const GlyphRange&, const std::string& data);
 
-} // namespace mbgl
+} // namespace mln

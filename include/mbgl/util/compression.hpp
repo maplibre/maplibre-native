@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 enum CompressionFormat {
@@ -20,4 +20,4 @@ std::string decompress(const std::string& raw, int windowBits = CompressionForma
 std::uint32_t crc32(const void* raw, size_t size) noexcept;
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

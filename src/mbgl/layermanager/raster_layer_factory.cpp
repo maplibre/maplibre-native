@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* RasterLayerFactory::getTypeInfo() const noexcept {
     return style::RasterLayer::Impl::staticTypeInfo();
@@ -24,4 +24,4 @@ std::unique_ptr<RenderLayer> RasterLayerFactory::createRenderLayer(Immutable<sty
     return std::make_unique<RenderRasterLayer>(staticImmutableCast<style::RasterLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

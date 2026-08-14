@@ -1,5 +1,5 @@
 #include <mbgl/style/light_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {} // namespace style
-} // namespace mbgl
+} // namespace mln

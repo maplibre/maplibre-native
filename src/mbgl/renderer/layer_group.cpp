@@ -6,7 +6,7 @@
 #include <mbgl/renderer/render_orchestrator.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 
-namespace mbgl {
+namespace mln {
 
 void LayerGroupBase::addDrawable(gfx::UniqueDrawable& drawable) {
     // init their tweakers
@@ -46,4 +46,4 @@ std::size_t LayerGroup::clearDrawables() {
     return count;
 }
 
-} // namespace mbgl
+} // namespace mln

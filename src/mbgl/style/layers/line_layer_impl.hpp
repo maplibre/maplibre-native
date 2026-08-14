@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/line_layer.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class LineLayer::Impl : public Layer::Impl {
@@ -25,4 +25,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

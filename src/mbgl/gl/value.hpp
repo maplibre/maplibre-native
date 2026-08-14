@@ -12,7 +12,7 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/range.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -289,4 +289,4 @@ struct PixelStoreUnpack {
 
 } // namespace value
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class Shader;
@@ -45,4 +45,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

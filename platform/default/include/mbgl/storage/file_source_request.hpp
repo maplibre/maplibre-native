@@ -7,7 +7,7 @@
 #include <memory>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 
 class Mailbox;
 
@@ -28,4 +28,4 @@ private:
     std::shared_ptr<Mailbox> mailbox;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #endif
 
 // TODO: return empty harfbuzz
-namespace mbgl {
+namespace mln {
 
 #ifndef MLN_TEXT_SHAPING_HARFBUZZ
 
@@ -49,4 +49,4 @@ bool HBShaper::valid() {
     return impl->valid();
 }
 
-} // namespace mbgl
+} // namespace mln

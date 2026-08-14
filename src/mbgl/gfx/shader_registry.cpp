@@ -1,7 +1,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 ShaderRegistry::ShaderRegistry()
@@ -47,4 +47,4 @@ bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, const std::str
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

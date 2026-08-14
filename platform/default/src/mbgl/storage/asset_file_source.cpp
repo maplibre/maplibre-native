@@ -13,11 +13,11 @@
 
 namespace {
 bool acceptsURL(const std::string& url) {
-    return url.starts_with(mbgl::util::ASSET_PROTOCOL);
+    return url.starts_with(mln::util::ASSET_PROTOCOL);
 }
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 class AssetFileSource::Impl {
 public:
@@ -36,7 +36,7 @@ public:
 
         // Cut off the protocol and prefix with path.
         const auto path = root + "/" +
-                          mbgl::util::percentDecode(
+                          mln::util::percentDecode(
                               resource.url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
         requestLocalFile(path, req, resource.dataRange);
     }
@@ -114,4 +114,4 @@ ClientOptions AssetFileSource::getClientOptions() {
     return impl->actor().ask(&Impl::getClientOptions).get();
 }
 
-} // namespace mbgl
+} // namespace mln

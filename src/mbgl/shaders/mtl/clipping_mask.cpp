@@ -1,6 +1,6 @@
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using ClippingMaskShaderSource = ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal>;
@@ -11,4 +11,4 @@ const std::array<AttributeInfo, 1> ClippingMaskShaderSource::attributes = {
 const std::array<TextureInfo, 0> ClippingMaskShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

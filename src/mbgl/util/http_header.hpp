@@ -5,7 +5,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace http {
 
 class CacheControl {
@@ -22,4 +22,4 @@ std::optional<Timestamp> parseRetryHeaders(const std::optional<std::string>& ret
                                            const std::optional<std::string>& xRateLimitReset);
 
 } // namespace http
-} // namespace mbgl
+} // namespace mln

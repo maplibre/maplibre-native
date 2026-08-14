@@ -4,5 +4,5 @@
 
 int main(int argc, char* argv[]) {
   [[NSFileManager defaultManager] changeCurrentDirectoryPath:[[NSBundle mainBundle] bundlePath]];
-  return mbgl::runTests(argc, argv);
+  return mln::runTests(argc, argv);
 }

@@ -5,7 +5,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 
 template <class T, class... Ts>
 struct TypeIndex;
@@ -67,4 +67,4 @@ public:
 template <class, class T>
 using ExpandToType = T;
 
-} // namespace mbgl
+} // namespace mln

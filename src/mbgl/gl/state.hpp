@@ -2,7 +2,7 @@
 
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // Wraps a piece of OpenGL state and remember its value to avoid redundant state
@@ -59,4 +59,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

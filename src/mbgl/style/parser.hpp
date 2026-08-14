@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <forward_list>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 using StyleParseResult = std::exception_ptr;
@@ -66,4 +66,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -13,7 +13,7 @@
 #include <mbgl/shaders/attributes.hpp>
 #include <mbgl/shaders/uniforms.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 struct CircleSortKey : DataDrivenLayoutProperty<float> {
@@ -101,6 +101,6 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

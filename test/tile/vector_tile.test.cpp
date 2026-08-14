@@ -22,7 +22,7 @@
 #include <memory>
 #include "mbgl/tile/vector_mlt_tile_data.hpp"
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(VectorTile, setError) {
     VectorTileTest test;
@@ -69,7 +69,7 @@ TEST(VectorTileData, ParseResults) {
     ASSERT_THROW(layer->getFeature(17154u), std::out_of_range);
 
     std::unique_ptr<GeometryTileFeature> feature = layer->getFeature(0u);
-    ASSERT_EQ(feature->getType(), mbgl::FeatureType::LineString);
+    ASSERT_EQ(feature->getType(), mln::FeatureType::LineString);
     ASSERT_TRUE(feature->getID().is<uint64_t>());
     ASSERT_EQ(feature->getID().get<uint64_t>(), 1u);
 
@@ -115,7 +115,7 @@ TEST(VectorTileData, MLTParseResults) {
         ASSERT_EQ(layer->featureCount(), 17154u);
 
         std::unique_ptr<GeometryTileFeature> feature = layer->getFeature(0u);
-        ASSERT_EQ(feature->getType(), mbgl::FeatureType::LineString);
+        ASSERT_EQ(feature->getType(), mln::FeatureType::LineString);
         ASSERT_TRUE(feature->getID().is<uint64_t>());
         ASSERT_EQ(feature->getID().get<uint64_t>(), 1u);
 

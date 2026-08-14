@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/symbol_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 SymbolLayerProperties::SymbolLayerProperties(
@@ -34,6 +34,6 @@ expression::Dependency SymbolLayerProperties::getDependencies() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

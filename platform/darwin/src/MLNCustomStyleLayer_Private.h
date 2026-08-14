@@ -4,12 +4,12 @@
 
 #include <mbgl/layermanager/custom_layer_factory.hpp>
 
-namespace mbgl {
+namespace mln {
 
-class CustomStyleLayerPeerFactory : public LayerPeerFactory, public mbgl::CustomLayerFactory {
+class CustomStyleLayerPeerFactory : public LayerPeerFactory, public mln::CustomLayerFactory {
     // LayerPeerFactory overrides.
     LayerFactory* getCoreLayerFactory() final { return this; }
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-} // namespace mbgl
+} // namespace mln

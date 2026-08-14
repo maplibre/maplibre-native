@@ -27,7 +27,7 @@
 #include <unordered_set>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -602,4 +602,4 @@ void GeometryTileWorker::finalizeLayout() {
                   correlationID);
 }
 
-} // namespace mbgl
+} // namespace mln

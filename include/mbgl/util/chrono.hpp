@@ -7,7 +7,7 @@
 #include <string>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 
 using Clock = std::chrono::steady_clock;
 
@@ -59,4 +59,4 @@ constexpr std::chrono::duration<Rep, Period> abs(std::chrono::duration<Rep, Peri
 
 } // namespace util
 
-} // namespace mbgl
+} // namespace mln

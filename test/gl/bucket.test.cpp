@@ -16,7 +16,7 @@
 
 #include <mbgl/map/mode.hpp>
 
-namespace mbgl {
+namespace mln {
 
 bool operator==(const SegmentBase& lhs, const SegmentBase& rhs) {
     return std::tie(lhs.vertexOffset, lhs.indexOffset, lhs.vertexLength, lhs.indexLength) ==
@@ -33,9 +33,9 @@ bool operator==(const VertexType<A1, A2>& lhs, const VertexType<A1, A2>& rhs) {
 
 } // namespace detail
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

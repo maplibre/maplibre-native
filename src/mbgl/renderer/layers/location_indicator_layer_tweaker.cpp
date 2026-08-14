@@ -6,7 +6,7 @@
 #include <mbgl/style/layers/location_indicator_layer_properties.hpp>
 #include <mbgl/shaders/location_indicator_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -58,4 +58,4 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
     });
 }
 
-} // namespace mbgl
+} // namespace mln

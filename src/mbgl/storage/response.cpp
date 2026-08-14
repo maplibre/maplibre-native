@@ -1,6 +1,6 @@
 #include <mbgl/storage/response.hpp>
 
-namespace mbgl {
+namespace mln {
 
 Response::Response(const Response& res) {
     *this = res;
@@ -23,4 +23,4 @@ Response::Error::Error(Reason reason_, std::string message_, std::optional<Times
       message(std::move(message_)),
       retryAfter(std::move(retryAfter_)) {}
 
-} // namespace mbgl
+} // namespace mln

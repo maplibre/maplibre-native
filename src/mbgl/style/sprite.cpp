@@ -1,6 +1,6 @@
 #include <mbgl/style/sprite.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 Sprite::~Sprite() = default;
@@ -11,4 +11,4 @@ Sprite::Sprite(std::string id_, std::string spriteURL_) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

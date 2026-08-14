@@ -2,7 +2,7 @@
 
 #include <mbgl/mtl/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 IndexBufferResource::IndexBufferResource(BufferResource&& ptr) noexcept
@@ -23,4 +23,4 @@ IndexBufferResource::~IndexBufferResource() noexcept {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

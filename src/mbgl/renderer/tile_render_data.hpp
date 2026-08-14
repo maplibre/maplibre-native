@@ -6,7 +6,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Texture2D;
@@ -59,4 +59,4 @@ private:
     std::shared_ptr<BucketType> bucket;
 };
 
-} // namespace mbgl
+} // namespace mln

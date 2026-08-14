@@ -10,7 +10,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class Context;
@@ -84,4 +84,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

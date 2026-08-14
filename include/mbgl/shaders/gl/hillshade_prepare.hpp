@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -111,4 +111,4 @@ void main() {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

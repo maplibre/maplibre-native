@@ -10,7 +10,7 @@
 #include <functional>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class AsyncRequest;
 class Resource;
@@ -118,4 +118,4 @@ constexpr const char* MAX_CONCURRENT_REQUESTS_KEY = "max-concurrent-requests";
 /// database opens in read-write-create mode otherwise. type: bool
 constexpr const char* READ_ONLY_MODE_KEY = "read-only-mode";
 
-} // namespace mbgl
+} // namespace mln

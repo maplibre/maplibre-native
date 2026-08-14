@@ -3,7 +3,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -170,4 +170,4 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

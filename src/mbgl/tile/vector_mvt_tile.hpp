@@ -4,7 +4,7 @@
 #include <mbgl/tile/tile_loader.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Tileset;
 class TileParameters;
@@ -22,4 +22,4 @@ public:
     void setData(const std::shared_ptr<const std::string>& data) override;
 };
 
-} // namespace mbgl
+} // namespace mln

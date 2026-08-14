@@ -14,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 
@@ -536,4 +536,4 @@ public:
     FeatureSortOrder featureSortOrder;
 };
 
-} // namespace mbgl
+} // namespace mln

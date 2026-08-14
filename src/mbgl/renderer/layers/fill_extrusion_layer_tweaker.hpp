@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Fill extrusion layer specific tweaker
@@ -28,4 +28,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -13,7 +13,7 @@
 #include <thread>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class ThreadedSchedulerBase : public Scheduler {
 public:
@@ -59,7 +59,7 @@ protected:
         std::mutex lock;                         /* lock */
         std::queue<std::function<void()>> queue; /* pending task queue */
     };
-    mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<Queue>> taggedQueue;
+    mln::unordered_map<util::SimpleIdentity, std::shared_ptr<Queue>> taggedQueue;
 };
 
 /**
@@ -155,7 +155,7 @@ private:
         std::queue<std::function<void()>> queue;
         std::mutex mutex;
     };
-    mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;
+    mln::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;
     std::mutex taggedRenderQueueLock;
 
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
@@ -183,4 +183,4 @@ public:
     ~ThreadPool() override { invalidateWeakPtrsEarly(); }
 };
 
-} // namespace mbgl
+} // namespace mln

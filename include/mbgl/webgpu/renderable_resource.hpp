@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class RendererBackend;
@@ -26,7 +26,7 @@ public:
         // explicitly can override this method.
     }
 
-    virtual const mbgl::webgpu::RendererBackend& getBackend() const = 0;
+    virtual const mln::webgpu::RendererBackend& getBackend() const = 0;
     virtual const WGPUCommandEncoder& getCommandEncoder() const = 0;
     virtual WGPURenderPassEncoder getRenderPassEncoder() const = 0;
 
@@ -51,4 +51,4 @@ public:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

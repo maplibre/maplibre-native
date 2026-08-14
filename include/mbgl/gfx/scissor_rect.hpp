@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class ScissorRect {
@@ -18,4 +18,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

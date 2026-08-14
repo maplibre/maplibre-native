@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 PluginLayer::Impl::Impl(std::string layerID,
@@ -81,19 +81,19 @@ std::vector<PluginLayerProperty*> PluginLayerPropertyManager::getProperties() {
     return tempResult;
 }
 
-const PropertyValue<mbgl::Color>& PluginLayerProperty::getColor() const {
+const PropertyValue<mln::Color>& PluginLayerProperty::getColor() const {
     return _dataDrivenColorProperty;
 }
 
-void PluginLayerProperty::setColor(const PropertyValue<mbgl::Color>& value) {
+void PluginLayerProperty::setColor(const PropertyValue<mln::Color>& value) {
     _dataDrivenColorProperty = std::move(value);
 }
 
-void PluginLayerProperty::setCurrentColorValue(mbgl::Color value) {
+void PluginLayerProperty::setCurrentColorValue(mln::Color value) {
     _dataDrivenColorValue = value;
 }
 
 namespace conversion {} // namespace conversion
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

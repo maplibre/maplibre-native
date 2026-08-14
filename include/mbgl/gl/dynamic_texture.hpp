@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/dynamic_texture.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -24,4 +24,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

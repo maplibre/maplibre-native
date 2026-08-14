@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/heatmap_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class HeatmapLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     HeatmapLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    HeatmapLayer(mbgl::style::HeatmapLayer&);
+    HeatmapLayer(mln::style::HeatmapLayer&);
 
-    HeatmapLayer(std::unique_ptr<mbgl::style::HeatmapLayer>);
+    HeatmapLayer(std::unique_ptr<mln::style::HeatmapLayer>);
 
     ~HeatmapLayer();
 
@@ -44,13 +44,13 @@ public:
 
 }; // class HeatmapLayer
 
-class HeatmapJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::HeatmapLayerFactory {
+class HeatmapJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::HeatmapLayerFactory {
 public:
     ~HeatmapJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -59,4 +59,4 @@ public:
 }; // class HeatmapJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

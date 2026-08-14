@@ -5,7 +5,7 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 void DrawableAtlasesTweaker::setupTextures(gfx::Drawable& drawable, const bool linearFilterForIcons) {
@@ -46,4 +46,4 @@ void DrawableAtlasesTweaker::execute(gfx::Drawable& drawable, PaintParameters& p
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 // Forward declare WebGPU types
 typedef struct WGPURenderPassEncoderImpl* WGPURenderPassEncoder;
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class CommandEncoder;
 class UniformBufferArray;
@@ -49,4 +49,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

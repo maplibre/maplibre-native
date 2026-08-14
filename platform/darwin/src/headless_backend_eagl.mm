@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class EAGLBackendImpl final : public HeadlessBackend::Impl {
@@ -44,4 +44,4 @@ void HeadlessBackend::createImpl() {
 }
 
 }  // namespace gl
-}  // namespace mbgl
+}  // namespace mln

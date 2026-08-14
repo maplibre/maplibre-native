@@ -3,7 +3,7 @@
 #include <mbgl/gl/object.hpp>
 #include <mbgl/util/size.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Framebuffer {
@@ -13,4 +13,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

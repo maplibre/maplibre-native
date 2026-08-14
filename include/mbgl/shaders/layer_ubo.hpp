@@ -5,7 +5,7 @@
 #include <array>
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 enum class AttributeSource : int32_t {
@@ -75,4 +75,4 @@ enum {
 #define MLN_USE_SYMBOL_INSTANCING (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

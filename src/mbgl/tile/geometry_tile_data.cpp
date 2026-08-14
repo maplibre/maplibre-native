@@ -20,7 +20,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 namespace {
 
 double signedArea(const GeometryCoordinates& ring) {
@@ -379,4 +379,4 @@ GeometryCollectionFloat roundPolygonCorners(GeometryCollection& polygon, double 
     }
     return roundedCornerPolygon;
 }
-} // namespace mbgl
+} // namespace mln

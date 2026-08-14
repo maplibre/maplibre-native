@@ -6,7 +6,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-namespace mbgl {
+namespace mln {
 
 using namespace std;
 using namespace style;
@@ -39,15 +39,15 @@ std::string VariableAnchorOffsetCollection::toString() const {
     return stringValue;
 }
 
-mbgl::Value VariableAnchorOffsetCollection::serialize() const {
-    std::vector<mbgl::Value> serialized;
+mln::Value VariableAnchorOffsetCollection::serialize() const {
+    std::vector<mln::Value> serialized;
     for (const auto& entry : anchorOffsets) {
         serialized.emplace_back(Enum<SymbolAnchorType>::toString(entry.anchorType));
-        std::vector<mbgl::Value> offset{entry.offset[0], entry.offset[1]};
+        std::vector<mln::Value> offset{entry.offset[0], entry.offset[1]};
         serialized.emplace_back(offset);
     }
 
     return serialized;
 }
 
-} // namespace mbgl
+} // namespace mln

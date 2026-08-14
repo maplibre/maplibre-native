@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /**
@@ -57,11 +57,11 @@ inline std::string toString(const util::SimpleIdentity& ident) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln
 
 template <>
-struct std::hash<mbgl::util::SimpleIdentity> {
-    std::size_t operator()(const mbgl::util::SimpleIdentity& s) const noexcept {
+struct std::hash<mln::util::SimpleIdentity> {
+    std::size_t operator()(const mln::util::SimpleIdentity& s) const noexcept {
         return std::hash<std::int64_t>{}(s.id());
     }
 };

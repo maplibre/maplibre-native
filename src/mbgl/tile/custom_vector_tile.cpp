@@ -7,7 +7,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 CustomVectorTile::CustomVectorTile(const OverscaledTileID& overscaledTileID,
                                    std::string sourceID_,
@@ -60,4 +60,4 @@ void CustomVectorTile::setNecessity(TileNecessity newNecessity) {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -14,7 +14,7 @@ namespace {
 char16_t ZWSP = u'\u200b';
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 // static
 AnchorAlignment AnchorAlignment::getAnchorAlignment(style::SymbolAnchorType anchor) {
@@ -759,4 +759,4 @@ Shaping getShaping(const TaggedString& formattedString,
     return shaping;
 }
 
-} // namespace mbgl
+} // namespace mln

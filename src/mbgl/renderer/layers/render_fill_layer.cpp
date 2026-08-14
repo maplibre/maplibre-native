@@ -29,7 +29,7 @@
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -83,7 +83,7 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
         // Supply both - evaluated based on opaquePassCutoff in render().
         passes |= RenderPass::Opaque;
     }
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -540,4 +540,4 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

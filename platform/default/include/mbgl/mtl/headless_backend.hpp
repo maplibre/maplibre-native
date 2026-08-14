@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class HeadlessBackend final : public mtl::RendererBackend, public gfx::HeadlessBackend {
@@ -33,4 +33,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

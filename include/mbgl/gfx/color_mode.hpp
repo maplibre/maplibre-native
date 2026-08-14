@@ -5,7 +5,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/hash.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class ColorMode {
@@ -69,15 +69,15 @@ public:
     }
 
     std::size_t hash() const {
-        return mbgl::util::hash(blendFunction.which(),
-                                blendColor.r,
-                                blendColor.g,
-                                blendColor.b,
-                                blendColor.a,
-                                mask.r,
-                                mask.g,
-                                mask.b,
-                                mask.a);
+        return mln::util::hash(blendFunction.which(),
+                               blendColor.r,
+                               blendColor.g,
+                               blendColor.b,
+                               blendColor.a,
+                               mask.r,
+                               mask.g,
+                               mask.b,
+                               mask.a);
     }
 };
 
@@ -86,4 +86,4 @@ constexpr bool operator!=(const ColorMode::Mask& a, const ColorMode::Mask& b) {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

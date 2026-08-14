@@ -5,7 +5,7 @@
 #include <string>
 #include <mbgl/util/tile_server_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Holds values for resource options.
@@ -131,4 +131,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace mbgl
+} // namespace mln

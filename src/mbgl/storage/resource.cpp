@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 std::string getQuadKey(int32_t x, int32_t y, int8_t z) {
@@ -129,4 +129,4 @@ Resource Resource::tile(const std::string& urlTemplate,
                     loadingMethod};
 }
 
-} // namespace mbgl
+} // namespace mln

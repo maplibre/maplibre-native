@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/style/expression/compound_expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -35,4 +35,4 @@ bool isRuntimeConstant(const Expression& e);
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

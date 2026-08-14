@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 class Request;
@@ -27,4 +27,4 @@ void makeThreadLowPriority();
 void setCurrentThreadPriority(double priority);
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

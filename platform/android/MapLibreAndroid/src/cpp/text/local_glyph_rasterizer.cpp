@@ -23,14 +23,14 @@
         * JS tries to extract multiple weights, this implementation only looks for
           "bold"
 
-     mbgl::LocalGlyphRasterizer is the portable interface
-     mbgl::LocalGlyphRasterizer::Impl stores platform-specific configuration data
-     mbgl::android::LocalGlyphRasterizer is the JNI wrapper
+     mln::LocalGlyphRasterizer is the portable interface
+     mln::LocalGlyphRasterizer::Impl stores platform-specific configuration data
+     mln::android::LocalGlyphRasterizer is the JNI wrapper
      com.mapbox.mapboxsdk.text.LocalGlyphRasterizer is the Java implementation that
       actually does the drawing
  */
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 LocalGlyphRasterizer::LocalGlyphRasterizer() {
@@ -145,4 +145,4 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack& fontStack, GlyphID g
     return fixedMetrics;
 }
 
-} // namespace mbgl
+} // namespace mln

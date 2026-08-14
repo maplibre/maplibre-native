@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -21,7 +21,7 @@ public:
           branches(std::move(branches_)),
           otherwise(std::move(otherwise_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
@@ -45,4 +45,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

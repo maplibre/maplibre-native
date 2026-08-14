@@ -3,7 +3,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gl/types.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class CommandEncoder;
@@ -62,4 +62,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

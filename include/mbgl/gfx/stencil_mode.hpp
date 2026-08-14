@@ -3,7 +3,7 @@
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class StencilMode {
@@ -50,4 +50,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

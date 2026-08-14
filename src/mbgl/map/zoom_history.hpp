@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 struct ZoomHistory {
     float lastZoom = 0;
@@ -44,4 +44,4 @@ struct ZoomHistory {
     }
 };
 
-} // namespace mbgl
+} // namespace mln

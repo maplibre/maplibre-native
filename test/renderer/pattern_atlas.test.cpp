@@ -12,7 +12,7 @@
 
 #include <utility>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(PatternAtlas, Basic) {
     FixtureLog log;

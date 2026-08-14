@@ -6,7 +6,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -14,7 +14,7 @@ class FeatureCollection {
 public:
     static constexpr auto Name() { return "org/maplibre/geojson/FeatureCollection"; };
 
-    static mbgl::FeatureCollection convert(jni::JNIEnv&, const jni::Object<FeatureCollection>&);
+    static mln::FeatureCollection convert(jni::JNIEnv&, const jni::Object<FeatureCollection>&);
 
     static jni::Local<jni::Object<java::util::List>> features(jni::JNIEnv&, const jni::Object<FeatureCollection>&);
 
@@ -23,4 +23,4 @@ public:
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

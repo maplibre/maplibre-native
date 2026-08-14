@@ -35,7 +35,7 @@ const static bool png_version_check [[maybe_unused]] = []() {
     return true;
 }();
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 void user_error_fn(png_structp, png_const_charp error_msg) {
@@ -133,4 +133,4 @@ PremultipliedImage decodePNG(const uint8_t* data, size_t size) {
     return util::premultiply(std::move(image));
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/style/expression/utf8_op_helpers.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -96,7 +96,7 @@ void IndexOf::eachChild(const std::function<void(const Expression &)> &visit) co
     }
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult IndexOf::parse(const Convertible &value, ParsingContext &ctx) {
     assert(isArray(value));
 
@@ -135,4 +135,4 @@ std::vector<std::optional<Value>> IndexOf::possibleOutputs() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 gfx::UniqueDrawable DrawableBuilder::createDrawable() const {
@@ -44,4 +44,4 @@ void DrawableBuilder::init() {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

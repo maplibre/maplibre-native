@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class Response {
 public:
@@ -65,4 +65,4 @@ public:
     Error(Reason, std::string = "", std::optional<Timestamp> = std::nullopt);
 };
 
-} // namespace mbgl
+} // namespace mln

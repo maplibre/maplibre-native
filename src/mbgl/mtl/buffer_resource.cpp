@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 namespace {
@@ -220,4 +220,4 @@ void BufferResource::updateFragmentBindOffset(const MTLRenderCommandEncoderPtr& 
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

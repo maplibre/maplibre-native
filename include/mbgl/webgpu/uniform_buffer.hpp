@@ -3,7 +3,7 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <webgpu/webgpu.h>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Context;
@@ -57,4 +57,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

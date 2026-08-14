@@ -3,7 +3,7 @@
 #include <future>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 // A movable type-erasing function wrapper. This allows to store arbitrary
 // invocable things (like std::function<>, or the result of a movable-only
@@ -100,4 +100,4 @@ std::unique_ptr<Message> makeMessage(std::promise<ResultType>&& promise,
 }
 
 } // namespace actor
-} // namespace mbgl
+} // namespace mln

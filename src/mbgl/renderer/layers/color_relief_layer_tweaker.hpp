@@ -2,7 +2,7 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Color relief layer specific tweaker
@@ -25,4 +25,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

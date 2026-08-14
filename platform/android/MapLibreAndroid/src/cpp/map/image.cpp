@@ -2,10 +2,10 @@
 #include <mbgl/util/exception.hpp>
 #include "image.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& image) {
+mln::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& image) {
     static auto& javaClass = jni::Class<Image>::Singleton(env);
     static auto widthField = javaClass.GetField<jni::jint>(env, "width");
     static auto heightField = javaClass.GetField<jni::jint>(env, "height");
@@ -29,9 +29,9 @@ mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& i
     jni::NullCheck(env, pixels.get());
     std::size_t size = pixels.Length(env);
 
-    mbgl::PremultipliedImage premultipliedImage({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+    mln::PremultipliedImage premultipliedImage({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
     if (premultipliedImage.bytes() != uint32_t(size)) {
-        throw mbgl::util::StyleImageException("Image pixel count mismatch");
+        throw mln::util::StyleImageException("Image pixel count mismatch");
     }
 
     jni::GetArrayRegion(env, *pixels, 0, size, reinterpret_cast<jbyte*>(premultipliedImage.data.get()));
@@ -54,16 +54,16 @@ mbgl::style::Image Image::getImage(jni::JNIEnv& env, const jni::Object<Image>& i
     if (content) {
         const style::ImageContent imageContent = style::ImageContent{
             content.Get(env, 0), content.Get(env, 1), content.Get(env, 2), content.Get(env, 3)};
-        return mbgl::style::Image{name,
-                                  std::move(premultipliedImage),
-                                  pixelRatio,
-                                  sdf,
-                                  imageStretchesX,
-                                  imageStretchesY,
-                                  std::move(imageContent)};
+        return mln::style::Image{name,
+                                 std::move(premultipliedImage),
+                                 pixelRatio,
+                                 sdf,
+                                 imageStretchesX,
+                                 imageStretchesY,
+                                 std::move(imageContent)};
     }
 
-    return mbgl::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf, imageStretchesX, imageStretchesY};
+    return mln::style::Image{name, std::move(premultipliedImage), pixelRatio, sdf, imageStretchesX, imageStretchesY};
 }
 
 void Image::registerNative(jni::JNIEnv& env) {
@@ -71,4 +71,4 @@ void Image::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

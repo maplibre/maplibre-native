@@ -25,7 +25,7 @@
 #include <mbgl/util/string.hpp>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, const TaggedScheduler& threadPool_)
@@ -451,4 +451,4 @@ Immutable<std::vector<Immutable<Layer::Impl>>> Style::Impl::getLayerImpls() cons
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -33,4 +33,4 @@ const ShapeAnnotationGeometry& FillAnnotationImpl::geometry() const {
     return annotation.geometry;
 }
 
-} // namespace mbgl
+} // namespace mln

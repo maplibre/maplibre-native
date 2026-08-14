@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 // Maximum number of vertex attributes, per vertex descriptor
@@ -94,7 +94,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
                                            const std::string_view vertexName,
                                            const std::string_view fragmentName,
                                            const ProgramParameters& programParameters,
-                                           const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
+                                           const mln::unordered_map<std::string, std::string>& additionalDefines) {
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?
@@ -381,14 +381,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         layoutDesc->setStepRate(1);
 
         // Create a render pipeline state, telling Metal how to render the primitives
-        const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
-                                                  0,
-                                                  MTL::VertexFormatShort2,
-                                                  vertexSize,
-                                                  MTL::VertexStepFunctionPerVertex,
-                                                  1);
+        const std::size_t hash = mln::util::hash(ShaderClass::attributes[0].index,
+                                                 0,
+                                                 MTL::VertexFormatShort2,
+                                                 vertexSize,
+                                                 MTL::VertexStepFunctionPerVertex,
+                                                 1);
         if (auto state = mtlShader.getRenderPipelineState(
-                renderable, vertDesc, colorMode, mbgl::util::hash(colorMode.hash(), hash))) {
+                renderable, vertDesc, colorMode, mln::util::hash(colorMode.hash(), hash))) {
             clipMaskPipelineState = std::move(state);
         }
     }
@@ -637,4 +637,4 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

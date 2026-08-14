@@ -3,7 +3,7 @@
 #include <mbgl/util/hash.hpp>
 #include <mbgl/vulkan/renderable_resource.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
@@ -456,4 +456,4 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBacke
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

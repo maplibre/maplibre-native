@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class Renderable;
 } // namespace gfx
@@ -69,9 +69,9 @@ protected:
     std::vector<GroupEntry> debugGroupNames;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> renderDebugGroups;
     std::vector<gfx::DebugGroup<gfx::UploadPass>> uploadDebugGroups;
-    mbgl::unordered_set<RenderPass*> renderPasses;
-    mbgl::unordered_set<UploadPass*> uploadPasses;
+    mln::unordered_set<RenderPass*> renderPasses;
+    mln::unordered_set<UploadPass*> uploadPasses;
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

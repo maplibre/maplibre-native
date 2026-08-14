@@ -3,7 +3,7 @@
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 RenderPass::RenderPass(gl::CommandEncoder& commandEncoder_,
@@ -26,4 +26,4 @@ void RenderPass::popDebugGroup() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

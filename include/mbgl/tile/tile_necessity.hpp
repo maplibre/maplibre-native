@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 
 // Tiles can have two states: optional or required.
 // - optional means that only low-cost actions should be taken to obtain the data
@@ -12,4 +12,4 @@ enum class TileNecessity : bool {
     Required = true,
 };
 
-} // namespace mbgl
+} // namespace mln

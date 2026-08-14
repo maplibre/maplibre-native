@@ -1,6 +1,6 @@
 #include <mbgl/renderer/render_light.hpp>
 
-namespace mbgl {
+namespace mln {
 
 RenderLight::RenderLight(Immutable<style::Light::Impl> impl_)
     : impl(std::move(impl_)),
@@ -22,4 +22,4 @@ const EvaluatedLight& RenderLight::getEvaluated() const {
     return evaluated;
 }
 
-} // namespace mbgl
+} // namespace mln

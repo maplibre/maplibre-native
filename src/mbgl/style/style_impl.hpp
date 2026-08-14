@@ -25,7 +25,7 @@
 #include <vector>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 class AsyncRequest;
@@ -151,4 +151,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

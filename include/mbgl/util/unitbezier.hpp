@@ -28,7 +28,7 @@
 #include <cmath>
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 struct UnitBezier {
@@ -116,4 +116,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

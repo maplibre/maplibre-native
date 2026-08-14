@@ -13,7 +13,7 @@
 #include <variant>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 /// A 2 by 2 matrix
 using mat2 = std::array<double, 2 * 2>;
@@ -444,7 +444,7 @@ protected:
     /// Copy or share the attribute data from a paint property
     template <typename TAttribute, typename TBinder>
     static void applyPaintProperty(const std::size_t attrIndex, const UniqueVertexAttribute& attrib, TBinder& binder) {
-        using Type = typename TAttribute::Type; // ::mbgl::gfx::AttributeType<type_, n_>
+        using Type = typename TAttribute::Type; // ::mln::gfx::AttributeType<type_, n_>
         using InterpType = ZoomInterpolatedAttributeType<Type>;
 
         if (!attrib) {
@@ -486,4 +486,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

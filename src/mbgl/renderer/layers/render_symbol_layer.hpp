@@ -9,7 +9,7 @@
 
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 
@@ -113,4 +113,4 @@ private:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

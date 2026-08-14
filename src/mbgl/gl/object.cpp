@@ -3,7 +3,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 namespace detail {
 
@@ -48,4 +48,4 @@ void RenderbufferDeleter::operator()(RenderbufferID id) const {
 
 } // namespace detail
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

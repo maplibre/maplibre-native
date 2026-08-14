@@ -10,8 +10,8 @@
 #include <atomic>
 #include <memory>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 
 class TestObject {
 public:
@@ -94,7 +94,7 @@ public:
     void send(std::function<void()> cb) { cb(); }
 
     void sendDelayed(std::function<void()> cb) {
-        timer.start(Milliseconds(300), mbgl::Duration::zero(), [cb] { cb(); });
+        timer.start(Milliseconds(300), mln::Duration::zero(), [cb] { cb(); });
     }
 
 private:

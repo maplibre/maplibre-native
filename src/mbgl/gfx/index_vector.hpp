@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 struct IndexBufferBase {
@@ -109,4 +109,4 @@ public:
 using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

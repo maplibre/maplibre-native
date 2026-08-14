@@ -5,7 +5,7 @@
 #include "android_renderer_backend.hpp"
 #include <android/native_window.h>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AndroidVulkanRendererBackend : public AndroidRendererBackend,
@@ -19,7 +19,7 @@ public:
     bool createSurface(ANativeWindow* window) override;
     void destroySurface() override;
 
-    mbgl::gfx::RendererBackend& getImpl() override { return *this; }
+    mln::gfx::RendererBackend& getImpl() override { return *this; }
 
     std::vector<const char*> getInstanceExtensions() override;
 
@@ -27,9 +27,9 @@ public:
     void enableFramebufferRead(bool value) override;
     PremultipliedImage readFramebuffer() override;
 
-    // mbgl::gfx::RendererBackend implementation
+    // mln::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 protected:
     void activate() override {
@@ -46,4 +46,4 @@ protected:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

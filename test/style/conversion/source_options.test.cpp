@@ -6,9 +6,9 @@
 
 #include <mbgl/util/logging.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(SourceOptions, Basic) {
     Error error;

@@ -1,6 +1,6 @@
 #include <mbgl/style/expression/collator.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -21,4 +21,4 @@ std::string Collator::resolvedLocale() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

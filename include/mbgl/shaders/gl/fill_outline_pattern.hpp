@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -178,4 +178,4 @@ mediump vec4 pattern_to = u_pattern_to;
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

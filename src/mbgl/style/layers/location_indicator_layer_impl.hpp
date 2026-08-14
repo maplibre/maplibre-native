@@ -12,7 +12,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 
@@ -31,4 +31,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

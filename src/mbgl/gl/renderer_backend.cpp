@@ -12,7 +12,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
@@ -155,4 +155,4 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

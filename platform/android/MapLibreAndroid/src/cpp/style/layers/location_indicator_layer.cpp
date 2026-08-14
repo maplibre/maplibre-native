@@ -9,29 +9,29 @@
 
 #include <mbgl/style/layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-inline mbgl::style::LocationIndicatorLayer& toLocationIndicatorLayer(mbgl::style::Layer& layer) {
-    return static_cast<mbgl::style::LocationIndicatorLayer&>(layer);
+inline mln::style::LocationIndicatorLayer& toLocationIndicatorLayer(mln::style::Layer& layer) {
+    return static_cast<mln::style::LocationIndicatorLayer&>(layer);
 }
 
 /**
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 LocationIndicatorLayer::LocationIndicatorLayer(jni::JNIEnv& env, jni::String& layerId)
-    : Layer(std::make_unique<mbgl::style::LocationIndicatorLayer>(jni::Make<std::string>(env, layerId))) {}
+    : Layer(std::make_unique<mln::style::LocationIndicatorLayer>(jni::Make<std::string>(env, layerId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
  */
-LocationIndicatorLayer::LocationIndicatorLayer(mbgl::style::LocationIndicatorLayer& coreLayer)
+LocationIndicatorLayer::LocationIndicatorLayer(mln::style::LocationIndicatorLayer& coreLayer)
     : Layer(coreLayer) {}
 
 /**
  * Creates an owning peer object (for layers not attached to the map)
  */
-LocationIndicatorLayer::LocationIndicatorLayer(std::unique_ptr<mbgl::style::LocationIndicatorLayer> coreLayer)
+LocationIndicatorLayer::LocationIndicatorLayer(std::unique_ptr<mln::style::LocationIndicatorLayer> coreLayer)
     : Layer(std::move(coreLayer)) {}
 
 LocationIndicatorLayer::~LocationIndicatorLayer() = default;
@@ -39,7 +39,7 @@ LocationIndicatorLayer::~LocationIndicatorLayer() = default;
 // Property getters
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getTopImage(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LocationIndicatorLayer::getDefaultTopImage()));
@@ -48,7 +48,7 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getTopImage(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getBearingImage(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -58,7 +58,7 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getBearingImage(jni::JNIEnv& e
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getShadowImage(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -68,7 +68,7 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getShadowImage(jni::JNIEnv& en
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getPerspectiveCompensation(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(
@@ -79,7 +79,7 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getPerspectiveCompensation(jni
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getImageTiltDisplacement(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -90,7 +90,7 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getImageTiltDisplacement(jni::
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getBearing(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LocationIndicatorLayer::getDefaultBearing()));
@@ -99,12 +99,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getBearing(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getBearingTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getBearingTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getBearingTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -113,14 +113,14 @@ void LocationIndicatorLayer::setBearingTransition(jni::JNIEnv&, jlong duration, 
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setBearingTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getLocation(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::LocationIndicatorLayer::getDefaultLocation()));
@@ -129,12 +129,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getLocation(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getLocationTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getLocationTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getLocationTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -143,14 +143,14 @@ void LocationIndicatorLayer::setLocationTransition(jni::JNIEnv&, jlong duration,
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setLocationTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadius(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -160,12 +160,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadius(jni::JNIEnv&
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getAccuracyRadiusTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getAccuracyRadiusTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getAccuracyRadiusTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -174,14 +174,14 @@ void LocationIndicatorLayer::setAccuracyRadiusTransition(jni::JNIEnv&, jlong dur
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setAccuracyRadiusTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getTopImageSize(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -191,12 +191,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getTopImageSize(jni::JNIEnv& e
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getTopImageSizeTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getTopImageSizeTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getTopImageSizeTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -205,14 +205,14 @@ void LocationIndicatorLayer::setTopImageSizeTransition(jni::JNIEnv&, jlong durat
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setTopImageSizeTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getBearingImageSize(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -222,12 +222,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getBearingImageSize(jni::JNIEn
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getBearingImageSizeTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getBearingImageSizeTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getBearingImageSizeTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -236,14 +236,14 @@ void LocationIndicatorLayer::setBearingImageSizeTransition(jni::JNIEnv&, jlong d
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setBearingImageSizeTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getShadowImageSize(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -253,12 +253,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getShadowImageSize(jni::JNIEnv
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getShadowImageSizeTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getShadowImageSizeTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getShadowImageSizeTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -267,14 +267,14 @@ void LocationIndicatorLayer::setShadowImageSizeTransition(jni::JNIEnv&, jlong du
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setShadowImageSizeTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadiusColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -285,12 +285,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadiusColor(jni::JN
 }
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getAccuracyRadiusColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getAccuracyRadiusColorTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getAccuracyRadiusColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -299,14 +299,14 @@ void LocationIndicatorLayer::setAccuracyRadiusColorTransition(jni::JNIEnv&, jlon
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setAccuracyRadiusColorTransition(options);
 }
 
 jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadiusBorderColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(
@@ -318,12 +318,12 @@ jni::Local<jni::Object<>> LocationIndicatorLayer::getAccuracyRadiusBorderColor(j
 
 jni::Local<jni::Object<TransitionOptions>> LocationIndicatorLayer::getAccuracyRadiusBorderColorTransition(
     jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getAccuracyRadiusBorderColorTransition();
+    mln::style::TransitionOptions options = toLocationIndicatorLayer(*layer).getAccuracyRadiusBorderColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -332,9 +332,9 @@ void LocationIndicatorLayer::setAccuracyRadiusBorderColorTransition(jni::JNIEnv&
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toLocationIndicatorLayer(*layer).setAccuracyRadiusBorderColorTransition(options);
 }
 
@@ -351,17 +351,17 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 } // namespace
 
 jni::Local<jni::Object<Layer>> LocationIndicatorJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                                          mbgl::style::Layer& layer) {
+                                                                                          mln::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new LocationIndicatorLayer(toLocationIndicatorLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> LocationIndicatorJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env,
-                          new LocationIndicatorLayer(std::unique_ptr<mbgl::style::LocationIndicatorLayer>(
-                              static_cast<mbgl::style::LocationIndicatorLayer*>(layer.release()))));
+                          new LocationIndicatorLayer(std::unique_ptr<mln::style::LocationIndicatorLayer>(
+                              static_cast<mln::style::LocationIndicatorLayer*>(layer.release()))));
 }
 
 void LocationIndicatorJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -412,4 +412,4 @@ void LocationIndicatorJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -6,18 +6,18 @@
 @interface NSColor (MLNAdditions)
 
 /**
- Converts the color into an mbgl::Color in sRGB space.
+ Converts the color into an mln::Color in sRGB space.
  */
-- (mbgl::Color)mgl_color;
+- (mln::Color)mgl_color;
 
-- (mbgl::Color)mgl_colorForPremultipliedValue;
+- (mln::Color)mgl_colorForPremultipliedValue;
 
 /**
- Instantiates `NSColor` from an `mbgl::Color`
+ Instantiates `NSColor` from an `mln::Color`
  */
-+ (NSColor *)mgl_colorWithColor:(mbgl::Color)color;
++ (NSColor *)mgl_colorWithColor:(mln::Color)color;
 
-- (mbgl::style::PropertyValue<mbgl::Color>)mgl_colorPropertyValue;
+- (mln::style::PropertyValue<mln::Color>)mgl_colorPropertyValue;
 
 @end
 

@@ -48,7 +48,7 @@
 #define GL_RENDERBUFFER 0x8D41
 #define GL_FRAMEBUFFER 0x8D40
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 namespace extension {
 
@@ -107,4 +107,4 @@ public:
 
 } // namespace extension
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

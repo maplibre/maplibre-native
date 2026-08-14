@@ -2,7 +2,7 @@
 
 #include <initializer_list>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /// Accept any number of parameters of any types, and do nothing with them.
@@ -24,4 +24,4 @@ void ignore(const std::initializer_list<T>&) noexcept {}
 inline void ignore(const std::initializer_list<int>&) noexcept {}
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

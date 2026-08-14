@@ -12,7 +12,7 @@
 #include <mbgl/util/mapbox.hpp>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 VectorSource::VectorSource(std::string id,
@@ -53,9 +53,9 @@ void VectorSource::setTiles(const std::vector<std::string>& tiles) {
     observer->onSourceChanged(*this);
 }
 
-bool VectorSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
+bool VectorSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
+    return mln::underlying_type(Tile::Kind::Geometry) == mln::underlying_type(info->tileKind);
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

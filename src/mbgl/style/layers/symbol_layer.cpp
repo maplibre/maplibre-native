@@ -15,7 +15,7 @@
 
 #include <mapbox/eternal.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 
@@ -1172,7 +1172,7 @@ enum class Property : uint8_t {
 
 template <typename T>
 constexpr uint8_t toUint8(T t) noexcept {
-    return uint8_t(mbgl::underlying_type(t));
+    return uint8_t(mln::underlying_type(t));
 }
 
 constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
@@ -1938,6 +1938,6 @@ Mutable<Layer::Impl> SymbolLayer::mutableBaseImpl() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

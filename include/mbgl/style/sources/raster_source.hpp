@@ -4,7 +4,7 @@
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class RasterSource : public TileSource {
@@ -14,7 +14,7 @@ public:
                  uint16_t tileSize,
                  SourceType sourceType = SourceType::Raster);
 
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
@@ -33,4 +33,4 @@ inline bool Source::is<RasterSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 /*
  * # Overview of coordinate spaces
@@ -576,4 +576,4 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
         }
     }
 }
-} // end namespace mbgl
+} // end namespace mln

@@ -2,7 +2,7 @@
 
 #include <mbgl/algorithm/update_tile_masks.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 class FakeTile {
 public:

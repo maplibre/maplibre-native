@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class LineAtlas;
@@ -18,4 +18,4 @@ public:
     LineAtlas& lineAtlas;
 };
 
-} // namespace mbgl
+} // namespace mln

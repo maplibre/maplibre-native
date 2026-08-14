@@ -3,7 +3,7 @@
 #include <mbgl/util/async_request.hpp>
 #include <mbgl/util/client_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace std::chrono_literals;
 
@@ -147,4 +147,4 @@ ClientOptions StubFileSource::getClientOptions() {
     return clientOptions.clone();
 }
 
-} // namespace mbgl
+} // namespace mln

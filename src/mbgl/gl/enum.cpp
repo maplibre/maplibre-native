@@ -2,7 +2,7 @@
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/gl/defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 template <>
@@ -477,4 +477,4 @@ platform::GLenum Enum<gfx::RenderbufferPixelType>::to(const gfx::RenderbufferPix
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

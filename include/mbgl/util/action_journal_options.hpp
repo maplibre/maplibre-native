@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 
@@ -117,4 +117,4 @@ protected:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

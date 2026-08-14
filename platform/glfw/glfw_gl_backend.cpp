@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-class GLFWGLRenderableResource final : public mbgl::gl::RenderableResource {
+class GLFWGLRenderableResource final : public mln::gl::RenderableResource {
 public:
     explicit GLFWGLRenderableResource(GLFWGLBackend& backend_)
         : backend(backend_) {}
@@ -29,13 +29,13 @@ private:
 };
 
 GLFWGLBackend::GLFWGLBackend(GLFWwindow* window_, const bool capFrameRate)
-    : mbgl::gl::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(
+    : mln::gl::RendererBackend(mln::gfx::ContextMode::Unique),
+      mln::gfx::Renderable(
           [window_] {
               int fbWidth;
               int fbHeight;
               glfwGetFramebufferSize(window_, &fbWidth, &fbHeight);
-              return mbgl::Size{static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight)};
+              return mln::Size{static_cast<uint32_t>(fbWidth), static_cast<uint32_t>(fbHeight)};
           }(),
           std::make_unique<GLFWGLRenderableResource>(*this)),
       window(window_) {
@@ -64,7 +64,7 @@ void GLFWGLBackend::deactivate() {
     glfwMakeContextCurrent(nullptr);
 }
 
-mbgl::gl::ProcAddress GLFWGLBackend::getExtensionFunctionPointer(const char* name) {
+mln::gl::ProcAddress GLFWGLBackend::getExtensionFunctionPointer(const char* name) {
     return glfwGetProcAddress(name);
 }
 
@@ -75,11 +75,11 @@ void GLFWGLBackend::updateAssumedState() {
     setViewport(0, 0, size);
 }
 
-mbgl::Size GLFWGLBackend::getSize() const {
+mln::Size GLFWGLBackend::getSize() const {
     return size;
 }
 
-void GLFWGLBackend::setSize(const mbgl::Size newSize) {
+void GLFWGLBackend::setSize(const mln::Size newSize) {
     size = newSize;
 }
 
@@ -89,15 +89,15 @@ void GLFWGLBackend::swap() {
     glfwSwapBuffers(window);
 }
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <>
-std::unique_ptr<GLFWBackend> Backend::Create<mbgl::gfx::Backend::Type::OpenGL>(GLFWwindow* window, bool capFrameRate) {
+std::unique_ptr<GLFWBackend> Backend::Create<mln::gfx::Backend::Type::OpenGL>(GLFWwindow* window, bool capFrameRate) {
     MLN_TRACE_FUNC();
 
     return std::make_unique<GLFWGLBackend>(window, capFrameRate);
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

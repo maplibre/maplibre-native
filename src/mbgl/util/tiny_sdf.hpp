@@ -2,7 +2,7 @@
 
 #include <mbgl/util/image.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /*
@@ -18,4 +18,4 @@ namespace util {
 AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, double cutoff);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

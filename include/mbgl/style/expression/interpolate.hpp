@@ -11,11 +11,11 @@
 #include <cmath>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
-ParseResult parseInterpolate(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+ParseResult parseInterpolate(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
 class Interpolate : public Expression {
 public:
@@ -44,7 +44,7 @@ public:
 
     // Return the smallest range of stops that covers the interval [lower, upper]
     Range<float> getCoveringStops(const double lower, const double upper) const noexcept {
-        return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
+        return ::mln::style::expression::getCoveringStops(stops, lower, upper);
     }
 
     double interpolationFactor(const Range<double>& inputLevels, const double inputValue) const {
@@ -65,7 +65,7 @@ public:
     }
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "interpolate"; }
 
 protected:
@@ -82,4 +82,4 @@ ParseResult createInterpolate(type::Type type,
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

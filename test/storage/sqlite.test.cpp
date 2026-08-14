@@ -3,10 +3,10 @@
 
 #include <mbgl/storage/sqlite3.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(SQLite, Statement) {
-    using namespace mbgl;
+    using namespace mln;
 
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(":memory:", mapbox::sqlite::ReadWriteCreate);
     db.exec("CREATE TABLE test (id INTEGER);");

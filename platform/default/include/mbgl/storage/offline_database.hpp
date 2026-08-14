@@ -23,7 +23,7 @@ class Exception;
 } // namespace sqlite
 } // namespace mapbox
 
-namespace mbgl {
+namespace mln {
 
 class Response;
 class TileID;
@@ -191,4 +191,4 @@ private:
     bool readOnly = false;
 };
 
-} // namespace mbgl
+} // namespace mln

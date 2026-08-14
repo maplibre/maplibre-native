@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class OverscaledTileID;
 class CanonicalTileID;
@@ -45,7 +45,7 @@ public:
 
     class Impl;
     const Impl& impl() const;
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
@@ -62,4 +62,4 @@ inline bool Source::is<CustomVectorSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

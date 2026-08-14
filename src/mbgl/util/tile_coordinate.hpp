@@ -7,7 +7,7 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/projection.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using TileCoordinatePoint = Point<double>;
 
@@ -48,4 +48,4 @@ public:
     }
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -16,7 +16,7 @@
 #include <mbgl/style/conversion/json.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 namespace dsl {
@@ -36,11 +36,11 @@ std::unique_ptr<Expression> createExpression(const char* expr) {
 
     const JSValue* expression = &document;
     expression::ParsingContext ctx;
-    expression::ParseResult parsed = ctx.parseExpression(mbgl::style::conversion::Convertible(expression));
+    expression::ParseResult parsed = ctx.parseExpression(mln::style::conversion::Convertible(expression));
     return parsed ? std::move(*parsed) : nullptr;
 }
 
-std::unique_ptr<Expression> createExpression(const mbgl::style::conversion::Convertible& expr) {
+std::unique_ptr<Expression> createExpression(const mln::style::conversion::Convertible& expr) {
     expression::ParsingContext ctx;
     expression::ParseResult parsed = ctx.parseExpression(expr);
     return parsed ? std::move(*parsed) : nullptr;
@@ -264,4 +264,4 @@ std::unique_ptr<Expression> image(std::unique_ptr<Expression> expression) {
 } // namespace dsl
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

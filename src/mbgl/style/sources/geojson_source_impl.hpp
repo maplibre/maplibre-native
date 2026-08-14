@@ -4,7 +4,7 @@
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/util/range.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AsyncRequest;
 class CanonicalTileID;
@@ -33,4 +33,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 std::optional<std::string> LayerFactory::getSource(const style::conversion::Convertible& value) const noexcept {
     auto sourceValue = objectMember(value, "source");
@@ -38,4 +38,4 @@ std::unique_ptr<Layout> LayerFactory::createLayout(const LayoutParameters&,
     return nullptr;
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 #include <mbgl/style/layers/color_relief_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace shaders;
 
@@ -90,4 +90,4 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

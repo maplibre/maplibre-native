@@ -4,7 +4,7 @@
 #include <mbgl/gl/object.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
@@ -26,4 +26,4 @@ protected:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

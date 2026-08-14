@@ -3,7 +3,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 
 RenderStaticData::RenderStaticData(std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
     : shaders(std::move(shaders_)),
@@ -133,4 +133,4 @@ SegmentBase RenderStaticData::symbolSegment(std::size_t baseInstance, float sort
     return SegmentBase(0, 0, 4, 6, baseInstance, 0, sortKey);
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/draw_scope.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Context;
@@ -17,4 +17,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #include "freetype.hpp"
 #endif
 
-namespace mbgl {
+namespace mln {
 
 #ifndef MLN_TEXT_SHAPING_HARFBUZZ
 struct FreeTypeLibrary {};
@@ -42,4 +42,4 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

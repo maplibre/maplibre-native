@@ -7,7 +7,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 template <class T>
 class Actor;
@@ -49,4 +49,4 @@ private:
     bool dirty = true;
 };
 
-} // namespace mbgl
+} // namespace mln

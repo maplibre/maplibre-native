@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Context;
@@ -41,4 +41,4 @@ protected:
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

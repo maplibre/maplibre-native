@@ -1,12 +1,12 @@
 #include <mbgl/gfx/headless_backend.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 bool Backend::enableGPUExpressionEval = false;
 
 HeadlessBackend::HeadlessBackend(Size size_)
-    : mbgl::gfx::Renderable(size_, nullptr) {}
+    : mln::gfx::Renderable(size_, nullptr) {}
 
 void HeadlessBackend::setSize(Size size_) {
     size = size_;
@@ -14,4 +14,4 @@ void HeadlessBackend::setSize(Size size_) {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -14,7 +14,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class ShaderGroupBase : public gfx::ShaderGroup {
@@ -22,7 +22,7 @@ protected:
     ShaderGroupBase(const ProgramParameters& parameters_)
         : programParameters(parameters_) {}
 
-    using DefinesMap = mbgl::unordered_map<std::string, std::string>;
+    using DefinesMap = mln::unordered_map<std::string, std::string>;
     void addAdditionalDefines(const StringIDSetsPair& propertiesAsUniforms, DefinesMap& additionalDefines) {
         additionalDefines.reserve(propertiesAsUniforms.first.size());
         for (const auto name : propertiesAsUniforms.first) {
@@ -54,8 +54,8 @@ public:
         constexpr auto& frag = ShaderSource::fragment;
 
         std::size_t seed = 0;
-        mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
-        mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
+        mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
+        mln::util::hash_combine(seed, programParameters.getDefinesHash());
         const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<webgpu::ShaderProgram>(shaderName);
@@ -106,4 +106,4 @@ public:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

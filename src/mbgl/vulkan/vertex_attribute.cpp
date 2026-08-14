@@ -10,7 +10,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 size_t VertexAttribute::getBufferUsage() const {
@@ -45,4 +45,4 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

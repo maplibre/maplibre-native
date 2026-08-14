@@ -6,7 +6,7 @@
 #include <mbgl/style/expression/is_expression.hpp>
 #include <mbgl/style/expression/parsing_context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -14,7 +14,7 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
                                                                                     Error& error,
                                                                                     bool,
                                                                                     bool) const {
-    using namespace mbgl::style::expression;
+    using namespace mln::style::expression;
     if (isUndefined(value)) {
         return ColorRampPropertyValue();
     } else if (isExpression(value)) {
@@ -45,4 +45,4 @@ std::optional<ColorRampPropertyValue> Converter<ColorRampPropertyValue>::operato
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

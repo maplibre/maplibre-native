@@ -5,7 +5,7 @@
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderFillExtrusionLayer final : public RenderLayer {
 public:
@@ -54,4 +54,4 @@ private:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

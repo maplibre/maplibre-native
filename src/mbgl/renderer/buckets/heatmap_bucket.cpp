@@ -5,7 +5,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -94,4 +94,4 @@ float HeatmapBucket::getQueryRadius(const RenderLayer& layer) const {
     return 0;
 }
 
-} // namespace mbgl
+} // namespace mln

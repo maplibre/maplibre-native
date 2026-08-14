@@ -24,7 +24,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace matrix {
 
 void identity(mat3& out) noexcept {
@@ -108,4 +108,4 @@ void transformMat3f(vec3f& out, const vec3f& a, const mat3& m) noexcept {
 }
 
 } // namespace matrix
-} // namespace mbgl
+} // namespace mln

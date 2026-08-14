@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -132,4 +132,4 @@ union FillTilePropsUnionUBO {
 #endif
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

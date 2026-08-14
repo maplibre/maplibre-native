@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class SymbolErrorObserver;
 
@@ -40,4 +40,4 @@ private:
     SymbolErrorObserver* previous;
 };
 
-} // namespace mbgl
+} // namespace mln

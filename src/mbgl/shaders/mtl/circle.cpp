@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/circle.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using CircleShaderSource = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
@@ -21,4 +21,4 @@ const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
 const std::array<TextureInfo, 0> CircleShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

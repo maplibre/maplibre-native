@@ -6,13 +6,13 @@
 #include <cstdint>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 template std::array<float, 2> convert(const std::array<int32_t, 2>&);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln
 
 #ifdef _MSC_VER
 #pragma warning(pop)
