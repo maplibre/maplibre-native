@@ -70,12 +70,16 @@ public:
 
   void swap() override {
     id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
-    [commandBuffer presentDrawable:currentDrawable];
-    [commandBuffer commit];
-
-    // Un-comment for synchronous, which can help troubleshoot rendering problems,
-    // particularly those related to resource tracking and multiple queued buffers.
-    //[commandBuffer waitUntilCompleted];
+    if (currentDrawable) {
+      if (presentsWithTransaction) {
+        [commandBuffer commit];
+        [commandBuffer waitUntilCompleted];
+        [currentDrawable present];
+      } else {
+        [commandBuffer presentDrawable:currentDrawable];
+        [commandBuffer commit];
+      }
+    }
 
     commandBuffer = nil;
     commandBufferPtr.reset();
@@ -99,6 +103,7 @@ public:
   MTKView* mtlView = nil;
   id<MTLCommandBuffer> commandBuffer;
   id<MTLCommandQueue> commandQueue;
+  bool presentsWithTransaction = false;
 
   // We count how often the context was activated/deactivated so that we can truly deactivate it
   // after the activation count drops to 0.
@@ -122,9 +127,11 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
   resource.mtlView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
   resource.mtlView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
   resource.mtlView.layer.opaque = mapView.opaque;
-  resource.mtlView.enableSetNeedsDisplay = NO;
+  resource.mtlView.paused = YES;
+  resource.mtlView.enableSetNeedsDisplay = YES;
   CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
   metalLayer.presentsWithTransaction = presentsWithTransaction;
+  resource.presentsWithTransaction = presentsWithTransaction;
 
   [mapView addSubview:resource.mtlView positioned:NSWindowBelow relativeTo:nil];
 }
@@ -157,6 +164,11 @@ void MLNMapViewMetalImpl::updateAssumedState() {
 mbgl::PremultipliedImage MLNMapViewMetalImpl::readStillImage() {
   // return readFramebuffer(mapView.framebufferSize); // TODO: RendererBackend::readFramebuffer
   return {};
+}
+
+void MLNMapViewMetalImpl::display() {
+  auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+  resource.mtlView.needsDisplay = YES;
 }
 
 MLNBackendResource* MLNMapViewMetalImpl::getObject() {
