@@ -1,10 +1,14 @@
 #pragma once
 
-#include <mbgl/gfx/context.hpp>
 #include <mbgl/style/layers/custom_layer_init_parameters.hpp>
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
 namespace mln {
+
+namespace gfx {
+class Context;
+} // namespace gfx
+
 namespace style {
 
 class CustomLayerHost {

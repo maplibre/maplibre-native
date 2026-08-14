@@ -204,7 +204,7 @@ android {
     prefab {
         create("maplibre") {
             headers = "../prefab-headers"
-            libraryName = "libmaplibre"
+            headerOnly = true
         }
     }
 
@@ -237,6 +237,16 @@ tasks.configureEach {
     if (name == "syncPrefabHeaders") return@configureEach
     if (name.contains("Prefab", ignoreCase = true) || name.contains("bundleLibRuntimeTo", ignoreCase = true)) {
         dependsOn(syncPrefabHeaders)
+    }
+}
+
+// AGP 9.1.1 still adds the native build output to the AAR even when the Prefab module is
+// declared header-only. Keep the header-only metadata and omit that redundant unstripped copy.
+tasks.withType<org.gradle.api.tasks.bundling.Zip>().configureEach {
+    if (name.startsWith("bundle") && name.endsWith("Aar")) {
+        // The Prefab artifact is added under a `prefab/` destination by a nested copy spec,
+        // so its paths are still relative to the Prefab root when exclusions are evaluated.
+        exclude("modules/maplibre/libs/**")
     }
 }
 
