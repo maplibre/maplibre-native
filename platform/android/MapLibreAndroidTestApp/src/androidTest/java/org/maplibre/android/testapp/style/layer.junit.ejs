@@ -238,6 +238,13 @@ public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
     layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(number));
     assertArrayEquals(layer.get<%- camelize(property.name) %>().getValue(), new Float[]{number, number, number, number});
 <% } -%>
+<% if (property.type === 'verticalGradient') { -%>
+    // Boolean form is still accepted for backward compatibility and normalizes to [depth, referenceHeight]
+    layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(true));
+    assertArrayEquals(layer.get<%- camelize(property.name) %>().getValue(), new Float[]f;
+    layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(false));
+    assertArrayEquals(layer.get<%- camelize(property.name) %>().getValue(), new Float[]{0f, 0f});
+<% } -%>
 <% if (property.tokens) { -%>
 
     layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>("{token}"));

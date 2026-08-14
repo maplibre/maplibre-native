@@ -57,8 +57,30 @@ public class PropertyFactory {
   }
 
 <% } -%>
+<% if (property.type == 'verticalGradient') { -%>
   /**
+   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides are shaded
+   * slightly darker farther down, scaled by building height; false disables shading.
+   * For per-building control, use the {@code Object[]} overload with {@code [depth, referenceHeight]}.
+   *
+   * @param value a Boolean value (legacy on/off form)
+   * @return property wrapper around Boolean
+   */
+  public static PropertyValue<Boolean> <%- camelizeWithLeadingLowercase(property.name) %>(Boolean value) {
+    return new PaintPropertyValue<>("<%-  property.name %>", value);
+  }
+
+<% } -%>
+  /**
+<% if (property.type == 'verticalGradient') { -%>
+   * Vertical shading applied to the sides of a fill-extrusion layer, as an array of one or two numbers,
+   * {@code [depth, referenceHeight]}, that shades every building regardless of height. depth (0-1) is how dark
+   * the foot of a wall gets, scaled by the light intensity, where 0 disables shading; referenceHeight re-enables
+   * height scaling above the given height in meters, and defaults to 0 (disabled). For the legacy on/off form,
+   * use the {@code Boolean} overload.
+<% } else { -%>
    * <%- propertyFactoryMethodDoc(property) %>
+<% } -%>
    *
    * @param value a <%- propertyType(property) %> value
    * @return property wrapper around <%- propertyType(property) %>

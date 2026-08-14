@@ -1250,9 +1250,11 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides will be shaded slightly darker farther down.
+   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides are shaded
+   * slightly darker farther down, scaled by building height; false disables shading.
+   * For per-building control, use the {@code Object[]} overload with {@code [depth, referenceHeight]}.
    *
-   * @param value a Boolean value
+   * @param value a Boolean value (legacy on/off form)
    * @return property wrapper around Boolean
    */
   public static PropertyValue<Boolean> fillExtrusionVerticalGradient(Boolean value) {
@@ -1260,7 +1262,21 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides will be shaded slightly darker farther down.
+   * Vertical shading applied to the sides of a fill-extrusion layer, as an array of one or two numbers,
+   * {@code [depth, referenceHeight]}, that shades every building regardless of height. depth (0-1) is how dark
+   * the foot of a wall gets, scaled by the light intensity, where 0 disables shading; referenceHeight re-enables
+   * height scaling above the given height in meters, and defaults to 0 (disabled). For the legacy on/off form,
+   * use the {@code Boolean} overload.
+   *
+   * @param value a Object[] value
+   * @return property wrapper around Object[]
+   */
+  public static PropertyValue<Object[]> fillExtrusionVerticalGradient(Object[] value) {
+    return new PaintPropertyValue<>("fill-extrusion-vertical-gradient", value);
+  }
+
+  /**
+   * Vertical shading applied to the sides of a fill-extrusion layer. `true` shades the sides slightly darker farther down, scaled by building height. `false` disables shading. Alternatively, an array of one or two numbers, `[depth, referenceHeight]`, shades every building regardless of height: `depth` (0-1) is how dark the foot of a wall gets, scaled by the light intensity, where 0 disables shading; `referenceHeight` re-enables height scaling above the given height in meters, and defaults to 0 (disabled).
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement

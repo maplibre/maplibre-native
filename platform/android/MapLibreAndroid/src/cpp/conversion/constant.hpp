@@ -4,6 +4,7 @@
 
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/padding.hpp>
+#include <mbgl/util/vertical_gradient.hpp>
 #include <mbgl/util/enum.hpp>
 
 #include <mbgl/style/expression/formatted.hpp>
@@ -67,6 +68,12 @@ struct Converter<jni::Local<jni::Object<>>, Padding> {
 template <>
 struct Converter<jni::Local<jni::Object<>>, VariableAnchorOffsetCollection> {
     Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const VariableAnchorOffsetCollection& value) const;
+};
+
+// fill-extrusion-vertical-gradient accepts either a boolean or a [depth, referenceHeight] array in the style.
+template <>
+struct Converter<jni::Local<jni::Object<>>, VerticalGradient> {
+    Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const VerticalGradient& value) const;
 };
 
 template <>
