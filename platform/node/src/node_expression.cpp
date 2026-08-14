@@ -230,8 +230,8 @@ struct ToValue {
 
     v8::Local<v8::Value> operator()(const mln::VerticalGradient& gradient) {
         // Matches VerticalGradient::serialize(): the `[depth, referenceHeight]` array form.
-        return operator()(std::vector<Value>{static_cast<double>(gradient.depth),
-                                             static_cast<double>(gradient.referenceHeight)});
+        return operator()(
+            std::vector<Value>{static_cast<double>(gradient.depth), static_cast<double>(gradient.referenceHeight)});
     }
 
     v8::Local<v8::Value> operator()(const std::unordered_map<std::string, Value>& map) {
