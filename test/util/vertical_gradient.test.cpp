@@ -49,8 +49,8 @@ TEST(VerticalGradient, ArrayLengthIsValidated) {
 }
 
 TEST(VerticalGradient, ArrayCanReproduceLegacy) {
-    EXPECT_EQ(VerticalGradient(true), fromArray({VerticalGradient::defaultDepth,
-                                                 VerticalGradient::legacyReferenceHeight}));
+    EXPECT_EQ(VerticalGradient(true),
+              fromArray({VerticalGradient::defaultDepth, VerticalGradient::legacyReferenceHeight}));
     EXPECT_NE(VerticalGradient(true), VerticalGradient(false));
     EXPECT_NE(fromArray({0.5f}), fromArray({0.5f, 150.0f}));
 }

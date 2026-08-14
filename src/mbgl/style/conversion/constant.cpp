@@ -160,8 +160,7 @@ std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, 
     return result;
 }
 
-std::optional<VerticalGradient> Converter<VerticalGradient>::operator()(const Convertible& value,
-                                                                        Error& error) const {
+std::optional<VerticalGradient> Converter<VerticalGradient>::operator()(const Convertible& value, Error& error) const {
     std::optional<VerticalGradient> result;
     if (isArray(value)) {
         const auto length = arrayLength(value);

@@ -45,9 +45,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     // to an exact no-op, so there is no separate enable flag.
     const VerticalGradient gradient = evaluated.get<FillExtrusionVerticalGradient>();
 
-    const float gradientReferenceHeightInv = gradient.referenceHeight > 0.0f
-                                                  ? 1.0f / gradient.referenceHeight
-                                                  : 0.0f;
+    const float gradientReferenceHeightInv = gradient.referenceHeight > 0.0f ? 1.0f / gradient.referenceHeight : 0.0f;
 
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
