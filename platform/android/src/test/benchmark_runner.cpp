@@ -11,11 +11,13 @@ bool running = false;
 bool done = false;
 ALooper* looper = NULL;
 
-void runner() {
+void runner(const std::string& storagePath, const std::string& benchmarkFilter) {
     std::vector<std::string> arguments = {"mbgl-benchmark-runner",
-                                          "--benchmark_repetitions=10",
                                           "--benchmark_format=json",
-                                          "--benchmark_out=/sdcard/benchmark/results/results.json"};
+                                          "--benchmark_out=" + storagePath + "/benchmark/results/results.json"};
+    if (!benchmarkFilter.empty()) {
+        arguments.emplace_back("--benchmark_filter=" + benchmarkFilter);
+    }
     std::vector<char*> argv;
     for (const auto& arg : arguments) {
         argv.push_back(const_cast<char*>(arg.data()));
@@ -24,7 +26,7 @@ void runner() {
 
     mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
     int status = mbgl::runBenchmark(argv.size(), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '%d'", status);
+    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '" + std::to_string(status) + "'");
     running = false;
     ALooper_wake(looper);
 }
@@ -37,20 +39,21 @@ void android_main(struct android_app* app) {
     looper = ALooper_forThread();
 
     std::string storagePath(app->activity->internalDataPath);
+    std::string benchmarkFilter = getIntentExtra(env, app, "benchmark_filter");
     std::string zipFile = storagePath + "/data.zip";
 
     if (copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
-        if (chdir("/sdcard")) {
-            mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to /sdcard");
+        if (chdir(storagePath.c_str())) {
+            mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to " + storagePath);
             done = true;
             changeState(env, app, false);
         } else {
-            unZipFile(env, zipFile, "/sdcard/");
+            unZipFile(env, zipFile, storagePath);
             running = true;
-            benchmarkThread = std::thread(runner);
+            benchmarkThread = std::thread(runner, storagePath, benchmarkFilter);
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '%s' to external storage", zipFile.c_str());
+        mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '" + zipFile + "' to app storage");
         done = true;
         changeState(env, app, false);
     }
