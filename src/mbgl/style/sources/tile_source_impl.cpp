@@ -1,6 +1,6 @@
 #include <mbgl/style/sources/tile_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 TileSource::Impl::Impl(SourceType sourceType, std::string id_, uint16_t tileSize_ = util::tileSize_I)
@@ -24,4 +24,4 @@ std::optional<std::string> TileSource::Impl::getAttribution() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

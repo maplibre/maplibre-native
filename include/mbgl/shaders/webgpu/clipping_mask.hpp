@@ -6,7 +6,7 @@
 #include <array>
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) ClipUBO {
@@ -62,4 +62,4 @@ fn main() -> @location(0) vec4<f32> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

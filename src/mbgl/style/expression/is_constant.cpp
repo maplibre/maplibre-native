@@ -1,7 +1,7 @@
 #include <mbgl/style/expression/is_constant.hpp>
 #include <mbgl/style/expression/collator_expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -75,4 +75,4 @@ bool isRuntimeConstant(const Expression& expression) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

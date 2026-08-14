@@ -5,7 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNActionJournalOptions (Private)
 
-- (mbgl::util::ActionJournalOptions)getCoreOptions;
+- (mln::util::ActionJournalOptions)getCoreOptions;
 
 @end
 

@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) DebugUBO {
@@ -17,4 +17,4 @@ struct alignas(16) DebugUBO {
 static_assert(sizeof(DebugUBO) == 6 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

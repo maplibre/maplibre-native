@@ -29,5 +29,5 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    return mbgl::runTests(argc, argv);
+    return mln::runTests(argc, argv);
 }

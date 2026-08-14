@@ -7,7 +7,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/benchmark/stub_geometry_tile_feature.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 style::Filter parse(const char* expression) {
     style::conversion::Error error;

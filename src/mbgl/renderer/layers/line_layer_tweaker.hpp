@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class UniformBuffer;
@@ -76,4 +76,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

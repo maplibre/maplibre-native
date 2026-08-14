@@ -10,7 +10,7 @@
  *          http://creativecommons.org/licenses/by/3.0/deed.en_US
  */
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 /**
@@ -92,4 +92,4 @@ size_t getCurrentRSS() {
 }
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln

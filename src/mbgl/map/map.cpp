@@ -24,7 +24,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -256,7 +256,7 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
                                     const std::optional<double>& bearing,
                                     const std::optional<double>& pitch) const {
     if (!bearing && !pitch) {
-        return mbgl::cameraForLatLngs(latLngs, impl->transform, padding);
+        return mln::cameraForLatLngs(latLngs, impl->transform, padding);
     }
 
     Transform transform(impl->transform.getState());
@@ -265,7 +265,7 @@ CameraOptions Map::cameraForLatLngs(const std::vector<LatLng>& latLngs,
         transform.jumpTo(CameraOptions().withBearing(bearing).withPitch(pitch));
     }
 
-    return mbgl::cameraForLatLngs(latLngs, transform, padding)
+    return mln::cameraForLatLngs(latLngs, transform, padding)
         .withBearing(util::rad2deg(-transform.getBearing()))
         .withPitch(util::rad2deg(transform.getPitch()));
 }
@@ -389,12 +389,12 @@ void Map::setNorthOrientation(NorthOrientation orientation) {
     impl->onUpdate();
 }
 
-void Map::setConstrainMode(mbgl::ConstrainMode mode) {
+void Map::setConstrainMode(mln::ConstrainMode mode) {
     impl->transform.setConstrainMode(mode);
     impl->onUpdate();
 }
 
-void Map::setViewportMode(mbgl::ViewportMode mode) {
+void Map::setViewportMode(mln::ViewportMode mode) {
     impl->transform.setViewportMode(mode);
     impl->onUpdate();
 }
@@ -604,4 +604,4 @@ const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
     return impl->actionJournal;
 }
 
-} // namespace mbgl
+} // namespace mln

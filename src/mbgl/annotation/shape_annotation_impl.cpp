@@ -8,7 +8,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/geometry.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -55,4 +55,4 @@ void ShapeAnnotationImpl::updateTileData(const CanonicalTileID& tileID, Annotati
     }
 }
 
-} // namespace mbgl
+} // namespace mln

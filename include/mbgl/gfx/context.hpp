@@ -16,7 +16,7 @@
 #include <mutex>
 #include <shared_mutex>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 class ProgramParameters;
@@ -192,4 +192,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

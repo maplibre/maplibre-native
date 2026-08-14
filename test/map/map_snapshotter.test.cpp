@@ -9,7 +9,7 @@
 #include <mbgl/util/timer.hpp>
 #include <mbgl/util/io.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 static PremultipliedImage namedImage(const std::string& name) {
     return decodeImage(util::read_file("test/fixtures/sprites/" + name + ".png"));
@@ -43,10 +43,10 @@ TEST(MapSnapshotter, setStyleJSON) {
     })JSON");
 
     snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
-                                    mbgl::PremultipliedImage image,
-                                    mbgl::MapSnapshotter::Attributions,
-                                    mbgl::MapSnapshotter::PointForFn,
-                                    mbgl::MapSnapshotter::LatLngForFn) {
+                                    mln::PremultipliedImage image,
+                                    mln::MapSnapshotter::Attributions,
+                                    mln::MapSnapshotter::PointForFn,
+                                    mln::MapSnapshotter::LatLngForFn) {
         EXPECT_EQ(nullptr, ptr);
         EXPECT_EQ(32, image.size.width);
         EXPECT_EQ(16, image.size.height);
@@ -71,10 +71,10 @@ TEST(MapSnapshotter, setSize) {
     snapshotter.setSize(Size{16, 32});
 
     snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
-                                    mbgl::PremultipliedImage image,
-                                    mbgl::MapSnapshotter::Attributions,
-                                    mbgl::MapSnapshotter::PointForFn,
-                                    mbgl::MapSnapshotter::LatLngForFn) {
+                                    mln::PremultipliedImage image,
+                                    mln::MapSnapshotter::Attributions,
+                                    mln::MapSnapshotter::PointForFn,
+                                    mln::MapSnapshotter::LatLngForFn) {
         EXPECT_EQ(nullptr, ptr);
         EXPECT_EQ(16, image.size.width);
         EXPECT_EQ(32, image.size.height);
@@ -89,10 +89,10 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(setStyleURL)) {
     MapSnapshotter snapshotter(Size{64, 32}, 1.0f, ResourceOptions());
     snapshotter.setStyleURL("http://127.0.0.1:3000/online/style.json");
     snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
-                                    mbgl::PremultipliedImage image,
-                                    mbgl::MapSnapshotter::Attributions,
-                                    mbgl::MapSnapshotter::PointForFn,
-                                    mbgl::MapSnapshotter::LatLngForFn) {
+                                    mln::PremultipliedImage image,
+                                    mln::MapSnapshotter::Attributions,
+                                    mln::MapSnapshotter::PointForFn,
+                                    mln::MapSnapshotter::LatLngForFn) {
         EXPECT_EQ(nullptr, ptr);
         EXPECT_EQ(64, image.size.width);
         EXPECT_EQ(32, image.size.height);
@@ -107,10 +107,10 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(cancel)) {
     MapSnapshotter snapshotter(Size{1, 1}, 1.0f, ResourceOptions());
     snapshotter.setStyleURL("http://127.0.0.1:3000/online/style.json");
     snapshotter.snapshot([](std::exception_ptr,
-                            mbgl::PremultipliedImage,
-                            mbgl::MapSnapshotter::Attributions,
-                            mbgl::MapSnapshotter::PointForFn,
-                            mbgl::MapSnapshotter::LatLngForFn) { ASSERT_TRUE(false); });
+                            mln::PremultipliedImage,
+                            mln::MapSnapshotter::Attributions,
+                            mln::MapSnapshotter::PointForFn,
+                            mln::MapSnapshotter::LatLngForFn) { ASSERT_TRUE(false); });
 
     snapshotter.cancel();
 
@@ -132,10 +132,10 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(runtimeStyling)) {
         fillLayer->setFillColor(Color(0.25f, 0.88f, 0.82f, 1.0f));
         snapshotter.getStyle().addLayer(std::move(fillLayer));
         snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
-                                        mbgl::PremultipliedImage image,
-                                        mbgl::MapSnapshotter::Attributions,
-                                        mbgl::MapSnapshotter::PointForFn,
-                                        mbgl::MapSnapshotter::LatLngForFn) {
+                                        mln::PremultipliedImage image,
+                                        mln::MapSnapshotter::Attributions,
+                                        mln::MapSnapshotter::PointForFn,
+                                        mln::MapSnapshotter::LatLngForFn) {
             EXPECT_EQ(nullptr, ptr);
             EXPECT_EQ(256, image.size.width);
             EXPECT_EQ(128, image.size.height);
@@ -161,10 +161,10 @@ TEST(MapSnapshotter, TEST_REQUIRES_SERVER(annotation)) {
     lineAnnotation.width = {5};
     snapshotter.addAnnotation(lineAnnotation);
     snapshotter.snapshot([&runLoop](std::exception_ptr ptr,
-                                    mbgl::PremultipliedImage image,
-                                    mbgl::MapSnapshotter::Attributions,
-                                    mbgl::MapSnapshotter::PointForFn,
-                                    mbgl::MapSnapshotter::LatLngForFn) {
+                                    mln::PremultipliedImage image,
+                                    mln::MapSnapshotter::Attributions,
+                                    mln::MapSnapshotter::PointForFn,
+                                    mln::MapSnapshotter::LatLngForFn) {
         EXPECT_EQ(nullptr, ptr);
         EXPECT_EQ(256, image.size.width);
         EXPECT_EQ(128, image.size.height);

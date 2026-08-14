@@ -14,7 +14,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class CustomDrawableLayerHost {
@@ -75,7 +75,7 @@ public:
     };
 
     template <typename T>
-    using TweakerCallback = std::function<void(mbgl::gfx::Drawable&, const mbgl::PaintParameters&, T&)>;
+    using TweakerCallback = std::function<void(mln::gfx::Drawable&, const mln::PaintParameters&, T&)>;
 
     using LineTweakerCallback = TweakerCallback<LineOptions>;
     using FillTweakerCallback = TweakerCallback<FillOptions>;
@@ -253,4 +253,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

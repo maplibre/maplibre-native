@@ -2,7 +2,7 @@
 
 #include <mbgl/style/expression/utf8_op_helpers.hpp>
 
-using namespace mbgl::style::expression;
+using namespace mln::style::expression;
 
 TEST(Utf8OpHelpers, unicodeLengthOnValidatedUtf8) {
     EXPECT_EQ(unicodeLengthOnValidatedUtf8(""), 0);

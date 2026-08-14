@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 enum class RenderPass : uint8_t {
     None = 0,
@@ -19,4 +19,4 @@ enum class PaintMode : bool {
     Overdraw = true,
 };
 
-} // namespace mbgl
+} // namespace mln

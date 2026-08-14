@@ -12,7 +12,7 @@
 #include <string>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class ShaderGroupBase : public gfx::ShaderGroup {
@@ -20,7 +20,7 @@ protected:
     ShaderGroupBase(const ProgramParameters& parameters_)
         : programParameters(parameters_) {}
 
-    using DefinesMap = mbgl::unordered_map<std::string, std::string>;
+    using DefinesMap = mln::unordered_map<std::string, std::string>;
     void addAdditionalDefines(const StringIDSetsPair& propertiesAsUniforms, DefinesMap& additionalDefines) {
         additionalDefines.reserve(propertiesAsUniforms.first.size());
         for (const auto name : propertiesAsUniforms.first) {
@@ -54,8 +54,8 @@ public:
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
 
         std::size_t seed = 0;
-        mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
-        mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
+        mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
+        mln::util::hash_combine(seed, programParameters.getDefinesHash());
         const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
@@ -94,4 +94,4 @@ public:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 GlyphManagerObserver nullObserver;
@@ -269,4 +269,4 @@ std::string GlyphManager::getFontFaceURL(GlyphIDType type) {
     return url;
 }
 
-} // namespace mbgl
+} // namespace mln

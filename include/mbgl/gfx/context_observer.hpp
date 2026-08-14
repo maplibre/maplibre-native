@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class ContextObserver {
@@ -17,4 +17,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

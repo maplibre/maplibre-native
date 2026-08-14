@@ -9,7 +9,7 @@
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
-namespace mbgl {
+namespace mln {
 
 void requestLocalFile(const std::string& path,
                       const ActorRef<FileSourceRequest>& req,
@@ -35,4 +35,4 @@ void requestLocalFile(const std::string& path,
     req.invoke(&FileSourceRequest::setResponse, response);
 }
 
-} // namespace mbgl
+} // namespace mln

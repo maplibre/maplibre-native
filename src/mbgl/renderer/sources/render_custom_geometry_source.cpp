@@ -3,7 +3,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/tile/custom_geometry_tile.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -55,4 +55,4 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
                        });
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class RenderSource;
 
@@ -44,4 +44,4 @@ protected:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

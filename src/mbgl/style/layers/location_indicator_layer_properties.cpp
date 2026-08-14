@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/location_indicator_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 LocationIndicatorLayerProperties::LocationIndicatorLayerProperties(
@@ -34,6 +34,6 @@ expression::Dependency LocationIndicatorLayerProperties::getDependencies() const
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

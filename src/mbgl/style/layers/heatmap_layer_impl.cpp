@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 bool HeatmapLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
@@ -10,4 +10,4 @@ bool HeatmapLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

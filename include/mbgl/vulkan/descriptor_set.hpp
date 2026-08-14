@@ -5,7 +5,7 @@
 #include <span>
 #include <queue>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class CommandEncoder;
@@ -101,4 +101,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

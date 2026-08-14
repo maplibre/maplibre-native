@@ -5,7 +5,7 @@
 #include <sstream>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using Dependency = style::expression::Dependency;
 
@@ -67,12 +67,12 @@ public:
 
     const PropertyMap& getProperties() const override { return feature.properties; }
     FeatureIdentifier getID() const override { return feature.id; }
-    std::optional<mbgl::Value> getValue(const std::string& key) const override {
+    std::optional<mln::Value> getValue(const std::string& key) const override {
         auto it = feature.properties.find(key);
         if (it != feature.properties.end()) {
-            return std::optional<mbgl::Value>(it->second);
+            return std::optional<mln::Value>(it->second);
         }
-        return std::optional<mbgl::Value>();
+        return std::optional<mln::Value>();
     }
     const GeometryCollection& getGeometries() const override {
         if (geometry) return *geometry;
@@ -111,11 +111,11 @@ EvaluationResult Expression::evaluate(std::optional<float> zoom,
                               .withCanonicalTileID(&canonical));
 }
 
-EvaluationResult Expression::evaluate(std::optional<mbgl::Value> accumulated, const Feature& feature) const {
+EvaluationResult Expression::evaluate(std::optional<mln::Value> accumulated, const Feature& feature) const {
     GeoJSONFeature f(feature);
     return this->evaluate(EvaluationContext(std::move(accumulated), &f));
 }
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

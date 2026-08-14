@@ -2,8 +2,8 @@
 
 #include <mbgl/util/util.hpp>
 
-namespace mbgl {
+namespace mln {
 
 MBGL_EXPORT int runTests(int argc, char* argv[]);
 
-} // namespace mbgl
+} // namespace mln

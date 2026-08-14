@@ -11,7 +11,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -208,4 +208,4 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

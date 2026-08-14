@@ -10,7 +10,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class CommandEncoder;
@@ -84,4 +84,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

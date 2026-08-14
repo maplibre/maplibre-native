@@ -14,24 +14,24 @@
 @end
 
 @implementation MLNMapProjection {
-  std::unique_ptr<mbgl::MapProjection> _mbglProjection;
+  std::unique_ptr<mln::MapProjection> _mbglProjection;
 }
 
 - (instancetype)initWithMapView:(MLNMapView *)mapView {
   if (self = [super init]) {
-    _mbglProjection = std::make_unique<mbgl::MapProjection>([mapView mbglMap]);
+    _mbglProjection = std::make_unique<mln::MapProjection>([mapView mbglMap]);
     self.mapFrameSize = mapView.frame.size;
   }
   return self;
 }
 
 - (MLNMapCamera *)camera {
-  mbgl::CameraOptions cameraOptions = _mbglProjection->getCamera();
+  mln::CameraOptions cameraOptions = _mbglProjection->getCamera();
 
   CLLocationCoordinate2D centerCoordinate =
       MLNLocationCoordinate2DFromLatLng(*cameraOptions.center);
   double zoomLevel = *cameraOptions.zoom;
-  CLLocationDirection direction = mbgl::util::wrap(*cameraOptions.bearing, 0., 360.);
+  CLLocationDirection direction = mln::util::wrap(*cameraOptions.bearing, 0., 360.);
   CGFloat pitch = *cameraOptions.pitch;
   CLLocationDistance altitude =
       MLNAltitudeForZoomLevel(zoomLevel, pitch, centerCoordinate.latitude, self.mapFrameSize);
@@ -42,7 +42,7 @@
 }
 
 - (void)setCamera:(MLNMapCamera *_Nonnull)camera withEdgeInsets:(UIEdgeInsets)insets {
-  mbgl::CameraOptions cameraOptions;
+  mln::CameraOptions cameraOptions;
   if (CLLocationCoordinate2DIsValid(camera.centerCoordinate)) {
     cameraOptions.center = MLNLatLngFromLocationCoordinate2D(camera.centerCoordinate);
   }
@@ -68,8 +68,8 @@
       bounds.ne,
   };
 
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(insets);
-  std::vector<mbgl::LatLng> latLngs;
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(insets);
+  std::vector<mln::LatLng> latLngs;
   latLngs.reserve(4);
   for (NSUInteger i = 0; i < 4; i++) {
     latLngs.push_back({coordinates[i].latitude, coordinates[i].longitude});
@@ -79,7 +79,7 @@
 }
 
 - (CLLocationCoordinate2D)convertPoint:(CGPoint)point {
-  mbgl::ScreenCoordinate screenCoordinate = mbgl::ScreenCoordinate(point.x, point.y);
+  mln::ScreenCoordinate screenCoordinate = mln::ScreenCoordinate(point.x, point.y);
   return MLNLocationCoordinate2DFromLatLng(
       _mbglProjection->latLngForPixel(screenCoordinate).wrapped());
 }
@@ -89,15 +89,15 @@
     return CGPointMake(NAN, NAN);
   }
 
-  mbgl::LatLng latLng = MLNLatLngFromLocationCoordinate2D(coordinate);
-  mbgl::ScreenCoordinate pixel = _mbglProjection->pixelForLatLng(latLng);
+  mln::LatLng latLng = MLNLatLngFromLocationCoordinate2D(coordinate);
+  mln::ScreenCoordinate pixel = _mbglProjection->pixelForLatLng(latLng);
   return CGPointMake(pixel.x, pixel.y);
 }
 
 - (CLLocationDistance)metersPerPoint {
-  mbgl::CameraOptions cameraOptions = _mbglProjection->getCamera();
-  return mbgl::Projection::getMetersPerPixelAtLatitude(cameraOptions.center->latitude(),
-                                                       *cameraOptions.zoom);
+  mln::CameraOptions cameraOptions = _mbglProjection->getCamera();
+  return mln::Projection::getMetersPerPixelAtLatitude(cameraOptions.center->latitude(),
+                                                      *cameraOptions.zoom);
 }
 
 @end

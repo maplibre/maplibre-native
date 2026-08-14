@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Symbol layer specific tweaker
@@ -29,4 +29,4 @@ private:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -11,7 +11,7 @@
 #include <optional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 template <typename To, typename From, std::size_t Size>
@@ -44,7 +44,7 @@ template <typename T>
 std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view str, int base = 10) noexcept {
     static_assert(std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, int64_t> ||
                       std::is_same_v<T, uint64_t>,
-                  "Unsupported integral type in mbgl::util::parse<T>.");
+                  "Unsupported integral type in mln::util::parse<T>.");
     char* end = nullptr;
     errno = 0;
 
@@ -70,7 +70,7 @@ std::enable_if_t<std::is_integral_v<T>, std::optional<T>> parse(std::string_view
 template <typename T>
 std::enable_if_t<std::is_floating_point_v<T>, std::optional<T>> parse(std::string_view str) noexcept {
     static_assert(std::is_same_v<T, float> || std::is_same_v<T, double> || std::is_same_v<T, long double>,
-                  "Unsupported floating point type in mbgl::util::parse<T>.");
+                  "Unsupported floating point type in mln::util::parse<T>.");
     char* end = nullptr;
     errno = 0;
 
@@ -89,4 +89,4 @@ std::enable_if_t<std::is_floating_point_v<T>, std::optional<T>> parse(std::strin
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

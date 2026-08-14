@@ -4,7 +4,7 @@
 #include <mbgl/util/range.hpp>
 #include <mbgl/util/unitbezier.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -47,4 +47,4 @@ using Interpolator = variant<ExponentialInterpolator, CubicBezierInterpolator>;
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class RenderableResource : public gfx::RenderableResource {
@@ -19,4 +19,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

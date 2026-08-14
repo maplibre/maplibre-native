@@ -1,6 +1,6 @@
 #include "util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace java {
 namespace util {
@@ -16,4 +16,4 @@ void registerNative(jni::JNIEnv& env) {
 } // namespace util
 } // namespace java
 } // namespace android
-} // namespace mbgl
+} // namespace mln

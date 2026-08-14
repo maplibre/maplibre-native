@@ -4,7 +4,7 @@
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/widevector_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -79,4 +79,4 @@ fn main(@location(0) color: vec4<f32>, @location(1) texCoord: vec2<f32>) -> @loc
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

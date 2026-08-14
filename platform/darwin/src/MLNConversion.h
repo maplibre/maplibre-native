@@ -2,7 +2,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -111,7 +111,7 @@ public:
     }
   }
 
-  static std::optional<mbgl::Value> toValue(const Holder& holder) {
+  static std::optional<mln::Value> toValue(const Holder& holder) {
     const id value = holder.value;
     if (isUndefined(value)) {
       return {};
@@ -167,6 +167,6 @@ inline Convertible makeConvertible(const id value) { return Convertible(Holder(v
 
 }  // namespace conversion
 }  // namespace style
-}  // namespace mbgl
+}  // namespace mln
 
 NS_ASSUME_NONNULL_END

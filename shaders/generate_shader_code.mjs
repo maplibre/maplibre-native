@@ -254,7 +254,7 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -265,7 +265,7 @@ struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln
 `);
         generatedHeaders.push("#include <mbgl/shaders/gl/" + elem.header + ".hpp>");
         shaderNames.push(elem.name);
@@ -289,7 +289,7 @@ fs.writeFileSync(path.join(outputRoot, "shader_source.hpp"),
 #pragma once
 #include <mbgl/gfx/backend.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 /// @brief This enum is used with the ShaderSource template to select
@@ -316,7 +316,7 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln
 `);
 
 // Generate shader_source.cpp
@@ -325,7 +325,7 @@ fs.writeFileSync(path.join(cppOutputRoot, "shader_source.cpp"),
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace shaders;
 
@@ -333,7 +333,7 @@ MBGL_DEFINE_ENUM(BuiltIn, {
 {BuiltIn::None, "None"},${shaderNames.map(name => `\n{BuiltIn::` + name + `, "` + name + `"}`)}
 });
 
-} // namespace mbgl
+} // namespace mln
 `);
 
 console.log("Shaders generated!");

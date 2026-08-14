@@ -12,7 +12,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace mbgl {
+namespace mln {
 
 class CanonicalTileID;
 class UnwrappedTileID;
@@ -244,4 +244,4 @@ struct LatLngAltitude {
     double altitude = 0.0;
 };
 
-} // namespace mbgl
+} // namespace mln

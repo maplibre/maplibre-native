@@ -15,7 +15,7 @@
 #include <limits>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class UnwrappedTileID;
 class TileCoordinate;
@@ -333,4 +333,4 @@ private:
     mutable mat4 invertedMatrix;
 };
 
-} // namespace mbgl
+} // namespace mln

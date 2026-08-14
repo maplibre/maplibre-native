@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -24,4 +24,4 @@ std::optional<T> convertJSON(const std::string& json, Error& error, Args&&... ar
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

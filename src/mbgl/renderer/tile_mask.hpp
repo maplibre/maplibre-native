@@ -4,7 +4,7 @@
 
 #include <set>
 
-namespace mbgl {
+namespace mln {
 
 // A TileMask is a set of TileIDs that describe what part of a tile should be
 // rendered. It omits those parts of the tile that are covered by other/better
@@ -13,4 +13,4 @@ namespace mbgl {
 // typically generated with algorithm::updateTileMasks().
 using TileMask = std::set<CanonicalTileID>;
 
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <mbgl/util/event.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 MBGL_DEFINE_ENUM(EventSeverity,
                  {
@@ -34,4 +34,4 @@ MBGL_DEFINE_ENUM(Event,
                      {Event(-1), "Unknown"},
                  });
 
-} // namespace mbgl
+} // namespace mln

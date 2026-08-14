@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class SymbolFeature;
 
@@ -27,4 +27,4 @@ unsigned int mergeFromLeft(std::vector<SymbolFeature> &features,
 void mergeLines(std::vector<SymbolFeature> &features);
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

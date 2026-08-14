@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
@@ -32,4 +32,4 @@ protected:
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

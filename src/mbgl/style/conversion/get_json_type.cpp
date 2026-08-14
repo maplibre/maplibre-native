@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -16,7 +16,7 @@ std::string getJSONType(const Convertible& value) {
     if (isObject(value)) {
         return "object";
     }
-    std::optional<mbgl::Value> v = toValue(value);
+    std::optional<mln::Value> v = toValue(value);
 
     // Since we've already checked the non-atomic types above, value must then
     // be a string, number, or boolean -- thus, assume that the toValue()
@@ -30,4 +30,4 @@ std::string getJSONType(const Convertible& value) {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #include <numeric>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 namespace {
@@ -129,4 +129,4 @@ void VertexAttributeArray::clear() {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

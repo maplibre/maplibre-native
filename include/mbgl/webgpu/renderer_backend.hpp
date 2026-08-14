@@ -12,7 +12,7 @@
 #include <mbgl/webgpu/wgpu_cpp_compat.hpp>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 
@@ -50,7 +50,7 @@ public:
     // Surface texture access - can be overridden by platform backends
     virtual void* getCurrentTextureView();
     virtual void* getDepthStencilView();
-    virtual mbgl::Size getFramebufferSize() const;
+    virtual mln::Size getFramebufferSize() const;
 
     void setDepthStencilFormat(wgpu::TextureFormat);
     wgpu::TextureFormat getDepthStencilFormat() const;
@@ -68,4 +68,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

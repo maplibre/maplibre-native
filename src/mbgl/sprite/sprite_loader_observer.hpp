@@ -7,7 +7,7 @@
 #include <exception>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 class Image;
@@ -25,4 +25,4 @@ public:
     virtual void onSpriteRequested(const std::optional<style::Sprite>&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

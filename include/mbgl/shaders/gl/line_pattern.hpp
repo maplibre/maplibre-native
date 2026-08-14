@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -292,4 +292,4 @@ lowp float opacity = u_opacity;
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

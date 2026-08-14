@@ -10,7 +10,7 @@
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -42,4 +42,4 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     layerUniforms.createOrUpdate(idHeatmapTexturePropsUBO, &propsUBO, parameters.context);
 }
 
-} // namespace mbgl
+} // namespace mln

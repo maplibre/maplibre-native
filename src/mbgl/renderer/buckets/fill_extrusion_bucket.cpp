@@ -24,28 +24,28 @@
 namespace mapbox {
 namespace util {
 template <>
-struct nth<0, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
+struct nth<0, mln::GeometryCoordinate> {
+    static int64_t get(const mln::GeometryCoordinate& t) { return t.x; };
 };
 
 template <>
-struct nth<1, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
+struct nth<1, mln::GeometryCoordinate> {
+    static int64_t get(const mln::GeometryCoordinate& t) { return t.y; };
 };
 
 template <>
-struct nth<0, mbgl::GeometryCoordinateFloat> {
-    static float get(const mbgl::GeometryCoordinateFloat& t) { return t.x; };
+struct nth<0, mln::GeometryCoordinateFloat> {
+    static float get(const mln::GeometryCoordinateFloat& t) { return t.x; };
 };
 
 template <>
-struct nth<1, mbgl::GeometryCoordinateFloat> {
-    static float get(const mbgl::GeometryCoordinateFloat& t) { return t.y; };
+struct nth<1, mln::GeometryCoordinateFloat> {
+    static float get(const mln::GeometryCoordinateFloat& t) { return t.y; };
 };
 } // namespace util
 } // namespace mapbox
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -261,4 +261,4 @@ float FillExtrusionBucket::lightIntensity(const EvaluatedLight& light) {
     return light.get<LightIntensity>();
 }
 
-} // namespace mbgl
+} // namespace mln

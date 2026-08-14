@@ -45,39 +45,39 @@ NS_INLINE NSString *MLNStringFromCLLocationCoordinate2D(CLLocationCoordinate2D c
       [NSString stringWithFormat:@"(lat: %f, lon: %f)", coordinate.latitude, coordinate.longitude];
 }
 
-mbgl::LatLng MLNLatLngFromLocationCoordinate2D(CLLocationCoordinate2D coordinate);
+mln::LatLng MLNLatLngFromLocationCoordinate2D(CLLocationCoordinate2D coordinate);
 
-NS_INLINE mbgl::Point<double> MLNPointFromLocationCoordinate2D(CLLocationCoordinate2D coordinate) {
-  return mbgl::Point<double>(coordinate.longitude, coordinate.latitude);
+NS_INLINE mln::Point<double> MLNPointFromLocationCoordinate2D(CLLocationCoordinate2D coordinate) {
+  return mln::Point<double>(coordinate.longitude, coordinate.latitude);
 }
 
-NS_INLINE CLLocationCoordinate2D MLNLocationCoordinate2DFromPoint(mbgl::Point<double> point) {
+NS_INLINE CLLocationCoordinate2D MLNLocationCoordinate2DFromPoint(mln::Point<double> point) {
   return CLLocationCoordinate2DMake(point.y, point.x);
 }
 
-NS_INLINE CLLocationCoordinate2D MLNLocationCoordinate2DFromLatLng(mbgl::LatLng latLng) {
+NS_INLINE CLLocationCoordinate2D MLNLocationCoordinate2DFromLatLng(mln::LatLng latLng) {
   return CLLocationCoordinate2DMake(latLng.latitude(), latLng.longitude());
 }
 
-NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsFromLatLngBounds(mbgl::LatLngBounds latLngBounds) {
+NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsFromLatLngBounds(mln::LatLngBounds latLngBounds) {
   return MLNCoordinateBoundsMake(MLNLocationCoordinate2DFromLatLng(latLngBounds.southwest()),
                                  MLNLocationCoordinate2DFromLatLng(latLngBounds.northeast()));
 }
 
-NS_INLINE mbgl::LatLngBounds MLNLatLngBoundsFromCoordinateBounds(
+NS_INLINE mln::LatLngBounds MLNLatLngBoundsFromCoordinateBounds(
     MLNCoordinateBounds coordinateBounds) {
-  return mbgl::LatLngBounds::hull(MLNLatLngFromLocationCoordinate2D(coordinateBounds.sw),
-                                  MLNLatLngFromLocationCoordinate2D(coordinateBounds.ne));
+  return mln::LatLngBounds::hull(MLNLatLngFromLocationCoordinate2D(coordinateBounds.sw),
+                                 MLNLatLngFromLocationCoordinate2D(coordinateBounds.ne));
 }
 
-NS_INLINE std::array<mbgl::LatLng, 4> MLNLatLngArrayFromCoordinateQuad(MLNCoordinateQuad quad) {
+NS_INLINE std::array<mln::LatLng, 4> MLNLatLngArrayFromCoordinateQuad(MLNCoordinateQuad quad) {
   return {MLNLatLngFromLocationCoordinate2D(quad.topLeft),
           MLNLatLngFromLocationCoordinate2D(quad.topRight),
           MLNLatLngFromLocationCoordinate2D(quad.bottomRight),
           MLNLatLngFromLocationCoordinate2D(quad.bottomLeft)};
 }
 
-NS_INLINE MLNCoordinateQuad MLNCoordinateQuadFromLatLngArray(std::array<mbgl::LatLng, 4> quad) {
+NS_INLINE MLNCoordinateQuad MLNCoordinateQuadFromLatLngArray(std::array<mln::LatLng, 4> quad) {
   return {MLNLocationCoordinate2DFromLatLng(quad[0]), MLNLocationCoordinate2DFromLatLng(quad[3]),
           MLNLocationCoordinate2DFromLatLng(quad[2]), MLNLocationCoordinate2DFromLatLng(quad[1])};
 }
@@ -99,11 +99,11 @@ NS_INLINE BOOL MLNLocationCoordinate2DIsValid(CLLocationCoordinate2D coordinate)
 #define MLNEdgeInsetsMake NSEdgeInsetsMake
 #endif
 
-NS_INLINE mbgl::EdgeInsets MLNEdgeInsetsFromNSEdgeInsets(MLNEdgeInsets insets) {
+NS_INLINE mln::EdgeInsets MLNEdgeInsetsFromNSEdgeInsets(MLNEdgeInsets insets) {
   return {insets.top, insets.left, insets.bottom, insets.right};
 }
 
-NS_INLINE MLNEdgeInsets NSEdgeInsetsFromMLNEdgeInsets(const mbgl::EdgeInsets &insets) {
+NS_INLINE MLNEdgeInsets NSEdgeInsetsFromMLNEdgeInsets(const mln::EdgeInsets &insets) {
   return MLNEdgeInsetsMake(insets.top(), insets.left(), insets.bottom(), insets.right());
 }
 

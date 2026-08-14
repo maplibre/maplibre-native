@@ -11,7 +11,7 @@
 #include <sstream>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
@@ -176,9 +176,9 @@ protected:
     }
 
 private:
-    mbgl::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
+    mln::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
     mutable std::shared_mutex programLock;
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

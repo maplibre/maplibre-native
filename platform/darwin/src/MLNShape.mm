@@ -39,13 +39,13 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
   }
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return self.geometryObject;
 }
 
-- (mbgl::Geometry<double>)geometryObject {
+- (mln::Geometry<double>)geometryObject {
   [NSException raise:MLNAbstractClassException format:@"MLNShape is an abstract class"];
-  return mbgl::Point<double>();
+  return mln::Point<double>();
 }
 
 - (NSData *)geoJSONDataUsingEncoding:(NSStringEncoding)encoding {

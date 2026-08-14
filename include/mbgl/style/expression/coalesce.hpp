@@ -7,7 +7,7 @@
 #include <memory>
 #include <map>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -18,7 +18,7 @@ public:
         : Expression(Kind::Coalesce, std::move(type_), collectDependencies(args_)),
           args(std::move(args_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
 
@@ -40,4 +40,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

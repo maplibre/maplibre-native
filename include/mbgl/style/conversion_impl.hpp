@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 /**
@@ -211,7 +211,7 @@ public:
 
 private:
 #if __ANDROID__
-    // Android:     JSValue* or mbgl::android::Value
+    // Android:     JSValue* or mln::android::Value
     using Storage = std::aligned_storage_t<32, 8>;
 #elif __QT__
     // Qt:          JSValue* or QVariant
@@ -398,4 +398,4 @@ inline StyleProperty makeStyleProperty(const ColorRampPropertyValue& value) {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) HeatmapDrawableUBO {
@@ -28,4 +28,4 @@ struct alignas(16) HeatmapEvaluatedPropsUBO {
 static_assert(sizeof(HeatmapEvaluatedPropsUBO) == 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

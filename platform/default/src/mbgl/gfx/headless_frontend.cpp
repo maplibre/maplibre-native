@@ -9,7 +9,7 @@
 #include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-namespace mbgl {
+namespace mln {
 
 HeadlessFrontend::HeadlessFrontend(float pixelRatio_,
                                    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
@@ -163,7 +163,7 @@ void HeadlessFrontend::renderOnce(Map&) {
 
 void HeadlessFrontend::renderFrame() {
     if (renderer && updateParameters) {
-        auto startTime = mbgl::util::MonotonicTimer::now();
+        auto startTime = mln::util::MonotonicTimer::now();
         gfx::BackendScope guard{*getBackend()};
 
         // onStyleImageMissing might be called during a render. The user
@@ -174,7 +174,7 @@ void HeadlessFrontend::renderFrame() {
         auto updateParameters_ = updateParameters;
         renderer->render(updateParameters_);
 
-        auto endTime = mbgl::util::MonotonicTimer::now();
+        auto endTime = mln::util::MonotonicTimer::now();
         frameTime = (endTime - startTime).count();
     }
 }
@@ -187,4 +187,4 @@ std::optional<TransformState> HeadlessFrontend::getTransformState() const {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

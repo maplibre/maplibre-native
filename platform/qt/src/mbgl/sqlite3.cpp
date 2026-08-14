@@ -144,7 +144,7 @@ void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
 void DatabaseImpl::setBusyTimeout(std::chrono::milliseconds timeout) {
     // std::chrono::milliseconds.count() is a long and Qt will cast
     // internally to int, so we need to make sure the limits apply.
-    std::string timeoutStr = mbgl::util::toString(timeout.count() & INT_MAX);
+    std::string timeoutStr = mln::util::toString(timeout.count() & INT_MAX);
 
     auto db = QSqlDatabase::database(connectionName);
     QString connectOptions = db.connectOptions();
@@ -254,7 +254,7 @@ void Query::bind(int offset, uint8_t value) {
 }
 
 template <>
-void Query::bind(int offset, mbgl::Timestamp value) {
+void Query::bind(int offset, mln::Timestamp value) {
     bind(offset, std::chrono::system_clock::to_time_t(value));
 }
 
@@ -268,7 +268,7 @@ void Query::bind(int offset, std::optional<std::string> value) {
 }
 
 template <>
-void Query::bind(int offset, std::optional<mbgl::Timestamp> value) {
+void Query::bind(int offset, std::optional<mln::Timestamp> value) {
     if (value) {
         bind(offset, *value);
     } else {
@@ -355,7 +355,7 @@ std::vector<uint8_t> Query::get(int offset) {
 }
 
 template <>
-mbgl::Timestamp Query::get(int offset) {
+mln::Timestamp Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
@@ -399,13 +399,13 @@ std::optional<std::string> Query::get(int offset) {
 }
 
 template <>
-std::optional<mbgl::Timestamp> Query::get(int offset) {
+std::optional<mln::Timestamp> Query::get(int offset) {
     assert(stmt.impl && stmt.impl->query.isValid());
     QVariant value = stmt.impl->query.value(offset);
     checkQueryError(stmt.impl->query);
     if (value.isNull()) return {};
     return {
-        std::chrono::time_point_cast<mbgl::Seconds>(std::chrono::system_clock::from_time_t(value.value<::time_t>()))};
+        std::chrono::time_point_cast<mln::Seconds>(std::chrono::system_clock::from_time_t(value.value<::time_t>()))};
 }
 
 void Query::reset() {

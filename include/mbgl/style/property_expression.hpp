@@ -11,7 +11,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class GPUExpression;
 using UniqueGPUExpression = std::unique_ptr<GPUExpression>;
@@ -176,4 +176,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

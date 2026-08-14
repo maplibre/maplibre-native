@@ -7,7 +7,7 @@
 #include <vector>
 #include <set>
 
-namespace mbgl {
+namespace mln {
 
 // An array of font names
 using FontStack = std::vector<std::string>;
@@ -22,4 +22,4 @@ struct FontStackHasher {
 // Statically evaluate layer properties to determine what font stacks are used.
 std::set<FontStack> fontStacks(const std::vector<Immutable<style::Layer::Impl>>&);
 
-} // namespace mbgl
+} // namespace mln

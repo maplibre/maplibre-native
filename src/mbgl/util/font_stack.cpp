@@ -4,7 +4,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -29,4 +29,4 @@ std::set<FontStack> fontStacks(const std::vector<Immutable<style::Layer::Impl>>&
     return result;
 }
 
-} // namespace mbgl
+} // namespace mln

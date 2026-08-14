@@ -2,7 +2,7 @@
 
 #include <mbgl/tile/tile_id.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TileID, Canonical) {
     CanonicalTileID id_0_0_0(0, 0, 0);

@@ -7,7 +7,7 @@
 #include <QtGui/QImage>
 #include <QtGui/QPainter>
 #include <qglobal.h>
-namespace mbgl {
+namespace mln {
 
 // 2x bitmap with 1x logical metrics.
 constexpr int kLocalGlyphTextureScale = 2;
@@ -98,4 +98,4 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack&, GlyphID glyphID) {
     return glyph;
 }
 
-} // namespace mbgl
+} // namespace mln

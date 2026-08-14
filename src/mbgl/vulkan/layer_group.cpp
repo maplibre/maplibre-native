@@ -11,11 +11,11 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : mbgl::LayerGroup(layerIndex_, initialCapacity, std::move(name_)),
+    : mln::LayerGroup(layerIndex_, initialCapacity, std::move(name_)),
       uniformBuffers(DescriptorSetType::Layer,
                      shaders::layerSSBOStartId,
                      shaders::maxSSBOCountPerLayer,
@@ -70,4 +70,4 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

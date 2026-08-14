@@ -8,7 +8,7 @@
 #include <array>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class IndexBuffer;
@@ -77,4 +77,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

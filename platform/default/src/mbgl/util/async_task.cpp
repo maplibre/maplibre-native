@@ -8,7 +8,7 @@
 
 #include <uv.h>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class AsyncTask::Impl {
@@ -56,4 +56,4 @@ void AsyncTask::send() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

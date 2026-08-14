@@ -2,11 +2,11 @@
 
 #include <mbgl/util/noncopyable.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AsyncRequest : private util::noncopyable {
 public:
     virtual ~AsyncRequest() = default;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -18,7 +18,7 @@
 #include <sstream>
 #include <optional>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 
@@ -124,7 +124,7 @@ static void API_renderStill_recreate_map_2(::benchmark::State& state) {
 }
 
 static void API_renderStill_multiple_sources(::benchmark::State& state) {
-    using namespace mbgl::style;
+    using namespace mln::style;
     RenderBenchmark bench;
     HeadlessFrontend frontend{size, pixelRatio};
     Map map{frontend,

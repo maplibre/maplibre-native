@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class HeadlessRenderableResource final : public mtl::RenderableResource {
@@ -56,8 +56,8 @@ public:
 HeadlessBackend::HeadlessBackend(const Size size_,
                                  gfx::HeadlessBackend::SwapBehaviour swapBehaviour_,
                                  const gfx::ContextMode contextMode_)
-    : mbgl::mtl::RendererBackend(contextMode_),
-      mbgl::gfx::HeadlessBackend(size_),
+    : mln::mtl::RendererBackend(contextMode_),
+      mln::gfx::HeadlessBackend(size_),
       swapBehaviour(swapBehaviour_) {}
 
 HeadlessBackend::~HeadlessBackend() {
@@ -119,4 +119,4 @@ std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::Metal>
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

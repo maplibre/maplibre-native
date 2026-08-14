@@ -2,7 +2,7 @@
 
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Source;
@@ -20,4 +20,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

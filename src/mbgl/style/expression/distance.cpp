@@ -17,7 +17,7 @@
 #include <queue>
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 namespace {
 
 constexpr std::size_t MinPointsSize = 100;
@@ -36,7 +36,7 @@ inline std::size_t getRangeSize(const IndexRange& range) noexcept {
 bool isRangeSafe(const IndexRange& range, const std::size_t threshold) noexcept {
     auto ret = (range.second >= range.first && range.second < threshold);
     if (!ret) {
-        mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
+        mln::Log::Error(mln::Event::Style, "Index is out of range");
     }
     return ret;
 }
@@ -101,7 +101,7 @@ DistanceBBox getBBox(const mapbox::geometry::polygon<double>& polygon) noexcept 
 
 bool isMultiPointValid(const mapbox::geometry::multi_point<double>& points) noexcept {
     if (points.empty()) {
-        mbgl::Log::Error(mbgl::Event::Style, "Invalid MultiPoint with empty geometry points");
+        mln::Log::Error(mln::Event::Style, "Invalid MultiPoint with empty geometry points");
         return false;
     }
     return true;
@@ -109,7 +109,7 @@ bool isMultiPointValid(const mapbox::geometry::multi_point<double>& points) noex
 
 bool isLineStringValid(const mapbox::geometry::line_string<double>& line) noexcept {
     if (line.size() < 2) {
-        mbgl::Log::Error(mbgl::Event::Style, "Invalid LineString with fewer than 2 geometry points");
+        mln::Log::Error(mln::Event::Style, "Invalid LineString with fewer than 2 geometry points");
         return false;
     }
     return true;
@@ -117,14 +117,14 @@ bool isLineStringValid(const mapbox::geometry::line_string<double>& line) noexce
 
 bool isPolygonValid(const mapbox::geometry::polygon<double>& polygon) noexcept {
     if (polygon.empty()) {
-        mbgl::Log::Error(mbgl::Event::Style, "Invalid Polygon with empty rings");
+        mln::Log::Error(mln::Event::Style, "Invalid Polygon with empty rings");
         return false;
     }
     for (const auto& ring : polygon) {
         if (ring.size() < 3) {
-            mbgl::Log::Error(mbgl::Event::Style,
-                             "Invalid Polygon with ring having fewer than 3 "
-                             "geometry points");
+            mln::Log::Error(mln::Event::Style,
+                            "Invalid Polygon with ring having fewer than 3 "
+                            "geometry points");
             return false;
         }
     }
@@ -372,7 +372,7 @@ double pointsToPolygonDistance(const mapbox::geometry::multi_point<double>& poin
         // In case the set size are relatively small, we could use brute-force directly
         if (getRangeSize(range) <= MinLinePointsSize) {
             if (!isRangeSafe(range, points.size())) {
-                mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
+                mln::Log::Error(mln::Event::Style, "Index is out of range");
                 return InvalidDistance;
             }
             for (std::size_t i = range.first; i <= range.second; ++i) {
@@ -586,7 +586,7 @@ double pointsToLineDistance(const mapbox::geometry::multi_point<double>& points,
         // In case the set size are relatively small, we could use brute-force directly
         if (getRangeSize(rangeA) <= MinPointsSize && getRangeSize(rangeB) <= MinLinePointsSize) {
             if (!isRangeSafe(rangeA, points.size()) && isRangeSafe(rangeB, line.size())) {
-                mbgl::Log::Error(mbgl::Event::Style, "Index is out of range");
+                mln::Log::Error(mln::Event::Style, "Index is out of range");
                 return InvalidDistance;
             }
             const auto subLine = mapbox::geometry::multi_point<double>(line.begin() + rangeB.first,
@@ -850,8 +850,7 @@ std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, s
     return std::nullopt;
 }
 
-std::optional<Feature::geometry_type> getGeometry(const Feature& feature,
-                                                  mbgl::style::expression::ParsingContext& ctx) {
+std::optional<Feature::geometry_type> getGeometry(const Feature& feature, mln::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), feature.geometry);
     if (type == FeatureType::Point || type == FeatureType::LineString || type == FeatureType::Polygon) {
         return feature.geometry;
@@ -873,7 +872,7 @@ Distance::Distance(GeoJSON geojson, Feature::geometry_type geometries_)
 
 Distance::~Distance() = default;
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 EvaluationResult Distance::evaluate(const EvaluationContext& params) const {
     if (!params.feature || !params.canonical) {
@@ -903,20 +902,20 @@ ParseResult Distance::parse(const Convertible& value, ParsingContext& ctx) {
 
     return parsedValue->match(
         [&parsedValue, &ctx](const mapbox::geometry::geometry<double>& geometrySet) {
-            if (auto ret = getGeometry(mbgl::Feature(geometrySet), ctx)) {
+            if (auto ret = getGeometry(mln::Feature(geometrySet), ctx)) {
                 return ParseResult(std::make_unique<Distance>(*parsedValue, std::move(*ret)));
             }
             return ParseResult();
         },
         [&parsedValue, &ctx](const mapbox::feature::feature<double>& feature) {
-            if (auto ret = getGeometry(mbgl::Feature(feature), ctx)) {
+            if (auto ret = getGeometry(mln::Feature(feature), ctx)) {
                 return ParseResult(std::make_unique<Distance>(*parsedValue, std::move(*ret)));
             }
             return ParseResult();
         },
         [&parsedValue, &ctx](const mapbox::feature::feature_collection<double>& features) {
             for (const auto& feature : features) {
-                if (auto ret = getGeometry(mbgl::Feature(feature), ctx)) {
+                if (auto ret = getGeometry(mln::Feature(feature), ctx)) {
                     return ParseResult(std::make_unique<Distance>(*parsedValue, std::move(*ret)));
                 }
             }
@@ -932,7 +931,7 @@ ParseResult Distance::parse(const Convertible& value, ParsingContext& ctx) {
     return ParseResult();
 }
 
-mbgl::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
+mln::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
     if (v.IsNumber()) {
         if (v.IsInt64()) return std::int64_t(v.GetInt64());
         if (v.IsUint64()) return std::uint64_t(v.GetUint64());
@@ -945,7 +944,7 @@ mbgl::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
         return std::string(v.GetString());
     }
     if (v.IsArray()) {
-        std::vector<mbgl::Value> result;
+        std::vector<mln::Value> result;
         result.reserve(v.Size());
         for (const auto& m : v.GetArray()) {
             result.push_back(convertValue(m));
@@ -953,7 +952,7 @@ mbgl::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
         return result;
     }
     if (v.IsObject()) {
-        std::unordered_map<std::string, mbgl::Value> result;
+        std::unordered_map<std::string, mln::Value> result;
         for (const auto& m : v.GetObject()) {
             result.emplace(m.name.GetString(), convertValue(m.value));
         }
@@ -963,8 +962,8 @@ mbgl::Value convertValue(const mapbox::geojson::rapidjson_value& v) {
     return Null;
 }
 
-mbgl::Value Distance::serialize() const {
-    std::unordered_map<std::string, mbgl::Value> serialized;
+mln::Value Distance::serialize() const {
+    std::unordered_map<std::string, mln::Value> serialized;
     rapidjson::CrtAllocator allocator;
     const mapbox::geojson::rapidjson_value value = mapbox::geojson::convert(geoJSONSource, allocator);
     if (value.IsObject()) {
@@ -972,11 +971,11 @@ mbgl::Value Distance::serialize() const {
             serialized.emplace(m.name.GetString(), convertValue(m.value));
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::Style,
-                         "Failed to serialize 'distance' expression, converted rapidJSON is "
-                         "not an object");
+        mln::Log::Error(mln::Event::Style,
+                        "Failed to serialize 'distance' expression, converted rapidJSON is "
+                        "not an object");
     }
-    return std::vector<mbgl::Value>{{getOperator(), serialized}};
+    return std::vector<mln::Value>{{getOperator(), serialized}};
 }
 
 bool Distance::operator==(const Expression& e) const noexcept {
@@ -989,4 +988,4 @@ bool Distance::operator==(const Expression& e) const noexcept {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 class ChangeRequest;
 class LayerGroupBase;
 class TileLayerGroup;
@@ -116,4 +116,4 @@ protected:
     RenderTargetPtr renderTarget;
 };
 
-} // namespace mbgl
+} // namespace mln

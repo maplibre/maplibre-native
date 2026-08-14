@@ -6,7 +6,7 @@
 #include <optional>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 using Value = mapbox::base::Value;
 using NullValue = mapbox::base::NullValue;
@@ -54,4 +54,4 @@ inline std::optional<std::string> featureIDtoString(const FeatureIdentifier& id)
                     [](const auto&) -> std::optional<std::string> { return std::nullopt; });
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <limits>
 #include <mbgl/util/geometry.hpp>
 
-namespace mbgl {
+namespace mln {
 
 // contains minX, minY, maxX, maxY
 template <typename T>
@@ -50,4 +50,4 @@ bool lineStringWithinPolygon(const LineString<T>& line, const Polygon<T>& polygo
 template <typename T>
 bool lineStringWithinPolygons(const LineString<T>& line, const MultiPolygon<T>& polygons) noexcept;
 
-} // namespace mbgl
+} // namespace mln

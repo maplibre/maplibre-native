@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 class Expression;
@@ -101,4 +101,4 @@ inline auto GPUExpression::evaluate<float>(const float zoom) const {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

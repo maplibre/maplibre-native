@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/raster_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class RasterLayer::Impl : public Layer::Impl {
@@ -20,4 +20,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

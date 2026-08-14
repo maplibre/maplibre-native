@@ -29,15 +29,15 @@
 
 namespace {
 bool acceptsURL(const std::string &url) {
-    return url.starts_with(mbgl::util::MBTILES_PROTOCOL);
+    return url.starts_with(mln::util::MBTILES_PROTOCOL);
 }
 
 std::string url_to_path(const std::string &url) {
-    return mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(mbgl::util::MBTILES_PROTOCOL)));
+    return mln::util::percentDecode(url.substr(std::char_traits<char>::length(mln::util::MBTILES_PROTOCOL)));
 }
 } // namespace
 
-namespace mbgl {
+namespace mln {
 using namespace rapidjson;
 
 class MBTilesFileSource::Impl {
@@ -338,4 +338,4 @@ ClientOptions MBTilesFileSource::getClientOptions() {
     return thread->actor().ask(&Impl::getClientOptions).get();
 }
 
-} // namespace mbgl
+} // namespace mln

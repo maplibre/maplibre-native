@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class LayerRenderData;
 class TransformState;
@@ -157,4 +157,4 @@ protected:
     TileObserver* observer = nullptr;
 };
 
-} // namespace mbgl
+} // namespace mln

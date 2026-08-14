@@ -8,7 +8,7 @@
 #include <cassert>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -177,4 +177,4 @@ void LineBucket::update(const FeatureStates& states,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

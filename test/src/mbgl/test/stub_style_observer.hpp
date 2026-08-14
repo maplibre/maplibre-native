@@ -2,8 +2,8 @@
 
 #include <mbgl/style/observer.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 /**
  * An implementation of style::Observer that forwards all methods to

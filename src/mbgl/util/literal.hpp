@@ -3,7 +3,7 @@
 #include <utility>
 #include <cstddef>
 
-namespace mbgl {
+namespace mln {
 
 // Using structs instead of constexpr templates because GCC 4.9 doesn't support these yet.
 
@@ -56,4 +56,4 @@ struct concat_literals {
     }
 };
 
-} // namespace mbgl
+} // namespace mln

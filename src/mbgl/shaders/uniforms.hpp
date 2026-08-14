@@ -4,7 +4,7 @@
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/color.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace uniforms {
 
 // Legacy matrix uniform used in legacy shader ClippingMaskProgram
@@ -35,4 +35,4 @@ MBGL_DEFINE_UNIFORM_VECTOR(uint16_t, 4, pattern_from);
 MBGL_DEFINE_UNIFORM_VECTOR(uint16_t, 4, pattern_to);
 
 } // namespace uniforms
-} // namespace mbgl
+} // namespace mln

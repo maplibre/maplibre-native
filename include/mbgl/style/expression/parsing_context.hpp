@@ -13,7 +13,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -97,7 +97,7 @@ public:
     /**
         Parse the given style-spec JSON value as an expression.
     */
-    ParseResult parseExpression(const mbgl::style::conversion::Convertible& value,
+    ParseResult parseExpression(const mln::style::conversion::Convertible& value,
                                 const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     /**
@@ -105,12 +105,12 @@ public:
        used in a layout or paint property.  This entails checking additional
        constraints that exist in that context but not, e.g., for filters.
     */
-    ParseResult parseLayerPropertyExpression(const mbgl::style::conversion::Convertible& value);
+    ParseResult parseLayerPropertyExpression(const mln::style::conversion::Convertible& value);
 
     /**
         Parse a child expression. For use by individual Expression::parse() methods.
     */
-    ParseResult parse(const mbgl::style::conversion::Convertible&,
+    ParseResult parse(const mln::style::conversion::Convertible&,
                       std::size_t,
                       std::optional<type::Type> = std::nullopt,
                       const std::optional<TypeAnnotationOption>& = std::nullopt);
@@ -118,7 +118,7 @@ public:
     /**
         Parse a child expression.  For use by individual Expression::parse() methods.
     */
-    ParseResult parse(const mbgl::style::conversion::Convertible&,
+    ParseResult parse(const mln::style::conversion::Convertible&,
                       std::size_t index,
                       std::optional<type::Type>,
                       const std::map<std::string, std::shared_ptr<Expression>>&);
@@ -168,7 +168,7 @@ private:
         type (either Literal, or the one named in value[0]) and dispatching to the
         appropriate ParseXxxx::parse(const V&, ParsingContext) method.
     */
-    ParseResult parse(const mbgl::style::conversion::Convertible& value,
+    ParseResult parse(const mln::style::conversion::Convertible& value,
                       const std::optional<TypeAnnotationOption>& = std::nullopt);
 
     std::string key;
@@ -181,4 +181,4 @@ bool isExpression(const std::string&) noexcept;
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

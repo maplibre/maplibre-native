@@ -8,7 +8,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class Log {
 public:
@@ -91,4 +91,4 @@ private:
     const std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

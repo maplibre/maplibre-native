@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Holds values for tile server options.
@@ -254,7 +254,7 @@ public:
     /**
      * @brief Gets the default styles.
      */
-    const std::vector<mbgl::util::DefaultStyle> defaultStyles() const;
+    const std::vector<mln::util::DefaultStyle> defaultStyles() const;
 
     /**
      * @brief Sets the collection default styles.
@@ -262,7 +262,7 @@ public:
      * @param styles The style set.
      * @return TileServerOptions for chaining options together.
      */
-    TileServerOptions& withDefaultStyles(std::vector<mbgl::util::DefaultStyle> styles);
+    TileServerOptions& withDefaultStyles(std::vector<mln::util::DefaultStyle> styles);
 
     /**
      * @brief Sets the default style by name. The style name must exist in
@@ -303,4 +303,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace mbgl
+} // namespace mln

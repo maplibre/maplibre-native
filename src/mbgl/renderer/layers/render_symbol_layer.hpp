@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 
@@ -128,4 +128,4 @@ private:
     LayerTweakerPtr collisionLayerTweaker;
 };
 
-} // namespace mbgl
+} // namespace mln

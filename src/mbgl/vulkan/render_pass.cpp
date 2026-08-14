@@ -5,7 +5,7 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor_)
@@ -82,4 +82,4 @@ void RenderPass::addDebugSignpost(const char* name) {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 class BiDiImpl {
 public:
@@ -35,7 +35,7 @@ std::u16string applyArabicShaping(const std::u16string& input) {
     UErrorCode errorCode = U_ZERO_ERROR;
 
     const int32_t outputLength = u_shapeArabic(
-        mbgl::utf16char_cast<const UChar*>(input.c_str()),
+        mln::utf16char_cast<const UChar*>(input.c_str()),
         static_cast<int32_t>(input.size()),
         nullptr,
         0,
@@ -48,9 +48,9 @@ std::u16string applyArabicShaping(const std::u16string& input) {
     std::u16string outputText(outputLength, 0);
 
     u_shapeArabic(
-        mbgl::utf16char_cast<const UChar*>(input.c_str()),
+        mln::utf16char_cast<const UChar*>(input.c_str()),
         static_cast<int32_t>(input.size()),
-        mbgl::utf16char_cast<UChar*>(outputText.data()),
+        mln::utf16char_cast<UChar*>(outputText.data()),
         outputLength,
         (U_SHAPE_LETTERS_SHAPE & U_SHAPE_LETTERS_MASK) | (U_SHAPE_TEXT_DIRECTION_LOGICAL & U_SHAPE_TEXT_DIRECTION_MASK),
         &errorCode);
@@ -101,7 +101,7 @@ std::vector<std::u16string> BiDi::processText(const std::u16string& input, std::
     UErrorCode errorCode = U_ZERO_ERROR;
 
     ubidi_setPara(impl->bidiText,
-                  mbgl::utf16char_cast<const UChar*>(input.c_str()),
+                  mln::utf16char_cast<const UChar*>(input.c_str()),
                   static_cast<int32_t>(input.size()),
                   UBIDI_DEFAULT_LTR,
                   nullptr,
@@ -122,7 +122,7 @@ std::vector<StyledText> BiDi::processStyledText(const StyledText& input, std::se
     UErrorCode errorCode = U_ZERO_ERROR;
 
     ubidi_setPara(impl->bidiText,
-                  mbgl::utf16char_cast<const UChar*>(inputText.c_str()),
+                  mln::utf16char_cast<const UChar*>(inputText.c_str()),
                   static_cast<int32_t>(inputText.size()),
                   UBIDI_DEFAULT_LTR,
                   nullptr,
@@ -210,9 +210,9 @@ std::u16string BiDi::writeReverse(const std::u16string& input, std::size_t logic
     // parentheses UBIDI_REMOVE_BIDI_CONTROLS: Now that all the lines are set,
     // remove control characters so that they don't show up on screen (some
     // fonts have glyphs representing them)
-    int32_t outputLength = ubidi_writeReverse(mbgl::utf16char_cast<const UChar*>(&input[logicalStart]),
+    int32_t outputLength = ubidi_writeReverse(mln::utf16char_cast<const UChar*>(&input[logicalStart]),
                                               logicalLength,
-                                              mbgl::utf16char_cast<UChar*>(outputText.data()),
+                                              mln::utf16char_cast<UChar*>(outputText.data()),
                                               logicalLength + 1, // Extra room for null terminator, although we don't
                                                                  // really need to have ICU write it for us
                                               UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
@@ -247,7 +247,7 @@ std::u16string BiDi::getLine(std::size_t start, std::size_t end) {
     // remove control characters so that they don't show up on screen (some
     // fonts have glyphs representing them)
     int32_t finalLength = ubidi_writeReordered(impl->bidiLine,
-                                               mbgl::utf16char_cast<UChar*>(outputText.data()),
+                                               mln::utf16char_cast<UChar*>(outputText.data()),
                                                outputLength,
                                                UBIDI_DO_MIRRORING | UBIDI_REMOVE_BIDI_CONTROLS,
                                                &errorCode);
@@ -261,4 +261,4 @@ std::u16string BiDi::getLine(std::size_t start, std::size_t end) {
     return outputText;
 }
 
-} // end namespace mbgl
+} // end namespace mln

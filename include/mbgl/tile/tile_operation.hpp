@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 enum class TileOperation : uint8_t {
     RequestedFromCache,   ///< A read request from the cache
     RequestedFromNetwork, ///< A read request from the online source
@@ -13,4 +13,4 @@ enum class TileOperation : uint8_t {
     Cancelled,            ///< Loading of a tile was cancelled
     NullOp,               ///< No operation has taken place
 };
-} // namespace mbgl
+} // namespace mln

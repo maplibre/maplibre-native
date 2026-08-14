@@ -13,7 +13,7 @@
 
 #include <utility>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(ImageManager, Missing) {
     auto imageManager = ImageManager::create();

@@ -12,8 +12,8 @@
 
 #include <utility>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 class StubSpriteLoaderObserver : public SpriteLoaderObserver {
 public:

@@ -1,9 +1,9 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace version {
 
 extern const char* revision;
 
 } // namespace version
-} // namespace mbgl
+} // namespace mln

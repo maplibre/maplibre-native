@@ -5,9 +5,7 @@
 #include <mbgl/gl/renderer_backend.hpp>
 
 /// Adapter responsible for bridging calls from mbgl to MLNMapView and Cocoa.
-class MLNMapViewOpenGLImpl final : public MLNMapViewImpl,
-                                   public mbgl::gl::RendererBackend,
-                                   public mbgl::gfx::Renderable {
+class MLNMapViewOpenGLImpl final : public MLNMapViewImpl, public mln::gl::RendererBackend, public mln::gfx::Renderable {
 public:
     MLNMapViewOpenGLImpl(MLNMapView*);
     ~MLNMapViewOpenGLImpl() override = default;
@@ -15,27 +13,27 @@ public:
 public:
     void restoreFramebufferBinding();
 
-    // Implementation of mbgl::gfx::RendererBackend
+    // Implementation of mln::gfx::RendererBackend
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 private:
     void activate() override;
     void deactivate() override;
-    // End implementation of mbgl::gfx::RendererBackend
+    // End implementation of mln::gfx::RendererBackend
 
-    // Implementation of mbgl::gl::RendererBackend
+    // Implementation of mln::gl::RendererBackend
 public:
     void updateAssumedState() override;
 
 private:
-    mbgl::gl::ProcAddress getExtensionFunctionPointer(const char* name) override;
-    // End implementation of mbgl::gl::Rendererbackend
+    mln::gl::ProcAddress getExtensionFunctionPointer(const char* name) override;
+    // End implementation of mln::gl::Rendererbackend
 
     // Implementation of MLNMapViewImpl
 public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
+    mln::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
-    mbgl::PremultipliedImage readStillImage() override;
+    mln::PremultipliedImage readStillImage() override;
     CGLContextObj getCGLContextObj() override;
 };

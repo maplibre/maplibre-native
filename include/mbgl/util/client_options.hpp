@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Holds values for client options.
@@ -59,4 +59,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace mbgl
+} // namespace mln

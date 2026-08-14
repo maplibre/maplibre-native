@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -39,4 +39,4 @@ const std::array<TextureInfo, 1> FillExtrusionPatternShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

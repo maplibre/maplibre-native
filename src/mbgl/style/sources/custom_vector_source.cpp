@@ -10,7 +10,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomVectorSource::CustomVectorSource(std::string id, const CustomVectorSource::Options& options)
@@ -30,8 +30,8 @@ void CustomVectorSource::loadDescription(FileSource&) {
     observer->onSourceLoaded(*this);
 }
 
-bool CustomVectorSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
+bool CustomVectorSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
+    return mln::underlying_type(Tile::Kind::Geometry) == mln::underlying_type(info->tileKind);
 }
 
 void CustomVectorSource::setTileData(const CanonicalTileID& tileID,
@@ -53,4 +53,4 @@ Mutable<Source::Impl> CustomVectorSource::createMutable() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

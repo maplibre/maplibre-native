@@ -3,7 +3,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 
 RenderStaticData::RenderStaticData(std::unique_ptr<gfx::ShaderRegistry>&& shaders_)
     : shaders(std::move(shaders_)),
@@ -115,4 +115,4 @@ SegmentVector RenderStaticData::fillExtrusionSegments() {
     return segments;
 }
 
-} // namespace mbgl
+} // namespace mln

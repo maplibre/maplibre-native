@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSDictionary (MLNAdditions)
 
-- (mbgl::PropertyMap)mgl_propertyMap;
+- (mln::PropertyMap)mgl_propertyMap;
 
 @end
 

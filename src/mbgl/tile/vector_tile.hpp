@@ -3,7 +3,7 @@
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile_loader.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Tileset;
 class TileParameters;
@@ -29,4 +29,4 @@ protected:
     std::unique_ptr<TileLoader<VectorTile>> loader;
 };
 
-} // namespace mbgl
+} // namespace mln

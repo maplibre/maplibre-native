@@ -7,25 +7,25 @@
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace mtl {
 
-CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParameters& paintParameters)
-    : mbgl::style::CustomLayerRenderParameters(paintParameters),
+CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParameters& paintParameters)
+    : mln::style::CustomLayerRenderParameters(paintParameters),
       renderPass(paintParameters.renderPass) {
-    const mbgl::gfx::Renderable& renderable = paintParameters.backend.getDefaultRenderable();
-    const mbgl::mtl::RenderableResource& resource = renderable.getResource<mbgl::mtl::RenderableResource>();
-    renderPassDesc = renderable.getResource<mbgl::mtl::RenderableResource>().getRenderPassDescriptor();
+    const mln::gfx::Renderable& renderable = paintParameters.backend.getDefaultRenderable();
+    const mln::mtl::RenderableResource& resource = renderable.getResource<mln::mtl::RenderableResource>();
+    renderPassDesc = renderable.getResource<mln::mtl::RenderableResource>().getRenderPassDescriptor();
     if (const auto& buffer_ = resource.getCommandBuffer()) {
         commandBuffer = buffer_;
     }
     if (paintParameters.renderPass) {
-        const mbgl::mtl::RenderPass& metalRenderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+        const mln::mtl::RenderPass& metalRenderPass = static_cast<mln::mtl::RenderPass&>(*paintParameters.renderPass);
         encoder = metalRenderPass.getMetalEncoder();
     }
 }
 
 } // namespace mtl
 } // namespace style
-} // namespace mbgl
+} // namespace mln

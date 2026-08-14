@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 constexpr auto prelude = R"(
@@ -233,4 +233,4 @@ enum {
 )";
 
 }
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <mbgl/style/conversion.hpp>
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderTile;
 
@@ -30,4 +30,4 @@ private:
     LayerFeatureStates deletedStates;
 };
 
-} // namespace mbgl
+} // namespace mln

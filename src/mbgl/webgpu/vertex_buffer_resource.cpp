@@ -1,7 +1,7 @@
 #include <mbgl/webgpu/vertex_buffer_resource.hpp>
 #include <mbgl/webgpu/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 VertexBufferResource::VertexBufferResource(BufferResource&& buffer_) noexcept
@@ -22,4 +22,4 @@ VertexBufferResource::~VertexBufferResource() noexcept {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

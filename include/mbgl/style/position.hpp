@@ -5,7 +5,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 class Position {
 public:
@@ -64,4 +64,4 @@ private:
     };
 };
 } // namespace style
-} // namespace mbgl
+} // namespace mln

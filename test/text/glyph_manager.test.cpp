@@ -8,7 +8,7 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/logging.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 // Alpha channel rendering of '中'
 static constexpr const uint8_t stubBitmap[] = {

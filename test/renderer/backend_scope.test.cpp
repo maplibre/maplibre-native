@@ -6,7 +6,7 @@
 
 #include <functional>
 
-using namespace mbgl;
+using namespace mln;
 
 class StubRendererBackend : public gl::RendererBackend {
 public:

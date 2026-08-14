@@ -3,7 +3,7 @@
 #include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/conversion.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -17,4 +17,4 @@ struct Converter<ColorRampPropertyValue> {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

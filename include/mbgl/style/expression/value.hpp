@@ -18,7 +18,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -95,9 +95,9 @@ struct ValueConverter<Value> {
 };
 
 template <>
-struct ValueConverter<mbgl::Value> {
-    static Value toExpressionValue(const mbgl::Value& value);
-    static mbgl::Value fromExpressionValue(const Value& value);
+struct ValueConverter<mln::Value> {
+    static Value toExpressionValue(const mln::Value& value);
+    static mln::Value fromExpressionValue(const Value& value);
 };
 
 template <>
@@ -124,7 +124,7 @@ struct ValueConverter<std::vector<T>> {
 template <>
 struct ValueConverter<Position> {
     static type::Type expressionType() { return type::Array(type::Number, 3); }
-    static Value toExpressionValue(const mbgl::style::Position& value);
+    static Value toExpressionValue(const mln::style::Position& value);
     static std::optional<Position> fromExpressionValue(const Value& v);
 };
 
@@ -158,10 +158,10 @@ std::vector<std::optional<T>> fromExpressionValues(const std::vector<std::option
 template <>
 struct ValueConverter<Rotation> {
     static type::Type expressionType() { return type::Number; }
-    static Value toExpressionValue(const mbgl::style::Rotation& value);
+    static Value toExpressionValue(const mln::style::Rotation& value);
     static std::optional<Rotation> fromExpressionValue(const Value& v);
 };
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -45,8 +45,8 @@
 
 #include <atomic>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 using namespace std::literals::string_literals;
 
 template <class FileSource = StubFileSource, class Frontend = HeadlessFrontend>
@@ -1686,7 +1686,7 @@ TEST(Map, ResourceError) {
         test.frontend.render(test.map);
     } catch (...) {
         auto error = std::current_exception(); // captur
-        EXPECT_EQ(mbgl::util::toString(error), "Font file Server failed");
+        EXPECT_EQ(mln::util::toString(error), "Font file Server failed");
     }
 }
 
@@ -1946,7 +1946,7 @@ TEST(Map, ObserveTileLifecycle) {
 }
 
 TEST(BackgroundLayer, StyleUpdateZoomDependency) {
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
 
     MapTest<> test;
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/map/style_update_zoom_dependency/style.json"));

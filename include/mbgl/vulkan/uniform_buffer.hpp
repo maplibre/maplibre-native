@@ -4,7 +4,7 @@
 #include <mbgl/vulkan/buffer_resource.hpp>
 #include <mbgl/vulkan/descriptor_set.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class UniformBuffer final : public gfx::UniformBuffer {
@@ -85,4 +85,4 @@ private:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class SegmentBase;
 
@@ -63,10 +63,10 @@ public:
     void setEnabled(bool value) { enabled = value; }
 
     /// The pass on which we'll be rendered
-    mbgl::RenderPass getRenderPass() const { return renderPass; }
+    mln::RenderPass getRenderPass() const { return renderPass; }
 
     /// Set the pass on which the drawable will render
-    void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
+    void setRenderPass(mln::RenderPass value) { renderPass = value; }
 
     /// The draw priority assigned to generated drawables
     DrawPriority getDrawPriority() const;
@@ -229,7 +229,7 @@ protected:
     std::string name;
     std::string drawableName;
     std::size_t vertexAttrId;
-    mbgl::RenderPass renderPass;
+    mln::RenderPass renderPass;
     bool enabled = true;
     bool enableColor = true;
     bool enableStencil = false;
@@ -246,7 +246,7 @@ protected:
     std::vector<DrawableTweakerPtr> tweakers;
     gfx::VertexAttributeArrayPtr vertexAttrs;
     gfx::VertexAttributeArrayPtr instanceAttrs;
-    std::optional<mbgl::Point<double>> origin;
+    std::optional<mln::Point<double>> origin;
 
     class Impl;
     std::unique_ptr<Impl> impl;
@@ -255,4 +255,4 @@ protected:
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -7,7 +7,7 @@
 #include <Metal/MTLRenderCommandEncoder.hpp>
 #include <Metal/MTLSampler.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 Texture2D::Texture2D(Context& context_)
@@ -42,7 +42,7 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     return *this;
 }
 
-gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
+gfx::Texture2D& Texture2D::setSize(mln::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
@@ -302,4 +302,4 @@ void Texture2D::upload() {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

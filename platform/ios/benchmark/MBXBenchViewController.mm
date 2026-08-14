@@ -20,7 +20,7 @@
                              frameRenderingTime:(double)frameRenderingTime;
 @end
 
-class BenchMapObserver : public mbgl::MapObserver {
+class BenchMapObserver : public mln::MapObserver {
 public:
   BenchMapObserver() = delete;
   BenchMapObserver(id<BenchMapDelegate> mapDelegate_) : mapDelegate(mapDelegate_) {}
@@ -30,7 +30,7 @@ public:
     // NSLog(@"Frame encoding time: %4.1f ms", status.renderingStats.encodingTime * 1e3);
     // NSLog(@"Frame rendering time: %4.1f ms", status.renderingStats.renderingTime * 1e3);
 
-    bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
+    bool fullyRendered = status.mode == mln::MapObserver::RenderMode::Full;
     [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered
                                        frameEncodingTime:status.renderingStats.encodingTime
                                       frameRenderingTime:status.renderingStats.renderingTime];
@@ -42,8 +42,8 @@ protected:
 
 @interface MBXBenchViewController () <BenchMapDelegate> {
   std::unique_ptr<BenchMapObserver> observer;
-  std::unique_ptr<mbgl::HeadlessFrontend> frontend;
-  std::unique_ptr<mbgl::Map> map;
+  std::unique_ptr<mln::HeadlessFrontend> frontend;
+  std::unique_ptr<mln::Map> map;
 }
 
 @property (nonatomic) UIImageView *imageView;
@@ -96,32 +96,32 @@ protected:
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   [self.view addSubview:self.imageView];
 
-  mbgl::Size viewSize = {static_cast<uint32_t>(self.view.bounds.size.width),
-                         static_cast<uint32_t>(self.view.bounds.size.height)};
+  mln::Size viewSize = {static_cast<uint32_t>(self.view.bounds.size.width),
+                        static_cast<uint32_t>(self.view.bounds.size.height)};
   auto pixelRatio = [[UIScreen mainScreen] scale];
 
   observer = std::make_unique<BenchMapObserver>(self);
-  frontend = std::make_unique<mbgl::HeadlessFrontend>(
-      viewSize, pixelRatio, mbgl::gfx::HeadlessBackend::SwapBehaviour::Flush,
-      mbgl::gfx::ContextMode::Unique,
+  frontend = std::make_unique<mln::HeadlessFrontend>(
+      viewSize, pixelRatio, mln::gfx::HeadlessBackend::SwapBehaviour::Flush,
+      mln::gfx::ContextMode::Unique,
       /* localFontFamily */ std::nullopt,
       /* invalidateOnUpdate */ false);
 
-  mbgl::MapOptions mapOptions;
-  mapOptions.withMapMode(mbgl::MapMode::Continuous)
+  mln::MapOptions mapOptions;
+  mapOptions.withMapMode(mln::MapMode::Continuous)
       .withSize(viewSize)
       .withPixelRatio(pixelRatio)
-      .withConstrainMode(mbgl::ConstrainMode::None)
-      .withViewportMode(mbgl::ViewportMode::Default)
+      .withConstrainMode(mln::ConstrainMode::None)
+      .withViewportMode(mln::ViewportMode::Default)
       .withCrossSourceCollisions(true);
 
-  mbgl::TileServerOptions *tileServerOptions =
+  mln::TileServerOptions *tileServerOptions =
       [[MLNSettings sharedSettings] tileServerOptionsInternal];
-  mbgl::ResourceOptions resourceOptions;
+  mln::ResourceOptions resourceOptions;
   resourceOptions.withCachePath(MLNOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
       .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
       .withTileServerOptions(*tileServerOptions);
-  mbgl::ClientOptions clientOptions;
+  mln::ClientOptions clientOptions;
 
   auto apiKey = [[MLNSettings sharedSettings] apiKey];
   if (apiKey) {
@@ -129,9 +129,9 @@ protected:
   }
 
   map =
-      std::make_unique<mbgl::Map>(*frontend, *observer, mapOptions, resourceOptions, clientOptions);
+      std::make_unique<mln::Map>(*frontend, *observer, mapOptions, resourceOptions, clientOptions);
   map->setSize(viewSize);
-  map->setDebug(mbgl::MapDebugOptions::NoDebug);
+  map->setDebug(mln::MapDebugOptions::NoDebug);
   map->getStyle().loadURL([url.absoluteString UTF8String]);
 
   [self startBenchmarkIteration];
@@ -190,12 +190,12 @@ std::vector<std::pair<std::string, std::pair<double, double>>> result;
 
 static const int benchmarkDuration = 5;  // seconds
 
-namespace mbgl {
+namespace mln {
 extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploadInvalidSegments;
 }
 
 - (void)renderFrame {
-  mbgl::gfx::BackendScope guard{*(frontend->getBackend())};
+  mln::gfx::BackendScope guard{*(frontend->getBackend())};
 
   frontend->renderFrame();
 
@@ -214,20 +214,20 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
 }
 
 - (void)startBenchmarkIteration {
-  if (mbgl::bench::locations.size() > idx) {
+  if (mln::bench::locations.size() > idx) {
     if (advancedMetrics == nil) {
       advancedMetrics = [[BenchmarkAdvancedMetrics alloc] init];
       [advancedMetrics start:1];
     }
 
-    const auto &location = mbgl::bench::locations[idx];
+    const auto &location = mln::bench::locations[idx];
 
-    mbgl::CameraOptions cameraOptions;
-    cameraOptions.center = mbgl::LatLng(location.latitude, location.longitude);
+    mln::CameraOptions cameraOptions;
+    cameraOptions.center = mln::LatLng(location.latitude, location.longitude);
     cameraOptions.zoom = location.zoom;
     cameraOptions.bearing = location.bearing;
-    mbgl::AnimationOptions animationOptions;
-    animationOptions.duration.emplace(std::chrono::duration_cast<mbgl::Duration>(
+    mln::AnimationOptions animationOptions;
+    animationOptions.duration.emplace(std::chrono::duration_cast<mln::Duration>(
         std::chrono::duration<NSTimeInterval>(benchmarkDuration)));
     map->easeTo(cameraOptions, animationOptions);
 
@@ -260,10 +260,10 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
     NSLog(@"Average frame encoding time: %4.2f ms", totalFrameEncodingTime * 1e3 / result.size());
     NSLog(@"Average frame rendering time: %4.2f ms", totalFrameRenderingTime * 1e3 / result.size());
 
-    // NSLog(@"Total uploads: %zu", mbgl::uploadCount);
-    // NSLog(@"Total uploads with dirty vattr: %zu", mbgl::uploadVertextAttrsDirty);
-    // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
-    // NSLog(@"Total uploads with build: %zu", mbgl::uploadBuildCount);
+    // NSLog(@"Total uploads: %zu", mln::uploadCount);
+    // NSLog(@"Total uploads with dirty vattr: %zu", mln::uploadVertextAttrsDirty);
+    // NSLog(@"Total uploads with invalid segs: %zu", mln::uploadInvalidSegments);
+    // NSLog(@"Total uploads with build: %zu", mln::uploadBuildCount);
 
     [advancedMetrics stop];
 
@@ -315,7 +315,7 @@ extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploa
       // Report FPS
       const auto frameEncodingTime = static_cast<double>(totalFrameEncodingTime) / frames;
       const auto frameRenderingTime = static_cast<double>(totalFrameRenderingTime) / frames;
-      result.emplace_back(mbgl::bench::locations[idx].name,
+      result.emplace_back(mln::bench::locations[idx].name,
                           std::make_pair(frameEncodingTime, frameRenderingTime));
       NSLog(@"- Frame encoding time: %.1f ms, Frame rendering time: %.1f ms (%d frames)",
             frameEncodingTime * 1e3, frameRenderingTime * 1e3, frames);

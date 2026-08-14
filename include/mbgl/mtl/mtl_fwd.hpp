@@ -38,7 +38,7 @@ class VertexBufferLayoutDescriptor;
 class VertexDescriptor;
 } // namespace MTL
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 using CAMetalDrawablePtr = NS::SharedPtr<CA::MetalDrawable>;
@@ -64,4 +64,4 @@ using MTLVertexAttributeDescriptorPtr = NS::SharedPtr<MTL::VertexAttributeDescri
 using MTLVertexBufferLayoutDescriptorPtr = NS::SharedPtr<MTL::VertexBufferLayoutDescriptor>;
 using MTLVertexDescriptorPtr = NS::SharedPtr<MTL::VertexDescriptor>;
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

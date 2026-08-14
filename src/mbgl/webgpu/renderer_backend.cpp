@@ -28,7 +28,7 @@
 #include <mbgl/shaders/webgpu/symbol.hpp>
 #include <mbgl/shaders/webgpu/widevector.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 // Forward declare and define the Impl class
@@ -170,7 +170,7 @@ void* RendererBackend::getDepthStencilView() {
     return nullptr;
 }
 
-mbgl::Size RendererBackend::getFramebufferSize() const {
+mln::Size RendererBackend::getFramebufferSize() const {
     // Default implementation - platform backends should override
     return {0, 0};
 }
@@ -192,4 +192,4 @@ wgpu::TextureFormat RendererBackend::getColorFormat() const {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

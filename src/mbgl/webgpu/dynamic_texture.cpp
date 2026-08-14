@@ -2,7 +2,7 @@
 #include <mbgl/webgpu/texture2d.hpp>
 #include <mbgl/webgpu/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 DynamicTexture::DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType)
@@ -71,4 +71,4 @@ bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

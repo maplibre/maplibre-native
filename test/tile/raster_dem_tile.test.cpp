@@ -13,7 +13,7 @@
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/gfx/dynamic_texture_atlas.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 class RasterDEMTileTest {
 public:

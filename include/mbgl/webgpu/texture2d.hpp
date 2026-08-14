@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class Context;
@@ -60,5 +60,5 @@ protected:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln
 #include <functional>

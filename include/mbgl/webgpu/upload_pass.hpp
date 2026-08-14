@@ -6,7 +6,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class CommandEncoder;
 class Renderable;
@@ -67,4 +67,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

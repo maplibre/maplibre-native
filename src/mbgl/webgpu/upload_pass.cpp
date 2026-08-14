@@ -11,7 +11,7 @@
 #include <mbgl/util/logging.hpp>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 UploadPass::UploadPass([[maybe_unused]] gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
@@ -61,7 +61,7 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
     BufferResource buffer(context, data, size, WGPUBufferUsage_Vertex, /*isIndexBuffer=*/false, persistent);
 
     if (!buffer.getBuffer()) {
-        mbgl::Log::Error(mbgl::Event::Render, "  Failed to create vertex buffer!");
+        mln::Log::Error(mln::Event::Render, "  Failed to create vertex buffer!");
     }
 
     return std::make_unique<VertexBufferResource>(std::move(buffer));
@@ -241,4 +241,4 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

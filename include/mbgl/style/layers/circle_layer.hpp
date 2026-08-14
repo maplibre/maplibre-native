@@ -9,7 +9,7 @@
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/util/color.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class TransitionOptions;
@@ -113,6 +113,6 @@ protected:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

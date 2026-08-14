@@ -6,7 +6,7 @@
 #include <mbgl/text/shaping.hpp>
 #include <mbgl/util/constants.hpp>
 
-using namespace mbgl;
+using namespace mln;
 using namespace util;
 
 TEST(Shaping, ZWSP) {

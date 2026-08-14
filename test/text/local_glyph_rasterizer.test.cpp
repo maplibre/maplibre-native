@@ -23,7 +23,7 @@
    adding a new test case (probably using the "Droid" font family).
 */
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

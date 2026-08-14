@@ -10,7 +10,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -22,7 +22,7 @@ struct SignatureBase;
     CompoundExpression provides a mechanism for implementing an expression
     simply by providing a list of pure functions of the form
     (const T0& arg0, const T1& arg1, ...) -> Result<U> where T0, T1, ..., U are
-    member types of mbgl::style::expression::Value.
+    member types of mln::style::expression::Value.
 
     The majority of expressions specified in the style-spec are implemented in
     this fashion (see compound_expression.cpp).
@@ -47,7 +47,7 @@ protected:
 };
 
 ParseResult parseCompoundExpression(const std::string& name,
-                                    const mbgl::style::conversion::Convertible& value,
+                                    const mln::style::conversion::Convertible& value,
                                     ParsingContext& ctx);
 
 ParseResult createCompoundExpression(const std::string& name,
@@ -56,4 +56,4 @@ ParseResult createCompoundExpression(const std::string& name,
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

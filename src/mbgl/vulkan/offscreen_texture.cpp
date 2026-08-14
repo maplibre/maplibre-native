@@ -4,7 +4,7 @@
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class OffscreenTextureResource final : public RenderableResource {
@@ -151,4 +151,4 @@ const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

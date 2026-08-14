@@ -6,7 +6,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 float getAngleWindowSize(const float textLeft, const float textRight, const float glyphSize, const float boxScale) {
     return (textLeft - textRight) != 0.0f ? 3.0f / 5.0f * glyphSize * boxScale : 0;
@@ -178,4 +178,4 @@ std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
     return {};
 }
 
-} // namespace mbgl
+} // namespace mln

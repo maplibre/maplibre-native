@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 // This stub implementation is stateless and doesn't implement the private
 // methods used by the ICU BiDi
@@ -50,4 +50,4 @@ std::vector<StyledText> BiDi::processStyledText(const StyledText& input, std::se
     return transformedLines;
 }
 
-} // end namespace mbgl
+} // end namespace mln

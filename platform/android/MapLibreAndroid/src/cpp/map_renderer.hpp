@@ -12,7 +12,7 @@
 #include <jni/jni.hpp>
 #include <android/native_window.h>
 
-namespace mbgl {
+namespace mln {
 
 template <class>
 class ActorRef;
@@ -167,4 +167,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <mbgl/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 namespace {
@@ -815,4 +815,4 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

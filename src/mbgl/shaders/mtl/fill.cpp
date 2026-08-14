@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -79,4 +79,4 @@ const std::array<AttributeInfo, 2> FillOutlineTriangulatedShaderSource::attribut
 const std::array<TextureInfo, 0> FillOutlineTriangulatedShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 #include <mbgl/storage/pmtiles_file_source.hpp>
 #include <mbgl/storage/resource_options.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class DefaultFileSourceManagerImpl final : public FileSourceManager {
 public:
@@ -55,4 +55,4 @@ FileSourceManager* FileSourceManager::get() noexcept {
     return &instance;
 }
 
-} // namespace mbgl
+} // namespace mln

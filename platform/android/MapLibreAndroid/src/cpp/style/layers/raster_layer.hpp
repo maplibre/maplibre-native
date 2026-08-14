@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class RasterLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     RasterLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    RasterLayer(mbgl::style::RasterLayer&);
+    RasterLayer(mln::style::RasterLayer&);
 
-    RasterLayer(std::unique_ptr<mbgl::style::RasterLayer>);
+    RasterLayer(std::unique_ptr<mln::style::RasterLayer>);
 
     ~RasterLayer();
 
@@ -56,13 +56,13 @@ public:
 
 }; // class RasterLayer
 
-class RasterJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::RasterLayerFactory {
+class RasterJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::RasterLayerFactory {
 public:
     ~RasterJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -71,4 +71,4 @@ public:
 }; // class RasterJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

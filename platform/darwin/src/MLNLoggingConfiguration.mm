@@ -8,7 +8,7 @@
 #import <os/log.h>
 #endif
 
-namespace mbgl {
+namespace mln {
 
 class MLNCoreLoggingObserver : public Log ::Observer {
 public:
@@ -37,10 +37,10 @@ public:
     return true;
   }
 };
-}  // namespace mbgl
+}  // namespace mln
 
 @implementation MLNLoggingConfiguration {
-  std::unique_ptr<mbgl::MLNCoreLoggingObserver> _coreLoggingObserver;
+  std::unique_ptr<mln::MLNCoreLoggingObserver> _coreLoggingObserver;
 }
 
 + (instancetype)sharedConfiguration {
@@ -55,7 +55,7 @@ public:
 
 - (id)init {
   if (self = [super init]) {
-    mbgl::Log::setObserver(std::make_unique<mbgl::MLNCoreLoggingObserver>());
+    mln::Log::setObserver(std::make_unique<mln::MLNCoreLoggingObserver>());
   }
   return self;
 }

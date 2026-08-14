@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class HeadlessRenderableResource final : public gl::RenderableResource {
@@ -44,8 +44,8 @@ public:
 HeadlessBackend::HeadlessBackend(const Size size_,
                                  gfx::HeadlessBackend::SwapBehaviour swapBehaviour_,
                                  const gfx::ContextMode contextMode_)
-    : mbgl::gl::RendererBackend(contextMode_),
-      mbgl::gfx::HeadlessBackend(size_),
+    : mln::gl::RendererBackend(contextMode_),
+      mln::gfx::HeadlessBackend(size_),
       swapBehaviour(swapBehaviour_) {}
 
 HeadlessBackend::~HeadlessBackend() {
@@ -135,4 +135,4 @@ std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::OpenGL
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

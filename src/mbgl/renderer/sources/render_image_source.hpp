@@ -5,7 +5,7 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/style/sources/image_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RasterBucket;
 
@@ -69,4 +69,4 @@ private:
     std::vector<UnwrappedTileID> tileIds;
 };
 
-} // namespace mbgl
+} // namespace mln

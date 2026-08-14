@@ -25,7 +25,7 @@
 #include <functional>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using ProcAddress = void (*)();
@@ -72,7 +72,7 @@ public:
         return {size, readFramebuffer(size, format, flip)};
     }
 
-    void clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil);
+    void clear(std::optional<mln::Color> color, std::optional<float> depth, std::optional<int32_t> stencil);
 
     void setDepthMode(const gfx::DepthMode&);
     void setStencilMode(const gfx::StencilMode&);
@@ -255,4 +255,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

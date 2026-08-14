@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/background_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* BackgroundLayerFactory::getTypeInfo() const noexcept {
     return style::BackgroundLayer::Impl::staticTypeInfo();
@@ -21,4 +21,4 @@ std::unique_ptr<RenderLayer> BackgroundLayerFactory::createRenderLayer(Immutable
     return std::make_unique<RenderBackgroundLayer>(staticImmutableCast<style::BackgroundLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

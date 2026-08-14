@@ -16,7 +16,7 @@
 #include <map>
 #include <set>
 
-namespace mbgl {
+namespace mln {
 
 union GlyphID {
     char32_t hash;
@@ -218,4 +218,4 @@ struct GlyphPosition {
 using GlyphPositionMap = std::map<GlyphID, GlyphPosition>;
 using GlyphPositions = std::map<FontStackHash, GlyphPositionMap>;
 
-} // end namespace mbgl
+} // end namespace mln

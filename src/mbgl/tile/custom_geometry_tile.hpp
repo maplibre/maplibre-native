@@ -6,7 +6,7 @@
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/actor/mailbox.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TileParameters;
 
@@ -41,4 +41,4 @@ private:
     ActorRef<CustomGeometryTile> actorRef;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Drawable;
@@ -76,4 +76,4 @@ protected:
     bool propertiesUpdated = true;
 };
 
-} // namespace mbgl
+} // namespace mln

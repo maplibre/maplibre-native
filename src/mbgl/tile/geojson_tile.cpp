@@ -6,7 +6,7 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using TileFeatures = style::GeoJSONData::TileFeatures;
 
@@ -58,4 +58,4 @@ void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const Source
     }
 }
 
-} // namespace mbgl
+} // namespace mln

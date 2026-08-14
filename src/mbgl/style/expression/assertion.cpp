@@ -3,11 +3,11 @@
 #include <mbgl/style/expression/check_subtype.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 Assertion::Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
     : Expression(Kind::Assertion, std::move(type_), collectDependencies(inputs_)),
@@ -123,8 +123,8 @@ std::vector<std::optional<Value>> Assertion::possibleOutputs() const {
     return result;
 }
 
-mbgl::Value Assertion::serialize() const {
-    std::vector<mbgl::Value> serialized;
+mln::Value Assertion::serialize() const {
+    std::vector<mln::Value> serialized;
     serialized.emplace_back(getOperator());
 
     if (getType().is<type::Array>()) {
@@ -135,7 +135,7 @@ mbgl::Value Assertion::serialize() const {
             if (array.N) {
                 serialized.emplace_back(uint64_t(*array.N));
             } else if (inputs.size() > 1) {
-                serialized.emplace_back(mbgl::NullValue());
+                serialized.emplace_back(mln::NullValue());
             }
         }
     }
@@ -149,4 +149,4 @@ mbgl::Value Assertion::serialize() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

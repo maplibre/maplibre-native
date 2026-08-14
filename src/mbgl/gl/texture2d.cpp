@@ -5,7 +5,7 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 Texture2D::Texture2D(gl::Context& context_)
@@ -31,7 +31,7 @@ Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_, gfx::Texture
     return *this;
 }
 
-Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
+Texture2D& Texture2D::setSize(mln::Size size_) noexcept {
     size = size_;
     storageDirty = true;
     return *this;
@@ -203,4 +203,4 @@ void Texture2D::upload() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

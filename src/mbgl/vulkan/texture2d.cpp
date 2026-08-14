@@ -8,7 +8,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 bool ImageAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::ImageCreateInfo& imageInfo) {
@@ -70,7 +70,7 @@ gfx::Texture2D& Texture2D::setFormat(gfx::TexturePixelType pixelFormat_,
     return *this;
 }
 
-gfx::Texture2D& Texture2D::setSize(mbgl::Size size_) noexcept {
+gfx::Texture2D& Texture2D::setSize(mln::Size size_) noexcept {
     if (size_ == size) {
         return *this;
     }
@@ -186,7 +186,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
+        mln::Log::Error(mln::Event::Render, "Vulkan texture buffer allocation failed");
         throw std::bad_alloc();
     }
 
@@ -347,7 +347,7 @@ void Texture2D::createTexture() {
 
     imageAllocation = std::make_shared<ImageAllocation>(backend.getAllocator());
     if (!imageAllocation->create(allocCreateInfo, imageCreateInfo)) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture allocation failed");
+        mln::Log::Error(mln::Event::Render, "Vulkan texture allocation failed");
         throw std::bad_alloc();
     }
 
@@ -667,7 +667,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
 
         SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
         if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
-            mbgl::Log::Error(mbgl::Event::Render, "Vulkan readImage staging buffer allocation failed");
+            mln::Log::Error(mln::Event::Render, "Vulkan readImage staging buffer allocation failed");
             return nullptr;
         }
 
@@ -819,4 +819,4 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

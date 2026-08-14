@@ -73,7 +73,7 @@
   return [geometries copy];
 }
 
-- (mbgl::Geometry<double>)geometryObject {
+- (mln::Geometry<double>)geometryObject {
   mapbox::geojson::geometry_collection collection;
   collection.reserve(self.shapes.count);
   for (MLNShape *shape in self.shapes) {

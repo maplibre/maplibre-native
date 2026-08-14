@@ -24,31 +24,31 @@
 namespace mapbox {
 namespace sqlite {
 
-static_assert(mbgl::underlying_type(ResultCode::OK) == SQLITE_OK, "error");
-static_assert(mbgl::underlying_type(ResultCode::Error) == SQLITE_ERROR, "error");
-static_assert(mbgl::underlying_type(ResultCode::Internal) == SQLITE_INTERNAL, "error");
-static_assert(mbgl::underlying_type(ResultCode::Perm) == SQLITE_PERM, "error");
-static_assert(mbgl::underlying_type(ResultCode::Abort) == SQLITE_ABORT, "error");
-static_assert(mbgl::underlying_type(ResultCode::Busy) == SQLITE_BUSY, "error");
-static_assert(mbgl::underlying_type(ResultCode::Locked) == SQLITE_LOCKED, "error");
-static_assert(mbgl::underlying_type(ResultCode::NoMem) == SQLITE_NOMEM, "error");
-static_assert(mbgl::underlying_type(ResultCode::ReadOnly) == SQLITE_READONLY, "error");
-static_assert(mbgl::underlying_type(ResultCode::Interrupt) == SQLITE_INTERRUPT, "error");
-static_assert(mbgl::underlying_type(ResultCode::IOErr) == SQLITE_IOERR, "error");
-static_assert(mbgl::underlying_type(ResultCode::Corrupt) == SQLITE_CORRUPT, "error");
-static_assert(mbgl::underlying_type(ResultCode::NotFound) == SQLITE_NOTFOUND, "error");
-static_assert(mbgl::underlying_type(ResultCode::Full) == SQLITE_FULL, "error");
-static_assert(mbgl::underlying_type(ResultCode::CantOpen) == SQLITE_CANTOPEN, "error");
-static_assert(mbgl::underlying_type(ResultCode::Protocol) == SQLITE_PROTOCOL, "error");
-static_assert(mbgl::underlying_type(ResultCode::Schema) == SQLITE_SCHEMA, "error");
-static_assert(mbgl::underlying_type(ResultCode::TooBig) == SQLITE_TOOBIG, "error");
-static_assert(mbgl::underlying_type(ResultCode::Constraint) == SQLITE_CONSTRAINT, "error");
-static_assert(mbgl::underlying_type(ResultCode::Mismatch) == SQLITE_MISMATCH, "error");
-static_assert(mbgl::underlying_type(ResultCode::Misuse) == SQLITE_MISUSE, "error");
-static_assert(mbgl::underlying_type(ResultCode::NoLFS) == SQLITE_NOLFS, "error");
-static_assert(mbgl::underlying_type(ResultCode::Auth) == SQLITE_AUTH, "error");
-static_assert(mbgl::underlying_type(ResultCode::Range) == SQLITE_RANGE, "error");
-static_assert(mbgl::underlying_type(ResultCode::NotADB) == SQLITE_NOTADB, "error");
+static_assert(mln::underlying_type(ResultCode::OK) == SQLITE_OK, "error");
+static_assert(mln::underlying_type(ResultCode::Error) == SQLITE_ERROR, "error");
+static_assert(mln::underlying_type(ResultCode::Internal) == SQLITE_INTERNAL, "error");
+static_assert(mln::underlying_type(ResultCode::Perm) == SQLITE_PERM, "error");
+static_assert(mln::underlying_type(ResultCode::Abort) == SQLITE_ABORT, "error");
+static_assert(mln::underlying_type(ResultCode::Busy) == SQLITE_BUSY, "error");
+static_assert(mln::underlying_type(ResultCode::Locked) == SQLITE_LOCKED, "error");
+static_assert(mln::underlying_type(ResultCode::NoMem) == SQLITE_NOMEM, "error");
+static_assert(mln::underlying_type(ResultCode::ReadOnly) == SQLITE_READONLY, "error");
+static_assert(mln::underlying_type(ResultCode::Interrupt) == SQLITE_INTERRUPT, "error");
+static_assert(mln::underlying_type(ResultCode::IOErr) == SQLITE_IOERR, "error");
+static_assert(mln::underlying_type(ResultCode::Corrupt) == SQLITE_CORRUPT, "error");
+static_assert(mln::underlying_type(ResultCode::NotFound) == SQLITE_NOTFOUND, "error");
+static_assert(mln::underlying_type(ResultCode::Full) == SQLITE_FULL, "error");
+static_assert(mln::underlying_type(ResultCode::CantOpen) == SQLITE_CANTOPEN, "error");
+static_assert(mln::underlying_type(ResultCode::Protocol) == SQLITE_PROTOCOL, "error");
+static_assert(mln::underlying_type(ResultCode::Schema) == SQLITE_SCHEMA, "error");
+static_assert(mln::underlying_type(ResultCode::TooBig) == SQLITE_TOOBIG, "error");
+static_assert(mln::underlying_type(ResultCode::Constraint) == SQLITE_CONSTRAINT, "error");
+static_assert(mln::underlying_type(ResultCode::Mismatch) == SQLITE_MISMATCH, "error");
+static_assert(mln::underlying_type(ResultCode::Misuse) == SQLITE_MISUSE, "error");
+static_assert(mln::underlying_type(ResultCode::NoLFS) == SQLITE_NOLFS, "error");
+static_assert(mln::underlying_type(ResultCode::Auth) == SQLITE_AUTH, "error");
+static_assert(mln::underlying_type(ResultCode::Range) == SQLITE_RANGE, "error");
+static_assert(mln::underlying_type(ResultCode::NotADB) == SQLITE_NOTADB, "error");
 
 void setTempPath(const std::string& path) {
     sqlite3_temp_directory = sqlite3_mprintf("%s", path.c_str());
@@ -60,17 +60,17 @@ public:
         : db(db_) {
         const int error = sqlite3_extended_result_codes(db, true);
         if (error != SQLITE_OK) {
-            mbgl::Log::Warning(mbgl::Event::Database,
-                               error,
-                               std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db));
+            mln::Log::Warning(mln::Event::Database,
+                              error,
+                              std::string("Failed to enable extended result codes: ") + sqlite3_errmsg(db));
         }
     }
 
     ~DatabaseImpl() {
         const int error = sqlite3_close(db);
         if (error != SQLITE_OK) {
-            mbgl::Log::Error(
-                mbgl::Event::Database, error, std::string("Failed to close database: ") + sqlite3_errmsg(db));
+            mln::Log::Error(
+                mln::Event::Database, error, std::string("Failed to close database: ") + sqlite3_errmsg(db));
         }
     }
 
@@ -109,7 +109,7 @@ public:
 
 #ifndef NDEBUG
 void logSqlMessage(void*, const int err, const char* msg) {
-    mbgl::Log::Record(mbgl::EventSeverity::Debug, mbgl::Event::Database, std::to_string(err) + msg);
+    mln::Log::Record(mln::EventSeverity::Debug, mln::Event::Database, std::to_string(err) + msg);
 }
 #endif
 

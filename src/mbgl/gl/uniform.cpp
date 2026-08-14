@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -200,4 +200,4 @@ bool verifyUniform<std::array<uint16_t, 4>>(const ActiveUniform& uniform) {
 #endif
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

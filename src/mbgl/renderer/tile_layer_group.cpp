@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <set>
 
-namespace mbgl {
+namespace mln {
 
 LayerGroupBase::LayerGroupBase(int32_t layerIndex_, std::string name_, Type type_)
     : type(type_),
@@ -26,13 +26,13 @@ std::size_t TileLayerGroup::getDrawableCount() const {
 
 static const gfx::UniqueDrawable no_tile;
 
-std::size_t TileLayerGroup::getDrawableCount(mbgl::RenderPass pass, const OverscaledTileID& id) const {
+std::size_t TileLayerGroup::getDrawableCount(mln::RenderPass pass, const OverscaledTileID& id) const {
     assert(drawablesByTile.size() == sortedDrawables.size());
     const auto range = drawablesByTile.equal_range({pass, id});
     return std::distance(range.first, range.second);
 }
 
-std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPass pass, const OverscaledTileID& id) {
+std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mln::RenderPass pass, const OverscaledTileID& id) {
     assert(drawablesByTile.size() == sortedDrawables.size());
     const auto range = drawablesByTile.equal_range({pass, id});
     std::vector<gfx::UniqueDrawable> result(std::distance(range.first, range.second));
@@ -51,7 +51,7 @@ std::vector<gfx::UniqueDrawable> TileLayerGroup::removeDrawables(mbgl::RenderPas
     return result;
 }
 
-void TileLayerGroup::addDrawable(mbgl::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
+void TileLayerGroup::addDrawable(mln::RenderPass pass, const OverscaledTileID& id, gfx::UniqueDrawable&& drawable) {
     assert(drawablesByTile.size() == sortedDrawables.size());
     if (drawable) {
         LayerGroupBase::addDrawable(drawable);
@@ -74,4 +74,4 @@ void TileLayerGroup::setStencilTiles(RenderTiles tiles) {
     stencilTiles = std::move(tiles);
 }
 
-} // namespace mbgl
+} // namespace mln

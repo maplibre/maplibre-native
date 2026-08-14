@@ -4,7 +4,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 namespace {
@@ -216,7 +216,7 @@ std::vector<std::optional<Value>> CollatorComparison::possibleOutputs() const {
     return {{true}, {false}};
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult parseComparison(const Convertible& value, ParsingContext& ctx) {
     std::size_t length = arrayLength(value);
 
@@ -277,4 +277,4 @@ ParseResult parseComparison(const Convertible& value, ParsingContext& ctx) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

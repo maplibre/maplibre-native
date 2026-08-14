@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/util/color.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 namespace dsl {
@@ -18,4 +18,4 @@ std::unique_ptr<Expression> compound(const char* op, Args&&... args) {
 } // namespace dsl
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

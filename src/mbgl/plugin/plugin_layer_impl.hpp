@@ -17,7 +17,7 @@
 #include <map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 using namespace conversion;
@@ -26,8 +26,8 @@ struct DataDrivenSingleFloatProperty : DataDrivenPaintProperty<float, attributes
     static float defaultValue() { return 1.f; }
 };
 
-struct DataDrivenColorProperty : DataDrivenPaintProperty<mbgl::Color, attributes::color, uniforms::color> {
-    static mbgl::Color defaultValue() { return mbgl::Color::black(); }
+struct DataDrivenColorProperty : DataDrivenPaintProperty<mln::Color, attributes::color, uniforms::color> {
+    static mln::Color defaultValue() { return mln::Color::black(); }
     static constexpr auto expressionType() { return expression::type::ColorType{}; };
     using EvaluatorType = DataDrivenPropertyEvaluator<Color, false>;
 };
@@ -54,12 +54,12 @@ public:
     void setCurrentSingleFloatValue(float value);
 
     // Color
-    const PropertyValue<mbgl::Color>& getColor() const;
-    void setColor(const PropertyValue<mbgl::Color>& value);
-    mbgl::Color _defaultColorValue = mbgl::Color::black();
-    mbgl::Color _dataDrivenColorValue = mbgl::Color::black();
-    PropertyValue<mbgl::Color> _dataDrivenColorProperty;
-    void setCurrentColorValue(mbgl::Color value);
+    const PropertyValue<mln::Color>& getColor() const;
+    void setColor(const PropertyValue<mln::Color>& value);
+    mln::Color _defaultColorValue = mln::Color::black();
+    mln::Color _dataDrivenColorValue = mln::Color::black();
+    PropertyValue<mln::Color> _dataDrivenColorProperty;
+    void setCurrentColorValue(mln::Color value);
 
     // Return this property as json
     std::string asJSON();
@@ -119,4 +119,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

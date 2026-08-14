@@ -5,7 +5,7 @@
 #include <memory>
 #include <mbgl/util/color.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 class Style;
@@ -113,7 +113,7 @@ public:
     void create(style::Style& style);
     void destroy(style::Style& style);
 
-    mbgl::style::SymbolLayer* getLayer(style::Style& style);
+    mln::style::SymbolLayer* getLayer(style::Style& style);
 
     void update(style::Style& style, const gfx::RenderingStats& stats);
 
@@ -130,4 +130,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

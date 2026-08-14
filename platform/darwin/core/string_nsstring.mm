@@ -2,7 +2,7 @@
 
 #include <mbgl/util/platform.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string uppercase(const std::string &string) {
@@ -28,4 +28,4 @@ std::string lowercase(const std::string &string) {
 }
 
 }  // namespace platform
-}  // namespace mbgl
+}  // namespace mln

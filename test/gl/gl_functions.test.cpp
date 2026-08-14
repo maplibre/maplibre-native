@@ -4,7 +4,7 @@
 
 #include <mbgl/platform/gl_functions.hpp>
 
-using namespace mbgl::platform;
+using namespace mln::platform;
 
 TEST(GLFunctions, OpenGLES) {
     /* OpenGL ES 2.0 */

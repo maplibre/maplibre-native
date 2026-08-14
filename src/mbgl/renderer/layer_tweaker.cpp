@@ -13,7 +13,7 @@
 #include <chrono>
 #endif // MLN_RENDER_BACKEND_METAL
 
-namespace mbgl {
+namespace mln {
 
 LayerTweaker::LayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
     : id(std::move(id_)),
@@ -76,4 +76,4 @@ void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
     matrix::multiply(matrix, projMatrixRef, matrix);
 }
 
-} // namespace mbgl
+} // namespace mln

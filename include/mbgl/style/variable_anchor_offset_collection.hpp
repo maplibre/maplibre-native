@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 struct AnchorOffsetPair {
     style::SymbolAnchorType anchorType;
@@ -39,7 +39,7 @@ public:
 
     std::string toString() const;
 
-    mbgl::Value serialize() const;
+    mln::Value serialize() const;
 
     bool empty() const { return anchorOffsets.size() == 0; }
 
@@ -58,4 +58,4 @@ public:
     bool operator==(const VariableAnchorOffsetCollection& other) const = default;
 };
 
-} // namespace mbgl
+} // namespace mln

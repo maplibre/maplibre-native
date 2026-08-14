@@ -8,7 +8,7 @@
 
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 
@@ -53,4 +53,4 @@ protected:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

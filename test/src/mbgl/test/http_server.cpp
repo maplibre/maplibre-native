@@ -14,7 +14,7 @@
 
 using namespace std::literals::string_literals;
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 void runServer(std::unique_ptr<httplib::Server>& server) {
@@ -218,4 +218,4 @@ HttpServer::~HttpServer() {
 }
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln

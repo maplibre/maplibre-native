@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/background.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -25,4 +25,4 @@ const std::array<AttributeInfo, 1> BackgroundPatternShaderSource::attributes = {
 const std::array<TextureInfo, 1> BackgroundPatternShaderSource::textures = {TextureInfo{0, idBackgroundImageTexture}};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 
 #include <mbgl/text/glyph.hpp>
 
-namespace mbgl {
+namespace mln {
 
 /*
     Given a font stack and a glyph ID, platform-specific implementations of
@@ -36,4 +36,4 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

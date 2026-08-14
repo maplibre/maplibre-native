@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) CollisionDrawableUBO {
@@ -20,4 +20,4 @@ struct alignas(16) CollisionTilePropsUBO {
 static_assert(sizeof(CollisionTilePropsUBO) == 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

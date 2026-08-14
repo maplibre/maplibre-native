@@ -12,7 +12,7 @@
 #include <mbgl/util/timer.hpp>
 #include <mbgl/util/tile_server_options.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheResponse)) {
     util::RunLoop loop;

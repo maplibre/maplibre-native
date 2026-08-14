@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Sprite {
@@ -15,4 +15,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

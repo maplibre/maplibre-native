@@ -3,7 +3,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/math/angles.hpp>
 
-namespace mbgl {
+namespace mln {
 
 Settings_JSON::Settings_JSON() {
     load();
@@ -57,4 +57,4 @@ void Settings_JSON::clear() {
     online = true;
 }
 
-} // namespace mbgl
+} // namespace mln

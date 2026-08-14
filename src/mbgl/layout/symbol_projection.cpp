@@ -9,7 +9,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 /*
  * # Overview of coordinate spaces
@@ -569,4 +569,4 @@ void reprojectLineLabels(gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttrib
         }
     }
 }
-} // end namespace mbgl
+} // end namespace mln

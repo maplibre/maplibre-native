@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -15,7 +15,7 @@ public:
         : Expression(Kind::Any, type::Boolean, collectDependencies(inputs_)),
           inputs(std::move(inputs_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
@@ -34,7 +34,7 @@ public:
         : Expression(Kind::All, type::Boolean, collectDependencies(inputs_)),
           inputs(std::move(inputs_)) {}
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
@@ -49,4 +49,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

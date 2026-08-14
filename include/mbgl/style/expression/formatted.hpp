@@ -9,7 +9,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -51,7 +51,7 @@ public:
     bool operator==(const Formatted&) const;
 
     std::string toString() const;
-    mbgl::Value toObject() const;
+    mln::Value toObject() const;
 
     bool empty() const;
 
@@ -76,4 +76,4 @@ struct ValueFactory<expression::Formatted> {
 } // namespace conversion
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

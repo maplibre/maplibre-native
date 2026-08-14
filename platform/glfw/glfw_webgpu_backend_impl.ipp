@@ -83,14 +83,14 @@ namespace {
 
 #if MLN_WEBGPU_IMPL_DAWN
 void logUncapturedError(const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
-    mbgl::Log::Error(mbgl::Event::Render,
+    mln::Log::Error(mln::Event::Render,
                      std::string("Dawn validation error [") +
                          std::to_string(static_cast<int>(type)) + "] " +
                          (message.data ? std::string(message.data, message.length) : std::string()));
 }
 
 void logDeviceLost(const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::StringView message) {
-    mbgl::Log::Error(mbgl::Event::Render,
+    mln::Log::Error(mln::Event::Render,
                      std::string("Dawn device lost [") +
                          std::to_string(static_cast<int>(reason)) + "] " +
                          (message.data ? std::string(message.data, message.length) : std::string()));
@@ -164,7 +164,7 @@ MTLPixelFormat toMetalPixelFormat(wgpu::TextureFormat format) {
 // Forward declaration
 class GLFWWebGPUBackend;
 
-namespace mbgl {
+namespace mln {
 
 // WebGPU-specific RenderableResource implementation (similar to Metal's)
 class WebGPURenderableResource final : public webgpu::RenderableResource {
@@ -184,7 +184,7 @@ public:
         backend.swap();
     }
 
-    const mbgl::webgpu::RendererBackend& getBackend() const override {
+    const mln::webgpu::RendererBackend& getBackend() const override {
         return backend;
     }
 
@@ -219,11 +219,11 @@ private:
 
 namespace gfx {
 template <>
-std::unique_ptr<GLFWBackend> Backend::Create<mbgl::gfx::Backend::Type::WebGPU>(GLFWwindow* window, bool capFrameRate) {
+std::unique_ptr<GLFWBackend> Backend::Create<mln::gfx::Backend::Type::WebGPU>(GLFWwindow* window, bool capFrameRate) {
     return std::make_unique<GLFWWebGPUBackend>(window, capFrameRate);
 }
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln
 
 void GLFWWebGPUBackend::SpinLock::lock() {
     while (flag.test_and_set(std::memory_order_acquire)) {
@@ -237,17 +237,17 @@ void GLFWWebGPUBackend::SpinLock::unlock() {
 
 GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     : GLFWBackend(),
-      mbgl::webgpu::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable([window_] {
+      mln::webgpu::RendererBackend(mln::gfx::ContextMode::Unique),
+      mln::gfx::Renderable([window_] {
           int fbWidth = 0;
           int fbHeight = 0;
           if (window_) {
               glfwGetFramebufferSize(window_, &fbWidth, &fbHeight);
           }
-          return mbgl::Size{static_cast<uint32_t>(std::max(fbWidth, 0)),
+          return mln::Size{static_cast<uint32_t>(std::max(fbWidth, 0)),
                             static_cast<uint32_t>(std::max(fbHeight, 0))};
       }(),
-          std::make_unique<mbgl::WebGPURenderableResource>(*this)),
+          std::make_unique<mln::WebGPURenderableResource>(*this)),
       window(window_),
       enableVSync(capFrameRate) {
 
@@ -321,14 +321,14 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
             if (isMatch) {
                 selectedIndex = i;
                 matched = true;
-                mbgl::Log::Info(mbgl::Event::Render,
+                mln::Log::Info(mln::Event::Render,
                                 std::string("WebGPU: Forcing adapter backend to ") +
                                     backendTypeToString(candidate));
                 break;
             }
         }
         if (!matched) {
-            mbgl::Log::Warning(mbgl::Event::Render,
+            mln::Log::Warning(mln::Event::Render,
                                "WebGPU: Requested backend not available, using default adapter");
         }
     }
@@ -338,7 +338,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     {
         WGPUAdapterInfo info = WGPU_ADAPTER_INFO_INIT;
         if (wgpuAdapterGetInfo(selectedAdapter.Get(), &info) == WGPUStatus_Success) {
-            mbgl::Log::Info(mbgl::Event::Render,
+            mln::Log::Info(mln::Event::Render,
                             std::string("WebGPU: Selected adapter backend = ") +
                                 backendTypeToString(info.backendType) +
                                 ", name = " +
@@ -353,7 +353,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     {
         WGPUAdapterInfo info = {};
         if (wgpuAdapterGetInfo(static_cast<WGPUAdapter>(selectedAdapter), &info) == WGPUStatus_Success) {
-            mbgl::Log::Info(mbgl::Event::Render,
+            mln::Log::Info(mln::Event::Render,
                             std::string("WebGPU: Selected adapter backend = ") +
                                 backendTypeToString(info.backendType) +
                                 ", name = " +
@@ -416,7 +416,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
     WGPUDevice rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
     if (!rawDevice) {
         // Retry once after delay
-        mbgl::Log::Warning(mbgl::Event::Render, "Failed to create device, retrying...");
+        mln::Log::Warning(mln::Event::Render, "Failed to create device, retrying...");
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
         if (!rawDevice) {
@@ -621,7 +621,7 @@ GLFWWebGPUBackend::GLFWWebGPUBackend(GLFWwindow* window_, bool capFrameRate)
         struct wl_surface* waylandSurface = glfwGetWaylandWindow(window);
 
         if (waylandDisplay && waylandSurface) {
-            mbgl::Log::Warning(mbgl::Event::Render, "Attempting Wayland surface (experimental)");
+            mln::Log::Warning(mln::Event::Render, "Attempting Wayland surface (experimental)");
 
             wgpu::SurfaceDescriptorFromWaylandSurface waylandDesc = {};
             waylandDesc.display = waylandDisplay;
@@ -798,13 +798,13 @@ GLFWWebGPUBackend::~GLFWWebGPUBackend() {
 
 }
 
-mbgl::gfx::RendererBackend& GLFWWebGPUBackend::getRendererBackend() {
-    // We inherit from mbgl::webgpu::RendererBackend which is a mbgl::gfx::RendererBackend
+mln::gfx::RendererBackend& GLFWWebGPUBackend::getRendererBackend() {
+    // We inherit from mln::webgpu::RendererBackend which is a mln::gfx::RendererBackend
     return *this;
 }
 
-mbgl::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
-    // We directly inherit from mbgl::gfx::Renderable
+mln::gfx::Renderable& GLFWWebGPUBackend::getDefaultRenderable() {
+    // We directly inherit from mln::gfx::Renderable
     return *this;
 }
 
@@ -896,11 +896,11 @@ void GLFWWebGPUBackend::deactivate() {
     // WebGPU doesn't need explicit context deactivation like OpenGL
 }
 
-mbgl::Size GLFWWebGPUBackend::getSize() const {
+mln::Size GLFWWebGPUBackend::getSize() const {
     return size;
 }
 
-void GLFWWebGPUBackend::setSize(mbgl::Size newSize) {
+void GLFWWebGPUBackend::setSize(mln::Size newSize) {
     // Update swap chain size if needed
     if (size != newSize) {
 #ifdef __APPLE__
@@ -1066,7 +1066,7 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 #endif
 }
 
-mbgl::Size GLFWWebGPUBackend::getFramebufferSize() const {
+mln::Size GLFWWebGPUBackend::getFramebufferSize() const {
     return getSize();
 }
 
@@ -1204,7 +1204,7 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
 #endif
 
     if (!depthStencilTexture) {
-        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to create depth/stencil texture");
+        mln::Log::Warning(mln::Event::Render, "WebGPU: Failed to create depth/stencil texture");
         depthStencilFormat = wgpu::TextureFormat::Undefined;
         setDepthStencilFormat(depthStencilFormat);
         return;
@@ -1233,7 +1233,7 @@ void GLFWWebGPUBackend::createDepthStencilTexture(uint32_t width, uint32_t heigh
 #endif
 
     if (!depthStencilView) {
-        mbgl::Log::Warning(mbgl::Event::Render, "WebGPU: Failed to create depth/stencil view");
+        mln::Log::Warning(mln::Event::Render, "WebGPU: Failed to create depth/stencil view");
         depthStencilTexture = nullptr;
         depthStencilFormat = wgpu::TextureFormat::Undefined;
         setDepthStencilFormat(depthStencilFormat);

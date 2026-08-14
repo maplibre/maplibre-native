@@ -11,7 +11,7 @@
 #include <mutex>
 #include <condition_variable>
 
-namespace mbgl {
+namespace mln {
 
 class TileCache {
 public:
@@ -52,4 +52,4 @@ private:
     size_t size;
 };
 
-} // namespace mbgl
+} // namespace mln

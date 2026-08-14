@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -38,7 +38,7 @@ void At::eachChild(const std::function<void(const Expression&)>& visit) const {
     visit(*input);
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult At::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
 
@@ -60,4 +60,4 @@ ParseResult At::parse(const Convertible& value, ParsingContext& ctx) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

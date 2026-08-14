@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/style/expression/parsing_context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -17,14 +17,14 @@ public:
 
     ~NumberFormat() override;
 
-    static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression& e) const noexcept override;
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "number-format"; }
 
 private:
@@ -37,4 +37,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

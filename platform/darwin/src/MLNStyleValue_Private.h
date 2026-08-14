@@ -28,48 +28,48 @@
 #import "NSColor+MLNAdditions.h"
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 class Expression;
 }
 }  // namespace style
-}  // namespace mbgl
+}  // namespace mln
 
-id MLNJSONObjectFromMBGLValue(const mbgl::Value &value);
+id MLNJSONObjectFromMBGLValue(const mln::Value &value);
 
-NS_INLINE MLNTransition MLNTransitionFromOptions(const mbgl::style::TransitionOptions &options) {
+NS_INLINE MLNTransition MLNTransitionFromOptions(const mln::style::TransitionOptions &options) {
   MLNTransition transition;
   transition.duration =
-      MLNTimeIntervalFromDuration(options.duration.value_or(mbgl::Duration::zero()));
-  transition.delay = MLNTimeIntervalFromDuration(options.delay.value_or(mbgl::Duration::zero()));
+      MLNTimeIntervalFromDuration(options.duration.value_or(mln::Duration::zero()));
+  transition.delay = MLNTimeIntervalFromDuration(options.delay.value_or(mln::Duration::zero()));
 
   return transition;
 }
 
-NS_INLINE mbgl::style::TransitionOptions MLNOptionsFromTransition(MLNTransition transition) {
-  mbgl::style::TransitionOptions options{{MLNDurationFromTimeInterval(transition.duration)},
-                                         {MLNDurationFromTimeInterval(transition.delay)}};
+NS_INLINE mln::style::TransitionOptions MLNOptionsFromTransition(MLNTransition transition) {
+  mln::style::TransitionOptions options{{MLNDurationFromTimeInterval(transition.duration)},
+                                        {MLNDurationFromTimeInterval(transition.delay)}};
   return options;
 }
 
-std::unique_ptr<mbgl::style::expression::Expression> MLNClusterPropertyFromNSExpression(
+std::unique_ptr<mln::style::expression::Expression> MLNClusterPropertyFromNSExpression(
     NSExpression *expression);
 
-id MLNJSONObjectFromMBGLExpression(const mbgl::style::expression::Expression &mbglExpression);
+id MLNJSONObjectFromMBGLExpression(const mln::style::expression::Expression &mbglExpression);
 
 template <typename MBGLType, typename ObjCType, typename MBGLElement = MBGLType,
           typename ObjCEnum = ObjCType>
 class MLNStyleValueTransformer {
 public:
   /// Convert an mbgl property value into an mgl style value
-  NSExpression *toExpression(const mbgl::style::PropertyValue<MBGLType> &mbglValue) {
+  NSExpression *toExpression(const mln::style::PropertyValue<MBGLType> &mbglValue) {
     PropertyExpressionEvaluator evaluator;
     return mbglValue.evaluate(evaluator);
   }
 
   // Convert an mbgl heatmap color property value into an mgl style value
-  NSExpression *toExpression(const mbgl::style::ColorRampPropertyValue &mbglValue) {
+  NSExpression *toExpression(const mln::style::ColorRampPropertyValue &mbglValue) {
     if (mbglValue.isUndefined()) {
       return nil;
     }
@@ -81,7 +81,7 @@ public:
    Converts an NSExpression to an mbgl property value.
    */
   template <typename MBGLValue>
-  typename std::enable_if_t<!std::is_same<MBGLValue, mbgl::style::ColorRampPropertyValue>::value,
+  typename std::enable_if_t<!std::is_same<MBGLValue, mln::style::ColorRampPropertyValue>::value,
                             MBGLValue>
   toPropertyValue(NSExpression *expression, bool allowDataExpressions) {
     if (!expression) {
@@ -101,9 +101,9 @@ public:
 
     NSArray *jsonExpression = expression.mgl_jsonExpressionObject;
 
-    mbgl::style::conversion::Error valueError;
-    auto value = mbgl::style::conversion::convert<MBGLValue>(
-        mbgl::style::conversion::makeConvertible(jsonExpression), valueError, allowDataExpressions,
+    mln::style::conversion::Error valueError;
+    auto value = mln::style::conversion::convert<MBGLValue>(
+        mln::style::conversion::makeConvertible(jsonExpression), valueError, allowDataExpressions,
         false);
     if (!value) {
       [NSException raise:NSInvalidArgumentException
@@ -118,7 +118,7 @@ public:
    Converts an NSExpression to an mbgl property value.
    */
   template <typename MBGLValue>
-  typename std::enable_if_t<std::is_same<MBGLValue, mbgl::style::ColorRampPropertyValue>::value,
+  typename std::enable_if_t<std::is_same<MBGLValue, mln::style::ColorRampPropertyValue>::value,
                             MBGLValue>
   toPropertyValue(NSExpression *expression) {
     if (!expression) {
@@ -127,9 +127,9 @@ public:
 
     NSArray *jsonExpression = expression.mgl_jsonExpressionObject;
 
-    mbgl::style::conversion::Error valueError;
-    auto value = mbgl::style::conversion::convert<mbgl::style::ColorRampPropertyValue>(
-        mbgl::style::conversion::makeConvertible(jsonExpression), valueError);
+    mln::style::conversion::Error valueError;
+    auto value = mln::style::conversion::convert<mln::style::ColorRampPropertyValue>(
+        mln::style::conversion::makeConvertible(jsonExpression), valueError);
     if (!value) {
       [NSException raise:NSInvalidArgumentException
                   format:@"Invalid property value: %@", @(valueError.message.c_str())];
@@ -170,7 +170,7 @@ private:  // Private utilities for converting from mgl to mbgl values
   NSString *toRawStyleSpecValue(ObjCType rawValue, MBGLEnum &) {
     MLNEnum mglEnum;
     [rawValue getValue:&mglEnum];
-    return @(mbgl::Enum<MLNEnum>::toString(mglEnum));
+    return @(mln::Enum<MLNEnum>::toString(mglEnum));
   }
 
   NSObject *toRawStyleSpecValue(MLNColor *color, MBGLType &) {
@@ -187,8 +187,8 @@ private:  // Private utilities for converting from mgl to mbgl values
   void getMBGLValue(NSString *rawValue, std::string &mbglValue) { mbglValue = rawValue.UTF8String; }
 
   // Formatted
-  void getMBGLValue(NSString *rawValue, mbgl::style::expression::Formatted &mbglValue) {
-    mbglValue = mbgl::style::expression::Formatted(rawValue.UTF8String);
+  void getMBGLValue(NSString *rawValue, mln::style::expression::Formatted &mbglValue) {
+    mbglValue = mln::style::expression::Formatted(rawValue.UTF8String);
   }
 
   // Offsets
@@ -217,10 +217,10 @@ private:  // Private utilities for converting from mgl to mbgl values
   }
 
   // Padding type (supports numbers and float arrays w/ sizes 1 to 4)
-  void getMBGLValue(id rawValue, mbgl::Padding &mbglValue) {
+  void getMBGLValue(id rawValue, mln::Padding &mbglValue) {
     if ([rawValue isKindOfClass:[NSNumber class]]) {
       NSNumber *number = (NSNumber *)rawValue;
-      mbglValue = mbgl::Padding(number.floatValue);
+      mbglValue = mln::Padding(number.floatValue);
     } else if ([rawValue isKindOfClass:[NSArray class]]) {
       NSArray *array = (NSArray *)rawValue;
       if (array.count < 1 || array.count > 4) {
@@ -231,17 +231,17 @@ private:  // Private utilities for converting from mgl to mbgl values
       for (size_t i = 0; i < array.count; ++i) {
         getMBGLValue(array[i], values[i]);
       }
-      mbglValue = mbgl::Padding(std::span<float>(values.begin(), array.count));
+      mbglValue = mln::Padding(std::span<float>(values.begin(), array.count));
     } else if ([rawValue isKindOfClass:[NSValue class]]) {
-      mbglValue = mbgl::Padding([rawValue mgl_paddingArrayValue]);
+      mbglValue = mln::Padding([rawValue mgl_paddingArrayValue]);
     }
   }
 
   // Color
-  void getMBGLValue(MLNColor *rawValue, mbgl::Color &mbglValue) { mbglValue = rawValue.mgl_color; }
+  void getMBGLValue(MLNColor *rawValue, mln::Color &mbglValue) { mbglValue = rawValue.mgl_color; }
 
   // VariableAnchorOffsetCollection
-  void getMBGLValue(id rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
+  void getMBGLValue(id rawValue, mln::VariableAnchorOffsetCollection &mbglValue) {
     if ([rawValue isKindOfClass:[NSArray class]]) {
       NSArray *array = (NSArray *)rawValue;
       if (array.count % 2 != 0) {
@@ -250,11 +250,11 @@ private:  // Private utilities for converting from mgl to mbgl values
             format:@"VariableTextAnchorOffset array should have an even number of elements."];
       }
 
-      std::vector<mbgl::AnchorOffsetPair> anchorOffsets;
+      std::vector<mln::AnchorOffsetPair> anchorOffsets;
       anchorOffsets.reserve(array.count / 2);
       for (NSUInteger i = 0; i < array.count; i += 2) {
-        mbgl::style::SymbolAnchorType anchor{0};
-        getMBGLValue<mbgl::style::SymbolAnchorType, MLNTextAnchor>(array[i], anchor);
+        mln::style::SymbolAnchorType anchor{0};
+        getMBGLValue<mln::style::SymbolAnchorType, MLNTextAnchor>(array[i], anchor);
 
         std::array<float, 2> offsetArray;
         getMBGLValue(array[i + 1], offsetArray);
@@ -262,13 +262,13 @@ private:  // Private utilities for converting from mgl to mbgl values
         anchorOffsets.emplace_back(anchor, offsetArray);
       }
 
-      mbglValue = mbgl::VariableAnchorOffsetCollection(std::move(anchorOffsets));
+      mbglValue = mln::VariableAnchorOffsetCollection(std::move(anchorOffsets));
     }
   }
 
   // Image
-  void getMBGLValue(NSString *rawValue, mbgl::style::expression::Image &mbglValue) {
-    mbglValue = mbgl::style::expression::Image(rawValue.UTF8String);
+  void getMBGLValue(NSString *rawValue, mln::style::expression::Image &mbglValue) {
+    mbglValue = mln::style::expression::Image(rawValue.UTF8String);
   }
 
   // Array
@@ -286,9 +286,9 @@ private:  // Private utilities for converting from mgl to mbgl values
     }
   }
 
-  void getMBGLValue(NSValue *rawValue, mbgl::style::Position &mbglValue) {
+  void getMBGLValue(NSValue *rawValue, mln::style::Position &mbglValue) {
     auto spherical = rawValue.mgl_lightPositionArrayValue;
-    mbgl::style::Position position(spherical);
+    mln::style::Position position(spherical);
     mbglValue = position;
   }
 
@@ -298,12 +298,12 @@ private:  // Private utilities for converting from mgl to mbgl values
             class = typename std::enable_if<std::is_enum<MLNEnum>::value>::type>
   void getMBGLValue(id rawValue, MBGLEnum &mbglValue) {
     if ([rawValue isKindOfClass:[NSString class]]) {
-      mbglValue = *mbgl::Enum<MBGLEnum>::toEnum([(NSString *)rawValue UTF8String]);
+      mbglValue = *mln::Enum<MBGLEnum>::toEnum([(NSString *)rawValue UTF8String]);
     } else {
       MLNEnum mglEnum;
       [(NSValue *)rawValue getValue:&mglEnum];
-      auto str = mbgl::Enum<MLNEnum>::toString(mglEnum);
-      mbglValue = *mbgl::Enum<MBGLEnum>::toEnum(str);
+      auto str = mln::Enum<MLNEnum>::toString(mglEnum);
+      mbglValue = *mln::Enum<MBGLEnum>::toEnum(str);
     }
   }
 
@@ -323,7 +323,7 @@ private:  // Private utilities for converting from mbgl to mgl values
   }
 
   // Formatted
-  static NSString *toMLNRawStyleValue(const mbgl::style::expression::Formatted &mbglStopValue) {
+  static NSString *toMLNRawStyleValue(const mln::style::expression::Formatted &mbglStopValue) {
     return @(mbglStopValue.toString().c_str());
   }
 
@@ -338,18 +338,18 @@ private:  // Private utilities for converting from mbgl to mgl values
   }
 
   // Padding type
-  static NSValue *toMLNRawStyleValue(const mbgl::Padding &mbglStopValue) {
+  static NSValue *toMLNRawStyleValue(const mln::Padding &mbglStopValue) {
     return [NSValue mgl_valueWithPaddingArray:mbglStopValue.toArray()];
   }
 
   // Color
-  static MLNColor *toMLNRawStyleValue(const mbgl::Color mbglStopValue) {
+  static MLNColor *toMLNRawStyleValue(const mln::Color mbglStopValue) {
     return [MLNColor mgl_colorWithColor:mbglStopValue];
   }
 
   // VariableAnchorOffsetCollection
   static NSArray<NSExpression *> *toMLNRawStyleValue(
-      const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
+      const mln::VariableAnchorOffsetCollection mbglStopValue) {
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:mbglStopValue.size() * 2];
     for (const auto &anchorOffset : mbglStopValue) {
       NSString *anchor = toMLNRawStyleValue(anchorOffset.anchorType);
@@ -361,7 +361,7 @@ private:  // Private utilities for converting from mbgl to mgl values
   }
 
   // Image
-  static NSString *toMLNRawStyleValue(const mbgl::style::expression::Image &mbglImageValue) {
+  static NSString *toMLNRawStyleValue(const mln::style::expression::Image &mbglImageValue) {
     return @(mbglImageValue.id().c_str());
   }
 
@@ -375,7 +375,7 @@ private:  // Private utilities for converting from mbgl to mgl values
     return array;
   }
 
-  static NSValue *toMLNRawStyleValue(const mbgl::style::Position &mbglStopValue) {
+  static NSValue *toMLNRawStyleValue(const mln::style::Position &mbglStopValue) {
     std::array<float, 3> spherical = mbglStopValue.getSpherical();
     MLNSphericalPosition position =
         MLNSphericalPositionMake(spherical[0], spherical[1], spherical[2]);
@@ -385,13 +385,13 @@ private:  // Private utilities for converting from mbgl to mgl values
   // Enumerations
   template <typename MBGLEnum = MBGLType, typename MLNEnum = ObjCEnum>
   static NSString *toMLNRawStyleValue(const MBGLEnum &value) {
-    return @(mbgl::Enum<MBGLEnum>::toString(value));
+    return @(mln::Enum<MBGLEnum>::toString(value));
   }
 
   /// Converts all types of mbgl property values into an equivalent NSExpression.
   class PropertyExpressionEvaluator {
   public:
-    NSExpression *operator()(const mbgl::style::Undefined) const { return nil; }
+    NSExpression *operator()(const mln::style::Undefined) const { return nil; }
 
     NSExpression *operator()(const MBGLType &value) const {
       id constantValue = toMLNRawStyleValue(value);
@@ -401,7 +401,7 @@ private:  // Private utilities for converting from mbgl to mgl values
       return [NSExpression expressionForConstantValue:constantValue];
     }
 
-    NSExpression *operator()(const mbgl::style::PropertyExpression<MBGLType> &mbglValue) const {
+    NSExpression *operator()(const mln::style::PropertyExpression<MBGLType> &mbglValue) const {
       return [NSExpression
           expressionWithMLNJSONObject:MLNJSONObjectFromMBGLExpression(mbglValue.getExpression())];
     }

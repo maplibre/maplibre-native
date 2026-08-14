@@ -3,7 +3,7 @@
 #include <mbgl/util/mat3.hpp>
 #include <mbgl/util/mat4.hpp>
 
-namespace mbgl {
+namespace mln {
 
 struct Quaternion {
     union {
@@ -39,4 +39,4 @@ struct Quaternion {
 bool operator==(const Quaternion&, const Quaternion&) noexcept;
 bool operator!=(const Quaternion&, const Quaternion&) noexcept;
 
-} // namespace mbgl
+} // namespace mln

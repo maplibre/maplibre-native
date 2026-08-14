@@ -3,7 +3,7 @@
 #include <mbgl/gfx/renderbuffer.hpp>
 #include <mbgl/gl/object.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class RenderbufferResource final : public gfx::RenderbufferResource {
@@ -17,4 +17,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

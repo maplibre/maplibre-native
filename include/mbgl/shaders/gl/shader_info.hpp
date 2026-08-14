@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct UniformBlockInfo {
@@ -241,4 +241,4 @@ struct ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL> 
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

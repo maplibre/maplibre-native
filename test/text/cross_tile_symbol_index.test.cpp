@@ -4,7 +4,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/text/cross_tile_symbol_index.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
     GeometryCoordinates line;

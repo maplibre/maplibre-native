@@ -11,7 +11,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -145,4 +145,4 @@ void RenderTile::setFeatureState(const LayerFeatureStates& states) {
     tile.setFeatureState(states);
 }
 
-} // namespace mbgl
+} // namespace mln

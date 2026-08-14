@@ -3,7 +3,7 @@
 #include <cassert>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 const std::string empty;
@@ -82,4 +82,4 @@ StringIndexer& stringIndexer() {
     return inst;
 }
 
-} // namespace mbgl
+} // namespace mln

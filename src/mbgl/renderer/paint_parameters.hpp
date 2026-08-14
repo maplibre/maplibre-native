@@ -18,7 +18,7 @@
 #include <set>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class UpdateParameters;
 class RenderStaticData;
@@ -158,4 +158,4 @@ public:
     gfx::ScissorRect scissorRect;
 };
 
-} // namespace mbgl
+} // namespace mln

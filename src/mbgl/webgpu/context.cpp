@@ -32,7 +32,7 @@
 #include <mbgl/shaders/program_parameters.hpp>
 #include <mbgl/gfx/gfx_types.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 namespace {
@@ -472,4 +472,4 @@ gfx::AttributeBindingArray Context::getOrCreateVertexBindings(gfx::Context&,
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

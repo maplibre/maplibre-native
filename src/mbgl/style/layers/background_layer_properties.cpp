@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/background_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 BackgroundLayerProperties::BackgroundLayerProperties(
@@ -36,6 +36,6 @@ expression::Dependency BackgroundLayerProperties::getDependencies() const noexce
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

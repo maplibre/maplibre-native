@@ -2,7 +2,7 @@
 #include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/mtl/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 DynamicTexture::DynamicTexture(Context& context, Size size, gfx::TexturePixelType pixelType)
@@ -20,4 +20,4 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

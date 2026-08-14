@@ -12,8 +12,8 @@
 
 #include <mbgl/gl/texture2d.hpp>
 
-using namespace mbgl;
-using namespace mbgl::platform;
+using namespace mln;
+using namespace mln::platform;
 
 TEST(OffscreenTexture, EmptyRed) {
     if (gfx::Backend::GetType() != gfx::Backend::Type::OpenGL) {

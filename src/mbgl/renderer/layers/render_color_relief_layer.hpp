@@ -8,14 +8,14 @@
 #include <memory>
 #include <vector> // Added for std::vector<float>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class Texture2D;
 class ShaderProgramBase;
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln
 
-namespace mbgl {
+namespace mln {
 
 class RenderColorReliefLayer final : public RenderLayer {
 public:
@@ -70,4 +70,4 @@ private:
     std::shared_ptr<ColorReliefVertexVector> staticDataSharedVertices;
 };
 
-} // namespace mbgl
+} // namespace mln

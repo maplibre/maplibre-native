@@ -9,7 +9,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -19,7 +19,7 @@ public:
     static constexpr auto Name() { return "org/maplibre/geojson/LineString"; };
     static constexpr auto Type() { return "LineString"; };
 
-    static jni::Local<jni::Object<LineString>> New(jni::JNIEnv&, const mbgl::LineString<double>&);
+    static jni::Local<jni::Object<LineString>> New(jni::JNIEnv&, const mln::LineString<double>&);
 
     static mapbox::geojson::line_string convert(jni::JNIEnv&, const jni::Object<LineString>&);
 
@@ -32,4 +32,4 @@ public:
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

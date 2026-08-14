@@ -8,7 +8,7 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/premultiply.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 ImageSource::ImageSource(std::string id, const std::array<LatLng, 4> coords_)
@@ -82,8 +82,8 @@ void ImageSource::loadDescription(FileSource& fileSource) {
     });
 }
 
-bool ImageSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(info->tileKind);
+bool ImageSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
+    return mln::underlying_type(Tile::Kind::Raster) == mln::underlying_type(info->tileKind);
 }
 
 Mutable<Source::Impl> ImageSource::createMutable() const noexcept {
@@ -91,4 +91,4 @@ Mutable<Source::Impl> ImageSource::createMutable() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

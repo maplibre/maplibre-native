@@ -30,7 +30,7 @@
 #include <mbgl/shaders/mtl/symbol.hpp>
 #endif
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(OrderIndependentHash, Permutations) {
     // Try collections of up to this many elements
@@ -74,7 +74,7 @@ TEST(OrderIndependentHash, Permutations) {
 
 #if MLN_RENDER_BACKEND_METAL
 
-using namespace mbgl::shaders;
+using namespace mln::shaders;
 
 template <typename TSet, typename TIter = typename TSet::const_iterator, typename TFunc>
 void each_subset(const TSet& sofar, TIter beg, TIter end, TFunc f) {
@@ -91,7 +91,7 @@ void each_subset(const TSet& sofar, TIter beg, TIter end, TFunc f) {
 /// Ensure that no combination of attributes used by a shader definition produce a hash conflict
 template <typename ShaderType>
 void checkShaderHashes() {
-    using AttribSet = mbgl::unordered_set<size_t>;
+    using AttribSet = mln::unordered_set<size_t>;
     AttribSet attributes;
     for (const auto& attrib : ShaderType::attributes) {
         attributes.insert(attrib.id);

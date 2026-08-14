@@ -6,9 +6,9 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/test/util.hpp>
 
-using namespace mbgl;
-using namespace mbgl::gfx;
-using namespace mbgl::gl;
+using namespace mln;
+using namespace mln::gfx;
+using namespace mln::gl;
 
 TEST(GL, DrawModeType) {
     ASSERT_EQ(GL_POINTS, Enum<DrawModeType>::to(DrawModeType::Points));

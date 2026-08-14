@@ -34,7 +34,7 @@
 #include <sstream>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 namespace {
@@ -178,7 +178,7 @@ struct IndexBuffer : public gfx::IndexBufferBase {
         : buffer(std::move(buffer_)) {}
     ~IndexBuffer() override = default;
 
-    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+    std::unique_ptr<mln::gfx::IndexBuffer> buffer;
 };
 
 Drawable::Drawable(std::string name_)
@@ -490,7 +490,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     // Build bind groups based on shader metadata
     if (shader) {
-        auto webgpuShader = std::static_pointer_cast<mbgl::webgpu::ShaderProgram>(shader);
+        auto webgpuShader = std::static_pointer_cast<mln::webgpu::ShaderProgram>(shader);
         if (webgpuShader) {
             WGPUDevice deviceHandle = static_cast<WGPUDevice>(backend.getDevice());
 
@@ -781,7 +781,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    auto& shaderWebGPU = static_cast<mbgl::webgpu::ShaderProgram&>(*shader);
+    auto& shaderWebGPU = static_cast<mln::webgpu::ShaderProgram&>(*shader);
 
     if (!impl->pipelineState) {
         // Create vertex layout from attribute bindings
@@ -1039,4 +1039,4 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

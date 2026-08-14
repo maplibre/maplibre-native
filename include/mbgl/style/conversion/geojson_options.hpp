@@ -3,7 +3,7 @@
 #include <mbgl/style/sources/geojson_source.hpp>
 #include <mbgl/style/conversion.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -14,4 +14,4 @@ struct Converter<GeoJSONOptions> {
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

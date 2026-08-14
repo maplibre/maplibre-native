@@ -28,7 +28,7 @@
         return result;                               \
     }
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -270,4 +270,4 @@ double AnnotationManager::getTopOffsetPixelsForImage(const std::string& id_) {
     return it != images.end() ? -(it->second.getImage().size.height / it->second.getPixelRatio()) / 2 : 0.0;
 }
 
-} // namespace mbgl
+} // namespace mln

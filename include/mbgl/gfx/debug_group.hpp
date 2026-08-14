@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <typename T>
@@ -27,4 +27,4 @@ private:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

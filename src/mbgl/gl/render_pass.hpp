@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/render_pass.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class CommandEncoder;
@@ -28,4 +28,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

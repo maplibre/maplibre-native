@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 PluginLayer::PluginLayer(const std::string& layerID,
@@ -43,7 +43,7 @@ Value PluginLayer::serialize() const {
 
 std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::string& name,
                                                                   const conversion::Convertible& value) {
-    auto i = static_cast<const mbgl::style::PluginLayer::Impl*>(baseImpl.get());
+    auto i = static_cast<const mln::style::PluginLayer::Impl*>(baseImpl.get());
     auto pm = i->_propertyManager;
 
     // The properties should be defined when the plugin layer is created
@@ -60,7 +60,7 @@ std::optional<conversion::Error> PluginLayer::setPropertyInternal(const std::str
         }
         property->setSingleFloat(tempValue.value());
     } else if (property->_propertyType == PluginLayerProperty::PropertyType::Color) {
-        const auto& tempValue = convert<PropertyValue<mbgl::Color>>(value, error, false, false);
+        const auto& tempValue = convert<PropertyValue<mln::Color>>(value, error, false, false);
         if (!tempValue) {
             return error;
         }
@@ -81,4 +81,4 @@ Mutable<Layer::Impl> PluginLayer::mutableBaseImpl() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

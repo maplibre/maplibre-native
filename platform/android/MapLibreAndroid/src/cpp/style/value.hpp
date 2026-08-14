@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class Value {
@@ -40,4 +40,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

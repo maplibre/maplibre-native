@@ -3,7 +3,7 @@
 #include <mbgl/gfx/draw_scope.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class DrawScopeResource : public gfx::DrawScopeResource {
@@ -15,4 +15,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

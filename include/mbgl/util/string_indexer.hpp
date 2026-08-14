@@ -9,7 +9,7 @@
 #include <mutex>
 #include <shared_mutex>
 
-namespace mbgl {
+namespace mln {
 
 using StringIdentity = std::size_t;
 
@@ -42,4 +42,4 @@ protected:
 /// StringIndexer singleton
 StringIndexer& stringIndexer();
 
-} // namespace mbgl
+} // namespace mln

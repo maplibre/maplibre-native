@@ -5,7 +5,7 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 namespace value {
 
@@ -666,4 +666,4 @@ PixelStoreUnpack::Type PixelStoreUnpack::Get() {
 
 } // namespace value
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

@@ -4,15 +4,15 @@
 #include <mbgl/style/layers/custom_layer_impl.hpp>
 #include <mbgl/test/util.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::expression;
-using namespace mbgl::style::expression::dsl;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::expression;
+using namespace mln::style::expression::dsl;
 
 using namespace std::string_literals;
 
 namespace std {
-using ::mbgl::operator<<;
+using ::mln::operator<<;
 }
 
 template <typename T>

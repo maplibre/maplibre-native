@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // Mapping based on https://www.opengl.org/wiki/OpenGL_Type
@@ -59,4 +59,4 @@ enum class UniformDataType : uint32_t {
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

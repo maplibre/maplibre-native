@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /// Receives errors detected by the symbol guard checks (see `MLN_SYMBOL_GUARDS`).
 /// Both `TileObserver` and `RendererObserver` derive from this, so that whichever of them owns
@@ -16,4 +16,4 @@ public:
     virtual void onSymbolError(const std::string&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

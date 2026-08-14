@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 
 /// Run a lambda on scope exit
 template <typename Func>
@@ -18,4 +18,4 @@ private:
     Func cb;
 };
 
-} // namespace mbgl
+} // namespace mln

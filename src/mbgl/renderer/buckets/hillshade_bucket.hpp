@@ -12,7 +12,7 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/mat4.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using HillshadeBinders = PaintPropertyBinders<style::HillshadePaintProperties::DataDrivenProperties>;
 using HillshadeLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::texture_pos>>;
@@ -62,4 +62,4 @@ private:
     bool prepared = false;
 };
 
-} // namespace mbgl
+} // namespace mln

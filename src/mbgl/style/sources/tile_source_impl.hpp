@@ -3,7 +3,7 @@
 #include <mbgl/style/sources/tile_source.hpp>
 #include <mbgl/style/source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class TileSource::Impl : public Source::Impl {
@@ -22,4 +22,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

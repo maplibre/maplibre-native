@@ -23,7 +23,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -110,9 +110,9 @@ GlyphIDType getCharGlyphIDType(char16_t ch,
     return GlyphIDType::FontPBF;
 }
 
-} // namespace mbgl
+} // namespace mln
 
-namespace mbgl {
+namespace mln {
 
 SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                            const std::vector<Immutable<style::LayerProperties>>& layers,
@@ -251,8 +251,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                             }
                         }
                     } catch (...) {
-                        mbgl::Log::Error(
-                            mbgl::Event::ParseTile,
+                        mln::Log::Error(
+                            mln::Event::ParseTile,
                             "Encountered section with invalid UTF-8 in tile, source: " + sourceLayer->getName() +
                                 " z: " + std::to_string(canonicalID.z) + " x: " + std::to_string(canonicalID.x) +
                                 " y: " + std::to_string(canonicalID.y));
@@ -1012,7 +1012,7 @@ std::vector<float> SymbolLayout::calculateTileDistances(const GeometryCoordinate
 
 void SymbolLayout::createBucket(const ImagePositions&,
                                 std::unique_ptr<FeatureIndex>&,
-                                mbgl::unordered_map<std::string, LayerRenderData>& renderData,
+                                mln::unordered_map<std::string, LayerRenderData>& renderData,
                                 const bool firstLoad,
                                 const bool showCollisionBoxes,
                                 const CanonicalTileID& canonical) {
@@ -1416,4 +1416,4 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/heatmap_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 HeatmapLayerProperties::HeatmapLayerProperties(
@@ -34,6 +34,6 @@ expression::Dependency HeatmapLayerProperties::getDependencies() const noexcept 
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class LatLng;
 
@@ -40,4 +40,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

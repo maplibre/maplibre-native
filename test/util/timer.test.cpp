@@ -9,26 +9,26 @@
 #include <memory>
 #include <optional>
 
-using namespace mbgl::util;
+using namespace mln::util;
 
 TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Basic)) {
     RunLoop loop;
 
-    const auto interval = mbgl::Milliseconds(300);
+    const auto interval = mln::Milliseconds(300);
     const auto expectedTotalTime = interval;
 
     const auto first = MonotonicTimer::now();
     const auto elapsed = [=] {
-        return std::chrono::duration_cast<mbgl::Milliseconds>(MonotonicTimer::now() - first);
+        return std::chrono::duration_cast<mln::Milliseconds>(MonotonicTimer::now() - first);
     };
-    std::optional<mbgl::Milliseconds> callbackTime;
+    std::optional<mln::Milliseconds> callbackTime;
     auto callback = [&] {
         callbackTime = elapsed();
         loop.stop();
     };
 
     Timer timer;
-    timer.start(interval, mbgl::Duration::zero(), std::move(callback));
+    timer.start(interval, mln::Duration::zero(), std::move(callback));
 
     loop.run();
 
@@ -52,15 +52,15 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Repeat)) {
         }
     };
 
-    auto interval = mbgl::Milliseconds(50);
+    auto interval = mln::Milliseconds(50);
     auto expectedTotalTime = interval * count;
 
-    auto first = mbgl::Clock::now();
+    auto first = mln::Clock::now();
     timer.start(interval, interval, callback);
 
     loop.run();
 
-    auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
+    auto totalTime = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - first);
 
     EXPECT_GE(totalTime, expectedTotalTime * 0.8);
     EXPECT_LE(totalTime, expectedTotalTime * 1.3);
@@ -72,8 +72,8 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Stop)) {
     Timer timer1;
     Timer timer2;
 
-    auto interval1 = mbgl::Milliseconds(50);
-    auto interval2 = mbgl::Milliseconds(250);
+    auto interval1 = mln::Milliseconds(50);
+    auto interval2 = mln::Milliseconds(250);
     auto expectedTotalTime = interval2;
 
     int count = 0;
@@ -88,13 +88,13 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Stop)) {
         loop.stop();
     };
 
-    auto first = mbgl::Clock::now();
+    auto first = mln::Clock::now();
     timer1.start(interval1, interval1, callback1);
-    timer2.start(interval2, mbgl::Duration::zero(), callback2);
+    timer2.start(interval2, mln::Duration::zero(), callback2);
 
     loop.run();
 
-    auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
+    auto totalTime = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - first);
 
     EXPECT_EQ(count, 2);
 
@@ -108,8 +108,8 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(DestroyShouldStop)) {
     auto timer1 = std::make_unique<Timer>();
     Timer timer2;
 
-    auto interval1 = mbgl::Milliseconds(50);
-    auto interval2 = mbgl::Milliseconds(250);
+    auto interval1 = mln::Milliseconds(50);
+    auto interval2 = mln::Milliseconds(250);
     auto expectedTotalTime = interval2;
 
     int count = 0;
@@ -124,13 +124,13 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(DestroyShouldStop)) {
         loop.stop();
     };
 
-    auto first = mbgl::Clock::now();
+    auto first = mln::Clock::now();
     timer1->start(interval1, interval1, callback1);
-    timer2.start(interval2, mbgl::Duration::zero(), callback2);
+    timer2.start(interval2, mln::Duration::zero(), callback2);
 
     loop.run();
 
-    auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
+    auto totalTime = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - first);
 
     EXPECT_EQ(count, 2);
 
@@ -148,7 +148,7 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedDuringExpiration)) {
 
     auto timer = std::make_unique<Timer>();
     auto loopStopTimer = std::make_unique<Timer>();
-    auto expireTimeout = mbgl::Milliseconds(50);
+    auto expireTimeout = mln::Milliseconds(50);
 
     auto timerCallback = [&] {
         // we cannot expect much here as in some cases timer may be finished earlier
@@ -160,14 +160,14 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedDuringExpiration)) {
         loop.stop();
     };
 
-    auto first = mbgl::Clock::now();
+    auto first = mln::Clock::now();
 
-    loopStopTimer->start(expireTimeout, mbgl::Milliseconds(0), loopStopTimerCallback);
-    timer->start(expireTimeout, mbgl::Milliseconds(0), timerCallback);
+    loopStopTimer->start(expireTimeout, mln::Milliseconds(0), loopStopTimerCallback);
+    timer->start(expireTimeout, mln::Milliseconds(0), timerCallback);
 
     loop.run();
 
-    auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
+    auto totalTime = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - first);
 
     EXPECT_GE(totalTime, expireTimeout * 0.8);
     EXPECT_LE(totalTime, expireTimeout * 1.3);
@@ -178,7 +178,7 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedAfterExpiration)) {
 
     auto timer = std::make_unique<Timer>();
     auto loopStopTimer = std::make_unique<Timer>();
-    auto expireTimeout = mbgl::Milliseconds(50);
+    auto expireTimeout = mln::Milliseconds(50);
 
     bool callbackFired = false;
 
@@ -186,22 +186,22 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedAfterExpiration)) {
         callbackFired = true;
     };
 
-    auto first = mbgl::Clock::now();
+    auto first = mln::Clock::now();
 
-    timer->start(expireTimeout, mbgl::Milliseconds(0), timerCallback);
+    timer->start(expireTimeout, mln::Milliseconds(0), timerCallback);
 
     // poll until the timer expires
     auto expireWaitInterval = expireTimeout * 2;
-    auto startWaitTime = mbgl::Clock::now();
-    auto waitDuration = mbgl::Duration::zero();
+    auto startWaitTime = mln::Clock::now();
+    auto waitDuration = mln::Duration::zero();
     while (waitDuration < expireWaitInterval) {
-        waitDuration = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - startWaitTime);
+        waitDuration = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - startWaitTime);
     }
     timer->stop();
 
     loop.runOnce();
 
-    auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
+    auto totalTime = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - first);
 
     EXPECT_TRUE(!callbackFired);
     EXPECT_GE(totalTime, expireWaitInterval * 0.8);
@@ -213,8 +213,8 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StartOverrides)) {
 
     Timer timer;
 
-    auto interval1 = mbgl::Milliseconds(50);
-    auto interval2 = mbgl::Milliseconds(250);
+    auto interval1 = mln::Milliseconds(50);
+    auto interval2 = mln::Milliseconds(250);
     auto expectedTotalTime = interval1 + interval2;
 
     int count = 0;
@@ -226,15 +226,15 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StartOverrides)) {
 
     auto callback1 = [&] {
         ++count;
-        timer.start(interval2, mbgl::Duration::zero(), callback2);
+        timer.start(interval2, mln::Duration::zero(), callback2);
     };
 
-    auto first = mbgl::Clock::now();
-    timer.start(interval1, mbgl::Duration::zero(), callback1);
+    auto first = mln::Clock::now();
+    timer.start(interval1, mln::Duration::zero(), callback1);
 
     loop.run();
 
-    auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
+    auto totalTime = std::chrono::duration_cast<mln::Milliseconds>(mln::Clock::now() - first);
 
     EXPECT_EQ(count, 2);
 

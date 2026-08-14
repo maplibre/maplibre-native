@@ -9,7 +9,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace android {
 
@@ -24,12 +24,12 @@ public:
     /**
      * Set core layer (ie return ownership after remove)
      */
-    void setLayer(std::unique_ptr<mbgl::style::Layer>);
+    void setLayer(std::unique_ptr<mln::style::Layer>);
 
-    void addToStyle(mbgl::style::Style&, std::optional<std::string>);
+    void addToStyle(mln::style::Style&, std::optional<std::string>);
 
     // Release the owned view and return it
-    std::unique_ptr<mbgl::style::Layer> releaseCoreLayer();
+    std::unique_ptr<mln::style::Layer> releaseCoreLayer();
 
     jni::Local<jni::String> getId(jni::JNIEnv&);
 
@@ -67,18 +67,18 @@ protected:
     /*
      * Called when a non-owning peer object is created on the c++ side
      */
-    Layer(mbgl::style::Layer&);
+    Layer(mln::style::Layer&);
 
     /*
      * Called when a owning peer object is created on the c++ side
      */
-    Layer(std::unique_ptr<mbgl::style::Layer>);
+    Layer(std::unique_ptr<mln::style::Layer>);
 
     // Owned layer is set when creating a new layer, before adding it to the map
-    std::unique_ptr<mbgl::style::Layer> ownedLayer;
+    std::unique_ptr<mln::style::Layer> ownedLayer;
 
     // Raw reference to the layer
-    mapbox::base::WeakPtr<mbgl::style::Layer> layerPtr;
+    mapbox::base::WeakPtr<mln::style::Layer> layerPtr;
 };
 
 /**
@@ -90,13 +90,13 @@ public:
     /**
      * @brief Create a non-owning peer.
      */
-    virtual jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) = 0;
+    virtual jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) = 0;
 
     /**
      * @brief Create an owning peer.
      */
     virtual jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env,
-                                                               std::unique_ptr<mbgl::style::Layer>) = 0;
+                                                               std::unique_ptr<mln::style::Layer>) = 0;
 
     /**
      * @brief Register peer methods.
@@ -112,4 +112,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

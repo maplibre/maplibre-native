@@ -13,7 +13,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class VectorTileTest {
 public:
@@ -55,4 +55,4 @@ public:
     }
 };
 
-} // namespace mbgl
+} // namespace mln

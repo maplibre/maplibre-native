@@ -4,7 +4,7 @@
 #include <mbgl/style/conversion/transition_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -104,4 +104,4 @@ std::optional<Light> Converter<Light>::operator()(const Convertible& value, Erro
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

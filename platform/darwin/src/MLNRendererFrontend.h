@@ -9,10 +9,10 @@
  The RenderFrontend is passed to the Map to facilitate rendering in a platform
  dependent way.
  */
-class MLNRenderFrontend : public mbgl::RendererFrontend {
+class MLNRenderFrontend : public mln::RendererFrontend {
 public:
-  MLNRenderFrontend(std::unique_ptr<mbgl::Renderer> renderer_, MLNMapView* nativeView_,
-                    mbgl::gfx::RendererBackend& mbglBackend_, bool async = false)
+  MLNRenderFrontend(std::unique_ptr<mln::Renderer> renderer_, MLNMapView* nativeView_,
+                    mln::gfx::RendererBackend& mbglBackend_, bool async = false)
       : renderer(std::move(renderer_)), nativeView(nativeView_), mbglBackend(mbglBackend_) {
     if (async) {
       asyncInvalidate.emplace([&]() { [nativeView setNeedsRerender]; });
@@ -25,7 +25,7 @@ public:
     }
   }
 
-  void update(std::shared_ptr<mbgl::UpdateParameters> updateParameters_) override {
+  void update(std::shared_ptr<mln::UpdateParameters> updateParameters_) override {
     updateParameters = std::move(updateParameters_);
     if (asyncInvalidate) {
       asyncInvalidate->send();
@@ -34,11 +34,9 @@ public:
     }
   }
 
-  const mbgl::TaggedScheduler& getThreadPool() const override {
-    return mbglBackend.getThreadPool();
-  }
+  const mln::TaggedScheduler& getThreadPool() const override { return mbglBackend.getThreadPool(); }
 
-  void setObserver(mbgl::RendererObserver& observer) override {
+  void setObserver(mln::RendererObserver& observer) override {
     if (!renderer) return;
     renderer->setObserver(&observer);
   }
@@ -46,7 +44,7 @@ public:
   void render() {
     if (!renderer || !updateParameters) return;
 
-    mbgl::gfx::BackendScope guard{mbglBackend, mbgl::gfx::BackendScope::ScopeType::Implicit};
+    mln::gfx::BackendScope guard{mbglBackend, mln::gfx::BackendScope::ScopeType::Implicit};
 
     // onStyleImageMissing might be called during a render. The user implemented method
     // could trigger a call to MLNRenderFrontend#update which overwrites `updateParameters`.
@@ -56,7 +54,7 @@ public:
     renderer->render(updateParameters_);
   }
 
-  mbgl::Renderer* getRenderer() { return renderer.get(); }
+  mln::Renderer* getRenderer() { return renderer.get(); }
 
   void setTileCacheEnabled(bool enable) {
     if (!renderer) return;
@@ -74,9 +72,9 @@ public:
   }
 
 private:
-  std::unique_ptr<mbgl::Renderer> renderer;
+  std::unique_ptr<mln::Renderer> renderer;
   __weak MLNMapView* nativeView = nullptr;
-  mbgl::gfx::RendererBackend& mbglBackend;
-  std::shared_ptr<mbgl::UpdateParameters> updateParameters;
-  std::optional<mbgl::util::AsyncTask> asyncInvalidate;
+  mln::gfx::RendererBackend& mbglBackend;
+  std::shared_ptr<mln::UpdateParameters> updateParameters;
+  std::optional<mln::util::AsyncTask> asyncInvalidate;
 };

@@ -16,7 +16,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 float interpolationFactor(float base, Range<float> range, float z) noexcept;
@@ -222,4 +222,4 @@ struct Interpolatable
     : std::conditional_t<!std::is_base_of_v<Uninterpolated, Interpolator<T>>, std::true_type, std::false_type> {};
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

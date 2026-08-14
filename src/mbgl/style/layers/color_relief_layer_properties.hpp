@@ -13,7 +13,7 @@
 #include <mbgl/shaders/attributes.hpp>
 #include <mbgl/shaders/uniforms.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 struct ColorReliefColor : ColorRampProperty {
@@ -46,6 +46,6 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

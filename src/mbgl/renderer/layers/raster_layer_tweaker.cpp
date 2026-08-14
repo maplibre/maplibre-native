@@ -11,7 +11,7 @@
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -133,4 +133,4 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

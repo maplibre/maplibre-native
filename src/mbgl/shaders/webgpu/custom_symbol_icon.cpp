@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using CustomSymbolIconShaderSource = ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::WebGPU>;
@@ -14,4 +14,4 @@ const std::array<AttributeInfo, 2> CustomSymbolIconShaderSource::attributes = {
 const std::array<TextureInfo, 1> CustomSymbolIconShaderSource::textures = {TextureInfo{0, idCustomSymbolImageTexture}};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

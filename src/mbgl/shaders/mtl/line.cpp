@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/line.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -88,4 +88,4 @@ const std::array<TextureInfo, 1> LineSDFShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

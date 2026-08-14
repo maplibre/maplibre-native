@@ -13,7 +13,7 @@
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/tile_cover.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -193,4 +193,4 @@ void RenderImageSource::dumpDebugLogs() const {
     Log::Info(Event::General, "RenderImageSource::loaded: " + std::string(isLoaded() ? "yes" : "no"));
 }
 
-} // namespace mbgl
+} // namespace mln

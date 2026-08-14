@@ -4,7 +4,7 @@
 #include <mbgl/tile/custom_vector_tile.hpp>
 #include <mbgl/util/constants.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -54,4 +54,4 @@ void RenderCustomVectorSource::update(Immutable<style::Source::Impl> baseImpl_,
                        });
 }
 
-} // namespace mbgl
+} // namespace mln

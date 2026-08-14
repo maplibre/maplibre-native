@@ -5,7 +5,7 @@
 
 #include <cstdlib>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class RendererBackend;
@@ -20,11 +20,11 @@ public:
         // explicitly can override this method.
     }
 
-    virtual const mbgl::mtl::RendererBackend& getBackend() const = 0;
-    virtual const mbgl::mtl::MTLCommandBufferPtr& getCommandBuffer() const = 0;
-    virtual mbgl::mtl::MTLBlitPassDescriptorPtr getUploadPassDescriptor() const = 0;
-    virtual const mbgl::mtl::MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const = 0;
+    virtual const mln::mtl::RendererBackend& getBackend() const = 0;
+    virtual const mln::mtl::MTLCommandBufferPtr& getCommandBuffer() const = 0;
+    virtual mln::mtl::MTLBlitPassDescriptorPtr getUploadPassDescriptor() const = 0;
+    virtual const mln::mtl::MTLRenderPassDescriptorPtr& getRenderPassDescriptor() const = 0;
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln
