@@ -313,6 +313,9 @@ TEST(MapLibre, CanonicalURL) {
     EXPECT_EQ("https://demotiles.maplibre.org/font/{fontstack}/{start}-{end}.pbf",
               mln::util::mapbox::normalizeGlyphsURL(
                   mapboxFixture::mapLibreTileServerOptions, "maplibre://fonts/{fontstack}/{start}-{end}.pbf", ""));
+    EXPECT_EQ("maplibre://fonts/{fontstack}/{range}.pbf",
+              mln::util::mapbox::canonicalizeGlyphURL(mapboxFixture::mapLibreTileServerOptions,
+                                                      "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf"));
 
     EXPECT_EQ("maplibre://tiles/tiles/{z}/{x}/{y}.pbf",
               mln::util::mapbox::canonicalizeTileURL(mapboxFixture::mapLibreTileServerOptions,

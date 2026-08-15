@@ -225,7 +225,7 @@ TileServerOptions TileServerOptions::MapLibreConfiguration() {
                                     .withSourceTemplate("/tiles/{domain}.json", "", {})
                                     .withStyleTemplate("{path}.json", "maps", {})
                                     .withSpritesTemplate("/{path}/sprite{scale}.{format}", "", {})
-                                    .withGlyphsTemplate("/font/{fontstack}/{start}-{end}.pbf", "fonts", {})
+                                    .withGlyphsTemplate("/font{path}", "fonts", {})
                                     .withTileTemplate("/{path}", "tiles", {})
                                     .withDefaultStyles(styles)
                                     .withDefaultStyle("Basic")
