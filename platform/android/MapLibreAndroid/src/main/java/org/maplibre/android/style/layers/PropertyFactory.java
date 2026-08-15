@@ -1276,7 +1276,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Vertical shading applied to the sides of a fill-extrusion layer. `true` shades the sides slightly darker farther down, scaled by building height. `false` disables shading. Alternatively, an array of one or two numbers, `[depth, referenceHeight]`, shades every building regardless of height: `depth` (0-1) is how dark the foot of a wall gets, scaled by the light intensity, where 0 disables shading; `referenceHeight` re-enables height scaling above the given height in meters, and defaults to 0 (disabled).
+   * Vertical shading applied to the sides of a fill-extrusion layer. `true` shades the sides slightly darker farther down, scaled by building height so that the effect is only really visible above 150 meters. `false` disables shading. Alternatively, an array of one or two numbers, `[depth, referenceHeight]`, shades every building regardless of height: `depth` (0-1) is how dark the foot of a wall gets, scaled by the light intensity, where 0 disables shading; `referenceHeight` re-enables height scaling above the given height in meters, and defaults to 0 (disabled).
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
