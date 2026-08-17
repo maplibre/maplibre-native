@@ -88,20 +88,21 @@ TEST(VerticalGradient, CoercionRejectsOutOfRangeValues) {
     {
         auto result = parse(R"(["to-verticalgradient", ["literal", [0.5, 80]]])");
         ASSERT_TRUE(result) << error.message;
-        EXPECT_EQ(fromArray({0.5f, 80.0f}), result->asExpression().evaluate(0.0f));
+        ASSERT_TRUE(result->isConstant());
+        EXPECT_EQ(fromArray({0.5f, 80.0f}), result->asConstant());
     }
     // Out of range
     {
-        auto result = parse(R"(["to-verticalgradient", ["literal", [-5, 0]]])");
-        if (result) {
-            EXPECT_EQ(VerticalGradient(), result->asExpression().evaluate(0.0f));
-        }
+        EXPECT_FALSE(parse(R"(["to-verticalgradient", ["literal", [-5, 0]]])"));
+        EXPECT_FALSE(error.message.empty());
     }
     {
-        auto result = parse(R"(["to-verticalgradient", ["literal", [0.5, -1]]])");
-        if (result) {
-            EXPECT_EQ(VerticalGradient(), result->asExpression().evaluate(0.0f));
-        }
+        EXPECT_FALSE(parse(R"(["to-verticalgradient", ["literal", [0.5, -1]]])"));
+        EXPECT_FALSE(error.message.empty());
+    }
+    {
+        EXPECT_FALSE(parse(R"(["to-verticalgradient", ["literal", [0.5, 80, 1]]])"));
+        EXPECT_FALSE(error.message.empty());
     }
 }
 
@@ -135,6 +136,7 @@ TEST(VerticalGradient, StepExpressionOverZoom) {
         /*allowDataExpressions*/ false,
         /*convertTokens*/ false);
     ASSERT_TRUE(result) << error.message;
+    ASSERT_TRUE(result->isExpression());
 
     const auto expr = result->asExpression();
     EXPECT_EQ(VerticalGradient(true), expr.evaluate(15.0f));
