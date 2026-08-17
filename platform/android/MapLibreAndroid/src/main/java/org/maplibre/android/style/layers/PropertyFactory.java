@@ -1263,10 +1263,12 @@ The unit is in density-independent pixels only for SDF sprites that were created
 
   /**
    * Vertical shading applied to the sides of a fill-extrusion layer, as an array of one or two numbers,
-   * {@code [depth, referenceHeight]}, that shades every building regardless of height. depth (0-1) is how dark
-   * the foot of a wall gets, scaled by the light intensity, where 0 disables shading; referenceHeight re-enables
-   * height scaling above the given height in meters, and defaults to 0 (disabled). For the legacy on/off form,
-   * use the {@code Boolean} overload.
+   * {@code [depth, referenceHeight]}. depth (0-1) is how dark the foot of a wall gets, as a multiple of
+   * the shading {@code true} applies: 0 disables shading, 0.5 matches {@code true}, 1 doubles it.
+   * referenceHeight selects whether the shading is scaled by building height: 0 (the default) shades
+   * every building equally, and a positive value in meters restores the height-scaled behaviour above
+   * that height, which is what {@code true} does at 150. For the legacy on/off form, use the
+   * {@code Boolean} overload.
    *
    * @param value a Object[] value
    * @return property wrapper around Object[]
