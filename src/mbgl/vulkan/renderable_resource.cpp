@@ -115,12 +115,12 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         // update values based on surface limits
         extent.width = std::min(std::max(w, capabilities.minImageExtent.width), capabilities.maxImageExtent.width);
         extent.height = std::min(std::max(h, capabilities.minImageExtent.height), capabilities.maxImageExtent.height);
+    }
 
-        if (hasSurfaceTransformSupport()) {
-            if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
-                capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
-                std::swap(extent.width, extent.height);
-            }
+    if (hasSurfaceTransformSupport()) {
+        if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
+            capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
+            std::swap(extent.width, extent.height);
         }
     }
 
