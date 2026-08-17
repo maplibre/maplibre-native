@@ -158,18 +158,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
-        // of the reference height so this stays a multiply rather than a per-vertex
+        // `gradient_depth` sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // `fill-extrusion-vertical-gradient: true`, 1 is twice as dark.
         //
-        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        // `gradient_reference_height_inv` decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        const float legacyFloor = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float fMin = 1.0 - (1.0 - legacyFloor) * props.gradient_depth * 2.0;
+
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
-            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
             factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
         } else {
-            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
-            // intensity so that dimly lit scenes shade less.
-            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+            factor = mix(fMin, 1.0, t);
         }
         directional *= factor;
     }
@@ -305,19 +307,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
-        // of the reference height so this stays a multiply rather than a per-vertex
+        // `gradient_depth` sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // `fill-extrusion-vertical-gradient: true`, 1 is twice as dark.
         //
-        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        // `gradient_reference_height_inv` decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        const float legacyFloor = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float fMin = 1.0 - (1.0 - legacyFloor) * props.gradient_depth * 2.0;
+
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
-            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
             factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
         } else {
-            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
-            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
-            // how `false` is represented.
-            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+            factor = mix(fMin, 1.0, t);
         }
         directional *= factor;
     }
@@ -461,19 +464,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
     if (normal.z == 0.0) {
-        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
-        // of the reference height so this stays a multiply rather than a per-vertex
+        // `gradient_depth` sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // `fill-extrusion-vertical-gradient: true`, 1 is twice as dark.
         //
-        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        // `gradient_reference_height_inv` decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        const float legacyFloor = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float fMin = 1.0 - (1.0 - legacyFloor) * props.gradient_depth * 2.0;
+
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
-            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
             factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
         } else {
-            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
-            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
-            // how `false` is represented.
-            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+            factor = mix(fMin, 1.0, t);
         }
         directional *= factor;
     }
@@ -688,19 +692,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
     if (normal.z == 0.0) {
-        // `gradient_reference_height_inv` selects the shading model, and holds the reciprocal
-        // of the reference height so this stays a multiply rather than a per-vertex
+        // `gradient_depth` sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // `fill-extrusion-vertical-gradient: true`, 1 is twice as dark.
         //
-        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        // `gradient_reference_height_inv` decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        const float legacyFloor = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float fMin = 1.0 - (1.0 - legacyFloor) * props.gradient_depth * 2.0;
+
         float factor;
         if (props.gradient_reference_height_inv > 0.0) {
-            const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
             factor = clamp((t + base) * sqrt(height * props.gradient_reference_height_inv), fMin, 1.0);
         } else {
-            // `gradient_depth` is how dark the foot of a wall gets, scaled by the light
-            // intensity so that dimly lit scenes shade less. 0 is an exact no-op, which is
-            // how `false` is represented.
-            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+            factor = mix(fMin, 1.0, t);
         }
         directional *= factor;
     }

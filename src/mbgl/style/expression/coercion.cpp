@@ -112,7 +112,12 @@ EvaluationResult toVerticalGradient(const Value& gradientValue) {
                 for (std::size_t i = 0; i < len; i++) {
                     componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
                 }
-                return VerticalGradient(std::span<float>(componentsAsFloats, len));
+                const std::span<const float> values(componentsAsFloats, len);
+                if (!VerticalGradient::isInRange(values)) {
+                    return EvaluationError{"Invalid vertical gradient value " + stringify(gradientValue) + ": " +
+                                           VerticalGradient::rangeErrorMessage};
+                }
+                return VerticalGradient(values);
             } else {
                 return EvaluationError{"Invalid vertical gradient value " + stringify(gradientValue) +
                                        ": expected an array containing one or two "

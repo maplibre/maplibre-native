@@ -167,6 +167,11 @@ std::optional<VerticalGradient> Converter<VerticalGradient>::operator()(const Co
         if (length >= 1 && length <= 2) {
             auto vector = Converter<std::vector<float>>{}(value, error);
             if (vector) {
+                if (!VerticalGradient::isInRange(*vector)) {
+                    error.message = VerticalGradient::rangeErrorMessage;
+                    return std::nullopt;
+                }
+
                 result = VerticalGradient(*vector);
             }
         }

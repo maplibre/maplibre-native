@@ -75,6 +75,55 @@ TEST(StyleConversion, VerticalGradient) {
     }
 }
 
+TEST(StyleConversion, VerticalGradientRangeValidation) {
+    Error error;
+    auto parseVerticalGradient = [&](const std::string& src) {
+        error = {};
+        return convertJSON<VerticalGradient>(src, error);
+    };
+
+    {
+        auto lower = parseVerticalGradient("[0]");
+        ASSERT_TRUE(lower.has_value());
+        ASSERT_EQ(0.0f, lower->depth);
+
+        auto upper = parseVerticalGradient("[1]");
+        ASSERT_TRUE(upper.has_value());
+        ASSERT_EQ(1.0f, upper->depth);
+    }
+    {
+        ASSERT_FALSE(parseVerticalGradient("[-0.1]").has_value());
+        ASSERT_FALSE(error.message.empty());
+    }
+    {
+        ASSERT_FALSE(parseVerticalGradient("[1.1]").has_value());
+        ASSERT_FALSE(error.message.empty());
+    }
+    {
+        ASSERT_FALSE(parseVerticalGradient("[-5]").has_value());
+        ASSERT_FALSE(parseVerticalGradient("[2, 150]").has_value());
+    }
+    {
+        auto zero = parseVerticalGradient("[0.5, 0]");
+        ASSERT_TRUE(zero.has_value());
+        ASSERT_EQ(0.0f, zero->referenceHeight);
+
+        auto tall = parseVerticalGradient("[0.5, 10000]");
+        ASSERT_TRUE(tall.has_value());
+        ASSERT_EQ(10000.0f, tall->referenceHeight);
+    }
+    {
+        ASSERT_FALSE(parseVerticalGradient("[0.5, -1]").has_value());
+        ASSERT_FALSE(error.message.empty());
+    }
+    {
+        parseVerticalGradient("[5]");
+        const auto rangeMessage = error.message;
+        parseVerticalGradient(R"("round")");
+        EXPECT_NE(rangeMessage, error.message);
+    }
+}
+
 TEST(StyleConversion, VerticalGradientReportsErrorsWithoutThrowing) {
     Error error;
 

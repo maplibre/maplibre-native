@@ -116,15 +116,20 @@ fn main(in: VertexInput) -> VertexOutput {
     var directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     if (normal.z == 0.0) {
-        // A positive `gradient_reference_height_inv` runs the legacy height-scaled gradient
-        // against it (what `fill-extrusion-vertical-gradient: true` maps to); zero runs the
-        // uniform ramp, shading every building regardless of height.
+        // `gradient_depth` sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // `fill-extrusion-vertical-gradient: true`, 1 is twice as dark.
+        //
+        // `gradient_reference_height_inv` decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        let legacyFloor = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        let gradientMin = 1.0 - (1.0 - legacyFloor) * props.gradient_depth * 2.0;
+
         var factor: f32;
         if (props.gradient_reference_height_inv > 0.0) {
-            let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
             factor = clamp((t + baseValue) * sqrt(heightValue * props.gradient_reference_height_inv), gradientMin, 1.0);
         } else {
-            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+            factor = mix(gradientMin, 1.0, t);
         }
         directional *= factor;
     }
@@ -311,15 +316,20 @@ fn main(in: VertexInput) -> VertexOutput {
     directional = mix(1.0 - props.light_intensity, max(0.5 + props.light_intensity, 1.0), directional);
 
     if (normal.z == 0.0) {
-        // A positive `gradient_reference_height_inv` runs the legacy height-scaled gradient
-        // against it (what `fill-extrusion-vertical-gradient: true` maps to); zero runs the
-        // uniform ramp, shading every building regardless of height.
+        // `gradient_depth` sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // `fill-extrusion-vertical-gradient: true`, 1 is twice as dark.
+        //
+        // `gradient_reference_height_inv` decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        let legacyFloor = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        let gradientMin = 1.0 - (1.0 - legacyFloor) * props.gradient_depth * 2.0;
+
         var factor: f32;
         if (props.gradient_reference_height_inv > 0.0) {
-            let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
             factor = clamp((t + baseValue) * sqrt(heightValue * props.gradient_reference_height_inv), gradientMin, 1.0);
         } else {
-            factor = mix(1.0 - props.gradient_depth * props.light_intensity, 1.0, t);
+            factor = mix(gradientMin, 1.0, t);
         }
         directional *= factor;
     }

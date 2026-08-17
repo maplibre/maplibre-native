@@ -106,14 +106,20 @@ void main() {
     if (normal.z == 0.0) {
         // u_gradient_reference_height_inv selects the shading model, and holds the reciprocal of the reference height.
         // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        // u_gradient_depth sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // what a style value of true gives, 1 is twice as dark.
+        //
+        // u_gradient_reference_height_inv decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        float legacyFloor = mix(0.7, 0.98, 1.0 - u_lightintensity);
+        float fMin = 1.0 - (1.0 - legacyFloor) * u_gradient_depth * 2.0;
+
         float factor;
         if (u_gradient_reference_height_inv > 0.0) {
-            float fMin = mix(0.7, 0.98, 1.0 - u_lightintensity);
             factor = clamp((t + base) * sqrt(height * u_gradient_reference_height_inv), fMin, 1.0);
         } else {
-            // u_gradient_depth is how dark the foot of a wall gets, scaled by the light
-            // intensity so that dimly lit scenes shade less.
-            factor = mix(1.0 - u_gradient_depth * u_lightintensity, 1.0, t);
+            factor = mix(fMin, 1.0, t);
         }
         directional *= factor;
     }

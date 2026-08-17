@@ -6084,7 +6084,7 @@
     "fill-extrusion-vertical-gradient": {
       "type": "verticalGradient",
       "default": true,
-      "doc": "Vertical shading applied to the sides of a fill-extrusion layer. `true` shades the sides slightly darker farther down, scaled by building height so that the effect is only really visible above 150 meters. `false` disables shading. Alternatively, an array of one or two numbers, `[depth, referenceHeight]`, shades every building regardless of height: `depth` (0-1) is how dark the foot of a wall gets, scaled by the light intensity, where 0 disables shading; `referenceHeight` re-enables height scaling above the given height in meters, and defaults to 0 (disabled).",
+      "doc": "Vertical shading applied to the sides of a fill-extrusion layer. `true` shades the sides slightly darker farther down, scaled by building height so that the effect is only really visible above 150 meters. `false` disables shading. Alternatively, an array of one or two numbers, `[depth, referenceHeight]`. `depth` (0-1) is how dark the foot of a wall gets, as a multiple of the shading `true` applies: 0 disables shading, 0.5 matches `true`, 1 doubles it. `referenceHeight` selects whether the shading is scaled by building height: 0 (the default) shades every building equally, and a positive value in meters restores the height-scaled behaviour above that height, which is what `true` does at 150.",
       "transition": false,
       "sdk-support": {
         "basic functionality": {

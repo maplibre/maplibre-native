@@ -16,7 +16,8 @@ namespace mln {
 /// There is also no curve-shape parameter. A curve would require per-fragment
 /// evaluation or a subdivided wall mesh.
 struct VerticalGradient {
-    /// How dark the foot of a wall gets, scaled by the light intensity. 0 is a no-op.
+    /// How dark the foot of a wall gets, as a multiple of the shading `true` applies:
+    /// 0 is a no-op, 0.5 matches `true` exactly at every light intensity, 1 doubles it.
     static constexpr float defaultDepth = 0.5f;
     /// Height at which the legacy gradient reaches full strength. Shorter buildings
     /// are shaded proportionally less.
@@ -31,9 +32,17 @@ struct VerticalGradient {
     /// `[depth]` or `[depth, referenceHeight]`.
     explicit VerticalGradient(const std::span<const float>& values);
 
+    /// Whether the given `[depth]` or `[depth, referenceHeight]` values are in range:
+    /// depth within 0-1, referenceHeight non-negative.
+    static bool isInRange(const std::span<const float>& values);
+
+    /// The message the style-facing entry points report when `isInRange` fails.
+    static constexpr auto rangeErrorMessage = "value must be [depth (0-1), referenceHeight (>= 0)]";
+
     float depth = defaultDepth;
-    /// 0 disables height scaling, so every building is shaded regardless of height.
-    /// A positive value runs the legacy gradient against it.
+    /// Selects whether the shading is scaled by building height. 0 shades every building
+    /// equally; a positive value restores the height-scaled ramp above that height in
+    /// meters, which is what `true` does at 150. `depth` applies either way.
     float referenceHeight = legacyReferenceHeight;
 
     bool operator==(const VerticalGradient&) const = default;

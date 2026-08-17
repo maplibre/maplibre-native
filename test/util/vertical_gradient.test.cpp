@@ -55,6 +55,56 @@ TEST(VerticalGradient, ArrayCanReproduceLegacy) {
     EXPECT_NE(fromArray({0.5f}), fromArray({0.5f, 150.0f}));
 }
 
+TEST(VerticalGradient, IsInRange) {
+    auto inRange = [](std::vector<float> values) {
+        return VerticalGradient::isInRange(values);
+    };
+
+    EXPECT_TRUE(inRange({0.0f}));
+    EXPECT_TRUE(inRange({1.0f}));
+    EXPECT_TRUE(inRange({0.5f, 0.0f}));
+    EXPECT_TRUE(inRange({0.5f, 10000.0f}));
+
+    EXPECT_FALSE(inRange({-0.1f}));
+    EXPECT_FALSE(inRange({1.1f}));
+    EXPECT_FALSE(inRange({-5.0f}));
+    EXPECT_FALSE(inRange({0.5f, -1.0f}));
+
+    EXPECT_TRUE(inRange({}));
+
+    EXPECT_TRUE(inRange(std::vector<float>{VerticalGradient(true).depth, VerticalGradient(true).referenceHeight}));
+    EXPECT_TRUE(inRange(std::vector<float>{VerticalGradient(false).depth, VerticalGradient(false).referenceHeight}));
+}
+
+TEST(VerticalGradient, CoercionRejectsOutOfRangeValues) {
+    conversion::Error error;
+    auto parse = [&](const char* json) {
+        error = {};
+        return conversion::convertJSON<PropertyValue<VerticalGradient>>(
+            json, error, /*allowDataExpressions*/ false, /*convertTokens*/ false);
+    };
+
+    // In range
+    {
+        auto result = parse(R"(["to-verticalgradient", ["literal", [0.5, 80]]])");
+        ASSERT_TRUE(result) << error.message;
+        EXPECT_EQ(fromArray({0.5f, 80.0f}), result->asExpression().evaluate(0.0f));
+    }
+    // Out of range
+    {
+        auto result = parse(R"(["to-verticalgradient", ["literal", [-5, 0]]])");
+        if (result) {
+            EXPECT_EQ(VerticalGradient(), result->asExpression().evaluate(0.0f));
+        }
+    }
+    {
+        auto result = parse(R"(["to-verticalgradient", ["literal", [0.5, -1]]])");
+        if (result) {
+            EXPECT_EQ(VerticalGradient(), result->asExpression().evaluate(0.0f));
+        }
+    }
+}
+
 TEST(VerticalGradient, ToArrayOrder) {
     const auto values = fromArray({0.25f, 80.0f}).toArray();
     EXPECT_EQ(0.25f, values[0]);

@@ -251,7 +251,13 @@ private:  // Private utilities for converting from mgl to mbgl values
       for (size_t i = 0; i < array.count; ++i) {
         getMBGLValue(array[i], values[i]);
       }
-      mbglValue = mln::VerticalGradient(std::span<float>(values.begin(), array.count));
+      const std::span<const float> span(values.begin(), array.count);
+      if (!mln::VerticalGradient::isInRange(span)) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Vertical gradient %s",
+                           mln::VerticalGradient::rangeErrorMessage];
+      }
+      mbglValue = mln::VerticalGradient(span);
     } else if ([rawValue isKindOfClass:[NSNumber class]]) {
       NSNumber *number = (NSNumber *)rawValue;
       mbglValue = mln::VerticalGradient(number.boolValue);

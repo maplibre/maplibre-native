@@ -20,6 +20,16 @@ VerticalGradient::VerticalGradient(const std::span<const float>& values) {
     referenceHeight = values.size() > 1 ? values[1] : 0.0f;
 }
 
+bool VerticalGradient::isInRange(const std::span<const float>& values) {
+    if (!values.empty() && (values[0] < 0.0f || values[0] > 1.0f)) {
+        return false;
+    }
+    if (values.size() > 1 && values[1] < 0.0f) {
+        return false;
+    }
+    return true;
+}
+
 std::array<float, 2> VerticalGradient::toArray() const {
     return {{depth, referenceHeight}};
 }
