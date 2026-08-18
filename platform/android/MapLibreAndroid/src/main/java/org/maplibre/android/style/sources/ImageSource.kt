@@ -60,6 +60,10 @@ class ImageSource : Source {
      *
      *  * load resources from the Android file system
      *
+     *  * file:///android_asset/
+     *
+     *  * load resources from the APK assets folder (same as asset://)
+     *
      *  * asset://
      *
      *  * load resources from the binary packaged assets folder
@@ -136,6 +140,10 @@ class ImageSource : Source {
      *
      *  * load resources from the Android file system
      *
+     *  * file:///android_asset/
+     *
+     *  * load resources from the APK assets folder (same as asset://)
+     *
      *  * asset://
      *
      *  * load resources from the binary packaged assets folder
@@ -164,6 +172,10 @@ class ImageSource : Source {
      *  * file://
      *
      *  * load resources from the Android file system
+     *
+     *  * file:///android_asset/
+     *
+     *  * load resources from the APK assets folder (same as asset://)
      *
      *  * asset://
      *
