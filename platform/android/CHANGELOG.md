@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+- android: load APK assets from `file:///android_asset/` URIs in addition to `asset://`.
+
 ## 13.5.0
 
 ### 🐞 Bug fixes

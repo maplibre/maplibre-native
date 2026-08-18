@@ -48,6 +48,10 @@ class RasterDemSource : Source {
      *
      *  * load resources from the Android file system
      *
+     *  * file:///android_asset/
+     *
+     *  * load resources from the APK assets folder (same as asset://)
+     *
      *  * asset://
      *
      *  * load resources from the binary packaged assets folder
@@ -74,6 +78,10 @@ class RasterDemSource : Source {
      *  * file://
      *
      *  * load resources from the Android file system
+     *
+     *  * file:///android_asset/
+     *
+     *  * load resources from the APK assets folder (same as asset://)
      *
      *  * asset://
      *
@@ -103,6 +111,10 @@ class RasterDemSource : Source {
      *  * file://
      *
      *  * load resources from the Android file system
+     *
+     *  * file:///android_asset/
+     *
+     *  * load resources from the APK assets folder (same as asset://)
      *
      *  * asset://
      *

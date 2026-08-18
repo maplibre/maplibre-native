@@ -824,6 +824,9 @@ public class Style {
      * <li>{@code asset://...}:
      * loads the style from the APK {@code assets/} directory.
      * This is used to load a style bundled with your app.</li>
+     * <li>{@code file:///android_asset/...}:
+     * same as {@code asset://}, using the Android WebView-style asset URI
+     * (also produced by Compose Multiplatform {@code Res.getUri()}).</li>
      * <li>{@code file://...}:
      * loads the style from a file path. This is used to load a style from disk.
      * </li>
@@ -861,6 +864,9 @@ public class Style {
      * <li>{@code asset://...}:
      * loads the style from the APK {@code assets/} directory.
      * This is used to load a style bundled with your app.</li>
+     * <li>{@code file:///android_asset/...}:
+     * same as {@code asset://}, using the Android WebView-style asset URI
+     * (also produced by Compose Multiplatform {@code Res.getUri()}).</li>
      * <li>{@code file://...}:
      * loads the style from a file path. This is used to load a style from disk.
      * </li>

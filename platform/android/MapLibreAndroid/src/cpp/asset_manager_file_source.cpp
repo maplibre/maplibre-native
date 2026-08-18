@@ -5,6 +5,7 @@
 #include <mbgl/storage/resource.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/storage/response.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/thread.hpp>
 #include <mbgl/util/url.hpp>
 #include <mbgl/util/util.hpp>
@@ -12,7 +13,43 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
+#include <optional>
+#include <string_view>
+
 namespace mln {
+namespace {
+
+// Android WebView / Media3 / Coil / Glide / Picasso / Compose Multiplatform Res.getUri().
+constexpr std::string_view kAndroidAssetPathPrefix = "/android_asset/";
+
+void stripLeadingSlashes(std::string& path) {
+    path.erase(0, path.find_first_not_of('/'));
+}
+
+// Resolves MapLibre `asset://` and the Android `file:///android_asset/` convention
+// to a path suitable for AAssetManager_open (no leading '/').
+std::optional<std::string> androidAssetPathFromUrl(const std::string& url) {
+    if (url.starts_with(util::ASSET_PROTOCOL)) {
+        std::string path = util::percentDecode(url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
+        // asset://foo and asset:///foo both resolve to foo.
+        stripLeadingSlashes(path);
+        return path;
+    }
+
+    if (url.starts_with(util::FILE_PROTOCOL)) {
+        std::string path = util::percentDecode(url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
+        if (!path.starts_with(kAndroidAssetPathPrefix)) {
+            return std::nullopt;
+        }
+        path = path.substr(kAndroidAssetPathPrefix.size());
+        stripLeadingSlashes(path);
+        return path;
+    }
+
+    return std::nullopt;
+}
+
+} // namespace
 
 class AssetManagerFileSource::Impl {
 public:
@@ -25,12 +62,17 @@ public:
           assetManager(assetManager_) {}
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
-        // Note: AssetManager already prepends "assets" to the filename.
-        const std::string path = mln::util::percentDecode(url.substr(8));
-
         Response response;
 
-        if (AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER)) {
+        const auto path = androidAssetPathFromUrl(url);
+        if (!path) {
+            response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid asset URL");
+            req.invoke(&FileSourceRequest::setResponse, response);
+            return;
+        }
+
+        // Note: AssetManager already prepends "assets" to the filename.
+        if (AAsset* asset = AAssetManager_open(assetManager, path->c_str(), AASSET_MODE_BUFFER)) {
             response.data = std::make_shared<std::string>(reinterpret_cast<const char*>(AAsset_getBuffer(asset)),
                                                           AAsset_getLength64(asset));
             AAsset_close(asset);
@@ -79,7 +121,7 @@ std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& re
 }
 
 bool AssetManagerFileSource::canRequest(const Resource& resource) const {
-    return 0 == resource.url.rfind(mln::util::ASSET_PROTOCOL, 0);
+    return androidAssetPathFromUrl(resource.url).has_value();
 }
 
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
