@@ -28,6 +28,7 @@ class ImageManager;
 class LineAtlas;
 class PatternAtlas;
 class UnwrappedTileID;
+class RenderTerrain;
 
 namespace gfx {
 class Context;
@@ -82,6 +83,29 @@ public:
     PatternAtlas& patternAtlas;
     TexturePool& texturePool;
 
+    /// Set when 3D terrain is enabled; used by layer tweakers to bind DEM elevation data
+    RenderTerrain* terrain = nullptr;
+
+    /// (z, x including wrap, y, 1) of the drape render target currently being
+    /// rendered into, zero otherwise; backends without per-pass global uniform
+    /// rebinding (Vulkan push constants) deliver it to apply_drape_transform
+    /// from here at draw-record time
+    std::array<float, 4> currentDrapeTile{{0, 0, 0, 0}};
+
+    /// Frame-global signature of everything a terrain drape's baked content can
+    /// depend on (the set of draped drawable ids, the draped group count, zoom,
+    /// and the evaluated-property epoch). Computed once per frame; used to gate the
+    /// draped layer groups' tweakers (all-or-nothing, cheap). See Renderer::render.
+    std::size_t drapedContentSignature = 0;
+
+    /// Per-drape-target signature, keyed by target tile id: a signature of just the
+    /// drawables overlapping that target (plus zoom and the property epoch), built
+    /// once per frame in a single pass. RenderTarget::render compares its target's
+    /// entry against what the target last baked, so during movement only the targets
+    /// whose own content changed re-scan/re-render - not all of them, as the global
+    /// signature would force. Owned by the renderer for the frame; null off-terrain.
+    const std::map<UnwrappedTileID, std::size_t>* perTargetDrapeSignature = nullptr;
+
     RenderPass pass = RenderPass::Opaque;
     MapMode mapMode;
     MapDebugOptions debugOptions;
@@ -97,6 +121,14 @@ public:
     gfx::ColorMode colorModeForRenderPass() const;
 
     mat4 matrixForTile(const UnwrappedTileID&, bool aligned = false) const;
+
+    /// The matrix that places a tile's clipping-mask quad where that tile's geometry
+    /// actually lands. Outside a drape pass this is `matrixForTile`. Inside one, draped
+    /// geometry does not use the camera matrix at all - it uses a tile-local orthographic
+    /// matrix plus an affine NDC placement the vertex shader applies from the drawable and
+    /// target tile ids (apply_drape_transform), so the mask has to be built the same way or
+    /// it would clip against the wrong region.
+    mat4 clipMatrixForTile(const UnwrappedTileID&) const;
 
     // Stencil handling
 public:
@@ -117,6 +149,12 @@ public:
 
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
     void clearStencil();
+
+    /// Forget the cached tile clipping masks, without touching the stencil buffer.
+    /// The cache is keyed only on the tile set, so it has to be dropped whenever the
+    /// same tiles would now be placed differently - entering or leaving a drape
+    /// target, or moving between drape targets (see clipMatrixForTile).
+    void invalidateTileClippingMasks() { tileClippingMaskIDs.clear(); }
 
     /// @brief Get a stencil mode for rendering constrined to the specified tile ID.
     /// The tile ID must have been present in the set previously passed to `renderTileClippingMasks`

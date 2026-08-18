@@ -48,8 +48,16 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const auto anchor = data.translateAnchor;
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        // Collision debug boxes are never draped
+        const auto matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          translate,
+                                          anchor,
+                                          nearClipped,
+                                          inViewportPixelUnits,
+                                          drawable,
+                                          /*aligned=*/false,
+                                          /*renderToTerrain=*/false);
 
         // extrude scale
         const auto pixelRatio = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));

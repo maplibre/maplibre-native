@@ -200,6 +200,7 @@ public:
     std::size_t clearDrawables() override;
 
     void setStencilTiles(RenderTiles);
+    const RenderTiles& getStencilTiles() const { return stencilTiles; }
 
     void updateLayerIndex(int32_t value) override { layerIndex = value; }
 

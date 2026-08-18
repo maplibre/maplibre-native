@@ -7,26 +7,22 @@
 #include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/shaders/terrain_layer_ubo.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/logging.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace mbgl {
 
 using namespace shaders;
 
 void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    Log::Info(Event::Render,
-              "TerrainLayerTweaker::execute called, layerGroup.empty()=" + std::to_string(layerGroup.empty()) +
-                  ", terrain=" + std::to_string(terrain != nullptr));
-
     if (layerGroup.empty() || !terrain) {
-        Log::Warning(Event::Render, "TerrainLayerTweaker::execute early return - empty or no terrain");
         return;
     }
-
-    Log::Info(Event::Render,
-              "TerrainLayerTweaker processing " + std::to_string(layerGroup.getDrawableCount()) + " drawables");
 
     auto& context = parameters.context;
 
@@ -35,24 +31,24 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // Get terrain properties
-    const float baseExaggeration = terrain->getExaggeration();
-    // Apply moderate exaggeration for visible 3D terrain (3x)
-    const float exaggeration = baseExaggeration * 3.0f;
-    const float elevationOffset = 0.0f;
+    // Get terrain properties; per the style spec, exaggeration is applied as-is
+    // (default 1.0 renders true-scale elevation)
+    const float exaggeration = terrain->getExaggeration();
 
-    static bool hasLoggedExaggeration = false;
-    if (!hasLoggedExaggeration) {
-        Log::Info(Event::Render,
-                  "Terrain exaggeration: base=" + std::to_string(baseExaggeration) +
-                      ", multiplied=" + std::to_string(exaggeration));
-        hasLoggedExaggeration = true;
-    }
+    // Skirt depth (u_ele_delta): the shader drops the mesh's skirt vertices by
+    // this many metres into a curtain that hides the cracks between neighbouring
+    // tiles at different zoom levels. ~1/5 of the tile's world width at this zoom,
+    // matching maplibre-gl-js Terrain.getSkirtLength().
+    const auto zoom = std::max(parameters.state.getZoom(), 0.0);
+    const float elevationOffset = static_cast<float>(util::M2PI * util::EARTH_RADIUS_M / std::pow(2.0, zoom) / 5.0);
 
     // Populate layer-level UBO with terrain properties
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    const TerrainEvaluatedPropsUBO propsUBO = {
-        .exaggeration = exaggeration, .elevation_offset = elevationOffset, .pad1 = 0.0f, .pad2 = 0.0f};
+    const TerrainEvaluatedPropsUBO propsUBO = {.unpack = terrain->getDEMUnpackVector(),
+                                               .exaggeration = exaggeration,
+                                               .elevation_offset = elevationOffset,
+                                               .pad1 = 0.0f,
+                                               .pad2 = 0.0f};
     layerUniforms.createOrUpdate(idTerrainEvaluatedPropsUBO, &propsUBO, context);
 
 #if MLN_UBO_CONSOLIDATION
@@ -69,8 +65,25 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         // Calculate transformation matrix for this terrain tile
-        // This uses the same matrix calculation as other layers
+        // This uses the same matrix calculation as other layers. The metres->world
+        // pixels elevation scale (pixelsPerMeter) is baked into the projection matrix
+        // in TransformState::getProjMatrix, so it applies here and to the elevated
+        // symbol / circle layers consistently, matching maplibre-gl-js.
         mat4 matrix = parameters.matrixForTile(tileID);
+
+#if !MLN_RENDER_BACKEND_OPENGL
+        // matrixForTile builds a GL-convention projection (clip z in [-1, 1]); Vulkan,
+        // Metal and WebGPU clip to [0, 1]. Remap clip z from [-1, 1] to [0, 1] the usual
+        // way, z' = (z + w) / 2, so terrain that projects into the near half of the GL
+        // clip volume (z < 0) is not clipped away on those backends. Matches
+        // LayerTweaker::getTileMatrix and clipMatrixForTile, which remap the draped / RTT
+        // matrices for the same reason. Monotonic, so skirt-vs-surface depth ordering and
+        // the packed depth texture used for symbol occlusion are preserved; GL unchanged.
+        matrix[2] = 0.5 * (matrix[2] + matrix[3]);
+        matrix[6] = 0.5 * (matrix[6] + matrix[7]);
+        matrix[10] = 0.5 * (matrix[10] + matrix[11]);
+        matrix[14] = 0.5 * (matrix[14] + matrix[15]);
+#endif
 
 #if !MLN_UBO_CONSOLIDATION
         auto& drawableUniforms = drawable.mutableUniformBuffers();
@@ -81,7 +94,8 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #else
         const TerrainDrawableUBO drawableUBO = {
 #endif
-            .matrix = util::cast<float>(matrix)
+            .matrix = util::cast<float>(matrix),
+            .dem_coords = terrain->getDrawableDemCoords(*drawable.getTileID())
         };
 
 #if !MLN_UBO_CONSOLIDATION

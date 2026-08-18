@@ -30,9 +30,17 @@ struct alignas(16) FillExtrusionDrawableUBO {
     /* 100 */ float pattern_from_t;
     /* 104 */ float pattern_to_t;
     /* 108 */ float pad1;
-    /* 112 */
+
+    // 3D terrain elevation
+    /* 112 */ float4 dem_coords;
+    /* 128 */ float4 dem_unpack;
+    /* 144 */ float dem_dim;
+    /* 148 */ float dem_exaggeration;
+    /* 152 */ float dem_enabled;
+    /* 156 */ float pad2;
+    /* 160 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "wrong size");
+static_assert(sizeof(FillExtrusionDrawableUBO) == 10 * 16, "wrong size");
 
 struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ float4 pattern_from;
@@ -69,25 +77,29 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
     short2 pos [[attribute(0)]];
+    ushort2 decimals_ed [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
+    float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(2)]];
+    float base [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(3)]];
+    float height [[attribute(4)]];
 #endif
+
+    // Polygon centroid, for the terrain elevation lookup
+    short2 centroid [[attribute(5)]];
 };
 
 struct FragmentStage {
@@ -103,25 +115,39 @@ struct FragmentOutput {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
-                                device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]]) {
+                                device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]]) {
 
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
+
+    // Raise the whole extrusion by the terrain elevation sampled once at the
+    // polygon centroid (so it doesn't shear across a slope), and drop
+    // ground-level floors slightly so buildings don't hang off a slope
+    // (mirrors the GL fill_extrusion.vertex.glsl / maplibre-gl-js)
+    const float ele = get_elevation(float2(vertx.centroid), demTexture, demSampler, drawable.dem_coords,
+                                    drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration,
+                                    drawable.dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    height += ele;
 
     const float3 normal = float3(0.0, 0.0, 1.0);
     const float t = 1.0;
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(vertx.pos), z, 1);
+    const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
+
+    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -154,7 +180,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
         // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
@@ -191,7 +217,7 @@ struct ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::M
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 5> instanceAttributes;
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto prelude = fillExtrusionShaderPrelude;
     static constexpr auto source = R"(
@@ -210,9 +236,14 @@ struct VertexStage {
 #endif
 };
 
+// Aliases the 12-byte FillExtrusionLayoutVertex (shared vertex buffer used as
+// the instance buffer); centroid_pos is the polygon centroid for terrain
+// elevation. Keep the layout in sync with the C++ struct and the Vulkan
+// OutlineInstance.
 struct OutlineInstance {
     short2 pos;
-    ushort2 ed_discard;
+    ushort2 decimals_ed;
+    short2 centroid_pos;
 };
 
 struct FragmentStage {
@@ -230,9 +261,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO* drawableVector [[buffer(idFillExtrusionDrawableUBO)]],
                                 device const FillExtrusionPropsUBO& props [[buffer(idFillExtrusionPropsUBO)]],
                                 uint instanceID [[ instance_id ]],
-                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
+                                device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]],
+                                texture2d<float, access::sample> demTexture [[texture(0)]],
+                                sampler demSampler [[sampler(0)]]) {
 
-    if (outline[instanceID].ed_discard.y) {
+    bool isDiscarded = glMod(float(outline[instanceID].decimals_ed.x), 2.0) > 0.0;
+    if (isDiscarded) {
         return {
             .position = float4(0.0),
             .color    = half4(0.0),
@@ -242,28 +276,34 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillExtrusionDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_base)
-    const auto base   = props.light_position_base.w;
+    auto base   = props.light_position_base.w;
 #else
-    const auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
+    auto base   = max(unpack_mix_float(vertx.base, drawable.base_t), 0.0);
 #endif
 #if defined(HAS_UNIFORM_u_height)
-    const auto height = props.height;
+    auto height = props.height;
 #else
-    const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
+    auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
 
-    float2 p1 = float2(outline[instanceID + 1].pos);
-    float2 p2 = float2(outline[instanceID + 0].pos);
-    float2 perp = p1 - p2;
-    float magnitude = sqrt(perp.x * perp.x + perp.y * perp.y);
-    if (magnitude > 0) {
-        perp = perp / magnitude;
-    }
+    // Same rigid whole-building lift as the roof shader: elevation at the
+    // polygon centroid (from the aliased instance record), so walls and roof
+    // stay attached on a slope
+    const float ele = get_elevation(float2(outline[instanceID].centroid_pos), demTexture, demSampler,
+                                    drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim,
+                                    drawable.dem_exaggeration, drawable.dem_enabled);
+    base += ele - (base > 0.0 ? 0.0 : 10.0) * drawable.dem_enabled;
+    height += ele;
 
-    const float3 normal = float3(-perp.y, perp.x, 0.0);
+    const float2 p1 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].decimals_ed.x / 2)) / 128.0;
+    const float2 p2 = float2(outline[instanceID + 1].pos) + unpack_float(float(outline[instanceID + 1].decimals_ed.x / 2)) / 128.0;
+    const float2 edgevector = normalize(p2 - p1);
+
+    const float3 normal = float3(-edgevector.y, edgevector.x, 0.0);
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(outline[instanceID + vertx.pos.x].pos), z, 1);
+
+    const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -296,7 +336,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = mix(minDirectional, maxDirectional, directionalFraction);
 
     // Add gradient along z axis of side surfaces
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no
         // vertical gradient, and otherwise calculates the gradient based on base + height
         // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
@@ -331,7 +371,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -340,18 +380,19 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
 
 struct VertexStage {
     short2 pos [[attribute(0)]];
+    ushort2 decimals_ed [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(1)]];
+    float base [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(2)]];
+    float height [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(3)]];
+    ushort4 pattern_from [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(4)]];
+    ushort4 pattern_to [[attribute(5)]];
 #endif
 };
 
@@ -398,7 +439,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float3 normal = float3(0.0, 0.0, 1.0);
     const float t = 1.0;
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(vertx.pos), z, 1);
+    const float2 decimals = unpack_float(float(vertx.decimals_ed.x / 2)) / 128.0;
+
+    const float4 position = drawable.matrix * float4(float2(vertx.pos) + decimals, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -441,12 +484,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
-        directional *= (
-            (1.0 - props.vertical_gradient) +
-            (props.vertical_gradient * clamp((t + base) * pow(height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - props.light_intensity), 1.0)));
+        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
+        //       the square root when height is a uniform.
+        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
+        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb), float3(1.0));
@@ -537,9 +582,14 @@ struct VertexStage {
 #endif
 };
 
+// Aliases the 12-byte FillExtrusionLayoutVertex (shared vertex buffer used as
+// the instance buffer); centroid_pos is the polygon centroid for terrain
+// elevation. Keep the layout in sync with the C++ struct and the Vulkan
+// OutlineInstance.
 struct OutlineInstance {
     short2 pos;
-    ushort2 ed_discard;
+    ushort2 decimals_ed;
+    short2 centroid_pos;
 };
 
 struct FragmentStage {
@@ -570,7 +620,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 uint instanceID [[ instance_id ]],
                                 device const OutlineInstance* outline [[buffer(fillExtrusionUBOCount + 1)]]) {
 
-    if (outline[instanceID].ed_discard.y) {
+    bool isDiscarded = glMod(float(outline[instanceID].decimals_ed.x), 2.0) > 0.0;
+    if (isDiscarded) {
         return {
             .position       = float4(0.0),
             .lighting       = float4(0.0),
@@ -600,19 +651,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto height = max(unpack_mix_float(vertx.height, drawable.height_t), 0.0);
 #endif
 
-    float2 p1 = float2(outline[instanceID + 1].pos);
-    float2 p2 = float2(outline[instanceID + 0].pos);
-    float2 perp = p1 - p2;
-    float magnitude = sqrt(perp.x * perp.x + perp.y * perp.y);
-    if (magnitude > 0) {
-        perp = perp / magnitude;
-    }
+    const float2 p1 = float2(outline[instanceID + 0].pos) + unpack_float(float(outline[instanceID + 0].decimals_ed.x / 2)) / 128.0;
+    const float2 p2 = float2(outline[instanceID + 1].pos) + unpack_float(float(outline[instanceID + 1].decimals_ed.x / 2)) / 128.0;
+    const float2 edgevector = normalize(p2 - p1);
 
-    const float3 normal = float3(-perp.y, perp.x, 0.0);
-    const float edgedistance = outline[instanceID + 1 - vertx.pos.x].ed_discard.x;
+    const float3 normal = float3(-edgevector.y, edgevector.x, 0.0);
+    const float edgedistance = outline[instanceID + 1 - vertx.pos.x].decimals_ed.y;
     const float t = float(vertx.pos.y);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = drawable.matrix * float4(float2(outline[instanceID + vertx.pos.x].pos), z, 1);
+
+    const float4 position = drawable.matrix * float4(vertx.pos.x == 0.0 ? p1 : p2, z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -660,12 +708,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);
 
-    if (normal.y != 0.0) {
+    if (normal.z == 0.0) {
         // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
         // and otherwise calculates the gradient based on base + height
-        directional *= (
-            (1.0 - props.vertical_gradient) +
-            (props.vertical_gradient * clamp((t + base) * pow(height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - props.light_intensity), 1.0)));
+        // TODO: If we're optimizing to the level of avoiding branches, we should pre-compute
+        //       the square root when height is a uniform.
+        const float fMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
+        const float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
+        directional *= (1.0 - props.vertical_gradient) + (props.vertical_gradient * factor);
     }
 
     lighting.rgb += clamp(directional * props.light_color_pad.rgb, mix(float3(0.0), float3(0.3), 1.0 - props.light_color_pad.rgb), float3(1.0));

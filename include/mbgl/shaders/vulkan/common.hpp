@@ -105,6 +105,7 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float pixel_ratio;
     float map_zoom;
     float pad1;
+    vec4 drape_tile;
 } paintParams;
 
 #ifdef USE_SURFACE_TRANSFORM
@@ -113,12 +114,136 @@ layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
 } platformParams;
 #endif
 
-void applySurfaceTransform() {
+// Draped geometry passes its drape target tile (the push-constant drape_tile that
+// apply_drape_transform also uses; the per-target global UBO swap is a no-op on
+// Vulkan). While drawing into a drape target (drape_tile.w != 0) the surface
+// transform is skipped: the offscreen drape target is oriented by the tile-local
+// drape ortho and matched by the terrain shader's uv.y sample flip, so applying the
+// swapchain's pre-rotation + y-down flip on top would mirror every draped tile
+// vertically — the draped map (color-relief, hillshade, fill, ...) stops lining up
+// with the terrain heights, and apply_drape_transform's zoom-mismatch y-offset
+// inverts (the misalignment grows on zoom-out). Matches the GL path, which applies
+// no surface flip to draped geometry.
+void applySurfaceTransform(vec4 drape_tile) {
+    if (drape_tile.w != 0.0) {
+        return;
+    }
+
 #ifdef USE_SURFACE_TRANSFORM
     gl_Position.xy = platformParams.rotation * gl_Position.xy;
 #endif
 
     gl_Position.y *= -1.0;
+}
+
+// Same surface transform applied to a value instead of gl_Position: used to bring a
+// tile-projected position into the clip space the terrain depth pass rendered in
+// (which itself went through applySurfaceTransform), e.g. for calculate_visibility.
+vec4 surface_transformed(vec4 pos) {
+#ifdef USE_SURFACE_TRANSFORM
+    pos.xy = platformParams.rotation * pos.xy;
+#endif
+    pos.y *= -1.0;
+    return pos;
+}
+
+// Non-draped geometry renders to the swapchain and always gets the surface transform.
+void applySurfaceTransform() {
+    applySurfaceTransform(vec4(0.0));
+}
+
+// Place a clip-space position computed with a tile-local drape matrix into the
+// current terrain drape render target (see the GL prelude for the derivation).
+// `matrix` carries the drawable's tile (z, x, y) in its unused third column and
+// target_tile is GlobalPaintParamsUBO::drape_tile (w != 0 while drawing into a
+// drape target). Must be applied before applySurfaceTransform().
+vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
+    if (target_tile.w == 0.0) {
+        return clip;
+    }
+    vec3 tile = vec3(matrix[2][0], matrix[2][1], matrix[2][2]);
+    float k = target_tile.x - tile.x; // target zoom - drawable zoom
+    float scale = exp2(k);
+    vec2 offset;
+    if (k >= 0.0) {
+        offset = tile.yz * scale - target_tile.yz;
+    } else {
+        offset = (tile.yz - target_tile.yz * exp2(-k)) * scale;
+    }
+    clip.x = clip.x * scale + (scale - 1.0 + 2.0 * offset.x);
+    clip.y = clip.y * scale + (1.0 - scale - 2.0 * offset.y);
+    return clip;
+}
+
+// Sample the terrain elevation in meters at a tile-local coordinate, with manual
+// bilinear interpolation on DEM pixel centers (the DEM has a 1px backfilled border),
+// matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
+// terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
+// sampler and dem_* values are passed in as arguments rather than read from globals.
+// Unpack a depth value packed by the terrain depth pass (vulkan/terrain_depth.hpp).
+// The pass packs gl_FragCoord.z in [0,1]; remap it to [-1,1] with *2-1, as the GL
+// prelude and Metal do. The terrain depth pass renders with the terrain tweaker's
+// matrix, which remaps clip z from GL's [-1,1] to Vulkan's [0,1] - but the SYMBOL
+// matrices carry no such remap, so the pos.z/pos.w compared in calculate_visibility
+// is still in GL convention ([-1,1]). Returning the stored [0,1] value unconverted
+// made the comparison almost never fire (labels showed through terrain); converting
+// back to [-1,1] puts both sides in the same (GL) z space.
+float unpack_depth(vec4 rgba_depth) {
+    const vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
+    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+}
+
+// Whether a clip-space position is visible in front of the terrain, from the
+// packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
+// Pass the position *after* applySurfaceTransform(), so it shares the clip space
+// the depth pass rendered in; Vulkan's y-down NDC and top-left texture origin
+// then agree, so no V flip is needed (unlike Metal).
+// Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
+// hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
+// sitting exactly on the terrain surface (e.g. a label anchored to it) does not
+// occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+float depth_opacity(vec3 frag, sampler2D depth_texture) {
+    const float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+}
+float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
+    if (depth_enabled == 0.0) {
+        return 1.0;
+    }
+    const vec3 frag = pos.xyz / pos.w;
+    // check if coordinate is fully visible
+    const float d = depth_opacity(frag, depth_texture);
+    if (d > 0.95) {
+        return 1.0;
+    }
+    // if not, sample some pixels above: a label whose anchor is just behind a
+    // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour).
+    // Vulkan NDC is y-down (pos comes after applySurfaceTransform), so "above"
+    // on screen is -y, where gl-js's y-up NDC uses +y.
+    return (d + depth_opacity(frag + vec3(0.0, -0.01, 0.0), depth_texture)) / 2.0;
+}
+
+float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
+                    float dem_dim, float dem_exaggeration, float dem_enabled) {
+    if (dem_enabled == 0.0) {
+        return 0.0;
+    }
+    vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 1.0;
+    vec2 f = fract(coord);
+    vec2 c = (floor(coord) + 0.5) / (dem_dim + 2.0);
+    float d = 1.0 / (dem_dim + 2.0);
+    vec4 tl = textureLod(dem, c, 0.0) * 255.0;
+    tl.a = -1.0;
+    vec4 tr = textureLod(dem, c + vec2(d, 0.0), 0.0) * 255.0;
+    tr.a = -1.0;
+    vec4 bl = textureLod(dem, c + vec2(0.0, d), 0.0) * 255.0;
+    bl.a = -1.0;
+    vec4 br = textureLod(dem, c + vec2(d, d), 0.0) * 255.0;
+    br.a = -1.0;
+    float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
+                          mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
+                          f.y);
+    return elevation * dem_exaggeration;
 }
 
 )";
@@ -152,6 +277,7 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float pixel_ratio;
     float map_zoom;
     float pad1;
+    vec4 drape_tile;
 } paintParams;
 
 )";

@@ -18,8 +18,8 @@
 namespace mbgl {
 namespace webgpu {
 
-LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : mbgl::LayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
+LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_, bool renderToTerrain_)
+    : mbgl::LayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
 
 void LayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled) {

@@ -17,7 +17,9 @@ const std::array<AttributeInfo, 8> CircleShaderSource::attributes = {
     AttributeInfo{6, gfx::AttributeDataType::Float2, idCircleStrokeWidthVertexAttribute},
     AttributeInfo{7, gfx::AttributeDataType::Float2, idCircleStrokeOpacityVertexAttribute},
 };
-const std::array<TextureInfo, 0> CircleShaderSource::textures = {};
+const std::array<TextureInfo, 1> CircleShaderSource::textures = {
+    TextureInfo{0, idCircleDEMTexture},
+};
 
 } // namespace shaders
 } // namespace mbgl

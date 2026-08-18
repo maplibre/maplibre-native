@@ -28,6 +28,7 @@ layout(location = 0) in ivec2 in_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct BackgroundDrawableUBO {
@@ -44,7 +45,8 @@ void main() {
     const BackgroundDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    applySurfaceTransform();
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
+    applySurfaceTransform(constant.drape_tile);
 }
 )";
 
@@ -85,6 +87,7 @@ layout(location = 0) in ivec2 in_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct BackgroundPatternDrawableUBO {
@@ -132,7 +135,8 @@ void main() {
                                  in_position);
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    applySurfaceTransform();
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
+    applySurfaceTransform(constant.drape_tile);
 }
 )";
 

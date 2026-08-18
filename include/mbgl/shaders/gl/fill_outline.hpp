@@ -18,6 +18,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     highp float u_pixel_ratio;
     highp float u_map_zoom;
     lowp float global_pad1;
+    highp vec4 u_drape_tile;
 };
 
 layout (std140) uniform FillOutlineDrawableUBO {
@@ -64,6 +65,7 @@ lowp float opacity = u_opacity;
 #endif
 
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
 }
 )";

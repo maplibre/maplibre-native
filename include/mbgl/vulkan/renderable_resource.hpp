@@ -26,6 +26,16 @@ public:
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;
     virtual float getRotation() const { return 0.0f; }
 
+    /// Whether this render pass has a stencil attachment. Offscreen render targets
+    /// (e.g. the terrain drape RTT) have a depth attachment but no stencil, matching
+    /// maplibre-gl-js's drape framebuffer, so pipelines rendered into them must not
+    /// enable stencil test/write.
+    virtual bool hasStencilAttachment() const { return true; }
+
+    /// Whether this renderable is the window surface (offscreen render targets
+    /// return false; they have no swapchain or surface transform)
+    virtual bool isSurface() const { return false; }
+
 protected:
     RendererBackend& backend;
 
@@ -69,6 +79,8 @@ public:
 
     bool hasSurfaceTransformSupport() const;
     bool didSurfaceTransformUpdate() const;
+
+    bool isSurface() const override { return true; }
 
     // rotation needed to align framebuffer contents with device surface
     float getRotation() const override;

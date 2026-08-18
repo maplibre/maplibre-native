@@ -3,12 +3,16 @@
 #include <mbgl/style/terrain_impl.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/constants.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/renderer/texture_pool.hpp>
+#include <mbgl/util/mat4.hpp>
 
+#include <array>
 #include <memory>
 #include <map>
+#include <set>
 #include <string>
 #include <optional>
 #include <vector>
@@ -35,6 +39,12 @@ class ShaderRegistry;
 class Texture2D;
 } // namespace gfx
 
+#if MLN_RENDER_BACKEND_OPENGL
+namespace gl {
+class Texture2DArray;
+} // namespace gl
+#endif
+
 /**
  * @brief Manages 3D terrain rendering using DEM (Digital Elevation Model) data
  *
@@ -49,11 +59,39 @@ public:
     RenderTerrain(Immutable<style::Terrain::Impl>);
     ~RenderTerrain();
 
-    /**
-     * @brief Update terrain state for the current frame
-     * @param parameters Update parameters including transform state and sources
-     */
-    void update(const UpdateParameters& parameters);
+    /// The terrain mesh (and drape render target) tile set, computed as an
+    /// elevation-aware, LOD-based ideal cover directly from the transform - like
+    /// maplibre-gl-js `coveringTiles({tileSize: 512, terrain})` - rather than
+    /// from the DEM source's loaded render tiles. This matters for sparse DEMs
+    /// (e.g. mapterhorn), where high-zoom tiles 404 and native falls back to a
+    /// lower-zoom DEM tile: deriving the mesh cover from that fallback set would
+    /// drag the drape resolution down with it (large low-zoom drape targets =
+    /// blurry roads) and leave uncovered areas as skirt until the DEM loads. The
+    /// mesh cover instead stays at the view's ideal zoom; the DEM/drape textures
+    /// fall back to ancestors per tile while exact tiles load. Needs the DEM
+    /// source, so it is a member (not static). Returns {} when there is none.
+    std::set<UnwrappedTileID> computeMeshCover(const TransformState& state,
+                                               const std::shared_ptr<UpdateParameters>& updateParameters) const;
+
+    /// Resolve the DEM render source from the orchestrator if not yet bound.
+    /// Renderer::Impl::render calls this before building the frame's drape-target
+    /// pool from computeMeshCover: the source is otherwise first bound inside
+    /// update(), which runs after the pool is built, so the FIRST frame after a
+    /// style (re)load computed an empty cover -> zero drape targets -> update()
+    /// created no terrain drawables -> terrain rendered nothing. Continuous
+    /// rendering hid this (frame 2 recovers); single-frame still renders - the
+    /// render tests - stayed blank.
+    void prepareSource(class RenderOrchestrator& orchestrator);
+
+    /// Cache the mesh cover Renderer::Impl computed for this frame, so update()
+    /// meshes exactly the tile set the drape-target pool was built from.
+    /// computeMeshCover() is not stable within a frame: it derives its tile size
+    /// from `demDim`, which is 0 until the first DEM decodes and only then takes
+    /// the source's real value. For a 256px DEM the pre-pool call therefore falls
+    /// back to 512 and covers a different (shallower) tile set than the in-update
+    /// call, so every getRenderTarget() lookup missed and no terrain drawable was
+    /// ever created - the map rendered empty.
+    void setFrameMeshCover(std::set<UnwrappedTileID> cover) { frameMeshCover = std::move(cover); }
 
     /**
      * @brief Update terrain rendering (create/update drawables)
@@ -108,6 +146,59 @@ public:
     bool isEnabled() const;
 
     /**
+     * @brief Remove the terrain's mesh layer group from the orchestrator.
+     *
+     * Must be queued (and the changes processed) before this RenderTerrain is
+     * destroyed. activateLayerGroup() registers the mesh layer group with the
+     * orchestrator, which then holds its own reference; dropping RenderTerrain
+     * alone leaves that group behind, so the orchestrator keeps drawing an
+     * orphaned terrain surface (a second, floating terrain layer appears after
+     * the user toggles 3D terrain off and back on).
+     */
+    void deactivate(UniqueChangeRequestVec& changes);
+
+    /**
+     * @brief Get the DEM unpack vector for the source's raster-dem encoding
+     */
+    const std::array<float, 4>& getDEMUnpackVector() const { return demUnpackVector; }
+
+    /**
+     * @brief {scale, x offset, y offset, DEM dim} mapping a terrain drawable's
+     * tile-local position (0..EXTENT) into its bound DEM texture's normalized
+     * space, for the shader's get_elevation() (see the demCoords built in update)
+     */
+    std::array<float, 4> getDrawableDemCoords(const OverscaledTileID& tileID) const {
+        const auto it = drawableDemCoords.find(tileID);
+        return it != drawableDemCoords.end()
+                   ? it->second
+                   : std::array<float, 4>{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
+    }
+
+    /**
+     * @brief Per-tile DEM binding data for layers that sample elevation in their
+     * vertex shaders (the native analog of maplibre-gl-js terrain.getTerrainData)
+     */
+    struct TerrainData {
+        std::shared_ptr<gfx::Texture2D> demTexture;
+        /// scale and x/y offset mapping tile-local coordinates (0..EXTENT) of the
+        /// requested tile into normalized coordinates (0..1) of the DEM tile
+        std::array<float, 4> demCoords;
+        float demDim;
+    };
+
+    /**
+     * @brief Get the DEM texture and coordinate mapping covering the given tile,
+     * from the matching DEM tile or its closest available ancestor
+     */
+    std::optional<TerrainData> getTerrainData(const UnwrappedTileID&) const;
+
+    /**
+     * @brief A 1x1 zero-elevation DEM texture bound when no DEM tile is available,
+     * so shaders that declare the DEM sampler always have a valid binding
+     */
+    const std::shared_ptr<gfx::Texture2D>& getPlaceholderDEMTexture(gfx::Context&);
+
+    /**
      * @brief Get the terrain implementation
      */
     const Immutable<style::Terrain::Impl>& getImpl() const { return impl; }
@@ -132,10 +223,38 @@ public:
 
     const TerrainMesh& getMesh(gfx::Context& context);
 
+    /// Mesh used by the instanced depth pass. Aliased to the full terrain mesh for now;
+    /// the coarser depth-only mesh optimization from the source PR can be pulled separately.
+    const TerrainMesh& getDepthMesh(gfx::Context& context);
+
     /**
      * @brief Get the layer group for terrain drawables
      */
     const LayerGroupBasePtr& getLayerGroup() const { return layerGroup; }
+
+    /**
+     * @brief Render the terrain depth pass: the terrain meshes drawn with the
+     * depth-packing shader into a viewport-sized render target, sampled by the
+     * symbol shaders for occlusion (maplibre-gl-js calculate_visibility)
+     */
+    void renderDepth(RenderOrchestrator&, const RenderTree&, PaintParameters&);
+
+    /**
+     * @brief Ensure the depth render target exists for this frame's size.
+     *
+     * Must run before the upload phase so the symbol tweaker binds the real
+     * depth texture rather than the far-plane placeholder; renderDepth then
+     * renders into it later the same frame, before the symbols draw.
+     */
+    void prepareDepthTarget(PaintParameters&);
+
+    /// The packed-RGBA terrain depth texture for the current frame, or a 1x1
+    /// far-plane placeholder while the depth pass has not rendered yet
+    const std::shared_ptr<gfx::Texture2D>& getDepthTexture(gfx::Context&);
+
+    /// Layer group holding the terrain depth-pass drawables (not part of the
+    /// orchestrator; rendered only by renderDepth)
+    const LayerGroupBasePtr& getDepthLayerGroup() const { return depthLayerGroup; }
 
     /**
      * @brief Get the terrain layer tweaker
@@ -155,11 +274,6 @@ private:
     void generateMesh(gfx::Context& context);
 
     /**
-     * @brief Find the DEM source for the current terrain
-     */
-    RenderSource* findDEMSource(const UpdateParameters& parameters);
-
-    /**
      * @brief Activate or deactivate the layer group
      */
     void activateLayerGroup(bool activate, UniqueChangeRequestVec& changes);
@@ -170,17 +284,115 @@ private:
     // Layer group for terrain drawables
     LayerGroupBasePtr layerGroup;
 
+    // Layer group and viewport-sized target for the terrain depth pass
+    LayerGroupBasePtr depthLayerGroup;
+    std::shared_ptr<RenderTarget> depthRenderTarget;
+    // The depth pass output only changes when the camera moves or the terrain mesh
+    // set changes, so it is re-rendered only then (as maplibre-gl-js's maybeDrawDepth
+    // does) instead of every frame. depthDirty is set when depth drawables are added
+    // or removed; lastDepthProjMatrix detects camera movement.
+    bool depthDirty = true;
+    std::optional<mat4> lastDepthProjMatrix;
+    // See getDepthTexture
+    std::shared_ptr<gfx::Texture2D> placeholderDepthTexture;
+
     // Terrain layer tweaker for UBO updates
     std::unique_ptr<TerrainLayerTweaker> tweaker;
 
-    // Track which tiles have terrain drawables
-    std::unordered_map<OverscaledTileID, bool> tilesWithDrawables;
+    // Track which tiles have terrain drawables; the value is true when the
+    // drawable samples the tile's own DEM texture, false when it is using an
+    // ancestor tile's DEM as a fallback while its own DEM is still loading
+    // Mesh drawables by tile, with the DEM quality tier they were built with
+    // (0 = placeholder/flat, 1 = ancestor fallback, 2 = own DEM); a drawable
+    // is replaced whenever a higher tier becomes available
+    std::unordered_map<OverscaledTileID, uint8_t> tilesWithDrawables;
 
-    // Mesh resolution (vertices per side)
+    // Per-drawable scale/offset into the bound DEM texture ({1,0,0,0} unless
+    // an ancestor tile's DEM is bound); read by the terrain layer tweaker
+    std::map<OverscaledTileID, std::array<float, 4>> drawableDemCoords;
+#if MLN_RENDER_BACKEND_OPENGL
+    // Per-tile demTextureArray layer (own or ancestor DEM), -1 when the tile has no packed DEM;
+    // feeds the instanced depth pass (see rebuildInstancedDepthDrawable / depthInstances).
+    std::map<OverscaledTileID, float> drawableDemLayer;
+#endif
+
+    // Mesh resolution (grid cells per side)
     static constexpr size_t MESH_SIZE = 128;
+
+    // Log the camera eye's clearance over the rendered terrain (throttled), so tests can report
+    // when the sea-level-anchored camera dips below terrain (TERRAIN.md Phase 4). See the .cpp.
+    void logAboveGroundMargin(const TransformState& state);
+    double lastAboveGroundLog = 0.0;
+    static constexpr double kAboveGroundLogInterval = 0.25; // seconds
+    // Only log when the eye is within this clearance of the terrain (or below it); above this,
+    // stay silent to keep normal viewing noise-free. Also filters DEM-miss (groundM==0) rows.
+    static constexpr double kAboveGroundAlertM = 1000.0; // metres
+
+    // The mesh-tile cap now comes from the per-map TerrainLoadMode
+    // (TerrainLoadBudget::maxMeshTiles) rather than a single constant, so Quality keeps a long
+    // terrain render distance while Balanced/Performance trade it for frame time. See
+    // RenderTerrain::update.
 
     // Cached DEM source
     RenderSource* demSource = nullptr;
+    /// Mesh cover for the current frame, set by Renderer::Impl before the drape
+    /// target pool is built; consumed (and cleared) by update()
+    std::optional<std::set<UnwrappedTileID>> frameMeshCover;
+
+    // DEM decode vector for the source's encoding (default: Mapbox Terrain-RGB)
+    std::array<float, 4> demUnpackVector = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
+
+    // DEM tile inner dimension (e.g. 256/512), source-constant; rides in
+    // dem_coords.w so the shader's get_elevation() knows the texel grid
+    int32_t demDim = 0;
+
+    // DEM textures by tile, for elevation sampling by non-draped layers
+    struct DEMTextureEntry {
+        std::shared_ptr<gfx::Texture2D> texture;
+        int32_t dim;
+        uint64_t lastUsed = 0;
+    };
+    std::map<UnwrappedTileID, DEMTextureEntry> demTextures;
+    // Retention cap for demTextures (~1MB per 514x514 DEM texture); entries not
+    // used in the current frame are evicted least-recently-used first beyond
+    // this, preventing unbounded growth while browsing (previously reached 2GB+)
+    static constexpr size_t maxDEMTextures = 96;
+    uint64_t demUpdateCounter = 0;
+
+#if MLN_RENDER_BACKEND_OPENGL
+    // OpenGL-only: the same DEM tiles packed into one GL_TEXTURE_2D_ARRAY so the
+    // depth pass (and later the surface pass) can sample a per-instance layer in a
+    // single instanced draw instead of one draw per tile. Populated alongside the
+    // per-tile textures above (which remain the source of truth for CPU elevation
+    // and non-instanced sampling); a simple free-list recycles layer slots as tiles
+    // come and go. Cap the layer count to keep the array a bounded size.
+    static constexpr uint32_t maxDEMArrayLayers = 64;
+    std::unique_ptr<gl::Texture2DArray> demTextureArray;
+    std::map<UnwrappedTileID, uint32_t> demArrayLayer; // tile -> array layer index
+    std::vector<uint32_t> demArrayFreeLayers;          // recycled layer slots
+    uint32_t demArrayNextLayer = 0;                    // next never-used slot
+    void packDEMArrayLayer(gfx::Context&, const UnwrappedTileID&, const DEMData&);
+    void freeDEMArrayLayer(const UnwrappedTileID&);
+
+    // Instanced depth pass: one draw covers every mesh tile, sampling each tile's DEM from
+    // its demTextureArray layer (see terrain_depth.vertex / TerrainDepthInstanceUBO). Rebuilt
+    // when the tile set changes; the per-instance transform matrix is refreshed every frame in
+    // updateInstancedDepthUBO (renderDepth), since it depends on the camera.
+    static constexpr uint32_t maxDepthInstances = 64; // must match TERRAIN_MAX_INSTANCES in shader
+    struct DepthInstance {
+        OverscaledTileID tileID;
+        std::array<float, 4> demCoords; // scale, x/y offset, dem_dim (.w)
+        float demLayer;                 // demTextureArray layer for this tile (own or ancestor)
+    };
+    std::vector<DepthInstance> depthInstances; // current tile set, index == a_instance / gl_InstanceID
+    std::size_t depthInstanceSignature = 0;    // hash of the tile set the instanced drawable was built for
+    gfx::UniformBufferPtr depthInstanceUBO;    // TerrainDepthInstanceUBO[N], refreshed per frame
+    void rebuildInstancedDepthDrawable(gfx::Context&, gfx::ShaderRegistry&);
+    void updateInstancedDepthUBO(PaintParameters&);
+#endif
+
+    // See getPlaceholderDEMTexture
+    std::shared_ptr<gfx::Texture2D> placeholderDEMTexture;
 
     // Layer index (terrain renders early in 3D pass, use negative index)
     static constexpr int32_t TERRAIN_LAYER_INDEX = -1000;
@@ -194,14 +406,6 @@ private:
     std::shared_ptr<gfx::Texture2D> createDEMTexture(gfx::Context& context, const DEMData& demData);
 
     /**
-     * @brief Create a test map texture (checkerboard pattern)
-     * This will be replaced with render-to-texture output later
-     * @param context Graphics context
-     * @return Shared pointer to created texture
-     */
-    std::shared_ptr<gfx::Texture2D> createTestMapTexture(gfx::Context& context);
-
-    /**
      * @brief Create a terrain drawable for a specific tile
      * @param context Graphics context
      * @param shaders Shader registry
@@ -213,7 +417,8 @@ private:
                                                          gfx::ShaderRegistry& shaders,
                                                          const OverscaledTileID& tileID,
                                                          std::shared_ptr<gfx::Texture2D> demTexture,
-                                                         std::shared_ptr<gfx::Texture2D> mapTexture);
+                                                         std::shared_ptr<gfx::Texture2D> mapTexture,
+                                                         bool depthPass = false);
 };
 
 } // namespace mbgl

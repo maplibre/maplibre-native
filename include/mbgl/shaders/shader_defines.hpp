@@ -308,6 +308,7 @@ enum {
 };
 
 enum {
+    idCircleDEMTexture,
     circleTextureCount
 };
 
@@ -341,6 +342,7 @@ enum {
 
 enum {
     idFillExtrusionImageTexture,
+    idFillExtrusionDEMTexture,
     fillExtrusionTextureCount
 };
 
@@ -381,12 +383,15 @@ enum {
 enum {
     idSymbolImageTexture,
     idSymbolImageIconTexture,
+    idSymbolDEMTexture,
+    idSymbolDepthTexture,
     symbolTextureCount
 };
 
 enum {
     idTerrainDEMTexture,
     idTerrainMapTexture,
+    idTerrainDEMArrayTexture, // sampler2DArray of packed DEM tiles for the instanced GL depth pass
     terrainTextureCount
 };
 
@@ -475,13 +480,15 @@ enum {
 
 enum {
     idFillExtrusionPosVertexAttribute,
+    idFillExtrusionDecimalsEdAttribute,
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     idFillExtrusionOutlinePosAttribute,
-    idFillExtrusionEdDiscardAttribute,
 #else
-    idFillExtrusionNormalEdVertexAttribute,
+    idFillExtrusionNormal2DVertexAttribute,
 #endif
+    // Both paths: polygon centroid for terrain elevation
+    idFillExtrusionCentroidVertexAttribute,
 
     // Data driven
     idFillExtrusionBaseVertexAttribute,
@@ -565,6 +572,7 @@ enum {
 enum {
     idTerrainPosVertexAttribute,
     idTerrainTexturePosVertexAttribute,
+    idTerrainInstanceVertexAttribute, // per-instance index for the instanced GL depth pass
     terrainVertexAttributeCount
 };
 

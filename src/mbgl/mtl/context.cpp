@@ -245,14 +245,10 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(*this, size, type);
-}
-
 RenderTargetPtr Context::createRenderTarget(const Size size,
                                             const gfx::TextureChannelDataType type,
-                                            const Color& backgroundColor) {
-    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
+                                            const bool stencil) {
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {}
@@ -477,7 +473,7 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size, gfx::TextureChannelDataType type) {
-    return createOffscreenTexture(size, type, false, false);
+    return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {

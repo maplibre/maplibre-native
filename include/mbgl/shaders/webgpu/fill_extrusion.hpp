@@ -10,22 +10,24 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionShader";
-    static const std::array<AttributeInfo, 5> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<TextureInfo, 0> textures;
+    static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
-    @location(4) normal_ed: vec4<i32>,
+    @location(4) decimals_ed: vec2<u32>,
+    @location(5) normal2d: vec2<i32>,
+    @location(9) centroid: vec2<i32>,
 #ifndef HAS_UNIFORM_u_color
-    @location(5) color: vec4<f32>,
+    @location(6) color: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_base
-    @location(6) base: vec2<f32>,
+    @location(7) base: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_height
-    @location(7) height: vec2<f32>,
+    @location(8) height: vec2<f32>,
 #endif
 };
 
@@ -46,6 +48,12 @@ struct FillExtrusionDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad2: f32,
 };
 
 struct FillExtrusionPropsUBO {
@@ -70,6 +78,32 @@ struct GlobalIndexUBO {
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
 @group(0) @binding(5) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(1) @binding(0) var dem_sampler: sampler;
+@group(1) @binding(1) var dem_texture: texture_2d<f32>;
+
+// Terrain elevation (meters) at a tile-local coordinate, bilinear on DEM pixel
+// centers (1px backfilled border), matching maplibre-gl-js get_elevation().
+fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionDrawableUBO) -> f32 {
+    if (drawable.dem_enabled == 0.0) {
+        return 0.0;
+    }
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
+    let f = fract(coord);
+    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
+    let d = 1.0 / (drawable.dem_dim + 2.0);
+    var tl = textureSampleLevel(dem_texture, dem_sampler, c, 0.0) * 255.0;
+    tl.a = -1.0;
+    var tr = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
+    tr.a = -1.0;
+    var bl = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
+    bl.a = -1.0;
+    var br = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
+    br.a = -1.0;
+    let elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
+                        mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
+                        f.y);
+    return elevation * drawable.dem_exaggeration;
+}
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -77,22 +111,30 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value];
 
 #ifndef HAS_UNIFORM_u_base
-    let baseValue = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
+    let baseClamped = max(unpack_mix_float(in.base, drawable.base_t), 0.0);
 #else
-    let baseValue = max(props.light_position_base.w, 0.0);
+    let baseClamped = max(props.light_position_base.w, 0.0);
 #endif
 
 #ifndef HAS_UNIFORM_u_height
-    let heightValue = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
+    let heightClamped = max(unpack_mix_float(in.height, drawable.height_t), 0.0);
 #else
-    let heightValue = max(props.height, 0.0);
+    let heightClamped = max(props.height, 0.0);
 #endif
 
-    let normal_i = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));
-    let t = glMod(normal_i.x, 2.0);
-    let z = select(baseValue, heightValue, t != 0.0);
+    // Raise the whole extrusion by the terrain elevation at the polygon centroid
+    // (one value per building), with gl-js's "basement" drop for ground-level floors.
+    let ele = fillExtrusionElevation(vec2<f32>(f32(in.centroid.x), f32(in.centroid.y)), drawable);
+    let baseValue = baseClamped + ele - select(10.0, 0.0, baseClamped > 0.0) * drawable.dem_enabled;
+    let heightValue = heightClamped + ele;
 
-    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), z, 1.0);
+    let normal = vec3<f32>(vec2<f32>(in.normal2d) / 16384.0, select(0.0, 1.0, in.normal2d.x == 0 && in.normal2d.y == 0));
+
+    let t = glMod(f32(in.decimals_ed.x), 2.0);
+    let z = select(baseValue, heightValue, t > 0.0);
+    let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
+
+    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
 
 #ifdef OVERDRAW_INSPECTOR
     out.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -107,13 +149,12 @@ fn main(in: VertexInput) -> VertexOutput {
     color = color + min(vec4<f32>(0.03, 0.03, 0.03, 1.0), vec4<f32>(1.0));
 
     let luminance = dot(color.rgb, vec3<f32>(0.2126, 0.7152, 0.0722));
-    let unitNormal = normal_i / 16384.0;
-    let directionalFraction = clamp(dot(unitNormal, props.light_position_base.xyz), 0.0, 1.0);
+    let directionalFraction = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     let minDirectional = 1.0 - props.light_intensity;
     let maxDirectional = max(1.0 - luminance + props.light_intensity, 1.0);
     var directional = mix(minDirectional, maxDirectional, directionalFraction);
 
-    if (normal_i.y != 0.0) {
+    if (normal.z == 0.0) {
         let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
         directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;
@@ -146,25 +187,26 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillExtrusionPatternShader";
-    static const std::array<AttributeInfo, 6> attributes;
+    static const std::array<AttributeInfo, 7> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto vertex = R"(
 struct VertexInput {
     @location(3) position: vec2<i32>,
-    @location(4) normal_ed: vec4<i32>,
+    @location(4) decimals_ed: vec2<u32>,
+    @location(5) normal2d: vec2<i32>,
 #ifndef HAS_UNIFORM_u_base
-    @location(5) base: vec2<f32>,
+    @location(6) base: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_height
-    @location(6) height: vec2<f32>,
+    @location(7) height: vec2<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(7) pattern_from: vec4<u32>,
+    @location(8) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(8) pattern_to: vec4<u32>,
+    @location(9) pattern_to: vec4<u32>,
 #endif
 };
 
@@ -193,6 +235,12 @@ struct FillExtrusionPatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     pad1: f32,
+    dem_coords: vec4<f32>,
+    dem_unpack: vec4<f32>,
+    dem_dim: f32,
+    dem_exaggeration: f32,
+    dem_enabled: f32,
+    pad2: f32,
 };
 
 struct FillExtrusionPatternTilePropsUBO {
@@ -250,16 +298,18 @@ fn main(in: VertexInput) -> VertexOutput {
     let heightValue = max(props.height, 0.0);
 #endif
 
-    let normal_i = vec3<f32>(f32(in.normal_ed.x), f32(in.normal_ed.y), f32(in.normal_ed.z));
-    let edgedistance = f32(in.normal_ed.w);
-    let t = glMod(normal_i.x, 2.0);
-    let z = select(baseValue, heightValue, t != 0.0);
+    let normal = vec3<f32>(vec2<f32>(in.normal2d) / 16384.0, select(0.0, 1.0, in.normal2d.x == 0 && in.normal2d.y == 0));
+    let edgedistance = f32(in.decimals_ed.y);
 
-    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), z, 1.0);
+    let t = glMod(f32(in.decimals_ed.x), 2.0);
+    let z = select(baseValue, heightValue, t > 0.0);
+    let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
+
+    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
 
     var patternPos: vec2<f32>;
-    if (normal_i.x == 1.0 && normal_i.y == 0.0 && normal_i.z == 16384.0) {
-        patternPos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    if (normal.z == 1.0) {
+        patternPos = vec2<f32>(in.position);
     } else {
         patternPos = vec2<f32>(edgedistance, z * drawable.height_factor);
     }
@@ -294,10 +344,10 @@ fn main(in: VertexInput) -> VertexOutput {
                                    (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     var lighting = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-    var directional = clamp(dot(normal_i / 16383.0, props.light_position_base.xyz), 0.0, 1.0);
+    var directional = clamp(dot(normal, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix(1.0 - props.light_intensity, max(0.5 + props.light_intensity, 1.0), directional);
 
-    if (normal_i.y != 0.0) {
+    if (normal.z == 0.0) {
         let gradientMin = mix(0.7, 0.98, 1.0 - props.light_intensity);
         let factor = clamp((t + baseValue) * pow(heightValue / 150.0, 0.5), gradientMin, 1.0);
         directional *= (1.0 - props.vertical_gradient) + props.vertical_gradient * factor;

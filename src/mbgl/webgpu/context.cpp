@@ -6,6 +6,7 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <array>
+#include <cstring>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/webgpu/command_encoder.hpp>
 #include <mbgl/webgpu/drawable_builder.hpp>
@@ -53,10 +54,12 @@ Context::Context(RendererBackend& backend_)
       backend(backend_),
       globalUniformBuffers(std::make_unique<UniformBufferArray>()) {}
 
-Context::~Context() = default;
+Context::~Context() {
+    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+}
 
 void Context::beginFrame() {
-    // Begin a new frame - WebGPU command recording starts here
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::endFrame() {
@@ -64,11 +67,11 @@ void Context::endFrame() {
 }
 
 void Context::performCleanup() {
-    // Clean up unused resources
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::reduceMemoryUsage() {
-    // Free cached resources to reduce memory
+    backend.getThreadPool().runRenderJobs();
 }
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
@@ -112,13 +115,21 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
-TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto tileLayerGroup = std::make_shared<webgpu::TileLayerGroup>(layerIndex, initialCapacity, std::move(name));
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex,
+                                                std::size_t initialCapacity,
+                                                std::string name,
+                                                bool renderToTerrain) {
+    auto tileLayerGroup = std::make_shared<webgpu::TileLayerGroup>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     return tileLayerGroup;
 }
 
-LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
-    auto layerGroup = std::make_shared<webgpu::LayerGroup>(layerIndex, initialCapacity, std::move(name));
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex,
+                                        std::size_t initialCapacity,
+                                        std::string name,
+                                        bool renderToTerrain) {
+    auto layerGroup = std::make_shared<webgpu::LayerGroup>(
+        layerIndex, initialCapacity, std::move(name), renderToTerrain);
     return layerGroup;
 }
 
@@ -130,8 +141,10 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    return std::make_shared<RenderTarget>(*this, size, type);
+RenderTargetPtr Context::createRenderTarget(const Size size,
+                                            const gfx::TextureChannelDataType type,
+                                            const bool stencil) {
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 void Context::resetState(gfx::DepthMode, gfx::ColorMode) {
@@ -231,6 +244,24 @@ const BufferResource& Context::getTileIndexBuffer() {
         tileIndexBuffer = createBuffer(indices.data(), indices.bytes(), usage, true, true);
     }
     return *tileIndexBuffer;
+}
+
+// Fallback texture for shader-declared but unbound texture slots (mirrors Vulkan's
+// getDummyTexture). WebGPU requires every bind group a pipeline declares to be set
+// on each draw, so an optional/unbound texture binding must still receive a valid
+// texture and sampler. Its contents are never sampled (shaders guard on a flag), so
+// a 1x1 texture is sufficient.
+const std::shared_ptr<Texture2D>& Context::getDummyTexture() {
+    if (!dummyTexture) {
+        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
+        std::memset(image->data.get(), 0, image->bytes());
+        dummyTexture = std::make_shared<Texture2D>(*this);
+        dummyTexture->setImage(image);
+        dummyTexture->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                               .wrapU = gfx::TextureWrapType::Clamp,
+                                               .wrapV = gfx::TextureWrapType::Clamp});
+    }
+    return dummyTexture;
 }
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,

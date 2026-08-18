@@ -26,6 +26,8 @@
 #include <mbgl/shaders/webgpu/location_indicator.hpp>
 #include <mbgl/shaders/webgpu/raster.hpp>
 #include <mbgl/shaders/webgpu/symbol.hpp>
+#include <mbgl/shaders/webgpu/terrain.hpp>
+#include <mbgl/shaders/webgpu/terrain_depth.hpp>
 #include <mbgl/shaders/webgpu/widevector.hpp>
 
 namespace mbgl {
@@ -46,7 +48,9 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
       impl(std::make_unique<Impl>()) {}
 
-RendererBackend::~RendererBackend() = default;
+RendererBackend::~RendererBackend() {
+    context.reset();
+}
 
 void RendererBackend::activate() {
     // Activation logic if needed
@@ -120,6 +124,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::TerrainShader,
+                  shaders::BuiltIn::TerrainDepthShader,
                   shaders::BuiltIn::WideVectorShader>(registry, parameters);
 }
 

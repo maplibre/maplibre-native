@@ -383,6 +383,15 @@ void checkFramebuffer() {
     }
 }
 
+void bindDepthRenderbuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
+    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC_GL();
+
+    auto& depthResource = depth.getResource<gl::RenderbufferResource>();
+    MBGL_CHECK_ERROR(
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthResource.renderbuffer));
+}
+
 void bindDepthStencilRenderbuffer(const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
@@ -436,7 +445,16 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Siz
                                                                        const gfx::TextureChannelDataType type) {
     MLN_TRACE_FUNC();
 
-    return std::make_unique<gl::OffscreenTexture>(*this, size, type);
+    return createOffscreenTexture(size, type, /*depth=*/true, /*stencil=*/false);
+}
+
+std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(const Size size,
+                                                                       const gfx::TextureChannelDataType type,
+                                                                       const bool depth,
+                                                                       const bool stencil) {
+    MLN_TRACE_FUNC();
+
+    return std::make_unique<gl::OffscreenTexture>(*this, size, type, depth, stencil);
 }
 
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
@@ -532,6 +550,7 @@ void Context::setDirtyState() {
     vertexBuffer.setDirty();
     bindVertexArray.setDirty();
     globalVertexArrayState.setDirty();
+    invalidateUniformBufferBindings();
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
@@ -598,18 +617,12 @@ gfx::DynamicTexturePtr Context::createDynamicTexture(Size size, gfx::TexturePixe
     return std::make_shared<DynamicTexture>(*this, size, pixelType);
 }
 
-RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC();
-
-    return std::make_shared<RenderTarget>(*this, size, type);
-}
-
 RenderTargetPtr Context::createRenderTarget(const Size size,
                                             const gfx::TextureChannelDataType type,
-                                            const Color& backgroundColor) {
+                                            const bool stencil) {
     MLN_TRACE_FUNC();
 
-    return std::make_shared<RenderTarget>(*this, size, type, backgroundColor);
+    return std::make_shared<RenderTarget>(*this, size, type, stencil);
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
@@ -622,6 +635,44 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
                                             GL_TEXTURE_2D,
                                             static_cast<const gl::Texture2D&>(color).getTextureID(),
                                             0));
+    checkFramebuffer();
+    return {color.getSize(), std::move(fbo)};
+}
+
+Framebuffer Context::createFramebuffer(const gfx::Texture2D& color,
+                                       const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth) {
+    MLN_TRACE_FUNC();
+
+    if (color.getSize() != depth.getSize()) {
+        throw std::runtime_error("Renderbuffer size mismatch");
+    }
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    bindDepthRenderbuffer(depth);
+    checkFramebuffer();
+    return {color.getSize(), std::move(fbo)};
+}
+
+Framebuffer Context::createFramebuffer(
+    const gfx::Texture2D& color, const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil) {
+    MLN_TRACE_FUNC();
+
+    if (color.getSize() != depthStencil.getSize()) {
+        throw std::runtime_error("Renderbuffer size mismatch");
+    }
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    bindDepthStencilRenderbuffer(depthStencil);
     checkFramebuffer();
     return {color.getSize(), std::move(fbo)};
 }
@@ -775,6 +826,72 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
 
     stats.numDrawCalls++;
     stats.totalDrawCalls++;
+}
+
+void Context::drawInstanced(const gfx::DrawMode& drawMode,
+                            std::size_t indexOffset,
+                            std::size_t indexLength,
+                            std::size_t instanceCount) {
+    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC_GL();
+
+    if (instanceCount <= 1) {
+        draw(drawMode, indexOffset, indexLength);
+        return;
+    }
+
+    switch (drawMode.type) {
+        case gfx::DrawModeType::Lines:
+        case gfx::DrawModeType::LineLoop:
+        case gfx::DrawModeType::LineStrip:
+            lineWidth = drawMode.size;
+            break;
+        default:
+            break;
+    }
+
+    MBGL_CHECK_ERROR(glDrawElementsInstanced(Enum<gfx::DrawModeType>::to(drawMode.type),
+                                             static_cast<GLsizei>(indexLength),
+                                             GL_UNSIGNED_SHORT,
+                                             reinterpret_cast<GLvoid*>(sizeof(uint16_t) * indexOffset),
+                                             static_cast<GLsizei>(instanceCount)));
+
+    // One GPU draw call, but it issued instanceCount worth of geometry - count it
+    // as one for the encoder-cost metric, which is the point of instancing.
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
+}
+
+void Context::bindUniformBufferRange(uint32_t bindingIndex, uint32_t buffer, int64_t offset, int64_t size) {
+    if (uniformBufferBindings.size() <= bindingIndex) {
+        uniformBufferBindings.resize(bindingIndex + 1);
+    }
+    auto& cur = uniformBufferBindings[bindingIndex];
+    if (cur.buffer == buffer && cur.offset == offset && cur.size == size) {
+        return; // identical binding already in place - skip the redundant GL call
+    }
+    cur = {buffer, offset, size};
+    MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
+                                       static_cast<GLuint>(bindingIndex),
+                                       static_cast<GLuint>(buffer),
+                                       static_cast<GLintptr>(offset),
+                                       static_cast<GLsizeiptr>(size)));
+}
+
+void Context::unbindUniformBuffer(uint32_t bindingIndex) {
+    if (uniformBufferBindings.size() <= bindingIndex) {
+        uniformBufferBindings.resize(bindingIndex + 1);
+    }
+    auto& cur = uniformBufferBindings[bindingIndex];
+    if (cur.buffer == 0) {
+        return;
+    }
+    cur = {0, -1, -1};
+    MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(bindingIndex), 0));
+}
+
+void Context::invalidateUniformBufferBindings() {
+    uniformBufferBindings.clear();
 }
 
 void Context::performCleanup() {

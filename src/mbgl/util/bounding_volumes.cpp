@@ -232,6 +232,56 @@ IntersectionResult Frustum::intersects(const AABB& aabb) const {
     return fullyInside ? IntersectionResult::Contains : IntersectionResult::Intersects;
 }
 
+namespace {
+// Halfspace test of an aabb against a single plane, choosing per axis the near and
+// far corner from the plane's sign (p-vertex / n-vertex). Matches maplibre-gl-js
+// Aabb::intersectsPlane.
+IntersectionResult intersectsPlane(const vec4& plane, const AABB& aabb) {
+    double distMin = plane[3];
+    double distMax = plane[3];
+    for (int i = 0; i < 3; i++) {
+        if (plane[i] > 0) {
+            distMin += plane[i] * aabb.min[i];
+            distMax += plane[i] * aabb.max[i];
+        } else {
+            distMax += plane[i] * aabb.min[i];
+            distMin += plane[i] * aabb.max[i];
+        }
+    }
+    if (distMax < 0.0) {
+        return IntersectionResult::Separate; // fully behind the plane
+    }
+    if (distMin < 0.0) {
+        return IntersectionResult::Intersects; // straddles the plane
+    }
+    return IntersectionResult::Contains; // fully in front
+}
+} // namespace
+
+IntersectionResult Frustum::intersectsElevated(const AABB& aabb) const {
+    bool fullyInside = true;
+    for (const vec4& plane : planes) {
+        const IntersectionResult planeResult = intersectsPlane(plane, aabb);
+        if (planeResult == IntersectionResult::Separate) {
+            return IntersectionResult::Separate;
+        }
+        if (planeResult == IntersectionResult::Intersects) {
+            fullyInside = false;
+        }
+    }
+    if (fullyInside) {
+        return IntersectionResult::Contains;
+    }
+    // Broad-phase reject to trim the plane test's ~0.5% false positives, as the flat
+    // path does with `bounds`: if the boxes' extents are disjoint on any axis they
+    // cannot touch, regardless of what the planes suggested.
+    if (bounds.min[0] > aabb.max[0] || bounds.min[1] > aabb.max[1] || bounds.min[2] > aabb.max[2] ||
+        bounds.max[0] < aabb.min[0] || bounds.max[1] < aabb.min[1] || bounds.max[2] < aabb.min[2]) {
+        return IntersectionResult::Separate;
+    }
+    return IntersectionResult::Intersects;
+}
+
 IntersectionResult Frustum::intersectsPrecise(const AABB& aabb, bool edgeCasesOnly) const {
     if (!edgeCasesOnly) {
         IntersectionResult result = intersects(aabb);

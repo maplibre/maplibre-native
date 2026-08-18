@@ -114,6 +114,8 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+    TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
+    bool debugAboveGroundLog = false;
 };
 
 // Forward declaration of this method is required for the MapProjection class

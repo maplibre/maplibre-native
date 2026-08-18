@@ -13,7 +13,7 @@
     "source": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.terrain.png"
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.png"
       ],
       "maxzoom": 15,
       "tileSize": 512

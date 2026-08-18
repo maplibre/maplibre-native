@@ -320,6 +320,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        // Progressive build budget: this is a new tile (no drawables yet). If the per-frame
+        // tile budget is spent, defer constructing it - it is retried next frame (a follow-up
+        // frame is requested via Context::newTileBuildWasDeferred), and the terrain drape
+        // keeps the parent/prior texture meanwhile, so tiles fill in over a few frames
+        // instead of stalling one.
+        if (!context.allowNewTileBuild(std::hash<OverscaledTileID>{}(tileID))) {
+            continue;
+        }
+
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
 

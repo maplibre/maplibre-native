@@ -343,6 +343,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        // Progressive build budget: new tile (no drawables yet). Defer its construction when
+        // the per-frame tile budget is spent; retried next frame (follow-up frame requested),
+        // with the terrain drape keeping the parent/prior texture meanwhile.
+        if (!context.allowNewTileBuild(std::hash<OverscaledTileID>{}(tileID))) {
+            continue;
+        }
+
         const auto addDrawable = [&](std::unique_ptr<gfx::Drawable>&& drawable, LineLayerTweaker::LineType type) {
             drawable->setTileID(tileID);
             drawable->setType(mbgl::underlying_type(type));

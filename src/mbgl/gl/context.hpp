@@ -82,6 +82,26 @@ public:
     bool hasStencilBuffer() const;
 
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
+    /// Instanced draw: renders `instanceCount` copies of the index range in a single
+    /// call (glDrawElementsInstanced). Per-instance data is supplied via vertex
+    /// attributes configured with glVertexAttribDivisor. instanceCount <= 1 falls
+    /// back to a plain draw.
+    void drawInstanced(const gfx::DrawMode&,
+                       std::size_t indexOffset,
+                       std::size_t indexLength,
+                       std::size_t instanceCount);
+
+    /// Bind a uniform buffer to an indexed GL_UNIFORM_BUFFER binding point, skipping
+    /// the glBindBufferRange call when the (buffer, offset, size) already tracked
+    /// there is identical. All UBO binds funnel through UniformBufferArrayGL, so this
+    /// tracking is authoritative; it is invalidated in setDirtyState(). Cuts the
+    /// several redundant binds every drawable would otherwise issue each frame.
+    void bindUniformBufferRange(uint32_t bindingIndex, uint32_t buffer, int64_t offset, int64_t size);
+    /// Unbind (bind 0 to) an indexed uniform buffer binding point, tracked.
+    void unbindUniformBuffer(uint32_t bindingIndex);
+    /// Forget all tracked uniform-buffer bindings (e.g. after a custom layer may have
+    /// bound buffers directly), so the next bind always issues the GL call.
+    void invalidateUniformBufferBindings();
 
     void finish();
 
@@ -137,13 +157,13 @@ public:
 
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
-
-    RenderTargetPtr createRenderTarget(const Size size,
-                                       const gfx::TextureChannelDataType type,
-                                       const Color& backgroundColor) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
+    Framebuffer createFramebuffer(const gfx::Texture2D& color,
+                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>& depth);
+    Framebuffer createFramebuffer(const gfx::Texture2D& color,
+                                  const gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil>& depthStencil);
 
     gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
 
@@ -196,6 +216,16 @@ public:
     State<value::PixelStoreUnpack> pixelStoreUnpack;
 
 private:
+    // Tracks the buffer/offset/size currently bound at each GL_UNIFORM_BUFFER binding
+    // point, so redundant glBindBufferRange calls can be skipped (see
+    // bindUniformBufferRange). Indexed by binding point.
+    struct UniformBufferBindingState {
+        uint32_t buffer = 0;
+        int64_t offset = -1;
+        int64_t size = -1;
+    };
+    std::vector<UniformBufferBindingState> uniformBufferBindings;
+
     State<value::StencilFunc> stencilFunc;
     State<value::StencilMask> stencilMask;
     State<value::StencilTest> stencilTest;
@@ -222,6 +252,11 @@ private:
 
 public:
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
+
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool depth,
+                                                                  bool stencil) override;
 
 private:
     std::unique_ptr<gfx::RenderbufferResource> createRenderbufferResource(gfx::RenderbufferPixelType,

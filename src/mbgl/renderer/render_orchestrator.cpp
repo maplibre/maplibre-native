@@ -9,6 +9,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_target.hpp>
 #include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/renderer/dem_elevation_provider.hpp>
 #include <mbgl/renderer/render_terrain.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
@@ -220,15 +221,37 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         renderLight.evaluate(evaluationParameters);
     }
 
-    // Update terrain.
+    // Update terrain. The per-frame drawable/DEM update happens later in
+    // updateRenderTree once the render sources have been updated; here we only
+    // (re)create or drop the RenderTerrain to match the style.
     if (updateParameters->terrain) {
         if (!renderTerrain || renderTerrain->getImpl() != *updateParameters->terrain) {
             renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
         }
-        renderTerrain->update(*updateParameters);
     } else if (renderTerrain) {
+        // Unregister the terrain mesh layer group from the orchestrator before
+        // dropping RenderTerrain, or the orchestrator keeps its own reference and
+        // draws the orphaned mesh - a second, floating terrain surface after the
+        // user toggles 3D terrain off and back on.
+        UniqueChangeRequestVec terrainChanges;
+        renderTerrain->deactivate(terrainChanges);
+        addChanges(terrainChanges);
         renderTerrain.reset();
     }
+
+    // Let every source's tile cover account for the height of the terrain, so that the
+    // sources are asked for the tiles the terrain mesh will need. Without this the cover
+    // is computed against the flat ground plane and relief leaning towards the camera -
+    // the near edge of the view, at high zoom - is judged off-screen, leaving the mesh
+    // there with an empty drape. Outlives the source update loop below.
+    //
+    // The DEM tiles read here are the previous frame's, as in gl-js: the cover only has
+    // to be conservative, and a DEM that is still loading converges on the next frame.
+    const bool terrainEnabled = renderTerrain && renderTerrain->isEnabled();
+    const DEMElevationProvider elevationProvider{
+        terrainEnabled ? getRenderSource(renderTerrain->getSourceID()) : nullptr,
+        terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
+    tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
@@ -429,7 +452,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         // Mark DEM source as needed for terrain rendering
         if (renderTerrain && renderTerrain->isEnabled() && sourceImpl->id == renderTerrain->getSourceID()) {
             sourceNeedsRendering = true;
-            Log::Info(Event::Render, "Marking DEM source '" + sourceImpl->id + "' for terrain rendering");
         }
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
@@ -993,6 +1015,13 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    // Progressive tile build: cap how many new tiles construct their drawables this frame so
+    // a burst of newly revealed tiles (tilt/pan/zoom-in) is spread over frames instead of
+    // stalling one. Layers consume from this budget before building a new tile (fill/line).
+    // The cap comes from the map's TerrainLoadMode; Quality (default) is unlimited.
+    const int tileBuildBudget = terrainLoadBudget(updateParameters->terrainLoadMode).newTileBuildsPerFrame;
+    context.resetNewTileBuildBudget(tileBuildBudget > 0 ? tileBuildBudget : (1 << 30));
+
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
 #if MLN_RENDER_BACKEND_OPENGL
@@ -1045,12 +1074,24 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
 }
 
 void RenderOrchestrator::addRenderTargets(const TexturePool& texturePool) {
-    texturePool.visitRenderTargets([&](const RenderTargetPtr& renderTarget) {
-        auto it = std::find(renderTargets.begin(), renderTargets.end(), renderTarget);
-        if (it == renderTargets.end()) {
-            renderTargets.emplace_back(renderTarget);
-        }
-    });
+    // The pool owns the terrain drape targets and drops them when their tile leaves
+    // the cover, so rebuild our drape entries from it each frame. Merely adding
+    // would keep every drape target ever created alive here, rendering forever.
+    //
+    // Non-drape targets (the hillshade prepare targets, added by change request) are
+    // owned by their tile's bucket. When only this list still references one, the
+    // bucket has been evicted, so drop it here too; otherwise its offscreen (prepare)
+    // and DEM input textures leak as hillshade tiles cycle in and out of the cover.
+    renderTargets.erase(std::remove_if(renderTargets.begin(),
+                                       renderTargets.end(),
+                                       [](const RenderTargetPtr& renderTarget) {
+                                           if (!renderTarget) return true;
+                                           if (renderTarget->getDrapeTileID().has_value()) return true;
+                                           return renderTarget.use_count() == 1;
+                                       }),
+                        renderTargets.end());
+    texturePool.visitRenderTargets(
+        [&](const RenderTargetPtr& renderTarget) { renderTargets.emplace_back(renderTarget); });
 }
 
 void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {

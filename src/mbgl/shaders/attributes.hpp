@@ -22,12 +22,11 @@ MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, placed);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 3, size);
 MBGL_DEFINE_ATTRIBUTE(float, 1, offset);
 MBGL_DEFINE_ATTRIBUTE(float, 2, shift);
-
-#if MLN_USE_FILL_EXTRUSION_INSTANCING
-MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, ed_discard);
-#else
-MBGL_DEFINE_ATTRIBUTE(int16_t, 4, normal_ed);
-#endif
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, decimals_ed);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
+// Per-polygon centroid (tile-local), used to sample a single terrain elevation
+// per building so extrusions don't shear across a slope (see fill_extrusion)
+MBGL_DEFINE_ATTRIBUTE(int16_t, 2, centroid);
 
 template <typename T, std::size_t N>
 struct data {

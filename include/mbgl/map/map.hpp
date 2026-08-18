@@ -205,6 +205,19 @@ public:
     void setTileLodMode(TileLodMode mode);
     TileLodMode getTileLodMode() const;
 
+    /// Selects the 3D-terrain progressive-loading budget (see TerrainLoadMode). Default
+    /// is Quality (no budget). Balanced/Performance spread new-tile builds and drape
+    /// re-renders across frames for smoother interaction on weaker GPUs, at the cost of a
+    /// brief progressive fill-in. No effect when terrain is not enabled.
+    void setTerrainLoadMode(TerrainLoadMode mode);
+    TerrainLoadMode getTerrainLoadMode() const;
+
+    /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
+    /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
+    /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.
+    void setDebugAboveGroundLog(bool enabled);
+    bool getDebugAboveGroundLog() const;
+
     ClientOptions getClientOptions() const;
 
     const std::unique_ptr<util::ActionJournal>& getActionJournal();
