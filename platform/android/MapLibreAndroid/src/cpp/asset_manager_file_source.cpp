@@ -5,6 +5,7 @@
 #include <mln/storage/resource.hpp>
 #include <mln/storage/resource_options.hpp>
 #include <mln/storage/response.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/thread.hpp>
 #include <mln/util/url.hpp>
 #include <mln/util/util.hpp>
@@ -12,7 +13,39 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
+#include <optional>
+#include <string_view>
+
 namespace mln {
+namespace {
+
+constexpr std::string_view androidAssetPathPrefix = "/android_asset/";
+
+void stripLeadingSlashes(std::string& path) {
+    path.erase(0, path.find_first_not_of('/'));
+}
+
+std::optional<std::string> androidAssetPathFromUrl(const std::string& url) {
+    if (url.starts_with(util::ASSET_PROTOCOL)) {
+        std::string path = util::percentDecode(url.substr(std::char_traits<char>::length(util::ASSET_PROTOCOL)));
+        stripLeadingSlashes(path);
+        return path;
+    }
+
+    if (url.starts_with(util::FILE_PROTOCOL)) {
+        std::string path = util::percentDecode(url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
+        if (!path.starts_with(androidAssetPathPrefix)) {
+            return std::nullopt;
+        }
+        path.erase(0, androidAssetPathPrefix.size());
+        stripLeadingSlashes(path);
+        return path;
+    }
+
+    return std::nullopt;
+}
+
+} // namespace
 
 class AssetManagerFileSource::Impl {
 public:
@@ -25,12 +58,12 @@ public:
           assetManager(assetManager_) {}
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
-        // Note: AssetManager already prepends "assets" to the filename.
-        const std::string path = mln::util::percentDecode(url.substr(8));
-
         Response response;
 
-        if (AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER)) {
+        // Note: AssetManager already prepends "assets" to the filename.
+        const auto path = androidAssetPathFromUrl(url);
+        AAsset* asset = path ? AAssetManager_open(assetManager, path->c_str(), AASSET_MODE_BUFFER) : nullptr;
+        if (asset) {
             response.data = std::make_shared<std::string>(reinterpret_cast<const char*>(AAsset_getBuffer(asset)),
                                                           AAsset_getLength64(asset));
             AAsset_close(asset);
@@ -79,7 +112,7 @@ std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& re
 }
 
 bool AssetManagerFileSource::canRequest(const Resource& resource) const {
-    return 0 == resource.url.rfind(mln::util::ASSET_PROTOCOL, 0);
+    return androidAssetPathFromUrl(resource.url).has_value();
 }
 
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
