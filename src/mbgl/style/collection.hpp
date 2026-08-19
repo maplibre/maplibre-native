@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 /*
@@ -177,4 +177,4 @@ void CollectionBase<T>::update(std::size_t implIndex, const T& wrapper) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

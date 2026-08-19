@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 struct Rect {
@@ -25,4 +25,4 @@ struct Rect {
 
     bool hasArea() const { return w != 0 && h != 0; }
 };
-} // namespace mbgl
+} // namespace mln

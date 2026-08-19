@@ -10,7 +10,7 @@
 #include <memory>
 #include <thread>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::chrono_literals;
 
 TEST(Actor, Construction) {

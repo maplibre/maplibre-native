@@ -12,16 +12,16 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
 @interface MLNSource ()
 
 // Even though this class is abstract, MLNStyle uses it to represent some
-// special internal source types like mbgl::AnnotationSource.
-@property (nonatomic, readonly) mbgl::style::Source *rawSource;
+// special internal source types like mln::AnnotationSource.
+@property (nonatomic, readonly) mln::style::Source *rawSource;
 
 @property (nonatomic, readonly, weak) id<MLNStylable> stylable;
 
 @end
 
 @implementation MLNSource {
-  std::unique_ptr<mbgl::style::Source> _pendingSource;
-  mapbox::base::WeakPtr<mbgl::style::Source> _weakSource;
+  std::unique_ptr<mln::style::Source> _pendingSource;
+  mapbox::base::WeakPtr<mln::style::Source> _weakSource;
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
@@ -31,7 +31,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   return self;
 }
 
-- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource
+- (instancetype)initWithRawSource:(mln::style::Source *)rawSource
                          stylable:(id<MLNStylable>)stylable {
   NSString *identifier = @(rawSource->getID().c_str());
   if (self = [self initWithIdentifier:identifier]) {
@@ -42,11 +42,11 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   return self;
 }
 
-- (mbgl::style::Source *)rawSource {
+- (mln::style::Source *)rawSource {
   return _weakSource.get();
 }
 
-- (instancetype)initWithPendingSource:(std::unique_ptr<mbgl::style::Source>)pendingSource {
+- (instancetype)initWithPendingSource:(std::unique_ptr<mln::style::Source>)pendingSource {
   if (self = [self initWithRawSource:pendingSource.get() stylable:nil]) {
     _pendingSource = std::move(pendingSource);
   }

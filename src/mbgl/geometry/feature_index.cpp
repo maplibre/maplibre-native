@@ -18,20 +18,20 @@
 #include <string>
 
 namespace {
-mbgl::LatLng screenCoordinateToLatLng(mbgl::ScreenCoordinate point,
-                                      const mbgl::TransformState& state,
-                                      mbgl::LatLng::WrapMode wrapMode = mbgl::LatLng::Wrapped) {
+mln::LatLng screenCoordinateToLatLng(mln::ScreenCoordinate point,
+                                     const mln::TransformState& state,
+                                     mln::LatLng::WrapMode wrapMode = mln::LatLng::Wrapped) {
     point.y = state.getSize().height - point.y;
     return state.screenCoordinateToLatLng(point, wrapMode);
 }
-mbgl::Point<double> project(const mbgl::LatLng& coordinate, const mbgl::TransformState& state) {
-    mbgl::LatLng unwrappedLatLng = coordinate.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(state.getLatLng(mbgl::LatLng::Wrapped));
-    return mbgl::Projection::project(unwrappedLatLng, state.getScale());
+mln::Point<double> project(const mln::LatLng& coordinate, const mln::TransformState& state) {
+    mln::LatLng unwrappedLatLng = coordinate.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(state.getLatLng(mln::LatLng::Wrapped));
+    return mln::Projection::project(unwrappedLatLng, state.getScale());
 }
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 constexpr auto expectedUniqueLayerIDs = 10;
 constexpr auto expectedUniqueLeaderIDs = 30;
@@ -337,23 +337,23 @@ void FeatureIndex::setBucketLayerIDs(const std::string& bucketLeaderID, const st
 DynamicFeatureIndex::~DynamicFeatureIndex() = default;
 
 void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& result,
-                                const mbgl::ScreenLineString& queryGeometry,
+                                const mln::ScreenLineString& queryGeometry,
                                 const TransformState& state) const {
     if (features.empty()) return;
-    mbgl::GeometryBBox<int64_t> queryBox = DefaultWithinBBox;
+    mln::GeometryBBox<int64_t> queryBox = DefaultWithinBBox;
     for (const auto& p : queryGeometry) {
         const LatLng c = screenCoordinateToLatLng(p, state);
         const Point<double> pm = project(c, state);
         const Point<int64_t> coord = {int64_t(pm.x), int64_t(pm.y)};
-        mbgl::updateBBox(queryBox, coord);
+        mln::updateBBox(queryBox, coord);
     }
 
     for (const auto& f : features) {
         // hit testing
-        mbgl::GeometryBBox<int64_t> featureBox = DefaultWithinBBox;
-        for (const auto& p : f.envelope->front()) mbgl::updateBBox(featureBox, p);
+        mln::GeometryBBox<int64_t> featureBox = DefaultWithinBBox;
+        for (const auto& p : f.envelope->front()) mln::updateBBox(featureBox, p);
 
-        const bool hit = mbgl::boxWithinBox(featureBox, queryBox) || mbgl::boxWithinBox(queryBox, featureBox);
+        const bool hit = mln::boxWithinBox(featureBox, queryBox) || mln::boxWithinBox(queryBox, featureBox);
         if (hit) {
             assert(f.feature);
             result[f.feature->sourceLayer].push_back(*f.feature);
@@ -366,4 +366,4 @@ void DynamicFeatureIndex::insert(std::shared_ptr<Feature> feature,
     features.push_back({std::move(feature), std::move(envelope)});
 }
 
-} // namespace mbgl
+} // namespace mln

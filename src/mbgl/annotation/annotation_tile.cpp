@@ -5,7 +5,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 AnnotationTile::AnnotationTile(const OverscaledTileID& overscaledTileID,
                                const TileParameters& parameters,
@@ -118,4 +118,4 @@ std::unique_ptr<AnnotationTileLayer> AnnotationTileData::addLayer(const std::str
     return std::make_unique<AnnotationTileLayer>(it->second);
 }
 
-} // namespace mbgl
+} // namespace mln

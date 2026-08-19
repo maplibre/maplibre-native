@@ -7,10 +7,10 @@
 
 #include "../value.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value);
+variant<std::string, Tileset> convertURLOrTileset(mln::android::Value&& value);
 
 }
-} // namespace mbgl
+} // namespace mln

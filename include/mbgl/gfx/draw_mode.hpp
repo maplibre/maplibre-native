@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class DrawMode {
@@ -91,4 +91,4 @@ template <>
 struct PrimitiveTypeOf<TriangleStrip> : std::integral_constant<PrimitiveType, PrimitiveType::Triangle> {};
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

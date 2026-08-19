@@ -2,11 +2,11 @@
 
 #include <mbgl/util/image.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 PremultipliedImage premultiply(UnassociatedImage&&);
 UnassociatedImage unpremultiply(PremultipliedImage&&);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

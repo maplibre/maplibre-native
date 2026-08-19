@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 /// A movable type-erasing function wrapper. This allows to store arbitrary
 /// invocable things (like std::function<>, or the result of a movable-only
@@ -21,4 +21,4 @@ public:
     static std::shared_ptr<WorkTask> make(Fn&&, Args&&...);
 };
 
-} // namespace mbgl
+} // namespace mln

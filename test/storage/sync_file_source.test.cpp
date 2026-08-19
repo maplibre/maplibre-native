@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 class SyncFileSource : public FileSource {
 public:

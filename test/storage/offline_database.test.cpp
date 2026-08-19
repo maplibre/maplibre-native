@@ -15,7 +15,7 @@
 #include <variant>
 
 using namespace std::literals::string_literals;
-using namespace mbgl;
+using namespace mln;
 using mapbox::sqlite::ResultCode;
 
 static constexpr const char* filename = "test/fixtures/offline_database/offline.db";

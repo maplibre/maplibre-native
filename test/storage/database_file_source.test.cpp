@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(DatabaseFileSource, PauseResume) {
     util::RunLoop loop;
@@ -34,7 +34,7 @@ TEST(DatabaseFileSource, VolatileResource) {
     Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
     Response response{};
     response.data = std::make_shared<std::string>("Cached value");
-    std::unique_ptr<mbgl::AsyncRequest> req;
+    std::unique_ptr<mln::AsyncRequest> req;
 
     dbfs->forward(resource, response, [&] {
         req = dbfs->request(resource, [&](Response res1) {

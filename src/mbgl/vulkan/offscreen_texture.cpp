@@ -9,7 +9,7 @@
 #include <array>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class OffscreenTextureResource final : public RenderableResource {
@@ -251,4 +251,4 @@ const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -274,4 +274,4 @@ lowp float floorwidth = u_floorwidth;
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

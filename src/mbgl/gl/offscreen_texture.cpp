@@ -4,7 +4,7 @@
 #include <mbgl/gl/framebuffer.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class OffscreenTextureResource final : public gl::RenderableResource {
@@ -103,4 +103,4 @@ const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

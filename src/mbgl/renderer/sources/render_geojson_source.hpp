@@ -3,7 +3,7 @@
 #include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/sources/geojson_source_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 class GeoJSONData;
@@ -32,4 +32,4 @@ private:
     std::weak_ptr<style::GeoJSONData> data;
 };
 
-} // namespace mbgl
+} // namespace mln

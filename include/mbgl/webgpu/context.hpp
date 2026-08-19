@@ -8,7 +8,7 @@
 #include <optional>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 class RenderStaticData;
 namespace gfx {
 // Forward declaration
@@ -150,4 +150,4 @@ private:
 };
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

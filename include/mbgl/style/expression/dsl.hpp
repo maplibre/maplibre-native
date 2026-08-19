@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 /// This convenience API does little to no expression validation or
@@ -25,7 +25,7 @@ std::vector<std::unique_ptr<Expression>> vec(Args... args) {
 }
 
 std::unique_ptr<Expression> createExpression(const char* expr);
-std::unique_ptr<Expression> createExpression(const mbgl::style::conversion::Convertible& expr);
+std::unique_ptr<Expression> createExpression(const mln::style::conversion::Convertible& expr);
 std::unique_ptr<Expression> error(std::string);
 
 std::unique_ptr<Expression> literal(const char* value);
@@ -101,4 +101,4 @@ std::unique_ptr<Expression> image(std::unique_ptr<Expression>);
 } // namespace dsl
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

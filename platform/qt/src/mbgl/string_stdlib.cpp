@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string uppercase(const std::string& str) {
@@ -21,4 +21,4 @@ std::string lowercase(const std::string& str) {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

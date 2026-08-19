@@ -28,9 +28,9 @@
 
 #include <memory>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 using namespace expression;
 using namespace expression::dsl;
 using namespace std::literals::string_literals;
@@ -63,9 +63,9 @@ class MockLayoutProperties : public Properties<TextField> {};
 class MockPaintProperties : public Properties<TextColor> {};
 using MockOverrides = FormatSectionOverrides<MockPaintProperties::OverridableProperties>;
 
-mbgl::style::Filter parseFilter(const std::string& expression) {
+mln::style::Filter parseFilter(const std::string& expression) {
     Error error;
-    return *convertJSON<mbgl::style::Filter>(expression, error);
+    return *convertJSON<mln::style::Filter>(expression, error);
 }
 
 } // namespace

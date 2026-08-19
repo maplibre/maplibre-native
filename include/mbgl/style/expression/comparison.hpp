@@ -7,11 +7,11 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
-ParseResult parseComparison(const mbgl::style::conversion::Convertible&, ParsingContext&);
+ParseResult parseComparison(const mln::style::conversion::Convertible&, ParsingContext&);
 
 class BasicComparison : public Expression {
 public:
@@ -59,4 +59,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

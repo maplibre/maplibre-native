@@ -10,7 +10,7 @@
 
 // Implementation based on Chromium's platform_thread_android.cc.
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 thread_local static JNIEnv* env;
@@ -61,4 +61,4 @@ void detachThread() {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

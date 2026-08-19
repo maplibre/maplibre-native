@@ -8,7 +8,7 @@
 #include <optional>
 #include <array>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Image::Impl {
@@ -55,11 +55,11 @@ enum class ImageType : bool {
     Pattern
 };
 
-using ImageMap = mbgl::unordered_map<std::string, Immutable<style::Image::Impl>>;
-using ImageDependencies = mbgl::unordered_map<std::string, ImageType>;
+using ImageMap = mln::unordered_map<std::string, Immutable<style::Image::Impl>>;
+using ImageDependencies = mln::unordered_map<std::string, ImageType>;
 using ImageRequestPair = std::pair<ImageDependencies, uint64_t>;
-using ImageVersionMap = mbgl::unordered_map<std::string, uint32_t>;
-inline bool operator<(const Immutable<mbgl::style::Image::Impl>& a, const Immutable<mbgl::style::Image::Impl>& b) {
+using ImageVersionMap = mln::unordered_map<std::string, uint32_t>;
+inline bool operator<(const Immutable<mln::style::Image::Impl>& a, const Immutable<mln::style::Image::Impl>& b) {
     return a->id < b->id;
 }
 
@@ -109,6 +109,6 @@ public:
     }
 };
 
-using ImagePositions = mbgl::unordered_map<std::string, ImagePosition>;
+using ImagePositions = mln::unordered_map<std::string, ImagePosition>;
 
-} // namespace mbgl
+} // namespace mln

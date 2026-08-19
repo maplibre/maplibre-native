@@ -27,14 +27,14 @@ std::string toAbsoluteURL(const std::string& fileName) {
     char* cwd = getcwd(buff, PATH_MAX + 1);
 #endif
     // NOLINTNEXTLINE(clang-analyzer-nullability.NullPassedToNonnull)
-    std::string url = {mbgl::util::FILE_PROTOCOL + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName};
+    std::string url = {mln::util::FILE_PROTOCOL + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName};
     assert(url.size() <= PATH_MAX);
     return url;
 }
 
 } // namespace
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(LocalFileSource, AcceptsURL) {
     LocalFileSource fs(ResourceOptions::Default(), ClientOptions());

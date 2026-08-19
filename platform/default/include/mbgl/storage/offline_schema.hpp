@@ -3,7 +3,7 @@
 // THIS IS A GENERATED FILE; EDIT offline_schema.sql INSTEAD
 // To regenerate, run `node platform/default/include/mbgl/storage/offline_schema.js`
 
-namespace mbgl {
+namespace mln {
 
 static constexpr const char* offlineDatabaseSchema =
     "CREATE TABLE resources (\n"
@@ -59,4 +59,4 @@ static constexpr const char* offlineDatabaseSchema =
     "CREATE INDEX region_tiles_tile_id\n"
     "ON region_tiles (tile_id);\n";
 
-} // namespace mbgl
+} // namespace mln

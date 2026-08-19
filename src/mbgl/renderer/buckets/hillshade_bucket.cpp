@@ -2,7 +2,7 @@
 #include <mbgl/renderer/layers/render_hillshade_layer.hpp>
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -107,4 +107,4 @@ bool HillshadeBucket::hasData() const {
     return demdata.getImage()->valid();
 }
 
-} // namespace mbgl
+} // namespace mln

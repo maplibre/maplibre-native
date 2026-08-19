@@ -9,7 +9,7 @@
 #include <vector>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 using AnnotationID = uint64_t;
 using AnnotationIDs = std::vector<AnnotationID>;
@@ -63,4 +63,4 @@ public:
 
 using Annotation = variant<SymbolAnnotation, LineAnnotation, FillAnnotation>;
 
-} // namespace mbgl
+} // namespace mln

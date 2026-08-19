@@ -3,7 +3,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/constants.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 SurfaceRenderableResource::~SurfaceRenderableResource() {
@@ -14,7 +14,7 @@ SurfaceRenderableResource::~SurfaceRenderableResource() {
     try {
         backend.getDevice()->waitIdle(backend.getDispatcher());
     } catch (const vk::DeviceLostError& error) {
-        Log::Error(mbgl::Event::Render, "Vulkan device lost during surface shutdown");
+        Log::Error(mln::Event::Render, "Vulkan device lost during surface shutdown");
     }
 
     // specific order
@@ -65,7 +65,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
         auto& colorAllocation = colorAllocations.back();
 
         if (!colorAllocation->create(allocCreateInfo, imageCreateInfo)) {
-            mbgl::Log::Error(mbgl::Event::Render, "Vulkan color texture allocation failed");
+            mln::Log::Error(mln::Event::Render, "Vulkan color texture allocation failed");
         }
 
         swapchainImages.push_back(colorAllocation->image);
@@ -90,8 +90,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         const auto& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get(), dispatcher);
 
         if (std::find(presentModes.begin(), presentModes.end(), presentMode) == presentModes.end()) {
-            mbgl::Log::Error(
-                mbgl::Event::Render,
+            mln::Log::Error(
+                mln::Event::Render,
                 "Requested PresentModeKHR not available (" + std::to_string(static_cast<int>(presentMode)) + ")");
 
             presentMode = vk::PresentModeKHR::eFifo;
@@ -115,12 +115,12 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         // update values based on surface limits
         extent.width = std::min(std::max(w, capabilities.minImageExtent.width), capabilities.maxImageExtent.width);
         extent.height = std::min(std::max(h, capabilities.minImageExtent.height), capabilities.maxImageExtent.height);
+    }
 
-        if (hasSurfaceTransformSupport()) {
-            if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
-                capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
-                std::swap(extent.width, extent.height);
-            }
+    if (hasSurfaceTransformSupport()) {
+        if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
+            capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
+            std::swap(extent.width, extent.height);
         }
     }
 
@@ -208,7 +208,7 @@ void SurfaceRenderableResource::initDepthStencil() {
     });
 
     if (formatIt == formats.end()) {
-        mbgl::Log::Error(mbgl::Event::Render, "Depth/Stencil format not available");
+        mln::Log::Error(mln::Event::Render, "Depth/Stencil format not available");
         return;
     }
 
@@ -242,7 +242,7 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
     if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan depth texture allocation failed");
+        mln::Log::Error(mln::Event::Render, "Vulkan depth texture allocation failed");
         return;
     }
 
@@ -589,4 +589,4 @@ std::shared_ptr<PremultipliedImage> SurfaceRenderableResource::readImage() {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

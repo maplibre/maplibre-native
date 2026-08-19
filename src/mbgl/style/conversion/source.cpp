@@ -12,7 +12,7 @@
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/util/geo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -242,4 +242,4 @@ std::optional<std::unique_ptr<Source>> Converter<std::unique_ptr<Source>>::opera
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

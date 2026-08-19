@@ -13,7 +13,7 @@
 #include <list>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 OpacityState::OpacityState(bool placed_, bool skipFade)
     : opacity((skipFade && placed_) ? 1.0f : 0.0f),
@@ -1693,4 +1693,4 @@ Mutable<Placement> Placement::create(std::shared_ptr<const UpdateParameters> upd
     return makeMutable<Placement>();
 }
 
-} // namespace mbgl
+} // namespace mln

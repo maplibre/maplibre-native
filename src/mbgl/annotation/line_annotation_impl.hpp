@@ -3,7 +3,7 @@
 #include <mbgl/annotation/shape_annotation_impl.hpp>
 #include <mbgl/annotation/annotation.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class LineAnnotationImpl : public ShapeAnnotationImpl {
 public:
@@ -16,4 +16,4 @@ private:
     const LineAnnotation annotation;
 };
 
-} // namespace mbgl
+} // namespace mln

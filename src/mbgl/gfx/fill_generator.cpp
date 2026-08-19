@@ -18,18 +18,18 @@
 namespace mapbox {
 namespace util {
 template <>
-struct nth<0, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
+struct nth<0, mln::GeometryCoordinate> {
+    static int64_t get(const mln::GeometryCoordinate& t) { return t.x; };
 };
 
 template <>
-struct nth<1, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
+struct nth<1, mln::GeometryCoordinate> {
+    static int64_t get(const mln::GeometryCoordinate& t) { return t.y; };
 };
 } // namespace util
 } // namespace mapbox
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 struct GeometryTooLongException : std::exception {};
@@ -245,4 +245,4 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
 } // namespace gfx
 
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -42,8 +42,8 @@ std::vector<std::optional<Value>> Match<T>::possibleOutputs() const {
 }
 
 template <typename T>
-mbgl::Value Match<T>::serialize() const {
-    std::vector<mbgl::Value> serialized;
+mln::Value Match<T>::serialize() const {
+    std::vector<mln::Value> serialized;
     serialized.emplace_back(getOperator());
     serialized.emplace_back(input->serialize());
 
@@ -54,13 +54,13 @@ mbgl::Value Match<T>::serialize() const {
     // Group branches by unique match expression to support condensed
     // serializations of the form [case1, case2, ...] -> matchExpression
     std::map<Expression*, size_t> outputLookup;
-    std::vector<std::pair<Expression*, std::vector<mbgl::Value>>> groupedByOutput;
+    std::vector<std::pair<Expression*, std::vector<mln::Value>>> groupedByOutput;
     for (auto& entry : sortedBranches) {
         auto outputIndex = outputLookup.find(entry.second.get());
         if (outputIndex == outputLookup.end()) {
             // First time seeing this output, add it to the end of the grouped list
             outputLookup[entry.second.get()] = groupedByOutput.size();
-            groupedByOutput.emplace_back(entry.second.get(), std::vector<mbgl::Value>{{entry.first}});
+            groupedByOutput.emplace_back(entry.second.get(), std::vector<mln::Value>{{entry.first}});
         } else {
             // We've seen this expression before, add the label to that output's group
             groupedByOutput[outputIndex->second].second.emplace_back(entry.first);
@@ -125,12 +125,12 @@ template class Match<std::string>;
 
 using InputType = variant<int64_t, std::string>;
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 std::optional<InputType> parseInputValue(const Convertible& input,
                                          ParsingContext& parentContext,
                                          std::size_t index,
                                          std::optional<type::Type>& inputType) {
-    using namespace mbgl::style::conversion;
+    using namespace mln::style::conversion;
     std::optional<InputType> result;
     std::optional<type::Type> type;
 
@@ -330,4 +330,4 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

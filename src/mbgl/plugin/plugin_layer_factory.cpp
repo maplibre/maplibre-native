@@ -7,7 +7,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace plugins {
 
@@ -57,12 +57,12 @@ style::LayerTypeInfo getDefaultInfo() {
 }
 
 PluginLayerFactory::PluginLayerFactory(std::string& layerType,
-                                       mbgl::style::LayerTypeInfo::Source source,
-                                       mbgl::style::LayerTypeInfo::Pass3D pass3D,
-                                       mbgl::style::LayerTypeInfo::Layout layout,
-                                       mbgl::style::LayerTypeInfo::FadingTiles fadingTiles,
-                                       mbgl::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
-                                       mbgl::style::LayerTypeInfo::TileKind tileKind)
+                                       mln::style::LayerTypeInfo::Source source,
+                                       mln::style::LayerTypeInfo::Pass3D pass3D,
+                                       mln::style::LayerTypeInfo::Layout layout,
+                                       mln::style::LayerTypeInfo::FadingTiles fadingTiles,
+                                       mln::style::LayerTypeInfo::CrossTileIndex crossTileIndex,
+                                       mln::style::LayerTypeInfo::TileKind tileKind)
     : _layerTypeInfo(getDefaultInfo()),
       _layerType(layerType) {
     _layerTypeInfo.type = layerType.c_str();
@@ -157,9 +157,9 @@ std::unique_ptr<style::Layer> PluginLayerFactory::createLayer(const std::string&
 
     if (_onLayerCreated != nullptr) {
         auto layerRaw = tempResult.get();
-        auto pluginLayer = static_cast<mbgl::style::PluginLayer*>(layerRaw);
+        auto pluginLayer = static_cast<mln::style::PluginLayer*>(layerRaw);
         _onLayerCreated(pluginLayer);
-        auto pluginLayerImpl = (mbgl::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
+        auto pluginLayerImpl = (mln::style::PluginLayer::Impl*)pluginLayer->baseImpl.get();
         if (pluginLayerImpl->_updateLayerPropertiesFunction != nullptr) {
             pluginLayerImpl->_updateLayerPropertiesFunction(layerProperties);
         }
@@ -184,4 +184,4 @@ std::unique_ptr<RenderLayer> PluginLayerFactory::createRenderLayer(Immutable<sty
     return tempResult;
 }
 
-} // namespace mbgl
+} // namespace mln

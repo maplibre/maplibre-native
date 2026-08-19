@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/color_relief_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class ColorReliefLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     ColorReliefLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    ColorReliefLayer(mbgl::style::ColorReliefLayer&);
+    ColorReliefLayer(mln::style::ColorReliefLayer&);
 
-    ColorReliefLayer(std::unique_ptr<mbgl::style::ColorReliefLayer>);
+    ColorReliefLayer(std::unique_ptr<mln::style::ColorReliefLayer>);
 
     ~ColorReliefLayer();
 
@@ -34,13 +34,13 @@ public:
 
 }; // class ColorReliefLayer
 
-class ColorReliefJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::ColorReliefLayerFactory {
+class ColorReliefJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::ColorReliefLayerFactory {
 public:
     ~ColorReliefJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -49,4 +49,4 @@ public:
 }; // class ColorReliefJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

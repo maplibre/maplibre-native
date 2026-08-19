@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/collision_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -33,4 +33,4 @@ const std::array<AttributeInfo, 4> CollisionCircleShaderSource::attributes = {
 const std::array<TextureInfo, 0> CollisionCircleShaderSource::textures = {};
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

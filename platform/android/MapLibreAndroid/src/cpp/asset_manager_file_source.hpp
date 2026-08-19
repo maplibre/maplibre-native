@@ -8,7 +8,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 template <typename T>
@@ -39,4 +39,4 @@ private:
     std::unique_ptr<util::Thread<Impl>> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

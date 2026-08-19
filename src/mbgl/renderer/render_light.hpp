@@ -3,7 +3,7 @@
 #include <mbgl/style/light_impl.hpp>
 #include <mbgl/util/immutable.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TransitionParameters;
 class PropertyEvaluationParameters;
@@ -28,4 +28,4 @@ private:
     EvaluatedLight evaluated;
 };
 
-} // namespace mbgl
+} // namespace mln

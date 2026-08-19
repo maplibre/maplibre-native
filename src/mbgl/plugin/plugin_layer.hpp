@@ -4,7 +4,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 
@@ -42,4 +42,4 @@ protected:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

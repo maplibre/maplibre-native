@@ -18,7 +18,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -157,4 +157,4 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

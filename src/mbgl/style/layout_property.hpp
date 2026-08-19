@@ -4,7 +4,7 @@
 #include <mbgl/renderer/property_evaluator.hpp>
 #include <mbgl/renderer/data_driven_property_evaluator.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 template <class T>
@@ -32,4 +32,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

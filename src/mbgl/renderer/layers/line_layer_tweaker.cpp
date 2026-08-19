@@ -18,7 +18,7 @@
 #include <mbgl/shaders/mtl/line.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -442,4 +442,4 @@ void LineLayerTweaker::updateGPUExpressions(const Unevaluated& unevaluated, Time
 
 #endif // MLN_RENDER_BACKEND_METAL
 
-} // namespace mbgl
+} // namespace mln

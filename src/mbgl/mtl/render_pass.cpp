@@ -7,7 +7,7 @@
 
 #include <Metal/Metal.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
@@ -259,4 +259,4 @@ void RenderPass::setScissorRect(MTL::ScissorRect rect) {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

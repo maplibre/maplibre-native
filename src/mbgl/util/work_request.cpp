@@ -4,7 +4,7 @@
 #include <cassert>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 WorkRequest::WorkRequest(Task task_)
     : task(std::move(task_)) {
@@ -15,4 +15,4 @@ WorkRequest::~WorkRequest() {
     task->cancel();
 }
 
-} // namespace mbgl
+} // namespace mln

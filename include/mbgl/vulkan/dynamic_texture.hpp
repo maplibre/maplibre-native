@@ -5,7 +5,7 @@
 
 #define DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD 0
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class Context;
@@ -41,4 +41,4 @@ private:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

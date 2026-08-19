@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 VectorMVTTile::VectorMVTTile(const OverscaledTileID& id_,
                              std::string sourceID_,
@@ -30,4 +30,4 @@ void VectorMVTTile::setData(const std::shared_ptr<const std::string>& data_) {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

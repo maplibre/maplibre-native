@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class ShaderRegistry;
@@ -98,4 +98,4 @@ public:
     virtual void onSymbolError(const std::string&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

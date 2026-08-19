@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class Transform;
 
@@ -27,4 +27,4 @@ private:
     std::unique_ptr<Transform> transform;
 };
 
-} // namespace mbgl
+} // namespace mln

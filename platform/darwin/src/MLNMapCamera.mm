@@ -31,7 +31,7 @@
                                                          longitude:eyeCoordinate.longitude];
     CLLocationDistance groundDistance = [eyeLocation distanceFromLocation:centerLocation];
     CGFloat radianPitch = atan2(eyeAltitude, groundDistance);
-    pitch = mbgl::util::wrap(90 - MLNDegreesFromRadians(radianPitch), 0.0, 360.0);
+    pitch = mln::util::wrap(90 - MLNDegreesFromRadians(radianPitch), 0.0, 360.0);
   }
 
   return [[self alloc] initWithCenterCoordinate:centerCoordinate

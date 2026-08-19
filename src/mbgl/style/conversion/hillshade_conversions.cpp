@@ -5,7 +5,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 // Enum specializations
 template <>
@@ -87,4 +87,4 @@ std::optional<HillshadeMethodType> ValueConverter<HillshadeMethodType>::fromExpr
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -12,7 +12,7 @@
 #include <boost/geometry/geometries/register/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AnnotationTileLayer;
 class CanonicalTileID;
@@ -27,7 +27,7 @@ public:
     const SymbolAnnotation annotation;
 };
 
-} // namespace mbgl
+} // namespace mln
 
 namespace boost {
 namespace geometry {
@@ -36,62 +36,62 @@ namespace geometry {
 namespace traits {
 
 template <>
-struct tag<mbgl::LatLng> {
+struct tag<mln::LatLng> {
     using type = point_tag;
 };
 template <>
-struct dimension<mbgl::LatLng> : boost::mpl::int_<2> {};
+struct dimension<mln::LatLng> : boost::mpl::int_<2> {};
 template <>
-struct coordinate_type<mbgl::LatLng> {
+struct coordinate_type<mln::LatLng> {
     using type = double;
 };
 template <>
-struct coordinate_system<mbgl::LatLng> {
+struct coordinate_system<mln::LatLng> {
     using type = boost::geometry::cs::cartesian;
 };
 
 template <>
-struct access<mbgl::LatLng, 0> {
-    static inline double get(mbgl::LatLng const& p) { return p.longitude(); }
+struct access<mln::LatLng, 0> {
+    static inline double get(mln::LatLng const& p) { return p.longitude(); }
 };
 template <>
-struct access<mbgl::LatLng, 1> {
-    static inline double get(mbgl::LatLng const& p) { return p.latitude(); }
+struct access<mln::LatLng, 1> {
+    static inline double get(mln::LatLng const& p) { return p.latitude(); }
 };
 
 template <>
-struct tag<mbgl::LatLngBounds> {
+struct tag<mln::LatLngBounds> {
     using type = box_tag;
 };
 template <>
-struct point_type<mbgl::LatLngBounds> {
-    using type = mbgl::LatLng;
+struct point_type<mln::LatLngBounds> {
+    using type = mln::LatLng;
 };
 
 template <size_t D>
-struct indexed_access<mbgl::LatLngBounds, min_corner, D> {
-    using ct = coordinate_type<mbgl::LatLng>::type;
-    static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.southwest()); }
-    static inline void set(mbgl::LatLngBounds& b, ct const& value) { geometry::set<D>(b.southwest(), value); }
+struct indexed_access<mln::LatLngBounds, min_corner, D> {
+    using ct = coordinate_type<mln::LatLng>::type;
+    static inline ct get(mln::LatLngBounds const& b) { return geometry::get<D>(b.southwest()); }
+    static inline void set(mln::LatLngBounds& b, ct const& value) { geometry::set<D>(b.southwest(), value); }
 };
 
 template <size_t D>
-struct indexed_access<mbgl::LatLngBounds, max_corner, D> {
-    using ct = coordinate_type<mbgl::LatLng>::type;
-    static inline ct get(mbgl::LatLngBounds const& b) { return geometry::get<D>(b.northeast()); }
-    static inline void set(mbgl::LatLngBounds& b, ct const& value) { geometry::set<D>(b.northeast(), value); }
+struct indexed_access<mln::LatLngBounds, max_corner, D> {
+    using ct = coordinate_type<mln::LatLng>::type;
+    static inline ct get(mln::LatLngBounds const& b) { return geometry::get<D>(b.northeast()); }
+    static inline void set(mln::LatLngBounds& b, ct const& value) { geometry::set<D>(b.northeast(), value); }
 };
 
 } // namespace traits
 
-// Tell Boost Geometry how to access a std::shared_ptr<mbgl::SymbolAnnotation> object.
+// Tell Boost Geometry how to access a std::shared_ptr<mln::SymbolAnnotation> object.
 namespace index {
 
 template <>
-struct indexable<std::shared_ptr<const mbgl::SymbolAnnotationImpl>> {
-    using result_type = mbgl::LatLng;
-    mbgl::LatLng operator()(const std::shared_ptr<const mbgl::SymbolAnnotationImpl>& v) const {
-        const mbgl::Point<double>& p = v->annotation.geometry;
+struct indexable<std::shared_ptr<const mln::SymbolAnnotationImpl>> {
+    using result_type = mln::LatLng;
+    mln::LatLng operator()(const std::shared_ptr<const mln::SymbolAnnotationImpl>& v) const {
+        const mln::Point<double>& p = v->annotation.geometry;
         return {p.y, p.x};
     }
 };

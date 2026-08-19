@@ -19,7 +19,7 @@
 #include <memory>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class LayerManagerDefault final : public LayerManager {
 public:
@@ -32,7 +32,7 @@ public:
      * in order to save binary size (the corresponding SDK layer wrappers
      * should be excluded from the project build).
      */
-    void addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory>) override;
+    void addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>) override;
 
 private:
     void addLayerType(std::unique_ptr<LayerFactory>);
@@ -44,7 +44,7 @@ private:
     std::map<std::string, LayerFactory*> typeToFactory;
 };
 
-void LayerManagerDefault::addLayerTypeCoreOnly(std::unique_ptr<mbgl::LayerFactory> layerFactory) {
+void LayerManagerDefault::addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory> layerFactory) {
     addLayerType(std::move(layerFactory));
 }
 
@@ -104,7 +104,7 @@ void LayerManagerDefault::addLayerType(std::unique_ptr<LayerFactory> factory) {
     factories.emplace_back(std::move(factory));
 }
 
-LayerFactory* LayerManagerDefault::getFactory(const mbgl::style::LayerTypeInfo* typeInfo) noexcept {
+LayerFactory* LayerManagerDefault::getFactory(const mln::style::LayerTypeInfo* typeInfo) noexcept {
     assert(typeInfo);
     for (const auto& factory : factories) {
         if (layerTypeInfoEquals(factory->getTypeInfo(), typeInfo)) {
@@ -133,4 +133,4 @@ const bool LayerManager::annotationsEnabled = false;
 const bool LayerManager::annotationsEnabled = true;
 #endif
 
-} // namespace mbgl
+} // namespace mln

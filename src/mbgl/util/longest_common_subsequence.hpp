@@ -5,7 +5,7 @@
 #include <iterator>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 /*
     Computes the longest common subsequence (LCS) of sequences A and B,
@@ -98,4 +98,4 @@ OutIt longest_common_subsequence(InIt a, InIt endA, InIt b, InIt endB, OutIt out
     return longest_common_subsequence(a, endA, b, endB, outIt, std::equal_to<>());
 }
 
-} // namespace mbgl
+} // namespace mln

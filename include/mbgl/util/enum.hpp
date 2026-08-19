@@ -7,7 +7,7 @@
 #include <string>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 class Enum {
@@ -36,4 +36,4 @@ public:
         return it == std::end(T##_names) ? std::optional<T>() : it->first;                             \
     }
 
-} // namespace mbgl
+} // namespace mln

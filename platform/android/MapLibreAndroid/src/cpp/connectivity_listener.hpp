@@ -4,10 +4,10 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class ConnectivityListener : private mbgl::util::noncopyable {
+class ConnectivityListener : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/net/NativeConnectivityListener"; };
 
@@ -24,4 +24,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

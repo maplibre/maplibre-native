@@ -20,7 +20,7 @@
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -59,7 +59,7 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
                evaluated.get<style::CircleStrokeOpacity>().constantOr(1) > 0))
                  ? RenderPass::Translucent
                  : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -198,7 +198,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> circleBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
 
-    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+    if (!(mln::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
@@ -293,4 +293,4 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

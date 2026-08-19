@@ -9,8 +9,8 @@
 #include <mbgl/util/geojson.hpp>
 #include <nan.h>
 
-using namespace mbgl::style;
-using namespace mbgl::style::expression;
+using namespace mln::style;
+using namespace mln::style::expression;
 
 namespace node_mbgl {
 
@@ -113,10 +113,10 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     auto expr = info[0];
 
     try {
-        mbgl::style::conversion::Convertible convertible(expr);
+        mln::style::conversion::Convertible convertible(expr);
 
         if (expr->IsObject() && !expr->IsArray() && expected) {
-            mbgl::style::conversion::Error error;
+            mln::style::conversion::Error error;
             auto func = convertFunctionToExpression(*expected, convertible, error, false);
             if (func) {
                 return success(std::move(*func));
@@ -125,7 +125,7 @@ void NodeExpression::Parse(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         }
 
         ParsingContext ctx = expected ? ParsingContext(*expected) : ParsingContext();
-        ParseResult parsed = ctx.parseLayerPropertyExpression(mbgl::style::conversion::Convertible(expr));
+        ParseResult parsed = ctx.parseLayerPropertyExpression(mln::style::conversion::Convertible(expr));
         if (parsed) {
             assert(ctx.getErrors().empty());
             return success(std::move(*parsed));
@@ -145,7 +145,7 @@ void NodeExpression::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 struct ToValue {
-    v8::Local<v8::Value> operator()(mbgl::NullValue) {
+    v8::Local<v8::Value> operator()(mln::NullValue) {
         Nan::EscapableHandleScope scope;
         return scope.Escape(Nan::Null());
     }
@@ -185,27 +185,27 @@ struct ToValue {
     v8::Local<v8::Value> operator()(const Formatted& formatted) {
         // This mimics the internal structure of the Formatted class in formatted.js
         // A better approach might be to use the explicit serialized form
-        // both here and on the JS side? e.g. toJS(fromExpressionValue<mbgl::Value>(formatted))
-        std::unordered_map<std::string, mbgl::Value> serialized;
-        std::vector<mbgl::Value> sections;
+        // both here and on the JS side? e.g. toJS(fromExpressionValue<mln::Value>(formatted))
+        std::unordered_map<std::string, mln::Value> serialized;
+        std::vector<mln::Value> sections;
         for (const auto& section : formatted.sections) {
-            std::unordered_map<std::string, mbgl::Value> serializedSection;
+            std::unordered_map<std::string, mln::Value> serializedSection;
             serializedSection.emplace("text", section.text);
             if (section.fontScale) {
                 serializedSection.emplace("scale", *section.fontScale);
             } else {
-                serializedSection.emplace("scale", mbgl::NullValue());
+                serializedSection.emplace("scale", mln::NullValue());
             }
             if (section.fontStack) {
                 std::string fontStackString;
-                serializedSection.emplace("fontStack", mbgl::fontStackToString(*section.fontStack));
+                serializedSection.emplace("fontStack", mln::fontStackToString(*section.fontStack));
             } else {
-                serializedSection.emplace("fontStack", mbgl::NullValue());
+                serializedSection.emplace("fontStack", mln::NullValue());
             }
             if (section.textColor) {
                 serializedSection.emplace("textColor", section.textColor->toObject());
             } else {
-                serializedSection.emplace("textColor", mbgl::NullValue());
+                serializedSection.emplace("textColor", mln::NullValue());
             }
             sections.emplace_back(serializedSection);
         }
@@ -214,14 +214,14 @@ struct ToValue {
         return toJS(serialized);
     }
 
-    v8::Local<v8::Value> operator()(const mbgl::Color& color) {
+    v8::Local<v8::Value> operator()(const mln::Color& color) {
         return operator()(std::vector<Value>{static_cast<double>(color.r),
                                              static_cast<double>(color.g),
                                              static_cast<double>(color.b),
                                              static_cast<double>(color.a)});
     }
 
-    v8::Local<v8::Value> operator()(const mbgl::Padding& padding) {
+    v8::Local<v8::Value> operator()(const mln::Padding& padding) {
         return operator()(std::vector<Value>{static_cast<double>(padding.top),
                                              static_cast<double>(padding.right),
                                              static_cast<double>(padding.bottom),
@@ -240,12 +240,12 @@ struct ToValue {
 
     v8::Local<v8::Value> operator()(const Image& image) { return toJS(image.toValue()); }
 
-    v8::Local<v8::Value> operator()(const mbgl::VariableAnchorOffsetCollection& variableAnchorOffsets) {
+    v8::Local<v8::Value> operator()(const mln::VariableAnchorOffsetCollection& variableAnchorOffsets) {
         std::vector<Value> components;
         components.reserve(variableAnchorOffsets.size() * 2);
         for (const auto& variableAnchorOffset : variableAnchorOffsets) {
             components.emplace_back(
-                std::string(mbgl::Enum<mbgl::style::SymbolAnchorType>::toString(variableAnchorOffset.anchorType)));
+                std::string(mln::Enum<mln::style::SymbolAnchorType>::toString(variableAnchorOffset.anchorType)));
             components.emplace_back(std::vector<Value>{static_cast<double>(variableAnchorOffset.offset[0]),
                                                        static_cast<double>(variableAnchorOffset.offset[1])});
         }
@@ -279,7 +279,7 @@ void NodeExpression::Evaluate(const Nan::FunctionCallbackInfo<v8::Value>& info) 
 
     Nan::JSON NanJSON;
     conversion::Error conversionError;
-    std::optional<mbgl::GeoJSON> geoJSON = conversion::convert<mbgl::GeoJSON>(info[1], conversionError);
+    std::optional<mln::GeoJSON> geoJSON = conversion::convert<mln::GeoJSON>(info[1], conversionError);
     if (!geoJSON) {
         Nan::ThrowTypeError(conversionError.message.c_str());
         return;
@@ -326,7 +326,7 @@ void NodeExpression::Serialize(const Nan::FunctionCallbackInfo<v8::Value>& info)
     auto* nodeExpr = ObjectWrap::Unwrap<NodeExpression>(info.Holder());
     const std::unique_ptr<Expression>& expression = nodeExpr->expression;
 
-    const mbgl::Value serialized = expression->serialize();
+    const mln::Value serialized = expression->serialize();
     info.GetReturnValue().Set(toJS(serialized));
 }
 

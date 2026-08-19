@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <thread>
 
-using namespace mbgl;
-using namespace mbgl::android;
+using namespace mln;
+using namespace mln::android;
 
 bool running = false;
 bool done = false;
@@ -22,15 +22,15 @@ void runner() {
     }
     argv.push_back(nullptr);
 
-    mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
-    int status = mbgl::runBenchmark(argv.size(), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '%d'", status);
+    mln::Log::Info(mln::Event::General, "Start BenchmarkRunner");
+    int status = mln::runBenchmark(argv.size(), argv.data());
+    mln::Log::Info(mln::Event::General, "BenchmarkRunner finished with status: '%d'", status);
     running = false;
     ALooper_wake(looper);
 }
 
 void android_main(struct android_app* app) {
-    mbgl::android::theJVM = app->activity->vm;
+    mln::android::theJVM = app->activity->vm;
     JNIEnv* env = nullptr;
     std::thread benchmarkThread;
     app->activity->vm->AttachCurrentThread(&env, NULL);
@@ -41,7 +41,7 @@ void android_main(struct android_app* app) {
 
     if (copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
         if (chdir("/sdcard")) {
-            mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to /sdcard");
+            mln::Log::Error(mln::Event::General, "Failed to change the directory to /sdcard");
             done = true;
             changeState(env, app, false);
         } else {
@@ -50,7 +50,7 @@ void android_main(struct android_app* app) {
             benchmarkThread = std::thread(runner);
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '%s' to external storage", zipFile.c_str());
+        mln::Log::Error(mln::Event::General, "Failed to copy zip file '%s' to external storage", zipFile.c_str());
         done = true;
         changeState(env, app, false);
     }
@@ -65,7 +65,7 @@ void android_main(struct android_app* app) {
         }
 
         if (!running && !done) {
-            mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner done");
+            mln::Log::Info(mln::Event::General, "BenchmarkRunner done");
             done = true;
             benchmarkThread.join();
             changeState(env, app, true);
@@ -73,7 +73,7 @@ void android_main(struct android_app* app) {
 
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
-            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
+            mln::Log::Info(mln::Event::General, "Close the App!");
             return;
         }
     }

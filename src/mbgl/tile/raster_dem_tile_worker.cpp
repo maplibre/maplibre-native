@@ -4,7 +4,7 @@
 #include <mbgl/actor/actor.hpp>
 #include <mbgl/util/premultiply.hpp>
 
-namespace mbgl {
+namespace mln {
 
 RasterDEMTileWorker::RasterDEMTileWorker(const ActorRef<RasterDEMTileWorker>&, ActorRef<RasterDEMTile> parent_)
     : parent(std::move(parent_)) {}
@@ -26,4 +26,4 @@ void RasterDEMTileWorker::parse(const std::shared_ptr<const std::string>& data,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

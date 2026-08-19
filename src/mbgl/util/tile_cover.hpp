@@ -12,7 +12,7 @@
 #include <optional>
 #include <set>
 
-namespace mbgl {
+namespace mln {
 
 class LatLngBounds;
 
@@ -82,4 +82,4 @@ uint64_t tileCount(const LatLngBounds&, uint8_t z) noexcept;
 uint64_t tileCount(const Geometry<double>&, uint8_t z);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

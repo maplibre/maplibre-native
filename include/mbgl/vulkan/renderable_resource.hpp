@@ -4,7 +4,7 @@
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class Context;
@@ -135,4 +135,4 @@ public:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

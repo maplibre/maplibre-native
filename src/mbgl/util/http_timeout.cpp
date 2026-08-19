@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace http {
 
 Duration errorRetryTimeout(Response::Error::Reason failedRequestReason,
@@ -44,4 +44,4 @@ Duration expirationTimeout(std::optional<Timestamp> expires, uint32_t expiredReq
 }
 
 } // namespace http
-} // namespace mbgl
+} // namespace mln

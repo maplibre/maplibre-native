@@ -22,7 +22,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class RendererFrontend;
 class TransformState;
@@ -230,4 +230,4 @@ protected:
     Map(std::unique_ptr<Impl>, const util::ActionJournalOptions& = {});
 };
 
-} // namespace mbgl
+} // namespace mln

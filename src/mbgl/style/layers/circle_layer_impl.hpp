@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/circle_layer.hpp>
 #include <mbgl/style/layers/circle_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class CircleLayer::Impl : public Layer::Impl {
@@ -21,4 +21,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

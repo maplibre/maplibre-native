@@ -15,7 +15,7 @@
 #include <vector>
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class DrawableBuilder::Impl {
@@ -65,9 +65,9 @@ public:
                                     const GeometryCoordinates& coordinates,
                                     const gfx::PolylineGeneratorOptions& options);
 
-    mbgl::Point<double> addWideVectorPolylineGlobal(gfx::DrawableBuilder& builder,
-                                                    const LineString<double>& coordinates,
-                                                    const gfx::PolylineGeneratorOptions& options);
+    mln::Point<double> addWideVectorPolylineGlobal(gfx::DrawableBuilder& builder,
+                                                   const LineString<double>& coordinates,
+                                                   const gfx::PolylineGeneratorOptions& options);
 
     void setupForWideVectors(gfx::Context&, gfx::DrawableBuilder&);
 
@@ -100,4 +100,4 @@ private:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

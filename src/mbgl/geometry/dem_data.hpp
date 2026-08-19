@@ -9,7 +9,7 @@
 #include <cassert>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class DEMData {
 public:
@@ -45,4 +45,4 @@ private:
     }
 };
 
-} // namespace mbgl
+} // namespace mln

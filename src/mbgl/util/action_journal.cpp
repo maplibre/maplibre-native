@@ -1,7 +1,7 @@
 #include <mbgl/util/action_journal.hpp>
 #include <mbgl/util/action_journal_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 ActionJournal::ActionJournal(const Map& map, const ActionJournalOptions& options)
@@ -30,4 +30,4 @@ void ActionJournal::clearLog() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

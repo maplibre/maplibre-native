@@ -2,7 +2,7 @@
 
 #include <mutex>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 namespace {
@@ -56,4 +56,4 @@ mapbox::base::Value Settings::get(const std::string& key) const noexcept {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

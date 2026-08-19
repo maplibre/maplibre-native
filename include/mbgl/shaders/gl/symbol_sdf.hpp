@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -325,4 +325,4 @@ lowp float halo_blur = u_halo_blur;
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

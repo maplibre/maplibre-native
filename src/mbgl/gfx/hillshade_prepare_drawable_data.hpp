@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 
@@ -24,4 +24,4 @@ public:
 using UniqueHillshadePrepareDrawableData = std::unique_ptr<HillshadePrepareDrawableData>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

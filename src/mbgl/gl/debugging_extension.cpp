@@ -1,7 +1,7 @@
 #include <mbgl/gl/debugging_extension.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 namespace extension {
 
@@ -73,34 +73,34 @@ void Debugging::DebugCallback(GLenum source,
     }
 
     std::string strSeverity;
-    mbgl::EventSeverity evtSeverity;
+    mln::EventSeverity evtSeverity;
     switch (severity) {
         case GL_DEBUG_SEVERITY_HIGH:
             strSeverity = "DEBUG_SEVERITY_HIGH";
-            evtSeverity = mbgl::EventSeverity::Error;
+            evtSeverity = mln::EventSeverity::Error;
             break;
         case GL_DEBUG_SEVERITY_MEDIUM:
             strSeverity = "DEBUG_SEVERITY_MEDIUM";
-            evtSeverity = mbgl::EventSeverity::Warning;
+            evtSeverity = mln::EventSeverity::Warning;
             break;
         case GL_DEBUG_SEVERITY_LOW:
             strSeverity = "DEBUG_SEVERITY_LOW";
-            evtSeverity = mbgl::EventSeverity::Info;
+            evtSeverity = mln::EventSeverity::Info;
             break;
         case GL_DEBUG_SEVERITY_NOTIFICATION:
             strSeverity = "DEBUG_SEVERITY_NOTIFICATION";
-            evtSeverity = mbgl::EventSeverity::Debug;
+            evtSeverity = mln::EventSeverity::Debug;
             break;
         default:
             strSource = "(unknown)";
-            evtSeverity = mbgl::EventSeverity::Debug;
+            evtSeverity = mln::EventSeverity::Debug;
             break;
     }
     const std::string logMsg = "GL_" + strSource + " GL_" + strType + " " + std::to_string(id) + " GL_" + strSeverity +
                                " - " + message;
-    mbgl::Log::Record(evtSeverity, mbgl::Event::OpenGL, logMsg);
+    mln::Log::Record(evtSeverity, mln::Event::OpenGL, logMsg);
 }
 
 } // namespace extension
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

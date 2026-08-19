@@ -7,9 +7,9 @@
 
 #include <array>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(StyleConversion, Padding) {
     Error error;

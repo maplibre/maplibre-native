@@ -3,7 +3,7 @@
 #include <optional>
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 template <class T>
 class PaintPropertyStatistics {
@@ -23,4 +23,4 @@ private:
     std::optional<float> _max;
 };
 
-} // namespace mbgl
+} // namespace mln

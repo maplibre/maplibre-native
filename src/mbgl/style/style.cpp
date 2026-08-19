@@ -8,7 +8,7 @@
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 Style::Style(std::shared_ptr<FileSource> fileSource, float pixelRatio, const TaggedScheduler& threadPool_)
@@ -192,4 +192,4 @@ std::unique_ptr<Layer> Style::removeLayer(const std::string& id) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

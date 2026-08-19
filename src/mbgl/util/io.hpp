@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 struct IOException : std::runtime_error {
@@ -22,4 +22,4 @@ void deleteFile(const std::string& filename);
 void copyFile(const std::string& destination, const std::string& source);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

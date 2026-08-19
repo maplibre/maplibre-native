@@ -6,7 +6,7 @@
 
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 
 class Tile;
 
@@ -19,4 +19,4 @@ public:
     virtual void onTileAction(OverscaledTileID, std::string, TileOperation) {}
 };
 
-} // namespace mbgl
+} // namespace mln

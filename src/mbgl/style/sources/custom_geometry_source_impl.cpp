@@ -1,7 +1,7 @@
 #include <mbgl/style/sources/custom_geometry_source_impl.hpp>
 #include <mbgl/style/source_observer.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomGeometrySource::Impl::Impl(std::string id_, const CustomGeometrySource::Options& options)
@@ -37,4 +37,4 @@ std::optional<ActorRef<CustomTileLoader>> CustomGeometrySource::Impl::getTileLoa
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

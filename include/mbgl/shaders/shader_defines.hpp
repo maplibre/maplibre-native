@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 // layer SSBOs
@@ -616,4 +616,4 @@ static constexpr uint32_t maxVertexAttributeCountPerShader = std::max({
 });
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

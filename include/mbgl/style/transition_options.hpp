@@ -6,7 +6,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class TransitionOptions {
@@ -41,4 +41,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

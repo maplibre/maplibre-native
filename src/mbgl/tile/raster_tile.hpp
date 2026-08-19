@@ -5,7 +5,7 @@
 #include <mbgl/tile/raster_tile_worker.hpp>
 #include <mbgl/actor/actor.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class Tileset;
 class TileParameters;
@@ -56,4 +56,4 @@ private:
     std::atomic<bool> obsolete{false};
 };
 
-} // namespace mbgl
+} // namespace mln

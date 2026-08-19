@@ -7,7 +7,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 RenderPass::RenderPass(gl::CommandEncoder& commandEncoder_,
@@ -57,4 +57,4 @@ void RenderPass::popDebugGroup() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

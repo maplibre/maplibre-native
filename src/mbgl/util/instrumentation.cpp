@@ -1,6 +1,6 @@
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl::instrumentation {
+namespace mln::instrumentation {
 
 void setThreadName([[maybe_unused]] const std::string &name) {
 #ifdef MLN_TRACY_ENABLE
@@ -8,4 +8,4 @@ void setThreadName([[maybe_unused]] const std::string &name) {
 #endif
 }
 
-}; // namespace mbgl::instrumentation
+}; // namespace mln::instrumentation

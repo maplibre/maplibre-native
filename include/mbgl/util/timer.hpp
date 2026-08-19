@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class Timer : private util::noncopyable {
@@ -23,4 +23,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

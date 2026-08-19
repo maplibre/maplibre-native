@@ -6,7 +6,7 @@
 
 #include <mapbox/eternal.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -143,4 +143,4 @@ mapbox::util::variant<Value, FeatureCollection> RenderGeoJSONSource::queryFeatur
     return extensionIt->second(std::move(jsonData), static_cast<std::uint32_t>(*clusterID), args);
 }
 
-} // namespace mbgl
+} // namespace mln

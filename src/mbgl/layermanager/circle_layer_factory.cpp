@@ -6,7 +6,7 @@
 #include <mbgl/style/layers/circle_layer.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* CircleLayerFactory::getTypeInfo() const noexcept {
     return style::CircleLayer::Impl::staticTypeInfo();
@@ -31,4 +31,4 @@ std::unique_ptr<RenderLayer> CircleLayerFactory::createRenderLayer(Immutable<sty
                                             RenderCircleLayer(staticImmutableCast<style::CircleLayer::Impl>(impl)));
 }
 
-} // namespace mbgl
+} // namespace mln

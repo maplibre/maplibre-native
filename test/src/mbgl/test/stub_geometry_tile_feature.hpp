@@ -1,7 +1,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class StubGeometryTileFeature : public GeometryTileFeature {
 public:
@@ -37,4 +37,4 @@ public:
     const GeometryCollection& getGeometries() const override { return geometry; }
 };
 
-} // namespace mbgl
+} // namespace mln

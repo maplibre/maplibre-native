@@ -20,7 +20,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
 }  // namespace
 
 - (void)testTileSetFromTileURLTemplates {
-  mbgl::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, nil);
+  mln::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, nil);
 
   // has the correct URL templates
   XCTAssertEqual(tileSet.tiles.size(), 3UL);
@@ -29,7 +29,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   XCTAssertEqual(tileSet.tiles[2], "tile.3");
 
   // has the default scheme
-  XCTAssertEqual(tileSet.scheme, mbgl::Tileset::Scheme::XYZ);
+  XCTAssertEqual(tileSet.scheme, mln::Tileset::Scheme::XYZ);
 
   // when the tile set has no min or max zoom level set
   // the mbgl object has default values for min and max zoom level
@@ -124,7 +124,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the scheme is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.scheme, mbgl::Tileset::Scheme::TMS);
+  XCTAssertEqual(tileSet.scheme, mln::Tileset::Scheme::TMS);
 
   // when the tile coordinate system is changed using an NSValue
   MLNTileCoordinateSystem tms = MLNTileCoordinateSystemTMS;
@@ -134,11 +134,11 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the scheme is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.scheme, mbgl::Tileset::Scheme::TMS);
+  XCTAssertEqual(tileSet.scheme, mln::Tileset::Scheme::TMS);
 }
 
 - (void)testTileSetFromTileURLTemplatesRasterEncodings {
-  mbgl::Tileset tileSet;
+  mln::Tileset tileSet;
 
   // when the DEM encoding is changed using an NSNumber
   tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
@@ -146,7 +146,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the encoding is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.rasterEncoding, mbgl::Tileset::RasterEncoding::Terrarium);
+  XCTAssertEqual(tileSet.rasterEncoding, mln::Tileset::RasterEncoding::Terrarium);
   XCTAssertFalse(tileSet.vectorEncoding);
 
   // when the raster encoding is changed using an NSValue
@@ -157,12 +157,12 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the encoding is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.rasterEncoding, mbgl::Tileset::RasterEncoding::Terrarium);
+  XCTAssertEqual(tileSet.rasterEncoding, mln::Tileset::RasterEncoding::Terrarium);
   XCTAssertFalse(tileSet.vectorEncoding);
 }
 
 - (void)testTileSetFromTileURLTemplatesVectorEncodings {
-  mbgl::Tileset tileSet;
+  mln::Tileset tileSet;
 
   // when the raster encoding is changed using an NSNumber
   tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, @{
@@ -170,7 +170,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the encoding is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.vectorEncoding, mbgl::Tileset::VectorEncoding::Mapbox);
+  XCTAssertEqual(tileSet.vectorEncoding, mln::Tileset::VectorEncoding::Mapbox);
   XCTAssertFalse(tileSet.rasterEncoding);
 
   // when the raster encoding is changed using an NSNumber
@@ -179,7 +179,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the encoding is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.vectorEncoding, mbgl::Tileset::VectorEncoding::MLT);
+  XCTAssertEqual(tileSet.vectorEncoding, mln::Tileset::VectorEncoding::MLT);
   XCTAssertFalse(tileSet.rasterEncoding);
 
   // when the raster encoding is changed using an NSValue
@@ -190,7 +190,7 @@ NSArray *tileURLTemplates = @[ @"tile.1", @"tile.2", @"tile.3" ];
   });
 
   // the encoding is reflected by the mbgl tileset
-  XCTAssertEqual(tileSet.vectorEncoding, mbgl::Tileset::VectorEncoding::MLT);
+  XCTAssertEqual(tileSet.vectorEncoding, mln::Tileset::VectorEncoding::MLT);
   XCTAssertFalse(tileSet.rasterEncoding);
 }
 

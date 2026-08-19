@@ -1,7 +1,7 @@
 #include <mbgl/style/custom_vector_tile_loader.hpp>
 #include <mbgl/tile/custom_vector_tile.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomVectorTileLoader::CustomVectorTileLoader(const TileFunction& fetchTileFn, const TileFunction& cancelTileFn)
@@ -111,4 +111,4 @@ void CustomVectorTileLoader::invokeTileCancel(const CanonicalTileID& tileID) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

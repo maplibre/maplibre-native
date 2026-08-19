@@ -2,7 +2,7 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Hillshade layer specific tweaker
@@ -26,4 +26,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

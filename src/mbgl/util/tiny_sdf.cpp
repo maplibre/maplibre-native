@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 namespace tinysdf {
@@ -99,4 +99,4 @@ AlphaImage transformRasterToSDF(const AlphaImage& rasterInput, double radius, do
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

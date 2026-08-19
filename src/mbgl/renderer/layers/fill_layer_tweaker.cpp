@@ -17,7 +17,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -236,7 +236,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
             default: {
 #ifndef NDEBUG
-                mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
+                mln::Log::Error(mln::Event::Render, "Invalid fill variant type supplied during drawable update!");
 #endif
                 break;
             }
@@ -268,4 +268,4 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

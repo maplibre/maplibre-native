@@ -12,7 +12,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -60,4 +60,4 @@ struct Converter<PropertyValue<std::array<double, 3>>, void> {
 };
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

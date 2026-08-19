@@ -13,7 +13,7 @@
 #include <cassert>
 #include <map>
 
-namespace mbgl {
+namespace mln {
 
 class MainResourceLoaderThread {
 public:
@@ -290,4 +290,4 @@ ClientOptions MainResourceLoader::getClientOptions() {
     return impl->getClientOptions();
 }
 
-} // namespace mbgl
+} // namespace mln

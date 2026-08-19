@@ -10,37 +10,37 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class Source : private mbgl::util::noncopyable {
+class Source : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/sources/Source"; };
 
     static void registerNative(jni::JNIEnv&);
 
-    static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&, mbgl::style::Source&);
+    static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&, mln::style::Source&);
     static const jni::Object<Source>& peerForCoreSource(jni::JNIEnv&,
-                                                        mbgl::style::Source&,
+                                                        mln::style::Source&,
                                                         AndroidRendererFrontend&,
-                                                        mbgl::Map&);
+                                                        mln::Map&);
 
     /*
      * Called when a Java object is created for a core source that belongs to a map.
      */
-    Source(jni::JNIEnv&, mbgl::style::Source&, const jni::Object<Source>&, AndroidRendererFrontend*);
+    Source(jni::JNIEnv&, mln::style::Source&, const jni::Object<Source>&, AndroidRendererFrontend*);
 
     /*
      * Called when a Java object is created for a new core source that does not
      * belong to a map.
      */
-    Source(jni::JNIEnv&, std::unique_ptr<mbgl::style::Source>);
+    Source(jni::JNIEnv&, std::unique_ptr<mln::style::Source>);
 
     virtual ~Source();
 
-    virtual void addToMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map&, AndroidRendererFrontend&);
+    virtual void addToMap(JNIEnv&, const jni::Object<Source>&, mln::Map&, AndroidRendererFrontend&);
 
-    virtual bool removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map&);
+    virtual bool removeFromMap(JNIEnv&, const jni::Object<Source>&, mln::Map&);
 
     void releaseJavaPeer();
 
@@ -56,7 +56,7 @@ public:
 
     jni::Local<jni::Integer> getMaxOverscaleFactorForParentTiles(jni::JNIEnv&);
 
-    void addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mbgl::style::Style& style);
+    void addToStyle(JNIEnv& env, const jni::Object<Source>& obj, mln::style::Style& style);
 
     jni::Local<jni::Boolean> isVolatile(JNIEnv&);
 
@@ -80,14 +80,14 @@ public:
                                      const jni::String& featureId,
                                      const jni::String& stateKey);
 
-    void bindToMap(AndroidRendererFrontend&, mbgl::Map&);
+    void bindToMap(AndroidRendererFrontend&, mln::Map&);
 
 protected:
     // Set on newly created sources until added to the map.
-    std::unique_ptr<mbgl::style::Source> ownedSource;
+    std::unique_ptr<mln::style::Source> ownedSource;
 
     // Raw pointer that is valid at all times.
-    mbgl::style::Source& source;
+    mln::style::Source& source;
 
     // Set when the source is added to a map.
     jni::Global<jni::Object<Source>> javaPeer;
@@ -96,8 +96,8 @@ protected:
     AndroidRendererFrontend* rendererFrontend{nullptr};
 
     // Map pointer is valid only when added to the map.
-    mbgl::Map* map{nullptr};
+    mln::Map* map{nullptr};
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

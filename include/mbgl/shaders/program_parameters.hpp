@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters {
 public:
@@ -86,4 +86,4 @@ private:
     bool overdrawInspector;
 };
 
-} // namespace mbgl
+} // namespace mln

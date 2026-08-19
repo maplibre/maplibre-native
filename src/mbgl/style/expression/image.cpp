@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/image.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -22,7 +22,7 @@ bool Image::operator==(const Image& other) const {
     return imageID == other.imageID && available == other.available;
 }
 
-mbgl::Value Image::toValue() const {
+mln::Value Image::toValue() const {
     return mapbox::base::ValueObject{{"name", imageID}, {"available", available}};
 }
 
@@ -41,7 +41,7 @@ bool Image::empty() const {
 } // namespace expression
 
 namespace conversion {
-using namespace mbgl::style::expression;
+using namespace mln::style::expression;
 std::optional<Image> Converter<Image>::operator()(const Convertible& value, Error& error) const {
     if (isArray(value)) {
         Convertible imageParameters = arrayMember(value, 0);
@@ -68,4 +68,4 @@ std::optional<Image> Converter<Image>::operator()(const Convertible& value, Erro
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 
 #include <mbgl/gfx/gpu_expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -106,4 +106,4 @@ std::shared_ptr<const expression::Expression> PropertyExpressionBase::getSharedE
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

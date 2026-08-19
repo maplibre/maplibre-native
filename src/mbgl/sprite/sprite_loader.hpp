@@ -9,7 +9,7 @@
 #include <map>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 class SpriteLoaderObserver;
@@ -42,4 +42,4 @@ private:
     // Do not add members here, see `WeakPtrFactory`
 };
 
-} // namespace mbgl
+} // namespace mln

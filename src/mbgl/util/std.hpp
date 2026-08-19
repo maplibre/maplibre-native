@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 template <typename Container, typename ForwardIterator, typename Predicate>
@@ -24,4 +24,4 @@ void erase_if(Container& container, Predicate pred) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

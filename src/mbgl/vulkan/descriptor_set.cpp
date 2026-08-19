@@ -12,7 +12,7 @@
 
 #define USE_DESCRIPTOR_POOL_RESET
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 DescriptorSet::DescriptorSet(Context& context_, DescriptorSetType type_)
@@ -237,4 +237,4 @@ void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::max
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -578,7 +578,7 @@ void loadWGL() {
 }
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 /* OpenGL ES 2.0 */
@@ -1780,5 +1780,5 @@ const char* (*const wglGetExtensionsStringEXT)() = [](void) {
 };
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln
 #endif

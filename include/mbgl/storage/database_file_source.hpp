@@ -4,7 +4,7 @@
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/expected.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ClientOptions;
 class ResourceOptions;
@@ -258,4 +258,4 @@ private:
     const std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

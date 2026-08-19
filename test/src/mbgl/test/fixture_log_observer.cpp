@@ -2,7 +2,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 FixtureLog::Message::Message(EventSeverity severity_, Event event_, int64_t code_, std::string msg_)
     : severity(severity_),
@@ -123,4 +123,4 @@ size_t FixtureLogObserver::uncheckedCount() const {
     return os << "]" << std::endl;
 }
 
-} // namespace mbgl
+} // namespace mln

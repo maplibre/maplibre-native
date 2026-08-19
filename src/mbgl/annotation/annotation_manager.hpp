@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 class LatLngBounds;
 class AnnotationTile;
@@ -94,4 +94,4 @@ private:
     // Do not add members here, see `WeakPtrFactory`
 };
 
-} // namespace mbgl
+} // namespace mln

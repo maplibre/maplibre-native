@@ -10,7 +10,7 @@
 #include <map>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 class StubFileSource : public FileSource {
 public:
@@ -69,4 +69,4 @@ private:
     ClientOptions clientOptions;
 };
 
-} // namespace mbgl
+} // namespace mln

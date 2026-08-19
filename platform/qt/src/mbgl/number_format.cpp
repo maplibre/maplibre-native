@@ -3,7 +3,7 @@
 #include <QLocale>
 #include <QString>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string formatNumber(double number,
@@ -25,4 +25,4 @@ std::string formatNumber(double number,
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

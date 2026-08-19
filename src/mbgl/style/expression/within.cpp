@@ -17,10 +17,10 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 namespace {
 
-Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::CanonicalTileID& canonical) noexcept {
+Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mln::CanonicalTileID& canonical) noexcept {
     const double size = util::EXTENT * std::pow(2, canonical.z);
 
     const auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
@@ -39,7 +39,7 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
 
 using WithinBBox = GeometryBBox<int64_t>;
 Polygon<int64_t> getTilePolygon(const Polygon<double>& polygon,
-                                const mbgl::CanonicalTileID& canonical,
+                                const mln::CanonicalTileID& canonical,
                                 WithinBBox& bbox) {
     Polygon<int64_t> result;
     result.reserve(polygon.size());
@@ -57,7 +57,7 @@ Polygon<int64_t> getTilePolygon(const Polygon<double>& polygon,
 }
 
 MultiPolygon<int64_t> getTilePolygons(const Feature::geometry_type& polygonGeoSet,
-                                      const mbgl::CanonicalTileID& canonical,
+                                      const mln::CanonicalTileID& canonical,
                                       WithinBBox& bbox) {
     return polygonGeoSet.match(
         [&canonical, &bbox](const mapbox::geometry::multi_polygon<double>& polygons) {
@@ -96,7 +96,7 @@ void updatePoint(Point<int64_t>& p, WithinBBox& bbox, const WithinBBox& polyBBox
 }
 
 MultiPoint<int64_t> getTilePoints(const GeometryCoordinates& points,
-                                  const mbgl::CanonicalTileID& canonical,
+                                  const mln::CanonicalTileID& canonical,
                                   WithinBBox& bbox,
                                   const WithinBBox& polyBBox) {
     const int64_t xShift = util::EXTENT * canonical.x;
@@ -114,7 +114,7 @@ MultiPoint<int64_t> getTilePoints(const GeometryCoordinates& points,
 }
 
 MultiLineString<int64_t> getTileLines(const GeometryCollection& lines,
-                                      const mbgl::CanonicalTileID& canonical,
+                                      const mln::CanonicalTileID& canonical,
                                       WithinBBox& bbox,
                                       const WithinBBox& polyBBox) {
     const int64_t xShift = util::EXTENT * canonical.x;
@@ -176,10 +176,10 @@ bool featureWithinPolygons(const GeometryTileFeature& feature,
     };
 }
 
-std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertible& value_,
-                                        mbgl::style::expression::ParsingContext& ctx) {
+std::optional<mln::GeoJSON> parseValue(const mln::style::conversion::Convertible& value_,
+                                       mln::style::expression::ParsingContext& ctx) {
     if (isObject(value_)) {
-        mbgl::style::conversion::Error error;
+        mln::style::conversion::Error error;
         auto geojson = toGeoJSON(value_, error);
         if (geojson && error.message.empty()) {
             return geojson;
@@ -194,7 +194,7 @@ std::optional<mbgl::GeoJSON> parseValue(const mbgl::style::conversion::Convertib
 }
 
 std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
-                                                     mbgl::style::expression::ParsingContext& ctx) {
+                                                     mln::style::expression::ParsingContext& ctx) {
     const auto type = apply_visitor(ToFeatureType(), polyFeature.geometry);
     if (type == FeatureType::Polygon) {
         return polyFeature.geometry;
@@ -216,7 +216,7 @@ Within::Within(GeoJSON geojson, Feature::geometry_type geometries_)
 
 Within::~Within() = default;
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 EvaluationResult Within::evaluate(const EvaluationContext& params) const {
     if (!params.feature || !params.canonical) {
@@ -227,9 +227,9 @@ EvaluationResult Within::evaluate(const EvaluationContext& params) const {
     if (geometryType == FeatureType::Point || geometryType == FeatureType::LineString) {
         return featureWithinPolygons(*params.feature, *params.canonical, geometries);
     }
-    mbgl::Log::Warning(mbgl::Event::General,
-                       "within expression currently only support Point/LineString geometry "
-                       "type.");
+    mln::Log::Warning(mln::Event::General,
+                      "within expression currently only support Point/LineString geometry "
+                      "type.");
 
     return false;
 }
@@ -252,20 +252,20 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
 
         return parsedValue->match(
             [&parsedValue, &ctx](const mapbox::geometry::geometry<double>& geometrySet) {
-                if (auto ret = getPolygonInfo(mbgl::Feature(geometrySet), ctx)) {
+                if (auto ret = getPolygonInfo(mln::Feature(geometrySet), ctx)) {
                     return ParseResult(std::make_unique<Within>(*parsedValue, std::move(*ret)));
                 }
                 return ParseResult();
             },
             [&parsedValue, &ctx](const mapbox::feature::feature<double>& feature) {
-                if (auto ret = getPolygonInfo(mbgl::Feature(feature), ctx)) {
+                if (auto ret = getPolygonInfo(mln::Feature(feature), ctx)) {
                     return ParseResult(std::make_unique<Within>(*parsedValue, std::move(*ret)));
                 }
                 return ParseResult();
             },
             [&parsedValue, &ctx](const mapbox::feature::feature_collection<double>& features) {
                 for (const auto& feature : features) {
-                    if (auto ret = getPolygonInfo(mbgl::Feature(feature), ctx)) {
+                    if (auto ret = getPolygonInfo(mln::Feature(feature), ctx)) {
                         return ParseResult(std::make_unique<Within>(*parsedValue, std::move(*ret)));
                     }
                 }
@@ -282,7 +282,7 @@ ParseResult Within::parse(const Convertible& value, ParsingContext& ctx) {
     return ParseResult();
 }
 
-mbgl::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
+mln::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
     if (v.IsNumber()) {
         if (v.IsInt64()) return std::int64_t(v.GetInt64());
         if (v.IsUint64()) return std::uint64_t(v.GetUint64());
@@ -295,7 +295,7 @@ mbgl::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
         return std::string(v.GetString());
     }
     if (v.IsArray()) {
-        std::vector<mbgl::Value> result;
+        std::vector<mln::Value> result;
         result.reserve(v.Size());
         for (const auto& m : v.GetArray()) {
             result.push_back(valueConverter(m));
@@ -303,7 +303,7 @@ mbgl::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
         return result;
     }
     if (v.IsObject()) {
-        std::unordered_map<std::string, mbgl::Value> result;
+        std::unordered_map<std::string, mln::Value> result;
         for (const auto& m : v.GetObject()) {
             result.emplace(m.name.GetString(), valueConverter(m.value));
         }
@@ -313,8 +313,8 @@ mbgl::Value valueConverter(const mapbox::geojson::rapidjson_value& v) {
     return Null;
 }
 
-mbgl::Value Within::serialize() const {
-    std::unordered_map<std::string, mbgl::Value> serialized;
+mln::Value Within::serialize() const {
+    std::unordered_map<std::string, mln::Value> serialized;
     rapidjson::CrtAllocator allocator;
     const mapbox::geojson::rapidjson_value value = mapbox::geojson::convert(geoJSONSource, allocator);
     if (value.IsObject()) {
@@ -322,11 +322,11 @@ mbgl::Value Within::serialize() const {
             serialized.emplace(m.name.GetString(), valueConverter(m.value));
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::General,
-                         "Failed to serialize 'within' expression, converted rapidJSON is "
-                         "not an object");
+        mln::Log::Error(mln::Event::General,
+                        "Failed to serialize 'within' expression, converted rapidJSON is "
+                        "not an object");
     }
-    return std::vector<mbgl::Value>{{getOperator(), serialized}};
+    return std::vector<mln::Value>{{getOperator(), serialized}};
 }
 
 bool Within::operator==(const Expression& e) const noexcept {
@@ -343,4 +343,4 @@ std::vector<std::optional<Value>> Within::possibleOutputs() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

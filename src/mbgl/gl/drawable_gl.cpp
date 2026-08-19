@@ -17,7 +17,7 @@
 #include <unordered_set>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 DrawableGL::DrawableGL(std::string name_)
@@ -44,7 +44,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         }
     }
     if (!shader || context.program.getCurrentValue() == 0) {
-        mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        mln::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);
         return;
     }
@@ -185,7 +185,7 @@ struct IndexBufferGL : public gfx::IndexBufferBase {
         : buffer(std::move(buffer_)) {}
     ~IndexBufferGL() override = default;
 
-    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+    std::unique_ptr<mln::gfx::IndexBuffer> buffer;
 };
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
@@ -367,4 +367,4 @@ void DrawableGL::unbindTextures() const {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

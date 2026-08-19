@@ -14,7 +14,7 @@
 #include <string>
 #include <mbgl/tile/tile_id.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RendererObserver;
 class RenderStaticData;
@@ -121,4 +121,4 @@ private:
 #endif // MLN_RENDER_BACKEND_METAL
 };
 
-} // namespace mbgl
+} // namespace mln

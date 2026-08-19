@@ -24,8 +24,8 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/util/thread_pool.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 // Minimal FileSource stub for benchmark (doesn't actually fetch resources)
 class StubFileSource : public FileSource {

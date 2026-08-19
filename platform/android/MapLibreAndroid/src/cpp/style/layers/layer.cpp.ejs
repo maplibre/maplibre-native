@@ -13,11 +13,11 @@
 
 #include <mbgl/style/layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-    inline mbgl::style::<%- camelize(type) %>Layer& to<%- camelize(type) %>Layer(mbgl::style::Layer& layer) {
-        return static_cast<mbgl::style::<%- camelize(type) %>Layer&>(layer);
+    inline mln::style::<%- camelize(type) %>Layer& to<%- camelize(type) %>Layer(mln::style::Layer& layer) {
+        return static_cast<mln::style::<%- camelize(type) %>Layer&>(layer);
     }
 
 <% if (type === 'background' || type === 'location-indicator') { -%>
@@ -25,27 +25,27 @@ namespace android {
      * Creates an owning peer object (for layers not attached to the map) from the JVM side
      */
     <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(jni::JNIEnv& env, jni::String& layerId)
-        : Layer(std::make_unique<mbgl::style::<%- camelize(type) %>Layer>(jni::Make<std::string>(env, layerId))) {
+        : Layer(std::make_unique<mln::style::<%- camelize(type) %>Layer>(jni::Make<std::string>(env, layerId))) {
 <% } else { -%>
     /**
      * Creates an owning peer object (for layers not attached to the map) from the JVM side
      */
     <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-        : Layer(std::make_unique<mbgl::style::<%- camelize(type) %>Layer>(jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId))) {
+        : Layer(std::make_unique<mln::style::<%- camelize(type) %>Layer>(jni::Make<std::string>(env, layerId), jni::Make<std::string>(env, sourceId))) {
 <% } -%>
     }
 
     /**
      * Creates a non-owning peer object (for layers currently attached to the map)
      */
-    <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(mbgl::style::<%- camelize(type) %>Layer& coreLayer)
+    <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(mln::style::<%- camelize(type) %>Layer& coreLayer)
         : Layer(coreLayer) {
     }
 
     /**
      * Creates an owning peer object (for layers not attached to the map)
      */
-    <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(std::unique_ptr<mbgl::style::<%- camelize(type) %>Layer> coreLayer)
+    <%- camelize(type) %>Layer::<%- camelize(type) %>Layer(std::unique_ptr<mln::style::<%- camelize(type) %>Layer> coreLayer)
         : Layer(std::move(coreLayer)) {
     }
 
@@ -56,7 +56,7 @@ namespace android {
 <% for (const property of properties) { -%>
 <% if (property.name != 'heatmap-color') { -%>
     jni::Local<jni::Object<>> <%- camelize(type) %>Layer::get<%- camelize(property.name) %>(jni::JNIEnv& env) {
-        using namespace mbgl::android::conversion;
+        using namespace mln::android::conversion;
         auto layer = layerPtr.get();
         if (!layer) {
             return std::move(*convert<jni::Local<jni::Object<>>>(env, style::<%- camelize(type) %>Layer::getDefault<%- camelize(property.name) %>()));
@@ -66,7 +66,7 @@ namespace android {
 
 <% } else { -%>
     jni::Local<jni::Object<>> HeatmapLayer::getHeatmapColor(jni::JNIEnv& env) {
-        using namespace mbgl::android::conversion;
+        using namespace mln::android::conversion;
         auto layer = layerPtr.get();
         if (!layer) {
             return std::move(*convert<jni::Local<jni::Object<>>>(env, style::<%- camelize(type) %>Layer::getDefaultHeatmapColor()));
@@ -82,12 +82,12 @@ namespace android {
 <% } -%>
 <% if (property.transition) { -%>
     jni::Local<jni::Object<TransitionOptions>> <%- camelize(type) %>Layer::get<%- camelize(property.name) %>Transition(jni::JNIEnv& env) {
-        using namespace mbgl::android::conversion;
+        using namespace mln::android::conversion;
         auto layer = layerPtr.get();
         if (!layer) {
-            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+            return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
         }
-        mbgl::style::TransitionOptions options = to<%- camelize(type) %>Layer(*layer).get<%- camelize(property.name) %>Transition();
+        mln::style::TransitionOptions options = to<%- camelize(type) %>Layer(*layer).get<%- camelize(property.name) %>Transition();
         return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
     }
 
@@ -96,9 +96,9 @@ namespace android {
         if (!layer) {
             return;
         }
-        mbgl::style::TransitionOptions options;
-        options.duration.emplace(mbgl::Milliseconds(duration));
-        options.delay.emplace(mbgl::Milliseconds(delay));
+        mln::style::TransitionOptions options;
+        options.duration.emplace(mln::Milliseconds(duration));
+        options.delay.emplace(mln::Milliseconds(delay));
         to<%- camelize(type) %>Layer(*layer).set<%- camelize(property.name) %>Transition(options);
     }
 
@@ -117,14 +117,14 @@ namespace android {
         }
     }  // namespace
 
-    jni::Local<jni::Object<Layer>> <%- camelize(type) %>JavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env, mbgl::style::Layer& layer) {
+    jni::Local<jni::Object<Layer>> <%- camelize(type) %>JavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env, mln::style::Layer& layer) {
         assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
         return createJavaPeer(env, new <%- camelize(type) %>Layer(to<%- camelize(type) %>Layer(layer)));
     }
 
-    jni::Local<jni::Object<Layer>> <%- camelize(type) %>JavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::Local<jni::Object<Layer>> <%- camelize(type) %>JavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
         assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
-        return createJavaPeer(env, new <%- camelize(type) %>Layer(std::unique_ptr<mbgl::style::<%- camelize(type) %>Layer>(static_cast<mbgl::style::<%- camelize(type) %>Layer*>(layer.release()))));
+        return createJavaPeer(env, new <%- camelize(type) %>Layer(std::unique_ptr<mln::style::<%- camelize(type) %>Layer>(static_cast<mln::style::<%- camelize(type) %>Layer*>(layer.release()))));
     }
 
     void <%- camelize(type) %>JavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -153,4 +153,4 @@ namespace android {
     }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -23,7 +23,7 @@
 #include <dirent.h>
 #endif
 
-using namespace mbgl;
+using namespace mln;
 
 using Message = std::pair<uint32_t, std::string>;
 using Messages = std::vector<Message>;
@@ -189,12 +189,12 @@ TEST(StyleParser, SpriteAsArrayMultiple) {
 TEST(StyleParser, FontStacks) {
     style::Parser parser;
     parser.parse(util::read_file("test/fixtures/style_parser/font_stacks.json"));
-    std::set<mbgl::FontStack> expected = {
+    std::set<mln::FontStack> expected = {
         {"a"},
         {"a", "b"},
         {"a", "b", "c"},
     };
-    std::set<mbgl::FontStack> result = parser.fontStacks();
+    std::set<mln::FontStack> result = parser.fontStacks();
     ASSERT_EQ(expected, result);
 }
 
@@ -229,10 +229,10 @@ TEST(StyleParser, FontStacksCaseExpression) {
             }
         }]
     })");
-    std::set<mbgl::FontStack> expected;
+    std::set<mln::FontStack> expected;
     expected.insert(FontStack({"Arial"}));
     expected.insert(FontStack({"Helvetica"}));
-    std::set<mbgl::FontStack> result = parser.fontStacks();
+    std::set<mln::FontStack> result = parser.fontStacks();
     ASSERT_EQ(expected, result);
 }
 
@@ -250,10 +250,10 @@ TEST(StyleParser, FontStacksMatchExpression) {
             }
         }]
     })");
-    std::set<mbgl::FontStack> expected;
+    std::set<mln::FontStack> expected;
     expected.insert(FontStack({"Arial"}));
     expected.insert(FontStack({"Helvetica"}));
-    std::set<mbgl::FontStack> result = parser.fontStacks();
+    std::set<mln::FontStack> result = parser.fontStacks();
     ASSERT_EQ(expected, result);
 }
 
@@ -271,10 +271,10 @@ TEST(StyleParser, FontStacksStepExpression) {
             }
         }]
     })");
-    std::set<mbgl::FontStack> expected;
+    std::set<mln::FontStack> expected;
     expected.insert(FontStack({"Arial"}));
     expected.insert(FontStack({"Helvetica"}));
-    std::set<mbgl::FontStack> result = parser.fontStacks();
+    std::set<mln::FontStack> result = parser.fontStacks();
     ASSERT_EQ(expected, result);
 }
 
@@ -298,9 +298,9 @@ TEST(StyleParser, FontStacksGetExpression) {
 }
 
 TEST(StyleParser, ZoomCurve) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::expression;
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style;
+    using namespace mln::style::expression;
+    using namespace mln::style::expression::dsl;
 
     const auto zoomInterp = []() {
         return interpolate(linear(), zoom(), 0.0, literal(0.0), 0.0, literal(0.0));

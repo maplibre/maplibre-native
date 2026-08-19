@@ -8,7 +8,7 @@
 #include <mbgl/style/layers/fill_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class FillLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     FillLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    FillLayer(mbgl::style::FillLayer&);
+    FillLayer(mln::style::FillLayer&);
 
-    FillLayer(std::unique_ptr<mbgl::style::FillLayer>);
+    FillLayer(std::unique_ptr<mln::style::FillLayer>);
 
     ~FillLayer();
 
@@ -54,13 +54,13 @@ public:
 
 }; // class FillLayer
 
-class FillJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::FillLayerFactory {
+class FillJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::FillLayerFactory {
 public:
     ~FillJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -69,4 +69,4 @@ public:
 }; // class FillJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

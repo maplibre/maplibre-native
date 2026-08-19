@@ -8,7 +8,7 @@
 
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * @brief Base class for render sources that provide render tiles.
@@ -111,4 +111,4 @@ private:
     mutable std::shared_ptr<PolylineLayerTweaker> layerTweaker;
 };
 
-} // namespace mbgl
+} // namespace mln

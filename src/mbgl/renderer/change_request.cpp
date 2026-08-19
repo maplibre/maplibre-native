@@ -1,7 +1,7 @@
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/render_orchestrator.hpp>
 
-namespace mbgl {
+namespace mln {
 
 AddLayerGroupRequest::AddLayerGroupRequest(LayerGroupBasePtr layerGroup_)
     : layerGroup(std::move(layerGroup_)) {}
@@ -39,4 +39,4 @@ void RemoveRenderTargetRequest::execute(RenderOrchestrator &orchestrator) {
     orchestrator.removeRenderTarget(renderTarget);
 }
 
-} // namespace mbgl
+} // namespace mln

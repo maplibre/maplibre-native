@@ -2,7 +2,7 @@
 
 #include <benchmark/benchmark.h>
 
-namespace mbgl {
+namespace mln {
 
 int runBenchmark(int argc, char* argv[]) {
     ::benchmark::Initialize(&argc, argv);
@@ -10,4 +10,4 @@ int runBenchmark(int argc, char* argv[]) {
     return 0;
 }
 
-} // namespace mbgl
+} // namespace mln

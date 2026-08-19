@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 enum class EventSeverity : uint8_t {
     Debug,
@@ -55,4 +55,4 @@ constexpr Event disabledEvents[] = {
 
 constexpr EventPermutation disabledEventPermutations[] = {{.severity = EventSeverity::Debug, .event = Event::Shader}};
 
-} // namespace mbgl
+} // namespace mln

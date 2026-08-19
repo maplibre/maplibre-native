@@ -12,7 +12,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 namespace {
@@ -640,4 +640,4 @@ template class PolylineGenerator<gfx::DrawableBuilder::Impl::LineLayoutVertex,
 template class PolylineGenerator<LineLayoutVertex, SegmentBase>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

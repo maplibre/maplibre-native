@@ -5,7 +5,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -318,4 +318,4 @@ void SymbolInstance::forceFailInternal() {
 
 #endif // MLN_SYMBOL_GUARDS
 
-} // namespace mbgl
+} // namespace mln

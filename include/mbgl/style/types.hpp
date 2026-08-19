@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 namespace style {
 
@@ -135,4 +135,4 @@ enum class LightAnchorType : bool {
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

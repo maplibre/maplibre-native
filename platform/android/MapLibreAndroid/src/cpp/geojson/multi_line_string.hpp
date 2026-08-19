@@ -8,7 +8,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -18,7 +18,7 @@ public:
     static constexpr auto Name() { return "org/maplibre/geojson/MultiLineString"; };
     static constexpr auto Type() { return "MultiLineString"; };
 
-    static jni::Local<jni::Object<MultiLineString>> New(jni::JNIEnv&, const mbgl::MultiLineString<double>&);
+    static jni::Local<jni::Object<MultiLineString>> New(jni::JNIEnv&, const mln::MultiLineString<double>&);
 
     static mapbox::geojson::multi_line_string convert(jni::JNIEnv&, const jni::Object<MultiLineString>&);
 
@@ -32,4 +32,4 @@ public:
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

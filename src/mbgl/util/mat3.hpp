@@ -28,7 +28,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 using mat3 = std::array<double, 9>;
 
@@ -72,4 +72,4 @@ void scale(mat3& out, const mat3& a, double x, double y) noexcept;
 void transformMat3f(vec3f& out, const vec3f& a, const mat3& m) noexcept;
 
 } // namespace matrix
-} // namespace mbgl
+} // namespace mln

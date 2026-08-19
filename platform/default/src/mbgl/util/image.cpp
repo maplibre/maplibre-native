@@ -2,7 +2,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/premultiply.hpp>
 
-namespace mbgl {
+namespace mln {
 
 PremultipliedImage decodePNG(const uint8_t*, size_t);
 PremultipliedImage decodeJPEG(const uint8_t*, size_t);
@@ -44,4 +44,4 @@ PremultipliedImage decodeImage(const std::string& string) {
     throw std::runtime_error("unsupported image type");
 }
 
-} // namespace mbgl
+} // namespace mln

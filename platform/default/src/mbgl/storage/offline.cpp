@@ -13,7 +13,7 @@
 #include <cmath>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 // OfflineTilePyramidRegionDefinition
 
@@ -170,4 +170,4 @@ const OfflineRegionMetadata& OfflineRegion::getMetadata() const {
 int64_t OfflineRegion::getID() const {
     return id;
 }
-} // namespace mbgl
+} // namespace mln

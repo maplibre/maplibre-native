@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class PatternAtlas;
 class PaintParameters;
@@ -112,4 +112,4 @@ protected:
     double startTime;
 };
 
-} // namespace mbgl
+} // namespace mln

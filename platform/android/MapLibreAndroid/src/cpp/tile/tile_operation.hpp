@@ -4,17 +4,17 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class TileOperation {
 public:
     static constexpr auto Name() { return "org/maplibre/android/tile/TileOperation"; };
 
-    static jni::Local<jni::Object<TileOperation>> Create(jni::JNIEnv&, mbgl::TileOperation);
+    static jni::Local<jni::Object<TileOperation>> Create(jni::JNIEnv&, mln::TileOperation);
 
     static void registerNative(jni::JNIEnv& env);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

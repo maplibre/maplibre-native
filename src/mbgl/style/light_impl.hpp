@@ -9,7 +9,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 template <class T>
@@ -51,4 +51,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/util/utf.hpp>
 #include <mbgl/util/platform.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TextConversions, to_upper) {
     EXPECT_EQ(std::string("STREET"), platform::uppercase("strEEt")); // EN

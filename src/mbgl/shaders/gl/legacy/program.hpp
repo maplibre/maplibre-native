@@ -15,7 +15,7 @@
 
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class RenderPass;
@@ -180,4 +180,4 @@ public:
     virtual ~LayerTypePrograms() = default;
 };
 
-} // namespace mbgl
+} // namespace mln

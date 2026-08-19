@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)intersectsOverlayBounds:(MLNCoordinateBounds)overlayBounds;
 
 /** Constructs a shape annotation object, asking the delegate for style values. */
-- (mbgl::Annotation)annotationObjectWithDelegate:(id<MLNMultiPointDelegate>)delegate;
+- (mln::Annotation)annotationObjectWithDelegate:(id<MLNMultiPointDelegate>)delegate;
 
 @end
 
@@ -33,10 +33,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (double)alphaForShapeAnnotation:(MLNShape *)annotation;
 
 /** Returns the stroke color object for the given annotation. */
-- (mbgl::Color)strokeColorForShapeAnnotation:(MLNShape *)annotation;
+- (mln::Color)strokeColorForShapeAnnotation:(MLNShape *)annotation;
 
 /** Returns the fill color object for the given annotation. */
-- (mbgl::Color)fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
+- (mln::Color)fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
 
 /** Returns the stroke width object for the given annotation. */
 - (CGFloat)lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;

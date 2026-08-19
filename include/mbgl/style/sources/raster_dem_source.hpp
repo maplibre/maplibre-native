@@ -4,7 +4,7 @@
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 struct SourceOptions {
@@ -20,7 +20,7 @@ public:
                     uint16_t tileSize,
                     std::optional<SourceOptions> options = std::nullopt);
     ~RasterDEMSource() override;
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
 protected:
     void setTilesetOverrides(Tileset& tileset) override;
@@ -35,4 +35,4 @@ inline bool Source::is<RasterDEMSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

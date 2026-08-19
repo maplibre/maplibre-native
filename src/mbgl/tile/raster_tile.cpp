@@ -12,7 +12,7 @@
 #include <mbgl/tile/tile_observer.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 RasterTile::RasterTile(const OverscaledTileID& id_,
                        std::string sourceID_,
@@ -119,4 +119,4 @@ void RasterTile::markObsolete() {
     mailbox->abandon();
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -19,7 +19,7 @@
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
 #endif
 
-namespace mbgl {
+namespace mln {
 
 using namespace shaders;
 using namespace style;
@@ -62,7 +62,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
     propertiesUpdated = false;
 
     const auto zoom = static_cast<float>(parameters.state.getZoom());
-    const auto defPattern = mbgl::Faded<expression::Image>{.from = "", .to = ""};
+    const auto defPattern = mln::Faded<expression::Image>{.from = "", .to = ""};
     const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
 
 #if MLN_UBO_CONSOLIDATION
@@ -203,4 +203,4 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

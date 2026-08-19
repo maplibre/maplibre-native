@@ -1,10 +1,10 @@
 #include "default_style.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<DefaultStyle>> DefaultStyle::New(jni::JNIEnv& env,
-                                                        const mbgl::util::DefaultStyle& jDefaultStyle) {
+                                                        const mln::util::DefaultStyle& jDefaultStyle) {
     static auto& javaClass = jni::Class<DefaultStyle>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<jni::String, jni::String, int>(env);
     return javaClass.New(env,
@@ -14,9 +14,9 @@ jni::Local<jni::Object<DefaultStyle>> DefaultStyle::New(jni::JNIEnv& env,
                          jDefaultStyle.getCurrentVersion());
 }
 
-mbgl::util::DefaultStyle DefaultStyle::getDefaultStyle(jni::JNIEnv& env, const jni::Object<DefaultStyle>& options) {
+mln::util::DefaultStyle DefaultStyle::getDefaultStyle(jni::JNIEnv& env, const jni::Object<DefaultStyle>& options) {
     static auto& javaClass = jni::Class<DefaultStyle>::Singleton(env);
-    return mbgl::util::DefaultStyle(
+    return mln::util::DefaultStyle(
         jni::Make<std::string>(env, options.Get(env, javaClass.GetField<jni::String>(env, "url"))),
         jni::Make<std::string>(env, options.Get(env, javaClass.GetField<jni::String>(env, "name"))),
         options.Get(env, javaClass.GetField<int>(env, "version")));
@@ -27,4 +27,4 @@ void DefaultStyle::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

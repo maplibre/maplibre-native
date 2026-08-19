@@ -9,30 +9,30 @@
 
 #include <mbgl/style/layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-inline mbgl::style::ColorReliefLayer& toColorReliefLayer(mbgl::style::Layer& layer) {
-    return static_cast<mbgl::style::ColorReliefLayer&>(layer);
+inline mln::style::ColorReliefLayer& toColorReliefLayer(mln::style::Layer& layer) {
+    return static_cast<mln::style::ColorReliefLayer&>(layer);
 }
 
 /**
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 ColorReliefLayer::ColorReliefLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::ColorReliefLayer>(jni::Make<std::string>(env, layerId),
-                                                            jni::Make<std::string>(env, sourceId))) {}
+    : Layer(std::make_unique<mln::style::ColorReliefLayer>(jni::Make<std::string>(env, layerId),
+                                                           jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
  */
-ColorReliefLayer::ColorReliefLayer(mbgl::style::ColorReliefLayer& coreLayer)
+ColorReliefLayer::ColorReliefLayer(mln::style::ColorReliefLayer& coreLayer)
     : Layer(coreLayer) {}
 
 /**
  * Creates an owning peer object (for layers not attached to the map)
  */
-ColorReliefLayer::ColorReliefLayer(std::unique_ptr<mbgl::style::ColorReliefLayer> coreLayer)
+ColorReliefLayer::ColorReliefLayer(std::unique_ptr<mln::style::ColorReliefLayer> coreLayer)
     : Layer(std::move(coreLayer)) {}
 
 ColorReliefLayer::~ColorReliefLayer() = default;
@@ -40,7 +40,7 @@ ColorReliefLayer::~ColorReliefLayer() = default;
 // Property getters
 
 jni::Local<jni::Object<>> ColorReliefLayer::getColorReliefOpacity(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -50,12 +50,12 @@ jni::Local<jni::Object<>> ColorReliefLayer::getColorReliefOpacity(jni::JNIEnv& e
 }
 
 jni::Local<jni::Object<TransitionOptions>> ColorReliefLayer::getColorReliefOpacityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toColorReliefLayer(*layer).getColorReliefOpacityTransition();
+    mln::style::TransitionOptions options = toColorReliefLayer(*layer).getColorReliefOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -64,14 +64,14 @@ void ColorReliefLayer::setColorReliefOpacityTransition(jni::JNIEnv&, jlong durat
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toColorReliefLayer(*layer).setColorReliefOpacityTransition(options);
 }
 
 jni::Local<jni::Object<>> ColorReliefLayer::getColorReliefColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -93,17 +93,17 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 } // namespace
 
 jni::Local<jni::Object<Layer>> ColorReliefJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                                    mbgl::style::Layer& layer) {
+                                                                                    mln::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new ColorReliefLayer(toColorReliefLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> ColorReliefJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env,
-                          new ColorReliefLayer(std::unique_ptr<mbgl::style::ColorReliefLayer>(
-                              static_cast<mbgl::style::ColorReliefLayer*>(layer.release()))));
+                          new ColorReliefLayer(std::unique_ptr<mln::style::ColorReliefLayer>(
+                              static_cast<mln::style::ColorReliefLayer*>(layer.release()))));
 }
 
 void ColorReliefJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -127,4 +127,4 @@ void ColorReliefJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

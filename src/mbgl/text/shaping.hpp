@@ -8,7 +8,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 struct AnchorAlignment {
     AnchorAlignment(float horizontal, float vertical)
@@ -86,4 +86,4 @@ Shaping getShaping(const TaggedString& string,
                    float layoutTextSizeAtBucketZoomLevel,
                    bool allowVerticalPlacement);
 
-} // namespace mbgl
+} // namespace mln

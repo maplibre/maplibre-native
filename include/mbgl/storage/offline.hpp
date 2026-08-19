@@ -11,7 +11,7 @@
 #include <functional>
 #include <variant>
 
-namespace mbgl {
+namespace mln {
 
 class TileID;
 
@@ -234,4 +234,4 @@ private:
 
 using OfflineRegions = std::vector<OfflineRegion>;
 
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 /**
     An `ActorRef<O>` is a *non*-owning, weak reference to an actor of type `O`.
@@ -57,4 +57,4 @@ private:
     std::weak_ptr<Mailbox> weakMailbox;
 };
 
-} // namespace mbgl
+} // namespace mln

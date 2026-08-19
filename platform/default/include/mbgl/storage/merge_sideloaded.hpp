@@ -3,7 +3,7 @@
 // THIS IS A GENERATED FILE; EDIT merge_sideloaded.sql INSTEAD
 // To regenerate, run `node platform/default/mbgl/storage/merge_sideloaded.js`
 
-namespace mbgl {
+namespace mln {
 
 static constexpr const char* mergeSideloadedDatabaseSQL =
     "INSERT INTO regions\n"
@@ -59,4 +59,4 @@ static constexpr const char* mergeSideloadedDatabaseSQL =
     " \n"
     "DROP TABLE region_mapping;\n";
 
-} // namespace mbgl
+} // namespace mln

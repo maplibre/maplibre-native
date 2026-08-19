@@ -9,7 +9,7 @@
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class BucketParameters;
 class RenderFillExtrusionLayer;
@@ -43,7 +43,7 @@ public:
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
-                    const mbgl::ImagePositions&,
+                    const mln::ImagePositions&,
                     const PatternLayerMap&,
                     std::size_t,
                     const CanonicalTileID&) override;
@@ -119,4 +119,4 @@ public:
     std::unordered_map<std::string, FillExtrusionBinders> paintPropertyBinders;
 };
 
-} // namespace mbgl
+} // namespace mln

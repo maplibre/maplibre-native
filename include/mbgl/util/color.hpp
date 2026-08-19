@@ -7,7 +7,7 @@
 #include <array>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 // Stores a premultiplied color, with all four channels ranging from 0..1
 class Color {
@@ -46,8 +46,8 @@ public:
     std::string stringify() const;
     std::array<double, 4> toArray() const;
     operator std::array<float, 4>() const { return {r, g, b, a}; }
-    mbgl::Value toObject() const;
-    mbgl::Value serialize() const;
+    mln::Value toObject() const;
+    mln::Value serialize() const;
 };
 
 inline bool operator==(const Color& colorA, const Color& colorB) {
@@ -64,4 +64,4 @@ inline Color operator*(const Color& color, float alpha) {
     return {color.r * alpha, color.g * alpha, color.b * alpha, color.a * alpha};
 }
 
-} // namespace mbgl
+} // namespace mln

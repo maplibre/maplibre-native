@@ -16,7 +16,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 // TEMP Stage-2 diagnostic: per-frame count of drape targets (re-)rendered vs skipped (cache
 // hit). If `rendered` stays high while panning, the drape cache is not holding - the suspected
@@ -465,4 +465,4 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
     return RenderResult::Rendered;
 }
 
-} // namespace mbgl
+} // namespace mln

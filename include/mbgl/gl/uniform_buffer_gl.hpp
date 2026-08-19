@@ -4,7 +4,7 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/gl/buffer_allocator.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class UniformBufferGL final : public gfx::UniformBuffer {
@@ -73,4 +73,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

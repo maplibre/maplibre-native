@@ -1,17 +1,17 @@
 #include "offline_region_status.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<OfflineRegionStatus>> OfflineRegionStatus::New(jni::JNIEnv& env,
-                                                                      mbgl::OfflineRegionStatus status) {
+                                                                      mln::OfflineRegionStatus status) {
     // Convert to jint
     jint downloadState;
     switch (status.downloadState) {
-        case mbgl::OfflineRegionDownloadState::Inactive:
+        case mln::OfflineRegionDownloadState::Inactive:
             downloadState = 0;
             break;
-        case mbgl::OfflineRegionDownloadState::Active:
+        case mln::OfflineRegionDownloadState::Active:
             downloadState = 1;
             break;
     }
@@ -35,4 +35,4 @@ void OfflineRegionStatus::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 
 #include <mapbox/std/weak.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class FileSource;
@@ -49,4 +49,4 @@ public:
     const util::TileElevationProvider* elevationProvider = nullptr;
 };
 
-} // namespace mbgl
+} // namespace mln

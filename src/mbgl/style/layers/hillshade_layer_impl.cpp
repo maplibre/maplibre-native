@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 bool HillshadeLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
@@ -8,4 +8,4 @@ bool HillshadeLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -13,7 +13,7 @@
 #include <optional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 template <class T>
@@ -99,4 +99,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

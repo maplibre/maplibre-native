@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/command_encoder.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -30,4 +30,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

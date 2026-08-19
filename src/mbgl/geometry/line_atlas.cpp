@@ -8,7 +8,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace {
 
 size_t getDashPatternHash(const std::vector<float>& dasharray, const LinePatternCap patternCap) {
@@ -261,4 +261,4 @@ void LineAtlas::upload(gfx::UploadPass& uploadPass) {
     needsUpload.clear();
 }
 
-} // namespace mbgl
+} // namespace mln

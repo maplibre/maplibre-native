@@ -7,7 +7,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class RenderPluginLayer final : public RenderLayer {
 public:
@@ -70,4 +70,4 @@ private:
     style::PluginLayer::OnUpdateLayerProperties _updateLayerPropertiesFunction = nullptr;
 };
 
-} // namespace mbgl
+} // namespace mln

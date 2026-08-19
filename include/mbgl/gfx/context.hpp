@@ -17,7 +17,7 @@
 #include <shared_mutex>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 class ProgramParameters;
@@ -240,4 +240,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -9,7 +9,7 @@
 #include <functional>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 void RunLoop::Impl::onReadEvent(int fd) {
@@ -91,7 +91,7 @@ void RunLoop::runOnce() {
     }
 }
 
-void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
+void RunLoop::waitForEmpty([[maybe_unused]] const mln::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
@@ -138,4 +138,4 @@ void RunLoop::removeWatch(int fd) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

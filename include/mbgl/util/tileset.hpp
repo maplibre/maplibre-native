@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class Tileset {
 public:
@@ -54,4 +54,4 @@ public:
     bool operator!=(const Tileset&) const = default;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 UniformBuffer::UniformBuffer(BufferResource&& buffer_)
@@ -99,4 +99,4 @@ void UniformBufferArray::bindDescriptorSets(CommandEncoder& encoder) {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

@@ -9,30 +9,30 @@
 
 #include <mbgl/style/layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-inline mbgl::style::SymbolLayer& toSymbolLayer(mbgl::style::Layer& layer) {
-    return static_cast<mbgl::style::SymbolLayer&>(layer);
+inline mln::style::SymbolLayer& toSymbolLayer(mln::style::Layer& layer) {
+    return static_cast<mln::style::SymbolLayer&>(layer);
 }
 
 /**
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 SymbolLayer::SymbolLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::SymbolLayer>(jni::Make<std::string>(env, layerId),
-                                                       jni::Make<std::string>(env, sourceId))) {}
+    : Layer(std::make_unique<mln::style::SymbolLayer>(jni::Make<std::string>(env, layerId),
+                                                      jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
  */
-SymbolLayer::SymbolLayer(mbgl::style::SymbolLayer& coreLayer)
+SymbolLayer::SymbolLayer(mln::style::SymbolLayer& coreLayer)
     : Layer(coreLayer) {}
 
 /**
  * Creates an owning peer object (for layers not attached to the map)
  */
-SymbolLayer::SymbolLayer(std::unique_ptr<mbgl::style::SymbolLayer> coreLayer)
+SymbolLayer::SymbolLayer(std::unique_ptr<mln::style::SymbolLayer> coreLayer)
     : Layer(std::move(coreLayer)) {}
 
 SymbolLayer::~SymbolLayer() = default;
@@ -40,7 +40,7 @@ SymbolLayer::~SymbolLayer() = default;
 // Property getters
 
 jni::Local<jni::Object<>> SymbolLayer::getSymbolPlacement(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultSymbolPlacement()));
@@ -49,7 +49,7 @@ jni::Local<jni::Object<>> SymbolLayer::getSymbolPlacement(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getSymbolSpacing(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultSymbolSpacing()));
@@ -58,7 +58,7 @@ jni::Local<jni::Object<>> SymbolLayer::getSymbolSpacing(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getSymbolAvoidEdges(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultSymbolAvoidEdges()));
@@ -67,7 +67,7 @@ jni::Local<jni::Object<>> SymbolLayer::getSymbolAvoidEdges(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getSymbolSortKey(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultSymbolSortKey()));
@@ -76,7 +76,7 @@ jni::Local<jni::Object<>> SymbolLayer::getSymbolSortKey(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getSymbolZOrder(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultSymbolZOrder()));
@@ -85,7 +85,7 @@ jni::Local<jni::Object<>> SymbolLayer::getSymbolZOrder(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconAllowOverlap(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconAllowOverlap()));
@@ -94,7 +94,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconAllowOverlap(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconIgnorePlacement(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconIgnorePlacement()));
@@ -103,7 +103,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconIgnorePlacement(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconOptional(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconOptional()));
@@ -112,7 +112,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconOptional(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconRotationAlignment(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -122,7 +122,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconRotationAlignment(jni::JNIEnv& env
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconSize(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconSize()));
@@ -131,7 +131,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconSize(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconTextFit(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconTextFit()));
@@ -140,7 +140,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconTextFit(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconTextFitPadding(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconTextFitPadding()));
@@ -149,7 +149,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconTextFitPadding(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconImage(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconImage()));
@@ -158,7 +158,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconImage(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconRotate(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconRotate()));
@@ -167,7 +167,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconRotate(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconPadding(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconPadding()));
@@ -176,7 +176,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconPadding(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconKeepUpright(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconKeepUpright()));
@@ -185,7 +185,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconKeepUpright(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconOffset(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconOffset()));
@@ -194,7 +194,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconOffset(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconAnchor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconAnchor()));
@@ -203,7 +203,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconAnchor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconPitchAlignment(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconPitchAlignment()));
@@ -212,7 +212,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconPitchAlignment(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextPitchAlignment(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextPitchAlignment()));
@@ -221,7 +221,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextPitchAlignment(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextRotationAlignment(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -231,7 +231,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextRotationAlignment(jni::JNIEnv& env
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextField(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextField()));
@@ -240,7 +240,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextField(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextFont(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextFont()));
@@ -249,7 +249,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextFont(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextSize(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextSize()));
@@ -258,7 +258,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextSize(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextMaxWidth(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextMaxWidth()));
@@ -267,7 +267,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextMaxWidth(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextLineHeight(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextLineHeight()));
@@ -276,7 +276,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextLineHeight(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextLetterSpacing(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextLetterSpacing()));
@@ -285,7 +285,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextLetterSpacing(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextJustify(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextJustify()));
@@ -294,7 +294,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextJustify(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextRadialOffset(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextRadialOffset()));
@@ -303,7 +303,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextRadialOffset(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextVariableAnchor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextVariableAnchor()));
@@ -312,7 +312,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextVariableAnchor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextVariableAnchorOffset(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -322,7 +322,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextVariableAnchorOffset(jni::JNIEnv& 
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextAnchor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextAnchor()));
@@ -331,7 +331,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextAnchor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextMaxAngle(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextMaxAngle()));
@@ -340,7 +340,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextMaxAngle(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextWritingMode(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextWritingMode()));
@@ -349,7 +349,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextWritingMode(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextRotate(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextRotate()));
@@ -358,7 +358,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextRotate(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextPadding(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextPadding()));
@@ -367,7 +367,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextPadding(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextKeepUpright(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextKeepUpright()));
@@ -376,7 +376,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextKeepUpright(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextTransform(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextTransform()));
@@ -385,7 +385,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextTransform(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextOffset(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextOffset()));
@@ -394,7 +394,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextOffset(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextAllowOverlap(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextAllowOverlap()));
@@ -403,7 +403,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextAllowOverlap(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextIgnorePlacement(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextIgnorePlacement()));
@@ -412,7 +412,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextIgnorePlacement(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextOptional(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextOptional()));
@@ -421,7 +421,7 @@ jni::Local<jni::Object<>> SymbolLayer::getTextOptional(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getSymbolScreenSpace(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultSymbolScreenSpace()));
@@ -430,7 +430,7 @@ jni::Local<jni::Object<>> SymbolLayer::getSymbolScreenSpace(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconOpacity(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconOpacity()));
@@ -439,12 +439,12 @@ jni::Local<jni::Object<>> SymbolLayer::getIconOpacity(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getIconOpacityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getIconOpacityTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getIconOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -453,14 +453,14 @@ void SymbolLayer::setIconOpacityTransition(jni::JNIEnv&, jlong duration, jlong d
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setIconOpacityTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconColor()));
@@ -469,12 +469,12 @@ jni::Local<jni::Object<>> SymbolLayer::getIconColor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getIconColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getIconColorTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getIconColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -483,14 +483,14 @@ void SymbolLayer::setIconColorTransition(jni::JNIEnv&, jlong duration, jlong del
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setIconColorTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconHaloColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconHaloColor()));
@@ -499,12 +499,12 @@ jni::Local<jni::Object<>> SymbolLayer::getIconHaloColor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getIconHaloColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getIconHaloColorTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getIconHaloColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -513,14 +513,14 @@ void SymbolLayer::setIconHaloColorTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setIconHaloColorTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconHaloWidth(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconHaloWidth()));
@@ -529,12 +529,12 @@ jni::Local<jni::Object<>> SymbolLayer::getIconHaloWidth(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getIconHaloWidthTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getIconHaloWidthTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getIconHaloWidthTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -543,14 +543,14 @@ void SymbolLayer::setIconHaloWidthTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setIconHaloWidthTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconHaloBlur(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconHaloBlur()));
@@ -559,12 +559,12 @@ jni::Local<jni::Object<>> SymbolLayer::getIconHaloBlur(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getIconHaloBlurTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getIconHaloBlurTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getIconHaloBlurTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -573,14 +573,14 @@ void SymbolLayer::setIconHaloBlurTransition(jni::JNIEnv&, jlong duration, jlong 
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setIconHaloBlurTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconTranslate(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconTranslate()));
@@ -589,12 +589,12 @@ jni::Local<jni::Object<>> SymbolLayer::getIconTranslate(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getIconTranslateTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getIconTranslateTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getIconTranslateTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -603,14 +603,14 @@ void SymbolLayer::setIconTranslateTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setIconTranslateTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getIconTranslateAnchor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultIconTranslateAnchor()));
@@ -619,7 +619,7 @@ jni::Local<jni::Object<>> SymbolLayer::getIconTranslateAnchor(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextOpacity(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextOpacity()));
@@ -628,12 +628,12 @@ jni::Local<jni::Object<>> SymbolLayer::getTextOpacity(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getTextOpacityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getTextOpacityTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getTextOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -642,14 +642,14 @@ void SymbolLayer::setTextOpacityTransition(jni::JNIEnv&, jlong duration, jlong d
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setTextOpacityTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextColor()));
@@ -658,12 +658,12 @@ jni::Local<jni::Object<>> SymbolLayer::getTextColor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getTextColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getTextColorTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getTextColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -672,14 +672,14 @@ void SymbolLayer::setTextColorTransition(jni::JNIEnv&, jlong duration, jlong del
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setTextColorTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextHaloColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextHaloColor()));
@@ -688,12 +688,12 @@ jni::Local<jni::Object<>> SymbolLayer::getTextHaloColor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getTextHaloColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getTextHaloColorTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getTextHaloColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -702,14 +702,14 @@ void SymbolLayer::setTextHaloColorTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setTextHaloColorTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextHaloWidth(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextHaloWidth()));
@@ -718,12 +718,12 @@ jni::Local<jni::Object<>> SymbolLayer::getTextHaloWidth(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getTextHaloWidthTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getTextHaloWidthTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getTextHaloWidthTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -732,14 +732,14 @@ void SymbolLayer::setTextHaloWidthTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setTextHaloWidthTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextHaloBlur(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextHaloBlur()));
@@ -748,12 +748,12 @@ jni::Local<jni::Object<>> SymbolLayer::getTextHaloBlur(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getTextHaloBlurTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getTextHaloBlurTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getTextHaloBlurTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -762,14 +762,14 @@ void SymbolLayer::setTextHaloBlurTransition(jni::JNIEnv&, jlong duration, jlong 
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setTextHaloBlurTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextTranslate(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextTranslate()));
@@ -778,12 +778,12 @@ jni::Local<jni::Object<>> SymbolLayer::getTextTranslate(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> SymbolLayer::getTextTranslateTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toSymbolLayer(*layer).getTextTranslateTransition();
+    mln::style::TransitionOptions options = toSymbolLayer(*layer).getTextTranslateTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -792,14 +792,14 @@ void SymbolLayer::setTextTranslateTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toSymbolLayer(*layer).setTextTranslateTransition(options);
 }
 
 jni::Local<jni::Object<>> SymbolLayer::getTextTranslateAnchor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::SymbolLayer::getDefaultTextTranslateAnchor()));
@@ -820,17 +820,17 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 } // namespace
 
 jni::Local<jni::Object<Layer>> SymbolJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                               mbgl::style::Layer& layer) {
+                                                                               mln::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new SymbolLayer(toSymbolLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> SymbolJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env,
-                          new SymbolLayer(std::unique_ptr<mbgl::style::SymbolLayer>(
-                              static_cast<mbgl::style::SymbolLayer*>(layer.release()))));
+                          new SymbolLayer(std::unique_ptr<mln::style::SymbolLayer>(
+                              static_cast<mln::style::SymbolLayer*>(layer.release()))));
 }
 
 void SymbolJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -931,4 +931,4 @@ void SymbolJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

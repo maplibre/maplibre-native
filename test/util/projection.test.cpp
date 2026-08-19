@@ -5,7 +5,7 @@
 
 #include <limits>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Projection, Boundaries) {
     LatLng sw{-90.0, -180.0};

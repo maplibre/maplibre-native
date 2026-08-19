@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct AttributeInfo {
@@ -78,8 +78,8 @@ protected:
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
 
-    mutable mbgl::unordered_map<std::size_t, MTLRenderPipelineStatePtr> renderPipelineStateCache;
+    mutable mln::unordered_map<std::size_t, MTLRenderPipelineStatePtr> renderPipelineStateCache;
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

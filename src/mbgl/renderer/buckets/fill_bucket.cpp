@@ -5,7 +5,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/gfx/fill_generator.hpp>
 
-namespace mbgl {
+namespace mln {
 
 FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
@@ -102,4 +102,4 @@ void FillBucket::update(const FeatureStates& states,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

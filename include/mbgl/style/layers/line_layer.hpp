@@ -12,7 +12,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class TransitionOptions;
@@ -132,6 +132,6 @@ protected:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

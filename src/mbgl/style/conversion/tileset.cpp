@@ -4,7 +4,7 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/math/clamp.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -124,4 +124,4 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

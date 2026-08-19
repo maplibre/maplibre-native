@@ -11,7 +11,7 @@
 #include <mbgl/programs/symbol_program.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 
 Programs::Programs(const ProgramParameters& programParameters_)
     : programParameters(programParameters_) {}
@@ -77,4 +77,4 @@ void Programs::registerWith(gfx::ShaderRegistry& registry) {
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

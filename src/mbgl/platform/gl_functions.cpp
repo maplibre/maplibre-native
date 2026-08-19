@@ -3,7 +3,7 @@
 #include <mbgl/util/logging.hpp>
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 #ifndef NDEBUG
@@ -16,4 +16,4 @@ void glCheckError(const char* cmd, const char* file, int line) {
 #endif
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

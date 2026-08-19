@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 float interpolationFactor(float base, Range<float> range, float z) noexcept {
@@ -19,4 +19,4 @@ float interpolationFactor(float base, Range<float> range, float z) noexcept {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

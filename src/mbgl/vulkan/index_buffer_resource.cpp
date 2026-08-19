@@ -2,7 +2,7 @@
 
 #include <mbgl/vulkan/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 IndexBufferResource::IndexBufferResource(BufferResource&& ptr) noexcept
@@ -23,4 +23,4 @@ IndexBufferResource::~IndexBufferResource() noexcept {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

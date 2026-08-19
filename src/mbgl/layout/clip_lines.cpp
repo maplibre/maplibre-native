@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 GeometryCollection clipLines(
@@ -78,4 +78,4 @@ GeometryCollection clipLines(
 }
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

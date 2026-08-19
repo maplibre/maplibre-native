@@ -1,7 +1,7 @@
 #pragma once
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 // Maximum number of illumination sources supported
@@ -45,4 +45,4 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 176);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

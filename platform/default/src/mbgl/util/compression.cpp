@@ -23,7 +23,7 @@
     return true;
 }();
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // Needed when using a zlib compiled with -DZ_PREFIX
@@ -138,4 +138,4 @@ std::uint32_t crc32(const void *raw, size_t size) noexcept {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

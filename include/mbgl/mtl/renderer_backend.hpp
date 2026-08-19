@@ -10,7 +10,7 @@
 #include <Metal/MTLDevice.hpp>
 #include <Metal/MTLCommandQueue.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ProgramParameters;
 
@@ -66,4 +66,4 @@ protected:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

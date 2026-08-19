@@ -16,8 +16,8 @@
 
 #include <filesystem>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 using namespace ::testing;
 
 class TileLODTest {
@@ -41,7 +41,7 @@ public:
         map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
 
         style::CustomGeometrySource::Options options;
-        options.fetchTileFunction = [&](const mbgl::CanonicalTileID& tileID) {
+        options.fetchTileFunction = [&](const mln::CanonicalTileID& tileID) {
             auto source = static_cast<style::CustomGeometrySource*>(map.getStyle().getSource("custom"));
             if (!source) {
                 return;

@@ -10,7 +10,7 @@
 
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 using WatchCallback = std::function<void(int, RunLoop::Event)>;
@@ -36,4 +36,4 @@ public slots:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

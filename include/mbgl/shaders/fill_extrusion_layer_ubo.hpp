@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) FillExtrusionDrawableUBO {
@@ -63,4 +63,4 @@ struct alignas(16) FillExtrusionPropsUBO {
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

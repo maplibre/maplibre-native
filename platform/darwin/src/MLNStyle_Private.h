@@ -5,11 +5,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-namespace mbgl {
+namespace mln {
 namespace style {
 class Style;
 }
-}  // namespace mbgl
+}  // namespace mln
 
 @class MLNAttributionInfo;
 @class MLNMapView;
@@ -19,10 +19,10 @@ class Style;
 
 @interface MLNStyle (Private)
 
-- (instancetype)initWithRawStyle:(mbgl::style::Style *)rawStyle stylable:(id<MLNStylable>)stylable;
+- (instancetype)initWithRawStyle:(mln::style::Style *)rawStyle stylable:(id<MLNStylable>)stylable;
 
 @property (nonatomic, readonly, weak) id<MLNStylable> stylable;
-@property (nonatomic, readonly) mbgl::style::Style *rawStyle;
+@property (nonatomic, readonly) mln::style::Style *rawStyle;
 
 - (nullable NSArray<MLNAttributionInfo *> *)attributionInfosWithFontSize:(CGFloat)fontSize
                                                                linkColor:

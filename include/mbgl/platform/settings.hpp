@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 #define DECLARE_MAPLIBRE_SETTING(name, value) constexpr const char* name = "maplibre_" #value
@@ -46,4 +46,4 @@ private:
 };
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

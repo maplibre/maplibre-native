@@ -2,7 +2,7 @@
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/expression/image_expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -12,7 +12,7 @@ ImageExpression::ImageExpression(std::unique_ptr<Expression> imageID_)
     assert(imageID);
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 ParseResult ImageExpression::parse(const Convertible& value, ParsingContext& ctx) {
     std::size_t argsLength = arrayLength(value);
@@ -43,8 +43,8 @@ bool ImageExpression::operator==(const Expression& e) const noexcept {
     return false;
 }
 
-mbgl::Value ImageExpression::serialize() const {
-    std::vector<mbgl::Value> serialized{{getOperator()}};
+mln::Value ImageExpression::serialize() const {
+    std::vector<mln::Value> serialized{{getOperator()}};
     serialized.push_back(imageID->serialize());
     return serialized;
 }
@@ -66,4 +66,4 @@ EvaluationResult ImageExpression::evaluate(const EvaluationContext& ctx) const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

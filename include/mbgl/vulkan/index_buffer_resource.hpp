@@ -3,7 +3,7 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/vulkan/buffer_resource.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 class IndexBufferResource : public gfx::IndexBufferResource {
@@ -25,4 +25,4 @@ protected:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

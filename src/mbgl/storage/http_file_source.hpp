@@ -3,7 +3,7 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/storage/resource.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class ClientOptions;
 class ResourceOptions;
@@ -30,4 +30,4 @@ private:
     const std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

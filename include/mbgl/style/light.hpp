@@ -11,7 +11,7 @@
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/immutable.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class LightObserver;
@@ -59,6 +59,6 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

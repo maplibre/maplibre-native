@@ -1,6 +1,6 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 
-namespace mbgl {
+namespace mln {
 
 TileRenderData::TileRenderData() = default;
 
@@ -24,4 +24,4 @@ Bucket* TileRenderData::getBucket(const style::Layer::Impl&) const {
     return nullptr;
 }
 
-} // namespace mbgl
+} // namespace mln

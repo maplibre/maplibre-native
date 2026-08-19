@@ -158,8 +158,8 @@
     // The pitch intensity represents how much the map view is actually pitched compared to
     // what is possible. The value will range from 0% (not pitched at all) to 100% (pitched as much
     // as the map view will allow). The map view's maximum pitch is defined in
-    // `mbgl::util::PITCH_MAX`.
-    CGFloat pitchIntensity = pitch / MLNDegreesFromRadians(mbgl::util::PITCH_MAX);
+    // `mln::util::PITCH_MAX`.
+    CGFloat pitchIntensity = pitch / MLNDegreesFromRadians(mln::util::PITCH_MAX);
 
     // The pitch adjusted scale is the inverse proportion of the maximum possible scale reduction
     // multiplied by the pitch intensity. For example, if the maximum scale reduction is 75% and the

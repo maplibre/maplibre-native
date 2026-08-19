@@ -13,41 +13,41 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/style/properties.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class Drawable;
 }
-} // namespace mbgl
+} // namespace mln
 
-class RenderPluginLayerTweaker : public mbgl::gfx::DrawableTweaker {
+class RenderPluginLayerTweaker : public mln::gfx::DrawableTweaker {
 public:
     RenderPluginLayerTweaker(RenderPluginLayer* plugInRenderer)
         : _plugInRenderer(plugInRenderer) {}
     ~RenderPluginLayerTweaker() override = default;
 
-    void init(mbgl::gfx::Drawable&) override;
+    void init(mln::gfx::Drawable&) override;
 
-    void execute(mbgl::gfx::Drawable&, mbgl::PaintParameters&) override;
+    void execute(mln::gfx::Drawable&, mln::PaintParameters&) override;
 
 protected:
     RenderPluginLayer* _plugInRenderer = nullptr;
 };
 
-void RenderPluginLayerTweaker::init([[maybe_unused]] mbgl::gfx::Drawable& drawablee) {
+void RenderPluginLayerTweaker::init([[maybe_unused]] mln::gfx::Drawable& drawablee) {
 
 };
 
-void RenderPluginLayerTweaker::execute([[maybe_unused]] mbgl::gfx::Drawable& drawable,
-                                       [[maybe_unused]] mbgl::PaintParameters& paintParameters) {
+void RenderPluginLayerTweaker::execute([[maybe_unused]] mln::gfx::Drawable& drawable,
+                                       [[maybe_unused]] mln::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
-    context.resetState(paintParameters.depthModeForSublayer(0, mbgl::gfx::DepthMaskType::ReadOnly),
+    context.resetState(paintParameters.depthModeForSublayer(0, mln::gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
 #if MLN_RENDER_BACKEND_METAL
-    const auto& mtlRenderPass = static_cast<mbgl::mtl::RenderPass*>(paintParameters.renderPass.get());
+    const auto& mtlRenderPass = static_cast<mln::mtl::RenderPass*>(paintParameters.renderPass.get());
     mtlRenderPass->resetState();
 
     style::mtl::CustomLayerRenderParameters parameters(paintParameters);

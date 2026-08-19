@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/number_format.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -111,7 +111,7 @@ std::vector<std::optional<Value>> NumberFormat::possibleOutputs() const {
     return {std::nullopt};
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
     std::size_t length = arrayLength(value);
 
@@ -186,11 +186,11 @@ ParseResult NumberFormat::parse(const Convertible& value, ParsingContext& ctx) {
                                        maxFractionDigitsResult ? std::move(*maxFractionDigitsResult) : nullptr));
 }
 
-mbgl::Value NumberFormat::serialize() const {
-    std::vector<mbgl::Value> serialized{{getOperator()}};
+mln::Value NumberFormat::serialize() const {
+    std::vector<mln::Value> serialized{{getOperator()}};
     serialized.emplace_back(number->serialize());
 
-    std::unordered_map<std::string, mbgl::Value> options;
+    std::unordered_map<std::string, mln::Value> options;
     if (locale) {
         options[localeKey] = locale->serialize();
     }
@@ -210,4 +210,4 @@ mbgl::Value NumberFormat::serialize() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

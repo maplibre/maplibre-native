@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) HillshadePrepareDrawableUBO {
@@ -21,4 +21,4 @@ struct alignas(16) HillshadePrepareTilePropsUBO {
 static_assert(sizeof(HillshadePrepareTilePropsUBO) == 2 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

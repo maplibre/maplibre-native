@@ -16,14 +16,14 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_,
                                std::size_t initialCapacity,
                                std::string name_,
                                bool renderToTerrain_)
-    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
+    : mln::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled || !getDrawableCount()) {
@@ -95,8 +95,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         drawCount++;
 
         if (!drawable.getShader()) {
-            mbgl::Log::Warning(mbgl::Event::Render,
-                               "Drawable " + drawable.getName() + " in " + getName() + " missing shader; skipping");
+            mln::Log::Warning(mln::Event::Render,
+                              "Drawable " + drawable.getName() + " in " + getName() + " missing shader; skipping");
             return;
         }
 
@@ -139,11 +139,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     const auto finalDrawCalls = parameters.context.renderingStats().numDrawCalls;
     if (drawCount > 0 && finalDrawCalls == initialDrawCalls) {
-        mbgl::Log::Warning(
-            mbgl::Event::Render,
+        mln::Log::Warning(
+            mln::Event::Render,
             getName() + " visited " + std::to_string(visitCount) + " drawables but produced no draw calls!");
     }
 }
 
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

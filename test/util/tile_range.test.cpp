@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TileRange, ContainsWorld) {
     auto range = util::TileRange::fromLatLngBounds(LatLngBounds::world(), 0);

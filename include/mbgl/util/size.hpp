@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 class Size {
 public:
@@ -30,4 +30,4 @@ constexpr bool operator!=(const Size& a, const Size& b) noexcept {
     return !(a == b);
 }
 
-} // namespace mbgl
+} // namespace mln

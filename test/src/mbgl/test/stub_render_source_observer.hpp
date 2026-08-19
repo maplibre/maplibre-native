@@ -2,7 +2,7 @@
 
 #include <mbgl/renderer/render_source_observer.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 /**
  * An implementation of style::Observer that forwards all methods to

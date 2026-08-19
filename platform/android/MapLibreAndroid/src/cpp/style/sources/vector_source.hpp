@@ -5,7 +5,7 @@
 #include "../../geojson/feature.hpp"
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class VectorSource : public Source {
@@ -16,7 +16,7 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     VectorSource(jni::JNIEnv&, const jni::String&, const jni::Object<>&);
-    VectorSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend*);
+    VectorSource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
     ~VectorSource();
 
 private:
@@ -31,4 +31,4 @@ private:
 }; // class VectorSource
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

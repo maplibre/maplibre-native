@@ -12,7 +12,7 @@
 #include <cassert>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 CustomGeometryTile::CustomGeometryTile(const OverscaledTileID& overscaledTileID,
                                        std::string sourceID_,
@@ -89,4 +89,4 @@ void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result, const
     }
 }
 
-} // namespace mbgl
+} // namespace mln

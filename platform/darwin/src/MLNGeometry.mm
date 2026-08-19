@@ -36,9 +36,9 @@ CGRect MLNExtendRect(CGRect rect, CGPoint point) {
   return rect;
 }
 
-mbgl::LatLng MLNLatLngFromLocationCoordinate2D(CLLocationCoordinate2D coordinate) {
+mln::LatLng MLNLatLngFromLocationCoordinate2D(CLLocationCoordinate2D coordinate) {
   try {
-    return mbgl::LatLng(coordinate.latitude, coordinate.longitude);
+    return mln::LatLng(coordinate.latitude, coordinate.longitude);
   } catch (std::domain_error &error) {
     [NSException raise:NSInvalidArgumentException format:@"%s", error.what()];
     return {};
@@ -48,7 +48,7 @@ mbgl::LatLng MLNLatLngFromLocationCoordinate2D(CLLocationCoordinate2D coordinate
 CLLocationDistance MLNAltitudeForZoomLevel(double zoomLevel, CGFloat pitch,
                                            CLLocationDegrees latitude, CGSize size) {
   CLLocationDistance metersPerPixel =
-      mbgl::Projection::getMetersPerPixelAtLatitude(latitude, zoomLevel);
+      mln::Projection::getMetersPerPixelAtLatitude(latitude, zoomLevel);
   CLLocationDistance metersTall = metersPerPixel * size.height;
   CLLocationDistance altitude =
       metersTall / 2 / std::tan(MLNRadiansFromDegrees(MLNAngularFieldOfView) / 2.);
@@ -62,9 +62,9 @@ double MLNZoomLevelForAltitude(CLLocationDistance altitude, CGFloat pitch,
   CLLocationDistance metersTall =
       eyeAltitude * 2 * std::tan(MLNRadiansFromDegrees(MLNAngularFieldOfView) / 2.);
   CLLocationDistance metersPerPixel = metersTall / size.height;
-  CGFloat mapPixelWidthAtZoom = std::cos(MLNRadiansFromDegrees(latitude)) * mbgl::util::M2PI *
-                                mbgl::util::EARTH_RADIUS_M / metersPerPixel;
-  return ::log2(mapPixelWidthAtZoom / mbgl::util::tileSize_D);
+  CGFloat mapPixelWidthAtZoom = std::cos(MLNRadiansFromDegrees(latitude)) * mln::util::M2PI *
+                                mln::util::EARTH_RADIUS_M / metersPerPixel;
+  return ::log2(mapPixelWidthAtZoom / mln::util::tileSize_D);
 }
 
 MLNRadianDistance MLNDistanceBetweenRadianCoordinates(MLNRadianCoordinate2D from,
@@ -129,7 +129,7 @@ CGPoint MLNPointRounded(CGPoint point) {
 }
 
 MLNMapPoint MLNMapPointForCoordinate(CLLocationCoordinate2D coordinate, double zoomLevel) {
-  mbgl::Point<double> projectedCoordinate = mbgl::Projection::project(
+  mln::Point<double> projectedCoordinate = mln::Projection::project(
       MLNLatLngFromLocationCoordinate2D(coordinate), std::pow(2.0, zoomLevel));
   return MLNMapPointMake(projectedCoordinate.x, projectedCoordinate.y, zoomLevel);
 }

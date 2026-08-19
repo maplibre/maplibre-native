@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class RenderPassDescriptor {
@@ -40,4 +40,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -58,10 +58,10 @@
 
 #include <numbers>
 
-using namespace mbgl::platform;
+using namespace mln::platform;
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
@@ -84,8 +84,8 @@ struct LocationIndicatorRenderParameters {
     double puckBearing = 0.0;
     LatLng puckPosition = {0, 0};
     double errorRadiusMeters;
-    mbgl::Color errorRadiusColor{0, 0, 0, 0};
-    mbgl::Color errorRadiusBorderColor{0, 0, 0, 0};
+    mln::Color errorRadiusColor{0, 0, 0, 0};
+    mln::Color errorRadiusBorderColor{0, 0, 0, 0};
     float puckScale = 0;
     float puckHatScale = 0;
     float puckShadowScale = 0;
@@ -376,7 +376,7 @@ public:
         void detach() { MBGL_CHECK_ERROR(glBindTexture(GL_TEXTURE_2D, 0)); }
         bool isValid() { return imageDirty || image; }
         GLuint texId = 0;
-        const mbgl::PremultipliedImage* image = nullptr;
+        const mln::PremultipliedImage* image = nullptr;
         std::optional<Immutable<style::Image::Impl>> sharedImage;
         bool imageDirty = false;
         size_t width = 0;
@@ -409,7 +409,7 @@ public:
         texCoordsBuffer.upload(texCoords);
     }
 
-    void render(const mbgl::LocationIndicatorRenderParameters& params) {
+    void render(const mln::LocationIndicatorRenderParameters& params) {
         initialize();
         drawRadius(params);
         drawShadow();
@@ -453,7 +453,7 @@ public:
 
     bool setTextureFromImageID(const std::string& imagePath,
                                TextureInfo& textureInfo,
-                               const mbgl::LocationIndicatorRenderParameters& params) {
+                               const mln::LocationIndicatorRenderParameters& params) {
         bool updated = false;
         const Immutable<style::Image::Impl>* sharedImage = nullptr;
 
@@ -478,7 +478,7 @@ public:
 public:
     RenderLocationIndicatorImpl(std::string sourceLayer)
         : ruler(0, mapbox::cheap_ruler::CheapRuler::Meters),
-          feature(std::make_shared<mbgl::Feature>()),
+          feature(std::make_shared<mln::Feature>()),
           featureEnvelope(std::make_shared<mapbox::geometry::polygon<int64_t>>()) {
         feature->sourceLayer = std::move(sourceLayer);
     }
@@ -501,7 +501,7 @@ public:
 #endif
     }
 
-    void updatePuckGeometry(const mbgl::LocationIndicatorRenderParameters& params) {
+    void updatePuckGeometry(const mln::LocationIndicatorRenderParameters& params) {
         if (params.projectionMatrix != oldParams.projectionMatrix) positionChanged = true;
         if (params.puckPosition != oldParams.puckPosition) {
             positionChanged = true;
@@ -591,7 +591,7 @@ protected:
         return Projection::project(unwrappedLatLng, s.getScale());
     }
 
-    void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
+    void updateRadius(const mln::LocationIndicatorRenderParameters& params) {
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
         auto& circle = circleDrawableInfo.geometry;
         circleDrawableInfo.dirty = true;
@@ -646,7 +646,7 @@ protected:
     }
 
     static Point<double> hatShadowShiftVector(const LatLng& position,
-                                              const mbgl::LocationIndicatorRenderParameters& params) {
+                                              const mln::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         ScreenCoordinate posScreen = latLngToScreenCoordinate(position, s);
         posScreen.y = params.height - 1; // moving it to bottom
@@ -665,12 +665,12 @@ protected:
         return vec2(posScreenDelta - posScreen).normalized();
     }
 
-    void updatePuck(const mbgl::LocationIndicatorRenderParameters& params) {
+    void updatePuck(const mln::LocationIndicatorRenderParameters& params) {
         updatePuckPerspective(params);
         bearingChanged = false;
     }
 
-    void updatePuckPerspective(const mbgl::LocationIndicatorRenderParameters& params) {
+    void updatePuckPerspective(const mln::LocationIndicatorRenderParameters& params) {
         const TransformState& s = *params.state;
         projectionPuck = projectionCircle; // Duplicated as it might change, depending
                                            // on what puck style is chosen.
@@ -756,14 +756,14 @@ protected:
     }
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
-    void drawRadius(const mbgl::LocationIndicatorRenderParameters& params) {
+    void drawRadius(const mln::LocationIndicatorRenderParameters& params) {
         if (!(params.errorRadiusMeters > 0.0) ||
             (params.errorRadiusColor.a == 0.0 && params.errorRadiusBorderColor.a == 0.0))
             return;
 
         simpleShader.bind();
-        mbgl::gl::bindUniform(simpleShader.u_color, params.errorRadiusColor);
-        mbgl::gl::bindUniform(simpleShader.u_matrix, projectionCircle);
+        mln::gl::bindUniform(simpleShader.u_color, params.errorRadiusColor);
+        mln::gl::bindUniform(simpleShader.u_matrix, projectionCircle);
 
         circleBuffer.upload(circle);
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(simpleShader.a_pos));
@@ -771,7 +771,7 @@ protected:
 
         MBGL_CHECK_ERROR(glDrawArrays(GL_TRIANGLE_FAN, 0, GLsizei(circle.size())));
         if (params.errorRadiusBorderColor.a > 0.0f) {
-            mbgl::gl::bindUniform(simpleShader.u_color, params.errorRadiusBorderColor);
+            mln::gl::bindUniform(simpleShader.u_color, params.errorRadiusBorderColor);
             MBGL_CHECK_ERROR(glLineWidth(1.0f));
             MBGL_CHECK_ERROR(glDrawArrays(GL_LINE_STRIP, 1, GLsizei(circle.size() - 1)));
         }
@@ -785,7 +785,7 @@ protected:
         texturedShader.bind();
         texture->bind(0);
         glUniform1i(texturedShader.u_image, 0);
-        mbgl::gl::bindUniform(texturedShader.u_matrix, projectionPuck);
+        mln::gl::bindUniform(texturedShader.u_matrix, projectionPuck);
 
         buf.bind();
         buf.upload(data);
@@ -820,7 +820,7 @@ protected:
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     bool setTextureFromImageID(const std::string& imagePath,
                                std::shared_ptr<Texture>& texture,
-                               const mbgl::LocationIndicatorRenderParameters& params) {
+                               const mln::LocationIndicatorRenderParameters& params) {
         bool updated = false;
         if (textures.find(imagePath) == textures.end()) {
             std::shared_ptr<Texture> tx = std::make_shared<Texture>();
@@ -834,7 +834,7 @@ protected:
             texture = tx;
         } else {
             const Immutable<style::Image::Impl>* sharedImage = params.imageManager->getSharedImage(imagePath);
-            const mbgl::PremultipliedImage* img = (sharedImage) ? &sharedImage->get()->image : nullptr;
+            const mln::PremultipliedImage* img = (sharedImage) ? &sharedImage->get()->image : nullptr;
             std::shared_ptr<Texture>& tex = textures.at(imagePath);
             if (tex->image != img) { // image for the ID might have changed.
                 tex->assign(sharedImage);
@@ -867,14 +867,14 @@ protected:
 
     mapbox::cheap_ruler::CheapRuler ruler;
 
-    mbgl::mat4 translation{};
-    mbgl::mat4 projectionCircle{};
-    mbgl::mat4 projectionPuck{};
+    mln::mat4 translation{};
+    mln::mat4 projectionCircle{};
+    mln::mat4 projectionPuck{};
 
     bool positionChanged = false;
     bool radiusChanged = false;
     bool bearingChanged = false;
-    mbgl::LocationIndicatorRenderParameters oldParams;
+    mln::LocationIndicatorRenderParameters oldParams;
     bool initialized = false;
     bool dirtyFeature = true;
 
@@ -913,8 +913,8 @@ public:
 #endif
 
 public:
-    mbgl::LocationIndicatorRenderParameters parameters;
-    std::shared_ptr<mbgl::Feature> feature;
+    mln::LocationIndicatorRenderParameters parameters;
+    std::shared_ptr<mln::Feature> feature;
     std::shared_ptr<mapbox::geometry::polygon<int64_t>> featureEnvelope;
     static bool anisotropicFilteringAvailable;
 };
@@ -953,7 +953,7 @@ void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& 
     const auto& evaluated = properties->evaluated;
     auto& layout = impl(baseImpl).layout;
 
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
 
     // paint
     renderImpl->parameters.errorRadiusColor = evaluated.get<style::AccuracyRadiusColor>();
@@ -1302,4 +1302,4 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
 #endif
 
-} // namespace mbgl
+} // namespace mln

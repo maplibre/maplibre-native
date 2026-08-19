@@ -2,7 +2,7 @@
 
 #include <mbgl/renderer/layer_tweaker.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class UniformBuffer;
@@ -30,4 +30,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

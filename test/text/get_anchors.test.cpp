@@ -4,14 +4,14 @@
 
 #include <numbers>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 constexpr bool operator==(const Anchor& rhs, const Anchor& lhs) {
     return rhs.point == lhs.point && rhs.angle == lhs.angle && rhs.segment == lhs.segment;
 }
-} // namespace mbgl
+} // namespace mln
 
 namespace {
 const auto makeLine = [](std::size_t shift = 0u) {

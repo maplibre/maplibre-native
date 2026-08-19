@@ -4,7 +4,7 @@
 #include <string>
 #include <exception>
 
-namespace mbgl {
+namespace mln {
 
 class RenderSource;
 class OverscaledTileID;
@@ -20,4 +20,4 @@ public:
     virtual void onSymbolError(RenderSource&, const std::string&) {}
 };
 
-} // namespace mbgl
+} // namespace mln

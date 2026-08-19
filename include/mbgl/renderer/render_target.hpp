@@ -12,7 +12,7 @@
 #include <ranges>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Context;
@@ -196,4 +196,4 @@ protected:
     std::optional<std::size_t> bakedSignature;
 };
 
-} // namespace mbgl
+} // namespace mln

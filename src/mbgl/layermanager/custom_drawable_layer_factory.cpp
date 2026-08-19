@@ -3,7 +3,7 @@
 #include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* CustomDrawableLayerFactory::getTypeInfo() const noexcept {
     return style::CustomDrawableLayer::Impl::staticTypeInfo();
@@ -20,4 +20,4 @@ std::unique_ptr<RenderLayer> CustomDrawableLayerFactory::createRenderLayer(
     return std::make_unique<RenderCustomDrawableLayer>(staticImmutableCast<style::CustomDrawableLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

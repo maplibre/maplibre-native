@@ -9,7 +9,7 @@ extern "C" {
 #include <jpeglib.h>
 }
 
-namespace mbgl {
+namespace mln {
 
 const static unsigned BUF_SIZE = 4096;
 
@@ -144,4 +144,4 @@ PremultipliedImage decodeJPEG(const uint8_t* data, size_t size) {
     return image;
 }
 
-} // namespace mbgl
+} // namespace mln

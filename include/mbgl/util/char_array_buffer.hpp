@@ -2,7 +2,7 @@
 
 #include <streambuf>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // ref https://artofcode.wordpress.com/2010/12/12/deriving-from-stdstreambuf/
@@ -54,4 +54,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

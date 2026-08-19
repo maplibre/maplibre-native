@@ -4,7 +4,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 TileObserver nullObserver;
@@ -69,4 +69,4 @@ void Tile::onTileAction(TileOperation op) {
     observer->onTileAction(id, sourceID, op);
 };
 
-} // namespace mbgl
+} // namespace mln

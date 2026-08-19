@@ -7,7 +7,7 @@
 #include <limits>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 namespace {
@@ -69,4 +69,4 @@ void Timer::stop() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

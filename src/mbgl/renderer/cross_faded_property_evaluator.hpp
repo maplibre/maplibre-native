@@ -4,7 +4,7 @@
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
 #include <mbgl/util/interpolate.hpp>
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 class Faded {
@@ -39,4 +39,4 @@ template <typename T>
 struct Interpolator<Faded<T>> : Uninterpolated {};
 } // namespace util
 
-} // namespace mbgl
+} // namespace mln

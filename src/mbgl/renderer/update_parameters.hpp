@@ -16,7 +16,7 @@
 
 #include <mapbox/std/weak.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AnnotationManager;
 class FileSource;
@@ -64,4 +64,4 @@ public:
     bool debugAboveGroundLog = false;
 };
 
-} // namespace mbgl
+} // namespace mln

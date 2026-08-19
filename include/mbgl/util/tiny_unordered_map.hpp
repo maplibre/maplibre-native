@@ -5,7 +5,7 @@
 #include <optional>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /// A wrapper around `unordered_map` which uses linear search below some threshold of size.
@@ -210,4 +210,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

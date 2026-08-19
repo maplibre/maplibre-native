@@ -11,7 +11,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomGeometrySource::CustomGeometrySource(std::string id, const CustomGeometrySource::Options& options)
@@ -31,8 +31,8 @@ void CustomGeometrySource::loadDescription(FileSource&) {
     observer->onSourceLoaded(*this);
 }
 
-bool CustomGeometrySource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(info->tileKind);
+bool CustomGeometrySource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
+    return mln::underlying_type(Tile::Kind::Geometry) == mln::underlying_type(info->tileKind);
 }
 
 void CustomGeometrySource::setTileData(const CanonicalTileID& tileID, const GeoJSON& data) {
@@ -52,4 +52,4 @@ Mutable<Source::Impl> CustomGeometrySource::createMutable() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

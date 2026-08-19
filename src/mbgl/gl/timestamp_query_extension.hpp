@@ -13,7 +13,7 @@
 #define GL_TIMESTAMP 0x8E28
 #define GL_GPU_DISJOINT 0x8FBB
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 namespace extension {
 
@@ -38,4 +38,4 @@ void loadTimeStampQueryExtension(const GlContexsLoader &loadExtension);
 
 } // namespace extension
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

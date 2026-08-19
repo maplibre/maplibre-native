@@ -1,6 +1,6 @@
 #include <mbgl/util/version.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace version {
 
 #ifdef MBGL_VERSION_REV
@@ -10,4 +10,4 @@ const char* revision = "NOT SET";
 #endif
 
 } // namespace version
-} // namespace mbgl
+} // namespace mln

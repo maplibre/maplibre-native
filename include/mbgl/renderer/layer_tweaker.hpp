@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class Drawable;
@@ -92,4 +92,4 @@ protected:
     static uint64_t propertiesEpoch;
 };
 
-} // namespace mbgl
+} // namespace mln

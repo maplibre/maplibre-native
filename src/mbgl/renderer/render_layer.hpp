@@ -15,7 +15,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 class Bucket;
 class DynamicFeatureIndex;
 class LineAtlas;
@@ -333,4 +333,4 @@ private:
 
 using RenderLayerReferences = std::vector<std::reference_wrapper<RenderLayer>>;
 
-} // namespace mbgl
+} // namespace mln
