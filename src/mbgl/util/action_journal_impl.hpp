@@ -55,6 +55,8 @@ public:
     void onSpriteLoaded(const std::optional<style::Sprite>&) override;
     void onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr) override;
     void onSpriteRequested(const std::optional<style::Sprite>&) override;
+    void onRenderError(std::exception_ptr) override;
+    void onSymbolError(const std::string&) override;
 
     void onMapCreate();
     void onMapDestroy();

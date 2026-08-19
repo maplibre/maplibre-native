@@ -79,6 +79,7 @@
     <string name="activity_surfaceview_resize">SurfaceView resize</string>
     <string name="activity_overlay">Map overlay</string>
     <string name="activity_grid_source">Grid Source</string>
+    <string name="activity_custom_vector_source">Custom Vector Source</string>
     <string name="activity_no_style">No Style URI/JSON</string>
     <string name="activity_vector_tile">Vector Tile source</string>
     <string name="activity_pmtiles">PMTiles</string>

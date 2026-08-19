@@ -154,9 +154,7 @@ GLFWVulkanBackend::GLFWVulkanBackend(GLFWwindow* window_, const bool capFrameRat
     init();
 }
 
-GLFWVulkanBackend::~GLFWVulkanBackend() {
-    context.reset();
-}
+GLFWVulkanBackend::~GLFWVulkanBackend() {}
 
 mbgl::Size GLFWVulkanBackend::getSize() const {
     return size;

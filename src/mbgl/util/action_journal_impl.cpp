@@ -148,11 +148,21 @@ ActionJournal::Impl::Impl(const Map& map_, const ActionJournalOptions& options_)
 
     previousFrameTime = util::MonotonicTimer::now().count();
 
-    options.withPath((mbgl::filesystem::canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
+    try {
+        options.withPath(
+            (mbgl::filesystem::weakly_canonical(options.path()) / ACTION_JOURNAL_DIRECTORY_NAME).generic_string());
 
-    if (!openFile(detectFiles(), false)) {
-        Log::Error(Event::General, "Failed to open Action Journal file");
+        if (!openFile(detectFiles(), false)) {
+            Log::Error(Event::General, "Failed to open Action Journal file");
+        }
+    } catch (const mbgl::filesystem::filesystem_error& e) {
+        Log::Error(Event::General, std::string("Action Journal file exception: ") + e.what());
+    } catch (...) {
+        Log::Error(Event::General, std::string("Action Journal exception: ") + toString(std::current_exception()));
     }
+
+    scheduler->setExceptionHandler(
+        [](const std::exception_ptr e) { Log::Error(Event::General, "Action Journal log exception: " + toString(e)); });
 }
 
 ActionJournal::Impl::~Impl() {
@@ -477,6 +487,26 @@ void ActionJournal::Impl::onSpriteRequested(const std::optional<style::Sprite>& 
     });
 }
 
+void ActionJournal::Impl::onRenderError(std::exception_ptr e) {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        ActionJournalEvent event("onRenderError", env);
+
+        event.addEvent("exception", toString(e));
+
+        log(event);
+    });
+}
+
+void ActionJournal::Impl::onSymbolError(const std::string& message) {
+    scheduler->schedule([=, this, env = MapEnvironmentSnapshot(*this)]() {
+        ActionJournalEvent event("onSymbolError", env);
+
+        event.addEvent("message", message);
+
+        log(event);
+    });
+}
+
 void ActionJournal::Impl::onMapCreate() {
     scheduler->schedule(
         [=, this, env = MapEnvironmentSnapshot(*this)]() { log(ActionJournalEvent("onMapCreate", env)); });
@@ -589,7 +619,14 @@ bool ActionJournal::Impl::openFile(uint32_t fileIndex, bool truncate) {
 }
 
 bool ActionJournal::Impl::prepareFile(size_t size) {
-    if (currentFileSize + size <= options.logFileSize() && currentFile) {
+    if (!currentFile) {
+        if (!openFile(detectFiles(), false)) {
+            Log::Error(Event::General, "Failed to open Action Journal file");
+            return false;
+        }
+    }
+
+    if (currentFileSize + size <= options.logFileSize()) {
         currentFileSize += size;
         return true;
     }

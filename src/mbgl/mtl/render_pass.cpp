@@ -17,7 +17,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
     resource.bind();
 
-    if (const auto& buffer = resource.getCommandBuffer()) {
+    if (const auto& cmdBuff = resource.getCommandBuffer()) {
+        commandBuffer = cmdBuff;
         if (auto rpd = resource.getRenderPassDescriptor()) {
             if (descriptor.clearColor) {
                 if (auto copy = NS::TransferPtr(rpd->copy())) {
@@ -29,7 +30,7 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                     }
                 }
             }
-            encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
+            encoder = NS::RetainPtr(cmdBuff->renderCommandEncoder(rpd.get()));
 
             const auto& texture = rpd->colorAttachments()->object(0)->texture();
             width = texture->width();
@@ -94,10 +95,10 @@ NS::String* toNSString(const char* str) {
 }
 } // namespace
 
-void RenderPass::pushDebugGroup(const char* name) {
+void RenderPass::pushDebugGroup(const char* theName) {
     assert(encoder);
     if (encoder) {
-        encoder->pushDebugGroup(toNSString(name));
+        encoder->pushDebugGroup(toNSString(theName));
     }
 }
 
@@ -108,10 +109,10 @@ void RenderPass::popDebugGroup() {
     }
 }
 
-void RenderPass::addDebugSignpost(const char* name) {
+void RenderPass::addDebugSignpost(const char* theName) {
     assert(encoder);
     if (encoder) {
-        encoder->insertDebugSignpost(toNSString(name));
+        encoder->insertDebugSignpost(toNSString(theName));
     }
 }
 

@@ -302,6 +302,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                                   context,
                                   renderTreeParameters.transformParams.state,
                                   updateParameters,
+                                  parameters,
                                   renderTree,
                                   texturePool);
     }

@@ -3,6 +3,7 @@
 #include <mbgl/style/expression/compound_expression.hpp>
 #include <mbgl/style/expression/check_subtype.hpp>
 #include <mbgl/style/expression/util.hpp>
+#include <mbgl/style/expression/utf8_op_helpers.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/math/log2.hpp>
@@ -717,6 +718,45 @@ const auto& concatCompoundExpression() {
     return signature;
 }
 
+const auto& splitCompoundExpression() {
+    static auto signature = detail::makeSignature(
+        "split", [](const std::string& input, const std::string& delimiter) -> Result<std::vector<std::string>> {
+            std::vector<std::string> result;
+
+            if (delimiter.empty()) {
+                std::string_view remaining(input);
+                result.reserve(unicodeLengthOnValidatedUtf8(remaining));
+                while (!remaining.empty()) {
+                    const auto characterLength = getUnicodeCharacterOffsetOnValidatedUtf8(remaining, 1);
+                    result.emplace_back(remaining.substr(0, characterLength));
+                    remaining.remove_prefix(characterLength);
+                }
+                return result;
+            }
+
+            std::size_t start = 0;
+            while (true) {
+                const auto position = input.find(delimiter, start);
+                if (position == std::string::npos) {
+                    result.emplace_back(input.substr(start));
+                    break;
+                }
+                result.emplace_back(input.substr(start, position - start));
+                start = position + delimiter.size();
+            }
+            return result;
+        });
+    return signature;
+}
+
+const auto& joinCompoundExpression() {
+    static auto signature = detail::makeSignature(
+        "join", [](const std::vector<std::string>& input, const std::string& delimiter) -> Result<std::string> {
+            return boost::algorithm::join(input, delimiter);
+        });
+    return signature;
+}
+
 const auto& resolvedLocaleCompoundExpression() {
     static auto signature = detail::makeSignature(
         "resolved-locale", [](const Collator& collator) -> Result<std::string> { return collator.resolvedLocale(); });
@@ -1065,6 +1105,8 @@ constexpr const auto compoundExpressionRegistry =
         {"upcase", upcaseCompoundExpression},
         {"downcase", downcaseCompoundExpression},
         {"concat", concatCompoundExpression},
+        {"split", splitCompoundExpression},
+        {"join", joinCompoundExpression},
         {"resolved-locale", resolvedLocaleCompoundExpression},
         {"error", errorCompoundExpression},
         {"feature-state", featureStateCompoundExpression},

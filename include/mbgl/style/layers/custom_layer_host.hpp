@@ -4,6 +4,11 @@
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
 namespace mbgl {
+
+namespace gfx {
+class Context;
+} // namespace gfx
+
 namespace style {
 
 class CustomLayerHost {
@@ -23,6 +28,11 @@ public:
      * `deinitialize` function.
      */
     virtual void initialize(const CustomLayerInitParameters&) = 0;
+
+    /**
+     * Called right before the layers start rendering.
+     */
+    virtual void preRender(const mbgl::gfx::Context&, const mbgl::style::CustomLayerRenderParameters&) {};
 
     /**
      * Render the layer. This method is called once per frame. The
