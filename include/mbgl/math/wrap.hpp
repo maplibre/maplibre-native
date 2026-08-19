@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /// Constrains n to the given range (including min, excluding max) via modular
@@ -21,4 +21,4 @@ T wrap(T value, T min, T max) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

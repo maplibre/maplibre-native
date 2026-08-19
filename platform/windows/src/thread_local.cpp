@@ -10,7 +10,7 @@
 #define StorageToThreadInfo reinterpret_cast<THREAD_INFO*&>(storage)
 #define StorageToConstThreadInfo reinterpret_cast<THREAD_INFO* const&>(storage)
 
-namespace mbgl {
+namespace mln {
 namespace util {
 namespace impl {
 
@@ -59,4 +59,4 @@ void ThreadLocalBase::set(void* ptr) {
 
 } // namespace impl
 } // namespace util
-} // namespace mbgl
+} // namespace mln

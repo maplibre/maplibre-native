@@ -9,22 +9,22 @@
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 // Added this to support plugins and that their LayerTypeInfo isn't the same point
 // across the board
-bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other) {
+bool layerTypeInfoEquals(const mln::style::LayerTypeInfo* one, const mln::style::LayerTypeInfo* other) {
     return ((strcmp(one->type, other->type) == 0) && (one->source == other->source) && (one->pass3d == other->pass3d) &&
             (one->layout == other->layout) && (one->fadingTiles == other->fadingTiles) &&
             (one->crossTileIndex == other->crossTileIndex) && (one->tileKind == other->tileKind));
 };
 
-static_assert(mbgl::underlying_type(Tile::Kind::Geometry) == mbgl::underlying_type(LayerTypeInfo::TileKind::Geometry),
+static_assert(mln::underlying_type(Tile::Kind::Geometry) == mln::underlying_type(LayerTypeInfo::TileKind::Geometry),
               "tile kind error");
-static_assert(mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(LayerTypeInfo::TileKind::Raster),
+static_assert(mln::underlying_type(Tile::Kind::Raster) == mln::underlying_type(LayerTypeInfo::TileKind::Raster),
               "tile kind error");
-static_assert(mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
+static_assert(mln::underlying_type(Tile::Kind::RasterDEM) == mln::underlying_type(LayerTypeInfo::TileKind::RasterDEM),
               "tile kind error");
 
 namespace {
@@ -188,7 +188,7 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     } else if (name == "source-layer") {
         if (auto sourceLayer = convert<std::string>(value, *error)) {
             if (getTypeInfo()->source != LayerTypeInfo::Source::Required) {
-                Log::Warning(mbgl::Event::General,
+                Log::Warning(mln::Event::General,
                              "'source-layer' property cannot be set to"
                              "the layer " +
                                  baseImpl->id);
@@ -200,7 +200,7 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     } else if (name == "source") {
         if (auto sourceID = convert<std::string>(value, *error)) {
             if (getTypeInfo()->source != LayerTypeInfo::Source::Required) {
-                Log::Warning(mbgl::Event::General,
+                Log::Warning(mln::Event::General,
                              "'source' property cannot be set to"
                              "the layer " +
                                  baseImpl->id);
@@ -241,4 +241,4 @@ expression::Dependency Layer::getDependencies() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

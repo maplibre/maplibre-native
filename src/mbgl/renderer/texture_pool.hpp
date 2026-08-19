@@ -5,7 +5,7 @@
 #include <optional>
 #include <set>
 
-namespace mbgl {
+namespace mln {
 class TexturePool {
 public:
     TexturePool(uint32_t tilesize);
@@ -43,4 +43,4 @@ private:
     std::map<UnwrappedTileID, std::shared_ptr<RenderTarget>> renderTargets;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -6,7 +6,7 @@
 #include <mbgl/util/range.hpp>
 #include <mbgl/util/constants.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class OverscaledTileID;
 class CanonicalTileID;
@@ -48,7 +48,7 @@ public:
     // Private implementation
     class Impl;
     const Impl& impl() const;
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 protected:
@@ -67,4 +67,4 @@ inline bool Source::is<CustomGeometrySource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

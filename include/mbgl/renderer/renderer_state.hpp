@@ -3,7 +3,7 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/util/geo.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class UpdateParameters;
 
@@ -32,4 +32,4 @@ public:
     static LatLng latLngForPixel(const UpdateParameters&, const ScreenCoordinate&);
 };
 
-} // namespace mbgl
+} // namespace mln

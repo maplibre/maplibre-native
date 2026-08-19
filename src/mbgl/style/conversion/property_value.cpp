@@ -4,7 +4,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/conversion.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -13,7 +13,7 @@ std::optional<PropertyValue<T>> Converter<PropertyValue<T>>::operator()(const Co
                                                                         Error& error,
                                                                         bool allowDataExpressions,
                                                                         bool convertTokens) const {
-    using namespace mbgl::style::expression;
+    using namespace mln::style::expression;
 
     if (isUndefined(value)) {
         return PropertyValue<T>();
@@ -131,27 +131,27 @@ template std::optional<PropertyValue<TextTransformType>> Converter<PropertyValue
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<TranslateAnchorType>> Converter<PropertyValue<TranslateAnchorType>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
-template std::optional<PropertyValue<mbgl::style::expression::Formatted>>
-Converter<PropertyValue<mbgl::style::expression::Formatted>>::operator()(conversion::Convertible const&,
-                                                                         conversion::Error&,
-                                                                         bool,
-                                                                         bool) const;
+template std::optional<PropertyValue<mln::style::expression::Formatted>>
+Converter<PropertyValue<mln::style::expression::Formatted>>::operator()(conversion::Convertible const&,
+                                                                        conversion::Error&,
+                                                                        bool,
+                                                                        bool) const;
 template std::optional<PropertyValue<std::vector<TextWritingModeType>>>
 Converter<PropertyValue<std::vector<TextWritingModeType>>>::operator()(conversion::Convertible const&,
                                                                        conversion::Error&,
                                                                        bool,
                                                                        bool) const;
-template std::optional<PropertyValue<mbgl::style::expression::Image>>
-Converter<PropertyValue<mbgl::style::expression::Image>>::operator()(conversion::Convertible const&,
-                                                                     conversion::Error&,
-                                                                     bool,
-                                                                     bool) const;
+template std::optional<PropertyValue<mln::style::expression::Image>>
+Converter<PropertyValue<mln::style::expression::Image>>::operator()(conversion::Convertible const&,
+                                                                    conversion::Error&,
+                                                                    bool,
+                                                                    bool) const;
 
 std::optional<PropertyValue<std::array<double, 3>>>
-mbgl::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::operator()(const Convertible& value,
-                                                                                           Error& error,
-                                                                                           bool,
-                                                                                           bool) const {
+mln::style::conversion::Converter<PropertyValue<std::array<double, 3>>, void>::operator()(const Convertible& value,
+                                                                                          Error& error,
+                                                                                          bool,
+                                                                                          bool) const {
     std::optional<std::array<double, 3>> a = convert<std::array<double, 3>>(value, error);
 
     if (!a) {
@@ -177,4 +177,4 @@ template std::optional<PropertyValue<HillshadeMethodType>> Converter<PropertyVal
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

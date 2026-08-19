@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 using namespace shaders;
 
@@ -120,4 +120,4 @@ void TerrainLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

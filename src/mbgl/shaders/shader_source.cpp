@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/enum.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace shaders;
 
@@ -46,4 +46,4 @@ MBGL_DEFINE_ENUM(BuiltIn,
                   {BuiltIn::TerrainDepthShader, "TerrainDepthShader"},
                   {BuiltIn::WideVectorShader, "WideVectorShader"}});
 
-} // namespace mbgl
+} // namespace mln

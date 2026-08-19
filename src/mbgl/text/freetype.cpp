@@ -7,7 +7,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-namespace mbgl {
+namespace mln {
 
 //
 // FreeTypeLibray
@@ -95,4 +95,4 @@ Glyph FreeTypeFace::rasterizeGlyph(const GlyphID &glyph) {
     return fixedMetrics;
 }
 
-} // namespace mbgl
+} // namespace mln

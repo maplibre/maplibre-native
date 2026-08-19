@@ -32,7 +32,7 @@
 #define MLN_ENABLE_POLYLINE_DRAWABLES 0
 #endif
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -242,7 +242,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     };
 
     // build a set of tiles to cover
-    mbgl::unordered_set<OverscaledTileID> newTiles;
+    mln::unordered_set<OverscaledTileID> newTiles;
     newTiles.reserve(renderTiles->size());
     for (auto& tile : *renderTiles) {
         newTiles.insert(tile.getOverscaledTileID());
@@ -609,4 +609,4 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
     updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
 }
 
-} // namespace mbgl
+} // namespace mln

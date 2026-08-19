@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AssetManager {
@@ -9,4 +9,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

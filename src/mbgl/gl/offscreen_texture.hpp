@@ -3,7 +3,7 @@
 #include <mbgl/gfx/offscreen_texture.hpp>
 #include <mbgl/gfx/types.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -23,4 +23,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

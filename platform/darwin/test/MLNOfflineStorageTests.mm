@@ -665,9 +665,9 @@
   auto fs = os.mbglOnlineFileSource;
 
   // Delegate returns "https://api.mapbox.com" as a replacement URL.
-  const mbgl::Resource resource{mbgl::Resource::Unknown, "test://api"};
-  std::unique_ptr<mbgl::AsyncRequest> req;
-  req = fs->request(resource, [&](mbgl::Response res) {
+  const mln::Resource resource{mln::Resource::Unknown, "test://api"};
+  std::unique_ptr<mln::AsyncRequest> req;
+  req = fs->request(resource, [&](mln::Response res) {
     req.reset();
     XCTAssertFalse(res.error.get(), @"Request should not return an error");
     XCTAssertTrue(res.data.get(), @"Request should return data");
@@ -821,7 +821,7 @@
   MLNOfflineStorage *os = [MLNOfflineStorage sharedOfflineStorage];
   std::string testData("test data");
   NSData *data = [NSData dataWithBytes:testData.c_str() length:testData.length()];
-  __block std::unique_ptr<mbgl::AsyncRequest> req;
+  __block std::unique_ptr<mln::AsyncRequest> req;
   [os preloadData:data
                  forURL:styleURL
        modificationDate:nil
@@ -833,8 +833,8 @@
         XCTAssertEqual(styleURL, url, @"Preloaded resource url is invalid");
 
         auto fs = os.mbglDatabaseFileSource;
-        const mbgl::Resource resource{mbgl::Resource::Unknown, "https://api.mapbox.com/some/thing"};
-        req = fs->request(resource, [&](mbgl::Response res) {
+        const mln::Resource resource{mln::Resource::Unknown, "https://api.mapbox.com/some/thing"};
+        req = fs->request(resource, [&](mln::Response res) {
           XCTAssertFalse(res.error.get(), @"Request should not return an error");
           XCTAssertTrue(res.data.get(), @"Request should return data");
           XCTAssertFalse(res.modified, @"Request should not have a modification timestamp");
@@ -857,7 +857,7 @@
   NSData *data = [NSData dataWithBytes:testData.c_str() length:testData.length()];
   __block NSDate *now = [NSDate date];
   __block NSDate *future = [now dateByAddingTimeInterval:600];
-  __block std::unique_ptr<mbgl::AsyncRequest> req;
+  __block std::unique_ptr<mln::AsyncRequest> req;
   [os preloadData:data
                  forURL:styleURL
        modificationDate:now
@@ -869,10 +869,9 @@
         XCTAssertEqual(styleURL, url, @"Preloaded resource url is invalid");
 
         auto fs = os.mbglDatabaseFileSource;
-        const mbgl::Resource resource{mbgl::Resource::Unknown,
-                                      "https://api.mapbox.com/some/thing1"};
+        const mln::Resource resource{mln::Resource::Unknown, "https://api.mapbox.com/some/thing1"};
         req = fs->request(resource, [&, tNow = now.timeIntervalSince1970,
-                                     tFuture = future.timeIntervalSince1970](mbgl::Response res) {
+                                     tFuture = future.timeIntervalSince1970](mln::Response res) {
           XCTAssertFalse(res.error.get(), @"Request should not return an error");
           XCTAssertTrue(res.data.get(), @"Request should return data");
           XCTAssertTrue(res.modified, @"Request should have a modification timestamp");

@@ -11,7 +11,7 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

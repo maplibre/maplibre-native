@@ -1,7 +1,7 @@
 #include <mbgl/style/expression/boolean_operator.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -59,7 +59,7 @@ std::vector<std::optional<Value>> All::possibleOutputs() const {
     return {{true}, {false}};
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 template <class T>
 ParseResult parseBooleanOp(const Convertible& value, ParsingContext& ctx) {
@@ -91,4 +91,4 @@ ParseResult All::parse(const Convertible& value, ParsingContext& ctx) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

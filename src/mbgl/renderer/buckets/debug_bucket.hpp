@@ -9,7 +9,7 @@
 #include <mbgl/shaders/segment.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class OverscaledTileID;
 
@@ -43,4 +43,4 @@ public:
     std::optional<gfx::IndexBuffer> indexBuffer;
 };
 
-} // namespace mbgl
+} // namespace mln

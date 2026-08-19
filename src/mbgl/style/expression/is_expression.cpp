@@ -5,11 +5,11 @@
 
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 bool isExpression(const Convertible& value) {
     if (!isArray(value) || arrayLength(value) == 0) return false;
@@ -21,4 +21,4 @@ bool isExpression(const Convertible& value) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

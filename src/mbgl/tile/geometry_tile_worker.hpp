@@ -17,7 +17,7 @@
 #include <atomic>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 class GeometryTile;
 class GeometryTileData;
@@ -90,7 +90,7 @@ private:
     const float pixelRatio;
 
     std::unique_ptr<FeatureIndex> featureIndex;
-    mbgl::unordered_map<std::string, LayerRenderData> renderData;
+    mln::unordered_map<std::string, LayerRenderData> renderData;
 
     enum State {
         Idle,
@@ -125,4 +125,4 @@ private:
     std::shared_ptr<FontFaces> fontFaces;
 };
 
-} // namespace mbgl
+} // namespace mln

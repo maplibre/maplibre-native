@@ -6,7 +6,7 @@
 #include <memory>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class RenderbufferResource {
@@ -43,4 +43,4 @@ protected:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

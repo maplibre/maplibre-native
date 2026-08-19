@@ -25,7 +25,7 @@
 #error "Cannot define getPeakRSS( ) or getCurrentRSS( ) for an unknown OS."
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 /**
@@ -42,4 +42,4 @@ size_t getPeakRSS();
 size_t getCurrentRSS();
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln

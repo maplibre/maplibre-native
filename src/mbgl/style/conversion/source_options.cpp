@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -30,4 +30,4 @@ std::optional<SourceOptions> Converter<SourceOptions>::operator()(const Converti
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

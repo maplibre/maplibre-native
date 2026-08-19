@@ -20,9 +20,9 @@
 
 #include <regex>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 using namespace std::literals;
 
 namespace {
@@ -407,7 +407,7 @@ std::optional<TestData> parseTestData(const std::filesystem::path& path) {
         TestData data;
         auto maybeJson = readJson(path.string());
         if (!maybeJson.is<JSDocument>()) { // NOLINT
-            mbgl::Log::Error(mbgl::Event::General, "Cannot parse test '" + path.string() + "'.");
+            mln::Log::Error(mln::Event::General, "Cannot parse test '" + path.string() + "'.");
             return std::nullopt;
         }
 

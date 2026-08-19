@@ -3,7 +3,7 @@
 #include <memory>
 #include <array>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 
@@ -34,4 +34,4 @@ struct CustomLayerRenderParameters {
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

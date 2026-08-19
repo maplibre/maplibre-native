@@ -3,7 +3,7 @@
 #include <mbgl/style/terrain_observer.hpp>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -53,4 +53,4 @@ void Terrain::setExaggeration(float exaggeration) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/location_indicator_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -30,4 +30,4 @@ const std::array<TextureInfo, 1> LocationIndicatorShaderTexturedSource::textures
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -1,6 +1,6 @@
 #include <mbgl/style/layers/custom_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 CustomLayer::Impl::Impl(const std::string& id_, std::unique_ptr<CustomLayerHost> host_)
@@ -15,4 +15,4 @@ bool CustomLayer::Impl::hasLayoutDifference(const Layer::Impl&) const {
 void CustomLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const {}
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

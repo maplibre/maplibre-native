@@ -1,6 +1,6 @@
 #include <mbgl/util/default_style.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 DefaultStyle::DefaultStyle(std::string url_, std::string name_, int version_)
@@ -21,4 +21,4 @@ int DefaultStyle::getCurrentVersion() const {
 }
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

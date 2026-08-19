@@ -3,7 +3,7 @@
 #include <mbgl/style/layers/custom_layer_init_parameters.hpp>
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class CustomLayerHost {
@@ -15,7 +15,7 @@ public:
      * is active but before rendering for the first time.
      *
      * The parameters argument provides backend-specific device handles:
-     *   - Vulkan: cast to mbgl::style::vulkan::CustomLayerInitParameters for
+     *   - Vulkan: cast to mln::style::vulkan::CustomLayerInitParameters for
      *     access to vk::Device, vk::PhysicalDevice, and the dispatcher.
      *   - Metal/GL: base CustomLayerInitParameters (no extra handles currently).
      *
@@ -34,7 +34,7 @@ public:
      * advantage of the opaque fragment culling in case there are opaque layers
      * above your custom layer.
      */
-    virtual void render(const mbgl::style::CustomLayerRenderParameters&) = 0;
+    virtual void render(const mln::style::CustomLayerRenderParameters&) = 0;
 
     /**
      * Called when the system has destroyed the underlying GL/Metal context. The
@@ -56,4 +56,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

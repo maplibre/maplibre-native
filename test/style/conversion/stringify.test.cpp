@@ -10,9 +10,9 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 template <class T>
 std::string stringify(const T& t) {
@@ -83,13 +83,13 @@ TEST(Stringify, Value) {
 }
 
 TEST(Stringify, Filter) {
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
     ASSERT_EQ(stringify(Filter()), "null");
     ASSERT_EQ(stringify(Filter(eq(literal("a"), literal("b")))), "[\"==\",\"a\",\"b\"]");
 }
 
 TEST(Stringify, PropertyExpression) {
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
     ASSERT_EQ(stringify(PropertyExpression<float>(interpolate(linear(), zoom(), 0.0, literal(1.0), 1.0, literal(2.0)))),
               "[\"interpolate\",[\"linear\"],[\"zoom\"],0.0,1.0,1.0,2.0]");
 
@@ -115,7 +115,7 @@ TEST(Stringify, PropertyExpression) {
 }
 
 TEST(Stringify, PropertyValue) {
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
     ASSERT_EQ(stringify(PropertyValue<float>(1)), "1.0");
     ASSERT_EQ(stringify(PropertyValue<float>(PropertyExpression<float>(
                   interpolate(exponential(2.0), zoom(), 0.0, literal(1.0), 1.0, literal(2.0))))),

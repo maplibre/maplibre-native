@@ -4,7 +4,7 @@
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 #include <mbgl/shaders/color_relief_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -175,4 +175,4 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

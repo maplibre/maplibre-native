@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/color_relief_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 ColorReliefLayerProperties::ColorReliefLayerProperties(
@@ -34,6 +34,6 @@ expression::Dependency ColorReliefLayerProperties::getDependencies() const noexc
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

@@ -39,11 +39,11 @@ constexpr int pmtilesHeaderLength = 127;
 constexpr int MAX_DIRECTORY_CACHE_ENTRIES = 100;
 
 bool acceptsURL(const std::string& url) {
-    return url.starts_with(mbgl::util::PMTILES_PROTOCOL);
+    return url.starts_with(mln::util::PMTILES_PROTOCOL);
 }
 
 std::string extract_url(const std::string& url) {
-    return url.substr(std::char_traits<char>::length(mbgl::util::PMTILES_PROTOCOL));
+    return url.substr(std::char_traits<char>::length(mln::util::PMTILES_PROTOCOL));
 }
 } // namespace
 
@@ -52,7 +52,7 @@ namespace pmtiles {
 const uint8_t TILETYPE_MLT = 0x6;
 } // namespace pmtiles
 
-namespace mbgl {
+namespace mln {
 using namespace rapidjson;
 
 using AsyncCallback = std::function<void(std::unique_ptr<Response::Error>)>;
@@ -259,9 +259,9 @@ private:
 
                     if (response.error->message.empty() &&
                         response.error->reason == Response::Error::Reason::NotFound) {
-                        if (url.starts_with(mbgl::util::FILE_PROTOCOL)) {
+                        if (url.starts_with(mln::util::FILE_PROTOCOL)) {
                             message += "path not found: " +
-                                       url.substr(std::char_traits<char>::length(mbgl::util::FILE_PROTOCOL));
+                                       url.substr(std::char_traits<char>::length(mln::util::FILE_PROTOCOL));
                         } else {
                             message += "url not found: " + url;
                         }
@@ -670,4 +670,4 @@ ClientOptions PMTilesFileSource::getClientOptions() {
     return thread->actor().ask(&Impl::getClientOptions).get();
 }
 
-} // namespace mbgl
+} // namespace mln

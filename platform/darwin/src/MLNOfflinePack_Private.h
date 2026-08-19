@@ -6,11 +6,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNOfflinePack (Private)
 
-@property (nonatomic, nullable) mbgl::OfflineRegion *mbglOfflineRegion;
+@property (nonatomic, nullable) mln::OfflineRegion *mbglOfflineRegion;
 
 @property (nonatomic, readwrite) MLNOfflinePackState state;
 
-- (instancetype)initWithMBGLRegion:(mbgl::OfflineRegion *)region;
+- (instancetype)initWithMBGLRegion:(mln::OfflineRegion *)region;
 
 /**
  Invalidates the pack and ensures that no future progress update can ever

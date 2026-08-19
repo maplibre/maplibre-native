@@ -2,7 +2,7 @@
 
 #include <mbgl/gfx/dynamic_texture.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class Context;
@@ -15,4 +15,4 @@ public:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

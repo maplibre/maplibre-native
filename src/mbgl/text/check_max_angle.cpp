@@ -7,7 +7,7 @@
 
 using namespace std::numbers;
 
-namespace mbgl {
+namespace mln {
 
 struct Corner {
     Corner(float _distance, float _angleDelta)
@@ -80,4 +80,4 @@ bool checkMaxAngle(const GeometryCoordinates& line,
     return true;
 }
 
-} // namespace mbgl
+} // namespace mln

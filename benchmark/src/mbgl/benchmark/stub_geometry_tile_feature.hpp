@@ -3,7 +3,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/feature.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 class StubGeometryTileFeature : public GeometryTileFeature {
 public:

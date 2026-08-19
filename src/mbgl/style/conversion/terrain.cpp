@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion/constant.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -42,4 +42,4 @@ std::optional<Terrain> Converter<Terrain>::operator()(const Convertible& value, 
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

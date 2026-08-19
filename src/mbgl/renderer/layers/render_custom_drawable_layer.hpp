@@ -3,7 +3,7 @@
 #include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderCustomDrawableLayer final : public RenderLayer {
 public:
@@ -28,4 +28,4 @@ private:
     std::shared_ptr<style::CustomDrawableLayerHost> host;
 };
 
-} // namespace mbgl
+} // namespace mln

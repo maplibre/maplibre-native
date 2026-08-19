@@ -4,7 +4,7 @@
 #include <mbgl/util/containers.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class Renderable;
 } // namespace gfx
@@ -43,4 +43,4 @@ private:
 };
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

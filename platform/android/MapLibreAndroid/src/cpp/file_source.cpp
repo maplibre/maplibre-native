@@ -15,7 +15,7 @@
 
 #include "asset_manager_file_source.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 // FileSource //
@@ -28,11 +28,11 @@ FileSource::FileSource(jni::JNIEnv& _env,
     std::string path = jni::Make<std::string>(_env, _cachePath);
     mapbox::sqlite::setTempPath(path);
 
-    mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::Asset,
-        [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+    mln::FileSourceManager::get()->registerFileSourceFactory(
+        mln::FileSourceType::Asset,
+        [](const mln::ResourceOptions& resourceOptions, const mln::ClientOptions& clientOptions) {
             auto env{android::AttachEnv()};
-            std::unique_ptr<mbgl::FileSource> assetFileSource;
+            std::unique_ptr<mln::FileSource> assetFileSource;
             if (android::MapLibre::hasInstance(*env)) {
                 auto assetManager = android::MapLibre::getAssetManager(*env);
                 assetFileSource = std::make_unique<AssetManagerFileSource>(
@@ -48,12 +48,12 @@ FileSource::FileSource(jni::JNIEnv& _env,
 
     // Create a core file sources
     // TODO: Split Android FileSource API to smaller interfaces
-    resourceLoader = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
-    databaseSource = std::static_pointer_cast<mbgl::DatabaseFileSource>(std::shared_ptr<mbgl::FileSource>(
-        mbgl::FileSourceManager::get()->getFileSource(mbgl::FileSourceType::Database, resourceOptions, clientOptions)));
-    onlineSource = mbgl::FileSourceManager::get()->getFileSource(
-        mbgl::FileSourceType::Network, resourceOptions, clientOptions);
+    resourceLoader = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+    databaseSource = std::static_pointer_cast<mln::DatabaseFileSource>(std::shared_ptr<mln::FileSource>(
+        mln::FileSourceManager::get()->getFileSource(mln::FileSourceType::Database, resourceOptions, clientOptions)));
+    onlineSource = mln::FileSourceManager::get()->getFileSource(
+        mln::FileSourceType::Network, resourceOptions, clientOptions);
 }
 
 FileSource::~FileSource() {}
@@ -67,7 +67,7 @@ void FileSource::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileS
 }
 
 jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
-    if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
+    if (auto* token = onlineSource->getProperty(mln::API_KEY_KEY).getString()) {
         return jni::Make<jni::String>(env, *token);
     }
 
@@ -77,7 +77,7 @@ jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
 
 void FileSource::setApiKey(jni::JNIEnv& env, const jni::String& token) {
     if (onlineSource) {
-        onlineSource->setProperty(mbgl::API_KEY_KEY, token ? jni::Make<std::string>(env, token) : "");
+        onlineSource->setProperty(mln::API_KEY_KEY, token ? jni::Make<std::string>(env, token) : "");
     } else {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
     }
@@ -85,14 +85,14 @@ void FileSource::setApiKey(jni::JNIEnv& env, const jni::String& token) {
 
 void FileSource::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
     if (onlineSource) {
-        onlineSource->setProperty(mbgl::API_BASE_URL_KEY, jni::Make<std::string>(env, url));
+        onlineSource->setProperty(mln::API_BASE_URL_KEY, jni::Make<std::string>(env, url));
     } else {
         ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
     }
 }
 
 jni::Local<jni::String> FileSource::getAPIBaseUrl(jni::JNIEnv& env) {
-    if (auto* url = onlineSource->getProperty(mbgl::API_BASE_URL_KEY).getString()) {
+    if (auto* url = onlineSource->getProperty(mln::API_BASE_URL_KEY).getString()) {
         return jni::Make<jni::String>(env, std::string(*url));
     }
 
@@ -119,7 +119,7 @@ void FileSource::setResourceTransform(jni::JNIEnv& env,
             // is converted to a std::function, which requires copyability
             // of its captured variables.
             [callback = std::make_shared<decltype(global)>(std::move(global))](
-                mbgl::Resource::Kind kind, const std::string& url_, ResourceTransform::FinishedCallback cb) {
+                mln::Resource::Kind kind, const std::string& url_, ResourceTransform::FinishedCallback cb) {
                 android::UniqueEnv _env = android::AttachEnv();
                 cb(FileSource::ResourceTransformCallback::onURL(*_env, *callback, int(kind), url_));
             });
@@ -196,8 +196,8 @@ FileSource* FileSource::getNativePeer(jni::JNIEnv& env, const jni::Object<FileSo
     return reinterpret_cast<FileSource*>(jFileSource.Get(env, field));
 }
 
-mbgl::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
-                                                           const jni::Object<FileSource>& jFileSource) {
+mln::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
+                                                          const jni::Object<FileSource>& jFileSource) {
     FileSource* fileSource = FileSource::getNativePeer(env, jFileSource);
     // Core could be compiled without support for any sources.
     if (fileSource) {
@@ -207,7 +207,7 @@ mbgl::ResourceOptions FileSource::getSharedResourceOptions(jni::JNIEnv& env,
     return {};
 }
 
-mbgl::ClientOptions FileSource::getSharedClientOptions(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource) {
+mln::ClientOptions FileSource::getSharedClientOptions(jni::JNIEnv& env, const jni::Object<FileSource>& jFileSource) {
     FileSource* fileSource = FileSource::getNativePeer(env, jFileSource);
     // Core could be compiled without support for any sources.
     if (fileSource) {
@@ -281,4 +281,4 @@ std::string FileSource::ResourceTransformCallback::onURL(
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

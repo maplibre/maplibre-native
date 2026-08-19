@@ -6,7 +6,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 /**
  * Options for query rendered features.
@@ -40,4 +40,4 @@ public:
     std::optional<style::Filter> filter;
 };
 
-} // namespace mbgl
+} // namespace mln

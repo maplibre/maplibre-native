@@ -1,7 +1,7 @@
 #include <mbgl/gl/attribute.hpp>
 #include <mbgl/gl/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -16,4 +16,4 @@ std::optional<AttributeLocation> queryLocation(ProgramID id, const char* name) {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

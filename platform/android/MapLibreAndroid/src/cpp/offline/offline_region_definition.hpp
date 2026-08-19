@@ -3,7 +3,7 @@
 #include <mbgl/storage/offline.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class OfflineRegionDefinition {
@@ -12,8 +12,8 @@ public:
 
     static void registerNative(jni::JNIEnv&);
 
-    static mbgl::OfflineRegionDefinition getDefinition(JNIEnv& env,
-                                                       const jni::Object<OfflineRegionDefinition>& jDefinition);
+    static mln::OfflineRegionDefinition getDefinition(JNIEnv& env,
+                                                      const jni::Object<OfflineRegionDefinition>& jDefinition);
 };
 
 class OfflineTilePyramidRegionDefinition {
@@ -25,9 +25,9 @@ public:
     };
 
     static jni::Local<jni::Object<OfflineRegionDefinition>> New(jni::JNIEnv&,
-                                                                const mbgl::OfflineTilePyramidRegionDefinition&);
+                                                                const mln::OfflineTilePyramidRegionDefinition&);
 
-    static mbgl::OfflineTilePyramidRegionDefinition getDefinition(
+    static mln::OfflineTilePyramidRegionDefinition getDefinition(
         jni::JNIEnv&, const jni::Object<OfflineTilePyramidRegionDefinition>&);
 
     static void registerNative(jni::JNIEnv&);
@@ -39,13 +39,13 @@ public:
     static constexpr auto Name() { return "org/maplibre/android/offline/OfflineGeometryRegionDefinition"; };
 
     static jni::Local<jni::Object<OfflineRegionDefinition>> New(jni::JNIEnv&,
-                                                                const mbgl::OfflineGeometryRegionDefinition&);
+                                                                const mln::OfflineGeometryRegionDefinition&);
 
-    static mbgl::OfflineGeometryRegionDefinition getDefinition(jni::JNIEnv&,
-                                                               const jni::Object<OfflineGeometryRegionDefinition>&);
+    static mln::OfflineGeometryRegionDefinition getDefinition(jni::JNIEnv&,
+                                                              const jni::Object<OfflineGeometryRegionDefinition>&);
 
     static void registerNative(jni::JNIEnv&);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

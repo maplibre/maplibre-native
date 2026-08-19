@@ -3,7 +3,7 @@
 #include <cassert>
 #include <chrono>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // Prefer high resolution timer if it is monotonic
@@ -24,4 +24,4 @@ std::chrono::duration<double> MonotonicTimer::now() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

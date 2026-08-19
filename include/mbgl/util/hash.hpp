@@ -5,7 +5,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 template <class T>
@@ -47,4 +47,4 @@ TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) noe
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -16,8 +16,8 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 bool filter(const char* json,
             const PropertyMap& featureProperties = {{}},

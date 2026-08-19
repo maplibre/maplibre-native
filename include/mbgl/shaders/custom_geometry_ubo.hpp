@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) CustomGeometryDrawableUBO {
@@ -13,4 +13,4 @@ struct alignas(16) CustomGeometryDrawableUBO {
 static_assert(sizeof(CustomGeometryDrawableUBO) == 5 * 16);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

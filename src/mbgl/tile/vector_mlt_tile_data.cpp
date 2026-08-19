@@ -22,7 +22,7 @@
 #include <variant>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace {
 
 using MapLibreTile = mlt::MapLibreTile;
@@ -294,4 +294,4 @@ std::vector<std::string> VectorMLTTileData::layerNames() const {
     return impl ? impl->layerNames() : std::vector<std::string>{};
 }
 
-} // namespace mbgl
+} // namespace mln

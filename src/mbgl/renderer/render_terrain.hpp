@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 
 class TransformState;
 class UpdateParameters;
@@ -421,4 +421,4 @@ private:
                                                          bool depthPass = false);
 };
 
-} // namespace mbgl
+} // namespace mln

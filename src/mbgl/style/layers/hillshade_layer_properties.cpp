@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 HillshadeLayerProperties::HillshadeLayerProperties(
@@ -34,6 +34,6 @@ expression::Dependency HillshadeLayerProperties::getDependencies() const noexcep
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

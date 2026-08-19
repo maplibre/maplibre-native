@@ -11,7 +11,7 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/util/geo.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -229,4 +229,4 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

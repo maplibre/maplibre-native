@@ -3,11 +3,11 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 
-// Non-public version of mbgl::Map that accepts a file source as parameter.
+// Non-public version of mln::Map that accepts a file source as parameter.
 class MapAdapter : public Map {
 public:
     explicit MapAdapter(RendererFrontend& frontend,
@@ -17,4 +17,4 @@ public:
         : Map(std::make_unique<Map::Impl>(frontend, observer, std::move(fileSource), options)) {}
 };
 
-} // namespace mbgl
+} // namespace mln

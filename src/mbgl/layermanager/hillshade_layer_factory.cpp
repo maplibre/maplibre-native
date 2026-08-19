@@ -4,7 +4,7 @@
 #include <mbgl/style/layers/hillshade_layer.hpp>
 #include <mbgl/style/layers/hillshade_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 
 const style::LayerTypeInfo* HillshadeLayerFactory::getTypeInfo() const noexcept {
     return style::HillshadeLayer::Impl::staticTypeInfo();
@@ -24,4 +24,4 @@ std::unique_ptr<RenderLayer> HillshadeLayerFactory::createRenderLayer(Immutable<
     return std::make_unique<RenderHillshadeLayer>(staticImmutableCast<style::HillshadeLayer::Impl>(impl));
 }
 
-} // namespace mbgl
+} // namespace mln

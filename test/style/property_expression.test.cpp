@@ -11,15 +11,15 @@
 
 #include <sstream>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::expression;
-using namespace mbgl::style::expression::dsl;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::expression;
+using namespace mln::style::expression::dsl;
 
 using namespace std::string_literals;
 
 namespace std {
-using ::mbgl::operator<<;
+using ::mln::operator<<;
 }
 
 static const StubGeometryTileFeature oneInteger{PropertyMap{{"property", uint64_t(1)}}};
@@ -651,13 +651,13 @@ TEST(PropertyExpression, DistanceExpression) {
     }
 
     const auto getFeature = [](const std::string &name, FeatureType type, const CanonicalTileID &canonical) {
-        const auto geometryInput = mbgl::util::read_file(std::string("test/fixtures/geometry_data/" + name));
+        const auto geometryInput = mln::util::read_file(std::string("test/fixtures/geometry_data/" + name));
         mapbox::geojson::geojson geojson{mapbox::geojson::parse(geometryInput)};
         const auto &geometry = geojson.match(
-            [](const mapbox::geometry::geometry<double> &geometrySet) { return mbgl::Feature(geometrySet).geometry; },
-            [](const mapbox::feature::feature<double> &feature) { return mbgl::Feature(feature).geometry; },
+            [](const mapbox::geometry::geometry<double> &geometrySet) { return mln::Feature(geometrySet).geometry; },
+            [](const mapbox::feature::feature<double> &feature) { return mln::Feature(feature).geometry; },
             [](const mapbox::feature::feature_collection<double> &features) {
-                return mbgl::Feature(features.front()).geometry;
+                return mln::Feature(features.front()).geometry;
             },
             [](const auto &) { return mapbox::geometry::empty(); });
         return StubGeometryTileFeature(type, convertGeometry(geometry, canonical));
@@ -665,7 +665,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiPoint to MultiPoint distance
     {
-        const auto multiPoints1 = mbgl::util::read_file("test/fixtures/geometry_data/multi_point_1.geojson");
+        const auto multiPoints1 = mln::util::read_file("test/fixtures/geometry_data/multi_point_1.geojson");
         const auto multiPointsFeature = getFeature("multi_point_2.geojson", FeatureType::Point, canonicalTileID);
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << multiPoints1 << std::string(R"( ])");
@@ -680,7 +680,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiPoint to LineString distance
     {
-        const auto multiPoints1 = mbgl::util::read_file("test/fixtures/geometry_data/multi_point_1.geojson");
+        const auto multiPoints1 = mln::util::read_file("test/fixtures/geometry_data/multi_point_1.geojson");
         const auto multiLineFeature = getFeature("line_string_2.geojson", FeatureType::LineString, canonicalTileID);
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << multiPoints1 << std::string(R"( ])");
@@ -693,7 +693,7 @@ TEST(PropertyExpression, DistanceExpression) {
         EXPECT_NEAR(258.691, evaluatedResult, 0.01);
 
         // ----------------- switch feature and argument -----------------
-        const auto multiLine2 = mbgl::util::read_file("test/fixtures/geometry_data/line_string_2.geojson");
+        const auto multiLine2 = mln::util::read_file("test/fixtures/geometry_data/line_string_2.geojson");
         const auto multiPointsFeature = getFeature("multi_point_1.geojson", FeatureType::Point, canonicalTileID);
         std::stringstream ss1;
         ss1 << std::string(R"(["distance", )") << multiLine2 << std::string(R"( ])");
@@ -708,7 +708,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with LineString to LineString distance
     {
-        const auto lineString1 = mbgl::util::read_file("test/fixtures/geometry_data/line_string_1.geojson");
+        const auto lineString1 = mln::util::read_file("test/fixtures/geometry_data/line_string_1.geojson");
         const auto lineFeature = getFeature("line_string_2.geojson", FeatureType::LineString, canonicalTileID);
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << lineString1 << std::string(R"( ])");
@@ -723,7 +723,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiPoints to MutltiLineString distance
     {
-        const auto multiPoints = mbgl::util::read_file("test/fixtures/geometry_data/multi_point_2.geojson");
+        const auto multiPoints = mln::util::read_file("test/fixtures/geometry_data/multi_point_2.geojson");
         const auto multiLineFeature = getFeature(
             "multi_line_string_1.geojson", FeatureType::LineString, canonicalTileID);
         std::stringstream ss;
@@ -739,7 +739,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with LineString to MutltiLineString distance
     {
-        const auto LineString1 = mbgl::util::read_file("test/fixtures/geometry_data/line_string_1.geojson");
+        const auto LineString1 = mln::util::read_file("test/fixtures/geometry_data/line_string_1.geojson");
         const auto multiLineFeature = getFeature(
             "multi_line_string_2.geojson", FeatureType::LineString, canonicalTileID);
         std::stringstream ss;
@@ -755,7 +755,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiLineString to MutltiLineString distance
     {
-        const auto multiLineString1 = mbgl::util::read_file("test/fixtures/geometry_data/multi_line_string_1.geojson");
+        const auto multiLineString1 = mln::util::read_file("test/fixtures/geometry_data/multi_line_string_1.geojson");
         const auto multiLineFeature = getFeature(
             "multi_line_string_2.geojson", FeatureType::LineString, canonicalTileID);
         std::stringstream ss;
@@ -771,7 +771,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiPoint to MultiPolygon distance
     {
-        const auto multiPolygon = mbgl::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
+        const auto multiPolygon = mln::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << multiPolygon << std::string(R"( ])");
         auto expression = createExpression(ss.str().c_str());
@@ -791,7 +791,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiLine to MultiPolygon distance
     {
-        const auto multiPolygon = mbgl::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
+        const auto multiPolygon = mln::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << multiPolygon << std::string(R"( ])");
         auto expression = createExpression(ss.str().c_str());
@@ -813,7 +813,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with Polygon to MultiPolygon distance
     {
-        const auto multiPolygon = mbgl::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
+        const auto multiPolygon = mln::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << multiPolygon << std::string(R"( ])");
         auto expression = createExpression(ss.str().c_str());
@@ -835,7 +835,7 @@ TEST(PropertyExpression, DistanceExpression) {
 
     // Evaluation test with MultiPolygon to MultiPolygon distance
     {
-        const auto multiPolygon = mbgl::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
+        const auto multiPolygon = mln::util::read_file("test/fixtures/geometry_data/multi_polygon_1.geojson");
         std::stringstream ss;
         ss << std::string(R"(["distance", )") << multiPolygon << std::string(R"( ])");
         auto expression = createExpression(ss.str().c_str());

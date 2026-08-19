@@ -6,26 +6,26 @@
 
 /// Adapter responsible for bridging calls from mbgl to MLNMapView and Cocoa (WebGPU backend).
 class MLNMapViewWebGPUImpl final : public MLNMapViewImpl,
-                                   public mbgl::webgpu::RendererBackend,
-                                   public mbgl::gfx::Renderable {
+                                   public mln::webgpu::RendererBackend,
+                                   public mln::gfx::Renderable {
 public:
   MLNMapViewWebGPUImpl(MLNMapView*);
   ~MLNMapViewWebGPUImpl() override;
 
-  // Implementation of mbgl::gfx::RendererBackend
+  // Implementation of mln::gfx::RendererBackend
 public:
-  mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+  mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
   // webgpu::RendererBackend overrides
   void* getCurrentTextureView() override;
   void* getDepthStencilView() override;
-  mbgl::Size getFramebufferSize() const override;
+  mln::Size getFramebufferSize() const override;
   void presentSurface();
   void markNeedsPresent();
 
   // Implementation of MLNMapViewImpl
 public:
-  mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
+  mln::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
   void setOpaque(bool) override;
   void display() override;

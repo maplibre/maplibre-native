@@ -3,7 +3,7 @@
 #include <mbgl/util/constants.hpp>
 #include <mbgl/math/clamp.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Math, ClampFloatingPoint) {
     double lowestValue = std::numeric_limits<double>::lowest();

@@ -5,7 +5,7 @@
 #include <mbgl/style/sources/image_source.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class Bitmap;
@@ -19,7 +19,7 @@ public:
 
     ImageSource(jni::JNIEnv&, const jni::String&, const jni::Object<LatLngQuad>&);
 
-    ImageSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend*);
+    ImageSource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
 
     ~ImageSource();
 
@@ -36,4 +36,4 @@ private:
 }; // class ImageSource
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

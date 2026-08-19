@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-namespace mbgl {
+namespace mln {
 
 int runTests(int argc, char *argv[]) {
 #if (TEST_HAS_SERVER && defined(__QT__)) || USE_CPP_TEST_SERVER
@@ -20,4 +20,4 @@ int runTests(int argc, char *argv[]) {
     return RUN_ALL_TESTS();
 }
 
-} // namespace mbgl
+} // namespace mln

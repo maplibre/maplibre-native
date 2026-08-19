@@ -12,7 +12,7 @@
 namespace mlt {
 class MapLibreTile;
 }
-namespace mbgl {
+namespace mln {
 
 class CanonicalTileID;
 
@@ -151,4 +151,4 @@ using GeometryCollectionFloat = std::vector<GeometryCoordinatesFloat>;
 
 GeometryCollectionFloat roundPolygonCorners(GeometryCollection& polygon, double radius);
 
-} // namespace mbgl
+} // namespace mln

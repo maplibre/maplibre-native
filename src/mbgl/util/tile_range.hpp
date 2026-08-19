@@ -5,7 +5,7 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/projection.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class TileRange {
@@ -62,4 +62,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -3,7 +3,7 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/math/log2.hpp>
 
-namespace mbgl {
+namespace mln {
 
 CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                                    const Anchor& anchor,
@@ -219,4 +219,4 @@ void CollisionFeature::bboxifyLabel(const GeometryCoordinates& line,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

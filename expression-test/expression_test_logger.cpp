@@ -7,7 +7,7 @@
 #include <sstream>
 #include <filesystem>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::literals;
 
 namespace {

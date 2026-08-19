@@ -7,7 +7,7 @@ package org.maplibre.android.maps;
  *
  * <p>This is a rendering/performance option, not a style property, so it does not affect the
  * final rendered image - only how the loading work is spread across frames. The enum ordinals
- * must stay in sync with the native {@code mbgl::TerrainLoadMode}.</p>
+ * must stay in sync with the native {@code mln::TerrainLoadMode}.</p>
  */
 public enum TerrainLoadMode {
 

@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -188,17 +188,17 @@ Coercion::Coercion(const type::Type& type_, std::vector<std::unique_ptr<Expressi
     assert(!inputs.empty());
 }
 
-mbgl::Value Coercion::serialize() const {
+mln::Value Coercion::serialize() const {
     if (getType().is<type::FormattedType>()) {
         // Since there's no explicit "to-formatted" coercion, the only coercions
         // should be created by string expressions that get implicitly coerced
         // to "formatted".
-        std::vector<mbgl::Value> serialized{{std::string("format")}};
+        std::vector<mln::Value> serialized{{std::string("format")}};
         serialized.push_back(inputs[0]->serialize());
-        serialized.emplace_back(std::unordered_map<std::string, mbgl::Value>());
+        serialized.emplace_back(std::unordered_map<std::string, mln::Value>());
         return serialized;
     } else if (getType().is<type::ImageType>()) {
-        return std::vector<mbgl::Value>{{std::string("image")}, inputs[0]->serialize()};
+        return std::vector<mln::Value>{{std::string("image")}, inputs[0]->serialize()};
     } else {
         return Expression::serialize();
     }
@@ -219,7 +219,7 @@ std::string Coercion::getOperator() const {
     return std::string(s);
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
     static std::unordered_map<std::string, type::Type> types{
         {"to-boolean", type::Boolean},
@@ -304,4 +304,4 @@ std::vector<std::optional<Value>> Coercion::possibleOutputs() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

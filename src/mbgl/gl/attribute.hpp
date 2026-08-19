@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using AttributeBindingArray = std::vector<std::optional<gfx::AttributeBinding>>;
@@ -130,4 +130,4 @@ public:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

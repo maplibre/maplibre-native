@@ -19,9 +19,9 @@
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::platform;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::platform;
 
 static const GLchar* vertexShaderSource = R"MBGL_SHADER(
 #ifdef GL_ES

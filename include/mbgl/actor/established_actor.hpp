@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 /**
     An `EstablishedActor<O>` is one half of the pair of types that comprise an
@@ -107,4 +107,4 @@ private:
     AspiringActor<Object>& parent;
 };
 
-} // namespace mbgl
+} // namespace mln

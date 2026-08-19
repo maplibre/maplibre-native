@@ -9,29 +9,29 @@
 
 #include <mbgl/style/layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-inline mbgl::style::BackgroundLayer& toBackgroundLayer(mbgl::style::Layer& layer) {
-    return static_cast<mbgl::style::BackgroundLayer&>(layer);
+inline mln::style::BackgroundLayer& toBackgroundLayer(mln::style::Layer& layer) {
+    return static_cast<mln::style::BackgroundLayer&>(layer);
 }
 
 /**
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 BackgroundLayer::BackgroundLayer(jni::JNIEnv& env, jni::String& layerId)
-    : Layer(std::make_unique<mbgl::style::BackgroundLayer>(jni::Make<std::string>(env, layerId))) {}
+    : Layer(std::make_unique<mln::style::BackgroundLayer>(jni::Make<std::string>(env, layerId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
  */
-BackgroundLayer::BackgroundLayer(mbgl::style::BackgroundLayer& coreLayer)
+BackgroundLayer::BackgroundLayer(mln::style::BackgroundLayer& coreLayer)
     : Layer(coreLayer) {}
 
 /**
  * Creates an owning peer object (for layers not attached to the map)
  */
-BackgroundLayer::BackgroundLayer(std::unique_ptr<mbgl::style::BackgroundLayer> coreLayer)
+BackgroundLayer::BackgroundLayer(std::unique_ptr<mln::style::BackgroundLayer> coreLayer)
     : Layer(std::move(coreLayer)) {}
 
 BackgroundLayer::~BackgroundLayer() = default;
@@ -39,7 +39,7 @@ BackgroundLayer::~BackgroundLayer() = default;
 // Property getters
 
 jni::Local<jni::Object<>> BackgroundLayer::getBackgroundColor(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::BackgroundLayer::getDefaultBackgroundColor()));
@@ -48,12 +48,12 @@ jni::Local<jni::Object<>> BackgroundLayer::getBackgroundColor(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<TransitionOptions>> BackgroundLayer::getBackgroundColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundColorTransition();
+    mln::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -62,14 +62,14 @@ void BackgroundLayer::setBackgroundColorTransition(jni::JNIEnv&, jlong duration,
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toBackgroundLayer(*layer).setBackgroundColorTransition(options);
 }
 
 jni::Local<jni::Object<>> BackgroundLayer::getBackgroundPattern(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -79,12 +79,12 @@ jni::Local<jni::Object<>> BackgroundLayer::getBackgroundPattern(jni::JNIEnv& env
 }
 
 jni::Local<jni::Object<TransitionOptions>> BackgroundLayer::getBackgroundPatternTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundPatternTransition();
+    mln::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundPatternTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -93,14 +93,14 @@ void BackgroundLayer::setBackgroundPatternTransition(jni::JNIEnv&, jlong duratio
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toBackgroundLayer(*layer).setBackgroundPatternTransition(options);
 }
 
 jni::Local<jni::Object<>> BackgroundLayer::getBackgroundOpacity(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(
@@ -110,12 +110,12 @@ jni::Local<jni::Object<>> BackgroundLayer::getBackgroundOpacity(jni::JNIEnv& env
 }
 
 jni::Local<jni::Object<TransitionOptions>> BackgroundLayer::getBackgroundOpacityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundOpacityTransition();
+    mln::style::TransitionOptions options = toBackgroundLayer(*layer).getBackgroundOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -124,9 +124,9 @@ void BackgroundLayer::setBackgroundOpacityTransition(jni::JNIEnv&, jlong duratio
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toBackgroundLayer(*layer).setBackgroundOpacityTransition(options);
 }
 
@@ -143,17 +143,17 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 } // namespace
 
 jni::Local<jni::Object<Layer>> BackgroundJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                                   mbgl::style::Layer& layer) {
+                                                                                   mln::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new BackgroundLayer(toBackgroundLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> BackgroundJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env,
-                          new BackgroundLayer(std::unique_ptr<mbgl::style::BackgroundLayer>(
-                              static_cast<mbgl::style::BackgroundLayer*>(layer.release()))));
+                          new BackgroundLayer(std::unique_ptr<mln::style::BackgroundLayer>(
+                              static_cast<mln::style::BackgroundLayer*>(layer.release()))));
 }
 
 void BackgroundJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -182,4 +182,4 @@ void BackgroundJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

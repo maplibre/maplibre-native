@@ -9,7 +9,7 @@
 #include <memory>
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 
 enum class ImageAlphaMode {
     Unassociated,
@@ -179,4 +179,4 @@ using AlphaImage = Image<ImageAlphaMode::Exclusive>;
 PremultipliedImage decodeImage(const std::string&);
 std::string encodePNG(const PremultipliedImage&);
 
-} // namespace mbgl
+} // namespace mln

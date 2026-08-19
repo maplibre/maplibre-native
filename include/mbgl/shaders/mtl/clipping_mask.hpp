@@ -3,7 +3,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) ClipUBO {
@@ -73,4 +73,4 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

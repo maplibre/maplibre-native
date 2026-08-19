@@ -11,11 +11,11 @@
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_, bool renderToTerrain_)
-    : mbgl::LayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
+    : mln::LayerGroup(layerIndex_, initialCapacity, std::move(name_), renderToTerrain_) {}
 
 void LayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled) {
@@ -112,4 +112,4 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 }
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

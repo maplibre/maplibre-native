@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class Size;
 
@@ -125,4 +125,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

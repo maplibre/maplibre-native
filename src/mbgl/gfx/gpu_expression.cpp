@@ -8,7 +8,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 using namespace style::expression;
@@ -184,4 +184,4 @@ Color GPUExpression::evaluateColor(const float zoom) const {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 template <class F, class P>
 class WorkTaskImpl : public WorkTask {
@@ -62,4 +62,4 @@ std::shared_ptr<WorkTask> WorkTask::make(Fn&& fn, Args&&... args) {
         std::forward<Fn>(fn), std::move(tuple), flag);
 }
 
-} // namespace mbgl
+} // namespace mln

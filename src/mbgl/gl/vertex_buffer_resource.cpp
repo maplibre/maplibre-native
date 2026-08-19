@@ -2,7 +2,7 @@
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 VertexBufferResource::VertexBufferResource(UniqueBuffer&& buffer_, int byteSize_)
@@ -35,4 +35,4 @@ VertexBufferResource::~VertexBufferResource() noexcept {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

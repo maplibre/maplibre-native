@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 /**
     Location indicator layer specific tweaker
@@ -14,8 +14,8 @@ class LocationIndicatorLayerTweaker : public LayerTweaker {
 public:
     LocationIndicatorLayerTweaker(std::string id_,
                                   Immutable<style::LayerProperties> properties,
-                                  const mbgl::mat4& projectionCircle_,
-                                  const mbgl::mat4& projectionPuck_)
+                                  const mln::mat4& projectionCircle_,
+                                  const mln::mat4& projectionPuck_)
         : LayerTweaker(std::move(id_), properties),
           projectionCircle(projectionCircle_),
           projectionPuck(projectionPuck_) {}
@@ -26,8 +26,8 @@ public:
     void execute(LayerGroupBase&, const PaintParameters& params) override;
 
 private:
-    const mbgl::mat4& projectionCircle;
-    const mbgl::mat4& projectionPuck;
+    const mln::mat4& projectionCircle;
+    const mln::mat4& projectionPuck;
 };
 
-} // namespace mbgl
+} // namespace mln

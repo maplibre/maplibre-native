@@ -2,7 +2,7 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -13,4 +13,4 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::OpenGL> {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

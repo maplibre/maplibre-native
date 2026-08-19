@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/style/expression/parsing_context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -28,7 +28,7 @@ public:
     explicit FormatExpression(std::vector<FormatExpressionSection> sections);
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
-    static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
+    static ParseResult parse(const mln::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
@@ -42,7 +42,7 @@ public:
 
     const std::vector<FormatExpressionSection>& getSections() const noexcept { return sections; }
 
-    mbgl::Value serialize() const override;
+    mln::Value serialize() const override;
     std::string getOperator() const override { return "format"; }
 
 private:
@@ -56,4 +56,4 @@ private:
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

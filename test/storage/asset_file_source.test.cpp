@@ -11,7 +11,7 @@
 #include <gtest/gtest.h>
 #include <atomic>
 
-using namespace mbgl;
+using namespace mln;
 
 #if !ANDROID
 TEST(AssetFileSource, Load) {
@@ -29,13 +29,13 @@ TEST(AssetFileSource, Load) {
 
     class TestWorker {
     public:
-        TestWorker(ActorRef<TestWorker>, mbgl::AssetFileSource* fs_)
+        TestWorker(ActorRef<TestWorker>, mln::AssetFileSource* fs_)
             : fs(fs_) {}
 
         void run(std::function<void()> endCallback) {
             const std::string asset("asset://nonempty");
 
-            requestCallback = [this, asset, endCallback](mbgl::Response res) {
+            requestCallback = [this, asset, endCallback](mln::Response res) {
                 EXPECT_EQ(nullptr, res.error);
                 ASSERT_TRUE(res.data.get());
                 EXPECT_EQ("content is here\n", *res.data);
@@ -44,20 +44,20 @@ TEST(AssetFileSource, Load) {
                     endCallback();
                     request.reset();
                 } else {
-                    request = fs->request({mbgl::Resource::Unknown, asset}, requestCallback);
+                    request = fs->request({mln::Resource::Unknown, asset}, requestCallback);
                 }
             };
 
-            request = fs->request({mbgl::Resource::Unknown, asset}, requestCallback);
+            request = fs->request({mln::Resource::Unknown, asset}, requestCallback);
         }
 
     private:
         unsigned numRequests = 1000;
 
-        mbgl::AssetFileSource* fs;
-        std::unique_ptr<mbgl::AsyncRequest> request;
+        mln::AssetFileSource* fs;
+        std::unique_ptr<mln::AsyncRequest> request;
 
-        std::function<void(mbgl::Response)> requestCallback;
+        std::function<void(mln::Response)> requestCallback;
     };
 
     std::vector<std::unique_ptr<util::Thread<TestWorker>>> threads;

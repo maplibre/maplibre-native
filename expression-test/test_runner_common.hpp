@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-using namespace mbgl;
+using namespace mln;
 
 Value stripPrecision(const Value& value);
 std::vector<std::string> tokenize(std::string str);

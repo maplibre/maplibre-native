@@ -3,7 +3,7 @@
 #include <chrono>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class MonotonicTimer {
@@ -19,4 +19,4 @@ public:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

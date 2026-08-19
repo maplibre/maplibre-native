@@ -2,7 +2,7 @@
 #include <mbgl/style/expression/check_subtype.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -53,7 +53,7 @@ std::vector<std::optional<Value>> Coalesce::possibleOutputs() const {
     return result;
 }
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 ParseResult Coalesce::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
     auto length = arrayLength(value);
@@ -97,4 +97,4 @@ ParseResult Coalesce::parse(const Convertible& value, ParsingContext& ctx) {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

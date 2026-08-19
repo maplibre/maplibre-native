@@ -4,7 +4,7 @@
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/shaders/vulkan/terrain.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -82,4 +82,4 @@ void main() {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

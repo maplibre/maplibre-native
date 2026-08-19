@@ -11,7 +11,7 @@
 #include <sstream>
 #include <mutex>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 
@@ -114,4 +114,4 @@ void Log::record(EventSeverity severity,
     platformRecord(severity, logStream.str());
 }
 
-} // namespace mbgl
+} // namespace mln

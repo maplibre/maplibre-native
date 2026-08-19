@@ -1,7 +1,7 @@
 #include <mbgl/style/conversion/constant.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -310,4 +310,4 @@ std::optional<std::vector<std::string>> Converter<std::vector<std::string>>::ope
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

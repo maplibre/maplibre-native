@@ -6,7 +6,7 @@
 #include <memory>
 #include <filesystem>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 
@@ -65,4 +65,4 @@ public:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

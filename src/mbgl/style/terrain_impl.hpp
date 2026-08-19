@@ -4,7 +4,7 @@
 #include <mbgl/util/immutable.hpp>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class Terrain::Impl {
@@ -25,4 +25,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

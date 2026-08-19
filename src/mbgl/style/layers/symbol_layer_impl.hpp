@@ -9,7 +9,7 @@
 #include <mbgl/style/expression/format_section_override.hpp>
 #include <mbgl/style/expression/value.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 template <typename PaintProperty>
@@ -140,4 +140,4 @@ private:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

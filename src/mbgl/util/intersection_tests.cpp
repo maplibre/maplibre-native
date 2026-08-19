@@ -1,7 +1,7 @@
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 bool polygonContainsPoint(const GeometryCoordinates& ring, const GeometryCoordinate& p) {
@@ -141,4 +141,4 @@ bool polygonIntersectsMultiPolygon(const GeometryCoordinates& polygon, const Geo
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <mbgl/shaders/gl/shader_info.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 UniformBlockInfo::UniformBlockInfo(std::string_view name_, std::size_t id_)
@@ -587,4 +587,4 @@ const std::vector<TextureInfo> TerrainDepthShaderInfo::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -47,18 +47,18 @@ public:
 
     static std::optional<std::string> toString(const MockConvertible&) { return std::nullopt; }
 
-    static std::optional<mbgl::Value> toValue(const MockConvertible&) { return std::nullopt; }
+    static std::optional<mln::Value> toValue(const MockConvertible&) { return std::nullopt; }
 
     static std::optional<GeoJSON> toGeoJSON(const MockConvertible&, Error&) { return std::nullopt; }
 };
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(Conversion, Move) {
     int dtorCounter = 0;

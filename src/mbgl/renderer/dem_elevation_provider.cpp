@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace mbgl {
+namespace mln {
 
 DEMElevationProvider::DEMElevationProvider(const RenderSource* demSource_, double exaggeration_)
     : demSource(demSource_),
@@ -91,4 +91,4 @@ std::optional<Range<double>> DEMElevationProvider::getTileElevationRange(const C
     return Range<double>{best->getMinElevation() * exaggeration, best->getMaxElevation() * exaggeration};
 }
 
-} // namespace mbgl
+} // namespace mln

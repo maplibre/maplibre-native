@@ -19,7 +19,7 @@
 #include <mbgl/storage/sqlite3.hpp>
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::literals::string_literals;
 using mapbox::sqlite::ResultCode;
 

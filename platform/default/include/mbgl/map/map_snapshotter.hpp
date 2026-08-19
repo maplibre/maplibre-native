@@ -13,7 +13,7 @@
 #include <functional>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 struct CameraOptions;
 class ClientOptions;
@@ -62,8 +62,8 @@ public:
     void setRegion(const LatLngBounds&);
     LatLngBounds getRegion() const;
 
-    void setPadding(const mbgl::EdgeInsets&);
-    mbgl::EdgeInsets getPadding() const;
+    void setPadding(const mln::EdgeInsets&);
+    mln::EdgeInsets getPadding() const;
 
     void addAnnotationImage(std::unique_ptr<style::Image>);
     void addAnnotation(const Annotation&);
@@ -83,4 +83,4 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

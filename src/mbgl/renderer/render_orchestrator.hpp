@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 class ChangeRequest;
 class RendererObserver;
 class RenderSource;
@@ -254,4 +254,4 @@ private:
     RenderItem::DebugLayerGroupMap debugLayerGroups;
 };
 
-} // namespace mbgl
+} // namespace mln

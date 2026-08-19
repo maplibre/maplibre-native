@@ -3,7 +3,7 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 
@@ -105,4 +105,4 @@ const std::shared_ptr<gfx::Texture2D>& PatternAtlas::texture() const {
     return atlasTexture2D;
 }
 
-} // namespace mbgl
+} // namespace mln

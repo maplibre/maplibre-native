@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

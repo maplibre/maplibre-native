@@ -35,7 +35,7 @@ void handleError(CURLcode code) {
 }
 } // namespace
 
-namespace mbgl {
+namespace mln {
 
 class HTTPFileSource::Impl {
 public:
@@ -238,7 +238,7 @@ int HTTPFileSource::Impl::startTimeout(CURLM * /* multi */, long timeout_ms, voi
     timeout_ms = std::max<long>(timeout_ms, 0);
 
     context->timeout.stop();
-    context->timeout.start(mbgl::Milliseconds(timeout_ms), Duration::zero(), std::bind(&Impl::onTimeout, context));
+    context->timeout.start(mln::Milliseconds(timeout_ms), Duration::zero(), std::bind(&Impl::onTimeout, context));
 
     return 0;
 }
@@ -311,7 +311,7 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
 
 HTTPRequest::~HTTPRequest() {
     if (curl_multi_remove_handle(context->multi, handle) != CURLM_OK) {
-        mbgl::Log::Error(mbgl::Event::HttpRequest, "Error removing curl multi handle");
+        mln::Log::Error(mln::Event::HttpRequest, "Error removing curl multi handle");
     }
 
     context->returnHandle(handle);
@@ -479,4 +479,4 @@ ClientOptions HTTPFileSource::getClientOptions() {
     return impl->getClientOptions();
 }
 
-} // namespace mbgl
+} // namespace mln

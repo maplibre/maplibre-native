@@ -27,7 +27,7 @@
 
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -89,7 +89,7 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
                  : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
@@ -189,7 +189,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     auto renderPass = RenderPass::Translucent;
-    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+    if (!(mln::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
@@ -423,4 +423,4 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

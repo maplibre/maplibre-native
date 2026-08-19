@@ -7,7 +7,7 @@
 #include <mutex>
 #include <shared_mutex>
 
-namespace mbgl {
+namespace mln {
 
 class FileSource;
 class AsyncRequest;
@@ -67,4 +67,4 @@ private:
     std::shared_ptr<Shared> shared;
 };
 
-} // namespace mbgl
+} // namespace mln

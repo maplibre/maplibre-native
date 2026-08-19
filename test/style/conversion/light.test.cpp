@@ -12,9 +12,9 @@
 
 #include <array>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(StyleConversion, Light) {
     Error error;
@@ -27,30 +27,30 @@ TEST(StyleConversion, Light) {
         auto light = parseLight("{}");
         ASSERT_TRUE((bool)light);
 
-        const mbgl::JSValue colorValue("blue");
+        const mln::JSValue colorValue("blue");
         light->setProperty("color", &colorValue);
 
         ASSERT_FALSE(light->getColor().isUndefined());
         ASSERT_TRUE(light->getColor().isConstant());
-        ASSERT_EQ(light->getColor().asConstant(), mbgl::Color::blue());
+        ASSERT_EQ(light->getColor().asConstant(), mln::Color::blue());
 
-        const mbgl::JSValue intensityValue(0.5);
+        const mln::JSValue intensityValue(0.5);
         light->setProperty("intensity", &intensityValue);
         ASSERT_FALSE(light->getIntensity().isUndefined());
         ASSERT_TRUE(light->getIntensity().isConstant());
         ASSERT_EQ(light->getIntensity().asConstant(), 0.5);
 
-        mbgl::JSValue::AllocatorType allocator;
-        const mbgl::JSValue positionValue(std::move(mbgl::JSValue(rapidjson::kArrayType)
-                                                        .PushBack(1.f, allocator)
-                                                        .PushBack(2.f, allocator)
-                                                        .PushBack(3.f, allocator)
-                                                        .Move()));
+        mln::JSValue::AllocatorType allocator;
+        const mln::JSValue positionValue(std::move(mln::JSValue(rapidjson::kArrayType)
+                                                       .PushBack(1.f, allocator)
+                                                       .PushBack(2.f, allocator)
+                                                       .PushBack(3.f, allocator)
+                                                       .Move()));
         light->setProperty("position", &positionValue);
         ASSERT_FALSE(light->getPosition().isUndefined());
         ASSERT_TRUE(light->getPosition().isConstant());
         std::array<float, 3> expected{{1.f, 2.f, 3.f}};
-        ASSERT_EQ(light->getPosition().asConstant(), mbgl::style::Position({expected}));
+        ASSERT_EQ(light->getPosition().asConstant(), mln::style::Position({expected}));
     }
 
     {
@@ -74,7 +74,7 @@ TEST(StyleConversion, Light) {
         ASSERT_FALSE(light->getPosition().isUndefined());
         ASSERT_TRUE(light->getPosition().isConstant());
         std::array<float, 3> expected{{3, 90, 90}};
-        ASSERT_EQ(light->getPosition().asConstant(), mbgl::style::Position({expected}));
+        ASSERT_EQ(light->getPosition().asConstant(), mln::style::Position({expected}));
         ASSERT_FALSE(light->getPosition().isExpression());
     }
 
@@ -85,7 +85,7 @@ TEST(StyleConversion, Light) {
         ASSERT_FALSE(light->getColor().isUndefined());
         ASSERT_TRUE(light->getColor().isConstant());
         ASSERT_FALSE(light->getColor().isExpression());
-        ASSERT_EQ(light->getColorTransition().duration, mbgl::Duration(mbgl::Milliseconds(1000)));
+        ASSERT_EQ(light->getColorTransition().duration, mln::Duration(mln::Milliseconds(1000)));
         ASSERT_FALSE((bool)light->getColorTransition().delay);
     }
 

@@ -4,14 +4,14 @@
 #include <mbgl/style/conversion.hpp>
 #include <mbgl/style/conversion/tileset.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 // This conversion is expected not to fail because it's used only in contexts where
 // the value was originally a String or TileSet object on the Java side. If it fails
 // to convert, it's a bug in our serialization or Java-side static typing.
-variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value) {
-    using namespace mbgl::style::conversion;
+variant<std::string, Tileset> convertURLOrTileset(mln::android::Value&& value) {
+    using namespace mln::style::conversion;
 
     const Convertible convertible(std::move(value));
     if (isObject(convertible)) {
@@ -27,4 +27,4 @@ variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value) 
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

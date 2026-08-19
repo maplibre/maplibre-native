@@ -9,7 +9,7 @@
 #include <mutex>
 #include <tuple>
 
-namespace mbgl {
+namespace mln {
 
 struct FileSourceInfo {
     FileSourceInfo(FileSourceType type_, std::string id_, std::weak_ptr<FileSource> fileSource_)
@@ -86,4 +86,4 @@ FileSourceManager::FileSourceFactory FileSourceManager::unRegisterFileSourceFact
     return factory;
 }
 
-} // namespace mbgl
+} // namespace mln

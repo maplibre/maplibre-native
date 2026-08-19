@@ -3,7 +3,7 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Fence {
@@ -19,4 +19,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

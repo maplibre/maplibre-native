@@ -70,7 +70,7 @@
 - (void)testHandlePinchGestureContentInset {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(padding, cameraPadding,
                  @"MLNMapView's contentInset property should match camera's padding.");
@@ -94,7 +94,7 @@
   [self.mapView handlePinchGesture:pinchGesture];
   XCTAssertNotEqual(padding, cameraPadding);
 
-  mbgl::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+  mln::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
 
   pinchGesture.state = UIGestureRecognizerStateChanged;
   [self.mapView handlePinchGesture:pinchGesture];
@@ -112,7 +112,7 @@
 - (void)testHandleRotateGestureContentInset {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(padding, cameraPadding,
                  @"MLNMapView's contentInset property should match camera's padding.");
@@ -136,7 +136,7 @@
   [self.mapView handleRotateGesture:rotateGesture];
   XCTAssertNotEqual(padding, cameraPadding);
 
-  mbgl::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+  mln::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
 
   rotateGesture.state = UIGestureRecognizerStateChanged;
   [self.mapView handleRotateGesture:rotateGesture];
@@ -154,7 +154,7 @@
 - (void)testHandleDoubleTapGestureContentInset {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(padding, cameraPadding,
                  @"MLNMapView's contentInset property should match camera's padding.");
@@ -176,7 +176,7 @@
   doubleTapGesture.mockTappedView = self.mapView;
   doubleTapGesture.mockTappedPoint = CGPointMake(1.0, 1.0);
 
-  mbgl::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+  mln::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
 
   [self.mapView handleDoubleTapGesture:doubleTapGesture];
   _doubleTapExpectation = [self expectationWithDescription:@"Double tap gesture animation."];
@@ -195,7 +195,7 @@
 - (void)testHandleTwoFingerTapGesture {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(padding, cameraPadding,
                  @"MLNMapView's contentInset property should match camera's padding.");
@@ -226,7 +226,7 @@
                  });
   [self waitForExpectationsWithTimeout:10 handler:nil];
 
-  mbgl::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+  mln::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
   cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(edgePadding, cameraPadding,
                  @"When a gesture recognizer is performed camera paddings must not be changed.");
@@ -235,7 +235,7 @@
 - (void)testHandleQuickZoomGesture {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(padding, cameraPadding,
                  @"MLNMapView's contentInset property should match camera's padding.");
@@ -270,7 +270,7 @@
                  });
   [self waitForExpectationsWithTimeout:10 handler:nil];
 
-  mbgl::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+  mln::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
 
   cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(edgePadding, cameraPadding,
@@ -286,7 +286,7 @@
 - (void)testHandleTwoFingerDragGesture {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
-  mbgl::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
+  mln::EdgeInsets padding = MLNEdgeInsetsFromNSEdgeInsets(self.mapView.contentInset);
   auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(padding, cameraPadding,
                  @"MLNMapView's contentInset property should match camera's padding.");
@@ -328,7 +328,7 @@
                  });
   [self waitForExpectationsWithTimeout:10 handler:nil];
 
-  mbgl::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
+  mln::EdgeInsets edgePadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) + padding;
 
   cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
   XCTAssertEqual(edgePadding, cameraPadding,

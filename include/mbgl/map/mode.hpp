@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 
 using EnumType = uint32_t;
 
@@ -91,26 +91,26 @@ enum class MapDebugOptions : EnumType {
 
 constexpr MapDebugOptions operator|(MapDebugOptions lhs, MapDebugOptions rhs) {
     // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-    return MapDebugOptions(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs));
+    return MapDebugOptions(mln::underlying_type(lhs) | mln::underlying_type(rhs));
 }
 
 constexpr MapDebugOptions& operator|=(MapDebugOptions& lhs, MapDebugOptions rhs) {
     // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-    return (lhs = MapDebugOptions(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs)));
+    return (lhs = MapDebugOptions(mln::underlying_type(lhs) | mln::underlying_type(rhs)));
 }
 
 constexpr bool operator&(MapDebugOptions lhs, MapDebugOptions rhs) {
-    return mbgl::underlying_type(lhs) & mbgl::underlying_type(rhs);
+    return mln::underlying_type(lhs) & mln::underlying_type(rhs);
 }
 
 constexpr MapDebugOptions& operator&=(MapDebugOptions& lhs, MapDebugOptions rhs) {
     // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-    return (lhs = MapDebugOptions(mbgl::underlying_type(lhs) & mbgl::underlying_type(rhs)));
+    return (lhs = MapDebugOptions(mln::underlying_type(lhs) & mln::underlying_type(rhs)));
 }
 
 constexpr MapDebugOptions operator~(MapDebugOptions value) {
     // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange)
-    return MapDebugOptions(~mbgl::underlying_type(value));
+    return MapDebugOptions(~mln::underlying_type(value));
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using RasterShaderSource = ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal>;
@@ -16,4 +16,4 @@ const std::array<TextureInfo, 2> RasterShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

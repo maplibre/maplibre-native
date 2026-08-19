@@ -14,7 +14,7 @@
 
 #include <mbgl/test/stub_geometry_tile_feature.hpp>
 
-using namespace mbgl;
+using namespace mln;
 using namespace style;
 using namespace style::expression;
 using namespace style::expression::dsl;
@@ -82,7 +82,7 @@ TEST(Padding, Function) {
     // identity
     {
         auto expr = fromFunction(R"({"type": "identity", "property": "foo", "default": [3, 7, 9, 11]})");
-        EXPECT_EQ(Padding(2, 4, 6, 4), evalInContext(expr, {{"foo", std::vector<mbgl::Value>({2, 4, 6})}}));
+        EXPECT_EQ(Padding(2, 4, 6, 4), evalInContext(expr, {{"foo", std::vector<mln::Value>({2, 4, 6})}}));
         EXPECT_EQ(Padding(3), evalInContext(expr, {{"foo", 3}}));
         EXPECT_EQ(Padding(3, 7, 9, 11), evalInContext(expr, {{"bar", 3}}));
     }

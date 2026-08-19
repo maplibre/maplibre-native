@@ -6,7 +6,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class Anchor {
 public:
@@ -22,4 +22,4 @@ public:
 
 using Anchors = std::vector<Anchor>;
 
-} // namespace mbgl
+} // namespace mln

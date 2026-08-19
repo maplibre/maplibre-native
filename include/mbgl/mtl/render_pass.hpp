@@ -10,7 +10,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace mtl {
 
 class BufferResource;
@@ -109,4 +109,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

@@ -13,12 +13,12 @@ namespace {
 
 std::string toAbsoluteURL(const std::string &fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/pmtiles" / fileName;
-    return std::string(mbgl::util::PMTILES_PROTOCOL) + std::string(mbgl::util::FILE_PROTOCOL) + path.string();
+    return std::string(mln::util::PMTILES_PROTOCOL) + std::string(mln::util::FILE_PROTOCOL) + path.string();
 }
 
 } // namespace
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(PMTilesFileSource, AcceptsURL) {
     PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());

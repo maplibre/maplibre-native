@@ -6,7 +6,7 @@
 #include <mbgl/tile/vector_mlt_tile.hpp>
 #include <mbgl/tile/vector_mvt_tile.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -48,4 +48,4 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                        });
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -11,7 +11,7 @@
 #include <iosfwd>
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 class OverscaledTileID;
 class CanonicalTileID;
@@ -262,23 +262,23 @@ inline float UnwrappedTileID::pixelsToTileUnits(const float pixelValue, const fl
                          (static_cast<float>(util::tileSize_D) * std::pow(2.f, zoom - canonical.z)));
 }
 
-} // namespace mbgl
+} // namespace mln
 
 namespace std {
 
 template <>
-struct hash<mbgl::CanonicalTileID> {
-    size_t operator()(const mbgl::CanonicalTileID& id) const noexcept;
+struct hash<mln::CanonicalTileID> {
+    size_t operator()(const mln::CanonicalTileID& id) const noexcept;
 };
 
 template <>
-struct hash<mbgl::UnwrappedTileID> {
-    size_t operator()(const mbgl::UnwrappedTileID& id) const noexcept;
+struct hash<mln::UnwrappedTileID> {
+    size_t operator()(const mln::UnwrappedTileID& id) const noexcept;
 };
 
 template <>
-struct hash<mbgl::OverscaledTileID> {
-    size_t operator()(const mbgl::OverscaledTileID& id) const noexcept;
+struct hash<mln::OverscaledTileID> {
+    size_t operator()(const mln::OverscaledTileID& id) const noexcept;
 };
 
 } // namespace std

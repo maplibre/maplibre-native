@@ -5,7 +5,7 @@
 #include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/gfx/gpu_expression.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 //
@@ -165,4 +165,4 @@ union LineTilePropsUnionUBO {
 #endif
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

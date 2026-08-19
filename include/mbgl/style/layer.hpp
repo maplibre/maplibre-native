@@ -13,7 +13,7 @@
 #include <optional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 enum class Dependency : uint32_t;
@@ -91,7 +91,7 @@ struct LayerTypeInfo {
 
 // Added this to support plugins and that their LayerTypeInfo isn't the same point
 // across the board
-bool layerTypeInfoEquals(const mbgl::style::LayerTypeInfo* one, const mbgl::style::LayerTypeInfo* other);
+bool layerTypeInfoEquals(const mln::style::LayerTypeInfo* one, const mln::style::LayerTypeInfo* other);
 
 /**
  * The runtime representation of a [layer](https://maplibre.org/maplibre-style-spec/#layers)
@@ -186,4 +186,4 @@ protected:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

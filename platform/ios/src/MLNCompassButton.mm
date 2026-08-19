@@ -103,7 +103,7 @@
 
 - (void)updateCompassAnimated:(BOOL)animated {
   CLLocationDirection direction = self.mapView.direction;
-  CLLocationDirection plateDirection = mbgl::util::wrap(-direction, 0., 360.);
+  CLLocationDirection plateDirection = mln::util::wrap(-direction, 0., 360.);
   self.transform = CGAffineTransformMakeRotation(MLNRadiansFromDegrees(plateDirection));
 
   self.isAccessibilityElement = direction > 0;

@@ -9,7 +9,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @implementation MLNPointCollection {
-  std::optional<mbgl::LatLngBounds> _bounds;
+  std::optional<mln::LatLngBounds> _bounds;
   std::vector<CLLocationCoordinate2D> _coordinates;
 }
 
@@ -59,10 +59,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (MLNCoordinateBounds)overlayBounds {
   if (!_bounds) {
-    mbgl::LatLngBounds bounds = mbgl::LatLngBounds::empty();
+    mln::LatLngBounds bounds = mln::LatLngBounds::empty();
     for (auto coordinate : _coordinates) {
       if (!MLNLocationCoordinate2DIsValid(coordinate)) {
-        bounds = mbgl::LatLngBounds::empty();
+        bounds = mln::LatLngBounds::empty();
         break;
       }
       bounds.extend(MLNLatLngFromLocationCoordinate2D(coordinate));
@@ -101,12 +101,12 @@ NS_ASSUME_NONNULL_BEGIN
   return MLNCoordinateBoundsIntersectsCoordinateBounds(self.overlayBounds, overlayBounds);
 }
 
-- (mbgl::Geometry<double>)geometryObject {
-  mbgl::MultiPoint<double> multiPoint;
+- (mln::Geometry<double>)geometryObject {
+  mln::MultiPoint<double> multiPoint;
   multiPoint.reserve(self.pointCount);
   for (NSUInteger i = 0; i < self.pointCount; i++) {
     multiPoint.push_back(
-        mbgl::Point<double>(self.coordinates[i].longitude, self.coordinates[i].latitude));
+        mln::Point<double>(self.coordinates[i].longitude, self.coordinates[i].latitude));
   }
   return multiPoint;
 }

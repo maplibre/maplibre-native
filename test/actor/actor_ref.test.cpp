@@ -5,7 +5,7 @@
 
 #include <future>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(ActorRef, CanOutliveActor) {
     // An ActorRef can outlive its actor. Doing does not extend the actor's lifetime.

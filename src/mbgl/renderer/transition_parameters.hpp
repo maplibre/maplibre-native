@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class TransitionParameters {
 public:
@@ -13,4 +13,4 @@ public:
     style::TransitionOptions transition;
 };
 
-} // namespace mbgl
+} // namespace mln

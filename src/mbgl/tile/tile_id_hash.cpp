@@ -3,25 +3,25 @@
 
 namespace std {
 
-size_t hash<mbgl::CanonicalTileID>::operator()(const mbgl::CanonicalTileID& id) const noexcept {
+size_t hash<mln::CanonicalTileID>::operator()(const mln::CanonicalTileID& id) const noexcept {
     std::size_t seed = 0;
-    mbgl::util::hash_combine(seed, id.x);
-    mbgl::util::hash_combine(seed, id.y);
-    mbgl::util::hash_combine(seed, id.z);
+    mln::util::hash_combine(seed, id.x);
+    mln::util::hash_combine(seed, id.y);
+    mln::util::hash_combine(seed, id.z);
     return seed;
 }
 
-size_t hash<mbgl::UnwrappedTileID>::operator()(const mbgl::UnwrappedTileID& id) const noexcept {
+size_t hash<mln::UnwrappedTileID>::operator()(const mln::UnwrappedTileID& id) const noexcept {
     std::size_t seed = 0;
-    mbgl::util::hash_combine(seed, std::hash<mbgl::CanonicalTileID>{}(id.canonical));
-    mbgl::util::hash_combine(seed, id.wrap);
+    mln::util::hash_combine(seed, std::hash<mln::CanonicalTileID>{}(id.canonical));
+    mln::util::hash_combine(seed, id.wrap);
     return seed;
 }
 
-size_t hash<mbgl::OverscaledTileID>::operator()(const mbgl::OverscaledTileID& id) const noexcept {
+size_t hash<mln::OverscaledTileID>::operator()(const mln::OverscaledTileID& id) const noexcept {
     std::size_t seed = 0;
-    mbgl::util::hash_combine(seed, std::hash<mbgl::CanonicalTileID>{}(id.canonical));
-    mbgl::util::hash_combine(seed, id.overscaledZ);
+    mln::util::hash_combine(seed, std::hash<mln::CanonicalTileID>{}(id.canonical));
+    mln::util::hash_combine(seed, id.overscaledZ);
     return seed;
 }
 

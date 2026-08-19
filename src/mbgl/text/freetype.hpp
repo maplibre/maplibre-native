@@ -13,7 +13,7 @@ struct FT_LibraryRec_;
 using FT_Face = FT_FaceRec_ *;
 using FT_Library = FT_LibraryRec_ *;
 
-namespace mbgl {
+namespace mln {
 
 class FreeTypeLibrary {
 public:
@@ -48,4 +48,4 @@ private:
     bool valid = false;
 };
 
-} // namespace mbgl
+} // namespace mln

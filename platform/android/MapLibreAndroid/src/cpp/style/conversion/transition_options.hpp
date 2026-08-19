@@ -7,16 +7,16 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
 template <>
-struct Converter<jni::Local<jni::Object<TransitionOptions>>, mbgl::style::TransitionOptions> {
+struct Converter<jni::Local<jni::Object<TransitionOptions>>, mln::style::TransitionOptions> {
     Result<jni::Local<jni::Object<TransitionOptions>>> operator()(jni::JNIEnv&,
-                                                                  const mbgl::style::TransitionOptions&) const;
+                                                                  const mln::style::TransitionOptions&) const;
 };
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -10,7 +10,7 @@
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -63,4 +63,4 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
     });
 }
 
-} // namespace mbgl
+} // namespace mln

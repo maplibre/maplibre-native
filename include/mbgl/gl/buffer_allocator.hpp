@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -174,4 +174,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

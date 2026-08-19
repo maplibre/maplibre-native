@@ -4,7 +4,7 @@
 #include <jni/jni.hpp>
 #include <mbgl/util/action_journal_options.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class NativeMapOptions {
@@ -24,4 +24,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

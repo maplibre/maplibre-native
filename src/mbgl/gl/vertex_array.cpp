@@ -2,7 +2,7 @@
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 void VertexArray::bind(Context& context, const gfx::IndexBuffer& indexBuffer, const AttributeBindingArray& bindings) {
@@ -22,4 +22,4 @@ void VertexArray::bind(Context& context, const gfx::IndexBuffer& indexBuffer, co
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

@@ -4,7 +4,7 @@
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/math.hpp>
 
-namespace mbgl {
+namespace mln {
 
 Anchors getAnchors(const GeometryCoordinates& line,
                    float spacing,
@@ -26,4 +26,4 @@ std::optional<Anchor> getCenterAnchor(const GeometryCoordinates& line,
                                       float glyphSize,
                                       float boxScale);
 
-} // namespace mbgl
+} // namespace mln

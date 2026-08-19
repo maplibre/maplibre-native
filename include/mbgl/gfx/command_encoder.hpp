@@ -5,7 +5,7 @@
 #include <memory>
 #include <string_view>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 class RenderPassDescriptor;
@@ -36,4 +36,4 @@ public:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

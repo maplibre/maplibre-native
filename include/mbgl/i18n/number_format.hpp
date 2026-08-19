@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string formatNumber(double number,
@@ -13,4 +13,4 @@ std::string formatNumber(double number,
                          uint8_t maxFractionDigits);
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

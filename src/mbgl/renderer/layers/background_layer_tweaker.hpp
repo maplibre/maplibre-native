@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 class ShaderProgramBase;
@@ -33,4 +33,4 @@ protected:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -2,7 +2,7 @@
 #include <mbgl/shaders/shader_defines.hpp>
 #include <mbgl/shaders/terrain_layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using TerrainShaderSource = ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::WebGPU>;
@@ -16,4 +16,4 @@ const std::array<TextureInfo, 2> TerrainShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -4,18 +4,18 @@
 
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 CustomLayer::CustomLayer(jni::JNIEnv& env, const jni::String& layerId, jni::jlong host)
-    : Layer(std::make_unique<mbgl::style::CustomLayer>(
+    : Layer(std::make_unique<mln::style::CustomLayer>(
           jni::Make<std::string>(env, layerId),
-          std::unique_ptr<mbgl::style::CustomLayerHost>(reinterpret_cast<mbgl::style::CustomLayerHost*>(host)))) {}
+          std::unique_ptr<mln::style::CustomLayerHost>(reinterpret_cast<mln::style::CustomLayerHost*>(host)))) {}
 
-CustomLayer::CustomLayer(mbgl::style::CustomLayer& coreLayer)
+CustomLayer::CustomLayer(mln::style::CustomLayer& coreLayer)
     : Layer(coreLayer) {}
 
-CustomLayer::CustomLayer(std::unique_ptr<mbgl::style::CustomLayer> coreLayer)
+CustomLayer::CustomLayer(std::unique_ptr<mln::style::CustomLayer> coreLayer)
     : Layer(std::move(coreLayer)) {}
 
 CustomLayer::~CustomLayer() = default;
@@ -31,15 +31,15 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 CustomJavaLayerPeerFactory::~CustomJavaLayerPeerFactory() = default;
 
 jni::Local<jni::Object<Layer>> CustomJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                               mbgl::style::Layer& layer) {
-    return createJavaPeer(env, new CustomLayer(static_cast<mbgl::style::CustomLayer&>(layer)));
+                                                                               mln::style::Layer& layer) {
+    return createJavaPeer(env, new CustomLayer(static_cast<mln::style::CustomLayer&>(layer)));
 }
 
 jni::Local<jni::Object<Layer>> CustomJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
     return createJavaPeer(env,
-                          new CustomLayer(std::unique_ptr<mbgl::style::CustomLayer>(
-                              static_cast<mbgl::style::CustomLayer*>(layer.release()))));
+                          new CustomLayer(std::unique_ptr<mln::style::CustomLayer>(
+                              static_cast<mln::style::CustomLayer*>(layer.release()))));
 }
 
 void CustomJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -58,4 +58,4 @@ void CustomJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

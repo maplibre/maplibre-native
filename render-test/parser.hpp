@@ -12,25 +12,25 @@
 class Manifest;
 
 using ErrorMessage = std::string;
-using JSONReply = mbgl::variant<mbgl::JSDocument, ErrorMessage>;
+using JSONReply = mln::variant<mln::JSDocument, ErrorMessage>;
 
-JSONReply readJson(const mbgl::filesystem::path&);
-std::string serializeJsonValue(const mbgl::JSValue&);
+JSONReply readJson(const mln::filesystem::path&);
+std::string serializeJsonValue(const mln::JSValue&);
 std::string serializeMetrics(const TestMetrics&);
 
-std::vector<std::string> readExpectedImageEntries(const mbgl::filesystem::path& base);
-std::vector<std::string> readExpectedMetricEntries(const mbgl::filesystem::path& base);
-std::vector<std::string> readExpectedJSONEntries(const mbgl::filesystem::path& base);
+std::vector<std::string> readExpectedImageEntries(const mln::filesystem::path& base);
+std::vector<std::string> readExpectedMetricEntries(const mln::filesystem::path& base);
+std::vector<std::string> readExpectedJSONEntries(const mln::filesystem::path& base);
 
-TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path);
+TestMetrics readExpectedMetrics(const mln::filesystem::path& path);
 
 TestMetadata parseTestMetadata(const TestPaths& paths);
 TestOperations parseTestOperations(TestMetadata& metadata);
 
 std::string createResultPage(const TestStatistics&, const std::vector<TestMetadata>&, bool shuffle, uint32_t seed);
 
-std::string toJSON(const mbgl::Value& value, unsigned indent, bool singleLine);
-std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, bool singleLine);
+std::string toJSON(const mln::Value& value, unsigned indent, bool singleLine);
+std::string toJSON(const std::vector<mln::Feature>& features, unsigned indent, bool singleLine);
 
 namespace TestOperationNames {
 extern const std::string waitOp;

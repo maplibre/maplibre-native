@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 
 template <class T>
 class PossiblyEvaluatedPropertyValue {
@@ -153,4 +153,4 @@ struct Interpolator<PossiblyEvaluatedPropertyValue<T>> {
 
 } // namespace util
 
-} // namespace mbgl
+} // namespace mln

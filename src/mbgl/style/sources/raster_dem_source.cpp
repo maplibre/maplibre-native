@@ -9,7 +9,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 RasterDEMSource::RasterDEMSource(std::string id,
@@ -24,8 +24,8 @@ RasterDEMSource::~RasterDEMSource() {
     invalidateWeakPtrsEarly();
 }
 
-bool RasterDEMSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::RasterDEM) == mbgl::underlying_type(info->tileKind);
+bool RasterDEMSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
+    return mln::underlying_type(Tile::Kind::RasterDEM) == mln::underlying_type(info->tileKind);
 }
 
 void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
@@ -37,4 +37,4 @@ void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

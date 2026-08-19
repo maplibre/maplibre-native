@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -66,4 +66,4 @@ bool Fence::isSignaled() const {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

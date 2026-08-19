@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/terrain.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using TerrainShaderSource = ShaderSource<BuiltIn::TerrainShader, gfx::Backend::Type::Metal>;
@@ -15,4 +15,4 @@ const std::array<TextureInfo, 2> TerrainShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

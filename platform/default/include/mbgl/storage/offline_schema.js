@@ -6,7 +6,7 @@ fs.writeFileSync('platform/default/include/mbgl/storage/offline_schema.hpp', `#p
 // THIS IS A GENERATED FILE; EDIT offline_schema.sql INSTEAD
 // To regenerate, run \`node platform/default/include/mbgl/storage/offline_schema.js\`
 
-namespace mbgl {
+namespace mln {
 
 static constexpr const char* offlineDatabaseSchema =
 ${fs.readFileSync('platform/default/include/mbgl/storage/offline_schema.sql', 'utf8')
@@ -18,5 +18,5 @@ ${fs.readFileSync('platform/default/include/mbgl/storage/offline_schema.sql', 'u
 }
 ;
 
-} // namespace mbgl
+} // namespace mln
 `);

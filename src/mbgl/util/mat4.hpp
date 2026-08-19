@@ -25,7 +25,7 @@
 #include <array>
 #include <mbgl/util/vectors.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using mat4 = std::array<double, 16>;
 using matf4 = std::array<float, 16>;
@@ -55,4 +55,4 @@ void transformMat4(vec4& out, const vec4& a, const mat4& m);
 
 void diffsplit(matf4& outValue, matf4& outDiff, const mat4& source);
 } // namespace matrix
-} // namespace mbgl
+} // namespace mln

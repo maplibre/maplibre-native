@@ -4,7 +4,7 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Image, PNGRoundTrip) {
     PremultipliedImage rgba({1, 1});

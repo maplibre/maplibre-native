@@ -8,7 +8,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 
 class Mailbox;
 
@@ -147,10 +147,10 @@ public:
         scheduler->scheduleAndReplyValue(tag, task, reply);
     }
 
-    const mbgl::util::SimpleIdentity tag;
+    const mln::util::SimpleIdentity tag;
 
 private:
     std::shared_ptr<Scheduler> scheduler;
 };
 
-} // namespace mbgl
+} // namespace mln

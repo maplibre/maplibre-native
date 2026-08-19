@@ -5,16 +5,16 @@
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace mtl {
 
-CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParameters& paintParameters)
-    : mbgl::style::CustomLayerRenderParameters(paintParameters) {
-    const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParameters& paintParameters)
+    : mln::style::CustomLayerRenderParameters(paintParameters) {
+    const mln::mtl::RenderPass& renderPass = static_cast<mln::mtl::RenderPass&>(*paintParameters.renderPass);
     encoder = renderPass.getMetalEncoder();
 }
 
 } // namespace mtl
 } // namespace style
-} // namespace mbgl
+} // namespace mln

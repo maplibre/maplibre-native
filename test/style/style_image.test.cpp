@@ -4,7 +4,7 @@
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/exception.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(StyleImage, ZeroWidth) {
     try {

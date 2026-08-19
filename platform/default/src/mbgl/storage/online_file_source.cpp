@@ -29,7 +29,7 @@
 #include <map>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 // For testing only
 constexpr const char* ONLINE_STATUS_KEY = "online-status";
@@ -626,7 +626,7 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
             break;
 
         case Resource::Kind::Style:
-            res.url = mbgl::util::mapbox::normalizeStyleURL(options, resource.url, impl->getApiKey());
+            res.url = mln::util::mapbox::normalizeStyleURL(options, resource.url, impl->getApiKey());
             break;
 
         case Resource::Kind::Source:
@@ -655,8 +655,8 @@ std::unique_ptr<AsyncRequest> OnlineFileSource::request(const Resource& resource
 
 bool OnlineFileSource::canRequest(const Resource& resource) const {
     return resource.hasLoadingMethod(Resource::LoadingMethod::Network) &&
-           resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0) == std::string::npos &&
-           resource.url.rfind(mbgl::util::FILE_PROTOCOL, 0) == std::string::npos;
+           resource.url.rfind(mln::util::ASSET_PROTOCOL, 0) == std::string::npos &&
+           resource.url.rfind(mln::util::FILE_PROTOCOL, 0) == std::string::npos;
 }
 
 void OnlineFileSource::pause() {
@@ -718,4 +718,4 @@ ClientOptions OnlineFileSource::getClientOptions() {
     return impl->getClientOptions();
 }
 
-} // namespace mbgl
+} // namespace mln

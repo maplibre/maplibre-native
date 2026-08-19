@@ -7,7 +7,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 struct SectionOptions {
     SectionOptions(double scale_,
@@ -145,4 +145,4 @@ private:
     bool hasNeedShapeTextVal = false;
 };
 
-} // namespace mbgl
+} // namespace mln

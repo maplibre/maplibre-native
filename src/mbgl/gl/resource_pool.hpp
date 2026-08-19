@@ -10,7 +10,7 @@
 #include <mbgl/util/lru_cache.hpp>
 #include <mbgl/util/size.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 class Context;
@@ -129,4 +129,4 @@ private:
 };
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

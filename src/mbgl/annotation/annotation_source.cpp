@@ -2,7 +2,7 @@
 #include <mbgl/annotation/annotation_source.hpp>
 #include <mbgl/style/layer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -24,7 +24,7 @@ std::optional<std::string> AnnotationSource::Impl::getAttribution() const {
     return {};
 }
 
-bool AnnotationSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
+bool AnnotationSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
     return !std::strcmp(info->type, "line") || !std::strcmp(info->type, "symbol") || !std::strcmp(info->type, "fill");
 }
 
@@ -32,4 +32,4 @@ Mutable<Source::Impl> AnnotationSource::createMutable() const noexcept {
     return staticMutableCast<Source::Impl>(makeMutable<Impl>(impl()));
 }
 
-} // namespace mbgl
+} // namespace mln

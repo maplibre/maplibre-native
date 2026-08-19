@@ -8,7 +8,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class HeatmapLayerTweaker;
 class HeatmapTextureLayerTweaker;
@@ -74,4 +74,4 @@ private:
     LayerTweakerPtr textureTweaker;
 };
 
-} // namespace mbgl
+} // namespace mln

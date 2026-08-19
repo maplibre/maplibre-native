@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 TileCache::~TileCache() {
     MLN_TRACE_FUNC();
@@ -164,4 +164,4 @@ void TileCache::clear() {
     tiles.clear();
 }
 
-} // namespace mbgl
+} // namespace mln

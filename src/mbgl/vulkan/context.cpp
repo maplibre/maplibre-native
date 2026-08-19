@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 // Maximum number of vertex attributes, per vertex descriptor
@@ -149,7 +149,7 @@ void Context::destroyResources() {
     try {
         backend.getDevice()->waitIdle(backend.getDispatcher());
     } catch (const vk::DeviceLostError& error) {
-        Log::Error(mbgl::Event::Render, "Vulkan device lost during context shutdown");
+        Log::Error(mln::Event::Render, "Vulkan device lost during context shutdown");
     }
 
     for (auto& frame : frameResources) {
@@ -203,7 +203,7 @@ void Context::submitOneTimeCommand(const vk::UniqueCommandBuffer& commandBuffer)
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
     const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
-        mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
+        mln::Log::Error(mln::Event::Render, "OneTimeCommand - Wait fence failed");
     }
 }
 
@@ -248,7 +248,7 @@ void Context::waitFrame() const {
     const vk::Result waitFenceResult = device->waitForFences(
         1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
     if (waitFenceResult != vk::Result::eSuccess) {
-        mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
+        mln::Log::Error(mln::Event::Render, "Wait fence failed");
     }
 }
 
@@ -371,7 +371,7 @@ void Context::submitFrame() {
 
     const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get(), dispatcher);
     if (resetFenceResult != vk::Result::eSuccess) {
-        mbgl::Log::Error(mbgl::Event::Render, "Reset fence failed");
+        mln::Log::Error(mln::Event::Render, "Reset fence failed");
     }
 
     graphicsQueue.submit(submitInfo, frame.flightFrameFence.get(), dispatcher);
@@ -412,7 +412,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
                                            const std::string_view vertex,
                                            const std::string_view fragment,
                                            const ProgramParameters& programParameters,
-                                           const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
+                                           const mln::unordered_map<std::string, std::string>& additionalDefines) {
     auto program = std::make_unique<ShaderProgram>(
         shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
     return program;
@@ -844,4 +844,4 @@ void Context::FrameResources::runDeletionQueue(Context& context) {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

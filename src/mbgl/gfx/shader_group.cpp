@@ -1,7 +1,7 @@
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 bool ShaderGroup::isShader(const std::string& shaderName) const noexcept {
@@ -48,4 +48,4 @@ bool ShaderGroup::registerShader(std::shared_ptr<Shader>&& shader, const std::st
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

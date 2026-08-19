@@ -2,7 +2,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 CFTimeInterval toCFTimeInterval(Duration duration) {
@@ -50,4 +50,4 @@ void Timer::stop() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

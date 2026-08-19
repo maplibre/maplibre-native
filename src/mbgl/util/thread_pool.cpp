@@ -7,7 +7,7 @@
 #include <mbgl/util/platform.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 
 ThreadedSchedulerBase::~ThreadedSchedulerBase() = default;
 
@@ -171,4 +171,4 @@ void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

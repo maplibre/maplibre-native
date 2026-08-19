@@ -34,7 +34,7 @@ bool inEmulator() {
 } // namespace
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 MapRenderer::MapRenderer(jni::JNIEnv& _env,
@@ -378,4 +378,4 @@ MapRenderer& MapRenderer::getNativePeer(JNIEnv& env, const jni::Object<MapRender
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

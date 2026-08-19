@@ -4,7 +4,7 @@
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
@@ -136,7 +136,7 @@ void DynamicTexture::uploadImage(const uint8_t* pixelData, gfx::TextureHandle& t
 
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
     if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
+        mln::Log::Error(mln::Event::Render, "Vulkan texture buffer allocation failed");
         throw std::bad_alloc();
     }
 
@@ -198,4 +198,4 @@ bool DynamicTexture::removeTexture(const gfx::TextureHandle& texHandle) {
 #endif
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

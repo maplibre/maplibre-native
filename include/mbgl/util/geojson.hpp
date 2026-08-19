@@ -3,10 +3,10 @@
 #include <mapbox/geojson.hpp>
 #include <mbgl/util/feature.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using GeoJSON = mapbox::geojson::geojson;
 using FeatureCollection = mapbox::geojson::feature_collection;
 using FeatureExtensionValue = mapbox::util::variant<Value, FeatureCollection>;
 
-} // namespace mbgl
+} // namespace mln

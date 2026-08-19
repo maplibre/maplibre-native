@@ -4,7 +4,7 @@
 
 #include <memory>
 
-using namespace mbgl::util;
+using namespace mln::util;
 
 TEST(URL, percentEncode) {
     EXPECT_EQ("%22%c3%a9nc%c3%b8%c3%b0ing%22", percentEncode("\"éncøðing\""));

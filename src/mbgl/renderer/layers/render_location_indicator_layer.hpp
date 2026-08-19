@@ -9,7 +9,7 @@
 #define MLN_DRAWABLE_LOCATION_INDICATOR
 #endif
 
-namespace mbgl {
+namespace mln {
 class RenderLocationIndicatorImpl;
 class RenderLocationIndicatorLayer final : public RenderLayer {
 public:
@@ -60,4 +60,4 @@ private:
 #endif
 };
 
-} // namespace mbgl
+} // namespace mln

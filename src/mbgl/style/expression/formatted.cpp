@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/conversion/constant.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -44,7 +44,7 @@ bool Formatted::empty() const {
     });
 }
 
-mbgl::Value Formatted::toObject() const {
+mln::Value Formatted::toObject() const {
     mapbox::base::ValueObject result;
     mapbox::base::ValueArray sectionValues;
     sectionValues.reserve(sections.size());
@@ -77,10 +77,10 @@ mbgl::Value Formatted::toObject() const {
 
 namespace conversion {
 
-using namespace mbgl::style::expression;
+using namespace mln::style::expression;
 
 std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& value, Error& error) const {
-    using namespace mbgl::style::expression;
+    using namespace mln::style::expression;
 
     if (isArray(value)) {
         std::vector<FormattedSection> sections;
@@ -184,4 +184,4 @@ std::optional<Formatted> Converter<Formatted>::operator()(const Convertible& val
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

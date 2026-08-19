@@ -10,7 +10,7 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/mapbox.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 RasterSource::RasterSource(std::string id,
@@ -19,9 +19,9 @@ RasterSource::RasterSource(std::string id,
                            SourceType sourceType)
     : TileSource(id, urlOrTileset_, tileSize, sourceType) {}
 
-bool RasterSource::supportsLayerType(const mbgl::style::LayerTypeInfo* info) const {
-    return mbgl::underlying_type(Tile::Kind::Raster) == mbgl::underlying_type(info->tileKind);
+bool RasterSource::supportsLayerType(const mln::style::LayerTypeInfo* info) const {
+    return mln::underlying_type(Tile::Kind::Raster) == mln::underlying_type(info->tileKind);
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

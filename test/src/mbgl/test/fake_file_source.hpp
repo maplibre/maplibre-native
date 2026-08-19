@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <list>
 
-namespace mbgl {
+namespace mln {
 
 /*
    FakeFileSource is similar to StubFileSource, but it follows a post hoc,
@@ -102,4 +102,4 @@ public:
                                                                               ClientOptions());
 };
 
-} // namespace mbgl
+} // namespace mln

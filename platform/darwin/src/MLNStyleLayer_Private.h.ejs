@@ -13,12 +13,12 @@
 
 #include <mbgl/layermanager/<%- type.replace('-', '_') %>_layer_factory.hpp>
 
-namespace mbgl {
+namespace mln {
 
-class <%- camelize(type) %>StyleLayerPeerFactory : public LayerPeerFactory, public mbgl::<%- camelize(type) %>LayerFactory {
+class <%- camelize(type) %>StyleLayerPeerFactory : public LayerPeerFactory, public mln::<%- camelize(type) %>LayerFactory {
     // LayerPeerFactory overrides.
     LayerFactory* getCoreLayerFactory() final { return this; }
     virtual MLNStyleLayer* createPeer(style::Layer*) final;
 };
 
-}  // namespace mbgl
+}  // namespace mln

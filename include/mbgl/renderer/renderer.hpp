@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class RendererObserver;
 class RenderedQueryOptions;
@@ -126,4 +126,4 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

@@ -29,7 +29,7 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -78,7 +78,7 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
               evaluated.get<style::LineWidth>().constantOr(1.0) > 0)
                  ? RenderPass::Translucent
                  : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
@@ -254,7 +254,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
-                                                          ~mbgl::underlying_type(RenderPass::Opaque));
+                                                          ~mln::underlying_type(RenderPass::Opaque));
 
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
@@ -352,7 +352,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto addDrawable = [&](std::unique_ptr<gfx::Drawable>&& drawable, LineLayerTweaker::LineType type) {
             drawable->setTileID(tileID);
-            drawable->setType(mbgl::underlying_type(type));
+            drawable->setType(mln::underlying_type(type));
             drawable->setLayerTweaker(layerTweaker);
             drawable->setRenderTile(renderTilesOwner, &tile);
             drawable->setBinders(renderData->bucket, &paintPropertyBinders);
@@ -511,4 +511,4 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

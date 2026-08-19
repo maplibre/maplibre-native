@@ -34,7 +34,7 @@
 #include <mbgl/vulkan/context.hpp>
 #endif // MLN_RENDER_BACKEND_VULKAN
 
-namespace mbgl {
+namespace mln {
 
 TransformParameters::TransformParameters(const TransformState& state_)
     : state(state_) {
@@ -465,4 +465,4 @@ gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

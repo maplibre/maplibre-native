@@ -26,7 +26,7 @@
 #include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
 #endif
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

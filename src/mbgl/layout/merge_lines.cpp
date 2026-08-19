@@ -2,7 +2,7 @@
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/util/hash.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // Map of key -> index into features
@@ -89,4 +89,4 @@ void mergeLines(std::vector<SymbolFeature>& features) {
 }
 
 } // end namespace util
-} // end namespace mbgl
+} // end namespace mln

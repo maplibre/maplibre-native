@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 namespace util {
 
@@ -52,4 +52,4 @@ inline std::string transformURL(const std::string& tpl, const std::string& url) 
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

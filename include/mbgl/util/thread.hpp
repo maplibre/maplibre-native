@@ -16,7 +16,7 @@
 #include <thread>
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 /// @brief Manages a thread with `Object`.
@@ -165,4 +165,4 @@ private:
 std::function<void()> makeThreadPrioritySetter(std::string threadType);
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

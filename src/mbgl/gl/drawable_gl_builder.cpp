@@ -8,7 +8,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 gfx::UniqueDrawable DrawableGLBuilder::createDrawable() const {
@@ -47,4 +47,4 @@ void DrawableGLBuilder::init() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

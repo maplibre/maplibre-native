@@ -1,7 +1,7 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 
 int runBenchmark(int argc, char* argv[]);
 
-} // namespace mbgl
+} // namespace mln

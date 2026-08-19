@@ -8,7 +8,7 @@
 
 #include <cstring>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 CommandEncoder::~CommandEncoder() {
@@ -56,4 +56,4 @@ void CommandEncoder::popDebugGroup() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

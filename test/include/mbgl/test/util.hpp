@@ -56,7 +56,7 @@ namespace httplib {
 class Server;
 } // namespace httplib
 
-namespace mbgl {
+namespace mln {
 namespace test {
 
 class HttpServer {
@@ -82,4 +82,4 @@ void checkImages(const std::vector<std::string>& possibleExpected,
 double getImageDiff(const std::string& base, const PremultipliedImage& actual, double pixelThreshold = 0);
 
 } // namespace test
-} // namespace mbgl
+} // namespace mln

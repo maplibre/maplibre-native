@@ -8,7 +8,7 @@
 #include <vector>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 using ImageStretch = std::pair<float, float>;
@@ -93,4 +93,4 @@ public:
 };
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

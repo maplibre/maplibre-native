@@ -4,7 +4,7 @@
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class AsyncRequest;
 
@@ -40,4 +40,4 @@ inline bool Source::is<TileSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

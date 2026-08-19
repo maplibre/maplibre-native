@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 namespace impl {
 
@@ -33,4 +33,4 @@ public:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

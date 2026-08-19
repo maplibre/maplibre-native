@@ -5,7 +5,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 class LatLng;
 class AsyncRequest;
 
@@ -30,7 +30,7 @@ public:
 
     void loadDescription(FileSource&) final;
 
-    bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
+    bool supportsLayerType(const mln::style::LayerTypeInfo*) const override;
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
@@ -50,4 +50,4 @@ inline bool Source::is<ImageSource>() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

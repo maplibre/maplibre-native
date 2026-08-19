@@ -7,7 +7,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class ProjectedCollisionBox {
 public:
@@ -131,4 +131,4 @@ private:
                       float overscaling);
 };
 
-} // namespace mbgl
+} // namespace mln

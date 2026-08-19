@@ -10,8 +10,8 @@
 #include <filesystem>
 #include <fstream>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 TEST(Expression, IsExpression) {
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> spec;

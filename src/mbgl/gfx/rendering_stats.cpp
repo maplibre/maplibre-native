@@ -11,7 +11,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 bool RenderingStats::isZero() const {
@@ -135,7 +135,7 @@ void RenderingStatsView::create(style::Style& style) {
                 return;
             }
 
-            mbgl::FeatureCollection features;
+            mln::FeatureCollection features;
 
             mapbox::geojson::feature feature;
             feature.geometry = mapbox::geometry::geometry<double>(Point<double>{0, 0});
@@ -160,11 +160,11 @@ void RenderingStatsView::create(style::Style& style) {
         infoLayer->setTextColor(options.textColor);
         infoLayer->setTextSize(options.textSize);
         infoLayer->setTextMaxWidth(300.0f);
-        infoLayer->setTextJustify(mbgl::style::TextJustifyType::Left);
-        infoLayer->setTextAnchor(mbgl::style::SymbolAnchorType::TopRight);
+        infoLayer->setTextJustify(mln::style::TextJustifyType::Left);
+        infoLayer->setTextAnchor(mln::style::SymbolAnchorType::TopRight);
 
-        const float translation = mbgl::util::EXTENT / 2.0f - 100.0f;
-        infoLayer->setTextTranslateAnchor(mbgl::style::TranslateAnchorType::Viewport);
+        const float translation = mln::util::EXTENT / 2.0f - 100.0f;
+        infoLayer->setTextTranslateAnchor(mln::style::TranslateAnchorType::Viewport);
         infoLayer->setTextTranslate(std::array<float, 2>{translation, translation});
 
         style.addLayer(std::move(infoLayer));
@@ -176,8 +176,8 @@ void RenderingStatsView::destroy(style::Style& style) {
     style.removeSource(sourceID);
 }
 
-mbgl::style::SymbolLayer* RenderingStatsView::getLayer(style::Style& style) {
-    return static_cast<mbgl::style::SymbolLayer*>(style.getLayer(layerID));
+mln::style::SymbolLayer* RenderingStatsView::getLayer(style::Style& style) {
+    return static_cast<mln::style::SymbolLayer*>(style.getLayer(layerID));
 }
 
 namespace {
@@ -326,7 +326,7 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     printNumber(ss, "Stencil buffer clears", stats.stencilClears, true);
     printNumber(ss, "Stencil buffer updates", stats.stencilUpdates, options.verbose);
 
-    layer->setTextField(mbgl::style::expression::Formatted(ss.str().c_str()));
+    layer->setTextField(mln::style::expression::Formatted(ss.str().c_str()));
 
     frameCount = 0;
     encodingTime = 0.0;
@@ -338,4 +338,4 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

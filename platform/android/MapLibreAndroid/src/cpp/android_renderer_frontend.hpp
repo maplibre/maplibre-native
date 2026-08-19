@@ -16,7 +16,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 
 class RenderedQueryOptions;
 class SourceQueryOptions;
@@ -71,7 +71,7 @@ public:
                                                  const Feature& feature,
                                                  const std::string& extension,
                                                  const std::string& extensionField,
-                                                 const std::optional<std::map<std::string, mbgl::Value>>& args) const;
+                                                 const std::optional<std::map<std::string, mln::Value>>& args) const;
 
     // Memory
     void setTileCacheEnabled(bool);
@@ -86,4 +86,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -8,7 +8,7 @@
 
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 
 inline std::exception_ptr getCantLoadTileError() {
     return std::make_exception_ptr(std::runtime_error("Can't load tile."));
@@ -215,4 +215,4 @@ void TileLoader<T>::loadFromNetwork() {
     });
 }
 
-} // namespace mbgl
+} // namespace mln

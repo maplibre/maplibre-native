@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 namespace detail {
 
@@ -13,4 +13,4 @@ std::string preprocessWGSL(const std::string& source, const std::unordered_map<s
 
 } // namespace detail
 } // namespace webgpu
-} // namespace mbgl
+} // namespace mln

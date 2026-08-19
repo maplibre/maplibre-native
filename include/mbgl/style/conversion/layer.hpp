@@ -6,7 +6,7 @@
 #include <memory>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -20,4 +20,4 @@ std::optional<Error> setPaintProperties(Layer& layer, const Convertible& value);
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

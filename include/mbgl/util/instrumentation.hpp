@@ -63,13 +63,13 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 
 // TracyOpenGL.hpp assumes OpenGL functions are in the global namespace
 // Temporarily expose the functions to TracyOpenGL.hpp then undef
-#define glGenQueries mbgl::gl::extension::glGenQueries
-#define glGetQueryiv mbgl::gl::extension::glGetQueryiv
-#define glGetQueryObjectiv mbgl::gl::extension::glGetQueryObjectiv
-#define glGetInteger64v mbgl::gl::extension::glGetInteger64v
-#define glQueryCounter mbgl::gl::extension::glQueryCounter
-#define glGetQueryObjectui64v mbgl::gl::extension::glGetQueryObjectui64v
-#define GLint mbgl::platform::GLint
+#define glGenQueries mln::gl::extension::glGenQueries
+#define glGetQueryiv mln::gl::extension::glGetQueryiv
+#define glGetQueryObjectiv mln::gl::extension::glGetQueryObjectiv
+#define glGetInteger64v mln::gl::extension::glGetInteger64v
+#define glQueryCounter mln::gl::extension::glQueryCounter
+#define glGetQueryObjectui64v mln::gl::extension::glGetQueryObjectui64v
+#define GLint mln::platform::GLint
 
 #include "tracy/TracyOpenGL.hpp"
 
@@ -131,6 +131,6 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 
 #endif // MLN_TRACY_ENABLE
 
-namespace mbgl::instrumentation {
+namespace mln::instrumentation {
 void setThreadName(const std::string& name);
 };

@@ -5,7 +5,7 @@
 #include <webp/types.h>
 #include <webp/decode.h>
 
-namespace mbgl {
+namespace mln {
 
 PremultipliedImage decodeWEBP(const uint8_t* data, size_t size) {
     int32_t width, height;
@@ -23,4 +23,4 @@ PremultipliedImage decodeWEBP(const uint8_t* data, size_t size) {
     return util::premultiply(std::move(img));
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -23,7 +23,7 @@
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -66,7 +66,7 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
 
     passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0) ? (RenderPass::Translucent | RenderPass::Pass3D)
                                                                       : RenderPass::None;
-    properties->renderPasses = mbgl::underlying_type(passes);
+    properties->renderPasses = mln::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 
     if (layerTweaker) {
@@ -211,7 +211,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
 
-    if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
+    if (!(mln::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
     }
 
@@ -393,4 +393,4 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

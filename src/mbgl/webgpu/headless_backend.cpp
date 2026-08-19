@@ -12,7 +12,7 @@
 #include <wgpu.h>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace webgpu {
 
 class HeadlessRenderableResource final : public webgpu::RenderableResource {
@@ -37,7 +37,7 @@ public:
         // For headless rendering, we don't need to swap
     }
 
-    const mbgl::webgpu::RendererBackend& getBackend() const override { return context.getBackend(); }
+    const mln::webgpu::RendererBackend& getBackend() const override { return context.getBackend(); }
 
     const WGPUCommandEncoder& getCommandEncoder() const override {
         // This will be set by the command encoder when needed
@@ -374,7 +374,7 @@ void* HeadlessBackend::getDepthStencilView() {
     return nullptr;
 }
 
-mbgl::Size HeadlessBackend::getFramebufferSize() const {
+mln::Size HeadlessBackend::getFramebufferSize() const {
     if (impl) {
         return impl->framebufferSize;
     }
@@ -392,4 +392,4 @@ std::unique_ptr<gfx::HeadlessBackend> Backend::Create<Backend::Type::WebGPU>(
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

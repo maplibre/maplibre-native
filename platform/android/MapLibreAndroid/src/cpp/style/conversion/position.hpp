@@ -6,20 +6,20 @@
 #include <mbgl/style/position.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
 template <>
-struct Converter<jni::Local<jni::Object<Position>>, mbgl::style::Position> {
-    Result<jni::Local<jni::Object<Position>>> operator()(jni::JNIEnv &env, const mbgl::style::Position &value) const;
+struct Converter<jni::Local<jni::Object<Position>>, mln::style::Position> {
+    Result<jni::Local<jni::Object<Position>>> operator()(jni::JNIEnv &env, const mln::style::Position &value) const;
 };
 
 template <>
-struct Converter<mbgl::style::Position, jni::Object<Position>> {
-    Result<mbgl::style::Position> operator()(jni::JNIEnv &env, const jni::Object<Position> &value) const;
+struct Converter<mln::style::Position, jni::Object<Position>> {
+    Result<mln::style::Position> operator()(jni::JNIEnv &env, const jni::Object<Position> &value) const;
 };
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

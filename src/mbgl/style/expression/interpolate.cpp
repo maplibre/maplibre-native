@@ -2,11 +2,11 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 template <typename T>
 class InterpolateImpl : public Interpolate {
@@ -157,7 +157,7 @@ ParseResult parseInterpolate(const Convertible& value, ParsingContext& ctx) {
     double previous = -std::numeric_limits<double>::infinity();
 
     for (std::size_t i = 3; i + 1 < length; i += 2) {
-        const std::optional<mbgl::Value> labelValue = toValue(arrayMember(value, i));
+        const std::optional<mln::Value> labelValue = toValue(arrayMember(value, i));
         std::optional<double> label;
         std::optional<std::string> labelError;
         if (labelValue) {
@@ -275,16 +275,16 @@ std::vector<std::optional<Value>> Interpolate::possibleOutputs() const {
     return result;
 }
 
-mbgl::Value Interpolate::serialize() const {
-    std::vector<mbgl::Value> serialized;
+mln::Value Interpolate::serialize() const {
+    std::vector<mln::Value> serialized;
     serialized.emplace_back(getOperator());
 
     interpolator.match(
         [&](const ExponentialInterpolator& exponential) {
             if (exponential.base == 1) {
-                serialized.emplace_back(std::vector<mbgl::Value>{{std::string("linear")}});
+                serialized.emplace_back(std::vector<mln::Value>{{std::string("linear")}});
             } else {
-                serialized.emplace_back(std::vector<mbgl::Value>{{std::string("exponential"), exponential.base}});
+                serialized.emplace_back(std::vector<mln::Value>{{std::string("exponential"), exponential.base}});
             }
         },
         [&](const CubicBezierInterpolator& cubicBezier) {
@@ -292,7 +292,7 @@ mbgl::Value Interpolate::serialize() const {
             auto p1 = cubicBezier.ub.getP1();
             auto p2 = cubicBezier.ub.getP2();
             serialized.emplace_back(
-                std::vector<mbgl::Value>{{cubicBezierTag, p1.first, p1.second, p2.first, p2.second}});
+                std::vector<mln::Value>{{cubicBezierTag, p1.first, p1.second, p2.first, p2.second}});
         });
     serialized.emplace_back(input->serialize());
     for (auto& entry : stops) {
@@ -304,4 +304,4 @@ mbgl::Value Interpolate::serialize() const {
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

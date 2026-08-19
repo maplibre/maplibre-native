@@ -10,8 +10,8 @@
 
 @implementation NSCompoundPredicate (MLNAdditions)
 
-- (std::vector<mbgl::style::Filter>)mgl_subfilters {
-  std::vector<mbgl::style::Filter> filters;
+- (std::vector<mln::style::Filter>)mgl_subfilters {
+  std::vector<mln::style::Filter> filters;
   for (NSPredicate *predicate in self.subpredicates) {
     filters.push_back(predicate.mgl_filter);
   }

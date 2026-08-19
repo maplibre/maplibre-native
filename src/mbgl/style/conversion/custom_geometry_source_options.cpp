@@ -1,7 +1,7 @@
 #include <mbgl/style/conversion/custom_geometry_source_options.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -74,4 +74,4 @@ std::optional<CustomGeometrySource::Options> Converter<CustomGeometrySource::Opt
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

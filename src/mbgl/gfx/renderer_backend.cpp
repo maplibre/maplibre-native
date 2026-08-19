@@ -2,7 +2,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/context.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 RendererBackend::RendererBackend(const ContextMode contextMode_)
@@ -23,4 +23,4 @@ gfx::Context& RendererBackend::getContext() {
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

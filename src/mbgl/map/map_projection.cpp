@@ -3,7 +3,7 @@
 #include <mbgl/map/transform.hpp>
 #include <mbgl/math/angles.hpp>
 
-namespace mbgl {
+namespace mln {
 
 MapProjection::MapProjection(const Map& map)
     : transform(std::make_unique<Transform>(map.getTransfromState())) {}
@@ -31,9 +31,9 @@ CameraOptions MapProjection::getCamera() const {
 }
 
 void MapProjection::setVisibleCoordinates(const std::vector<LatLng>& latLngs, const EdgeInsets& padding) {
-    transform->jumpTo(mbgl::cameraForLatLngs(latLngs, *transform, padding)
+    transform->jumpTo(mln::cameraForLatLngs(latLngs, *transform, padding)
                           .withBearing(util::rad2deg(-transform->getBearing()))
                           .withPitch(util::rad2deg(transform->getPitch())));
 }
 
-} // namespace mbgl
+} // namespace mln

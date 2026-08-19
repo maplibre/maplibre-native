@@ -3,7 +3,7 @@
 
 #include <mbgl/util/string.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(NumberConversions, number_to_string) {
     EXPECT_EQ("0", util::toString(0));

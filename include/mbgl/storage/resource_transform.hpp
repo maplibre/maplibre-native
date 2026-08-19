@@ -5,7 +5,7 @@
 #include <functional>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class ResourceTransform {
 public:
@@ -20,4 +20,4 @@ private:
     TransformCallback transformCallback;
 };
 
-} // namespace mbgl
+} // namespace mln

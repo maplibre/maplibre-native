@@ -13,7 +13,7 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -77,4 +77,4 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-} // namespace mbgl
+} // namespace mln

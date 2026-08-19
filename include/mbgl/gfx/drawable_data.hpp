@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 
 namespace gfx {
 
@@ -14,4 +14,4 @@ public:
 using UniqueDrawableData = std::unique_ptr<DrawableData>;
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

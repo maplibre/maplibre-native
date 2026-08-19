@@ -3,7 +3,7 @@
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class VertexBufferResource;
 } // namespace gfx
@@ -64,4 +64,4 @@ private:
 };
 
 } // namespace mtl
-} // namespace mbgl
+} // namespace mln

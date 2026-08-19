@@ -3,8 +3,8 @@
 #include <mbgl/renderer/style_diff.hpp>
 #include <mbgl/style/layer_impl.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 struct TestLayerImpl : style::Layer::Impl {
     TestLayerImpl(std::string layerID, std::string sourceID)

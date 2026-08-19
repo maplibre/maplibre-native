@@ -9,7 +9,7 @@
 
 #include <numbers>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::numbers;
 
 static const double abs_double_error = 1e-7;

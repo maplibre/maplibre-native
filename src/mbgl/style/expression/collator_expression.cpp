@@ -4,7 +4,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace expression {
 
@@ -23,7 +23,7 @@ CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive
       diacriticSensitive(std::move(diacriticSensitive_)),
       locale(std::move(locale_)) {}
 
-using namespace mbgl::style::conversion;
+using namespace mln::style::conversion;
 
 ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& ctx) {
     if (arrayLength(value) != 2) {
@@ -93,14 +93,14 @@ bool CollatorExpression::operator==(const Expression& e) const noexcept {
     return false;
 }
 
-mbgl::Value CollatorExpression::serialize() const {
-    std::unordered_map<std::string, mbgl::Value> options;
+mln::Value CollatorExpression::serialize() const {
+    std::unordered_map<std::string, mln::Value> options;
     options["case-sensitive"] = caseSensitive->serialize();
     options["diacritic-sensitive"] = diacriticSensitive->serialize();
     if (locale && *locale) {
         options["locale"] = (*locale)->serialize();
     }
-    return std::vector<mbgl::Value>{{std::string("collator"), options}};
+    return std::vector<mln::Value>{{std::string("collator"), options}};
 }
 
 EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) const {
@@ -128,4 +128,4 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
 
 } // namespace expression
 } // namespace style
-} // namespace mbgl
+} // namespace mln

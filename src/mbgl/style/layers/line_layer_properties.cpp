@@ -6,7 +6,7 @@
 
 #include <mbgl/style/layers/line_layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 LineLayerProperties::LineLayerProperties(
@@ -36,6 +36,6 @@ expression::Dependency LineLayerProperties::getDependencies() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln
 
 // clang-format on

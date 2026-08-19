@@ -20,7 +20,7 @@
 
 #include <cmath>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 class GeoJSONVTData final : public GeoJSONData {
@@ -165,4 +165,4 @@ bool GeoJSONSource::Impl::isUpdateSynchronous() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

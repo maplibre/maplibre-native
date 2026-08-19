@@ -1,7 +1,7 @@
 #include "logger.hpp"
 #include "java_types.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void Logger::registerNative(jni::JNIEnv& env) {
@@ -31,4 +31,4 @@ void Logger::log(jni::JNIEnv& env, EventSeverity severity, const std::string& ms
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

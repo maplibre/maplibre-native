@@ -3,7 +3,7 @@
 #include <android/bitmap.h>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class PixelGuard {
@@ -20,7 +20,7 @@ public:
     ~PixelGuard() {
         const int result = AndroidBitmap_unlockPixels(&env, jni::Unwrap(*bitmap));
         if (result != ANDROID_BITMAP_RESULT_SUCCESS) {
-            Log::Warning(mbgl::Event::General, "Bitmap decoding: could not unlock pixels");
+            Log::Warning(mln::Event::General, "Bitmap decoding: could not unlock pixels");
         }
     }
 
@@ -121,4 +121,4 @@ jni::Local<jni::Object<Bitmap>> Bitmap::Copy(jni::JNIEnv& env, const jni::Object
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

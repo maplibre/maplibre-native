@@ -25,7 +25,7 @@ inline float stof(const std::string &str) {
 
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 std::string toString(int64_t);
@@ -97,7 +97,7 @@ inline float stof(const std::string &str) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln
 
 // Android's libstdc++ doesn't have std::to_string()
 #if defined(__ANDROID__) && defined(__GLIBCXX__)
@@ -106,7 +106,7 @@ namespace std {
 
 template <typename T>
 inline std::string to_string(T value) {
-    return mbgl::util::toString(value);
+    return mln::util::toString(value);
 }
 
 } // namespace std

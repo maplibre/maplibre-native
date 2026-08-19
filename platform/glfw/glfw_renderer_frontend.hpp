@@ -5,26 +5,26 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 class Renderer;
-} // namespace mbgl
+} // namespace mln
 
-class GLFWRendererFrontend : public mbgl::RendererFrontend {
+class GLFWRendererFrontend : public mln::RendererFrontend {
 public:
-    GLFWRendererFrontend(std::unique_ptr<mbgl::Renderer>, GLFWView&);
+    GLFWRendererFrontend(std::unique_ptr<mln::Renderer>, GLFWView&);
     ~GLFWRendererFrontend() override;
 
     void reset() override;
-    void setObserver(mbgl::RendererObserver&) override;
+    void setObserver(mln::RendererObserver&) override;
 
-    void update(std::shared_ptr<mbgl::UpdateParameters>) override;
-    const mbgl::TaggedScheduler& getThreadPool() const override;
+    void update(std::shared_ptr<mln::UpdateParameters>) override;
+    const mln::TaggedScheduler& getThreadPool() const override;
     void render();
 
-    mbgl::Renderer* getRenderer();
+    mln::Renderer* getRenderer();
 
 private:
     GLFWView& glfwView;
-    std::unique_ptr<mbgl::Renderer> renderer;
-    std::shared_ptr<mbgl::UpdateParameters> updateParameters;
+    std::unique_ptr<mln::Renderer> renderer;
+    std::shared_ptr<mln::UpdateParameters> updateParameters;
 };

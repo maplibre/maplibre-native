@@ -48,7 +48,7 @@ constexpr auto CaptureFrameCount = 1;
 #include <mbgl/gl/drawable_gl.hpp>
 #endif // !MLN_RENDER_BACKEND_METAL
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -769,4 +769,4 @@ void Renderer::Impl::reduceMemoryUse() {
     backend.getContext().reduceMemoryUsage();
 }
 
-} // namespace mbgl
+} // namespace mln

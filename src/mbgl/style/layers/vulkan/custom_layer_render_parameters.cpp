@@ -7,23 +7,23 @@
 #include <mbgl/vulkan/render_pass.hpp>
 #include <mbgl/vulkan/renderable_resource.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace vulkan {
 
-CustomLayerRenderParameters::CustomLayerRenderParameters(const mbgl::PaintParameters& paintParameters)
-    : mbgl::style::CustomLayerRenderParameters(paintParameters),
-      dispatcher(static_cast<mbgl::vulkan::RendererBackend&>(paintParameters.backend).getDispatcher()) {
-    device = static_cast<mbgl::vulkan::RendererBackend&>(paintParameters.backend).getDevice().get();
-    auto& vulkanRenderPass = static_cast<mbgl::vulkan::RenderPass&>(*paintParameters.renderPass);
+CustomLayerRenderParameters::CustomLayerRenderParameters(const mln::PaintParameters& paintParameters)
+    : mln::style::CustomLayerRenderParameters(paintParameters),
+      dispatcher(static_cast<mln::vulkan::RendererBackend&>(paintParameters.backend).getDispatcher()) {
+    device = static_cast<mln::vulkan::RendererBackend&>(paintParameters.backend).getDevice().get();
+    auto& vulkanRenderPass = static_cast<mln::vulkan::RenderPass&>(*paintParameters.renderPass);
     commandBuffer = vulkanRenderPass.getEncoder().getCommandBuffer().get();
 
     const auto& renderable = paintParameters.backend.getDefaultRenderable();
-    const auto& resource = renderable.getResource<mbgl::vulkan::RenderableResource>();
+    const auto& resource = renderable.getResource<mln::vulkan::RenderableResource>();
     renderPass = resource.getRenderPass().get();
     screenPreRotationRadiansClockwise = resource.getRotation();
 }
 
 } // namespace vulkan
 } // namespace style
-} // namespace mbgl
+} // namespace mln

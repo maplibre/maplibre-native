@@ -6,7 +6,7 @@
 #include <mbgl/renderer/buckets/hillshade_bucket.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 
@@ -121,4 +121,4 @@ std::vector<Feature> RenderRasterDEMSource::querySourceFeatures(const SourceQuer
     return {};
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -2,12 +2,12 @@
 #import <mbgl/util/action_journal_options.hpp>
 
 @implementation MLNActionJournalOptions {
-  std::unique_ptr<mbgl::util::ActionJournalOptions> _actionJournalOptionsInternal;
+  std::unique_ptr<mln::util::ActionJournalOptions> _actionJournalOptionsInternal;
 }
 
 - (instancetype)init {
   if (self = [super init]) {
-    _actionJournalOptionsInternal = std::make_unique<mbgl::util::ActionJournalOptions>();
+    _actionJournalOptionsInternal = std::make_unique<mln::util::ActionJournalOptions>();
 
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
     _actionJournalOptionsInternal->withPath(
@@ -16,7 +16,7 @@
   return self;
 }
 
-- (mbgl::util::ActionJournalOptions)getCoreOptions {
+- (mln::util::ActionJournalOptions)getCoreOptions {
   return *_actionJournalOptionsInternal;
 }
 

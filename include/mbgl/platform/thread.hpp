@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 /// Called when a thread is created
@@ -10,4 +10,4 @@ void attachThread();
 void detachThread();
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

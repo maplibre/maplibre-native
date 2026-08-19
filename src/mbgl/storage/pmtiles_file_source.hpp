@@ -5,7 +5,7 @@
 #include <mbgl/util/client_options.hpp>
 #include <mbgl/util/thread.hpp>
 
-namespace mbgl {
+namespace mln {
 // File source for supporting .pmtiles maps
 class PMTilesFileSource : public FileSource {
 public:
@@ -26,4 +26,4 @@ private:
     std::unique_ptr<util::Thread<Impl>> thread; // impl
 };
 
-} // namespace mbgl
+} // namespace mln

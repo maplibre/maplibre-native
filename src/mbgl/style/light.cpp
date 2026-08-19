@@ -14,7 +14,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 namespace {
@@ -55,7 +55,7 @@ enum class Property : uint8_t {
 
 template <typename T>
 constexpr uint8_t toUint8(T t) noexcept {
-    return uint8_t(mbgl::underlying_type(t));
+    return uint8_t(mln::underlying_type(t));
 }
 
 constexpr const auto properties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
@@ -285,4 +285,4 @@ TransitionOptions Light::getPositionTransition() const {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

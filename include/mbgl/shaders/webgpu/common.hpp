@@ -3,7 +3,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/webgpu/shader_program.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 // The enum values are already defined in layer_ubo.hpp
@@ -187,4 +187,4 @@ fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

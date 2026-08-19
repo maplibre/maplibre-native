@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class VectorMLTTileData : public GeometryTileData {
 public:
@@ -25,4 +25,4 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-} // namespace mbgl
+} // namespace mln

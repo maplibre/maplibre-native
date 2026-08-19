@@ -10,13 +10,13 @@
 #include <vector>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class MapSnapshot {
 public:
-    using PointForFn = mbgl::MapSnapshotter::PointForFn;
-    using LatLngForFn = mbgl::MapSnapshotter::LatLngForFn;
+    using PointForFn = mln::MapSnapshotter::PointForFn;
+    using LatLngForFn = mln::MapSnapshotter::LatLngForFn;
 
     static constexpr auto Name() { return "org/maplibre/android/snapshotter/MapSnapshot"; };
 
@@ -40,9 +40,9 @@ public:
 
 private:
     float pixelRatio;
-    mbgl::MapSnapshotter::PointForFn pointForFn;
-    mbgl::MapSnapshotter::LatLngForFn latLngForFn;
+    mln::MapSnapshotter::PointForFn pointForFn;
+    mln::MapSnapshotter::LatLngForFn latLngForFn;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

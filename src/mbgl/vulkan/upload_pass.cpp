@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace mbgl {
+namespace mln {
 namespace vulkan {
 
 UploadPass::UploadPass(gfx::Renderable&, CommandEncoder& commandEncoder_, const char* name)
@@ -191,4 +191,4 @@ const gfx::Context& UploadPass::getContext() const {
 }
 
 } // namespace vulkan
-} // namespace mbgl
+} // namespace mln

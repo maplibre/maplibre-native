@@ -12,18 +12,18 @@
 struct MockTileData;
 
 struct MockSource {
-    mbgl::Range<uint8_t> zoomRange{0, 16};
-    std::map<mbgl::OverscaledTileID, std::unique_ptr<MockTileData>> dataTiles;
-    std::set<mbgl::OverscaledTileID> idealTiles;
+    mln::Range<uint8_t> zoomRange{0, 16};
+    std::map<mln::OverscaledTileID, std::unique_ptr<MockTileData>> dataTiles;
+    std::set<mln::OverscaledTileID> idealTiles;
 
     // Test API
-    inline MockTileData* createTileData(const mbgl::OverscaledTileID& tileID);
+    inline MockTileData* createTileData(const mln::OverscaledTileID& tileID);
 };
 
 struct MockBucket {};
 
 struct MockTileData {
-    MockTileData(const mbgl::OverscaledTileID& tileID_)
+    MockTileData(const mln::OverscaledTileID& tileID_)
         : tileID(tileID_) {}
 
     bool hasTriedCache() const { return triedOptional; }
@@ -35,10 +35,10 @@ struct MockTileData {
     bool renderable = false;
     bool triedOptional = false;
     bool loaded = false;
-    const mbgl::OverscaledTileID tileID;
+    const mln::OverscaledTileID tileID;
 };
 
-MockTileData* MockSource::createTileData(const mbgl::OverscaledTileID& tileID) {
+MockTileData* MockSource::createTileData(const mln::OverscaledTileID& tileID) {
     // Replace the existing MockTileData object, if any.
     return (dataTiles[tileID] = std::make_unique<MockTileData>(tileID)).get();
 }

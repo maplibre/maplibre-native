@@ -14,7 +14,7 @@
 #include <QUrl>
 #include <QVector>
 
-namespace mbgl {
+namespace mln {
 
 class HTTPRequest;
 
@@ -44,4 +44,4 @@ private:
     ClientOptions m_clientOptions;
 };
 
-} // namespace mbgl
+} // namespace mln

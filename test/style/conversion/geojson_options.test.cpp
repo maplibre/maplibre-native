@@ -5,8 +5,8 @@
 
 #include <mbgl/util/logging.hpp>
 
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(GeoJSONOptions, Basic) {
     Error error;

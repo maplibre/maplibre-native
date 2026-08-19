@@ -9,7 +9,7 @@
 #include <set>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 template <class T>
 class Actor;
@@ -99,4 +99,4 @@ private:
     std::set<std::string> pendingRequests;
 };
 
-} // namespace mbgl
+} // namespace mln

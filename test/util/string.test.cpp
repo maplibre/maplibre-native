@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(ToString, FloatingPoint) {
     EXPECT_EQ("0", util::toString(0.0));

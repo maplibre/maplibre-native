@@ -6,7 +6,7 @@
 
 #include <fstream>
 
-namespace mbgl {
+namespace mln {
 
 class Map;
 class Scheduler;
@@ -120,4 +120,4 @@ protected:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

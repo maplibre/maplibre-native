@@ -5,7 +5,7 @@
 
 #include <utility>
 
-namespace mbgl {
+namespace mln {
 
 VectorTile::VectorTile(const OverscaledTileID& id_,
                        std::string sourceID_,
@@ -30,4 +30,4 @@ void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
     expires = std::move(expires_);
 }
 
-} // namespace mbgl
+} // namespace mln

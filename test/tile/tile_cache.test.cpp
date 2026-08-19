@@ -24,7 +24,7 @@
 
 #include <memory>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

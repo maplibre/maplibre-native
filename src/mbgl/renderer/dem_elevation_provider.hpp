@@ -6,7 +6,7 @@
 
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 
 class RenderSource;
 
@@ -42,4 +42,4 @@ private:
     std::optional<Range<double>> loadedRange;
 };
 
-} // namespace mbgl
+} // namespace mln

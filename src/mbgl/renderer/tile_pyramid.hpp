@@ -17,7 +17,7 @@
 #include <vector>
 #include <map>
 
-namespace mbgl {
+namespace mln {
 
 class PaintParameters;
 class TransformState;
@@ -56,7 +56,7 @@ public:
         const std::unordered_map<std::string, const RenderLayer*>&,
         const RenderedQueryOptions& options,
         const mat4& projMatrix,
-        const mbgl::SourceFeatureState& featureState) const;
+        const mln::SourceFeatureState& featureState) const;
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const;
 
@@ -87,4 +87,4 @@ private:
     bool cacheEnabled = true;
 };
 
-} // namespace mbgl
+} // namespace mln

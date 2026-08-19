@@ -11,7 +11,7 @@
 #include <mbgl/storage/offline_schema.hpp>
 #include <mbgl/storage/merge_sideloaded.hpp>
 
-namespace mbgl {
+namespace mln {
 
 // Single-point transformer for offline storage keys. For sources where the URL is
 // not enough to guarantee uniqueness (eg. PMTiles where all requests resolve to
@@ -1528,4 +1528,4 @@ void OfflineDatabase::updateAmbientCacheSize(DatabaseSizeChangeStats& stats) {
     }
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -10,7 +10,7 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/mapbox.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 
 TileSource::TileSource(std::string id,
@@ -101,4 +101,4 @@ Mutable<Source::Impl> TileSource::createMutable() const noexcept {
 }
 
 } // namespace style
-} // namespace mbgl
+} // namespace mln

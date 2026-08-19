@@ -17,7 +17,7 @@
 #include <optional>
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 class Bucket;
 class Color;
@@ -83,21 +83,21 @@ public:
     virtual void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
     /// The pass on which we'll be rendered
-    mbgl::RenderPass getRenderPass() const { return renderPass; }
+    mln::RenderPass getRenderPass() const { return renderPass; }
 
     /// Sets the render passes
-    void setRenderPass(mbgl::RenderPass value) { renderPass = value; }
+    void setRenderPass(mln::RenderPass value) { renderPass = value; }
 
     /// Test whether to draw this drawable in a given render pass.
-    bool hasRenderPass(const mbgl::RenderPass value) const {
-        return (mbgl::underlying_type(renderPass) & mbgl::underlying_type(value)) != 0;
+    bool hasRenderPass(const mln::RenderPass value) const {
+        return (mln::underlying_type(renderPass) & mln::underlying_type(value)) != 0;
     }
 
     /// Test whether to draw this drawable in a given render pass.
     /// If multiple render pass bits are set, all must be present.
-    bool hasAllRenderPasses(const mbgl::RenderPass value) const {
-        const auto underlying_value = mbgl::underlying_type(value);
-        return (mbgl::underlying_type(renderPass) & underlying_value) == underlying_value;
+    bool hasAllRenderPasses(const mln::RenderPass value) const {
+        const auto underlying_value = mln::underlying_type(value);
+        return (mln::underlying_type(renderPass) & underlying_value) == underlying_value;
     }
 
     /// Width for lines
@@ -259,7 +259,7 @@ public:
     const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
 
     /// Get origin point
-    const std::optional<mbgl::Point<double>>& getOrigin() const { return origin; }
+    const std::optional<mln::Point<double>>& getOrigin() const { return origin; }
 
     /// Set origin point
     void setOrigin(std::optional<Point<double>> p) { origin = std::move(p); }
@@ -288,7 +288,7 @@ protected:
     std::string name;
     const util::SimpleIdentity uniqueID;
     gfx::ShaderProgramBasePtr shader;
-    mbgl::RenderPass renderPass;
+    mln::RenderPass renderPass;
     std::optional<OverscaledTileID> tileID;
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
@@ -307,7 +307,7 @@ protected:
     LayerTweakerPtr layerTweaker;
 
     std::size_t type = 0;
-    std::optional<mbgl::Point<double>> origin;
+    std::optional<mln::Point<double>> origin;
     uint32_t uboIndex = 0;
 };
 
@@ -340,4 +340,4 @@ private:
 };
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

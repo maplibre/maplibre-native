@@ -11,7 +11,7 @@ using CGDataProviderHandle = CFHandle<CGDataProviderRef, CGDataProviderRef, CGDa
 using CGColorSpaceHandle = CFHandle<CGColorSpaceRef, CGColorSpaceRef, CGColorSpaceRelease>;
 using CGContextHandle = CFHandle<CGContextRef, CGContextRef, CGContextRelease>;
 
-CGImageRef CGImageCreateWithMLNPremultipliedImage(mbgl::PremultipliedImage&& src) {
+CGImageRef CGImageCreateWithMLNPremultipliedImage(mln::PremultipliedImage&& src) {
   // We're converting the PremultipliedImage's backing store to a CGDataProvider, and are taking
   // over ownership of the memory.
   CGDataProviderHandle provider(CGDataProviderCreateWithData(
@@ -41,11 +41,11 @@ CGImageRef CGImageCreateWithMLNPremultipliedImage(mbgl::PremultipliedImage&& src
                        *colorSpace, bitmapInfo, *provider, NULL, false, kCGRenderingIntentDefault);
 }
 
-mbgl::PremultipliedImage MLNPremultipliedImageFromCGImage(CGImageRef src) {
+mln::PremultipliedImage MLNPremultipliedImageFromCGImage(CGImageRef src) {
   const size_t width = CGImageGetWidth(src);
   const size_t height = CGImageGetHeight(src);
 
-  mbgl::PremultipliedImage image({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+  mln::PremultipliedImage image({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
   CGColorSpaceHandle colorSpace(CGColorSpaceCreateDeviceRGB());
   if (!colorSpace) {
@@ -70,7 +70,7 @@ mbgl::PremultipliedImage MLNPremultipliedImageFromCGImage(CGImageRef src) {
   return image;
 }
 
-namespace mbgl {
+namespace mln {
 
 PremultipliedImage decodeImage(const std::string& source) {
   CFDataHandle data(CFDataCreateWithBytesNoCopy(
@@ -93,4 +93,4 @@ PremultipliedImage decodeImage(const std::string& source) {
   return MLNPremultipliedImageFromCGImage(*image);
 }
 
-}  // namespace mbgl
+}  // namespace mln

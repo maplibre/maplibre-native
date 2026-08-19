@@ -14,7 +14,7 @@
 #include <mbgl/shaders/mtl/heatmap.hpp>
 #endif
 
-namespace mbgl {
+namespace mln {
 
 using namespace style;
 using namespace shaders;
@@ -111,4 +111,4 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #endif
 }
 
-} // namespace mbgl
+} // namespace mln

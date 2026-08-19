@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -121,7 +121,7 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
         assert(error.message.empty());
         eachMember(*clusterProperties,
                    [&](const std::string& k,
-                       const mbgl::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
+                       const mln::style::conversion::Convertible& v) -> std::optional<conversion::Error> {
                        // Each property shall be formed as ["key" : [operator,
                        // [mapExpression]]] or ["key" : [[operator, ['accumulated'],
                        // ['get', key]], [mapExpression]]]
@@ -180,4 +180,4 @@ std::optional<GeoJSONOptions> Converter<GeoJSONOptions>::operator()(const Conver
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln
