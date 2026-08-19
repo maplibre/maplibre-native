@@ -56,7 +56,7 @@
 #include <sstream>
 #include <unordered_set>
 
-namespace mbgl {
+namespace mln {
 
 namespace {
 
@@ -1212,4 +1212,4 @@ void RenderTerrain::updateInstancedDepthUBO(PaintParameters& parameters) {
 }
 #endif
 
-} // namespace mbgl
+} // namespace mln

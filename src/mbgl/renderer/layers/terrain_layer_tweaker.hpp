@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 
 class RenderTerrain;
 class LayerGroupBase;
@@ -38,4 +38,4 @@ protected:
     const RenderTerrain* terrain = nullptr;
 };
 
-} // namespace mbgl
+} // namespace mln

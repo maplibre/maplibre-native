@@ -2,7 +2,7 @@
 
 #include <mbgl/shaders/layer_ubo.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 struct alignas(16) TerrainDrawableUBO {
@@ -48,4 +48,4 @@ struct alignas(16) TerrainEvaluatedPropsUBO {
 static_assert(sizeof(TerrainEvaluatedPropsUBO) == 32);
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/mtl/terrain.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 template <>
@@ -67,4 +67,4 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

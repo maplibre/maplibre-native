@@ -1080,7 +1080,7 @@ jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
 
 void NativeMapView::setTerrain(JNIEnv& env, const jni::String& sourceId, jni::jfloat exaggeration) {
     map->getStyle().setTerrain(
-        std::make_unique<mbgl::style::Terrain>(jni::Make<std::string>(env, sourceId), exaggeration));
+        std::make_unique<mln::style::Terrain>(jni::Make<std::string>(env, sourceId), exaggeration));
 }
 
 void NativeMapView::removeTerrain(JNIEnv&) {
@@ -1372,7 +1372,7 @@ jni::jdouble NativeMapView::getTileLodScale(JNIEnv&) {
 }
 
 void NativeMapView::setTerrainLoadMode(JNIEnv&, jni::jint mode) {
-    map->setTerrainLoadMode(static_cast<mbgl::TerrainLoadMode>(mode));
+    map->setTerrainLoadMode(static_cast<mln::TerrainLoadMode>(mode));
 }
 
 jni::jint NativeMapView::getTerrainLoadMode(JNIEnv&) {

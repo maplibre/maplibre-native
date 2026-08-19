@@ -1067,7 +1067,7 @@ from entering the terrain in the first place rather than correcting afterwards.
 
 ```cpp
 // Create terrain configuration
-auto terrain = std::make_unique<mbgl::style::Terrain>("demSourceID", 1.5f);
+auto terrain = std::make_unique<mln::style::Terrain>("demSourceID", 1.5f);
 
 // Apply to style
 style->setTerrain(std::move(terrain));

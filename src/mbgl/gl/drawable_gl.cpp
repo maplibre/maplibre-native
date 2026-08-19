@@ -87,7 +87,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
             if (bound == 0) {
                 static std::unordered_set<std::string> reported;
                 if (reported.emplace(getName() + "/" + std::string(block.name)).second) {
-                    mbgl::Log::Warning(Event::OpenGL,
+                    mln::Log::Warning(Event::OpenGL,
                                        "Drawable '" + getName() + "' drawn with no buffer bound for uniform block '" +
                                            std::string(block.name) + "' (binding " + util::toString(block.binding) +
                                            ")");

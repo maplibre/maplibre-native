@@ -2,7 +2,7 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 TexturePool::TexturePool(uint32_t tilesize)
     : tileSize(tilesize) {}
 
@@ -53,4 +53,4 @@ std::shared_ptr<RenderTarget> TexturePool::getRenderTargetAncestorOrDescendant(
     }
     return bestRenderTarget;
 }
-} // namespace mbgl
+} // namespace mln

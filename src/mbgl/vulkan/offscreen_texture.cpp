@@ -102,7 +102,7 @@ public:
                 depthFormat = *formatIt;
                 stencilSupported = true;
             } else {
-                mbgl::Log::Error(mbgl::Event::Render, "Depth/Stencil format not available for offscreen texture");
+                mln::Log::Error(mln::Event::Render, "Depth/Stencil format not available for offscreen texture");
             }
         }
 
@@ -124,7 +124,7 @@ public:
 
         depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
         if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
-            mbgl::Log::Error(mbgl::Event::Render, "Vulkan offscreen depth allocation failed");
+            mln::Log::Error(mln::Event::Render, "Vulkan offscreen depth allocation failed");
             depthAllocation.reset();
             return;
         }

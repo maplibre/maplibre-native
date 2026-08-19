@@ -1,7 +1,7 @@
 #include <mbgl/shaders/mtl/terrain_depth.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace shaders {
 
 using TerrainDepthShaderSource = ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::Metal>;
@@ -14,4 +14,4 @@ const std::array<TextureInfo, 1> TerrainDepthShaderSource::textures = {
 };
 
 } // namespace shaders
-} // namespace mbgl
+} // namespace mln

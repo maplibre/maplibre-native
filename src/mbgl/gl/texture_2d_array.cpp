@@ -5,7 +5,7 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/instrumentation.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 using namespace platform;
@@ -96,4 +96,4 @@ void Texture2DArray::bind(int32_t location, int32_t textureUnit) {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln
