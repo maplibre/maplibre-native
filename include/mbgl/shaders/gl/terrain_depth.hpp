@@ -10,6 +10,10 @@ struct ShaderSource<BuiltIn::TerrainDepthShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "TerrainDepthShader";
     static constexpr const char* vertex = R"(#define TERRAIN_MAX_INSTANCES 64
 
+// One per instance: the tile's clip matrix, its DEM sub-tile coords ({scale, xoff, yoff,
+// dem_dim}) and the sampler2DArray layer holding that tile's (or an ancestor's) DEM. The
+// whole array is bound as the TerrainDrawableUBO block and indexed per instance; matches
+// TerrainDepthInstanceUBO on the C++ side (std140, 6*16 bytes each).
 struct TerrainInstance {
     highp mat4 matrix;
     highp vec4 dem_coords;
@@ -38,9 +42,16 @@ uniform highp sampler2DArray u_dem_array;
 out highp float v_depth;
 
 void main() {
-    // gl_InstanceID selects this instance's tile slot. A per-instance vertex attribute is not
-    // usable on the GL backend (getInstanceAttributes() is always empty, so divisor 1 is never
-    // bound and the attribute reads 0 for every instance); the built-in index is authoritative.
+    // Instanced depth pass: one draw covers every terrain mesh tile; gl_InstanceID selects this
+    // instance's tile data. Same elevation displacement (incl. skirt drop) as terrain.vertex,
+    // rendering only packed depth for symbol occlusion (calculate_visibility).
+    //
+    // We use the built-in gl_InstanceID rather than a per-instance vertex attribute: the GL
+    // backend keeps all program attributes in vertexAttributes and always returns an empty
+    // getInstanceAttributes(), so an instance attribute (divisor 1) is never actually bound -
+    // it reads the default 0 for every instance. The C++ instance-attribute array is still set
+    // on the drawable, but only as the instance-count source (DrawableGL::draw reads its
+    // getMinCount()); the index itself comes from gl_InstanceID.
     int idx = gl_InstanceID;
     highp mat4 matrix = u_inst[idx].matrix;
     highp vec4 dem_coords = u_inst[idx].dem_coords;
