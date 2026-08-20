@@ -382,16 +382,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
 
-#if !MLN_USE_FILL_EXTRUSION_INSTANCING
-        if (const auto& attr = vertexAttrs->set(idFillExtrusionNormal2DVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedVertices,
-                                   offsetof(FillExtrusionLayoutVertex, a3),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillExtrusionLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-#endif
-
         if (doDepthPass) {
             depthBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
             depthBuilder->setVertexAttributes(vertexAttrs);

@@ -94,9 +94,6 @@ public:
     void queueSurfaceRead();
     std::shared_ptr<PremultipliedImage> readImage();
 
-    void queueSurfaceRead();
-    std::shared_ptr<PremultipliedImage> readImage();
-
 protected:
     vk::UniqueSurfaceKHR surface;
     vk::UniqueSwapchainKHR swapchain;
