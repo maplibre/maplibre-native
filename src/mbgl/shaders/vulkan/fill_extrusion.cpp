@@ -49,26 +49,6 @@ const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = 
 };
 
 //
-// Fill extrusion instanced
-
-using FillExtrusionInstancedShaderSource =
-    ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::Vulkan>;
-
-const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
-};
-const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceAttributes = {
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionOutlinePosAttribute, idFillExtrusionInstanced},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionDecimalsEdAttribute, idFillExtrusionInstanced},
-
-    // Data driven
-    AttributeInfo{3, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
-};
-const std::array<TextureInfo, 0> FillExtrusionInstancedShaderSource::textures = {};
-
-//
 // Fill extrusion pattern
 
 using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>;

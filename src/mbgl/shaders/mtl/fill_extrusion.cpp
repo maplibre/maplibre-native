@@ -51,26 +51,6 @@ const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = 
 };
 
 //
-// Fill extrusion instanced
-
-using FillExtrusionInstancedShaderSource =
-    ShaderSource<BuiltIn::FillExtrusionInstancedShader, gfx::Backend::Type::Metal>;
-
-const std::array<AttributeInfo, 1> FillExtrusionInstancedShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 0, idFillExtrusionPosVertexAttribute},
-};
-const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceAttributes = {
-    AttributeInfo{1, gfx::AttributeDataType::Short2, fillExtrusionUBOCount + 1, idFillExtrusionOutlinePosAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, fillExtrusionUBOCount + 1, idFillExtrusionDecimalsEdAttribute},
-
-    // Data driven
-    AttributeInfo{3, gfx::AttributeDataType::Float4, fillExtrusionUBOCount + 2, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionHeightVertexAttribute},
-};
-const std::array<TextureInfo, 0> FillExtrusionInstancedShaderSource::textures = {};
-
-//
 // Fill extrusion pattern
 
 using FillExtrusionPatternShaderSource = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>;
