@@ -1,7 +1,7 @@
 #pragma once
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <memory>

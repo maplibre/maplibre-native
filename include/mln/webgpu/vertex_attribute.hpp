@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
 
 namespace mln {
 namespace gfx {

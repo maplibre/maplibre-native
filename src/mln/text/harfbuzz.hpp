@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/text/glyph.hpp>
+#include <mln/text/glyph.hpp>
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
 #include "freetype.hpp"

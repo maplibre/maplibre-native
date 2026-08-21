@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/webgpu/shader_program.hpp>
-#include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/webgpu/shader_program.hpp>
+#include <mln/shaders/heatmap_texture_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

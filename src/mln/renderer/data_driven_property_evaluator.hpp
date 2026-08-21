@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/renderer/possibly_evaluated_property_value.hpp>
-#include <mbgl/renderer/property_evaluation_parameters.hpp>
-#include <mbgl/style/property_value.hpp>
+#include <mln/renderer/cross_faded_property_evaluator.hpp>
+#include <mln/renderer/possibly_evaluated_property_value.hpp>
+#include <mln/renderer/property_evaluation_parameters.hpp>
+#include <mln/style/property_value.hpp>
 
 #include <cmath>
 

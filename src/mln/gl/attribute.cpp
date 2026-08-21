@@ -1,5 +1,5 @@
-#include <mbgl/gl/attribute.hpp>
-#include <mbgl/gl/context.hpp>
+#include <mln/gl/attribute.hpp>
+#include <mln/gl/context.hpp>
 
 namespace mln {
 namespace gl {

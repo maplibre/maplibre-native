@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/io.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)

@@ -4,15 +4,15 @@
 #elif MLN_WEBGPU_IMPL_WGPU
 #include <webgpu.h>
 #endif
-#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
+#include <mln/webgpu/wgpu_cpp_compat.hpp>
 
-#include <mbgl/webgpu/render_pass.hpp>
-#include <mbgl/webgpu/command_encoder.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/gfx/command_encoder.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/webgpu/render_pass.hpp>
+#include <mln/webgpu/command_encoder.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
+#include <mln/gfx/command_encoder.hpp>
+#include <mln/util/logging.hpp>
 
 #include <cstring> // for strlen
 #include <cstdlib> // for std::getenv

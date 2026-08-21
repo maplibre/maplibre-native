@@ -1,6 +1,6 @@
-#include <mbgl/gl/enum.hpp>
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/gl/defines.hpp>
+#include <mln/gl/enum.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gl/defines.hpp>
 
 namespace mln {
 namespace gl {

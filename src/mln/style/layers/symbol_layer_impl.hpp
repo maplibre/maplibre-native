@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/style/expression/literal.hpp>
-#include <mbgl/style/expression/format_expression.hpp>
-#include <mbgl/style/expression/formatted.hpp>
-#include <mbgl/style/expression/format_section_override.hpp>
-#include <mbgl/style/expression/value.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/expression/literal.hpp>
+#include <mln/style/expression/format_expression.hpp>
+#include <mln/style/expression/formatted.hpp>
+#include <mln/style/expression/format_section_override.hpp>
+#include <mln/style/expression/value.hpp>
 
 namespace mln {
 namespace style {

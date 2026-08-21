@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/offscreen_texture.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/plugin/plugin_layer_impl.hpp>
-#include <mbgl/plugin/plugin_layer_properties.hpp>
+#include <mln/gfx/offscreen_texture.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/plugin/plugin_layer_impl.hpp>
+#include <mln/plugin/plugin_layer_properties.hpp>
 
 #include <optional>
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
 
 namespace mln {
 

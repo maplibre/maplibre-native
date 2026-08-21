@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/circle.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/circle_layer_ubo.hpp>
+#include <mln/shaders/webgpu/circle.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/circle_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

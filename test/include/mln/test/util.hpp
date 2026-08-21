@@ -43,8 +43,8 @@
 #define TEST_DISABLED_ON_CI(name) DISABLED_##name
 #endif
 
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/chrono.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/chrono.hpp>
 
 #include <cstdint>
 #include <memory>

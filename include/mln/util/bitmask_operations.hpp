@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/traits.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/util/traits.hpp>
+#include <mln/util/util.hpp>
 
 namespace mln {
 

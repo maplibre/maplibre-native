@@ -1,9 +1,9 @@
-#include <mbgl/layermanager/line_layer_factory.hpp>
+#include <mln/layermanager/line_layer_factory.hpp>
 
-#include <mbgl/renderer/buckets/line_bucket.hpp>
-#include <mbgl/renderer/layers/render_line_layer.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/line_layer_impl.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
+#include <mln/renderer/layers/render_line_layer.hpp>
+#include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
 
 namespace mln {
 

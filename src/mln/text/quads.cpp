@@ -1,13 +1,13 @@
-#include <mbgl/geometry/anchor.hpp>
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/minmax.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/text/quads.hpp>
-#include <mbgl/text/shaping.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/geometry/anchor.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/minmax.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/text/quads.hpp>
+#include <mln/text/shaping.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/math.hpp>
 
 #include <cassert>
 #include <numbers>

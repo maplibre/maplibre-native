@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/style/color_ramp_property_value.hpp>
-#include <mbgl/style/properties.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/renderer/property_evaluator.hpp>
-#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/renderer/data_driven_property_evaluator.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/renderer/cross_faded_property_evaluator.hpp>
+#include <mln/renderer/data_driven_property_evaluator.hpp>
 
 #include <array>
 #include <optional>

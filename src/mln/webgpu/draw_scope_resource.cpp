@@ -1,5 +1,5 @@
-#include <mbgl/webgpu/draw_scope_resource.hpp>
-#include <mbgl/webgpu/context.hpp>
+#include <mln/webgpu/draw_scope_resource.hpp>
+#include <mln/webgpu/context.hpp>
 
 namespace mln {
 namespace webgpu {

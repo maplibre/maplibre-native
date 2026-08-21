@@ -2,7 +2,7 @@
 
 #include <mapbox/geometry/point.hpp>
 #include <mapbox/geometry/box.hpp>
-#include <mbgl/math/minmax.hpp>
+#include <mln/math/minmax.hpp>
 
 #include <cassert>
 #include <cmath>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/util/async_request.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/util/async_request.hpp>
 
 #include <memory>
 #include <functional>

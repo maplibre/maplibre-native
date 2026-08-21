@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/util/type_list.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
-#include <mbgl/util/ignore.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/util/type_list.hpp>
+#include <mln/util/indexed_tuple.hpp>
+#include <mln/util/ignore.hpp>
 
 #include <array>
 #include <type_traits>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geojson.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/source.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geojson.hpp>
 
 #include <map>
 #include <memory>

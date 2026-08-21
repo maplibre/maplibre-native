@@ -1,17 +1,17 @@
 #pragma once
 
-#include <mbgl/shaders/gl/legacy/program_base.hpp>
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gfx/shader.hpp>
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/shaders/attributes.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/shaders/shader_manifest.hpp>
-#include <mbgl/style/paint_property.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/shaders/gl/legacy/program_base.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/gfx/shader.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/gfx/draw_mode.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_manifest.hpp>
+#include <mln/style/paint_property.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/util/io.hpp>
 
 #include <unordered_map>
 

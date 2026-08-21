@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/dynamic_texture.hpp>
+#include <mln/gfx/dynamic_texture.hpp>
 
 namespace mln {
 namespace mtl {

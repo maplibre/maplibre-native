@@ -1,6 +1,6 @@
-#include <mbgl/style/conversion/source_options.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/expression/dsl.hpp>
+#include <mln/style/conversion/source_options.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/dsl.hpp>
 
 namespace mln {
 namespace style {

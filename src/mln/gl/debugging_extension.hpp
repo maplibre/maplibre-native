@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gl/extension.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/gl/extension.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS 0x8242
 #define GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH 0x8243

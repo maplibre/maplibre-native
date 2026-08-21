@@ -1,6 +1,6 @@
-#include <mbgl/webgpu/buffer_resource.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/buffer_resource.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
 
 #include <cstring>
 #include <cassert>

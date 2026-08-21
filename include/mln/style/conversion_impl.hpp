@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/style/color_ramp_property_value.hpp>
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/expression/image.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/style/rotation.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/traits.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/expression/image.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/style/rotation.hpp>
+#include <mln/style/transition_options.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/traits.hpp>
 
 #include <mapbox/compatibility/value.hpp>
 

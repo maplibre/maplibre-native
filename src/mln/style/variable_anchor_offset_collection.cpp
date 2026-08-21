@@ -1,7 +1,7 @@
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
-#include <mbgl/style/conversion/stringify.hpp>
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
+#include <mln/style/conversion/stringify.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/util/enum.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>

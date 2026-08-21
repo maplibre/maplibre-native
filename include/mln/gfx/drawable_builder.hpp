@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/gfx/polyline_generator.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/style/types.hpp>
+#include <mln/gfx/polyline_generator.hpp>
 
 #include <array>
 #include <memory>

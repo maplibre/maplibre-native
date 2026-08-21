@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/shaders/layer_ubo.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/util/immutable.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/shaders/layer_ubo.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/util/immutable.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <array>
 #include <memory>

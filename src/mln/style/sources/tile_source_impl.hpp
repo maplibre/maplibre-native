@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/sources/tile_source.hpp>
-#include <mbgl/style/source_impl.hpp>
+#include <mln/style/sources/tile_source.hpp>
+#include <mln/style/source_impl.hpp>
 
 namespace mln {
 namespace style {

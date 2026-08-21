@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/mat3.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/mat3.hpp>
+#include <mln/util/mat4.hpp>
 
 namespace mln {
 namespace util {

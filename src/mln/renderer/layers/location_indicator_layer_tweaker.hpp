@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
 
 #include <string>
 

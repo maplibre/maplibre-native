@@ -1,6 +1,6 @@
-#include <mbgl/mtl/dynamic_texture.hpp>
-#include <mbgl/mtl/texture2d.hpp>
-#include <mbgl/mtl/context.hpp>
+#include <mln/mtl/dynamic_texture.hpp>
+#include <mln/mtl/texture2d.hpp>
+#include <mln/mtl/context.hpp>
 
 namespace mln {
 namespace mtl {

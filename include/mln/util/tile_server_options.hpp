@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/default_style.hpp>
+#include <mln/util/default_style.hpp>
 
 #include <memory>
 #include <optional>

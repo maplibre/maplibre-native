@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/range.hpp>
 
 #include <vector>
 #include <memory>

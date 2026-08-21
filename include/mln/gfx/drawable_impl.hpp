@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/shaders/segment.hpp>
+#include <mln/gfx/draw_mode.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/shaders/segment.hpp>
 
 namespace mln {
 namespace gfx {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_necessity.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile_necessity.hpp>
+#include <mln/util/range.hpp>
 
 #include <unordered_set>
 #include <optional>

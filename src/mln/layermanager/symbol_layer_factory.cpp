@@ -1,9 +1,9 @@
-#include <mbgl/layermanager/symbol_layer_factory.hpp>
+#include <mln/layermanager/symbol_layer_factory.hpp>
 
-#include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
+#include <mln/layout/symbol_layout.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
 
 namespace mln {
 

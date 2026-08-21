@@ -1,9 +1,9 @@
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/uniform_buffer_gl.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/util/compression.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/uniform_buffer_gl.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/util/compression.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/logging.hpp>
 
 #include <atomic>
 #include <vector>

@@ -1,7 +1,7 @@
 #import <Mapbox.h>
 #import <XCTest/XCTest.h>
 
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/geometry.hpp>
 #import "../../darwin/src/MLNFeature_Private.h"
 #import "MLNFoundation_Private.h"
 

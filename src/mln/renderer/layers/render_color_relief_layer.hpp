@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/renderer/buckets/hillshade_bucket.hpp>
-#include <mbgl/style/layers/color_relief_layer_impl.hpp>
-#include <mbgl/style/layers/color_relief_layer_properties.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/style/layers/color_relief_layer_impl.hpp>
+#include <mln/style/layers/color_relief_layer_properties.hpp>
+#include <mln/util/image.hpp>
 #include <memory>
 #include <vector> // Added for std::vector<float>
 

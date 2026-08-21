@@ -1,9 +1,9 @@
-#include <mbgl/renderer/buckets/line_bucket.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/style/layers/line_layer_impl.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/gfx/polyline_generator.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
+#include <mln/util/math.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/gfx/polyline_generator.hpp>
 
 #include <cassert>
 #include <utility>

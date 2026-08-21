@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/map/zoom_history.hpp>
-#include <mbgl/util/chrono.hpp>
+#include <mln/map/zoom_history.hpp>
+#include <mln/util/chrono.hpp>
 
 namespace mln {
 

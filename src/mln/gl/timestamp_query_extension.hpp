@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/gl/extension.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/gl/extension.hpp>
 
 #include <functional>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/util/ignore.hpp>
+#include <mln/gfx/draw_mode.hpp>
+#include <mln/util/ignore.hpp>
 
 #include <memory>
 #include <vector>

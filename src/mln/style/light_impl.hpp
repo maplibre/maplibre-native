@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/position.hpp>
-#include <mbgl/style/properties.hpp>
-#include <mbgl/renderer/property_evaluator.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/position.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/indexed_tuple.hpp>
 
 namespace mln {
 namespace style {

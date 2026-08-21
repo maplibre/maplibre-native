@@ -1,4 +1,4 @@
-#include <mbgl/storage/sqlite3.hpp>
+#include <mln/storage/sqlite3.hpp>
 #include <sqlite3.h>
 
 #include <algorithm>
@@ -8,8 +8,8 @@
 #include <chrono>
 #include <optional>
 
-#include <mbgl/util/traits.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/traits.hpp>
+#include <mln/util/logging.hpp>
 
 #define MBGL_CONSTRUCTOR(f) \
     static void f(void);    \

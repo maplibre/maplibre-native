@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gl/object.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gl/object.hpp>
+#include <mln/util/monotonic_timer.hpp>
 
 namespace mln {
 namespace gl {

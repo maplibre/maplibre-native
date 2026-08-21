@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/size.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/size.hpp>
+#include <mln/util/util.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLDevice.hpp>

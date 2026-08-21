@@ -1,12 +1,12 @@
-#include <mbgl/annotation/shape_annotation_impl.hpp>
-#include <mbgl/annotation/annotation_tile.hpp>
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/math/wrap.hpp>
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geometry.hpp>
+#include <mln/annotation/shape_annotation_impl.hpp>
+#include <mln/annotation/annotation_tile.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/math/wrap.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geometry.hpp>
 
 namespace mln {
 

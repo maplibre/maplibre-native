@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/geometry/anchor.hpp>
-#include <mbgl/text/shaping.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/geometry/feature_index.hpp>
+#include <mln/geometry/anchor.hpp>
+#include <mln/text/shaping.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/geometry/feature_index.hpp>
 
 #include <vector>
 

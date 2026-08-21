@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/size.hpp>
 
 #include <memory>
 

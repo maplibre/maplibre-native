@@ -1,6 +1,6 @@
-#include <mbgl/shaders/vulkan/hillshade.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/hillshade_layer_ubo.hpp>
+#include <mln/shaders/vulkan/hillshade.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/hillshade_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

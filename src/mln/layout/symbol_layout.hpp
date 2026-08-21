@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/layout/layout.hpp>
-#include <mbgl/map/mode.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
-#include <mbgl/layout/symbol_feature.hpp>
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/text/bidi.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/layout/layout.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
+#include <mln/layout/symbol_feature.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/text/bidi.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/util/containers.hpp>
 
 #include <memory>
 #include <map>

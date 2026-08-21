@@ -1,7 +1,7 @@
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/shaders/program_parameters.hpp>
 
 namespace mln {
 

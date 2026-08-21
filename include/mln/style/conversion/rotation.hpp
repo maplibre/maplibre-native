@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/rotation.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/rotation.hpp>
 
 #include <optional>
 

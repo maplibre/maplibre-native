@@ -1,15 +1,15 @@
-#include <mbgl/renderer/layers/hillshade_layer_tweaker.hpp>
+#include <mln/renderer/layers/hillshade_layer_tweaker.hpp>
 
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/shaders/hillshade_layer_ubo.hpp>
-#include <mbgl/style/layers/hillshade_layer_properties.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/shaders/hillshade_layer_ubo.hpp>
+#include <mln/style/layers/hillshade_layer_properties.hpp>
+#include <mln/util/convert.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/util/geo.hpp>
 
 namespace mln {
 

@@ -1,6 +1,6 @@
-#include <mbgl/style/conversion/get_json_type.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/feature.hpp>
+#include <mln/style/conversion/get_json_type.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/feature.hpp>
 
 namespace mln {
 namespace style {

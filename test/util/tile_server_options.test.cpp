@@ -1,6 +1,6 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/tile_server_options.hpp>
+#include <mln/util/tile_server_options.hpp>
 
 TEST(TileServerOptions, CopyAssignment) {
     mln::TileServerOptions options = mln::TileServerOptions::MapboxConfiguration();

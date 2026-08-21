@@ -1,6 +1,6 @@
 #ifndef __QT__ // Qt doesn't expose SQLite VFS
 
-#include <mbgl/test/sqlite3_test_fs.hpp>
+#include <mln/test/sqlite3_test_fs.hpp>
 
 #include <sqlite3.h>
 

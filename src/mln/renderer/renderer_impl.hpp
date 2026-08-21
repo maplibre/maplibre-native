@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/render_orchestrator.hpp>
-#include <mbgl/gfx/context_observer.hpp>
+#include <mln/renderer/render_orchestrator.hpp>
+#include <mln/gfx/context_observer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
 #include <Foundation/Foundation.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 

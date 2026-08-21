@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/util/rect.hpp>
-#include <mbgl/util/traits.hpp>
-#include <mbgl/util/immutable.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/text/glyph_range.hpp>
+#include <mln/util/bitmask_operations.hpp>
+#include <mln/util/font_stack.hpp>
+#include <mln/util/rect.hpp>
+#include <mln/util/traits.hpp>
+#include <mln/util/immutable.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/util.hpp>
 
 #include <algorithm>
 #include <cstdint>

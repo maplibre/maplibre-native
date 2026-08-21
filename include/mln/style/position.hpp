@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/math/angles.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/util/constants.hpp>
 
 #include <array>
 

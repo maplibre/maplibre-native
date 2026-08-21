@@ -1,6 +1,6 @@
 #include <functional>
-#include <mbgl/platform/settings.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/platform/settings.hpp>
+#include <mln/util/platform.hpp>
 
 namespace mln {
 namespace util {

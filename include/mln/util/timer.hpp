@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/chrono.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/chrono.hpp>
 
 #include <memory>
 #include <functional>

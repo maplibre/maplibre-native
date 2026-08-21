@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/headless_backend.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include "mbgl/gfx/offscreen_texture.hpp"
+#include <mln/gfx/headless_backend.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include "mln/gfx/offscreen_texture.hpp"
 #include <memory>
 
 namespace mln {

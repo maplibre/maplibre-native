@@ -1,6 +1,6 @@
-#include <mbgl/gfx/dynamic_texture.hpp>
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/gfx/dynamic_texture.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gfx/context.hpp>
 
 namespace mln {
 namespace gfx {

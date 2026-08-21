@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/gl/uniform_buffer_gl.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/gl/uniform_buffer_gl.hpp>
 
 namespace mln {
 

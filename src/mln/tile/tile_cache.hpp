@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile.hpp>
 
 #include <list>
 #include <memory>

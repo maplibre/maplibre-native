@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
+#include <mln/gfx/types.hpp>
 
 namespace mln {
 namespace gfx {

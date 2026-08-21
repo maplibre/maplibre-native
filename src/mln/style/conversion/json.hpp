@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
 
 #include <string>
 

@@ -1,4 +1,4 @@
-#include <mbgl/storage/sqlite3.hpp>
+#include <mln/storage/sqlite3.hpp>
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -16,10 +16,10 @@
 #include <optional>
 #include <variant>
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/traits.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/traits.hpp>
 
 namespace mapbox {
 namespace sqlite {

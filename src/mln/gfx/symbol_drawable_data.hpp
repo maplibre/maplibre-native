@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/tiny_unordered_map.hpp>
+#include <mln/gfx/drawable_data.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/tiny_unordered_map.hpp>
 
 #include <memory>
 

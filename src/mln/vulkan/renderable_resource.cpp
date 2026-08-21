@@ -1,7 +1,7 @@
-#include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/constants.hpp>
 
 namespace mln {
 namespace vulkan {

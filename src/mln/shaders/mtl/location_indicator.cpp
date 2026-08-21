@@ -1,5 +1,5 @@
-#include <mbgl/shaders/mtl/location_indicator.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
+#include <mln/shaders/mtl/location_indicator.hpp>
+#include <mln/shaders/shader_defines.hpp>
 
 namespace mln {
 namespace shaders {

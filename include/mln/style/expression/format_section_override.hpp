@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/renderer/possibly_evaluated_property_value.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/renderer/possibly_evaluated_property_value.hpp>
 
 namespace mln {
 namespace style {

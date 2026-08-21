@@ -1,7 +1,7 @@
-#include <mbgl/text/collision_feature.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/log2.hpp>
+#include <mln/text/collision_feature.hpp>
+#include <mln/util/math.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/log2.hpp>
 
 namespace mln {
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/shaders/shader_program_base.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 #include <webgpu/webgpu.h>
-#include <mbgl/gfx/gfx_types.hpp>
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/gfx/stencil_mode.hpp>
+#include <mln/gfx/gfx_types.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/gfx/color_mode.hpp>
+#include <mln/gfx/depth_mode.hpp>
+#include <mln/gfx/stencil_mode.hpp>
 #include <string>
 #include <unordered_map>
 #include <array>

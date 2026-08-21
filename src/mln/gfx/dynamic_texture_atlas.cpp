@@ -1,5 +1,5 @@
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/gfx/dynamic_texture_atlas.hpp>
+#include <mln/gfx/context.hpp>
 
 #include <algorithm>
 #include <cmath>

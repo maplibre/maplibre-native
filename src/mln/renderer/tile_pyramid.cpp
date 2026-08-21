@@ -1,17 +1,17 @@
-#include <mbgl/renderer/tile_pyramid.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_source.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/tile_range.hpp>
-#include <mbgl/util/enum.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/renderer/tile_pyramid.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_source.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/util/tile_range.hpp>
+#include <mln/util/enum.hpp>
+#include <mln/util/logging.hpp>
 
-#include <mbgl/algorithm/update_renderables.hpp>
+#include <mln/algorithm/update_renderables.hpp>
 
 #include <mapbox/geometry/envelope.hpp>
 

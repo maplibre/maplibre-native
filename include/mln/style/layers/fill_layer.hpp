@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/util/color.hpp>
 
 namespace mln {
 namespace style {

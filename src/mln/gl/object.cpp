@@ -1,5 +1,5 @@
-#include <mbgl/gl/object.hpp>
-#include <mbgl/gl/context.hpp>
+#include <mln/gl/object.hpp>
+#include <mln/gl/context.hpp>
 
 #include <cassert>
 

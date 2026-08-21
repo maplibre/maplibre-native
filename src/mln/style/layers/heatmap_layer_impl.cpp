@@ -1,4 +1,4 @@
-#include <mbgl/style/layers/heatmap_layer_impl.hpp>
+#include <mln/style/layers/heatmap_layer_impl.hpp>
 
 namespace mln {
 namespace style {

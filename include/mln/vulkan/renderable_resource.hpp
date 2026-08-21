@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
-#include <mbgl/vulkan/texture2d.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/texture2d.hpp>
 
 namespace mln {
 namespace vulkan {

@@ -1,9 +1,9 @@
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/platform/settings.hpp>
-#include <mbgl/util/enum.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/traits.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/platform/settings.hpp>
+#include <mln/util/enum.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/traits.hpp>
 
 #include <cstdio>
 #include <cstdarg>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/tile/geometry_tile.hpp>
-#include <mbgl/style/sources/custom_vector_source.hpp>
-#include <mbgl/actor/mailbox.hpp>
+#include <mln/tile/geometry_tile.hpp>
+#include <mln/style/sources/custom_vector_source.hpp>
+#include <mln/actor/mailbox.hpp>
 
 namespace mln {
 

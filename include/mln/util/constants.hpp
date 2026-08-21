@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/unitbezier.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/unitbezier.hpp>
 
 #include <cmath>
 #include <cstddef>

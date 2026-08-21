@@ -1,7 +1,7 @@
-#include <mbgl/mtl/buffer_resource.hpp>
+#include <mln/mtl/buffer_resource.hpp>
 
-#include <mbgl/mtl/context.hpp>
-#include <mbgl/mtl/renderer_backend.hpp>
+#include <mln/mtl/context.hpp>
+#include <mln/mtl/renderer_backend.hpp>
 
 #include <Metal/MTLDevice.hpp>
 #include <Metal/MTLRenderCommandEncoder.hpp>

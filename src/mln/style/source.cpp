@@ -1,7 +1,7 @@
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/style/source_observer.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/style/source_observer.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace style {

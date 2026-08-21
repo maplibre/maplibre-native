@@ -1,6 +1,6 @@
 #pragma once
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/util/image.hpp>
 
 #include <cstddef>
 #include <vector>

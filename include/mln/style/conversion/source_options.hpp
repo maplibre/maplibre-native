@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/sources/raster_dem_source.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/style/sources/raster_dem_source.hpp>
+#include <mln/style/conversion.hpp>
 
 namespace mln {
 namespace style {

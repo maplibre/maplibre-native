@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/style/transition_options.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/style/transition_options.hpp>
 
 #include <vector>
 

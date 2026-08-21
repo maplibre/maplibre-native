@@ -1,7 +1,7 @@
-#include <mbgl/renderer/buckets/debug_bucket.hpp>
-#include <mbgl/geometry/debug_font_data.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/renderer/buckets/debug_bucket.hpp>
+#include <mln/geometry/debug_font_data.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/string.hpp>
 
 #include <cmath>
 #include <string>

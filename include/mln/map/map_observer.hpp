@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/sprite.hpp>
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/gfx/rendering_stats.hpp>
+#include <mln/tile/tile_operation.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/sprite.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/gfx/rendering_stats.hpp>
 
 #include <cstdint>
 #include <string>

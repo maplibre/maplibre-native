@@ -1,7 +1,7 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/vector_source.hpp>
+#include <mln/style/sources/vector_source.hpp>
 #include "../../geojson/feature.hpp"
 #include <jni/jni.hpp>
 

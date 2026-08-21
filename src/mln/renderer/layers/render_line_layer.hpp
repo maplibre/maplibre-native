@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/line_layer_impl.hpp>
-#include <mbgl/style/layers/line_layer_properties.hpp>
-#include <mbgl/shaders/uniforms.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/layout/pattern_layout.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
+#include <mln/style/layers/line_layer_properties.hpp>
+#include <mln/shaders/uniforms.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/layout/pattern_layout.hpp>
 
 #include <optional>
 #include <memory>

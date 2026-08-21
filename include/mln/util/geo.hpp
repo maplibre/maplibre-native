@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/math/wrap.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/math/wrap.hpp>
+#include <mln/util/constants.hpp>
 
 #include <mapbox/geometry/point.hpp>
 #include <mapbox/geometry/point_arithmetic.hpp>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/uniform_buffer.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
 #include <webgpu/webgpu.h>
 
 namespace mln {

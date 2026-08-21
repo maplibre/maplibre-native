@@ -1,7 +1,7 @@
-#include <mbgl/style/expression/let.hpp>
-#include <mbgl/style/conversion/get_json_type.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/expression/let.hpp>
+#include <mln/style/conversion/get_json_type.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/string.hpp>
 
 namespace mln {
 namespace style {

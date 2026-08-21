@@ -1,5 +1,5 @@
-#include <mbgl/style/custom_vector_tile_loader.hpp>
-#include <mbgl/tile/custom_vector_tile.hpp>
+#include <mln/style/custom_vector_tile_loader.hpp>
+#include <mln/tile/custom_vector_tile.hpp>
 
 namespace mln {
 namespace style {

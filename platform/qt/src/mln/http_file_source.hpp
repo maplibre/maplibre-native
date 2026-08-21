@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/storage/http_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/client_options.hpp>
+#include <mln/storage/http_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/client_options.hpp>
 
 #include <QMap>
 #include <QNetworkAccessManager>

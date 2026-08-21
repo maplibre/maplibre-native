@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/map/map.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/image.hpp>
 
 #include <exception>
 

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/style/image.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/style/image.hpp>
 
 #include <exception>
 #include <memory>

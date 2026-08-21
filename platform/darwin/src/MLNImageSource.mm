@@ -11,8 +11,8 @@
 #import "NSImage+MLNAdditions.h"
 #endif
 
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/util/premultiply.hpp>
 
 @interface MLNImageSource ()
 - (instancetype)initWithIdentifier:(NSString *)identifier

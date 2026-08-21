@@ -1,6 +1,6 @@
-#include <mbgl/renderer/buckets/hillshade_bucket.hpp>
-#include <mbgl/renderer/layers/render_hillshade_layer.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/renderer/layers/render_hillshade_layer.hpp>
+#include <mln/gfx/context.hpp>
 
 namespace mln {
 

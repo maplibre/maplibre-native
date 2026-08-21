@@ -1,7 +1,7 @@
-#include <mbgl/storage/file_source_request.hpp>
+#include <mln/storage/file_source_request.hpp>
 
-#include <mbgl/actor/mailbox.hpp>
-#include <mbgl/actor/scheduler.hpp>
+#include <mln/actor/mailbox.hpp>
+#include <mln/actor/scheduler.hpp>
 
 namespace mln {
 

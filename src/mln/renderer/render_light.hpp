@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/light_impl.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/style/light_impl.hpp>
+#include <mln/util/immutable.hpp>
 
 namespace mln {
 

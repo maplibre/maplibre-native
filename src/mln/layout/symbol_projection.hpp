@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/mat4.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
 
 namespace mln {
 

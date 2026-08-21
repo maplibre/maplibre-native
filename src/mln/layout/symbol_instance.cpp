@@ -1,7 +1,7 @@
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/util/error_sink.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/util/error_sink.hpp>
+#include <mln/util/logging.hpp>
 
 #include <utility>
 

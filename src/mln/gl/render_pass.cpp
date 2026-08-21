@@ -1,7 +1,7 @@
-#include <mbgl/gl/render_pass.hpp>
-#include <mbgl/gl/command_encoder.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#include <mbgl/gl/context.hpp>
+#include <mln/gl/render_pass.hpp>
+#include <mln/gl/command_encoder.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/context.hpp>
 
 namespace mln {
 namespace gl {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/filter.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/filter.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/gfx/shader_group.hpp>
+#include <mln/shaders/gl/shader_program_gl.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/util/containers.hpp>
 
 namespace mln {
 namespace gl {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/geometry.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <vector>
 #include <map>

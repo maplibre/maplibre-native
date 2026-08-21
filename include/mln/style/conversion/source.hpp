@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/conversion.hpp>
 
 #include <memory>
 #include <optional>

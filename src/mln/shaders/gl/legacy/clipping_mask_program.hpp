@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/shaders/gl/legacy/program.hpp>
-#include <mbgl/shaders/attributes.hpp>
-#include <mbgl/shaders/uniforms.hpp>
-#include <mbgl/style/properties.hpp>
+#include <mln/shaders/gl/legacy/program.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/shaders/uniforms.hpp>
+#include <mln/style/properties.hpp>
 
 namespace mln {
 

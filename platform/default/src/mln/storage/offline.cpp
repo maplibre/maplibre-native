@@ -1,7 +1,7 @@
-#include <mbgl/storage/offline.hpp>
-#include <mbgl/util/tileset.hpp>
-#include <mbgl/util/projection.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/storage/offline.hpp>
+#include <mln/util/tileset.hpp>
+#include <mln/util/projection.hpp>
+#include <mln/util/variant.hpp>
 
 #include <mapbox/geojson.hpp>
 #include <mapbox/geojson/rapidjson.hpp>

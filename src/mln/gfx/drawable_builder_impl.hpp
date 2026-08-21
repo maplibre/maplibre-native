@@ -1,13 +1,13 @@
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/polyline_generator.hpp>
-#include <mbgl/shaders/widevector_ubo.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/gfx/color_mode.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/index_vector.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/polyline_generator.hpp>
+#include <mln/shaders/widevector_ubo.hpp>
 
 #include <cstdint>
 #include <cstddef>

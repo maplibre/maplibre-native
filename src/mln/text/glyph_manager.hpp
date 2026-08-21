@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/text/glyph_manager_observer.hpp>
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/text/local_glyph_rasterizer.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/text/glyph_manager_observer.hpp>
+#include <mln/text/glyph_range.hpp>
+#include <mln/text/local_glyph_rasterizer.hpp>
+#include <mln/util/font_stack.hpp>
+#include <mln/util/immutable.hpp>
 
 #include <mutex>
 #include <string>

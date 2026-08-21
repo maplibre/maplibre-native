@@ -1,6 +1,6 @@
-#include <mbgl/test/fixture_log_observer.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/test/fixture_log_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/enum.hpp>
 
 namespace mln {
 

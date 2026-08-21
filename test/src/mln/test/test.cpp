@@ -1,6 +1,6 @@
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/test.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/test.hpp>
+#include <mln/test/util.hpp>
 
 #include <gtest/gtest.h>
 

@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/renderer/possibly_evaluated_property_value.hpp>
-#include <mbgl/renderer/property_evaluation_parameters.hpp>
-#include <mbgl/renderer/transition_parameters.hpp>
-#include <mbgl/style/color_ramp_property_value.hpp>
-#include <mbgl/style/conversion/stringify.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
-#include <mbgl/util/ignore.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/renderer/possibly_evaluated_property_value.hpp>
+#include <mln/renderer/property_evaluation_parameters.hpp>
+#include <mln/renderer/transition_parameters.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
+#include <mln/style/conversion/stringify.hpp>
+#include <mln/style/transition_options.hpp>
+#include <mln/util/convert.hpp>
+#include <mln/util/indexed_tuple.hpp>
+#include <mln/util/ignore.hpp>
+#include <mln/util/logging.hpp>
 
 #include <bitset>
 #include <tuple>

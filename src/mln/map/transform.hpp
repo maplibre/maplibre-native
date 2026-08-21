@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/projection_mode.hpp>
-#include <mbgl/map/map_observer.hpp>
-#include <mbgl/map/mode.hpp>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/projection_mode.hpp>
+#include <mln/map/map_observer.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <cstdint>
 #include <cmath>

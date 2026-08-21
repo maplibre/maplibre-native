@@ -1,7 +1,7 @@
 #pragma once
 
 // THIS IS A GENERATED FILE; EDIT merge_sideloaded.sql INSTEAD
-// To regenerate, run `node platform/default/mbgl/storage/merge_sideloaded.js`
+// To regenerate, run `node platform/default/mln/storage/merge_sideloaded.js`
 
 namespace mln {
 

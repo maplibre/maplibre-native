@@ -1,24 +1,24 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/style/observer.hpp>
-#include <mbgl/style/source_observer.hpp>
-#include <mbgl/style/layer_observer.hpp>
-#include <mbgl/style/light_observer.hpp>
-#include <mbgl/sprite/sprite_loader_observer.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/collection.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/transition_options.hpp>
+#include <mln/style/observer.hpp>
+#include <mln/style/source_observer.hpp>
+#include <mln/style/layer_observer.hpp>
+#include <mln/style/light_observer.hpp>
+#include <mln/sprite/sprite_loader_observer.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/collection.hpp>
 
-#include <mbgl/text/glyph.hpp>
+#include <mln/text/glyph.hpp>
 
-#include <mbgl/map/camera.hpp>
+#include <mln/map/camera.hpp>
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/geo.hpp>
 
 #include <memory>
 #include <string>

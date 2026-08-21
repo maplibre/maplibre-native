@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/source.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/style/source.hpp>
+#include <mln/util/image.hpp>
 
 #include <optional>
 

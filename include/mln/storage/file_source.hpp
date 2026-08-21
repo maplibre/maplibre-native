@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/storage/resource_transform.hpp>
-#include <mbgl/storage/response.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/client_options.hpp>
+#include <mln/storage/resource_transform.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/client_options.hpp>
 
 #include <mapbox/compatibility/value.hpp>
 

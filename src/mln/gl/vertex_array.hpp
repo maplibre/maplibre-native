@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gl/object.hpp>
-#include <mbgl/gl/attribute.hpp>
-#include <mbgl/gl/state.hpp>
-#include <mbgl/gl/value.hpp>
+#include <mln/gl/object.hpp>
+#include <mln/gl/attribute.hpp>
+#include <mln/gl/state.hpp>
+#include <mln/gl/value.hpp>
 
 #include <array>
 #include <memory>

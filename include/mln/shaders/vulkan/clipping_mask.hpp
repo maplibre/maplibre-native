@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/vulkan/shader_program.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/vulkan/shader_program.hpp>
+#include <mln/util/mat4.hpp>
 
 namespace mln {
 namespace shaders {

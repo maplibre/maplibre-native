@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/geometry/anchor.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/geometry/anchor.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/util/math.hpp>
 
 namespace mln {
 

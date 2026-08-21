@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/render_source.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/style/sources/image_source_impl.hpp>
+#include <mln/renderer/render_source.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/style/sources/image_source_impl.hpp>
 
 namespace mln {
 

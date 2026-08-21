@@ -1,5 +1,5 @@
-#include <mbgl/style/sources/custom_geometry_source_impl.hpp>
-#include <mbgl/style/source_observer.hpp>
+#include <mln/style/sources/custom_geometry_source_impl.hpp>
+#include <mln/style/source_observer.hpp>
 
 namespace mln {
 namespace style {

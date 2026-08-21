@@ -1,13 +1,13 @@
-#include <mbgl/layermanager/layer_factory.hpp>
+#include <mln/layermanager/layer_factory.hpp>
 
-#include <mbgl/layout/layout.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
+#include <mln/layout/layout.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
 
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/layer.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/layer.hpp>
 
 namespace mln {
 

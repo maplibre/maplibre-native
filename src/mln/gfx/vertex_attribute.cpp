@@ -1,6 +1,6 @@
-#include <mbgl/gfx/vertex_attribute.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
 
-#include <mbgl/gfx/vertex_vector.hpp>
+#include <mln/gfx/vertex_vector.hpp>
 
 #include <algorithm>
 #include <numeric>

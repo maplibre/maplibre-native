@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/thread.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/thread.hpp>
 
 namespace mln {
 // File source for supporting .pmtiles maps

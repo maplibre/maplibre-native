@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/shader.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/hash.hpp>
+#include <mln/gfx/shader.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/hash.hpp>
 
 #include <iomanip>
 #include <memory>

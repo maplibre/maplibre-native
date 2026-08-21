@@ -1,11 +1,11 @@
 #include "http_request.hpp"
 #include "http_file_source.hpp"
 
-#include <mbgl/storage/response.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/http_header.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/version.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/http_header.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/version.hpp>
 
 #include <QByteArray>
 #include <QNetworkReply>

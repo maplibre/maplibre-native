@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/vulkan/vertex_attribute.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
-#include <mbgl/vulkan/pipeline.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/vulkan/vertex_attribute.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/pipeline.hpp>
 
 #include <optional>
 #include <string>

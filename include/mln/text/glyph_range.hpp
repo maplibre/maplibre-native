@@ -3,8 +3,8 @@
 #include <utility>
 #include <cstdint>
 #include <unordered_set>
-#include <mbgl/util/hash.hpp>
-#include <mbgl/util/font_stack.hpp>
+#include <mln/util/hash.hpp>
+#include <mln/util/font_stack.hpp>
 
 namespace mln {
 

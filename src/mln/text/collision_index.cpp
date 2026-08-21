@@ -1,16 +1,16 @@
-#include <mbgl/text/collision_index.hpp>
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/math/log2.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/math/minmax.hpp>
-#include <mbgl/util/intersection_tests.hpp>
-#include <mbgl/layout/symbol_projection.hpp>
+#include <mln/text/collision_index.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/math/log2.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/math.hpp>
+#include <mln/math/minmax.hpp>
+#include <mln/util/intersection_tests.hpp>
+#include <mln/layout/symbol_projection.hpp>
 
 #include <mapbox/geometry/envelope.hpp>
 
-#include <mbgl/renderer/buckets/symbol_bucket.hpp> // For PlacedSymbol: pull out to another location
+#include <mln/renderer/buckets/symbol_bucket.hpp> // For PlacedSymbol: pull out to another location
 
 #include <cmath>
 

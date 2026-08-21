@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/clamp.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/clamp.hpp>
 
 #include <numbers>
 

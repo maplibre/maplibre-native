@@ -1,6 +1,6 @@
-#include <mbgl/i18n/number_format.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/expression/number_format.hpp>
+#include <mln/i18n/number_format.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/number_format.hpp>
 
 namespace mln {
 namespace style {

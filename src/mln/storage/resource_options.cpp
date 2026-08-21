@@ -1,6 +1,6 @@
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/tile_server_options.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/tile_server_options.hpp>
 
 namespace mln {
 

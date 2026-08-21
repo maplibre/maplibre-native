@@ -1,8 +1,8 @@
-#include <mbgl/style/expression/collator.hpp>
-#include <mbgl/style/expression/collator_expression.hpp>
-#include <mbgl/style/expression/literal.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/expression/collator.hpp>
+#include <mln/style/expression/collator_expression.hpp>
+#include <mln/style/expression/literal.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/string.hpp>
 
 namespace mln {
 namespace style {

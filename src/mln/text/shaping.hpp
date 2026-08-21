@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/text/tagged_string.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/types.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/text/tagged_string.hpp>
 
 #include <utility>
 

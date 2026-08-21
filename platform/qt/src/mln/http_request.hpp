@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/storage/http_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/util/async_request.hpp>
+#include <mln/storage/http_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/util/async_request.hpp>
 
 #include <QNetworkReply>
 #include <QNetworkRequest>

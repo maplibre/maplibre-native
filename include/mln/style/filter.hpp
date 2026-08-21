@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/style/expression/expression.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/style/expression/expression.hpp>
 
 #include <string>
 #include <vector>

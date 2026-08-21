@@ -1,8 +1,8 @@
-#include <mbgl/layermanager/color_relief_layer_factory.hpp>
+#include <mln/layermanager/color_relief_layer_factory.hpp>
 
-#include <mbgl/renderer/layers/render_color_relief_layer.hpp>
-#include <mbgl/style/layers/color_relief_layer.hpp>
-#include <mbgl/style/layers/color_relief_layer_impl.hpp>
+#include <mln/renderer/layers/render_color_relief_layer.hpp>
+#include <mln/style/layers/color_relief_layer.hpp>
+#include <mln/style/layers/color_relief_layer_impl.hpp>
 
 namespace mln {
 

@@ -1,7 +1,7 @@
-#include <mbgl/style/layers/custom_layer.hpp>
-#include <mbgl/style/layers/custom_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_custom_layer.hpp>
-#include <mbgl/style/layer_observer.hpp>
+#include <mln/style/layers/custom_layer.hpp>
+#include <mln/style/layers/custom_layer_impl.hpp>
+#include <mln/renderer/layers/render_custom_layer.hpp>
+#include <mln/style/layer_observer.hpp>
 
 namespace mln {
 namespace style {

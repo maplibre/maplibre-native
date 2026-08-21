@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/geometry/line_atlas.hpp>
+#include <mln/gfx/drawable_data.hpp>
+#include <mln/geometry/line_atlas.hpp>
 
 #include <memory>
 

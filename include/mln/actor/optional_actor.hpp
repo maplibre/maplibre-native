@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/actor/optional_actor_ref.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/actor/optional_actor_ref.hpp>
 
 namespace mln {
 

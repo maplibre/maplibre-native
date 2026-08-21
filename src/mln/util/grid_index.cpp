@@ -1,5 +1,5 @@
-#include <mbgl/util/grid_index.hpp>
-#include <mbgl/geometry/feature_index.hpp>
+#include <mln/util/grid_index.hpp>
+#include <mln/geometry/feature_index.hpp>
 
 namespace mln {
 

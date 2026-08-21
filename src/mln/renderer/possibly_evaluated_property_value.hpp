@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/style/property_expression.hpp>
-#include <mbgl/util/interpolate.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/renderer/cross_faded_property_evaluator.hpp>
+#include <mln/style/property_expression.hpp>
+#include <mln/util/interpolate.hpp>
+#include <mln/util/variant.hpp>
 
 #include <cmath>
 

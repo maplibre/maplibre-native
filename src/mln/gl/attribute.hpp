@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gl/types.hpp>
-#include <mbgl/shaders/attributes.hpp>
-#include <mbgl/util/literal.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/util/literal.hpp>
 
 #include <algorithm>
 #include <optional>

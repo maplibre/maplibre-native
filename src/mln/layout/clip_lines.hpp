@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
 namespace mln {
 namespace util {

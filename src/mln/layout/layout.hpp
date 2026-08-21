@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/util/containers.hpp>
 #include <memory>
 
 namespace mln {

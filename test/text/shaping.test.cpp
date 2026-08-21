@@ -1,10 +1,10 @@
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/text/bidi.hpp>
-#include <mbgl/text/tagged_string.hpp>
-#include <mbgl/text/shaping.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/text/bidi.hpp>
+#include <mln/text/tagged_string.hpp>
+#include <mln/text/shaping.hpp>
+#include <mln/util/constants.hpp>
 
 using namespace mln;
 using namespace util;

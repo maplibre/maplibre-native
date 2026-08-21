@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_layer.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_layer.hpp>
 
 namespace mln {
 

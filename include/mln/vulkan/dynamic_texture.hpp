@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/dynamic_texture.hpp>
-#include <mbgl/vulkan/texture2d.hpp>
+#include <mln/gfx/dynamic_texture.hpp>
+#include <mln/vulkan/texture2d.hpp>
 
 #define DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD 0
 

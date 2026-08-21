@@ -1,5 +1,5 @@
-#include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gl/debugging_extension.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace gl {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/webgpu/buffer_resource.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/webgpu/buffer_resource.hpp>
+#include <mln/util/monotonic_timer.hpp>
 
 #include <memory>
 

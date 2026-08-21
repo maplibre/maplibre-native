@@ -12,47 +12,47 @@
 #pragma warning(pop)
 #endif
 
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/layers/render_location_indicator_layer.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/style/layers/location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer_impl.hpp>
-#include <mbgl/style/layers/location_indicator_layer_properties.hpp>
-#include <mbgl/util/mat4.hpp>
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/gfx/context.hpp>
 
 #include <mapbox/eternal.hpp>
-#include <mbgl/renderer/image_manager.hpp>
+#include <mln/renderer/image_manager.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/uniform.hpp>
-#include <mbgl/gl/types.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/uniform.hpp>
+#include <mln/gl/types.hpp>
 
 #endif
 
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
 
-#include <mbgl/gfx/vertex_attribute.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/shaders/location_indicator_ubo.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/renderer/layers/location_indicator_layer_tweaker.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/shaders/location_indicator_ubo.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/renderer/layers/location_indicator_layer_tweaker.hpp>
 
 #endif
 

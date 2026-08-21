@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_operation.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile_operation.hpp>
 
 namespace mln {
 

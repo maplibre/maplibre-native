@@ -1,36 +1,36 @@
-#include <mbgl/webgpu/context.hpp>
+#include <mln/webgpu/context.hpp>
 
 #include <webgpu/webgpu.h>
 
-#include <mbgl/webgpu/vertex_buffer_resource.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/gfx/color_mode.hpp>
+#include <mln/webgpu/vertex_buffer_resource.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/gfx/color_mode.hpp>
 #include <array>
-#include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/webgpu/command_encoder.hpp>
-#include <mbgl/webgpu/drawable_builder.hpp>
-#include <mbgl/webgpu/draw_scope_resource.hpp>
-#include <mbgl/webgpu/dynamic_texture.hpp>
-#include <mbgl/webgpu/offscreen_texture.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/webgpu/uniform_buffer.hpp>
-#include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/webgpu/texture2d.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/render_target.hpp>
-#include <mbgl/webgpu/tile_layer_group.hpp>
-#include <mbgl/webgpu/layer_group.hpp>
-#include <mbgl/webgpu/render_pass.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/util/hash.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gfx/depth_mode.hpp>
+#include <mln/webgpu/command_encoder.hpp>
+#include <mln/webgpu/drawable_builder.hpp>
+#include <mln/webgpu/draw_scope_resource.hpp>
+#include <mln/webgpu/dynamic_texture.hpp>
+#include <mln/webgpu/offscreen_texture.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/webgpu/uniform_buffer.hpp>
+#include <mln/webgpu/upload_pass.hpp>
+#include <mln/webgpu/vertex_attribute.hpp>
+#include <mln/webgpu/texture2d.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/renderer/render_target.hpp>
+#include <mln/webgpu/tile_layer_group.hpp>
+#include <mln/webgpu/layer_group.hpp>
+#include <mln/webgpu/render_pass.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/util/hash.hpp>
+#include <mln/util/logging.hpp>
 
-#include <mbgl/shaders/attributes.hpp>
-#include <mbgl/shaders/webgpu/clipping_mask.hpp>
-#include <mbgl/shaders/webgpu/shader_program.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/gfx/gfx_types.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/shaders/webgpu/clipping_mask.hpp>
+#include <mln/shaders/webgpu/shader_program.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/gfx/gfx_types.hpp>
 
 namespace mln {
 namespace webgpu {

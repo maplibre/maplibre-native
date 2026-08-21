@@ -1,17 +1,17 @@
-#include <mbgl/map/transform.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/test/fake_file_source.hpp>
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/style/style.hpp>
+#include <mln/test/fake_file_source.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
 
 namespace mln {
 

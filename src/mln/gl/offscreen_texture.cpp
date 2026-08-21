@@ -1,7 +1,7 @@
-#include <mbgl/gl/offscreen_texture.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/framebuffer.hpp>
+#include <mln/gl/offscreen_texture.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/framebuffer.hpp>
 
 namespace mln {
 namespace gl {

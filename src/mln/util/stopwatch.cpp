@@ -1,8 +1,8 @@
 #ifndef DISABLE_STOPWATCH
-#include <mbgl/util/stopwatch.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/stopwatch.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/logging.hpp>
 
 #include <atomic>
 

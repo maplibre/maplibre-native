@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/util/range.hpp>
 
 namespace mln {
 namespace gfx {

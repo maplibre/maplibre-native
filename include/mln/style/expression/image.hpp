@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/util/color.hpp>
 
 #include <string>
 #include <vector>

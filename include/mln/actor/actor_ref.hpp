@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/actor/mailbox.hpp>
-#include <mbgl/actor/message.hpp>
+#include <mln/actor/mailbox.hpp>
+#include <mln/actor/message.hpp>
 
 #include <memory>
 

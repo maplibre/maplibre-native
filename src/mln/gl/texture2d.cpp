@@ -1,9 +1,9 @@
-#include <mbgl/gl/texture2d.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/enum.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gl/texture2d.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/enum.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/util/instrumentation.hpp>
 
 namespace mln {
 namespace gl {

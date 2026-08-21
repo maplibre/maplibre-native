@@ -1,7 +1,7 @@
-#include <mbgl/annotation/fill_annotation_impl.hpp>
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/style/style_impl.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
+#include <mln/annotation/fill_annotation_impl.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/style/style_impl.hpp>
+#include <mln/style/layers/fill_layer.hpp>
 
 namespace mln {
 

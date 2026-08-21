@@ -1,7 +1,7 @@
 #include "http_file_source.hpp"
 #include "http_request.hpp"
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #include <QByteArray>
 #include <QDir>

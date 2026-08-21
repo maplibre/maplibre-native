@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/gl/types.hpp>
-#include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/gfx/stencil_mode.hpp>
-#include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/scissor_rect.hpp>
-#include <mbgl/gl/attribute.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/size.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/gfx/depth_mode.hpp>
+#include <mln/gfx/stencil_mode.hpp>
+#include <mln/gfx/color_mode.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/scissor_rect.hpp>
+#include <mln/gl/attribute.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/size.hpp>
+#include <mln/util/range.hpp>
 
 namespace mln {
 namespace gl {

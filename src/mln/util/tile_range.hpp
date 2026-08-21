@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/range.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/projection.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/range.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 
 namespace mln {
 namespace util {

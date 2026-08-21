@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/text/quads.hpp>
-#include <mbgl/text/collision_feature.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/util/source_location.hpp>
+#include <mln/text/quads.hpp>
+#include <mln/text/collision_feature.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/util/bitmask_operations.hpp>
+#include <mln/util/source_location.hpp>
 
 #include <cstdint>
 

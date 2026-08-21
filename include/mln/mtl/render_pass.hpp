@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLCommandEncoder.hpp>

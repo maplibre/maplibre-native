@@ -5,10 +5,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/gl/types.hpp>
-#include <mbgl/util/lru_cache.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/util/lru_cache.hpp>
+#include <mln/util/size.hpp>
 
 namespace mln {
 namespace gl {

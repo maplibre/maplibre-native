@@ -1,24 +1,24 @@
-#include <mbgl/renderer/layers/render_circle_layer.hpp>
+#include <mln/renderer/layers/render_circle_layer.hpp>
 
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/util/intersection_tests.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/shader_group.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/renderer/buckets/circle_bucket.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/util/math.hpp>
+#include <mln/util/intersection_tests.hpp>
+#include <mln/util/containers.hpp>
 
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/shaders/circle_layer_ubo.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/renderer/layers/circle_layer_tweaker.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/circle_layer_ubo.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 
 namespace mln {
 

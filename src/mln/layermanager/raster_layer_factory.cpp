@@ -1,8 +1,8 @@
-#include <mbgl/layermanager/raster_layer_factory.hpp>
+#include <mln/layermanager/raster_layer_factory.hpp>
 
-#include <mbgl/renderer/layers/render_raster_layer.hpp>
-#include <mbgl/style/layers/raster_layer.hpp>
-#include <mbgl/style/layers/raster_layer_impl.hpp>
+#include <mln/renderer/layers/render_raster_layer.hpp>
+#include <mln/style/layers/raster_layer.hpp>
+#include <mln/style/layers/raster_layer_impl.hpp>
 
 namespace mln {
 

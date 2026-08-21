@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/tile_server_options.hpp>
-#include <mbgl/util/default_style.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/tile_server_options.hpp>
+#include <mln/util/default_style.hpp>
 
 #include <jni/jni.hpp>
 

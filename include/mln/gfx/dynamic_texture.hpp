@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/rect.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/rect.hpp>
 
 #include <mapbox/shelf-pack.hpp>
 

@@ -1,29 +1,29 @@
-#include <mbgl/renderer/layers/render_hillshade_layer.hpp>
-#include <mbgl/renderer/buckets/hillshade_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/style/layers/hillshade_layer_impl.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/offscreen_texture.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/renderer/layers/render_hillshade_layer.hpp>
+#include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/sources/render_raster_dem_source.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/style/layers/hillshade_layer_impl.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/offscreen_texture.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/util/geo.hpp>
 
-#include <mbgl/renderer/layers/hillshade_layer_tweaker.hpp>
-#include <mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/render_target.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/shaders/hillshade_layer_ubo.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/gfx/hillshade_prepare_drawable_data.hpp>
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
+#include <mln/renderer/layers/hillshade_layer_tweaker.hpp>
+#include <mln/renderer/layers/hillshade_prepare_layer_tweaker.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/render_target.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/shaders/hillshade_layer_ubo.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/hillshade_prepare_drawable_data.hpp>
+#include <mln/gfx/shader_group.hpp>
+#include <mln/gfx/shader_registry.hpp>
 
 namespace mln {
 

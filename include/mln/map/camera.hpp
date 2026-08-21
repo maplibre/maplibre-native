@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/unitbezier.hpp>
-#include <mbgl/util/vectors.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/unitbezier.hpp>
+#include <mln/util/vectors.hpp>
 
 #include <optional>
 

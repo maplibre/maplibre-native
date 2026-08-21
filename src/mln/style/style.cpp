@@ -1,11 +1,11 @@
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/style_impl.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/style_impl.hpp>
+#include <mln/util/instrumentation.hpp>
 
 namespace mln {
 namespace style {

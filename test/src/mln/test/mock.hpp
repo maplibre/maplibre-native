@@ -6,8 +6,8 @@
 #include <set>
 #include <map>
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/range.hpp>
 
 struct MockTileData;
 

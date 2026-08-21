@@ -1,5 +1,5 @@
-#include <mbgl/shaders/gl/shader_info.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
+#include <mln/shaders/gl/shader_info.hpp>
+#include <mln/shaders/shader_defines.hpp>
 
 namespace mln {
 namespace shaders {

@@ -1,6 +1,6 @@
 #include <libnu/strcoll.h>
 #include <libnu/unaccent.h>
-#include <mbgl/i18n/collator.hpp>
+#include <mln/i18n/collator.hpp>
 
 #include <cstring>
 #include <sstream>

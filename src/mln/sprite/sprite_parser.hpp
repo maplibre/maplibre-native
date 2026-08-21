@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/style/image.hpp>
+#include <mln/style/image.hpp>
 
 #include <memory>
 

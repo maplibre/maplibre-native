@@ -1,6 +1,6 @@
 // Generated code, do not modify this file!
 #pragma once
-#include <mbgl/shaders/shader_source.hpp>
+#include <mln/shaders/shader_source.hpp>
 
 namespace mln {
 namespace shaders {

@@ -1,10 +1,10 @@
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/text/cross_tile_symbol_index.hpp>
-#include <mbgl/text/placement.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/text/cross_tile_symbol_index.hpp>
+#include <mln/text/placement.hpp>
 
 #include <algorithm>
 #include <utility>

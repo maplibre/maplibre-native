@@ -1,9 +1,9 @@
 #include <mapbox/geometry/box.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/token.hpp>
-#include <mbgl/util/url.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/token.hpp>
+#include <mln/util/url.hpp>
 
 #include <cmath>
 

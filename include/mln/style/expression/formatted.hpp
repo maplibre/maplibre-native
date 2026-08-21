@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/expression/image.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/font_stack.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/expression/image.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/font_stack.hpp>
 
 #include <vector>
 #include <string>

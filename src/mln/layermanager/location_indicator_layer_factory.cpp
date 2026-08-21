@@ -1,8 +1,8 @@
-#include <mbgl/layermanager/location_indicator_layer_factory.hpp>
+#include <mln/layermanager/location_indicator_layer_factory.hpp>
 
-#include <mbgl/renderer/layers/render_location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer_impl.hpp>
+#include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
 
 namespace mln {
 

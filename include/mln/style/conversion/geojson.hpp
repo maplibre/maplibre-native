@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/style/conversion.hpp>
 
 #include <optional>
 #include <string>

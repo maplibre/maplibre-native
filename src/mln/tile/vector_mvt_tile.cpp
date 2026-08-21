@@ -1,8 +1,8 @@
-#include <mbgl/tile/vector_mvt_tile.hpp>
+#include <mln/tile/vector_mvt_tile.hpp>
 
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/tile/tile_loader_impl.hpp>
-#include <mbgl/tile/vector_mvt_tile_data.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/tile/tile_loader_impl.hpp>
+#include <mln/tile/vector_mvt_tile_data.hpp>
 
 #include <utility>
 

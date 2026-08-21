@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/renderer/render_source.hpp>
-#include <mbgl/renderer/source_state.hpp>
-#include <mbgl/renderer/tile_pyramid.hpp>
-#include <mbgl/style/sources/tile_source_impl.hpp>
-#include <mbgl/renderer/render_tree.hpp>
+#include <mln/renderer/render_source.hpp>
+#include <mln/renderer/source_state.hpp>
+#include <mln/renderer/tile_pyramid.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
+#include <mln/renderer/render_tree.hpp>
 
-#include <mbgl/gfx/context.hpp>
+#include <mln/gfx/context.hpp>
 
 namespace mln {
 

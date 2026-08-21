@@ -1,17 +1,17 @@
-#include <mbgl/renderer/layers/heatmap_layer_tweaker.hpp>
+#include <mln/renderer/layers/heatmap_layer_tweaker.hpp>
 
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/shaders/heatmap_layer_ubo.hpp>
-#include <mbgl/style/layers/heatmap_layer_properties.hpp>
-#include <mbgl/util/convert.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/shaders/heatmap_layer_ubo.hpp>
+#include <mln/style/layers/heatmap_layer_properties.hpp>
+#include <mln/util/convert.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/mtl/heatmap.hpp>
+#include <mln/shaders/mtl/heatmap.hpp>
 #endif
 
 namespace mln {

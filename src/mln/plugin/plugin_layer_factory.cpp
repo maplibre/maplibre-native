@@ -1,9 +1,9 @@
-#include <mbgl/plugin/plugin_layer_factory.hpp>
-#include <mbgl/plugin/plugin_layer.hpp>
-#include <mbgl/plugin/plugin_layer_impl.hpp>
-#include <mbgl/plugin/plugin_layer_render.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/renderer/bucket.hpp>
+#include <mln/plugin/plugin_layer_factory.hpp>
+#include <mln/plugin/plugin_layer.hpp>
+#include <mln/plugin/plugin_layer_impl.hpp>
+#include <mln/plugin/plugin_layer_render.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/renderer/bucket.hpp>
 
 #include <string>
 

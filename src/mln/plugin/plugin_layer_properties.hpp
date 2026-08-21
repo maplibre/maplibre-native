@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/layer_properties.hpp>
-#include <mbgl/plugin/plugin_layer.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/layer_properties.hpp>
+#include <mln/plugin/plugin_layer.hpp>
 
 namespace mln {
 namespace style {

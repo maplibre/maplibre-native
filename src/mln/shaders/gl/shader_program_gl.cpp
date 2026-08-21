@@ -1,11 +1,11 @@
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mln/shaders/gl/shader_program_gl.hpp>
 
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/types.hpp>
-#include <mbgl/gl/vertex_attribute_gl.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/shaders/shader_manifest.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/gl/vertex_attribute_gl.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_manifest.hpp>
 
 #include <cstring>
 #include <utility>

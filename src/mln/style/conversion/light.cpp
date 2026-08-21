@@ -1,8 +1,8 @@
-#include <mbgl/style/conversion/light.hpp>
-#include <mbgl/style/conversion/position.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion/transition_options.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/light.hpp>
+#include <mln/style/conversion/position.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion/transition_options.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 namespace mln {
 namespace style {

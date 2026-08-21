@@ -1,8 +1,8 @@
-#include <mbgl/tile/vector_mvt_tile_data.hpp>
+#include <mln/tile/vector_mvt_tile_data.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/logging.hpp>
 
 #if ANDROID
 #include <mlt/decoder.hpp>

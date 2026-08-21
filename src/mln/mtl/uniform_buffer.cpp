@@ -1,8 +1,8 @@
-#include <mbgl/mtl/uniform_buffer.hpp>
-#include <mbgl/mtl/render_pass.hpp>
-#include <mbgl/mtl/context.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/mtl/uniform_buffer.hpp>
+#include <mln/mtl/render_pass.hpp>
+#include <mln/mtl/context.hpp>
+#include <mln/shaders/layer_ubo.hpp>
+#include <mln/util/logging.hpp>
 
 #include <cassert>
 

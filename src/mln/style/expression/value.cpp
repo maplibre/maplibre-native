@@ -1,7 +1,7 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/style/conversion/stringify.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/style/conversion/stringify.hpp>
 
 namespace mln {
 namespace style {

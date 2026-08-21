@@ -1,8 +1,8 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/actor/optional_actor.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/actor/optional_actor.hpp>
 #include "../../geojson/geometry.hpp"
 #include "../../geojson/feature.hpp"
 #include "../../geojson/feature_collection.hpp"

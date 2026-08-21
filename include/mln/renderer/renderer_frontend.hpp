@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/actor/scheduler.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/actor/scheduler.hpp>
 
 namespace mln {
 

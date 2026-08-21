@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/renderer/render_pass.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/identity.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/renderer/render_pass.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/identity.hpp>
+#include <mln/util/logging.hpp>
 
 #include <functional>
 #include <memory>

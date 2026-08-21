@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/heatmap_texture.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
+#include <mln/shaders/webgpu/heatmap_texture.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/heatmap_texture_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

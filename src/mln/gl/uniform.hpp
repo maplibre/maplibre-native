@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gl/types.hpp>
-#include <mbgl/util/literal.hpp>
-#include <mbgl/util/ignore.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/util/literal.hpp>
+#include <mln/util/ignore.hpp>
+#include <mln/util/indexed_tuple.hpp>
 
 #include <array>
 #include <vector>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/layers/hillshade_layer.hpp>
-#include <mbgl/style/layers/hillshade_layer_properties.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/layers/hillshade_layer.hpp>
+#include <mln/style/layers/hillshade_layer_properties.hpp>
 
 namespace mln {
 namespace style {

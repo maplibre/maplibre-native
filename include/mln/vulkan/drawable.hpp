@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/draw_mode.hpp>
+#include <mln/gfx/upload_pass.hpp>
 
 #include <memory>
 

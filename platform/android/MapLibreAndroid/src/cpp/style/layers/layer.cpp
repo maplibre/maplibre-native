@@ -3,21 +3,21 @@
 
 #include <jni/jni.hpp>
 
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/util/logging.hpp>
 
 // Java -> C++ conversion
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion/layer.hpp>
-#include <mbgl/style/conversion/source.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/layer.hpp>
+#include <mln/style/conversion/source.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 // C++ -> Java conversion
 #include "../conversion/property_value.hpp"
 #include "custom_layer.hpp"
 #include "background_layer.hpp"
-#include <mbgl/style/filter.hpp>
+#include <mln/style/filter.hpp>
 
 #include <string>
 

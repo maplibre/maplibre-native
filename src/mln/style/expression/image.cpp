@@ -1,6 +1,6 @@
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/expression/image.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/image.hpp>
 
 namespace mln {
 namespace style {

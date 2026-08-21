@@ -1,19 +1,19 @@
 
-#include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/gfx/renderer_backend.hpp>
 
-#include <mbgl/webgpu/layer_group.hpp>
-#include <mbgl/webgpu/render_pass.hpp>
-#include <mbgl/webgpu/drawable.hpp>
-#include <mbgl/webgpu/context.hpp>
+#include <mln/webgpu/layer_group.hpp>
+#include <mln/webgpu/render_pass.hpp>
+#include <mln/webgpu/drawable.hpp>
+#include <mln/webgpu/context.hpp>
 
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/shaders/webgpu/shader_program.hpp>
 
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/convert.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/convert.hpp>
 
 namespace mln {
 namespace webgpu {

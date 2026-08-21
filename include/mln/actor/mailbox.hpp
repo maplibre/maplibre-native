@@ -7,7 +7,7 @@
 #include <queue>
 
 #include <mapbox/std/weak.hpp>
-#include <mbgl/actor/scheduler.hpp>
+#include <mln/actor/scheduler.hpp>
 
 namespace mln {
 

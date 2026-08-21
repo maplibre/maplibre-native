@@ -1,9 +1,9 @@
-#include <mbgl/text/shaping.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/layout/symbol_feature.hpp>
-#include <mbgl/math/minmax.hpp>
-#include <mbgl/text/bidi.hpp>
+#include <mln/text/shaping.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/layout/symbol_feature.hpp>
+#include <mln/math/minmax.hpp>
+#include <mln/text/bidi.hpp>
 
 #include <algorithm>
 #include <list>

@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/debug.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/debug_layer_ubo.hpp>
+#include <mln/shaders/webgpu/debug.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/debug_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

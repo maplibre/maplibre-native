@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
 
 // Limit to 4 threads (default is the nbr of CPU cores)
 #define CPPHTTPLIB_THREAD_POOL_COUNT 4

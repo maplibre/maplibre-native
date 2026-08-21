@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/util.hpp>
 
 #include <memory>
 #include <mutex>

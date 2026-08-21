@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/shaders/shader_program_base.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 
 namespace mln {
 namespace mtl {

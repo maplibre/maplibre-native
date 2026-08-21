@@ -1,15 +1,15 @@
-#include <mbgl/shaders/vulkan/shader_program.hpp>
+#include <mln/shaders/vulkan/shader_program.hpp>
 
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
-#include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/uniform_buffer.hpp>
-#include <mbgl/vulkan/vertex_attribute.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/shaders/shader_manifest.hpp>
-#include <mbgl/shaders/vulkan/common.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/uniform_buffer.hpp>
+#include <mln/vulkan/vertex_attribute.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_manifest.hpp>
+#include <mln/shaders/vulkan/common.hpp>
+#include <mln/util/logging.hpp>
 
 #include <cstring>
 #include <utility>

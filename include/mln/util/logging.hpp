@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/event.hpp>
+#include <mln/util/event.hpp>
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <memory>
 #include <string>

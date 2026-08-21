@@ -1,4 +1,4 @@
-#include <mbgl/style/sources/image_source_impl.hpp>
+#include <mln/style/sources/image_source_impl.hpp>
 
 namespace mln {
 namespace style {

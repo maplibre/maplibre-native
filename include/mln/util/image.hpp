@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/size.hpp>
 
 #include <string>
 #include <cstring>

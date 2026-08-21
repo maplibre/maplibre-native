@@ -1,18 +1,18 @@
 #pragma once
 
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/plugin/plugin_layer.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/layer_properties.hpp>
-#include <mbgl/style/layout_property.hpp>
-#include <mbgl/style/paint_property.hpp>
-#include <mbgl/style/properties.hpp>
-#include <mbgl/shaders/attributes.hpp>
-#include <mbgl/shaders/uniforms.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/plugin/plugin_layer.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/layer_properties.hpp>
+#include <mln/style/layout_property.hpp>
+#include <mln/style/paint_property.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/shaders/uniforms.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/util/color.hpp>
 
 #include <map>
 #include <vector>

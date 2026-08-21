@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/vulkan/shader_program.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/vulkan/shader_program.hpp>
 
 constexpr auto rasterShaderPrelude = R"(
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/immutable.hpp>
-#include <mbgl/style/layer.hpp>
+#include <mln/util/immutable.hpp>
+#include <mln/style/layer.hpp>
 
 #include <string>
 #include <vector>

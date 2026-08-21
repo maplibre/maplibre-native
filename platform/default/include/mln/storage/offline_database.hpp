@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/offline.hpp>
-#include <mbgl/util/tile_server_options.hpp>
-#include <mbgl/util/exception.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/mapbox.hpp>
-#include <mbgl/util/expected.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/offline.hpp>
+#include <mln/util/tile_server_options.hpp>
+#include <mln/util/exception.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/mapbox.hpp>
+#include <mln/util/expected.hpp>
 
 #include <list>
 #include <map>

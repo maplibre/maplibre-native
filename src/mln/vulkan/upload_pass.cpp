@@ -1,11 +1,11 @@
-#include <mbgl/vulkan/upload_pass.hpp>
+#include <mln/vulkan/upload_pass.hpp>
 
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/command_encoder.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/vulkan/vertex_attribute.hpp>
-#include <mbgl/vulkan/vertex_buffer_resource.hpp>
-#include <mbgl/vulkan/index_buffer_resource.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/vulkan/command_encoder.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/vulkan/vertex_attribute.hpp>
+#include <mln/vulkan/vertex_buffer_resource.hpp>
+#include <mln/vulkan/index_buffer_resource.hpp>
 
 #include <algorithm>
 

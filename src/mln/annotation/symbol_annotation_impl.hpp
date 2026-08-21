@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/util/geo.hpp>
 
 #include <string>
 

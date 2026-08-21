@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/layers/custom_layer_host.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layers/custom_layer_host.hpp>
 
 #include <memory>
 

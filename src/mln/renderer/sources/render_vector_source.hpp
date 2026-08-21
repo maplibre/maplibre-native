@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/renderer/sources/render_tile_source.hpp>
-#include <mbgl/renderer/tile_pyramid.hpp>
-#include <mbgl/style/sources/tile_source_impl.hpp>
+#include <mln/renderer/sources/render_tile_source.hpp>
+#include <mln/renderer/tile_pyramid.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 
 namespace mln {
 

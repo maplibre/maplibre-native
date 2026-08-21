@@ -1,8 +1,8 @@
-#include <mbgl/vulkan/offscreen_texture.hpp>
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
-#include <mbgl/vulkan/texture2d.hpp>
+#include <mln/vulkan/offscreen_texture.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/texture2d.hpp>
 
 namespace mln {
 namespace vulkan {

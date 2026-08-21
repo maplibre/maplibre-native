@@ -1,10 +1,10 @@
-#include <mbgl/math/log2.hpp>
-#include <mbgl/util/bounding_volumes.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/interpolate.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/tile_cover_impl.hpp>
+#include <mln/math/log2.hpp>
+#include <mln/util/bounding_volumes.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/interpolate.hpp>
+#include <mln/util/tile_coordinate.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/util/tile_cover_impl.hpp>
 
 #include <functional>
 #include <list>

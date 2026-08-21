@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/shader_group.hpp>
+#include <mln/gfx/shader_group.hpp>
 
 #include <memory>
 #include <mutex>

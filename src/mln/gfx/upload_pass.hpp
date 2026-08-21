@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gfx/debug_group.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/util/size.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/gfx/debug_group.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gfx/index_vector.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/util/size.hpp>
+#include <mln/util/image.hpp>
 
-#include <mbgl/gfx/texture2d.hpp>
+#include <mln/gfx/texture2d.hpp>
 
 #include <optional>
 #include <string>

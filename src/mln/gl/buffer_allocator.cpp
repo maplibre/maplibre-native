@@ -1,8 +1,8 @@
-#include <mbgl/gl/buffer_allocator.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/uniform_buffer_gl.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gl/buffer_allocator.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/uniform_buffer_gl.hpp>
+#include <mln/util/instrumentation.hpp>
 
 #include <utility>
 

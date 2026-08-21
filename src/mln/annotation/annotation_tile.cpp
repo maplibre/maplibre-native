@@ -1,7 +1,7 @@
-#include <mbgl/annotation/annotation_tile.hpp>
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
+#include <mln/annotation/annotation_tile.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/renderer/tile_parameters.hpp>
 
 #include <utility>
 

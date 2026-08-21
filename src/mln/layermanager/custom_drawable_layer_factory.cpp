@@ -1,7 +1,7 @@
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/layermanager/custom_drawable_layer_factory.hpp>
-#include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
+#include <mln/layermanager/custom_drawable_layer_factory.hpp>
+#include <mln/style/layers/custom_drawable_layer_impl.hpp>
+#include <mln/renderer/layers/render_custom_drawable_layer.hpp>
 
 namespace mln {
 

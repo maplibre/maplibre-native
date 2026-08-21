@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer_impl.hpp>
-#include <mbgl/style/layers/location_indicator_layer_properties.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
 
 #if !MLN_RENDER_BACKEND_OPENGL
 #define MLN_DRAWABLE_LOCATION_INDICATOR

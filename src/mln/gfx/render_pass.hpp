@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/debug_group.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/gfx/renderable.hpp>
+#include <mln/gfx/debug_group.hpp>
+#include <mln/util/color.hpp>
+#include <mln/gfx/renderable.hpp>
 
 #include <cstdint>
 

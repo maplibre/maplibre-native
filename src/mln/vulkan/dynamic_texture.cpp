@@ -1,8 +1,8 @@
-#include <mbgl/vulkan/dynamic_texture.hpp>
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/upload_pass.hpp>
-#include <mbgl/vulkan/command_encoder.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/vulkan/dynamic_texture.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/vulkan/upload_pass.hpp>
+#include <mln/vulkan/command_encoder.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace vulkan {

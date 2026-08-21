@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/style/sources/custom_vector_source.hpp>
-#include <mbgl/style/custom_vector_tile_loader.hpp>
-#include <mbgl/actor/actor_ref.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/style/sources/custom_vector_source.hpp>
+#include <mln/style/custom_vector_tile_loader.hpp>
+#include <mln/actor/actor_ref.hpp>
 
 namespace mln {
 namespace style {

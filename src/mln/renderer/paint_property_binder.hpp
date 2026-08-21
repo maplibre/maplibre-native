@@ -1,19 +1,19 @@
 #pragma once
 
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/layout/pattern_layout.hpp>
-#include <mbgl/shaders/attributes.hpp>
-#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/renderer/paint_property_statistics.hpp>
-#include <mbgl/renderer/possibly_evaluated_property_value.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
-#include <mbgl/util/literal.hpp>
-#include <mbgl/util/type_list.hpp>
-#include <mbgl/util/variant.hpp>
-#include <mbgl/util/vectors.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/layout/pattern_layout.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/renderer/cross_faded_property_evaluator.hpp>
+#include <mln/renderer/paint_property_statistics.hpp>
+#include <mln/renderer/possibly_evaluated_property_value.hpp>
+#include <mln/util/indexed_tuple.hpp>
+#include <mln/util/literal.hpp>
+#include <mln/util/type_list.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/util/vectors.hpp>
 
 namespace mln {
 

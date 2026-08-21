@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/size.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/size.hpp>
+#include <mln/util/util.hpp>
 
 namespace mln {
 

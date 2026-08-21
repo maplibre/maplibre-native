@@ -1,17 +1,17 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_necessity.hpp>
-#include <mbgl/tile/tile_loader_observer.hpp>
-#include <mbgl/renderer/tile_mask.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/style/layer_properties.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/tile_coordinate.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile_necessity.hpp>
+#include <mln/tile/tile_loader_observer.hpp>
+#include <mln/renderer/tile_mask.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/style/layer_properties.hpp>
 
 #include <string>
 #include <memory>

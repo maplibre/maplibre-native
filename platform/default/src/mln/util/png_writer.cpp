@@ -1,6 +1,6 @@
-#include <mbgl/util/compression.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/util/compression.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/premultiply.hpp>
 
 #include <boost/crc.hpp>
 

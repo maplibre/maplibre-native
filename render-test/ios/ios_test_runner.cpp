@@ -1,8 +1,8 @@
 #include "ios_test_runner.hpp"
 
-#include <mbgl/render_test.hpp>
+#include <mln/render_test.hpp>
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #include <vector>
 

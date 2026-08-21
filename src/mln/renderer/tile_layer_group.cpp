@@ -1,6 +1,6 @@
-#include <mbgl/renderer/layer_group.hpp>
+#include <mln/renderer/layer_group.hpp>
 
-#include <mbgl/gfx/upload_pass.hpp>
+#include <mln/gfx/upload_pass.hpp>
 
 #include <algorithm>
 #include <unordered_map>

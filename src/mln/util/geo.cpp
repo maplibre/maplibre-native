@@ -1,9 +1,9 @@
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/util/tile_range.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/util/tile_range.hpp>
 
 #include <cmath>
 #include <numbers>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
-#include <mbgl/style/layers/background_layer_properties.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layers/background_layer_properties.hpp>
 
 #include <optional>
 #include <memory>

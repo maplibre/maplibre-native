@@ -1,6 +1,6 @@
-#include <mbgl/gl/fence.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gl/fence.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/util/instrumentation.hpp>
 #include <cassert>
 #include <stdexcept>
 #include <string>

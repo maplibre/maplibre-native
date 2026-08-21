@@ -1,9 +1,9 @@
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/style/expression/type.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/style/expression/type.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/enum.hpp>
 
 namespace mln {
 

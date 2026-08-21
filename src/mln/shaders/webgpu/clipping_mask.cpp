@@ -1,5 +1,5 @@
-#include <mbgl/shaders/webgpu/clipping_mask.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
+#include <mln/shaders/webgpu/clipping_mask.hpp>
+#include <mln/shaders/shader_defines.hpp>
 
 namespace mln {
 namespace shaders {

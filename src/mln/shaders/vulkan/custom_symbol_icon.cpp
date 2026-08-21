@@ -1,6 +1,6 @@
-#include <mbgl/shaders/vulkan/custom_symbol_icon.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
+#include <mln/shaders/vulkan/custom_symbol_icon.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/custom_drawable_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

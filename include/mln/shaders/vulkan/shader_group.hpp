@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/shaders/vulkan/shader_program.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/util/hash.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/gfx/shader_group.hpp>
+#include <mln/shaders/vulkan/shader_program.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/util/hash.hpp>
+#include <mln/util/containers.hpp>
 
 #include <numeric>
 #include <string>

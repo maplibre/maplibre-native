@@ -1,6 +1,6 @@
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 #include <sstream>
 
 namespace mln {

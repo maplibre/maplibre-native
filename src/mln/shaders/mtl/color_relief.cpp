@@ -1,6 +1,6 @@
-#include <mbgl/shaders/mtl/color_relief.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mln/shaders/mtl/color_relief.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/mtl/shader_program.hpp>
 
 namespace mln {
 namespace shaders {

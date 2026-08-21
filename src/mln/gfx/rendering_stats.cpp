@@ -1,9 +1,9 @@
-#include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
+#include <mln/gfx/rendering_stats.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/util/monotonic_timer.hpp>
 
 #include <initializer_list>
 #include <sstream>

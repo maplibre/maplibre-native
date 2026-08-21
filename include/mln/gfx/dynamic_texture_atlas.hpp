@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/dynamic_texture.hpp>
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/style/image_impl.hpp>
+#include <mln/gfx/dynamic_texture.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/style/image_impl.hpp>
 
 namespace mln {
 

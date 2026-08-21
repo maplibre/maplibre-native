@@ -2,7 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "MLNMockGestureRecognizers.h"
 
-#import <mbgl/math/wrap.hpp>
+#import <mln/math/wrap.hpp>
 
 @interface MLNMapView (MLNMapViewDirectionTests)
 - (void)handleRotateGesture:(UIRotationGestureRecognizer *)rotate;

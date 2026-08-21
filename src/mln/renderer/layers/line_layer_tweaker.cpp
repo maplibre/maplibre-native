@@ -1,21 +1,21 @@
-#include <mbgl/renderer/layers/line_layer_tweaker.hpp>
+#include <mln/renderer/layers/line_layer_tweaker.hpp>
 
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/line_drawable_data.hpp>
-#include <mbgl/geometry/line_atlas.hpp>
-#include <mbgl/renderer/buckets/line_bucket.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/shaders/line_layer_ubo.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/style/layers/line_layer_properties.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/line_drawable_data.hpp>
+#include <mln/geometry/line_atlas.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/shaders/line_layer_ubo.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/style/layers/line_layer_properties.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/math.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/mtl/line.hpp>
+#include <mln/shaders/mtl/line.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mln {

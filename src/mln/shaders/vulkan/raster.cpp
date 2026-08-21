@@ -1,6 +1,6 @@
-#include <mbgl/shaders/vulkan/raster.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/raster_layer_ubo.hpp>
+#include <mln/shaders/vulkan/raster.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/raster_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

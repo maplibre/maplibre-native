@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/util/geo.hpp>
 
 namespace mln {
 

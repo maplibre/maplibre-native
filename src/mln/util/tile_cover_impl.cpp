@@ -1,5 +1,5 @@
-#include <mbgl/util/tile_cover_impl.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
+#include <mln/util/tile_cover_impl.hpp>
+#include <mln/util/tile_coordinate.hpp>
 
 #include <functional>
 #include <cmath>

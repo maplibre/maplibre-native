@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
+#include <mln/shaders/shader_source.hpp>
 
 #include <vector>
 #include <string>

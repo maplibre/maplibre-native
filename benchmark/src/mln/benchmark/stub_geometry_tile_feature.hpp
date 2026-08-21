@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/util/feature.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/util/feature.hpp>
 
 using namespace mln;
 

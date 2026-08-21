@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/variant.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/style/property_value.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/util/color.hpp>
+#include <mln/style/property_value.hpp>
 
 #include <cstdint>
 #include <vector>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/util/size.hpp>
 
 #include <functional>
 #include <map>

@@ -1,15 +1,15 @@
-#include <mbgl/shaders/webgpu/shader_program.hpp>
-#include <mbgl/shaders/webgpu/common.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/webgpu/uniform_buffer.hpp>
-#include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/gfx/stencil_mode.hpp>
+#include <mln/shaders/webgpu/shader_program.hpp>
+#include <mln/shaders/webgpu/common.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
+#include <mln/webgpu/uniform_buffer.hpp>
+#include <mln/webgpu/vertex_attribute.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/gfx/color_mode.hpp>
+#include <mln/gfx/depth_mode.hpp>
+#include <mln/gfx/stencil_mode.hpp>
 
 #include <algorithm>
 #include <cctype>
@@ -17,7 +17,7 @@
 #include <fstream>
 #include <map>
 #include <type_traits>
-#include <mbgl/util/variant.hpp>
+#include <mln/util/variant.hpp>
 
 namespace mln {
 namespace webgpu {

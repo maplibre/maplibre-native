@@ -1,6 +1,6 @@
 // Generated code, do not modify this file!
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/util/enum.hpp>
 
 namespace mln {
 

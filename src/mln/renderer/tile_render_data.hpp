@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layer_impl.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layer_impl.hpp>
 
 #include <memory>
 #include <optional>

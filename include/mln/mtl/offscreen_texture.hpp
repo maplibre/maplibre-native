@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/offscreen_texture.hpp>
-#include <mbgl/gfx/types.hpp>
+#include <mln/gfx/offscreen_texture.hpp>
+#include <mln/gfx/types.hpp>
 
 namespace mln {
 namespace mtl {

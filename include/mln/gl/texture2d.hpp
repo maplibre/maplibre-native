@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/gl/object.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gl/object.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/util/image.hpp>
 
 #include <memory>
 

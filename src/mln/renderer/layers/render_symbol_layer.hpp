@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
 
 #include <unordered_map>
 

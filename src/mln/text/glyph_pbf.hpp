@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/text/glyph_range.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/text/glyph_range.hpp>
 
 #include <string>
 #include <vector>

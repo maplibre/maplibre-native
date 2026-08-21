@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_impl.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_impl.hpp>
 
 namespace mln {
 

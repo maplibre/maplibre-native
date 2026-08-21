@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/bitmask_operations.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <map>
 #include <set>

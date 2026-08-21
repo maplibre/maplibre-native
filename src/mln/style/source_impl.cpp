@@ -1,6 +1,6 @@
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace style {

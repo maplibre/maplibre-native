@@ -1,15 +1,15 @@
-#include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mln/gl/vertex_attribute_gl.hpp>
 
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/upload_pass.hpp>
-#include <mbgl/gl/vertex_buffer_resource.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/upload_pass.hpp>
+#include <mln/gl/vertex_buffer_resource.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/shaders/gl/shader_program_gl.hpp>
 
 #include <cstring>
 #include <sstream>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace gl {

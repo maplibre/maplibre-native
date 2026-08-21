@@ -1,8 +1,8 @@
-#include <mbgl/style/conversion/tileset.hpp>
-#include <mbgl/style/conversion/source_options.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/math/clamp.hpp>
+#include <mln/style/conversion/tileset.hpp>
+#include <mln/style/conversion/source_options.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/math/clamp.hpp>
 
 namespace mln {
 namespace style {

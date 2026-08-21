@@ -1,8 +1,8 @@
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/tile/tile_observer.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/tile/tile_observer.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/layers/custom_layer_init_parameters.hpp>
-#include <mbgl/style/layers/custom_layer_render_parameters.hpp>
+#include <mln/style/layers/custom_layer_init_parameters.hpp>
+#include <mln/style/layers/custom_layer_render_parameters.hpp>
 
 namespace mln {
 

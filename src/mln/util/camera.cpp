@@ -1,12 +1,12 @@
 #include "camera.hpp"
 #include <cassert>
 #include <cmath>
-#include <mbgl/map/camera.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/log2.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/projection.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/log2.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 
 #include <numbers>
 

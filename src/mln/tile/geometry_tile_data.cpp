@@ -1,9 +1,9 @@
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/math.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)

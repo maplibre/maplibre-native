@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
+#include <mln/util/image.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLPixelFormat.hpp>

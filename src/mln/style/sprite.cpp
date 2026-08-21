@@ -1,4 +1,4 @@
-#include <mbgl/style/sprite.hpp>
+#include <mln/style/sprite.hpp>
 
 namespace mln {
 namespace style {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
-#include <mbgl/style/undefined.hpp>
-#include <mbgl/style/expression/expression.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/style/undefined.hpp>
+#include <mln/style/expression/expression.hpp>
 
 namespace mln {
 namespace style {

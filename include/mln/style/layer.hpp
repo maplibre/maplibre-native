@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/style_property.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/style_property.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/immutable.hpp>
 
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/renderer/property_evaluation_parameters.hpp>
-#include <mbgl/util/interpolate.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/renderer/property_evaluation_parameters.hpp>
+#include <mln/util/interpolate.hpp>
 
 namespace mln {
 

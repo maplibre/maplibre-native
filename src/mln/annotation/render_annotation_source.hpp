@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/annotation/annotation_source.hpp>
-#include <mbgl/renderer/sources/render_tile_source.hpp>
+#include <mln/annotation/annotation_source.hpp>
+#include <mln/renderer/sources/render_tile_source.hpp>
 
 namespace mln {
 

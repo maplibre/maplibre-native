@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/tile/tile_loader.hpp>
-#include <mbgl/tile/raster_tile_worker.hpp>
-#include <mbgl/actor/actor.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/tile/tile_loader.hpp>
+#include <mln/tile/raster_tile_worker.hpp>
+#include <mln/actor/actor.hpp>
 
 namespace mln {
 

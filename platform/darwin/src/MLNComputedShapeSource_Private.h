@@ -2,7 +2,7 @@
 #import "MLNFoundation.h"
 #import "MLNTypes.h"
 
-#include <mbgl/style/sources/custom_geometry_source.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 

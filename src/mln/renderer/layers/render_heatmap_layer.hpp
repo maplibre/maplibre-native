@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/offscreen_texture.hpp>
-#include <mbgl/renderer/buckets/heatmap_bucket.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/heatmap_layer_impl.hpp>
-#include <mbgl/style/layers/heatmap_layer_properties.hpp>
+#include <mln/gfx/offscreen_texture.hpp>
+#include <mln/renderer/buckets/heatmap_bucket.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/heatmap_layer_impl.hpp>
+#include <mln/style/layers/heatmap_layer_properties.hpp>
 
 #include <optional>
 

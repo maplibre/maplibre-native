@@ -1,6 +1,6 @@
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/premultiply.hpp>
 
 #include <webp/types.h>
 #include <webp/decode.h>

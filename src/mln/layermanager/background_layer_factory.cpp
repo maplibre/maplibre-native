@@ -1,8 +1,8 @@
-#include <mbgl/layermanager/background_layer_factory.hpp>
+#include <mln/layermanager/background_layer_factory.hpp>
 
-#include <mbgl/renderer/layers/render_background_layer.hpp>
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
+#include <mln/renderer/layers/render_background_layer.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/background_layer_impl.hpp>
 
 namespace mln {
 

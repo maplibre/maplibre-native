@@ -1,6 +1,6 @@
-#include <mbgl/style/layers/custom_layer_render_parameters.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/style/layers/custom_layer_render_parameters.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/util/mat4.hpp>
 
 namespace mln {
 namespace style {

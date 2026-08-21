@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/background.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/background_layer_ubo.hpp>
+#include <mln/shaders/webgpu/background.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/background_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

@@ -6,8 +6,8 @@
 #import "MLNTileSource_Private.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/sources/raster_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/sources/raster_source.hpp>
 
 const MLNTileSourceOption MLNTileSourceOptionTileSize = @"MLNTileSourceOptionTileSize";
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/tile/geometry_tile.hpp>
-#include <mbgl/tile/tile_loader.hpp>
-#include <mbgl/tile/vector_tile.hpp>
+#include <mln/tile/geometry_tile.hpp>
+#include <mln/tile/tile_loader.hpp>
+#include <mln/tile/vector_tile.hpp>
 
 namespace mln {
 

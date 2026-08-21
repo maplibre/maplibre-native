@@ -1,6 +1,6 @@
-#include <mbgl/storage/network_status.hpp>
+#include <mln/storage/network_status.hpp>
 
-#include <mbgl/util/async_task.hpp>
+#include <mln/util/async_task.hpp>
 
 // Example: Allocate a reachability object
 // Reachability* reach = [Reachability reachabilityForInternetConnection];

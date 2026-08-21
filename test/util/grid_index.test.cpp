@@ -1,6 +1,6 @@
-#include <mbgl/util/grid_index.hpp>
+#include <mln/util/grid_index.hpp>
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
 using namespace mln;
 

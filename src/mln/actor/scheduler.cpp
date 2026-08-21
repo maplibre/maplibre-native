@@ -1,7 +1,7 @@
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/thread_local.hpp>
-#include <mbgl/util/thread_pool.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/thread_local.hpp>
+#include <mln/util/thread_pool.hpp>
+#include <mln/util/run_loop.hpp>
 
 namespace mln {
 

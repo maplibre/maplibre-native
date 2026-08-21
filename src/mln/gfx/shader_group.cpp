@@ -1,5 +1,5 @@
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/gfx/shader.hpp>
+#include <mln/gfx/shader_group.hpp>
+#include <mln/gfx/shader.hpp>
 
 namespace mln {
 namespace gfx {

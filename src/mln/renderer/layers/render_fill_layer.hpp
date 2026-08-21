@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/fill_layer_impl.hpp>
-#include <mbgl/style/layers/fill_layer_properties.hpp>
-#include <mbgl/layout/pattern_layout.hpp>
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/style/layers/fill_layer_properties.hpp>
+#include <mln/layout/pattern_layout.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
 
 #include <memory>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/command_encoder.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
+#include <mln/gfx/command_encoder.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
 
 namespace mln {
 namespace gfx {

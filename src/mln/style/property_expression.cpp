@@ -1,9 +1,9 @@
-#include <mbgl/style/property_expression.hpp>
+#include <mln/style/property_expression.hpp>
 
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/util/convert.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/util/convert.hpp>
 
-#include <mbgl/gfx/gpu_expression.hpp>
+#include <mln/gfx/gpu_expression.hpp>
 
 namespace mln {
 namespace style {

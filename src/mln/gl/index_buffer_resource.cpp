@@ -1,6 +1,6 @@
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/index_buffer_resource.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/index_buffer_resource.hpp>
+#include <mln/util/instrumentation.hpp>
 
 namespace mln {
 namespace gl {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/string.hpp>
-#include <mbgl/style/expression/type.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/util/string.hpp>
+#include <mln/style/expression/type.hpp>
+#include <mln/style/conversion.hpp>
 
 #include <iterator>
 #include <map>

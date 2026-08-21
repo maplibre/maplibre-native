@@ -1,6 +1,6 @@
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/annotation/annotation_source.hpp>
-#include <mbgl/style/layer.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/annotation/annotation_source.hpp>
+#include <mln/style/layer.hpp>
 
 namespace mln {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <memory>
 #include <string>

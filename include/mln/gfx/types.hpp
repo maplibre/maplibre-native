@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/gfx_types.hpp>
+#include <mln/gfx/gfx_types.hpp>
 
 #include <cstdint>
 

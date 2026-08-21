@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/renderer/property_evaluator.hpp>
-#include <mbgl/renderer/data_driven_property_evaluator.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/renderer/data_driven_property_evaluator.hpp>
 
 namespace mln {
 namespace style {

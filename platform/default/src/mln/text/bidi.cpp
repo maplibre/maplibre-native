@@ -1,5 +1,5 @@
-#include <mbgl/text/bidi.hpp>
-#include <mbgl/util/traits.hpp>
+#include <mln/text/bidi.hpp>
+#include <mln/util/traits.hpp>
 
 #include <unicode/ubidi.h>
 #include <unicode/ushape.h>

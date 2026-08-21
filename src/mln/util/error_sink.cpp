@@ -1,5 +1,5 @@
-#include <mbgl/util/error_sink.hpp>
-#include <mbgl/util/symbol_error_observer.hpp>
+#include <mln/util/error_sink.hpp>
+#include <mln/util/symbol_error_observer.hpp>
 
 namespace mln {
 

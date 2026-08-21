@@ -1,4 +1,4 @@
-#include <mbgl/math/log2.hpp>
+#include <mln/math/log2.hpp>
 
 namespace mln {
 namespace util {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/util/feature.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/util/feature.hpp>
 
 namespace mln {
 

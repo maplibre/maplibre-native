@@ -1,7 +1,7 @@
-#include <mbgl/shaders/program_parameters.hpp>
+#include <mln/shaders/program_parameters.hpp>
 
-#include <mbgl/util/hash.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/util/hash.hpp>
+#include <mln/util/string.hpp>
 
 #include <string_view>
 #include <stdexcept>

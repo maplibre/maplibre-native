@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gl/vertex_attribute_gl.hpp>
 
 namespace mln {
 namespace gl {

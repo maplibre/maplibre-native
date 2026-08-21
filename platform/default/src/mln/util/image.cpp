@@ -1,6 +1,6 @@
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/premultiply.hpp>
 
 namespace mln {
 

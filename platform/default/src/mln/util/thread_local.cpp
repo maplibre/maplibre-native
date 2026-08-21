@@ -1,5 +1,5 @@
-#include <mbgl/util/thread_local.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/thread_local.hpp>
+#include <mln/util/logging.hpp>
 
 #include <cassert>
 #include <cstdlib>

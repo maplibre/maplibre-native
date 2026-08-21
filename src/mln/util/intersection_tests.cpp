@@ -1,5 +1,5 @@
-#include <mbgl/util/intersection_tests.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/util/intersection_tests.hpp>
+#include <mln/util/math.hpp>
 
 namespace mln {
 namespace util {

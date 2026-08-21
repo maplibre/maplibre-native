@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/style/layers/line_layer_properties.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
+#include <mln/style/layers/line_layer_properties.hpp>
 
 #if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
-#include <mbgl/shaders/line_layer_ubo.hpp>
+#include <mln/shaders/line_layer_ubo.hpp>
 #endif // MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU
 
 #include <string>

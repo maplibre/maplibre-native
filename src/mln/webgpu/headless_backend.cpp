@@ -1,10 +1,10 @@
-#include <mbgl/webgpu/headless_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/offscreen_texture.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
-#include <mbgl/webgpu/texture2d.hpp>
+#include <mln/webgpu/headless_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/offscreen_texture.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/webgpu/wgpu_cpp_compat.hpp>
+#include <mln/webgpu/texture2d.hpp>
 
 #if MLN_WEBGPU_IMPL_DAWN
 #include <dawn/native/DawnNative.h>

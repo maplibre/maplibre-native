@@ -1,10 +1,10 @@
-#include <mbgl/style/conversion/color_ramp_property_value.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/style/expression/is_constant.hpp>
-#include <mbgl/style/expression/is_expression.hpp>
-#include <mbgl/style/expression/parsing_context.hpp>
+#include <mln/style/conversion/color_ramp_property_value.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/style/expression/is_constant.hpp>
+#include <mln/style/expression/is_expression.hpp>
+#include <mln/style/expression/parsing_context.hpp>
 
 namespace mln {
 namespace style {

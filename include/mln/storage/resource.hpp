@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/storage/response.hpp>
-#include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/util/bitmask_operations.hpp>
+#include <mln/util/font_stack.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <string>
 #include <optional>

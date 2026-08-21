@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/action_journal.hpp>
-#include <mbgl/util/action_journal_options.hpp>
-#include <mbgl/map/map_observer.hpp>
+#include <mln/util/action_journal.hpp>
+#include <mln/util/action_journal_options.hpp>
+#include <mln/map/map_observer.hpp>
 
 #include <fstream>
 

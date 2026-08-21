@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/gl/vertex_array.hpp>
-#include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/draw_mode.hpp>
+#include <mln/gl/vertex_array.hpp>
+#include <mln/gl/vertex_attribute_gl.hpp>
 
 #include <memory>
 

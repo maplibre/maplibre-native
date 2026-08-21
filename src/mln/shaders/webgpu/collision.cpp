@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/collision.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/collision_layer_ubo.hpp>
+#include <mln/shaders/webgpu/collision.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/collision_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

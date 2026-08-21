@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/tile_server_options.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/tile_server_options.hpp>
 
 namespace mln {
 

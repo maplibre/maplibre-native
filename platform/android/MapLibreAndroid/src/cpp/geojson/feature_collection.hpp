@@ -2,7 +2,7 @@
 
 #include "../java/util.hpp"
 
-#include <mbgl/util/geojson.hpp>
+#include <mln/util/geojson.hpp>
 
 #include <jni/jni.hpp>
 

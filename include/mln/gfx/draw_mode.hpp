@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
+#include <mln/gfx/types.hpp>
 
 #include <cassert>
 #include <cstddef>

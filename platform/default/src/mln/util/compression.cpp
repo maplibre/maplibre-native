@@ -1,4 +1,4 @@
-#include <mbgl/util/compression.hpp>
+#include <mln/util/compression.hpp>
 
 #if defined(__QT__) && (defined(_WIN32) || defined(__EMSCRIPTEN__))
 #include <QtZlib/zlib.h>

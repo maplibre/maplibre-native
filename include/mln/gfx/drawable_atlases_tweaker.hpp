@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/style/types.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
 
 #include <memory>
 #include <string>

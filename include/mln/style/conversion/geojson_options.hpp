@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/conversion.hpp>
 
 namespace mln {
 namespace style {

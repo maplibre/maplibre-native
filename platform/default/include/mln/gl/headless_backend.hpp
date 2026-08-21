@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/headless_backend.hpp>
-#include <mbgl/gl/renderer_backend.hpp>
+#include <mln/gfx/headless_backend.hpp>
+#include <mln/gl/renderer_backend.hpp>
 #include <memory>
 #include <functional>
 

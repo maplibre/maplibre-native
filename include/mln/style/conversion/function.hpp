@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/style/property_expression.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/style/expression/value.hpp>
+#include <mln/style/property_expression.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/expression/value.hpp>
 
 #include <optional>
 

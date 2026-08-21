@@ -1,11 +1,11 @@
-#include <mbgl/util/thread_pool.hpp>
+#include <mln/util/thread_pool.hpp>
 
-#include <mbgl/platform/settings.hpp>
-#include <mbgl/platform/thread.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/platform/settings.hpp>
+#include <mln/platform/thread.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/monotonic_timer.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/string.hpp>
 
 namespace mln {
 

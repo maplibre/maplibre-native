@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/renderer/buckets/line_bucket.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/gfx/index_vector.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
 
 namespace mln {
 namespace gfx {

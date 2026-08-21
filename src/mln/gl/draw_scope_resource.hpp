@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/draw_scope.hpp>
-#include <mbgl/gl/vertex_array.hpp>
+#include <mln/gfx/draw_scope.hpp>
+#include <mln/gl/vertex_array.hpp>
 
 namespace mln {
 namespace gl {

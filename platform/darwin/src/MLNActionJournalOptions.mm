@@ -1,5 +1,5 @@
 #import "MLNActionJournalOptions.h"
-#import <mbgl/util/action_journal_options.hpp>
+#import <mln/util/action_journal_options.hpp>
 
 @implementation MLNActionJournalOptions {
   std::unique_ptr<mln::util::ActionJournalOptions> _actionJournalOptionsInternal;

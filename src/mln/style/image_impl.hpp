@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/image.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/rect.hpp>
+#include <mln/style/image.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/rect.hpp>
 
 #include <string>
 #include <optional>

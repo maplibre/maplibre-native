@@ -5,12 +5,12 @@
 #include <limits>
 #include <numbers>
 
-#include <mbgl/util/geometry.hpp>
+#include <mln/util/geometry.hpp>
 
 namespace mln {
 namespace util {
 
-// TODO: split this file up into individual headers, following mbgl/math/*.hpp.
+// TODO: split this file up into individual headers, following mln/math/*.hpp.
 
 template <typename T = double, typename S>
 T dotProduct(const Point<S>& a, const Point<S>& b) {

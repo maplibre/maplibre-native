@@ -1,6 +1,6 @@
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/util/hash.hpp>
+#include <mln/util/font_stack.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/util/hash.hpp>
 
 #include <boost/algorithm/string/join.hpp>
 

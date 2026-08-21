@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/util/size.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/util/size.hpp>
+#include <mln/util/color.hpp>
 
 namespace mln {
 namespace uniforms {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/util/range.hpp>
 
 namespace mln {
 

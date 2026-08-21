@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/image.hpp>
-#include <mbgl/util/immutable.hpp>
-#include <mbgl/style/sprite.hpp>
+#include <mln/style/image.hpp>
+#include <mln/util/immutable.hpp>
+#include <mln/style/sprite.hpp>
 
 #include <exception>
 #include <vector>

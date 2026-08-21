@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/util/string.hpp>
+#include <mln/util/string.hpp>
 #include <mapbox/geojsonvt.hpp>
 
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/style/style.hpp>
 
 #include <string>
 #include <memory>

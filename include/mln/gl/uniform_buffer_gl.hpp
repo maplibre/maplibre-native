@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/gl/types.hpp>
-#include <mbgl/gl/buffer_allocator.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/gl/buffer_allocator.hpp>
 
 namespace mln {
 namespace gl {

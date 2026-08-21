@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/util/size.hpp>
 
 #if MLN_WEBGPU_IMPL_DAWN
 #include <webgpu/webgpu.h>
@@ -9,7 +9,7 @@
 #include <webgpu.h>
 #endif
 
-#include <mbgl/webgpu/wgpu_cpp_compat.hpp>
+#include <mln/webgpu/wgpu_cpp_compat.hpp>
 #include <memory>
 
 namespace mln {

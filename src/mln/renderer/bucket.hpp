@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
-#include <mbgl/util/identity.hpp>
+#include <mln/util/identity.hpp>
 
 #include <atomic>
 

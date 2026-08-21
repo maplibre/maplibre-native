@@ -1,6 +1,6 @@
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/util/utf.hpp>
-#include <mbgl/text/glyph.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/util/utf.hpp>
+#include <mln/text/glyph.hpp>
 
 #include <algorithm>
 #include <map>

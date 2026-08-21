@@ -1,10 +1,10 @@
-#include <mbgl/mtl/vertex_attribute.hpp>
+#include <mln/mtl/vertex_attribute.hpp>
 
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/mtl/buffer_resource.hpp>
-#include <mbgl/mtl/upload_pass.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/convert.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/mtl/buffer_resource.hpp>
+#include <mln/mtl/upload_pass.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/convert.hpp>
 
 #include <cstring>
 #include <sstream>

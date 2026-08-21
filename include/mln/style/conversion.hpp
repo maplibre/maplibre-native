@@ -9,7 +9,7 @@ namespace conversion {
 // This is a forward-declaration only header intended to minimize dependencies
 // and to improve compilation speed. In order to specialize implementations and
 // get access to the actual implementation, include
-// <mbgl/style/conversion_impl.hpp>.
+// <mln/style/conversion_impl.hpp>.
 
 struct Error {
     std::string message;

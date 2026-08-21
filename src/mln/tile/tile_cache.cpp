@@ -1,7 +1,7 @@
-#include <mbgl/tile/tile_cache.hpp>
+#include <mln/tile/tile_cache.hpp>
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/instrumentation.hpp>
 
 #include <cassert>
 

@@ -1,9 +1,9 @@
-#include <mbgl/renderer/renderer_state.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
+#include <mln/renderer/renderer_state.hpp>
+#include <mln/renderer/update_parameters.hpp>
 
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/source_impl.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/source_impl.hpp>
 
 namespace mln {
 

@@ -1,6 +1,6 @@
-#include <mbgl/shaders/gl/legacy/programs.hpp>
-#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/shaders/gl/legacy/programs.hpp>
+#include <mln/shaders/gl/legacy/clipping_mask_program.hpp>
+#include <mln/util/logging.hpp>
 #include <exception>
 
 namespace mln {

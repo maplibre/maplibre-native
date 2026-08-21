@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <memory>
 #include <array>

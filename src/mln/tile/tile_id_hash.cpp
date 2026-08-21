@@ -1,5 +1,5 @@
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/hash.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/hash.hpp>
 
 namespace std {
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/vulkan/buffer_resource.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/vulkan/buffer_resource.hpp>
 
 namespace mln {
 namespace vulkan {

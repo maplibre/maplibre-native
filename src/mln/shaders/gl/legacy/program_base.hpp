@@ -1,19 +1,19 @@
 #pragma once
 
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gl/types.hpp>
-#include <mbgl/gl/object.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/draw_scope_resource.hpp>
-#include <mbgl/gl/vertex_array.hpp>
-#include <mbgl/gl/attribute.hpp>
-#include <mbgl/gl/uniform.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/shaders/shader_manifest.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/gl/object.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/draw_scope_resource.hpp>
+#include <mln/gl/vertex_array.hpp>
+#include <mln/gl/attribute.hpp>
+#include <mln/gl/uniform.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/shaders/shader_manifest.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
 
 #include <map>
 #include <set>

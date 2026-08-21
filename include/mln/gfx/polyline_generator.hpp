@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/style/types.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/gfx/index_vector.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/util/math.hpp>
 
 #include <cstdint>
 #include <cstddef>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/render_pass.hpp>
+#include <mln/gfx/render_pass.hpp>
 
 namespace mln {
 namespace gfx {

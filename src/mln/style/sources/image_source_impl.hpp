@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/geo.hpp>
 
 #include <array>
 

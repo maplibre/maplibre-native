@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/mtl/buffer_resource.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
+#include <mln/mtl/buffer_resource.hpp>
+#include <mln/util/monotonic_timer.hpp>
 
 #include <memory>
 

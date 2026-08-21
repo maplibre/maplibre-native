@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/layout/symbol_projection.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/text/collision_index.hpp>
-#include <mbgl/util/chrono.hpp>
+#include <mln/layout/symbol_projection.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/transition_options.hpp>
+#include <mln/text/collision_index.hpp>
+#include <mln/util/chrono.hpp>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>

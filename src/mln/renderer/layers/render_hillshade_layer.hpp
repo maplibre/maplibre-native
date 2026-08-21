@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/renderer/buckets/hillshade_bucket.hpp>
-#include <mbgl/style/layers/hillshade_layer_impl.hpp>
-#include <mbgl/style/layers/hillshade_layer_properties.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/style/layers/hillshade_layer_impl.hpp>
+#include <mln/style/layers/hillshade_layer_properties.hpp>
+#include <mln/tile/tile_id.hpp>
 
 namespace mln {
 

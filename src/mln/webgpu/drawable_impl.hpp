@@ -1,19 +1,19 @@
 #pragma once
 
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/webgpu/uniform_buffer.hpp>
-#include <mbgl/webgpu/render_pass.hpp>
-#include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/webgpu/vertex_buffer_resource.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
+#include <mln/webgpu/uniform_buffer.hpp>
+#include <mln/webgpu/render_pass.hpp>
+#include <mln/webgpu/upload_pass.hpp>
+#include <mln/webgpu/vertex_attribute.hpp>
+#include <mln/webgpu/vertex_buffer_resource.hpp>
 #include <webgpu/webgpu.h>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <cstdint>
 #include <memory>

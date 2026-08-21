@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/tile/geometry_tile.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/actor/mailbox.hpp>
+#include <mln/tile/geometry_tile.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/actor/mailbox.hpp>
 
 namespace mln {
 

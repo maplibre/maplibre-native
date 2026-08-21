@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/util/geo.hpp>
 
 #include <optional>
 

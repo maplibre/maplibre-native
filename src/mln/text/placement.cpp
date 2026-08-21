@@ -1,14 +1,14 @@
-#include <mbgl/text/placement.hpp>
+#include <mln/text/placement.hpp>
 
-#include <mbgl/layout/symbol_layout.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/tile/geometry_tile.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/layout/symbol_layout.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/tile/geometry_tile.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/math.hpp>
 
 #include <list>
 #include <utility>

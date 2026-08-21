@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/text/bidi.hpp>
-#include <mbgl/text/harfbuzz.hpp>
-#include <mbgl/style/expression/formatted.hpp>
-#include <mbgl/util/font_stack.hpp>
+#include <mln/text/bidi.hpp>
+#include <mln/text/harfbuzz.hpp>
+#include <mln/style/expression/formatted.hpp>
+#include <mln/util/font_stack.hpp>
 
 #include <optional>
 

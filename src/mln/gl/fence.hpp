@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gl/types.hpp>
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 namespace mln {
 namespace gl {

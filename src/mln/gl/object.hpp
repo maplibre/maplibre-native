@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gl/types.hpp>
+#include <mln/gl/types.hpp>
 
 #include <unique_resource.hpp>
 

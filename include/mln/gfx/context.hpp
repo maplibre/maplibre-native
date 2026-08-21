@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/command_encoder.hpp>
-#include <mbgl/gfx/context_observer.hpp>
-#include <mbgl/gfx/draw_scope.hpp>
-#include <mbgl/gfx/renderbuffer.hpp>
-#include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/gfx/types.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/command_encoder.hpp>
+#include <mln/gfx/context_observer.hpp>
+#include <mln/gfx/draw_scope.hpp>
+#include <mln/gfx/renderbuffer.hpp>
+#include <mln/gfx/rendering_stats.hpp>
+#include <mln/gfx/types.hpp>
 
-#include <mbgl/gfx/uniform_buffer.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
 
 #include <memory>
 #include <string>

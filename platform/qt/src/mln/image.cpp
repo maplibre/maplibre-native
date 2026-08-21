@@ -1,4 +1,4 @@
-#include <mbgl/util/image.hpp>
+#include <mln/util/image.hpp>
 
 #include <QBuffer>
 #include <QByteArray>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/range.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/storage/response.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/range.hpp>
+#include <mln/style/types.hpp>
+#include <mln/storage/response.hpp>
 
 #include <string>
 #include <vector>

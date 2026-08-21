@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/style/position.hpp>
-#include <mbgl/style/rotation.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
-#include <mbgl/util/enum.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/range.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/style/position.hpp>
+#include <mln/style/rotation.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
+#include <mln/util/enum.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/range.hpp>
+#include <mln/util/string.hpp>
 
 #include <array>
 #include <vector>

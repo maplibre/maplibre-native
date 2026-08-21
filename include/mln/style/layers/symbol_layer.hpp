@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/style/expression/formatted.hpp>
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/style/expression/formatted.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
+#include <mln/util/color.hpp>
 
 #include <vector>
 

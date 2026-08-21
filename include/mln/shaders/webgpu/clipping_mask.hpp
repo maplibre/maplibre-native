@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/webgpu/shader_program.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/webgpu/shader_program.hpp>
 
 #include <array>
 #include <cstdint>

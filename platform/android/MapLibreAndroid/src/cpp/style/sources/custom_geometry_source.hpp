@@ -1,9 +1,9 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/tile/tile_id.hpp>
 #include "../../geojson/geometry.hpp"
 #include "../../geojson/feature.hpp"
 #include "../../geojson/feature_collection.hpp"

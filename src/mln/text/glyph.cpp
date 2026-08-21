@@ -1,5 +1,5 @@
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/util/i18n.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/util/i18n.hpp>
 
 #include <algorithm>
 

@@ -1,13 +1,13 @@
-#include <mbgl/sprite/sprite_parser.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/image_impl.hpp>
+#include <mln/sprite/sprite_parser.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/image_impl.hpp>
 
-#include <mbgl/util/exception.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/exception.hpp>
+#include <mln/util/logging.hpp>
 
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/string.hpp>
 
 #include <algorithm>
 #include <cmath>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/interpolate.hpp>
-#include <mbgl/util/range.hpp>
-#include <mbgl/util/unitbezier.hpp>
+#include <mln/util/interpolate.hpp>
+#include <mln/util/range.hpp>
+#include <mln/util/unitbezier.hpp>
 
 namespace mln {
 namespace style {

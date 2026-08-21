@@ -1,8 +1,8 @@
-#include <mbgl/renderer/sources/render_custom_vector_source.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/tile/custom_vector_tile.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/renderer/sources/render_custom_vector_source.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/tile/custom_vector_tile.hpp>
+#include <mln/util/constants.hpp>
 
 namespace mln {
 

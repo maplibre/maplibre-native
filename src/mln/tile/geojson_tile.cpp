@@ -1,9 +1,9 @@
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/tile/geojson_tile.hpp>
-#include <mbgl/tile/geojson_tile_data.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/tile/geojson_tile.hpp>
+#include <mln/tile/geojson_tile_data.hpp>
+#include <mln/util/instrumentation.hpp>
 #include <utility>
 
 namespace mln {

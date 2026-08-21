@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/geometry/feature_index.hpp>
+#include <mln/geometry/feature_index.hpp>
 
-#include <mbgl/text/collision_feature.hpp>
-#include <mbgl/util/grid_index.hpp>
-#include <mbgl/map/transform_state.hpp>
+#include <mln/text/collision_feature.hpp>
+#include <mln/util/grid_index.hpp>
+#include <mln/map/transform_state.hpp>
 
 #include <array>
 

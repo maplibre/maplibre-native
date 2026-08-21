@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/renderbuffer.hpp>
-#include <mbgl/gl/object.hpp>
+#include <mln/gfx/renderbuffer.hpp>
+#include <mln/gl/object.hpp>
 
 namespace mln {
 namespace gl {

@@ -3,8 +3,8 @@
 #import "MLNStyleLayer.h"
 #import "MLNStyleValue_Private.h"
 
-#include <mbgl/layermanager/layer_factory.hpp>
-#include <mbgl/style/layer.hpp>
+#include <mln/layermanager/layer_factory.hpp>
+#include <mln/style/layer.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 

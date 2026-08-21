@@ -1,6 +1,6 @@
-#include <mbgl/text/check_max_angle.hpp>
-#include <mbgl/geometry/anchor.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/text/check_max_angle.hpp>
+#include <mln/geometry/anchor.hpp>
+#include <mln/util/math.hpp>
 
 #include <numbers>
 #include <queue>

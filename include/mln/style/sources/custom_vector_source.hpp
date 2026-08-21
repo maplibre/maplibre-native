@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/source.hpp>
-#include <mbgl/util/range.hpp>
+#include <mln/style/source.hpp>
+#include <mln/util/range.hpp>
 
 #include <cstdint>
 #include <functional>

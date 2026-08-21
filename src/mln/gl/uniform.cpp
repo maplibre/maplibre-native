@@ -1,9 +1,9 @@
-#include <mbgl/gl/uniform.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/size.hpp>
-#include <mbgl/util/convert.hpp>
+#include <mln/gl/uniform.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/size.hpp>
+#include <mln/util/convert.hpp>
 
 #include <memory>
 

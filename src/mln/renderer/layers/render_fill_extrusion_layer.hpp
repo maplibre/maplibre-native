@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/renderer/buckets/fill_extrusion_bucket.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
+#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
+#include <mln/style/layers/fill_extrusion_layer_properties.hpp>
 
 namespace mln {
 

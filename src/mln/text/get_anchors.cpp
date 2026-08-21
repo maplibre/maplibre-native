@@ -1,7 +1,7 @@
-#include <mbgl/text/get_anchors.hpp>
-#include <mbgl/text/check_max_angle.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/interpolate.hpp>
+#include <mln/text/get_anchors.hpp>
+#include <mln/text/check_max_angle.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/interpolate.hpp>
 
 #include <cassert>
 #include <cmath>

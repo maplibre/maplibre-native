@@ -1,7 +1,7 @@
 #include "metal_backend.h"
 
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/renderable_resource.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
+#include <mln/mtl/renderable_resource.hpp>
 
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>

@@ -1,12 +1,12 @@
-#include <mbgl/gfx/drawable.hpp>
+#include <mln/gfx/drawable.hpp>
 
-#include <mbgl/gfx/color_mode.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/gfx/index_vector.hpp>
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/render_pass.hpp>
+#include <mln/gfx/color_mode.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/index_vector.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/render_pass.hpp>
 
 namespace mln {
 namespace gfx {

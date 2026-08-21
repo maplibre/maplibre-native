@@ -1,7 +1,7 @@
 #include "run_loop_impl.hpp"
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/monotonic_timer.hpp>
 
 #include <QCoreApplication>
 

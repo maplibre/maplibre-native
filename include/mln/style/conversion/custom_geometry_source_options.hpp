@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
 
 namespace mln {
 namespace style {

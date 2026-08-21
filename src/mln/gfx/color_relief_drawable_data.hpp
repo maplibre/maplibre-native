@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/shaders/color_relief_layer_ubo.hpp>
+#include <mln/gfx/drawable_data.hpp>
+#include <mln/shaders/color_relief_layer_ubo.hpp>
 
 namespace mln {
 namespace gfx {

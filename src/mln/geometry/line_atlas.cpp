@@ -1,12 +1,12 @@
 #include <cmath>
-#include <mbgl/geometry/line_atlas.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/math/log2.hpp>
-#include <mbgl/math/minmax.hpp>
-#include <mbgl/util/hash.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/geometry/line_atlas.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/math/log2.hpp>
+#include <mln/math/minmax.hpp>
+#include <mln/util/hash.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
 
 namespace mln {
 namespace {

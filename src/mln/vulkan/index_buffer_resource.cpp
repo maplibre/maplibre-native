@@ -1,6 +1,6 @@
-#include <mbgl/vulkan/index_buffer_resource.hpp>
+#include <mln/vulkan/index_buffer_resource.hpp>
 
-#include <mbgl/vulkan/context.hpp>
+#include <mln/vulkan/context.hpp>
 
 namespace mln {
 namespace vulkan {

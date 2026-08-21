@@ -1,18 +1,18 @@
-#include <mbgl/gl/upload_pass.hpp>
+#include <mln/gl/upload_pass.hpp>
 
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/enum.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/command_encoder.hpp>
-#include <mbgl/gl/vertex_buffer_resource.hpp>
-#include <mbgl/gl/index_buffer_resource.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/enum.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/command_encoder.hpp>
+#include <mln/gl/vertex_buffer_resource.hpp>
+#include <mln/gl/index_buffer_resource.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/logging.hpp>
 
-#include <mbgl/gl/vertex_attribute_gl.hpp>
-#include <mbgl/gl/texture2d.hpp>
+#include <mln/gl/vertex_attribute_gl.hpp>
+#include <mln/gl/texture2d.hpp>
 
 #include <algorithm>
 

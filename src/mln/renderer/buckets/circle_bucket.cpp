@@ -1,9 +1,9 @@
-#include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_circle_layer.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/renderer/buckets/circle_bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/renderer/layers/render_circle_layer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/math.hpp>
 
 namespace mln {
 

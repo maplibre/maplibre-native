@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gfx/headless_backend.hpp>
-#include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/map/camera.hpp>
-#include <mbgl/renderer/renderer_frontend.hpp>
-#include <mbgl/util/async_task.hpp>
+#include <mln/gfx/headless_backend.hpp>
+#include <mln/gfx/rendering_stats.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/renderer/renderer_frontend.hpp>
+#include <mln/util/async_task.hpp>
 
 #include <atomic>
 #include <memory>

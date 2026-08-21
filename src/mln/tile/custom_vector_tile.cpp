@@ -1,9 +1,9 @@
-#include <mbgl/tile/custom_vector_tile.hpp>
-#include <mbgl/tile/vector_mvt_tile_data.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/style/custom_vector_tile_loader.hpp>
-#include <mbgl/tile/tile_observer.hpp>
+#include <mln/tile/custom_vector_tile.hpp>
+#include <mln/tile/vector_mvt_tile_data.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/style/custom_vector_tile_loader.hpp>
+#include <mln/tile/tile_observer.hpp>
 
 #include <utility>
 

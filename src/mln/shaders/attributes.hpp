@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/attribute.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
+#include <mln/gfx/attribute.hpp>
+#include <mln/shaders/layer_ubo.hpp>
 
 namespace mln {
 namespace attributes {

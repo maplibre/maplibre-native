@@ -2,8 +2,8 @@
 // which is conditionally compiled when the optional Rust build flag is enabled.
 #include <cmath>
 
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/string.hpp>
 
 #include <vector>
 

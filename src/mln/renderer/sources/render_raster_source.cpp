@@ -1,8 +1,8 @@
-#include <mbgl/renderer/sources/render_raster_source.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/tile/raster_tile.hpp>
-#include <mbgl/algorithm/update_tile_masks.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
+#include <mln/renderer/sources/render_raster_source.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/tile/raster_tile.hpp>
+#include <mln/algorithm/update_tile_masks.hpp>
+#include <mln/renderer/tile_parameters.hpp>
 
 namespace mln {
 

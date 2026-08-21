@@ -6,13 +6,13 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNStyle_Private.h"
 
-#include <mbgl/layermanager/custom_drawable_layer_factory.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
+#include <mln/layermanager/custom_drawable_layer_factory.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
 
 #include <cmath>
 #include <memory>
 
-#include <mbgl/style/layer.hpp>
+#include <mln/style/layer.hpp>
 
 @interface MLNCustomDrawableStyleLayer (Internal)
 - (instancetype)initWithPendingLayer:(std::unique_ptr<mln::style::Layer>)pendingLayer;

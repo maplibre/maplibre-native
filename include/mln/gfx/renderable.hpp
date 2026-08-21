@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/size.hpp>
+#include <mln/util/size.hpp>
 
 #include <memory>
 #include <cassert>

@@ -1,9 +1,9 @@
-#include <mbgl/layermanager/heatmap_layer_factory.hpp>
+#include <mln/layermanager/heatmap_layer_factory.hpp>
 
-#include <mbgl/renderer/buckets/heatmap_bucket.hpp>
-#include <mbgl/renderer/layers/render_heatmap_layer.hpp>
-#include <mbgl/style/layers/heatmap_layer.hpp>
-#include <mbgl/style/layers/heatmap_layer_impl.hpp>
+#include <mln/renderer/buckets/heatmap_bucket.hpp>
+#include <mln/renderer/layers/render_heatmap_layer.hpp>
+#include <mln/style/layers/heatmap_layer.hpp>
+#include <mln/style/layers/heatmap_layer_impl.hpp>
 
 namespace mln {
 

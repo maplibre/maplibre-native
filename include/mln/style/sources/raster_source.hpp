@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/sources/tile_source.hpp>
-#include <mbgl/util/tileset.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/style/sources/tile_source.hpp>
+#include <mln/util/tileset.hpp>
+#include <mln/util/variant.hpp>
 
 namespace mln {
 namespace style {

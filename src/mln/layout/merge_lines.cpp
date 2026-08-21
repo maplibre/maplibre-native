@@ -1,6 +1,6 @@
-#include <mbgl/layout/merge_lines.hpp>
-#include <mbgl/layout/symbol_feature.hpp>
-#include <mbgl/util/hash.hpp>
+#include <mln/layout/merge_lines.hpp>
+#include <mln/layout/symbol_feature.hpp>
+#include <mln/util/hash.hpp>
 
 namespace mln {
 namespace util {

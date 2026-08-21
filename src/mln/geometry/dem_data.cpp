@@ -1,5 +1,5 @@
-#include <mbgl/geometry/dem_data.hpp>
-#include <mbgl/math/clamp.hpp>
+#include <mln/geometry/dem_data.hpp>
+#include <mln/math/clamp.hpp>
 
 namespace mln {
 

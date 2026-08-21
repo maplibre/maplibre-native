@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/style/layer_properties.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/style/layer_properties.hpp>
 
 #include <memory>
 #include <vector>

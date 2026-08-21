@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/tile/tile.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/tile/tile.hpp>
 
 #include <atomic>
 #include <mutex>

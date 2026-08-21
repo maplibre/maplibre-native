@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/source_observer.hpp>
-#include <mbgl/style/sprite.hpp>
+#include <mln/style/source_observer.hpp>
+#include <mln/style/sprite.hpp>
 
 #include <exception>
 #include <optional>

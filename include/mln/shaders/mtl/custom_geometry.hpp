@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/shaders/custom_geometry_ubo.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mln/shaders/custom_geometry_ubo.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/mtl/shader_program.hpp>
 
 namespace mln {
 namespace shaders {

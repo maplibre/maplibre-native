@@ -1,9 +1,9 @@
-#include <mbgl/vulkan/uniform_buffer.hpp>
+#include <mln/vulkan/uniform_buffer.hpp>
 
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/vulkan/command_encoder.hpp>
-#include <mbgl/vulkan/render_pass.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/vulkan/command_encoder.hpp>
+#include <mln/vulkan/render_pass.hpp>
 
 #include <cassert>
 

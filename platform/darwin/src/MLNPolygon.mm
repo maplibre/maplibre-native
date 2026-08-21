@@ -7,7 +7,7 @@
 #import "MLNFeature.h"
 
 #import <mapbox/polylabel.hpp>
-#import <mbgl/util/geojson.hpp>
+#import <mln/util/geojson.hpp>
 
 @implementation MLNPolygon
 

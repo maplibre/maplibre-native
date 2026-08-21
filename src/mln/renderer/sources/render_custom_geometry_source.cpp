@@ -1,7 +1,7 @@
-#include <mbgl/renderer/sources/render_custom_geometry_source.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/tile/custom_geometry_tile.hpp>
+#include <mln/renderer/sources/render_custom_geometry_source.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/tile/custom_geometry_tile.hpp>
 
 namespace mln {
 

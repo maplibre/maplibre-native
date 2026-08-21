@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/shader.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
-#include <mbgl/util/identity.hpp>
+#include <mln/gfx/shader.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+#include <mln/util/identity.hpp>
 
 #include <string>
 #include <optional>

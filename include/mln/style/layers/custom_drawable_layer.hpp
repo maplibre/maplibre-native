@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/renderer/change_request.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/change_request.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gfx/context.hpp>
 
 #include <array>
 #include <memory>

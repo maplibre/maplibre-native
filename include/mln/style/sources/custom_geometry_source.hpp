@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/style/source.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/range.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/style/source.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/range.hpp>
+#include <mln/util/constants.hpp>
 
 namespace mln {
 

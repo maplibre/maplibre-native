@@ -1,6 +1,6 @@
-#include <mbgl/shaders/vulkan/location_indicator.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/location_indicator_ubo.hpp>
+#include <mln/shaders/vulkan/location_indicator.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/location_indicator_ubo.hpp>
 
 namespace mln {
 namespace shaders {

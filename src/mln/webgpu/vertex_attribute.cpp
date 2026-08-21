@@ -1,9 +1,9 @@
-#include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/webgpu/buffer_resource.hpp>
-#include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/convert.hpp>
+#include <mln/webgpu/vertex_attribute.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/webgpu/buffer_resource.hpp>
+#include <mln/webgpu/upload_pass.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/convert.hpp>
 
 #include <cstring>
 #include <sstream>

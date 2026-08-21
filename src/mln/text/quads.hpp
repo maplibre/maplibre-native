@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/style/types.hpp>
-#include <mbgl/text/glyph.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/types.hpp>
+#include <mln/text/glyph.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
 #include <vector>
 

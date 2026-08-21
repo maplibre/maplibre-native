@@ -1,10 +1,10 @@
-#include <mbgl/style/sources/geojson_source_impl.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/thread_pool.hpp>
-#include <mbgl/util/identity.hpp>
+#include <mln/style/sources/geojson_source_impl.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/thread_pool.hpp>
+#include <mln/util/identity.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)

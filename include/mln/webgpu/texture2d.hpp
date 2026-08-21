@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/texture2d.hpp>
+#include <mln/gfx/texture2d.hpp>
 #include <webgpu/webgpu.h>
-#include <mbgl/util/image.hpp>
+#include <mln/util/image.hpp>
 
 #include <memory>
 

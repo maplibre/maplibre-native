@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
-fs.writeFileSync('platform/default/include/mbgl/storage/offline_schema.hpp', `#pragma once
+fs.writeFileSync('platform/default/include/mln/storage/offline_schema.hpp', `#pragma once
 
 // THIS IS A GENERATED FILE; EDIT offline_schema.sql INSTEAD
-// To regenerate, run \`node platform/default/include/mbgl/storage/offline_schema.js\`
+// To regenerate, run \`node platform/default/include/mln/storage/offline_schema.js\`
 
 namespace mln {
 
 static constexpr const char* offlineDatabaseSchema =
-${fs.readFileSync('platform/default/include/mbgl/storage/offline_schema.sql', 'utf8')
+${fs.readFileSync('platform/default/include/mln/storage/offline_schema.sql', 'utf8')
     .replace(/ *--.*/g, '')
     .split('\n')
     .filter(a => a)

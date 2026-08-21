@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/style/expression/interpolator.hpp>
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/util/ignore.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/expression/interpolator.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/util/ignore.hpp>
 
 #include <initializer_list>
 #include <memory>

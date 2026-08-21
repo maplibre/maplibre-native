@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mapbox/shelf-pack.hpp>
-#include <mbgl/style/image_impl.hpp>
+#include <mln/style/image_impl.hpp>
 
 #include <unordered_map>
 #include <string>

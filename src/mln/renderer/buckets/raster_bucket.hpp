@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/renderer/tile_mask.hpp>
-#include <mbgl/style/layers/raster_layer_properties.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/renderer/tile_mask.hpp>
+#include <mln/style/layers/raster_layer_properties.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <memory>
 #include <optional>

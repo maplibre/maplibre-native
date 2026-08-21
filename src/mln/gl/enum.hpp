@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 #include <type_traits>
 

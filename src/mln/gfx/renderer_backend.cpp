@@ -1,6 +1,6 @@
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
 
 namespace mln {
 namespace gfx {

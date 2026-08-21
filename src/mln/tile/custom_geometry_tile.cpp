@@ -1,11 +1,11 @@
-#include <mbgl/tile/custom_geometry_tile.hpp>
-#include <mbgl/tile/geojson_tile_data.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/tile/tile_observer.hpp>
-#include <mbgl/style/custom_tile_loader.hpp>
+#include <mln/tile/custom_geometry_tile.hpp>
+#include <mln/tile/geojson_tile_data.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/string.hpp>
+#include <mln/tile/tile_observer.hpp>
+#include <mln/style/custom_tile_loader.hpp>
 
 #include <mapbox/geojsonvt.hpp>
 

@@ -1,6 +1,6 @@
-#include <mbgl/renderer/cross_faded_property_evaluator.hpp>
-#include <mbgl/style/expression/image.hpp>
-#include <mbgl/util/chrono.hpp>
+#include <mln/renderer/cross_faded_property_evaluator.hpp>
+#include <mln/style/expression/image.hpp>
+#include <mln/util/chrono.hpp>
 
 #include <cmath>
 

@@ -1,8 +1,8 @@
-#include <mbgl/gl/headless_backend.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gl/headless_backend.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/util/instrumentation.hpp>
 
 #include <cassert>
 #include <stdexcept>

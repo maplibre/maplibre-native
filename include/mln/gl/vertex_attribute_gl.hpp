@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 namespace mln {
 namespace gfx {

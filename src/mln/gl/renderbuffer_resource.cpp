@@ -1,6 +1,6 @@
 
-#include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gl/renderbuffer_resource.hpp>
+#include <mln/util/instrumentation.hpp>
 
 namespace mln {
 namespace gl {

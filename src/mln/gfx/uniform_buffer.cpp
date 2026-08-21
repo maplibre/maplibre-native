@@ -1,6 +1,6 @@
-#include <mbgl/gfx/uniform_buffer.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
 
-#include <mbgl/gfx/context.hpp>
+#include <mln/gfx/context.hpp>
 
 namespace mln {
 namespace gfx {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/expression/interpolate.hpp>
-#include <mbgl/style/expression/parsing_context.hpp>
-#include <mbgl/style/expression/step.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/style/expression/interpolate.hpp>
+#include <mln/style/expression/parsing_context.hpp>
+#include <mln/style/expression/step.hpp>
+#include <mln/util/variant.hpp>
 
 #include <optional>
 

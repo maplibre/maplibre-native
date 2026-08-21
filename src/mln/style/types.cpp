@@ -1,5 +1,5 @@
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/enum.hpp>
 
 namespace mln {
 

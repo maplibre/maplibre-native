@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/map/camera.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/transition_options.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/immutable.hpp>
 
 #include <string>
 #include <vector>

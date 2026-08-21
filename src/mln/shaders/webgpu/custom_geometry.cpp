@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/custom_geometry.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/custom_geometry_ubo.hpp>
+#include <mln/shaders/webgpu/custom_geometry.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/custom_geometry_ubo.hpp>
 
 namespace mln {
 namespace shaders {

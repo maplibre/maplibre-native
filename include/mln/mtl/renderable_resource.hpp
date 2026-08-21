@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/mtl/mtl_fwd.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
 
 #include <cstdlib>
 

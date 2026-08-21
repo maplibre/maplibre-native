@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/gfx/texture2d.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/util/image.hpp>
+#include <mln/gfx/texture2d.hpp>
 
 #include <variant>
 #include <map>

@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <mbgl/style/color_ramp_property_value.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/util/color.hpp>
 
 #include <vector>
 

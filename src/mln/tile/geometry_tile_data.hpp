@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/feature.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/feature.hpp>
 
 #include <cstdint>
 #include <memory>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/gfx/context.hpp>
 
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #define VULKAN_HPP_NO_DEFAULT_DISPATCHER

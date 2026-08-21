@@ -1,6 +1,6 @@
-#include <mbgl/mtl/index_buffer_resource.hpp>
+#include <mln/mtl/index_buffer_resource.hpp>
 
-#include <mbgl/mtl/context.hpp>
+#include <mln/mtl/context.hpp>
 
 namespace mln {
 namespace mtl {

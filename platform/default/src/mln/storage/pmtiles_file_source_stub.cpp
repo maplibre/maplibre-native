@@ -1,7 +1,7 @@
-#include <mbgl/storage/file_source_request.hpp>
-#include <mbgl/storage/pmtiles_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/util/async_request.hpp>
+#include <mln/storage/file_source_request.hpp>
+#include <mln/storage/pmtiles_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/util/async_request.hpp>
 
 namespace mln {
 

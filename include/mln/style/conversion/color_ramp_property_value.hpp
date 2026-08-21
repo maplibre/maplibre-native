@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/color_ramp_property_value.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
+#include <mln/style/conversion.hpp>
 
 namespace mln {
 namespace style {

@@ -1,5 +1,5 @@
-#include <mbgl/shaders/mtl/heatmap.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
+#include <mln/shaders/mtl/heatmap.hpp>
+#include <mln/shaders/shader_defines.hpp>
 
 namespace mln {
 namespace shaders {

@@ -1,9 +1,9 @@
-#include <mbgl/webgpu/uniform_buffer.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/uniform_buffer.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
 #include <webgpu/webgpu.h>
-#include <mbgl/webgpu/render_pass.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/webgpu/render_pass.hpp>
+#include <mln/util/logging.hpp>
 #include <cstring>
 #include <cstdint>
 

@@ -3,7 +3,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
     name = "testutils",
-    hdrs = glob(["include/mbgl/test/*.hpp"]),
+    hdrs = glob(["include/mln/test/*.hpp"]),
     strip_include_prefix = "include",
     deps = [
         "@googletest//:gtest",
@@ -13,16 +13,16 @@ cc_library(
 cc_library(
     name = "testlib",
     srcs = select({
-        "@platforms//os:ios": glob(["src/mbgl/test/*.cpp"]),
+        "@platforms//os:ios": glob(["src/mln/test/*.cpp"]),
         "//conditions:default": glob(
-            ["src/mbgl/test/*.cpp"],
-            exclude = ["src/mbgl/test/http_server.cpp"],
+            ["src/mln/test/*.cpp"],
+            exclude = ["src/mln/test/http_server.cpp"],
         ),
     }) + [
-        "include/mbgl/test.hpp",
+        "include/mln/test.hpp",
     ],
     hdrs = glob([
-        "src/mbgl/test/*.hpp",
+        "src/mln/test/*.hpp",
     ]),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + select({
         "@platforms//os:ios": ["-DUSE_CPP_TEST_SERVER"],

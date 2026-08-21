@@ -1,10 +1,10 @@
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/tile/raster_dem_tile.hpp>
-#include <mbgl/algorithm/update_tile_masks.hpp>
-#include <mbgl/geometry/dem_data.hpp>
-#include <mbgl/renderer/buckets/hillshade_bucket.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
+#include <mln/renderer/sources/render_raster_dem_source.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/tile/raster_dem_tile.hpp>
+#include <mln/algorithm/update_tile_masks.hpp>
+#include <mln/geometry/dem_data.hpp>
+#include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/renderer/tile_parameters.hpp>
 
 namespace mln {
 

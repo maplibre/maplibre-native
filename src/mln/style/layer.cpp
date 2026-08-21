@@ -1,13 +1,13 @@
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/layer_observer.hpp>
-#include <mbgl/tile/tile.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/layer_observer.hpp>
+#include <mln/tile/tile.hpp>
 
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace style {

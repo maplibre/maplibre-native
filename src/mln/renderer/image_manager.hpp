@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/util/immutable.hpp>
 
 #include <map>
 #include <memory>

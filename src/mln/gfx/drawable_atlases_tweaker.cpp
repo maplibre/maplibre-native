@@ -1,9 +1,9 @@
-#include <mbgl/gfx/drawable_atlases_tweaker.hpp>
+#include <mln/gfx/drawable_atlases_tweaker.hpp>
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/renderer/tile_render_data.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/renderer/tile_render_data.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/renderer/paint_parameters.hpp>
 
 namespace mln {
 namespace gfx {

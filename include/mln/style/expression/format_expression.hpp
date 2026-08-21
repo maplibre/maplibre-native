@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/style/expression/parsing_context.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/expression/parsing_context.hpp>
 
 namespace mln {
 namespace style {

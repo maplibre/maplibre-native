@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/symbol.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/symbol_layer_ubo.hpp>
+#include <mln/shaders/webgpu/symbol.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/symbol_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

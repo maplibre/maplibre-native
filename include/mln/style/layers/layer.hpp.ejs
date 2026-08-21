@@ -10,19 +10,19 @@
 #pragma once
 
 <% if (type === 'heatmap' || type === 'line' || type === 'color-relief') { -%>
-#include <mbgl/style/color_ramp_property_value.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
 <% } -%>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/style/property_value.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/style/property_value.hpp>
 <% if (type === 'location-indicator') { -%>
-#include <mbgl/style/rotation.hpp>
+#include <mln/style/rotation.hpp>
 <% } -%>
 <% if (type === 'symbol') { -%>
-#include <mbgl/style/expression/formatted.hpp>
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
+#include <mln/style/expression/formatted.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
 <% } -%>
-#include <mbgl/util/color.hpp>
+#include <mln/util/color.hpp>
 
 <% if (type === 'line' || type === 'symbol') { -%>
 #include <vector>

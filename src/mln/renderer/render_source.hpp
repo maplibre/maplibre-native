@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/map/mode.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_observer.hpp>
-#include <mbgl/util/mat4.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/style/layer_properties.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile_observer.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/style/layer_properties.hpp>
 
 #include <map>
 #include <memory>

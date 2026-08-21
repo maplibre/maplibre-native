@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/annotation/symbol_annotation_impl.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/annotation/symbol_annotation_impl.hpp>
+#include <mln/style/image.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <mapbox/std/weak.hpp>
 

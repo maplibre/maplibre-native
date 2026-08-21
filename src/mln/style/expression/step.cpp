@@ -1,7 +1,7 @@
-#include <mbgl/style/expression/step.hpp>
-#include <mbgl/style/expression/get_covering_stops.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/expression/step.hpp>
+#include <mln/style/expression/get_covering_stops.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/string.hpp>
 
 #include <cmath>
 

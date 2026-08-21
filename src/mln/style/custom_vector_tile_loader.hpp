@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/style/sources/custom_vector_source.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/style/sources/custom_vector_source.hpp>
+#include <mln/tile/tile_id.hpp>
 
 #include <map>
 #include <memory>

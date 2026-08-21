@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/style/expression/parsing_context.hpp>
-#include <mbgl/style/expression/type.hpp>
-#include <mbgl/style/expression/value.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/traits.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/style/expression/parsing_context.hpp>
+#include <mln/style/expression/type.hpp>
+#include <mln/style/expression/value.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/bitmask_operations.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/traits.hpp>
+#include <mln/util/variant.hpp>
 
 #include <array>
 #include <memory>

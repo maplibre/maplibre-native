@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/identity.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
-#include <mbgl/util/traits.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/gfx/drawable_data.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/identity.hpp>
+#include <mln/util/monotonic_timer.hpp>
+#include <mln/util/traits.hpp>
+#include <mln/util/immutable.hpp>
 
 #include <cstdint>
 #include <cstddef>

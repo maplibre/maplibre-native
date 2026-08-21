@@ -1,13 +1,13 @@
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/math/log2.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/interpolate.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/projection.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/math/log2.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/interpolate.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/projection.hpp>
+#include <mln/util/tile_coordinate.hpp>
 
 #include <numbers>
 

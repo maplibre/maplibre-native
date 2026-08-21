@@ -1,11 +1,11 @@
-#include <mbgl/webgpu/command_encoder.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/render_pass.hpp>
-#include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mln/webgpu/command_encoder.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/render_pass.hpp>
+#include <mln/webgpu/upload_pass.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
 #include <webgpu/webgpu.h>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 #include <cstring> // for strlen
 
 // Platform-specific includes for swap

@@ -1,5 +1,5 @@
-#include <mbgl/style/layers/location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer_impl.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
 
 namespace mln {
 namespace style {

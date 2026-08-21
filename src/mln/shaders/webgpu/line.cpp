@@ -1,6 +1,6 @@
-#include <mbgl/shaders/webgpu/line.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/line_layer_ubo.hpp>
+#include <mln/shaders/webgpu/line.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/line_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

@@ -1,6 +1,6 @@
-#include <mbgl/gl/vertex_array.hpp>
-#include <mbgl/gl/index_buffer_resource.hpp>
-#include <mbgl/gl/context.hpp>
+#include <mln/gl/vertex_array.hpp>
+#include <mln/gl/index_buffer_resource.hpp>
+#include <mln/gl/context.hpp>
 
 namespace mln {
 namespace gl {

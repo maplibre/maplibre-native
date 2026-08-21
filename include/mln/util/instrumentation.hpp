@@ -59,7 +59,7 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 // Metal and other APIs need to be handled separately
 #if MLN_RENDER_BACKEND_OPENGL
 
-#include <mbgl/gl/timestamp_query_extension.hpp>
+#include <mln/gl/timestamp_query_extension.hpp>
 
 // TracyOpenGL.hpp assumes OpenGL functions are in the global namespace
 // Temporarily expose the functions to TracyOpenGL.hpp then undef

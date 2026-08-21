@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/texture2d.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/util/image.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
 
 #include <memory>
 

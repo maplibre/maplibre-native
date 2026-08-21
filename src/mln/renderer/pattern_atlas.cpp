@@ -1,7 +1,7 @@
-#include <mbgl/renderer/pattern_atlas.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/texture2d.hpp>
+#include <mln/renderer/pattern_atlas.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/texture2d.hpp>
 
 namespace mln {
 

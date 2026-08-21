@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 
 namespace mln {
 

@@ -1,12 +1,12 @@
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/source_observer.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/style/sources/image_source_impl.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/source_observer.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/style/sources/image_source_impl.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/premultiply.hpp>
 
 namespace mln {
 namespace style {

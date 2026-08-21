@@ -1,5 +1,5 @@
-#include <mbgl/gfx/fill_generator.hpp>
-#include <mbgl/gfx/polyline_generator.hpp>
+#include <mln/gfx/fill_generator.hpp>
+#include <mln/gfx/polyline_generator.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)

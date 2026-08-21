@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/tile/tile_loader.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/tile/tile_loader.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <cassert>
 

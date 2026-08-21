@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/enum.hpp>
-#include <mbgl/gl/uniform_buffer_gl.hpp>
-#include <mbgl/gl/vertex_array.hpp>
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/uniform.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/enum.hpp>
+#include <mln/gl/uniform_buffer_gl.hpp>
+#include <mln/gl/vertex_array.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <cstdint>
 #include <memory>

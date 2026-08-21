@@ -2,16 +2,16 @@
 
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
-#include <mbgl/style/layer_observer.hpp>
-#include <mbgl/style/conversion/color_ramp_property_value.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion/transition_options.hpp>
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/traits.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layer_observer.hpp>
+#include <mln/style/conversion/color_ramp_property_value.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion/transition_options.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/traits.hpp>
 
 #include <mapbox/eternal.hpp>
 

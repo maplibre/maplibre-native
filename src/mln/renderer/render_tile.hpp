@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/mat4.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/types.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/types.hpp>
 
 #include <array>
 #include <memory>

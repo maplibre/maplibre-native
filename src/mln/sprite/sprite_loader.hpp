@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/sprite.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/sprite.hpp>
 #include <mapbox/std/weak.hpp>
 
 #include <string>

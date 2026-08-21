@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/style/types.hpp>
+#include <mln/gfx/drawable_data.hpp>
+#include <mln/style/types.hpp>
 
 #include <memory>
 

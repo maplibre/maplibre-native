@@ -1,9 +1,9 @@
-#include <mbgl/layermanager/fill_layer_factory.hpp>
+#include <mln/layermanager/fill_layer_factory.hpp>
 
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/renderer/layers/render_fill_layer.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/fill_layer_impl.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
+#include <mln/renderer/layers/render_fill_layer.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/layers/fill_layer_impl.hpp>
 
 namespace mln {
 

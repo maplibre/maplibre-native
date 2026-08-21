@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/shaders/shader_source.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/shaders/shader_source.hpp>
 
 #include <string>
 

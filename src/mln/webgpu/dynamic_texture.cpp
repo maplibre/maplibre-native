@@ -1,6 +1,6 @@
-#include <mbgl/webgpu/dynamic_texture.hpp>
-#include <mbgl/webgpu/texture2d.hpp>
-#include <mbgl/webgpu/context.hpp>
+#include <mln/webgpu/dynamic_texture.hpp>
+#include <mln/webgpu/texture2d.hpp>
+#include <mln/webgpu/context.hpp>
 
 namespace mln {
 namespace webgpu {

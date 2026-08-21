@@ -1,27 +1,27 @@
-#include <mbgl/renderer/layers/render_heatmap_layer.hpp>
-#include <mbgl/renderer/buckets/heatmap_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/style/layers/heatmap_layer_impl.hpp>
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/util/intersection_tests.hpp>
+#include <mln/renderer/layers/render_heatmap_layer.hpp>
+#include <mln/renderer/buckets/heatmap_bucket.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/style/layers/heatmap_layer_impl.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/util/math.hpp>
+#include <mln/util/intersection_tests.hpp>
 
-#include <mbgl/renderer/layers/heatmap_layer_tweaker.hpp>
-#include <mbgl/renderer/layers/heatmap_texture_layer_tweaker.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/render_target.hpp>
-#include <mbgl/shaders/heatmap_layer_ubo.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/gfx/shader_group.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
+#include <mln/renderer/layers/heatmap_layer_tweaker.hpp>
+#include <mln/renderer/layers/heatmap_texture_layer_tweaker.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/render_target.hpp>
+#include <mln/shaders/heatmap_layer_ubo.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/shader_group.hpp>
+#include <mln/gfx/shader_registry.hpp>
 
 namespace mln {
 

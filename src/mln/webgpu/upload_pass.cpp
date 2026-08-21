@@ -1,14 +1,14 @@
-#include <mbgl/webgpu/upload_pass.hpp>
-#include <mbgl/webgpu/command_encoder.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/vertex_buffer_resource.hpp>
-#include <mbgl/webgpu/index_buffer_resource.hpp>
-#include <mbgl/webgpu/vertex_attribute.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gfx/vertex_vector.hpp>
-#include <mbgl/gfx/debug_group.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/webgpu/upload_pass.hpp>
+#include <mln/webgpu/command_encoder.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/vertex_buffer_resource.hpp>
+#include <mln/webgpu/index_buffer_resource.hpp>
+#include <mln/webgpu/vertex_attribute.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/gfx/vertex_vector.hpp>
+#include <mln/gfx/debug_group.hpp>
+#include <mln/util/logging.hpp>
 #include <sstream>
 
 namespace mln {

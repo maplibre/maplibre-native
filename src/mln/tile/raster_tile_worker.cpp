@@ -1,8 +1,8 @@
-#include <mbgl/tile/raster_tile_worker.hpp>
-#include <mbgl/tile/raster_tile.hpp>
-#include <mbgl/renderer/buckets/raster_bucket.hpp>
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/tile/raster_tile_worker.hpp>
+#include <mln/tile/raster_tile.hpp>
+#include <mln/renderer/buckets/raster_bucket.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/util/premultiply.hpp>
 
 namespace mln {
 

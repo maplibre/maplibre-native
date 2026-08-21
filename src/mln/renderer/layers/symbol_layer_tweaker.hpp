@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/hash.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/hash.hpp>
 
 #include <string>
 

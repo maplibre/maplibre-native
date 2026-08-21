@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/gl/types.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/gl/types.hpp>
 
 namespace mln {
 namespace gfx {

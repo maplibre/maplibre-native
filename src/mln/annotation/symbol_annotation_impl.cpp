@@ -1,8 +1,8 @@
-#include <mbgl/annotation/symbol_annotation_impl.hpp>
-#include <mbgl/annotation/annotation_tile.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/math/clamp.hpp>
-#include <mbgl/util/tile_coordinate.hpp>
+#include <mln/annotation/symbol_annotation_impl.hpp>
+#include <mln/annotation/annotation_tile.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/math/clamp.hpp>
+#include <mln/util/tile_coordinate.hpp>
 
 namespace mln {
 

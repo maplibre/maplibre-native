@@ -1,7 +1,7 @@
-#include <mbgl/math/minmax.hpp>
-#include <mbgl/text/tagged_string.hpp>
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/math/minmax.hpp>
+#include <mln/text/tagged_string.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/util/logging.hpp>
 
 namespace {
 char16_t PUAbegin = u'\uE000';

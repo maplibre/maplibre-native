@@ -1,11 +1,11 @@
-#include <mbgl/renderer/image_manager.hpp>
+#include <mln/renderer/image_manager.hpp>
 
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/renderer/image_manager_observer.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/renderer/image_manager_observer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/logging.hpp>
 
 #include <sstream>
 

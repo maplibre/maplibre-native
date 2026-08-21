@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/shaders/layer_ubo.hpp>
-#include <mbgl/style/property_expression.hpp>
-#include <mbgl/util/bitmask_operations.hpp>
-#include <mbgl/gfx/gpu_expression.hpp>
+#include <mln/shaders/layer_ubo.hpp>
+#include <mln/style/property_expression.hpp>
+#include <mln/util/bitmask_operations.hpp>
+#include <mln/gfx/gpu_expression.hpp>
 
 namespace mln {
 namespace shaders {

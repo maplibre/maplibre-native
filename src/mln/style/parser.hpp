@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/sprite.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/light.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/sprite.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/light.hpp>
 
-#include <mbgl/text/glyph.hpp>
+#include <mln/text/glyph.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/font_stack.hpp>
+#include <mln/util/geo.hpp>
 
 #include <vector>
 #include <memory>

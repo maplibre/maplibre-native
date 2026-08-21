@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/background_layer_properties.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/background_layer_properties.hpp>
+#include <mln/tile/tile_id.hpp>
 
 #include <memory>
 #include <mutex>

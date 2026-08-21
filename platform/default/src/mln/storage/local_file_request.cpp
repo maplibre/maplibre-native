@@ -1,6 +1,6 @@
-#include <mbgl/storage/file_source_request.hpp>
-#include <mbgl/storage/response.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/storage/file_source_request.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/util/io.hpp>
 
 #include <sys/types.h>
 #include <sys/stat.h>

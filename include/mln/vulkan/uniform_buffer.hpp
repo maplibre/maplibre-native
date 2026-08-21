@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/vulkan/buffer_resource.hpp>
-#include <mbgl/vulkan/descriptor_set.hpp>
+#include <mln/gfx/uniform_buffer.hpp>
+#include <mln/vulkan/buffer_resource.hpp>
+#include <mln/vulkan/descriptor_set.hpp>
 
 namespace mln {
 namespace vulkan {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/type_list.hpp>
-#include <mbgl/util/indexed_tuple.hpp>
+#include <mln/util/type_list.hpp>
+#include <mln/util/indexed_tuple.hpp>
 
 #include <array>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/vulkan/uniform_buffer.hpp>
-#include <mbgl/renderer/layer_group.hpp>
+#include <mln/vulkan/uniform_buffer.hpp>
+#include <mln/renderer/layer_group.hpp>
 
 #include <optional>
 

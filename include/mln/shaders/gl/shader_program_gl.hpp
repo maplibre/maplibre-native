@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/vertex_attribute_gl.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/shaders/gl/shader_info.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/vertex_attribute_gl.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/shaders/gl/shader_info.hpp>
 
 #include <unordered_map>
 

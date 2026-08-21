@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/draw_mode.hpp>
 #include <webgpu/webgpu.h>
 #include <memory>
 #include <vector>

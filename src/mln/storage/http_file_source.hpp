@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/storage/resource.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/resource.hpp>
 
 namespace mln {
 

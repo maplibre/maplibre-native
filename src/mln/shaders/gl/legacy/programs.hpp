@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/gfx/shader_registry.hpp>
 #include <memory>
 
 namespace mln {

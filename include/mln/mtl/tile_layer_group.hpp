@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/uniform_buffer.hpp>
-#include <mbgl/renderer/layer_group.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
+#include <mln/mtl/uniform_buffer.hpp>
+#include <mln/renderer/layer_group.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 

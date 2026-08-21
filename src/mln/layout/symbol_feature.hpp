@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/expression/image.hpp>
-#include <mbgl/text/tagged_string.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mln/style/expression/image.hpp>
+#include <mln/text/tagged_string.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
 #include <string>
 #include <optional>

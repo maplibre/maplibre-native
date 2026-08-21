@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/identity.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/identity.hpp>
 
 #include <memory>
 #include <vector>

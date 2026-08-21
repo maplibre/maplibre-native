@@ -1,5 +1,5 @@
-#include <mbgl/shaders/mtl/symbol.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
+#include <mln/shaders/mtl/symbol.hpp>
+#include <mln/shaders/shader_defines.hpp>
 
 namespace mln {
 namespace shaders {

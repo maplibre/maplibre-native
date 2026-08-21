@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/renderer/sources/render_tile_source.hpp>
-#include <mbgl/style/sources/geojson_source_impl.hpp>
+#include <mln/renderer/sources/render_tile_source.hpp>
+#include <mln/style/sources/geojson_source_impl.hpp>
 
 namespace mln {
 

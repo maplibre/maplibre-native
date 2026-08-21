@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/util/font_stack.hpp>
+#include <mln/style/types.hpp>
+#include <mln/text/glyph_range.hpp>
+#include <mln/util/font_stack.hpp>
 
 #include <exception>
 

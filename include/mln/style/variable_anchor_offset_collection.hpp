@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/geometry.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <array>
 #include <string>

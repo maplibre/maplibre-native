@@ -1,7 +1,7 @@
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/geo.hpp>
 
 #include <memory>
 

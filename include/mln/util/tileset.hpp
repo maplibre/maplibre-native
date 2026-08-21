@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/range.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/util/range.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geo.hpp>
 
 #include <tuple>
 #include <vector>

@@ -1,8 +1,8 @@
 #include <iostream>
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/utf.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/util/utf.hpp>
+#include <mln/util/platform.hpp>
 
 using namespace mln;
 

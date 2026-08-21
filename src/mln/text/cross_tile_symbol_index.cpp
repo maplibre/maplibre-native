@@ -1,10 +1,10 @@
-#include <mbgl/text/cross_tile_symbol_index.hpp>
+#include <mln/text/cross_tile_symbol_index.hpp>
 
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/util/instrumentation.hpp>
 
 namespace mln {
 

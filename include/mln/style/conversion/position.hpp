@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/position.hpp>
-#include <mbgl/style/conversion.hpp>
+#include <mln/style/position.hpp>
+#include <mln/style/conversion.hpp>
 
 #include <optional>
 

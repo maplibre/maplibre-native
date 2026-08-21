@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/grid_index.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/style/types.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/grid_index.hpp>
+#include <mln/util/mat4.hpp>
 
 #include <vector>
 #include <string>

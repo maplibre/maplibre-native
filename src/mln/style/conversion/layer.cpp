@@ -1,9 +1,9 @@
-#include <mbgl/style/conversion/layer.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/layer.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion_impl.hpp>
 
-#include <mbgl/layermanager/layer_manager.hpp>
+#include <mln/layermanager/layer_manager.hpp>
 
 namespace mln {
 namespace style {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/style/layer_observer.hpp>
+#include <mln/style/layer_observer.hpp>
 
 using namespace mln;
 using namespace mln::style;

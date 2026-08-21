@@ -1,14 +1,14 @@
 #pragma once
 
 #include <array>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/style/layer_impl.hpp>
-#include <mbgl/style/layer_properties.hpp>
-#include <mbgl/style/layers/location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer_properties.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/layer_properties.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/geo.hpp>
 #include <memory>
 #include <string>
 

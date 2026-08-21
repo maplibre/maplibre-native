@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/map/mode.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/style/layers/heatmap_layer_properties.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/style/layers/heatmap_layer_properties.hpp>
 
 namespace mln {
 

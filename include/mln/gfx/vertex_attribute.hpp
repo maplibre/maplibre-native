@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/gfx_types.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/gfx/gfx_types.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/util/containers.hpp>
 
 #include <algorithm>
 #include <array>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/style/types.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/immutable.hpp>
 
 #include <mapbox/std/weak.hpp>
 #include <mapbox/util/type_wrapper.hpp>

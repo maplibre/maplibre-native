@@ -1,7 +1,7 @@
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/client_options.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/client_options.hpp>
 
 namespace mln {
 

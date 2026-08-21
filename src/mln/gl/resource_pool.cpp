@@ -1,14 +1,14 @@
-#include <mbgl/gl/resource_pool.hpp>
+#include <mln/gl/resource_pool.hpp>
 
 #include <cassert>
 #include <type_traits>
 
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/enum.hpp>
-#include <mbgl/util/hash.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/enum.hpp>
+#include <mln/util/hash.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace gl {

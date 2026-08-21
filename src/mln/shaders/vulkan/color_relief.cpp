@@ -1,6 +1,6 @@
-#include <mbgl/shaders/vulkan/color_relief.hpp>
-#include <mbgl/shaders/shader_defines.hpp>
-#include <mbgl/shaders/color_relief_layer_ubo.hpp>
+#include <mln/shaders/vulkan/color_relief.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/shaders/color_relief_layer_ubo.hpp>
 
 namespace mln {
 namespace shaders {

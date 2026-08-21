@@ -1,5 +1,5 @@
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace style {

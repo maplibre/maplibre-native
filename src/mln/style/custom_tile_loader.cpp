@@ -1,6 +1,6 @@
-#include <mbgl/style/custom_tile_loader.hpp>
-#include <mbgl/tile/custom_geometry_tile.hpp>
-#include <mbgl/util/tile_range.hpp>
+#include <mln/style/custom_tile_loader.hpp>
+#include <mln/tile/custom_geometry_tile.hpp>
+#include <mln/util/tile_range.hpp>
 
 namespace mln {
 namespace style {

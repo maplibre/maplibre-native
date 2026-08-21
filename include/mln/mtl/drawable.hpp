@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/mtl/upload_pass.hpp>
-#include <mbgl/shaders/segment.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/draw_mode.hpp>
+#include <mln/mtl/upload_pass.hpp>
+#include <mln/shaders/segment.hpp>
 
 #include <memory>
 

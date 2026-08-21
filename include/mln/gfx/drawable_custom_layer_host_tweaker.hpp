@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/style/layers/custom_layer.hpp>
 
 #include <memory>
 #include <string>

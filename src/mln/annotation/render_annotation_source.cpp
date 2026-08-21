@@ -1,10 +1,10 @@
-#include <mbgl/annotation/render_annotation_source.hpp>
-#include <mbgl/annotation/annotation_tile.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/annotation/render_annotation_source.hpp>
+#include <mln/annotation/annotation_tile.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/util/instrumentation.hpp>
 
-#include <mbgl/layermanager/layer_manager.hpp>
+#include <mln/layermanager/layer_manager.hpp>
 
 namespace mln {
 

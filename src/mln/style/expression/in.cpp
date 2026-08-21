@@ -1,7 +1,7 @@
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/expression/in.hpp>
-#include <mbgl/style/expression/type.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/in.hpp>
+#include <mln/style/expression/type.hpp>
+#include <mln/util/string.hpp>
 
 #include <cstring>
 

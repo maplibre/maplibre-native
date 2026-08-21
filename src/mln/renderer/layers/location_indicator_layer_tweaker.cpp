@@ -1,10 +1,10 @@
-#include <mbgl/renderer/layers/location_indicator_layer_tweaker.hpp>
+#include <mln/renderer/layers/location_indicator_layer_tweaker.hpp>
 
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/layers/render_location_indicator_layer.hpp>
-#include <mbgl/style/layers/location_indicator_layer_properties.hpp>
-#include <mbgl/shaders/location_indicator_ubo.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
+#include <mln/shaders/location_indicator_ubo.hpp>
 
 namespace mln {
 

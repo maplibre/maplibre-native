@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/buffer_resource.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/buffer_resource.hpp>
 #include <memory>
 #include <optional>
 #include <vector>

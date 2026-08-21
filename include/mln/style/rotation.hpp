@@ -1,5 +1,5 @@
 #pragma once
-#include <mbgl/math/wrap.hpp>
+#include <mln/math/wrap.hpp>
 namespace mln {
 namespace style {
 

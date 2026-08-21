@@ -1,9 +1,9 @@
-#include <mbgl/layout/symbol_projection.hpp>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/util/math.hpp>
+#include <mln/layout/symbol_projection.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
+#include <mln/util/math.hpp>
 
 #include <numbers>
 

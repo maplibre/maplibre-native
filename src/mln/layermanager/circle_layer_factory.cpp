@@ -1,10 +1,10 @@
-#include <mbgl/layermanager/circle_layer_factory.hpp>
+#include <mln/layermanager/circle_layer_factory.hpp>
 
-#include <mbgl/layout/circle_layout.hpp>
-#include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/layers/render_circle_layer.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
+#include <mln/layout/circle_layout.hpp>
+#include <mln/renderer/buckets/circle_bucket.hpp>
+#include <mln/renderer/layers/render_circle_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
 
 namespace mln {
 

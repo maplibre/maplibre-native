@@ -1,9 +1,9 @@
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/style/layers/fill_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_fill_layer.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/gfx/fill_generator.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/renderer/layers/render_fill_layer.hpp>
+#include <mln/util/math.hpp>
+#include <mln/gfx/fill_generator.hpp>
 
 namespace mln {
 

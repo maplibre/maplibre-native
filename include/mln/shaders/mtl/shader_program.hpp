@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/vertex_attribute.hpp>
+#include <mln/shaders/shader_program_base.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
+#include <mln/mtl/vertex_attribute.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 

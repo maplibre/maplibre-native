@@ -1,9 +1,9 @@
-#include <mbgl/webgpu/offscreen_texture.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/texture2d.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/webgpu/offscreen_texture.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/texture2d.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
+#include <mln/util/logging.hpp>
 #include <cstring>
 #include <functional>
 

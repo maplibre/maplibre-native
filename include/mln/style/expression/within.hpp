@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/util/geojson.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/util/geojson.hpp>
 
 #include <optional>
 

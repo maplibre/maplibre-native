@@ -1,11 +1,11 @@
 #pragma once
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/layout/layout.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/layout/layout.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/renderer/buckets/circle_bucket.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/util/containers.hpp>
 
 namespace mln {
 
