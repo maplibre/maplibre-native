@@ -54,17 +54,18 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
 
-    // If we're using stencil clipping, we need to handle 3D features separately
-    if (stencilTiles && !stencilTiles->empty()) {
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
-                }
+    // 3D features need the group-level depth/stencil state: `Drawable::draw`
+    // intentionally skips depth-stencil setup for is3D drawables. Detect them
+    // even without stencil tiles, otherwise is3D drawables (e.g. custom
+    // drawable geometry) render with whatever state happens to be bound.
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (stencilTiles && !stencilTiles->empty() && drawable.getEnableStencil()) {
+                stencil3d = true;
             }
-        });
-    }
+        }
+    });
 
 #if !defined(NDEBUG)
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
