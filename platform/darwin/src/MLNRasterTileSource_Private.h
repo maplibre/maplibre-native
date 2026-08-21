@@ -1,7 +1,7 @@
 #import "MLNRasterTileSource.h"
 
-#include <mln/util/variant.hpp>
 #include <memory>
+#include <mln/util/variant.hpp>
 
 namespace mln {
 class Tileset;
