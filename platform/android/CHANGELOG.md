@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## 13.5.1
+
+### 🐞 Bug fixes
+
+- fix(core): Fix surface transform ([#4495]https://github.com/maplibre/maplibre-native/pull/4495)
+- fix(core): Fix nullptr access during custom layer pre-render ([#4496]https://github.com/maplibre/maplibre-native/pull/4496)
+- android: reduce Android AAR size with header-only Prefab ([#4483]https://github.com/maplibre/maplibre-native/pull/4483)
+
+### ✨ Features and improvements
+
+- core: rename mbgl namespace to mln ([#4487]https://github.com/maplibre/maplibre-native/pull/4487)
+
 ## 13.5.0
 
 ### 🐞 Bug fixes
