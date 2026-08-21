@@ -13,6 +13,8 @@
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/tile_cover.hpp>
 
+#include <algorithm>
+
 namespace mln {
 
 using namespace style;
@@ -142,15 +144,15 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
                                       static_cast<uint8_t>(transformState.getZoom()),
                                       zoomRange);
     for (auto tile : idealTiles) {
-        if (tile.wrap != 0 && tileCover[0].canonical.isChildOf(tile.canonical)) {
-            tileIds.emplace_back(tile.wrap, tileCover[0].canonical);
-            hasVisibleTile = true;
-        } else if (!hasVisibleTile) {
-            for (auto coveringTile : tileCover) {
-                if (coveringTile.canonical == tile.canonical || coveringTile.canonical.isChildOf(tile.canonical) ||
-                    tile.canonical.isChildOf(coveringTile.canonical)) {
-                    hasVisibleTile = true;
+        for (auto coveringTile : tileCover) {
+            if (coveringTile.canonical == tile.canonical || coveringTile.canonical.isChildOf(tile.canonical) ||
+                tile.canonical.isChildOf(coveringTile.canonical)) {
+                hasVisibleTile = true;
+                const UnwrappedTileID wrappedTileID(tile.wrap, tileCover[0].canonical);
+                if (tile.wrap != 0 && std::find(tileIds.cbegin(), tileIds.cend(), wrappedTileID) == tileIds.cend()) {
+                    tileIds.push_back(wrappedTileID);
                 }
+                break;
             }
         }
     }

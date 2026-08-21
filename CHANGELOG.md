@@ -29,6 +29,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Fix `ImageSource` not rendering across world copies
 - [core] Repaint data-driven symbol paint properties after feature-state updates.
 - [core] Accept alpha values in legacy comma-separated `hsl()` colors ([#4434](https://github.com/maplibre/maplibre-native/issues/4434)).
 - [core] Fix thread-unsafe headless OpenGL display singleton initialization [#4332](https://github.com/maplibre/maplibre-native/pull/4332)
