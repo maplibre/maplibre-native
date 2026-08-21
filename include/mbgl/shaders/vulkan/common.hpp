@@ -145,7 +145,11 @@ void applySurfaceTransform(vec4 drape_tile) {
 // (which itself went through applySurfaceTransform), e.g. for calculate_visibility.
 vec4 surface_transformed(vec4 pos) {
 #ifdef USE_SURFACE_TRANSFORM
-    pos.xy = platformParams.rotation * pos.xy;
+    const mat2 rotation = {
+        platformParams.surfaceRotation.xy,
+        platformParams.surfaceRotation.zw
+    };
+    pos.xy = rotation * pos.xy;
 #endif
     pos.y *= -1.0;
     return pos;
