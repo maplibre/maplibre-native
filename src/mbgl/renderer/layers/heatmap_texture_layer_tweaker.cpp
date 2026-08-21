@@ -4,7 +4,6 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
@@ -30,7 +29,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     propertiesUpdated = false;
 
     mat4 matrix;
-    const auto& size = parameters.staticData.backendSize;
+    const auto& size = parameters.renderableSize;
     matrix::ortho(matrix, 0, size.width, size.height, 0, -1, 1);
 
     const HeatmapTexturePropsUBO propsUBO = {.matrix = util::cast<float>(matrix),

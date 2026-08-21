@@ -16,5 +16,4 @@ public:
     void deactivate() override;
     void updateAssumedState() override;
     void setSize(mln::Size size_);
-    mln::Size getSize() const;
 };
