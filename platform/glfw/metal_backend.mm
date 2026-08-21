@@ -130,6 +130,7 @@ void MetalBackend::deactivate() {}
 void MetalBackend::updateAssumedState() {}
 
 void MetalBackend::setSize(mln::Size size_) {
+  size = size_;
   getResource<mln::MetalRenderableResource>().setBackendSize(size_);
 }
 
