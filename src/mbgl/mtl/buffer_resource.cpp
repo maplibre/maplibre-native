@@ -169,6 +169,7 @@ void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
                                 const std::size_t offset,
                                 const std::size_t index,
                                 std::size_t size_) const noexcept {
+    context.renderingStats().numVertexBufferBinds++;
     assert(offset + size_ <= size);
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));

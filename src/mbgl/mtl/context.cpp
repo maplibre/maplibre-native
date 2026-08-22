@@ -423,6 +423,20 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].bufferIndex);
 
+    // The second and subsequent clip-mask rebuilds within a frame store
+    // their UBOs in a stack-local temporary `BufferResource`. Consecutive
+    // rebuilds reallocate that temporary at the same stack address with
+    // the same initial version (0), so `RenderPass`'s vertex-bind cache
+    // (`bind->buf == &buf && !buf.needReBind(bind->version)`) takes a
+    // dangling-pointer cache hit and skips `setVertexBuffer` -- leaving
+    // the previous rebuild's `MTLBuffer` bound while this rebuild's mask
+    // quads are drawn. The masks land with stale tile matrices and
+    // stencil refs, and every stencil-clipped fill in the layer group
+    // disappears in tile-aligned regions that shift with small camera
+    // moves. Drop the cached binding so each rebuild re-binds its own
+    // buffer.
+    mtlRenderPass.unbindVertex(shaders::idClippingMaskUBO);
+
     // Instancing is disabled for now because the `[[stencil]]` attribute in the fragment shader output
     // that we need to apply a different stencil value for each tile causes a problem on some older (A8-A11)
     // devices, specifically `XPC_ERROR_CONNECTION_INTERRUPTED` when creating a render pipeline state.

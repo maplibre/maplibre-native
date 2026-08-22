@@ -37,6 +37,10 @@ struct RenderingStats {
     int numTextureBindings = 0;
     /// Number of times a texture was updated
     int numTextureUpdates = 0;
+
+    /// Number of vertex buffer bindings issued to the command encoder
+    /// (full binds, not offset-only updates). Metal backend only.
+    int numVertexBufferBinds = 0;
     /// Number of bytes used in texture updates
     std::size_t textureUpdateBytes = 0;
 
