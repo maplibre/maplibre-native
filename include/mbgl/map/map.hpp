@@ -120,6 +120,7 @@ public:
     LatLng latLngForPixel(const ScreenCoordinate&) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
+    bool isLatLngOnScreen(const LatLng&) const;
 
     // Transform
     TransformState getTransfromState() const;

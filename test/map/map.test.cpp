@@ -195,6 +195,12 @@ TEST(Map, LatLngBoundsToCamera) {
     CameraOptions virtualCamera = test.map.cameraForLatLngBounds(bounds, {});
     ASSERT_TRUE(bounds.contains(*virtualCamera.center));
     EXPECT_NEAR(*virtualCamera.zoom, 1.55467, 1e-5);
+
+    test.map.jumpTo(virtualCamera);
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northwest()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southwest()));
 }
 
 TEST(Map, LatLngBoundsToCameraWithExcessivePadding) {
@@ -207,6 +213,12 @@ TEST(Map, LatLngBoundsToCameraWithExcessivePadding) {
     CameraOptions virtualCamera = test.map.cameraForLatLngBounds(bounds, {500, 0, 1200, 0});
     ASSERT_TRUE(bounds.contains(*virtualCamera.center));
     EXPECT_NEAR(*virtualCamera.zoom, 16.0, 1e-5);
+
+    test.map.jumpTo(virtualCamera);
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northwest()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southwest()));
 }
 
 TEST(Map, LatLngBoundsToCameraWithBearing) {
@@ -220,6 +232,12 @@ TEST(Map, LatLngBoundsToCameraWithBearing) {
     ASSERT_TRUE(bounds.contains(*virtualCamera.center));
     EXPECT_NEAR(*virtualCamera.zoom, 1.21385, 1e-5);
     EXPECT_NEAR(virtualCamera.bearing.value_or(0), 35.0, 1e-5);
+
+    test.map.jumpTo(virtualCamera);
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northwest()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southwest()));
 }
 
 TEST(Map, LatLngBoundsToCameraWithBearingPitchAndPadding) {
@@ -231,7 +249,7 @@ TEST(Map, LatLngBoundsToCameraWithBearingPitchAndPadding) {
 
     CameraOptions virtualCamera = test.map.cameraForLatLngBounds(bounds, {}, 35, 20);
     ASSERT_TRUE(bounds.contains(*virtualCamera.center));
-    EXPECT_NEAR(*virtualCamera.zoom, 13.66272, 1e-5);
+    EXPECT_NEAR(*virtualCamera.zoom, 13.66272, 1e-5); // The zoom should be close to the 0-pitch case, z = 1.2
     ASSERT_DOUBLE_EQ(*virtualCamera.pitch, 20.0);
     EXPECT_NEAR(virtualCamera.bearing.value_or(0), 35.0, 1e-5);
 
@@ -247,6 +265,18 @@ TEST(Map, LatLngBoundsToCameraWithBearingPitchAndPadding) {
     ASSERT_DOUBLE_EQ(*virtualCameraPadded.zoom, *virtualCamera.zoom + util::log2(scaleChange));
     ASSERT_DOUBLE_EQ(*virtualCameraPadded.pitch, *virtualCamera.pitch);
     ASSERT_DOUBLE_EQ(*virtualCameraPadded.bearing, *virtualCamera.bearing);
+
+    test.map.jumpTo(virtualCamera);
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northwest()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southwest()));
+
+    test.map.jumpTo(virtualCameraPadded);
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northwest()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.northeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southeast()));
+    EXPECT_TRUE(test.map.isLatLngOnScreen(bounds.southwest()));
 }
 
 TEST(Map, LatLngsToCamera) {
