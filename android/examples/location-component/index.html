@@ -1553,7 +1553,7 @@
 <p>In this method:</p>
 <ul>
 <li>Use the annotation <code>@SuppressLint("MissingPermission")</code> to suppress warnings related to missing location access permissions.</li>
-<li>In <code>setStyle(),</code> you can utilize other public and token-free styles like <a href="https://demotiles.maplibre.org/style.json">demotiles</a> instead of the <a href="https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp">predefined styles</a>.</li>
+<li>In <code>setStyle(),</code> you can utilize other public and token-free styles like <a href="https://demotiles.maplibre.org/style.json">demotiles</a> instead of the <a href="https://github.com/maplibre/maplibre-native/tree/main/src/mln/util/tile_server_options.cpp">predefined styles</a>.</li>
 <li>For the builder of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-options/index.html">LocationComponentOptions</a>, use <code>pulseEnabled(true)</code> to enable the pulse animation, which enhances awareness of the user's location.</li>
 <li>Use method <code>buildLocationComponentActivationOptions()</code> to set <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a>, then activate <code>locatinoComponent</code> with it.</li>
 <li>To apply options, make sure you call <code>activateLocationComponent()</code> of <code>locationComponent</code>. You can also set <code>locationComponent</code>'s various properties like <code>isLocationComponentEnabled</code> , <code>cameraMode</code> , etc...</li>
