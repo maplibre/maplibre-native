@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-07167a6c.js";
+            window.path_to_searchindex_js = "searchindex-917cba74.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-24c1b73c.js"></script>
@@ -2537,7 +2537,7 @@ The server can be downloaded from <a href="https://github.com/wolfpld/tracy/rele
 <p>Instrumentation is enabled by turning <code>ON</code> the CMake option <code>MLN_USE_TRACY</code>.
 Tracy computational overhead is very low but by default it keeps all instrumentation events that are not consumed by the server in system memory. This can have a negative effect on platforms with low memory. To prevent high memory usage, <code>TRACY_ON_DEMAND</code> macro should defined. This way instrumentation data is only stored when the server is connected to the application.</p>
 <h4 id="instrumentation-in-maplibre"><a class="header" href="#instrumentation-in-maplibre">Instrumentation in MapLibre</a></h4>
-<p>The file <code>include/mbgl/util/instrumentation.hpp</code> defines the following instrumentation macros:</p>
+<p>The file <code>include/mln/util/instrumentation.hpp</code> defines the following instrumentation macros:</p>
 <h5 id="mln_trace_zonelabel"><a class="header" href="#mln_trace_zonelabel"><code>MLN_TRACE_ZONE(label)</code></a></h5>
 <p>The macro records the timestamps at the start and end of the code scope. The parameter label is a user defined name for the zone. Example:</p>
 <pre><code class="language-cpp">// code is not instrumented
@@ -2637,20 +2637,20 @@ bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/
 <ol>
 <li>Add a new source file to <code>rustutils/src/example.rs</code>.</li>
 <li>Implement it, see the <a href="https://cxx.rs/index.html">CXX documentation</a> or see <code>rustutils/src/color.rs</code> for an example.</li>
-<li>Create a C++ source file that will use the generated C++ header. See <code>src/mbgl/util/color.rs.cpp</code> for an example. Import the generated header with
+<li>Create a C++ source file that will use the generated C++ header. See <code>src/mln/util/color.rs.cpp</code> for an example. Import the generated header with
 <pre><code class="language-cpp">#include &lt;rustutils/example.hpp&gt;
 </code></pre>
 </li>
 <li>Conditionally include either the <code>*.rs.cpp</code> file or the <code>*.cpp</code> file it replaces in CMake and Bazel. Here is what it looks like for CMake:
-<pre><code class="language-cmake">${PROJECT_SOURCE_DIR}/src/mbgl/util/color$&lt;IF:$&lt;BOOL:${MLN_USE_RUST}&gt;,.rs.cpp,.cpp&gt;
+<pre><code class="language-cmake">${PROJECT_SOURCE_DIR}/src/mln/util/color$&lt;IF:$&lt;BOOL:${MLN_USE_RUST}&gt;,.rs.cpp,.cpp&gt;
 </code></pre>
 And here for Bazel:
 <pre><code class="language-bazel">select({
   "//:rust": [
-      "src/mbgl/util/color.rs.cpp",
+      "src/mln/util/color.rs.cpp",
   ],
   "//conditions:default": [
-      "src/mbgl/util/color.cpp",
+      "src/mln/util/color.cpp",
   ],
 })
 </code></pre>

@@ -73,7 +73,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-07167a6c.js";
+            window.path_to_searchindex_js = "../searchindex-917cba74.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-24c1b73c.js"></script>
@@ -226,7 +226,7 @@ The server can be downloaded from <a href="https://github.com/wolfpld/tracy/rele
 <p>Instrumentation is enabled by turning <code>ON</code> the CMake option <code>MLN_USE_TRACY</code>.
 Tracy computational overhead is very low but by default it keeps all instrumentation events that are not consumed by the server in system memory. This can have a negative effect on platforms with low memory. To prevent high memory usage, <code>TRACY_ON_DEMAND</code> macro should defined. This way instrumentation data is only stored when the server is connected to the application.</p>
 <h4 id="instrumentation-in-maplibre"><a class="header" href="#instrumentation-in-maplibre">Instrumentation in MapLibre</a></h4>
-<p>The file <code>include/mbgl/util/instrumentation.hpp</code> defines the following instrumentation macros:</p>
+<p>The file <code>include/mln/util/instrumentation.hpp</code> defines the following instrumentation macros:</p>
 <h5 id="mln_trace_zonelabel"><a class="header" href="#mln_trace_zonelabel"><code>MLN_TRACE_ZONE(label)</code></a></h5>
 <p>The macro records the timestamps at the start and end of the code scope. The parameter label is a user defined name for the zone. Example:</p>
 <pre><code class="language-cpp">// code is not instrumented
