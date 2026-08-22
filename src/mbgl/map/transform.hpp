@@ -86,6 +86,7 @@ public:
     // Bearing
 
     void rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& = {});
+    void rotateBy(double angleDegree, const AnimationOptions& = {});
     double getBearing() const;
 
     // Pitch

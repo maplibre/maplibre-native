@@ -77,6 +77,7 @@ public:
     void scaleBy(double scale, const std::optional<ScreenCoordinate>& anchor, const AnimationOptions& animation = {});
     void pitchBy(double pitch, const AnimationOptions& animation = {});
     void rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second, const AnimationOptions& = {});
+    void rotateBy(double angleDegree, const AnimationOptions& = {});
     CameraOptions cameraForLatLngBounds(const LatLngBounds&,
                                         const EdgeInsets&,
                                         const std::optional<double>& bearing = std::nullopt,

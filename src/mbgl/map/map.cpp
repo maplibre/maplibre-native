@@ -184,6 +184,12 @@ void Map::rotateBy(const ScreenCoordinate& first, const ScreenCoordinate& second
     impl->onUpdate();
 }
 
+void Map::rotateBy(double angleDegree, const AnimationOptions& animation) {
+    impl->cameraMutated = true;
+    impl->transform.rotateBy(angleDegree, animation);
+    impl->onUpdate();
+}
+
 CameraOptions Map::cameraForLatLngBounds(const LatLngBounds& bounds,
                                          const EdgeInsets& padding,
                                          const std::optional<double>& bearing,

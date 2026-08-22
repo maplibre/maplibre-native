@@ -310,6 +310,10 @@ private:
 
     // map position
     double x = 0, y = 0, z = 0;
+    /*!
+     * \brief bearing
+     * Bearing in radian
+     */
     double bearing = 0;
     double scale = 1;
     double fov = util::DEFAULT_FOV;
