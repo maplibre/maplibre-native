@@ -1,8 +1,8 @@
 #include <ios_test_runner.hpp>
 
-#include <mbgl/benchmark.hpp>
+#include <mln/benchmark.hpp>
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #include <unistd.h>
 #include <vector>

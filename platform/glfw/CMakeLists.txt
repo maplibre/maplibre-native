@@ -14,7 +14,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_renderer_frontend.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/settings_json.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/test_writer.cpp
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp
     ${PROJECT_SOURCE_DIR}/platform/glfw/example_custom_drawable_style_layer.cpp
 )
 
@@ -114,7 +114,7 @@ target_include_directories(
     mbgl-glfw
     PRIVATE
         ${GLFW_INCLUDE_DIRS}
-        # For /platform/default/src/mbgl/map/map_snapshotter.hpp
+        # For /platform/default/src/mln/map/map_snapshotter.hpp
     PRIVATE ${PROJECT_SOURCE_DIR}/src
 )
 

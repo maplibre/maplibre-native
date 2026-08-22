@@ -2,7 +2,7 @@
 
 #include "source.hpp"
 #include "../../geometry/lat_lng_quad.hpp"
-#include <mbgl/style/sources/image_source.hpp>
+#include <mln/style/sources/image_source.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

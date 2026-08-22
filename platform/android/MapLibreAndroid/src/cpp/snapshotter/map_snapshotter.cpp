@@ -1,10 +1,10 @@
 #include "map_snapshotter.hpp"
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
 
 #include "attach_env.hpp"
 #include "../style/layers/layer_manager.hpp"

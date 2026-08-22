@@ -1,7 +1,7 @@
 #import "MLNMapView+OpenGL.h"
 #import "MLNOpenGLLayer.h"
 
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mln/gl/renderable_resource.hpp>
 
 #import <OpenGL/gl.h>
 

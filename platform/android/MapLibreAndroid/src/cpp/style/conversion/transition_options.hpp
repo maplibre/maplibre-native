@@ -3,7 +3,7 @@
 #include "../../conversion/conversion.hpp"
 #include "../transition_options.hpp"
 
-#include <mbgl/style/transition_options.hpp>
+#include <mln/style/transition_options.hpp>
 
 #include <jni/jni.hpp>
 

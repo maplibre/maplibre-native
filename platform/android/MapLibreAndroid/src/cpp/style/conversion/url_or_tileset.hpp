@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <string>
 

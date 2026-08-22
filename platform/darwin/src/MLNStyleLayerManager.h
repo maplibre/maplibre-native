@@ -2,8 +2,8 @@
 
 #import "MLNStyleLayer_Private.h"
 
-#include <mbgl/layermanager/layer_manager.hpp>
-#include <mbgl/style/layer.hpp>
+#include <mln/layermanager/layer_manager.hpp>
+#include <mln/style/layer.hpp>
 
 #include <map>
 #include <string>

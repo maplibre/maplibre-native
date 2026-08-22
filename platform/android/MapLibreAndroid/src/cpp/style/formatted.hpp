@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <jni/jni.hpp>
-#include <mbgl/style/expression/formatted.hpp>
+#include <mln/style/expression/formatted.hpp>
 
 namespace mln {
 namespace android {

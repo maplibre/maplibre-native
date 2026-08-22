@@ -4,8 +4,8 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/fill_extrusion_layer_factory.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer.hpp>
+#include <mln/layermanager/fill_extrusion_layer_factory.hpp>
+#include <mln/style/layers/fill_extrusion_layer.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

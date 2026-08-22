@@ -1,7 +1,7 @@
 #import <Mapbox.h>
 #import <XCTest/XCTest.h>
 
-#import <mbgl/math/wrap.hpp>
+#import <mln/math/wrap.hpp>
 
 @interface MLNMapView (MLNCompassButtonTests)
 - (void)resetNorthAnimated:(BOOL)animated;

@@ -1,9 +1,9 @@
-#include <mbgl/util/async_task.hpp>
+#include <mln/util/async_task.hpp>
 
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <atomic>
 #include <future>

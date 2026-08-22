@@ -1,9 +1,9 @@
 #if MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gl/headless_backend.hpp>
-#include <mbgl/gl/context.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gl/headless_backend.hpp>
+#include <mln/gl/context.hpp>
 
 #include <memory>
 

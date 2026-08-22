@@ -2,10 +2,10 @@
 
 #include "value.hpp"
 
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/style/conversion/geojson.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/style/conversion/geojson.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 #include <jni/jni.hpp>
 #include <optional>

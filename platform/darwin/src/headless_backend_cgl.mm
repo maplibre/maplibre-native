@@ -1,5 +1,5 @@
-#include <mbgl/gl/headless_backend.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gl/headless_backend.hpp>
+#include <mln/util/logging.hpp>
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/NSString.h>

@@ -1,7 +1,7 @@
 #include <iostream>
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/string.hpp>
+#include <mln/util/string.hpp>
 
 using namespace mln;
 

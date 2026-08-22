@@ -52,43 +52,43 @@ endif()
 target_sources(
     mbgl-core
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/image.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/jpeg_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/logging_stderr.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/string_stdlib.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_backend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_frontend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/collator.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/number_format.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/platform/time.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/asset_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/database_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_manager.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_request.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/http_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_request.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/mbtiles_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/main_resource_loader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_database.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_download.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/bidi.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/image.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/jpeg_reader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/webp_reader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/logging_stderr.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_reader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/string_stdlib.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/windows/src/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/windows/src/thread_local.cpp
 )
@@ -104,7 +104,7 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
     )
 endif()
 
@@ -148,7 +148,7 @@ elseif(MLN_WITH_VULKAN)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
     )
 else()
     find_package(OpenGL REQUIRED)
@@ -200,7 +200,7 @@ if(NOT ${ICU_FOUND} OR "${ICU_VERSION}" VERSION_LESS 62.0 OR MLN_USE_BUILTIN_ICU
     include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
 
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/i18n/number_format.cpp
         PROPERTIES
         COMPILE_DEFINITIONS
         MBGL_USE_BUILTIN_ICU
@@ -277,7 +277,7 @@ endif()
 
 add_executable(
     mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/test/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/test/main.cpp
 )
 
 target_compile_definitions(
@@ -318,7 +318,7 @@ endif()
 
 add_executable(
     mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/benchmark/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark/main.cpp
 )
 
 target_link_libraries(
@@ -338,7 +338,7 @@ endif()
 
 add_executable(
     mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test/main.cpp
 )
 
 target_link_libraries(

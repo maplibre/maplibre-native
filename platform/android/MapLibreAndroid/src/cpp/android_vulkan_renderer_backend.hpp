@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
 #include "android_renderer_backend.hpp"
 #include <android/native_window.h>
 

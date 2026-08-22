@@ -4,7 +4,7 @@
 #import "MLNStyleValue_Private.h"
 #import "MLNValueEvaluator.h"
 
-#include <mbgl/style/conversion/filter.hpp>
+#include <mln/style/conversion/filter.hpp>
 
 @implementation NSPredicate (MLNPrivateAdditions)
 

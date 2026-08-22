@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/util/rapidjson.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/util/rapidjson.hpp>
 
 using namespace mln;
 using namespace mln::style;

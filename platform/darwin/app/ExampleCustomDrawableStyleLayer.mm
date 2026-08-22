@@ -4,11 +4,11 @@
 
 #import <UIKit/UIKit.h>
 
-#include <mbgl/layermanager/layer_factory.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/image+MLNAdditions.hpp>
+#include <mln/layermanager/layer_factory.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/image+MLNAdditions.hpp>
 
 #include <cmath>
 #include <memory>
