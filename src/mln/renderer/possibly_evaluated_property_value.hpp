@@ -71,8 +71,6 @@ public:
                            [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 
-    /// The names of the global-state properties referenced by a retained
-    /// expression, or null if none are referenced.
     const std::set<std::string>* getGlobalStateRefs() const noexcept {
         return value.match(
             [](const T&) -> const std::set<std::string>* { return nullptr; },
@@ -133,8 +131,6 @@ public:
                            [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 
-    /// The names of the global-state properties referenced by a retained
-    /// expression, or null if none are referenced.
     const std::set<std::string>* getGlobalStateRefs() const noexcept {
         return value.match(
             [](const Faded<T>&) -> const std::set<std::string>* { return nullptr; },

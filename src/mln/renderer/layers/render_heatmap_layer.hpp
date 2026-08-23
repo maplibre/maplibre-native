@@ -60,8 +60,6 @@ private:
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
     std::shared_ptr<PremultipliedImage> colorRamp;
-    // The style's global state as of the last evaluation, used to resolve
-    // "global-state" expressions in the color ramp.
     std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
     SegmentVector segments;

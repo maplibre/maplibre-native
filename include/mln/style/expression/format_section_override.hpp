@@ -28,9 +28,8 @@ public:
 
         return defaultValue.match(
             [&context](const style::PropertyExpression<T>& e) {
-                // Fall back to the global state captured by the wrapped
-                // property expression, which would otherwise be bypassed by
-                // evaluating the raw inner expression directly.
+                // Evaluating the raw inner expression would bypass the
+                // captured-global-state fallback of the property expression.
                 if (context.globalState == nullptr && e.getCapturedGlobalState() != nullptr) {
                     EvaluationContext contextWithState = context;
                     contextWithState.globalState = e.getCapturedGlobalState().get();

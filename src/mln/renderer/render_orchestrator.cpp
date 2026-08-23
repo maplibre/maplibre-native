@@ -203,9 +203,6 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero());
 
     const bool globalStateChanged = globalState != updateParameters->globalState;
-    // The keys whose values changed, so that only the layers and properties
-    // referencing those keys are re-evaluated or relayouted. Null when the
-    // previous state is unknown (treat all keys as changed).
     std::shared_ptr<const std::set<std::string>> changedGlobalStateKeys;
     if (globalStateChanged && globalState && updateParameters->globalState) {
         changedGlobalStateKeys = std::make_shared<const std::set<std::string>>(
@@ -690,8 +687,6 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const std::unordered_map<std::string, const RenderLayer*>& layers) const {
     MLN_TRACE_FUNC();
 
-    // Inject the current global state so that "global-state" expressions in
-    // the query filter evaluate against the state that was rendered.
     RenderedQueryOptions options = options_;
     options.globalState = globalState;
 
@@ -770,8 +765,6 @@ std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& 
     const RenderSource* source = getRenderSource(sourceID);
     if (!source) return {};
 
-    // Inject the current global state so that "global-state" expressions in
-    // the query filter evaluate against the current state.
     SourceQueryOptions options = options_;
     options.globalState = globalState;
 
