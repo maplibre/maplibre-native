@@ -16,6 +16,7 @@ using GeoJSONFeature = mapbox::feature::feature<double>;
 using FeatureState = mapbox::base::ValueObject;
 using FeatureStates = std::unordered_map<std::string, FeatureState>;       // <featureID, FeatureState>
 using LayerFeatureStates = std::unordered_map<std::string, FeatureStates>; // <sourceLayer, FeatureStates>
+using GlobalStateMap = mapbox::base::ValueObject;                          // <property name, value>
 
 class Feature : public GeoJSONFeature {
 public:

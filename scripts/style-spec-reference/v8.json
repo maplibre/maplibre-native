@@ -106,6 +106,26 @@
         "intensity": 0.4
       }
     },
+    "state": {
+      "type": "state",
+      "default": {},
+      "doc": "An object used to define default values when using the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.",
+      "example": {
+        "chargerType": {
+          "default": ["CCS", "CHAdeMO", "Type2"]
+        },
+        "minPreferredChargingSpeed": {
+          "default": 50
+        }
+      },
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
+    },
     "sky": {
       "type": "sky",
       "doc": "The map's sky configuration. **Note:** this definition is still experimental and is under development in maplibre-gl-js.",
@@ -927,9 +947,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_fill": {
@@ -974,9 +1005,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_circle": {
@@ -1021,9 +1063,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_heatmap": {
@@ -1046,7 +1099,13 @@
           "ios": "4.0.0"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_fill-extrusion": {
@@ -1083,7 +1142,13 @@
           "ios": "3.6.0"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_line": {
@@ -1242,9 +1307,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_symbol": {
@@ -2697,9 +2773,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_raster": {
@@ -2720,9 +2807,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_hillshade": {
@@ -2745,7 +2843,13 @@
           "ios": "4.0.0"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_color-relief": {
@@ -2765,7 +2869,13 @@
         "basic functionality": {
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "filter": {
@@ -4158,6 +4268,32 @@
             "js": "0.46.0",
             "ios": "https://github.com/maplibre/maplibre-native/issues/1698",
             "android": "https://github.com/maplibre/maplibre-native/issues/1698"
+          }
+        }
+      },
+      "global-state": {
+        "doc": "Retrieves a property value from the map's global state. Returns null if the requested property is not present in the global state. The global state can be set programmatically and defaults can be defined using the root-level `state` style property.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string"
+            }
+          ]
+        },
+        "example": ["global-state", "chargerType"],
+        "group": "Feature data",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.6.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
           }
         }
       },

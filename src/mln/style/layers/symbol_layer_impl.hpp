@@ -129,6 +129,10 @@ public:
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
     void populateFontStack(std::set<FontStack>& fontStack) const final;
 
+    expression::Dependency getLayoutDependencies() const noexcept override {
+        return layout.getDependencies() | Layer::Impl::getLayoutDependencies();
+    }
+
     SymbolLayoutProperties::Unevaluated layout;
     SymbolPaintProperties::Transitionable paint;
 

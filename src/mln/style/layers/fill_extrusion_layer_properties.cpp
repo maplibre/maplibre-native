@@ -35,6 +35,10 @@ expression::Dependency FillExtrusionLayerProperties::getDependencies() const noe
     return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
 }
 
+expression::Dependency FillExtrusionLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
 } // namespace style
 } // namespace mln
 

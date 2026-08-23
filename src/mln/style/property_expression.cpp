@@ -23,7 +23,7 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
       useIntegerZoom_(false),
       isZoomConstant_(!expression->has(Dependency::Zoom)),
       isFeatureConstant_(!expression->has(Dependency::Feature)),
-      isRuntimeConstant_(!expression->has(Dependency::Image)),
+      isRuntimeConstant_(!expression->has(Dependency::Image | Dependency::GlobalState)),
       isGPUCapable_(checkGPUCapable(*expression, zoomCurve)) {
     assert(isZoomConstant_ == expression::isZoomConstant(*expression));
     assert(isFeatureConstant_ == expression::isFeatureConstant(*expression));
@@ -32,6 +32,7 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
 
 PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
     : expression(std::move(other.expression)),
+      capturedGlobalState_(std::move(other.capturedGlobalState_)),
       zoomCurve(std::move(other.zoomCurve)),
       useIntegerZoom_(other.useIntegerZoom_),
       isZoomConstant_(other.isZoomConstant_),
@@ -41,6 +42,7 @@ PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
 
 PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& other)
     : expression(other.expression),
+      capturedGlobalState_(other.capturedGlobalState_),
       zoomCurve(other.zoomCurve),
       useIntegerZoom_(other.useIntegerZoom_),
       isZoomConstant_(other.isZoomConstant_),
@@ -50,6 +52,7 @@ PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& oth
 
 PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase&& other) {
     expression = std::move(other.expression);
+    capturedGlobalState_ = std::move(other.capturedGlobalState_);
     zoomCurve = other.zoomCurve;
     useIntegerZoom_ = other.useIntegerZoom_;
     isZoomConstant_ = other.isZoomConstant_;
@@ -61,6 +64,7 @@ PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase
 
 PropertyExpressionBase& PropertyExpressionBase::operator=(const PropertyExpressionBase& other) {
     expression = other.expression;
+    capturedGlobalState_ = other.capturedGlobalState_;
     zoomCurve = other.zoomCurve;
     useIntegerZoom_ = other.useIntegerZoom_;
     isZoomConstant_ = other.isZoomConstant_;

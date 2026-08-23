@@ -2,6 +2,9 @@
 
 #include <mln/map/zoom_history.hpp>
 #include <mln/util/chrono.hpp>
+#include <mln/util/feature.hpp>
+
+#include <memory>
 
 namespace mln {
 
@@ -43,9 +46,13 @@ public:
     ZoomHistory zoomHistory;
     Duration defaultFadeDuration;
 
+    /// The style's current global state, used to evaluate `global-state` expressions.
+    std::shared_ptr<const GlobalStateMap> globalState;
+
     bool zoomChanged = true;
     bool layerChanged = false;
     bool hasCrossfade = true;
+    bool globalStateChanged = false;
 };
 
 } // namespace mln

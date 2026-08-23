@@ -51,6 +51,23 @@ public:
     /// Collect the style dependencies for this layer
     virtual expression::Dependency getDependencies() const noexcept { return expression::Dependency::None; }
 
+    /// Collect the dependencies of properties that affect tile layout:
+    /// the filter and the layout properties. Derived classes with layout
+    /// properties combine those with the filter dependencies from this base
+    /// implementation.
+    virtual expression::Dependency getLayoutDependencies() const noexcept { return getFilterDependencies(); }
+
+    expression::Dependency getFilterDependencies() const noexcept {
+        return (filter.expression && *filter.expression) ? (**filter.expression).dependencies
+                                                         : expression::Dependency::None;
+    }
+
+    // Optional expression backing the "visibility" layout value. Per the
+    // style specification, such expressions may only depend on the global
+    // state; the evaluated result is kept in `visibility` and re-evaluated
+    // by the style whenever the global state changes.
+    std::shared_ptr<const expression::Expression> visibilityExpression;
+
     std::string id;
     std::string source;
     std::string sourceLayer;

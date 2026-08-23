@@ -23,6 +23,11 @@ public:
 
     virtual expression::Dependency getDependencies() const noexcept = 0;
 
+    /// Returns the combined dependencies of the expressions retained in the
+    /// evaluated properties (i.e. those that still require per-feature
+    /// evaluation, such as data-driven paint properties).
+    virtual expression::Dependency getEvaluatedDependencies() const noexcept { return expression::Dependency::None; }
+
 protected:
     LayerProperties(Immutable<Layer::Impl> impl) noexcept
         : baseImpl(std::move(impl)) {}

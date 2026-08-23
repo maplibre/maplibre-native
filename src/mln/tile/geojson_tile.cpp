@@ -47,8 +47,10 @@ void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const Source
                 auto feature = layer->getFeature(i);
 
                 // Apply filter, if any
-                if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
-                                          static_cast<float>(this->id.overscaledZ), feature.get()})) {
+                if (options.filter &&
+                    !(*options.filter)(
+                        style::expression::EvaluationContext{static_cast<float>(this->id.overscaledZ), feature.get()}
+                            .withGlobalState(options.globalState.get()))) {
                     continue;
                 }
 

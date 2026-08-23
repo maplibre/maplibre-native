@@ -85,6 +85,11 @@ public:
         return *this;
     };
 
+    EvaluationContext& withGlobalState(const GlobalStateMap* globalState_) noexcept {
+        globalState = globalState_;
+        return *this;
+    };
+
     std::optional<float> zoom;
     std::optional<mln::Value> accumulated;
     GeometryTileFeature const* feature = nullptr;
@@ -95,6 +100,7 @@ public:
     const FeatureState* featureState = nullptr;
     const std::set<std::string>* availableImages = nullptr;
     const mln::CanonicalTileID* canonical = nullptr;
+    const GlobalStateMap* globalState = nullptr;
 };
 
 template <typename T>
@@ -219,9 +225,10 @@ enum class Dependency : uint32_t {
     Location = 1 << 3,  // Not used yet, "distance-from-center" not supported
     Bind = 1 << 4,      // Create variable binding ("let")
     Var = 1 << 5,       // Use variable binding
-    Override = 1 << 6,  // Property override
-    Elevation = 1 << 7, // Elevation from DEM
-    MaskCount = 8,
+    Override = 1 << 6,    // Property override
+    Elevation = 1 << 7,   // Elevation from DEM
+    GlobalState = 1 << 8, // Global state ("global-state")
+    MaskCount = 9,
     All = (1 << MaskCount) - 1,
 };
 
