@@ -37,6 +37,10 @@ expression::Dependency HillshadeLayerProperties::getEvaluatedDependencies() cons
     return evaluated.getDependencies();
 }
 
+void HillshadeLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

@@ -48,6 +48,10 @@ expression::Dependency <%- camelize(type) %>LayerProperties::getEvaluatedDepende
     return evaluated.getDependencies();
 }
 
+void <%- camelize(type) %>LayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

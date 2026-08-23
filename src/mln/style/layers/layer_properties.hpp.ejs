@@ -80,6 +80,8 @@ public:
 
     expression::Dependency getEvaluatedDependencies() const noexcept override;
 
+    void collectEvaluatedGlobalStateRefs(std::set<std::string>&) const override;
+
     const <%- camelize(type) %>Layer::Impl& layerImpl() const noexcept;
     // Data members.
 <% if (type === 'background' || type === 'fill' || type === 'line' || type === 'fill-extrusion') { -%>

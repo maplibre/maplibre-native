@@ -39,6 +39,10 @@ expression::Dependency FillLayerProperties::getEvaluatedDependencies() const noe
     return evaluated.getDependencies();
 }
 
+void FillLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

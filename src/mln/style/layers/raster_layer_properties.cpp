@@ -37,6 +37,10 @@ expression::Dependency RasterLayerProperties::getEvaluatedDependencies() const n
     return evaluated.getDependencies();
 }
 
+void RasterLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

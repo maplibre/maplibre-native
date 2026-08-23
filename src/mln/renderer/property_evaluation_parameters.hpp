@@ -5,6 +5,8 @@
 #include <mln/util/feature.hpp>
 
 #include <memory>
+#include <set>
+#include <string>
 
 namespace mln {
 
@@ -48,6 +50,11 @@ public:
 
     /// The style's current global state, used to evaluate `global-state` expressions.
     std::shared_ptr<const GlobalStateMap> globalState;
+
+    /// The names of the global-state properties that changed since the last
+    /// evaluation. Only meaningful when `globalStateChanged` is set; null
+    /// means the changed keys are unknown (treat all as changed).
+    std::shared_ptr<const std::set<std::string>> changedGlobalStateKeys;
 
     bool zoomChanged = true;
     bool layerChanged = false;

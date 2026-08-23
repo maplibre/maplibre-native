@@ -37,6 +37,10 @@ expression::Dependency SymbolLayerProperties::getEvaluatedDependencies() const n
     return evaluated.getDependencies();
 }
 
+void SymbolLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

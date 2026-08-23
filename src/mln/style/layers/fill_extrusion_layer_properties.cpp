@@ -39,6 +39,10 @@ expression::Dependency FillExtrusionLayerProperties::getEvaluatedDependencies() 
     return evaluated.getDependencies();
 }
 
+void FillExtrusionLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

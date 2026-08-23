@@ -62,6 +62,25 @@ RendererObserver& nullObserver() {
     return observer;
 }
 
+// The keys whose values differ between two global state snapshots. Values of
+// unchanged keys are copied verbatim between snapshots, so exact equality is
+// sufficient here.
+std::set<std::string> diffGlobalStateKeys(const GlobalStateMap& previous, const GlobalStateMap& current) {
+    std::set<std::string> keys;
+    for (const auto& entry : current) {
+        const auto it = previous.find(entry.first);
+        if (it == previous.end() || !(it->second == entry.second)) {
+            keys.insert(entry.first);
+        }
+    }
+    for (const auto& entry : previous) {
+        if (current.find(entry.first) == current.end()) {
+            keys.insert(entry.first);
+        }
+    }
+    return keys;
+}
+
 class RenderTreeImpl final : public RenderTree {
 public:
     RenderTreeImpl(std::unique_ptr<RenderTreeParameters> parameters_,
@@ -184,12 +203,21 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero());
 
     const bool globalStateChanged = globalState != updateParameters->globalState;
+    // The keys whose values changed, so that only the layers and properties
+    // referencing those keys are re-evaluated or relayouted. Null when the
+    // previous state is unknown (treat all keys as changed).
+    std::shared_ptr<const std::set<std::string>> changedGlobalStateKeys;
+    if (globalStateChanged && globalState && updateParameters->globalState) {
+        changedGlobalStateKeys = std::make_shared<const std::set<std::string>>(
+            diffGlobalStateKeys(*globalState, *updateParameters->globalState));
+    }
     globalState = updateParameters->globalState;
 
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
     evaluationParameters.globalState = globalState;
     evaluationParameters.globalStateChanged = globalStateChanged;
+    evaluationParameters.changedGlobalStateKeys = changedGlobalStateKeys;
 
     TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
                                   .debugOptions = updateParameters->debugOptions,
@@ -395,14 +423,25 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
                     // A global state change requires a relayout of this
-                    // layer's source if the state is referenced by anything
-                    // that is baked into the tile's buckets: the filter,
-                    // layout properties, or data-driven paint properties
-                    // (i.e. expressions retained in the evaluated properties).
-                    const bool globalStateRequiresRelayout =
-                        globalStateChanged && ((layer.baseImpl->getLayoutDependencies() |
-                                                layer.evaluatedProperties->getEvaluatedDependencies()) &
-                                               expression::Dependency::GlobalState);
+                    // layer's source if one of the changed state properties
+                    // is referenced by anything that is baked into the tile's
+                    // buckets: the filter, layout properties, or data-driven
+                    // paint properties (i.e. expressions retained in the
+                    // evaluated properties).
+                    const bool globalStateRequiresRelayout = [&] {
+                        if (!globalStateChanged || !((layer.baseImpl->getLayoutDependencies() |
+                                                      layer.evaluatedProperties->getEvaluatedDependencies()) &
+                                                     expression::Dependency::GlobalState)) {
+                            return false;
+                        }
+                        if (!changedGlobalStateKeys) {
+                            return true;
+                        }
+                        std::set<std::string> refs;
+                        layer.baseImpl->collectLayoutGlobalStateRefs(refs);
+                        layer.evaluatedProperties->collectEvaluatedGlobalStateRefs(refs);
+                        return expression::globalStateRefsIntersect(&refs, changedGlobalStateKeys.get());
+                    }();
                     sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
                                            constantsMaskChanged.contains(layerId) ||
                                            hasLayoutDifference(layerDiff, layerId) || globalStateRequiresRelayout);

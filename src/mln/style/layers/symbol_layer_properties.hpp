@@ -367,6 +367,8 @@ public:
 
     expression::Dependency getEvaluatedDependencies() const noexcept override;
 
+    void collectEvaluatedGlobalStateRefs(std::set<std::string>&) const override;
+
     const SymbolLayer::Impl& layerImpl() const noexcept;
     // Data members.
     SymbolPaintProperties::PossiblyEvaluated evaluated;
