@@ -16,7 +16,7 @@
 
 #import <objc/runtime.h>
 
-#import <mbgl/style/expression/expression.hpp>
+#import <mln/style/expression/expression.hpp>
 
 const MLNExpressionInterpolationMode MLNExpressionInterpolationModeLinear = @"linear";
 const MLNExpressionInterpolationMode MLNExpressionInterpolationModeExponential = @"exponential";
@@ -271,10 +271,10 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
 @implementation NSExpression (MLNPrivateAdditions)
 
-- (std::vector<mbgl::Value>)mgl_aggregateMBGLValue {
+- (std::vector<mln::Value>)mgl_aggregateMBGLValue {
   if ([self.constantValue isKindOfClass:[NSArray class]] ||
       [self.constantValue isKindOfClass:[NSSet class]]) {
-    std::vector<mbgl::Value> convertedValues;
+    std::vector<mln::Value> convertedValues;
     for (id value in self.constantValue) {
       NSExpression *expression = value;
       if (![expression isKindOfClass:[NSExpression class]]) {
@@ -289,7 +289,7 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return {};
 }
 
-- (mbgl::Value)mgl_constantMBGLValue {
+- (mln::Value)mgl_constantMBGLValue {
   id value = self.constantValue;
   if ([value isKindOfClass:NSString.class]) {
     return {std::string([(NSString *)value UTF8String])};
@@ -319,11 +319,11 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
       return {(double)number.doubleValue};
     } else if ([number compare:@(0)] == NSOrderedDescending ||
                [number compare:@(0)] == NSOrderedSame) {
-      // Positive integer or zero; use uint64_t per mbgl::Value definition.
+      // Positive integer or zero; use uint64_t per mln::Value definition.
       // We use unsigned long long here to avoid any truncation.
       return {(uint64_t)number.unsignedLongLongValue};
     } else if ([number compare:@(0)] == NSOrderedAscending) {
-      // Negative integer; use int64_t per mbgl::Value definition.
+      // Negative integer; use int64_t per mln::Value definition.
       // We use long long here to avoid any truncation.
       return {(int64_t)number.longLongValue};
     }
@@ -332,15 +332,15 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
     return {hexString};
   } else if (value && value != [NSNull null]) {
     [NSException raise:NSInvalidArgumentException
-                format:@"Can’t convert %s:%@ to mbgl::Value", [value objCType], value];
+                format:@"Can’t convert %s:%@ to mln::Value", [value objCType], value];
   }
   return {};
 }
 
-- (std::vector<mbgl::FeatureType>)mgl_aggregateFeatureType {
+- (std::vector<mln::FeatureType>)mgl_aggregateFeatureType {
   if ([self.constantValue isKindOfClass:[NSArray class]] ||
       [self.constantValue isKindOfClass:[NSSet class]]) {
-    std::vector<mbgl::FeatureType> convertedValues;
+    std::vector<mln::FeatureType> convertedValues;
     for (id value in self.constantValue) {
       NSExpression *expression = value;
       if (![expression isKindOfClass:[NSExpression class]]) {
@@ -355,37 +355,37 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return {};
 }
 
-- (mbgl::FeatureType)mgl_featureType {
+- (mln::FeatureType)mgl_featureType {
   id value = self.constantValue;
   if ([value isKindOfClass:NSString.class]) {
     if ([value isEqualToString:@"Point"]) {
-      return mbgl::FeatureType::Point;
+      return mln::FeatureType::Point;
     }
     if ([value isEqualToString:@"LineString"]) {
-      return mbgl::FeatureType::LineString;
+      return mln::FeatureType::LineString;
     }
     if ([value isEqualToString:@"Polygon"]) {
-      return mbgl::FeatureType::Polygon;
+      return mln::FeatureType::Polygon;
     }
   } else if ([value isKindOfClass:NSNumber.class]) {
     switch ([value integerValue]) {
       case 1:
-        return mbgl::FeatureType::Point;
+        return mln::FeatureType::Point;
       case 2:
-        return mbgl::FeatureType::LineString;
+        return mln::FeatureType::LineString;
       case 3:
-        return mbgl::FeatureType::Polygon;
+        return mln::FeatureType::Polygon;
       default:
         break;
     }
   }
-  return mbgl::FeatureType::Unknown;
+  return mln::FeatureType::Unknown;
 }
 
-- (std::vector<mbgl::FeatureIdentifier>)mgl_aggregateFeatureIdentifier {
+- (std::vector<mln::FeatureIdentifier>)mgl_aggregateFeatureIdentifier {
   if ([self.constantValue isKindOfClass:[NSArray class]] ||
       [self.constantValue isKindOfClass:[NSSet class]]) {
-    std::vector<mbgl::FeatureIdentifier> convertedValues;
+    std::vector<mln::FeatureIdentifier> convertedValues;
     for (id value in self.constantValue) {
       NSExpression *expression = value;
       if (![expression isKindOfClass:[NSExpression class]]) {
@@ -400,8 +400,8 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return {};
 }
 
-- (mbgl::FeatureIdentifier)mgl_featureIdentifier {
-  mbgl::Value mbglValue = self.mgl_constantMBGLValue;
+- (mln::FeatureIdentifier)mgl_featureIdentifier {
+  mln::Value mbglValue = self.mgl_constantMBGLValue;
 
   if (mbglValue.is<std::string>()) {
     return mbglValue.get<std::string>();

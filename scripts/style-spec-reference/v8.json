@@ -1050,6 +1050,20 @@
     }
   },
   "layout_fill-extrusion": {
+    "fill-extrusion-rounded-corner-distance": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "units": "meters",
+      "doc": "The distance from the corner that will be cut and replaced with rounded corner.",
+      "sdk-support": {
+        "basic functionality": {
+          "android": "13.0.0",
+          "ios": "6.0.0"
+        }
+      },
+      "property-type": "constant"
+    },
     "visibility": {
       "type": "enum",
       "values": {

@@ -2,6 +2,25 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.28.0
+
+- core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
+- fix(core): Update image descriptor sets when removing textures ([#4351](https://github.com/maplibre/maplibre-native/pull/4351)).
+- Fix surface snapshot timing ([#4339](https://github.com/maplibre/maplibre-native/pull/4339)).
+- Reduce Android runtime symbol resolution ([#4356](https://github.com/maplibre/maplibre-native/pull/4356)).
+- feat(core): render local CJK glyphs at 2x texture resolution ([#4304](https://github.com/maplibre/maplibre-native/pull/4304)).
+- Convert a PMTiles metadata decompression failure into an error response instead of an uncaught exception ([#4399](https://github.com/maplibre/maplibre-native/pull/4399)).
+- fix(core): notify layer observer when source-layer or source-id changes ([#4372](https://github.com/maplibre/maplibre-native/pull/4372)).
+- Fix MLNNetworkConfiguration not forwarding 'didReceiveResponse' to its delegate. ([#4393](https://github.com/maplibre/maplibre-native/pull/4393)).
+- core: add nearClippedProjectionMatrix to MLNCustomStyleLayer ([#4364](https://github.com/maplibre/maplibre-native/pull/4364)).
+- Fix blurry map view in landscape on iPad (due to an orientation-varying scale factor) ([#4373](https://github.com/maplibre/maplibre-native/pull/4373)).
+- Clamp pan offset to the horizon on pitched maps ([#3105](https://github.com/maplibre/maplibre-native/pull/3105)) (#4362).
+- core: do not use JSON serialization for layer grouping key ([#4075](https://github.com/maplibre/maplibre-native/pull/4075)).
+- core: Tolerate stencil clipping setup failures ([#4317](https://github.com/maplibre/maplibre-native/pull/4317)).
+- Enable FastPFOR encodings in MLT ([#4146](https://github.com/maplibre/maplibre-native/pull/4146)).
+- Add fill extrusion style property that enables rounded corners for extruded buildings (Core feature) ([#4343](https://github.com/maplibre/maplibre-native/pull/4343)).
+- core: check if edge length is zero for rounded corners  ([#4424](https://github.com/maplibre/maplibre-native/pull/4424)).
+
 ## 6.27.0
 
 - Implement ambient cache for PMTiles sources ([#4290](https://github.com/maplibre/maplibre-native/pull/4290)).
@@ -264,7 +283,7 @@ Note: this release has some changes to how icon offsets behave on pitched maps. 
   Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)).
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
-- Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Cleanup mln/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
 - Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
 - Ensure that all depth values are rendered before any color values ([#2811](https://github.com/maplibre/maplibre-native/pull/2811)).
 - Move UBO updates from render layers to tweakers ([#2703](https://github.com/maplibre/maplibre-native/pull/2703)).

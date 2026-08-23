@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/gfx/rendering_stats.hpp>
+#include <mln/gfx/rendering_stats.hpp>
 
 #include <string>
 #include <jni.h>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class RenderingStats {
@@ -19,4 +19,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

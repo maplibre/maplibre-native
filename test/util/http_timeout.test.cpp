@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/http_timeout.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/http_timeout.hpp>
 
-using namespace mbgl;
-using namespace mbgl::http;
+using namespace mln;
+using namespace mln::http;
 
 TEST(HttpRetry, OtherError) {
     // Non-retryable

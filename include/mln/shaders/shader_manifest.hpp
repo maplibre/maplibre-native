@@ -1,0 +1,41 @@
+// Generated code, do not modify this file!
+#pragma once
+#include <mln/shaders/shader_source.hpp>
+
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mln/shaders/gl/prelude.hpp>
+#include <mln/shaders/gl/clipping_mask.hpp>
+#include <mln/shaders/gl/background.hpp>
+#include <mln/shaders/gl/background_pattern.hpp>
+#include <mln/shaders/gl/circle.hpp>
+#include <mln/shaders/gl/collision_box.hpp>
+#include <mln/shaders/gl/collision_circle.hpp>
+#include <mln/shaders/gl/custom_geometry.hpp>
+#include <mln/shaders/gl/custom_symbol_icon.hpp>
+#include <mln/shaders/gl/debug.hpp>
+#include <mln/shaders/gl/fill.hpp>
+#include <mln/shaders/gl/fill_outline.hpp>
+#include <mln/shaders/gl/fill_pattern.hpp>
+#include <mln/shaders/gl/fill_outline_pattern.hpp>
+#include <mln/shaders/gl/fill_outline_triangulated.hpp>
+#include <mln/shaders/gl/fill_extrusion.hpp>
+#include <mln/shaders/gl/fill_extrusion_instanced.hpp>
+#include <mln/shaders/gl/fill_extrusion_pattern.hpp>
+#include <mln/shaders/gl/fill_extrusion_pattern_instanced.hpp>
+#include <mln/shaders/gl/heatmap.hpp>
+#include <mln/shaders/gl/heatmap_texture.hpp>
+#include <mln/shaders/gl/hillshade_prepare.hpp>
+#include <mln/shaders/gl/color_relief.hpp>
+#include <mln/shaders/gl/hillshade.hpp>
+#include <mln/shaders/gl/line.hpp>
+#include <mln/shaders/gl/line_gradient.hpp>
+#include <mln/shaders/gl/line_pattern.hpp>
+#include <mln/shaders/gl/location_indicator.hpp>
+#include <mln/shaders/gl/location_indicator_textured.hpp>
+#include <mln/shaders/gl/line_sdf.hpp>
+#include <mln/shaders/gl/raster.hpp>
+#include <mln/shaders/gl/symbol_icon.hpp>
+#include <mln/shaders/gl/symbol_sdf.hpp>
+#include <mln/shaders/gl/symbol_text_and_icon.hpp>
+#include <mln/shaders/gl/wide_vector.hpp>
+#endif

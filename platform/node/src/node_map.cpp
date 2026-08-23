@@ -3,51 +3,51 @@
 #include "node_feature.hpp"
 #include "node_conversion.hpp"
 
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/style/conversion/source.hpp>
-#include <mbgl/style/conversion/layer.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion/light.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/style/conversion/source.hpp>
+#include <mln/style/conversion/layer.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/light.hpp>
 
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer.hpp>
-#include <mbgl/style/layers/heatmap_layer.hpp>
-#include <mbgl/style/layers/hillshade_layer.hpp>
-#include <mbgl/style/layers/color_relief_layer.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/raster_layer.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/layers/fill_extrusion_layer.hpp>
+#include <mln/style/layers/heatmap_layer.hpp>
+#include <mln/style/layers/hillshade_layer.hpp>
+#include <mln/style/layers/color_relief_layer.hpp>
+#include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/raster_layer.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_observer.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/exception.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_observer.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/exception.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/premultiply.hpp>
 
 namespace node_mbgl {
 
 struct NodeMap::RenderOptions {
     double zoom = 0;
     double bearing = 0;
-    mbgl::style::Light light;
+    mln::style::Light light;
     double pitch = 0;
     double latitude = 0;
     double longitude = 0;
-    mbgl::Size size = {512, 512};
+    mln::Size size = {512, 512};
     bool axonometric = false;
     double xSkew = 0;
     double ySkew = 1;
     std::vector<std::string> classes;
-    mbgl::MapDebugOptions debugOptions = mbgl::MapDebugOptions::NoDebug;
+    mln::MapDebugOptions debugOptions = mln::MapDebugOptions::NoDebug;
 };
 
 Nan::Persistent<v8::Function> NodeMap::constructor;
@@ -57,9 +57,9 @@ static const char* releasedMessage() {
     return "Map resources have already been released";
 }
 
-void NodeMapObserver::onDidFailLoadingMap(mbgl::MapLoadError error, const std::string& description) {
+void NodeMapObserver::onDidFailLoadingMap(mln::MapLoadError error, const std::string& description) {
     switch (error) {
-        case mbgl::MapLoadError::StyleParseError:
+        case mln::MapLoadError::StyleParseError:
             Nan::ThrowError(NodeMap::ParseError(description.c_str()));
             break;
         default:
@@ -207,9 +207,9 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     if (Nan::Has(options, Nan::New("request").ToLocalChecked()).FromJust() &&
         Nan::Get(options, Nan::New("request").ToLocalChecked()).ToLocalChecked()->IsFunction()) {
-        mbgl::FileSourceManager::get()->registerFileSourceFactory(
-            mbgl::FileSourceType::ResourceLoader,
-            [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
+        mln::FileSourceManager::get()->registerFileSourceFactory(
+            mln::FileSourceType::ResourceLoader,
+            [](const mln::ResourceOptions& resourceOptions, const mln::ClientOptions&) {
                 return std::make_unique<node_mbgl::NodeFileSource>(
                     reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
             });
@@ -269,7 +269,7 @@ void NodeMap::Load(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     try {
         nodeMap->map->getStyle().loadJSON(style);
-    } catch (const mbgl::util::StyleParseException& ex) {
+    } catch (const mln::util::StyleParseException& ex) {
         return Nan::ThrowError(ParseError(ex.what()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
@@ -333,8 +333,8 @@ NodeMap::RenderOptions NodeMap::ParseOptions(v8::Local<v8::Object> obj) {
 
     if (Nan::Has(obj, Nan::New("light").ToLocalChecked()).FromJust()) {
         auto lightObj = Nan::Get(obj, Nan::New("light").ToLocalChecked()).ToLocalChecked();
-        mbgl::style::conversion::Error conversionError;
-        if (auto light = mbgl::style::conversion::convert<mbgl::style::Light>(lightObj, conversionError)) {
+        mln::style::conversion::Error conversionError;
+        if (auto light = mln::style::conversion::convert<mln::style::Light>(lightObj, conversionError)) {
             options.light = *light;
         } else {
             throw std::move(conversionError);
@@ -399,27 +399,27 @@ NodeMap::RenderOptions NodeMap::ParseOptions(v8::Local<v8::Object> obj) {
             Nan::To<v8::Object>(Nan::Get(obj, Nan::New("debug").ToLocalChecked()).ToLocalChecked()).ToLocalChecked();
         if (Nan::Has(debug, Nan::New("tileBorders").ToLocalChecked()).FromJust()) {
             if (Nan::To<bool>(Nan::Get(debug, Nan::New("tileBorders").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-                options.debugOptions = options.debugOptions | mbgl::MapDebugOptions::TileBorders;
+                options.debugOptions = options.debugOptions | mln::MapDebugOptions::TileBorders;
             }
         }
         if (Nan::Has(debug, Nan::New("parseStatus").ToLocalChecked()).FromJust()) {
             if (Nan::To<bool>(Nan::Get(debug, Nan::New("parseStatus").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-                options.debugOptions = options.debugOptions | mbgl::MapDebugOptions::ParseStatus;
+                options.debugOptions = options.debugOptions | mln::MapDebugOptions::ParseStatus;
             }
         }
         if (Nan::Has(debug, Nan::New("timestamps").ToLocalChecked()).FromJust()) {
             if (Nan::To<bool>(Nan::Get(debug, Nan::New("timestamps").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-                options.debugOptions = options.debugOptions | mbgl::MapDebugOptions::Timestamps;
+                options.debugOptions = options.debugOptions | mln::MapDebugOptions::Timestamps;
             }
         }
         if (Nan::Has(debug, Nan::New("collision").ToLocalChecked()).FromJust()) {
             if (Nan::To<bool>(Nan::Get(debug, Nan::New("collision").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-                options.debugOptions = options.debugOptions | mbgl::MapDebugOptions::Collision;
+                options.debugOptions = options.debugOptions | mln::MapDebugOptions::Collision;
             }
         }
         if (Nan::Has(debug, Nan::New("overdraw").ToLocalChecked()).FromJust()) {
             if (Nan::To<bool>(Nan::Get(debug, Nan::New("overdraw").ToLocalChecked()).ToLocalChecked()).ToChecked()) {
-                options.debugOptions = mbgl::MapDebugOptions::Overdraw;
+                options.debugOptions = mln::MapDebugOptions::Overdraw;
             }
         }
     }
@@ -489,11 +489,11 @@ void NodeMap::Render(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
             nodeMap->startRender(options);
         }
-    } catch (const mbgl::style::conversion::Error& err) {
+    } catch (const mln::style::conversion::Error& err) {
         return Nan::ThrowTypeError(err.message.c_str());
-    } catch (const mbgl::util::StyleParseException& ex) {
+    } catch (const mln::util::StyleParseException& ex) {
         return Nan::ThrowError(ParseError(ex.what()));
-    } catch (const mbgl::util::Exception& ex) {
+    } catch (const mln::util::Exception& ex) {
         return Nan::ThrowError(ex.what());
     }
 
@@ -525,14 +525,14 @@ void NodeMap::startRender(const NodeMap::RenderOptions& options) {
     frontend->setSize(options.size);
     map->setSize(options.size);
 
-    mbgl::CameraOptions camera;
-    camera.center = mbgl::LatLng{options.latitude, options.longitude};
+    mln::CameraOptions camera;
+    camera.center = mln::LatLng{options.latitude, options.longitude};
     camera.zoom = options.zoom;
     camera.bearing = options.bearing;
     camera.pitch = options.pitch;
 
     auto projectionOptions =
-        mbgl::ProjectionMode().withAxonometric(options.axonometric).withXSkew(options.xSkew).withYSkew(options.ySkew);
+        mln::ProjectionMode().withAxonometric(options.axonometric).withXSkew(options.xSkew).withYSkew(options.ySkew);
 
     map->setProjectionMode(projectionOptions);
 
@@ -587,7 +587,7 @@ void NodeMap::renderFinished() {
         try {
             std::rethrow_exception(error);
             assert(false);
-        } catch (const mbgl::util::StyleParseException& ex) {
+        } catch (const mln::util::StyleParseException& ex) {
             err = ParseError(ex.what());
         } catch (const std::exception& ex) {
             err = Nan::Error(ex.what());
@@ -643,7 +643,7 @@ void NodeMap::Release(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::release() {
-    if (!map) throw mbgl::util::Exception(releasedMessage());
+    if (!map) throw mln::util::Exception(releasedMessage());
 
     uv_close(reinterpret_cast<uv_handle_t*>(async), [](uv_handle_t* h) { delete reinterpret_cast<uv_async_t*>(h); });
 
@@ -686,16 +686,16 @@ void NodeMap::cancel() {
     uv_async_init(
         uv_default_loop(), async, [](uv_async_t* h) { reinterpret_cast<NodeMap*>(h->data)->renderFinished(); });
 
-    frontend = std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size{512, 512}, pixelRatio);
-    map = std::make_unique<mbgl::Map>(*frontend,
-                                      mapObserver,
-                                      mbgl::MapOptions()
-                                          .withSize(frontend->getSize())
-                                          .withPixelRatio(pixelRatio)
-                                          .withMapMode(mode)
-                                          .withCrossSourceCollisions(crossSourceCollisions),
-                                      mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
-                                      mbgl::ClientOptions());
+    frontend = std::make_unique<mln::HeadlessFrontend>(mln::Size{512, 512}, pixelRatio);
+    map = std::make_unique<mln::Map>(*frontend,
+                                     mapObserver,
+                                     mln::MapOptions()
+                                         .withSize(frontend->getSize())
+                                         .withPixelRatio(pixelRatio)
+                                         .withMapMode(mode)
+                                         .withCrossSourceCollisions(crossSourceCollisions),
+                                     mln::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
+                                     mln::ClientOptions());
 
     // FIXME: Reload the style after recreating the map. We need to find
     // a better way of canceling an ongoing rendering on the core level
@@ -707,8 +707,8 @@ void NodeMap::cancel() {
 }
 
 void NodeMap::AddSource(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -737,8 +737,8 @@ void NodeMap::AddSource(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::RemoveSource(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -755,8 +755,8 @@ void NodeMap::RemoveSource(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::AddLayer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -776,8 +776,8 @@ void NodeMap::AddLayer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::RemoveLayer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -794,8 +794,8 @@ void NodeMap::RemoveLayer(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::AddImage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     v8::Local<v8::Context> context = info.GetIsolate()->GetCurrentContext();
 
@@ -861,15 +861,15 @@ void NodeMap::AddImage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     std::unique_ptr<uint8_t[]> data = std::make_unique<uint8_t[]>(imageLength);
     std::copy(imageDataBuffer, imageDataBuffer + imageLength, data.get());
 
-    mbgl::UnassociatedImage cImage({imageWidth, imageHeight}, std::move(data));
-    mbgl::PremultipliedImage cPremultipliedImage = mbgl::util::premultiply(std::move(cImage));
-    nodeMap->map->getStyle().addImage(std::make_unique<mbgl::style::Image>(
+    mln::UnassociatedImage cImage({imageWidth, imageHeight}, std::move(data));
+    mln::PremultipliedImage cPremultipliedImage = mln::util::premultiply(std::move(cImage));
+    nodeMap->map->getStyle().addImage(std::make_unique<mln::style::Image>(
         *Nan::Utf8String(info[0]), std::move(cPremultipliedImage), pixelRatio, sdf));
 }
 
 void NodeMap::RemoveImage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -886,7 +886,7 @@ void NodeMap::RemoveImage(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::SetLayerZoomRange(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
+    using namespace mln::style;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -903,7 +903,7 @@ void NodeMap::SetLayerZoomRange(const Nan::FunctionCallbackInfo<v8::Value>& info
         return Nan::ThrowTypeError("Second and third arguments must be numbers");
     }
 
-    mbgl::style::Layer* layer = nodeMap->map->getStyle().getLayer(*Nan::Utf8String(info[0]));
+    mln::style::Layer* layer = nodeMap->map->getStyle().getLayer(*Nan::Utf8String(info[0]));
     if (!layer) {
         return Nan::ThrowTypeError("layer not found");
     }
@@ -913,8 +913,8 @@ void NodeMap::SetLayerZoomRange(const Nan::FunctionCallbackInfo<v8::Value>& info
 }
 
 void NodeMap::SetLayerProperty(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -927,7 +927,7 @@ void NodeMap::SetLayerProperty(const Nan::FunctionCallbackInfo<v8::Value>& info)
         return Nan::ThrowTypeError("First argument must be a string");
     }
 
-    mbgl::style::Layer* layer = nodeMap->map->getStyle().getLayer(*Nan::Utf8String(info[0]));
+    mln::style::Layer* layer = nodeMap->map->getStyle().getLayer(*Nan::Utf8String(info[0]));
     if (!layer) {
         return Nan::ThrowTypeError("layer not found");
     }
@@ -945,8 +945,8 @@ void NodeMap::SetLayerProperty(const Nan::FunctionCallbackInfo<v8::Value>& info)
 }
 
 void NodeMap::SetFilter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -959,7 +959,7 @@ void NodeMap::SetFilter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         return Nan::ThrowTypeError("First argument must be a string");
     }
 
-    mbgl::style::Layer* layer = nodeMap->map->getStyle().getLayer(*Nan::Utf8String(info[0]));
+    mln::style::Layer* layer = nodeMap->map->getStyle().getLayer(*Nan::Utf8String(info[0]));
     if (!layer) {
         return Nan::ThrowTypeError("layer not found");
     }
@@ -1026,7 +1026,7 @@ void NodeMap::SetCenter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->jumpTo(mbgl::CameraOptions().withCenter(mbgl::LatLng{latitude, longitude}));
+        nodeMap->map->jumpTo(mln::CameraOptions().withCenter(mln::LatLng{latitude, longitude}));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1043,7 +1043,7 @@ void NodeMap::SetZoom(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->jumpTo(mbgl::CameraOptions().withZoom(Nan::To<double>(info[0]).ToChecked()));
+        nodeMap->map->jumpTo(mln::CameraOptions().withZoom(Nan::To<double>(info[0]).ToChecked()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1060,7 +1060,7 @@ void NodeMap::SetBearing(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->jumpTo(mbgl::CameraOptions().withBearing(Nan::To<double>(info[0]).ToChecked()));
+        nodeMap->map->jumpTo(mln::CameraOptions().withBearing(Nan::To<double>(info[0]).ToChecked()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1077,7 +1077,7 @@ void NodeMap::SetPitch(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->jumpTo(mbgl::CameraOptions().withPitch(Nan::To<double>(info[0]).ToChecked()));
+        nodeMap->map->jumpTo(mln::CameraOptions().withPitch(Nan::To<double>(info[0]).ToChecked()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1086,8 +1086,8 @@ void NodeMap::SetPitch(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::SetLight(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -1098,7 +1098,7 @@ void NodeMap::SetLight(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     try {
         Error conversionError;
-        if (auto light = convert<mbgl::style::Light>(info[0], conversionError)) {
+        if (auto light = convert<mln::style::Light>(info[0], conversionError)) {
             nodeMap->map->getStyle().setLight(std::make_unique<Light>(*light));
         } else {
             return Nan::ThrowTypeError(conversionError.message.c_str());
@@ -1119,7 +1119,7 @@ void NodeMap::SetAxonometric(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->setProjectionMode(mbgl::ProjectionMode().withAxonometric(Nan::To<bool>(info[0]).ToChecked()));
+        nodeMap->map->setProjectionMode(mln::ProjectionMode().withAxonometric(Nan::To<bool>(info[0]).ToChecked()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1136,7 +1136,7 @@ void NodeMap::SetXSkew(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->setProjectionMode(mbgl::ProjectionMode().withXSkew(Nan::To<double>(info[0]).ToChecked()));
+        nodeMap->map->setProjectionMode(mln::ProjectionMode().withXSkew(Nan::To<double>(info[0]).ToChecked()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1153,7 +1153,7 @@ void NodeMap::SetYSkew(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
 
     try {
-        nodeMap->map->setProjectionMode(mbgl::ProjectionMode().withYSkew(Nan::To<double>(info[0]).ToChecked()));
+        nodeMap->map->setProjectionMode(mln::ProjectionMode().withYSkew(Nan::To<double>(info[0]).ToChecked()));
     } catch (const std::exception& ex) {
         return Nan::ThrowError(ex.what());
     }
@@ -1162,8 +1162,8 @@ void NodeMap::SetYSkew(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl;
-    using namespace mbgl::style::conversion;
+    using namespace mln;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -1313,7 +1313,7 @@ void NodeMap::GetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>& info) 
         return Nan::ThrowTypeError("GetFeatureState: Requires feature.id property");
     }
 
-    mbgl::FeatureState state;
+    mln::FeatureState state;
     try {
         nodeMap->frontend->getRenderer()->getFeatureState(state, sourceID, sourceLayerID, featureID);
     } catch (const std::exception& ex) {
@@ -1402,8 +1402,8 @@ void NodeMap::DumpDebugLogs(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 }
 
 void NodeMap::QueryRenderedFeatures(const Nan::FunctionCallbackInfo<v8::Value>& info) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto nodeMap = Nan::ObjectWrap::Unwrap<NodeMap>(info.Holder());
     if (!nodeMap->map) return Nan::ThrowError(releasedMessage());
@@ -1417,7 +1417,7 @@ void NodeMap::QueryRenderedFeatures(const Nan::FunctionCallbackInfo<v8::Value>& 
         return Nan::ThrowTypeError("First argument must have two components");
     }
 
-    mbgl::RenderedQueryOptions queryOptions;
+    mln::RenderedQueryOptions queryOptions;
     if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
         if (!info[1]->IsObject()) {
             return Nan::ThrowTypeError("options argument must be an object");
@@ -1452,23 +1452,23 @@ void NodeMap::QueryRenderedFeatures(const Nan::FunctionCallbackInfo<v8::Value>& 
     }
 
     try {
-        std::vector<mbgl::Feature> optional;
+        std::vector<mln::Feature> optional;
 
         if (Nan::Get(posOrBox, 0).ToLocalChecked()->IsArray()) {
             auto pos0 = Nan::Get(posOrBox, 0).ToLocalChecked().As<v8::Array>();
             auto pos1 = Nan::Get(posOrBox, 1).ToLocalChecked().As<v8::Array>();
 
             optional = nodeMap->frontend->getRenderer()->queryRenderedFeatures(
-                mbgl::ScreenBox{{Nan::To<double>(Nan::Get(pos0, 0).ToLocalChecked()).ToChecked(),
-                                 Nan::To<double>(Nan::Get(pos0, 1).ToLocalChecked()).ToChecked()},
-                                {Nan::To<double>(Nan::Get(pos1, 0).ToLocalChecked()).ToChecked(),
-                                 Nan::To<double>(Nan::Get(pos1, 1).ToLocalChecked()).ToChecked()}},
+                mln::ScreenBox{{Nan::To<double>(Nan::Get(pos0, 0).ToLocalChecked()).ToChecked(),
+                                Nan::To<double>(Nan::Get(pos0, 1).ToLocalChecked()).ToChecked()},
+                               {Nan::To<double>(Nan::Get(pos1, 0).ToLocalChecked()).ToChecked(),
+                                Nan::To<double>(Nan::Get(pos1, 1).ToLocalChecked()).ToChecked()}},
                 queryOptions);
 
         } else {
             optional = nodeMap->frontend->getRenderer()->queryRenderedFeatures(
-                mbgl::ScreenCoordinate{Nan::To<double>(Nan::Get(posOrBox, 0).ToLocalChecked()).ToChecked(),
-                                       Nan::To<double>(Nan::Get(posOrBox, 1).ToLocalChecked()).ToChecked()},
+                mln::ScreenCoordinate{Nan::To<double>(Nan::Get(posOrBox, 0).ToLocalChecked()).ToChecked(),
+                                      Nan::To<double>(Nan::Get(posOrBox, 1).ToLocalChecked()).ToChecked()},
                 queryOptions);
         }
 
@@ -1496,9 +1496,9 @@ NodeMap::NodeMap(v8::Local<v8::Object> options)
           if (std::string(*v8::String::Utf8Value(
                   v8::Isolate::GetCurrent(), Nan::Get(options, Nan::New("mode").ToLocalChecked()).ToLocalChecked())) ==
               "tile") {
-              return mbgl::MapMode::Tile;
+              return mln::MapMode::Tile;
           } else {
-              return mbgl::MapMode::Static;
+              return mln::MapMode::Static;
           }
       }()),
       crossSourceCollisions([&] {
@@ -1510,16 +1510,16 @@ NodeMap::NodeMap(v8::Local<v8::Object> options)
                      : true;
       }()),
       mapObserver(NodeMapObserver()),
-      frontend(std::make_unique<mbgl::HeadlessFrontend>(mbgl::Size{512, 512}, pixelRatio)),
-      map(std::make_unique<mbgl::Map>(*frontend,
-                                      mapObserver,
-                                      mbgl::MapOptions()
-                                          .withSize(frontend->getSize())
-                                          .withPixelRatio(pixelRatio)
-                                          .withMapMode(mode)
-                                          .withCrossSourceCollisions(crossSourceCollisions),
-                                      mbgl::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
-                                      mbgl::ClientOptions())),
+      frontend(std::make_unique<mln::HeadlessFrontend>(mln::Size{512, 512}, pixelRatio)),
+      map(std::make_unique<mln::Map>(*frontend,
+                                     mapObserver,
+                                     mln::MapOptions()
+                                         .withSize(frontend->getSize())
+                                         .withPixelRatio(pixelRatio)
+                                         .withMapMode(mode)
+                                         .withCrossSourceCollisions(crossSourceCollisions),
+                                     mln::ResourceOptions().withPlatformContext(reinterpret_cast<void*>(this)),
+                                     mln::ClientOptions())),
       async(new uv_async_t) {
     async->data = this;
     uv_async_init(
@@ -1533,12 +1533,12 @@ NodeMap::~NodeMap() {
     try {
         if (map) release();
     } catch (...) {
-        mbgl::Log::Error(mbgl::Event::General, "Error release the map object when destroying NodeMap");
+        mln::Log::Error(mln::Event::General, "Error release the map object when destroying NodeMap");
     }
 }
 
-std::unique_ptr<mbgl::AsyncRequest> NodeFileSource::request(const mbgl::Resource& resource,
-                                                            mbgl::FileSource::Callback callback_) {
+std::unique_ptr<mln::AsyncRequest> NodeFileSource::request(const mln::Resource& resource,
+                                                           mln::FileSource::Callback callback_) {
     assert(nodeMap);
 
     Nan::HandleScope scope;
@@ -1561,23 +1561,23 @@ std::unique_ptr<mbgl::AsyncRequest> NodeFileSource::request(const mbgl::Resource
     return asyncRequest;
 }
 
-bool NodeFileSource::canRequest(const mbgl::Resource&) const {
+bool NodeFileSource::canRequest(const mln::Resource&) const {
     return true;
 }
 
-void NodeFileSource::setResourceOptions(mbgl::ResourceOptions options) {
+void NodeFileSource::setResourceOptions(mln::ResourceOptions options) {
     this->_resourceOptions = std::move(options);
 }
 
-mbgl::ResourceOptions NodeFileSource::getResourceOptions() {
+mln::ResourceOptions NodeFileSource::getResourceOptions() {
     return this->_resourceOptions.clone();
 }
 
-void NodeFileSource::setClientOptions(mbgl::ClientOptions options) {
+void NodeFileSource::setClientOptions(mln::ClientOptions options) {
     this->_clientOptions = std::move(options);
 }
 
-mbgl::ClientOptions NodeFileSource::getClientOptions() {
+mln::ClientOptions NodeFileSource::getClientOptions() {
     return this->_clientOptions.clone();
 }
 

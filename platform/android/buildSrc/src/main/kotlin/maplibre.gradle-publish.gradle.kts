@@ -1,7 +1,9 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.Task
+import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.authentication.http.BasicAuthentication
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.get
 import java.util.Locale
@@ -16,18 +18,54 @@ plugins {
 
 val androidComponents = extensions.getByType<LibraryAndroidComponentsExtension>()
 val androidLibrary = extensions.getByType<LibraryExtension>()
+val publicationRepositoryUrl = providers.gradleProperty("publicationRepositoryUrl")
+    .orElse(providers.environmentVariable("MAVEN_REPOSITORY_URL"))
+val publicationRepositoryUsername = providers.gradleProperty("publicationRepositoryUsername")
+    .orElse(providers.environmentVariable("MAVEN_REPOSITORY_USERNAME"))
+val publicationRepositoryPassword = providers.gradleProperty("publicationRepositoryPassword")
+    .orElse(providers.environmentVariable("MAVEN_REPOSITORY_PASSWORD"))
 
 androidLibrary.publishing {
     singleVariant("vulkanRelease")
     singleVariant("vulkanDebug")
     singleVariant("openglRelease")
     singleVariant("openglDebug")
+    singleVariant("multiBackendRelease")
+    singleVariant("multiBackendDebug")
 }
 
 afterEvaluate {
-    mavenPublishing {
-        publishToMavenCentral(true)
-        signAllPublications()
+    val configuredRepositoryUrl = publicationRepositoryUrl.orNull
+    if (configuredRepositoryUrl == null) {
+        mavenPublishing {
+            publishToMavenCentral(true)
+        }
+    } else {
+        publishing.repositories.maven {
+            name = "Configured"
+            url = uri(configuredRepositoryUrl)
+
+            val configuredUsername = publicationRepositoryUsername.orNull
+            val configuredPassword = publicationRepositoryPassword.orNull
+            require(configuredUsername.isNullOrBlank() == configuredPassword.isNullOrBlank()) {
+                "Both publicationRepositoryUsername and publicationRepositoryPassword must be configured together"
+            }
+            if (!configuredUsername.isNullOrBlank()) {
+                credentials(PasswordCredentials::class) {
+                    username = configuredUsername
+                    password = configuredPassword
+                }
+                authentication {
+                    create<BasicAuthentication>("basic")
+                }
+            }
+        }
+    }
+
+    if (configuredRepositoryUrl == null || providers.gradleProperty("signingInMemoryKey").isPresent) {
+        mavenPublishing {
+            signAllPublications()
+        }
     }
 }
 
@@ -37,7 +75,9 @@ gradle.projectsEvaluated {
     // This fixes Gradle's implicit dependency validation warnings
     // Since some publications may share components (e.g., defaultdebug and opengldebug both use openglDebug),
     // we ensure all signing tasks complete before any publish task
-    tasks.filter { it.name.startsWith("publish") && it.name.endsWith("PublicationToMavenCentralRepository") }.forEach { publishTask ->
+    tasks.filter {
+        it.name.startsWith("publish") && it.name.contains("PublicationTo") && it.name.endsWith("Repository")
+    }.forEach { publishTask ->
         tasks.filter { it.name.startsWith("sign") && it.name.endsWith("Publication") }.forEach { signingTask ->
             publishTask.dependsOn(signingTask)
         }
@@ -143,6 +183,8 @@ afterEvaluate {
     // OpenGL ES with this artifact ID if that happens.
     configureMavenPublication("opengl", "openglrelease", "-opengl", " (OpenGL ES)")
     configureMavenPublication("opengl", "opengldebug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
+    configureMavenPublication("multiBackend", "multibackendrelease", "-vulkan-opengl", " (Vulkan + OpenGL ES)")
+    configureMavenPublication("multiBackend", "multibackenddebug", "-vulkan-opengl-debug", " (Vulkan + OpenGL ES, Debug)", "Debug")
 }
 
 // Wire per-variant compile classpaths into the Javadoc task.

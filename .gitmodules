@@ -103,7 +103,7 @@
 [submodule "vendor/maplibre-tile-spec"]
 	path = vendor/maplibre-tile-spec
 	url = https://github.com/maplibre/maplibre-tile-spec.git
-	branch = cpp
+	branch = main
 [submodule "vendor/kdbush.hpp"]
 	path = vendor/kdbush.hpp
 	url = https://github.com/mourner/kdbush.hpp.git

@@ -2,8 +2,8 @@
 
 #include "glfw_backend.hpp"
 
-#include <mbgl/vulkan/renderable_resource.hpp>
-#include <mbgl/vulkan/renderer_backend.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
+#include <mln/vulkan/renderer_backend.hpp>
 
 // Example of using an application side VkInstance/VkDevice
 // that's shared with MapLibre's renderer backend
@@ -12,8 +12,8 @@
 struct GLFWwindow;
 
 class GLFWVulkanBackend final : public GLFWBackend,
-                                public mbgl::vulkan::RendererBackend,
-                                public mbgl::vulkan::Renderable {
+                                public mln::vulkan::RendererBackend,
+                                public mln::vulkan::Renderable {
 public:
     GLFWVulkanBackend(GLFWwindow*, bool capFrameRate);
     ~GLFWVulkanBackend() override;
@@ -22,13 +22,13 @@ public:
 
     // GLFWRendererBackend implementation
 public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
-    mbgl::Size getSize() const override;
-    void setSize(mbgl::Size) override;
+    mln::gfx::RendererBackend& getRendererBackend() override { return *this; }
+    mln::Size getSize() const override;
+    void setSize(mln::Size) override;
 
-    // mbgl::gfx::RendererBackend implementation
+    // mln::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 protected:
     std::vector<const char*> getInstanceExtensions() override;

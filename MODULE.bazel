@@ -13,6 +13,12 @@ bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "rules_swift_package_manager", version = "1.3.0")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
+bazel_dep(name = "maplibre-tile-spec", version = "0.0.0", repo_name = "maplibre_tile_spec")
+
+local_path_override(
+    module_name = "maplibre-tile-spec",
+    path = "vendor/maplibre-tile-spec",
+)
 
 # rules_xcodeproj accidentally includes a trailing comma in the generated
 # Testing.framework rsync exclusion, causing intermittent test-host build races.

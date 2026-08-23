@@ -2,8 +2,8 @@
 
 #include <jni/jni.hpp>
 #include <mapbox/std/weak.hpp>
-#include <mbgl/map/map_snapshotter.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/map/map_snapshotter.hpp>
+#include <mln/util/util.hpp>
 
 #include <memory>
 
@@ -14,10 +14,10 @@
 #include "../style/layers/layer.hpp"
 #include "../style/sources/source.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class MapSnapshotter final : public mbgl::MapSnapshotterObserver {
+class MapSnapshotter final : public mln::MapSnapshotterObserver {
 public:
     static constexpr auto Name() { return "org/maplibre/android/snapshotter/MapSnapshotter"; };
 
@@ -63,7 +63,7 @@ public:
     void addLayerBelow(JNIEnv&, jlong, const jni::String&);
     void addLayerAbove(JNIEnv&, jlong, const jni::String&);
     void addSource(JNIEnv&, const jni::Object<Source>&, jlong nativePtr);
-    void addImages(JNIEnv&, const jni::Array<jni::Object<mbgl::android::Image>>&);
+    void addImages(JNIEnv&, const jni::Array<jni::Object<mln::android::Image>>&);
     jni::Local<jni::Object<Layer>> getLayer(JNIEnv&, const jni::String&);
     jni::Local<jni::Object<Source>> getSource(JNIEnv&, const jni::String&);
 
@@ -86,9 +86,9 @@ private:
     void activateFilesource(JNIEnv&);
     void deactivateFilesource(JNIEnv&);
     bool activatedFilesource = false;
-    mapbox::base::WeakPtr<mbgl::Scheduler> weakScheduler;
-    std::unique_ptr<mbgl::MapSnapshotter> snapshotter;
+    mapbox::base::WeakPtr<mln::Scheduler> weakScheduler;
+    std::unique_ptr<mln::MapSnapshotter> snapshotter;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

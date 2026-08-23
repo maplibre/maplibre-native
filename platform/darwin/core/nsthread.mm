@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
-#include <mbgl/platform/thread.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/platform/thread.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
 
 #include <pthread.h>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string getCurrentThreadName() {
@@ -47,4 +47,4 @@ void attachThread() {}
 void detachThread() {}
 
 }  // namespace platform
-}  // namespace mbgl
+}  // namespace mln

@@ -1,28 +1,28 @@
 #include "offline_region_error.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-jni::Local<jni::Object<OfflineRegionError>> OfflineRegionError::New(jni::JNIEnv& env, mbgl::Response::Error error) {
+jni::Local<jni::Object<OfflineRegionError>> OfflineRegionError::New(jni::JNIEnv& env, mln::Response::Error error) {
     // Handle the value of reason independently of the underlying int value
     std::string reason;
     switch (error.reason) {
-        case mbgl::Response::Error::Reason::Success:
+        case mln::Response::Error::Reason::Success:
             reason = "REASON_SUCCESS";
             break;
-        case mbgl::Response::Error::Reason::NotFound:
+        case mln::Response::Error::Reason::NotFound:
             reason = "REASON_NOT_FOUND";
             break;
-        case mbgl::Response::Error::Reason::Server:
+        case mln::Response::Error::Reason::Server:
             reason = "REASON_SERVER";
             break;
-        case mbgl::Response::Error::Reason::Connection:
+        case mln::Response::Error::Reason::Connection:
             reason = "REASON_CONNECTION";
             break;
-        case mbgl::Response::Error::Reason::RateLimit:
+        case mln::Response::Error::Reason::RateLimit:
             reason = "REASON_RATE_LIMIT";
             break;
-        case mbgl::Response::Error::Reason::Other:
+        case mln::Response::Error::Reason::Other:
             reason = "REASON_OTHER";
             break;
     }
@@ -39,4 +39,4 @@ void OfflineRegionError::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

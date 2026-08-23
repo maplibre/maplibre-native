@@ -1,18 +1,18 @@
-#include <mbgl/style/expression/collator_expression.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/style/expression/format_section_override.hpp>
-#include <mbgl/style/layers/custom_layer_impl.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/style/expression/collator_expression.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/style/expression/format_section_override.hpp>
+#include <mln/style/layers/custom_layer_impl.hpp>
+#include <mln/test/util.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::expression;
-using namespace mbgl::style::expression::dsl;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::expression;
+using namespace mln::style::expression::dsl;
 
 using namespace std::string_literals;
 
 namespace std {
-using ::mbgl::operator<<;
+using ::mln::operator<<;
 }
 
 template <typename T>

@@ -10,27 +10,27 @@
 #undef GetObject
 #endif
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/layer.hpp>
-#include <mbgl/style/conversion/light.hpp>
-#include <mbgl/style/conversion/source.hpp>
-#include <mbgl/style/conversion/sprite.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/compression.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/enum.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
+#include <mln/style/conversion/light.hpp>
+#include <mln/style/conversion/source.hpp>
+#include <mln/style/conversion/sprite.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/compression.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/enum.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/timer.hpp>
 
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
@@ -104,23 +104,23 @@ const char* resultsHeaderButtons = R"HTML(
 </h1>
 )HTML";
 
-void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const mbgl::Value& value) {
-    value.match([&writer](const mbgl::NullValue&) { writer.Null(); },
+void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const mln::Value& value) {
+    value.match([&writer](const mln::NullValue&) { writer.Null(); },
                 [&writer](bool b) { writer.Bool(b); },
                 [&writer](uint64_t u) { writer.Uint64(u); },
                 [&writer](int64_t i) { writer.Int64(i); },
                 [&writer](double d) { d == std::floor(d) ? writer.Int64(static_cast<int64_t>(d)) : writer.Double(d); },
                 [&writer](const std::string& s) { writer.String(s); },
-                [&writer](const std::vector<mbgl::Value>& arr) {
+                [&writer](const std::vector<mln::Value>& arr) {
                     writer.StartArray();
                     for (const auto& item : arr) {
                         writeJSON(writer, item);
                     }
                     writer.EndArray();
                 },
-                [&writer](const std::unordered_map<std::string, mbgl::Value>& obj) {
+                [&writer](const std::unordered_map<std::string, mln::Value>& obj) {
                     writer.StartObject();
-                    std::map<std::string, mbgl::Value> sorted(obj.begin(), obj.end());
+                    std::map<std::string, mln::Value> sorted(obj.begin(), obj.end());
                     for (const auto& entry : sorted) {
                         writer.Key(entry.first.c_str());
                         writeJSON(writer, entry.second);
@@ -131,7 +131,7 @@ void writeJSON(rapidjson::PrettyWriter<rapidjson::StringBuffer>& writer, const m
 
 } // namespace
 
-std::string toJSON(const mbgl::Value& value, unsigned indent, bool singleLine) {
+std::string toJSON(const mln::Value& value, unsigned indent, bool singleLine) {
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     if (singleLine) {
@@ -142,7 +142,7 @@ std::string toJSON(const mbgl::Value& value, unsigned indent, bool singleLine) {
     return buffer.GetString();
 }
 
-std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, bool singleLine) {
+std::string toJSON(const std::vector<mln::Feature>& features, unsigned indent, bool singleLine) {
     rapidjson::CrtAllocator allocator;
     rapidjson::StringBuffer buffer;
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
@@ -152,9 +152,9 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
     writer.SetIndent(' ', indent);
     writer.StartArray();
     for (const auto& feature : features) {
-        mbgl::JSValue result(rapidjson::kObjectType);
+        mln::JSValue result(rapidjson::kObjectType);
         result.AddMember("type", "Feature", allocator);
-        if (!feature.id.is<mbgl::NullValue>()) {
+        if (!feature.id.is<mln::NullValue>()) {
             result.AddMember(
                 "id", mapbox::geojson::identifier::visit(feature.id, mapbox::geojson::to_value{allocator}), allocator);
         }
@@ -171,22 +171,22 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
     return buffer.GetString();
 }
 
-JSONReply readJson(const mbgl::filesystem::path& jsonPath) {
-    auto maybeJSON = mbgl::util::readFile(jsonPath.generic_string());
+JSONReply readJson(const mln::filesystem::path& jsonPath) {
+    auto maybeJSON = mln::util::readFile(jsonPath.generic_string());
     if (!maybeJSON) {
         return {std::string("Unable to open file ") + jsonPath.string()};
     }
 
-    mbgl::JSDocument document;
+    mln::JSDocument document;
     document.Parse<0>(*maybeJSON);
     if (document.HasParseError()) {
-        return {mbgl::formatJSONParseError(document)};
+        return {mln::formatJSONParseError(document)};
     }
 
     return {std::move(document)};
 }
 
-std::string serializeJsonValue(const mbgl::JSValue& value) {
+std::string serializeJsonValue(const mln::JSValue& value) {
     rapidjson::StringBuffer buffer;
     buffer.Clear();
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -297,9 +297,9 @@ std::string serializeMetrics(const TestMetrics& metrics) {
 }
 
 namespace {
-std::vector<std::string> readExpectedEntries(const std::regex& regex, const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedEntries(const std::regex& regex, const mln::filesystem::path& base) {
     std::vector<std::string> expectedEntries;
-    for (const auto& entry : mbgl::filesystem::directory_iterator(base)) {
+    for (const auto& entry : mln::filesystem::directory_iterator(base)) {
         if (entry.is_regular_file()) {
             const std::string path = entry.path().string();
             if (std::regex_match(path, regex)) {
@@ -311,33 +311,33 @@ std::vector<std::string> readExpectedEntries(const std::regex& regex, const mbgl
 }
 } // namespace
 
-std::vector<std::string> readExpectedImageEntries(const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedImageEntries(const mln::filesystem::path& base) {
     static const std::regex regex(".*[/\\\\]expected.*.png");
     return readExpectedEntries(regex, base);
 }
 
-std::vector<std::string> readExpectedMetricEntries(const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedMetricEntries(const mln::filesystem::path& base) {
     static const std::regex regex(".*[/\\\\]metrics.json");
     return readExpectedEntries(regex, base);
 }
 
-std::vector<std::string> readExpectedJSONEntries(const mbgl::filesystem::path& base) {
+std::vector<std::string> readExpectedJSONEntries(const mln::filesystem::path& base) {
     static const std::regex regex(".*[/\\\\]expected.*.json");
     return readExpectedEntries(regex, base);
 }
 
-TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
+TestMetrics readExpectedMetrics(const mln::filesystem::path& path) {
     TestMetrics result;
 
     auto maybeJson = readJson(path.string());
-    if (!maybeJson.is<mbgl::JSDocument>()) { // NOLINT
+    if (!maybeJson.is<mln::JSDocument>()) { // NOLINT
         return result;
     }
 
-    const auto& document = maybeJson.get<mbgl::JSDocument>();
+    const auto& document = maybeJson.get<mln::JSDocument>();
 
     if (document.HasMember("file-size")) {
-        const mbgl::JSValue& fileSizeValue = document["file-size"];
+        const mln::JSValue& fileSizeValue = document["file-size"];
         assert(fileSizeValue.IsArray());
         for (auto& probeValue : fileSizeValue.GetArray()) {
             assert(probeValue.IsArray());
@@ -359,7 +359,7 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
     }
 
     if (document.HasMember("memory")) {
-        const mbgl::JSValue& memoryValue = document["memory"];
+        const mln::JSValue& memoryValue = document["memory"];
         assert(memoryValue.IsArray());
         for (auto& probeValue : memoryValue.GetArray()) {
             assert(probeValue.IsArray());
@@ -377,7 +377,7 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
     }
 
     if (document.HasMember("network")) {
-        const mbgl::JSValue& networkValue = document["network"];
+        const mln::JSValue& networkValue = document["network"];
         assert(networkValue.IsArray());
         for (auto& probeValue : networkValue.GetArray()) {
             assert(probeValue.IsArray());
@@ -396,7 +396,7 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
     }
 
     if (document.HasMember("fps")) {
-        const mbgl::JSValue& fpsValue = document["fps"];
+        const mln::JSValue& fpsValue = document["fps"];
         assert(fpsValue.IsArray());
         for (auto& probeValue : fpsValue.GetArray()) {
             assert(probeValue.IsArray());
@@ -413,7 +413,7 @@ TestMetrics readExpectedMetrics(const mbgl::filesystem::path& path) {
     }
 
     if (document.HasMember("gfx")) {
-        const mbgl::JSValue& gfxValue = document["gfx"];
+        const mln::JSValue& gfxValue = document["gfx"];
         assert(gfxValue.IsArray());
         for (auto& probeValue : gfxValue.GetArray()) {
             assert(probeValue.IsArray());
@@ -454,49 +454,49 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     metadata.paths = paths;
 
     auto maybeJson = readJson(paths.stylePath.string());
-    if (!maybeJson.is<mbgl::JSDocument>()) { // NOLINT
+    if (!maybeJson.is<mln::JSDocument>()) { // NOLINT
         metadata.errorMessage = std::string("Unable to parse: ") + metadata.paths.stylePath.string();
         return metadata;
     }
 
-    metadata.document = std::move(maybeJson.get<mbgl::JSDocument>());
+    metadata.document = std::move(maybeJson.get<mln::JSDocument>());
     if (!metadata.document.HasMember("metadata")) {
-        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata': " + paths.stylePath.string());
+        mln::Log::Warning(mln::Event::ParseStyle, "Style has no 'metadata': " + paths.stylePath.string());
         return metadata;
     }
 
-    const mbgl::JSValue& metadataValue = metadata.document["metadata"];
+    const mln::JSValue& metadataValue = metadata.document["metadata"];
     if (!metadataValue.HasMember("test")) {
-        mbgl::Log::Warning(mbgl::Event::ParseStyle, "Style has no 'metadata.test': " + paths.stylePath.string());
+        mln::Log::Warning(mln::Event::ParseStyle, "Style has no 'metadata.test': " + paths.stylePath.string());
         return metadata;
     }
 
-    const mbgl::JSValue& testValue = metadataValue["test"];
+    const mln::JSValue& testValue = metadataValue["test"];
 
     if (testValue.HasMember("mapMode")) {
         metadata.outputsImage = true;
         assert(testValue["mapMode"].IsString());
         std::string mapModeStr = testValue["mapMode"].GetString();
         if (mapModeStr == "tile") {
-            metadata.mapMode = mbgl::MapMode::Tile;
+            metadata.mapMode = mln::MapMode::Tile;
             // In the tile mode, map is showing exactly one tile.
-            metadata.size = {mbgl::util::tileSize_I, mbgl::util::tileSize_I};
+            metadata.size = {mln::util::tileSize_I, mln::util::tileSize_I};
         } else if (mapModeStr == "continuous") {
-            metadata.mapMode = mbgl::MapMode::Continuous;
+            metadata.mapMode = mln::MapMode::Continuous;
             metadata.outputsImage = false;
         } else if (mapModeStr == "static")
-            metadata.mapMode = mbgl::MapMode::Static;
+            metadata.mapMode = mln::MapMode::Static;
         else {
-            mbgl::Log::Warning(mbgl::Event::ParseStyle,
-                               "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
-            metadata.mapMode = mbgl::MapMode::Static;
+            mln::Log::Warning(mln::Event::ParseStyle,
+                              "Unknown map mode: " + mapModeStr + ". Falling back to static mode");
+            metadata.mapMode = mln::MapMode::Static;
         }
     }
 
     if (testValue.HasMember("width")) {
         assert(testValue["width"].IsNumber());
-        if (metadata.mapMode == mbgl::MapMode::Tile) {
-            mbgl::Log::Warning(mbgl::Event::ParseStyle, "The 'width' metadata field is ignored in tile map mode");
+        if (metadata.mapMode == mln::MapMode::Tile) {
+            mln::Log::Warning(mln::Event::ParseStyle, "The 'width' metadata field is ignored in tile map mode");
         } else {
             metadata.size.width = testValue["width"].GetInt();
         }
@@ -504,8 +504,8 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
 
     if (testValue.HasMember("height")) {
         assert(testValue["height"].IsNumber());
-        if (metadata.mapMode == mbgl::MapMode::Tile) {
-            mbgl::Log::Warning(mbgl::Event::ParseStyle, "The 'height' metadata field is ignored in tile map mode");
+        if (metadata.mapMode == mln::MapMode::Tile) {
+            mln::Log::Warning(mln::Event::ParseStyle, "The 'height' metadata field is ignored in tile map mode");
         } else {
             metadata.size.height = testValue["height"].GetInt();
         }
@@ -535,15 +535,15 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     // Test operations handled in runner.cpp.
 
     if (testValue.HasMember("debug")) {
-        metadata.debug |= mbgl::MapDebugOptions::TileBorders;
+        metadata.debug |= mln::MapDebugOptions::TileBorders;
     }
 
     if (testValue.HasMember("collisionDebug")) {
-        metadata.debug |= mbgl::MapDebugOptions::Collision;
+        metadata.debug |= mln::MapDebugOptions::Collision;
     }
 
     if (testValue.HasMember("showOverdrawInspector")) {
-        metadata.debug |= mbgl::MapDebugOptions::Overdraw;
+        metadata.debug |= mln::MapDebugOptions::Overdraw;
     }
 
     if (testValue.HasMember("crossSourceCollisions")) {
@@ -595,8 +595,8 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
             metadata.queryOptions.layerIDs = layersVec;
         }
 
-        using namespace mbgl::style;
-        using namespace mbgl::style::conversion;
+        using namespace mln::style;
+        using namespace mln::style::conversion;
         if (testValue["queryOptions"].HasMember("filter")) {
             assert(testValue["queryOptions"]["filter"].IsArray());
             auto& filterVal = testValue["queryOptions"]["filter"];
@@ -613,7 +613,7 @@ TestMetadata parseTestMetadata(const TestPaths& paths) {
     return metadata;
 }
 
-namespace mbgl {
+namespace mln {
 MBGL_DEFINE_ENUM(TileLodMode, {{TileLodMode::Default, "default"}, {TileLodMode::Distance, "distance"}});
 }
 
@@ -689,18 +689,18 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             });
         } else if (operationArray[0].GetString() == sleepOp) {
             // sleep
-            mbgl::Duration duration = mbgl::Seconds(3);
+            mln::Duration duration = mln::Seconds(3);
             if (operationArray.Size() >= 2u) {
-                duration = mbgl::Milliseconds(operationArray[1].GetUint());
+                duration = mln::Milliseconds(operationArray[1].GetUint());
             }
             result.emplace_back([duration](TestContext&) {
-                mbgl::util::Timer sleepTimer;
+                mln::util::Timer sleepTimer;
                 bool sleeping = true;
 
-                sleepTimer.start(duration, mbgl::Duration::zero(), [&]() { sleeping = false; });
+                sleepTimer.start(duration, mln::Duration::zero(), [&]() { sleeping = false; });
 
                 while (sleeping) {
-                    mbgl::util::RunLoop::Get()->runOnce();
+                    mln::util::RunLoop::Get()->runOnce();
                 }
                 return true;
             });
@@ -732,8 +732,8 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 std::optional<std::string> maybeImage;
                 bool requestCompleted = false;
 
-                auto req = ctx.getFileSource().request(mbgl::Resource::image("mapbox://render-tests/" + imagePath),
-                                                       [&](mbgl::Response response) {
+                auto req = ctx.getFileSource().request(mln::Resource::image("mapbox://render-tests/" + imagePath),
+                                                       [&](mln::Response response) {
                                                            if (response.data) {
                                                                maybeImage = *response.data;
                                                            }
@@ -742,7 +742,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                                                        });
 
                 while (!requestCompleted) {
-                    mbgl::util::RunLoop::Get()->runOnce();
+                    mln::util::RunLoop::Get()->runOnce();
                 }
 
                 if (!maybeImage) {
@@ -751,7 +751,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 }
 
                 ctx.getMap().getStyle().addImage(
-                    std::make_unique<mbgl::style::Image>(imageName, mbgl::decodeImage(*maybeImage), pixelRatio, sdf));
+                    std::make_unique<mln::style::Image>(imageName, mln::decodeImage(*maybeImage), pixelRatio, sdf));
                 return true;
             });
 
@@ -790,9 +790,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
 
             const auto& centerArray = operationArray[1].GetArray();
             assert(centerArray.Size() == 2u);
-            mbgl::LatLng center{centerArray[1].GetDouble(), centerArray[0].GetDouble()};
+            mln::LatLng center{centerArray[1].GetDouble(), centerArray[0].GetDouble()};
             result.emplace_back([center](TestContext& ctx) {
-                ctx.getMap().jumpTo(mbgl::CameraOptions().withCenter(center));
+                ctx.getMap().jumpTo(mln::CameraOptions().withCenter(center));
                 return true;
             });
         } else if (operationArray[0].GetString() == setZoomOp) {
@@ -801,7 +801,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsNumber());
             double zoom = operationArray[1].GetDouble();
             result.emplace_back([zoom](TestContext& ctx) {
-                ctx.getMap().jumpTo(mbgl::CameraOptions().withZoom(zoom));
+                ctx.getMap().jumpTo(mln::CameraOptions().withZoom(zoom));
                 return true;
             });
         } else if (operationArray[0].GetString() == setBearingOp) {
@@ -810,7 +810,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsNumber());
             double bearing = operationArray[1].GetDouble();
             result.emplace_back([bearing](TestContext& ctx) {
-                ctx.getMap().jumpTo(mbgl::CameraOptions().withBearing(bearing));
+                ctx.getMap().jumpTo(mln::CameraOptions().withBearing(bearing));
                 return true;
             });
         } else if (operationArray[0].GetString() == setPitchOp) {
@@ -819,7 +819,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsNumber());
             double pitch = operationArray[1].GetDouble();
             result.emplace_back([pitch](TestContext& ctx) {
-                ctx.getMap().jumpTo(mbgl::CameraOptions().withPitch(pitch));
+                ctx.getMap().jumpTo(mln::CameraOptions().withPitch(pitch));
                 return true;
             });
         } else if (operationArray[0].GetString() == setRollOp) {
@@ -828,7 +828,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsNumber());
             double roll = operationArray[1].GetDouble();
             result.emplace_back([roll](TestContext& ctx) {
-                ctx.getMap().jumpTo(mbgl::CameraOptions().withRoll(roll));
+                ctx.getMap().jumpTo(mln::CameraOptions().withRoll(roll));
                 return true;
             });
         } else if (operationArray[0].GetString() == setCenterAltitudeOp) {
@@ -837,7 +837,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsNumber());
             double centerAltitude = operationArray[1].GetDouble();
             result.emplace_back([centerAltitude](TestContext& ctx) {
-                ctx.getMap().jumpTo(mbgl::CameraOptions().withCenterAltitude(centerAltitude));
+                ctx.getMap().jumpTo(mln::CameraOptions().withCenterAltitude(centerAltitude));
                 return true;
             });
         } else if (operationArray[0].GetString() == setFilterOp) {
@@ -846,8 +846,8 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsString());
 
             std::string layerName{operationArray[1].GetString(), operationArray[1].GetStringLength()};
-            mbgl::style::conversion::Error error;
-            auto converted = mbgl::style::conversion::convert<mbgl::style::Filter>(operationArray[2], error);
+            mln::style::conversion::Error error;
+            auto converted = mln::style::conversion::convert<mln::style::Filter>(operationArray[2], error);
             result.emplace_back([converted, layerName, error](TestContext& ctx) {
                 if (!converted) {
                     ctx.getMetadata().errorMessage = std::string("Unable to convert filter: ") + error.message;
@@ -886,14 +886,14 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             // setLight
             assert(operationArray.Size() >= 2u);
             assert(operationArray[1].IsObject());
-            mbgl::style::conversion::Error error;
-            auto converted = mbgl::style::conversion::convert<mbgl::style::Light>(operationArray[1], error);
+            mln::style::conversion::Error error;
+            auto converted = mln::style::conversion::convert<mln::style::Light>(operationArray[1], error);
             if (!converted) {
                 metadata.errorMessage = std::string("Unable to convert light: ") + error.message;
                 return {};
             }
             result.emplace_back([impl = converted->impl](TestContext& ctx) {
-                ctx.getMap().getStyle().setLight(std::make_unique<mbgl::style::Light>(impl));
+                ctx.getMap().getStyle().setLight(std::make_unique<mln::style::Light>(impl));
                 return true;
             });
         } else if (operationArray[0].GetString() == addLayerOp) {
@@ -901,8 +901,8 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray.Size() >= 2u);
             assert(operationArray[1].IsObject());
             result.emplace_back([json = serializeJsonValue(operationArray[1])](TestContext& ctx) {
-                mbgl::style::conversion::Error error;
-                auto converted = mbgl::style::conversion::convertJSON<std::unique_ptr<mbgl::style::Layer>>(json, error);
+                mln::style::conversion::Error error;
+                auto converted = mln::style::conversion::convertJSON<std::unique_ptr<mln::style::Layer>>(json, error);
                 if (!converted) {
                     ctx.getMetadata().errorMessage = std::string("Unable to convert layer: ") + error.message;
                     return false;
@@ -925,8 +925,8 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             std::string sourceName = operationArray[1].GetString();
 
             result.emplace_back([sourceName, json = serializeJsonValue(operationArray[2])](TestContext& ctx) {
-                mbgl::style::conversion::Error error;
-                auto converted = mbgl::style::conversion::convertJSON<std::unique_ptr<mbgl::style::Source>>(
+                mln::style::conversion::Error error;
+                auto converted = mln::style::conversion::convertJSON<std::unique_ptr<mln::style::Source>>(
                     json, error, sourceName);
                 if (!converted) {
                     ctx.getMetadata().errorMessage = std::string("Unable to convert source: ") + error.message;
@@ -958,9 +958,9 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                         ctx.getMetadata().errorMessage = std::string("Layer not found: ") + layerName;
                         return false;
                     }
-                    mbgl::JSDocument d;
+                    mln::JSDocument d;
                     d.Parse(json.c_str(), json.length());
-                    const mbgl::JSValue* propertyValue = &d;
+                    const mln::JSValue* propertyValue = &d;
                     layer->setProperty(propertyName, propertyValue);
                     return true;
                 });
@@ -976,7 +976,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(!path.empty());
 
             float tolerance = static_cast<float>(operationArray[3].GetDouble());
-            mbgl::filesystem::path filePath(path);
+            mln::filesystem::path filePath(path);
 
             bool compressed = false;
             if (operationArray.Size() == 5) {
@@ -989,15 +989,15 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 filePath = metadata.paths.defaultExpectations() / filePath;
             }
             result.emplace_back([filePath, path, mark, tolerance, compressed](TestContext& ctx) {
-                if (!mbgl::filesystem::exists(filePath)) {
+                if (!mln::filesystem::exists(filePath)) {
                     ctx.getMetadata().errorMessage = std::string("File not found: ") + path;
                     return false;
                 }
                 size_t size = 0;
                 if (compressed) {
-                    size = mbgl::util::compress(*mbgl::util::readFile(filePath.generic_string())).size();
+                    size = mln::util::compress(*mln::util::readFile(filePath.generic_string())).size();
                 } else {
-                    size = mbgl::filesystem::file_size(filePath);
+                    size = mln::filesystem::file_size(filePath);
                 }
 
                 ctx.getMetadata().metrics.fileSize.emplace(std::piecewise_construct,
@@ -1043,7 +1043,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
         } else if (operationArray[0].GetString() == networkProbeStartOp) {
             // probeNetworkStart
             result.emplace_back([](TestContext&) {
-                mbgl::ProxyFileSource::setTrackingActive(true);
+                mln::ProxyFileSource::setTrackingActive(true);
                 return true;
             });
         } else if (operationArray[0].GetString() == networkProbeOp) {
@@ -1055,14 +1055,14 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 ctx.getMetadata().metrics.network.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(std::move(mark)),
-                    std::forward_as_tuple(mbgl::ProxyFileSource::getRequestCount(),
-                                          mbgl::ProxyFileSource::getTransferredSize()));
+                    std::forward_as_tuple(mln::ProxyFileSource::getRequestCount(),
+                                          mln::ProxyFileSource::getTransferredSize()));
                 return true;
             });
         } else if (operationArray[0].GetString() == networkProbeEndOp) {
             // probeNetworkEnd
             result.emplace_back([](TestContext&) {
-                mbgl::ProxyFileSource::setTrackingActive(false);
+                mln::ProxyFileSource::setTrackingActive(false);
                 return true;
             });
         } else if (operationArray[0].GetString() == setFeatureStateOp) {
@@ -1071,8 +1071,8 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[1].IsObject());
             assert(operationArray[2].IsObject());
 
-            using namespace mbgl;
-            using namespace mbgl::style::conversion;
+            using namespace mln;
+            using namespace mln::style::conversion;
 
             std::string sourceID;
             std::optional<std::string> sourceLayer;
@@ -1093,7 +1093,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 if (featureOptions["id"].IsString()) {
                     featureID = featureOptions["id"].GetString();
                 } else if (featureOptions["id"].IsNumber()) {
-                    featureID = mbgl::util::toString(featureOptions["id"].GetUint64());
+                    featureID = mln::util::toString(featureOptions["id"].GetUint64());
                 }
             }
             const JSValue* state = &operationArray[2];
@@ -1164,7 +1164,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 if (featureOptions["id"].IsString()) {
                     featureID = featureOptions["id"].GetString();
                 } else if (featureOptions["id"].IsNumber()) {
-                    featureID = mbgl::util::toString(featureOptions["id"].GetUint64());
+                    featureID = mln::util::toString(featureOptions["id"].GetUint64());
                 }
             }
             result.emplace_back([sourceID, sourceLayer, featureID](TestContext& ctx) {
@@ -1174,7 +1174,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 } catch (const std::exception&) {
                     return false;
                 }
-                mbgl::FeatureState state;
+                mln::FeatureState state;
                 frontend.getRenderer()->getFeatureState(state, sourceID, sourceLayer, featureID);
                 return true;
             });
@@ -1199,7 +1199,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 if (featureOptions["id"].IsString()) {
                     featureID = featureOptions["id"].GetString();
                 } else if (featureOptions["id"].IsNumber()) {
-                    featureID = mbgl::util::toString(featureOptions["id"].GetUint64());
+                    featureID = mln::util::toString(featureOptions["id"].GetUint64());
                 }
             }
 
@@ -1226,17 +1226,17 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             assert(operationArray[3].IsArray());  // start [lat, lng, zoom]
             assert(operationArray[4].IsArray());  // end [lat, lng, zoom]
 
-            if (metadata.mapMode != mbgl::MapMode::Continuous) {
+            if (metadata.mapMode != mln::MapMode::Continuous) {
                 metadata.errorMessage = "Map mode must be Continuous for " + panGestureOp + " operation";
                 return {};
             }
 
             std::string mark = operationArray[1].GetString();
             int duration = static_cast<int>(operationArray[2].GetFloat());
-            mbgl::LatLng startPos, endPos;
+            mln::LatLng startPos, endPos;
             double startZoom, endZoom;
 
-            auto parsePosition = [](auto arr) -> std::tuple<mbgl::LatLng, double> {
+            auto parsePosition = [](auto arr) -> std::tuple<mln::LatLng, double> {
                 assert(arr.Size() >= 3);
                 return {{arr[1].GetDouble(), arr[0].GetDouble()}, arr[2].GetDouble()};
             };
@@ -1250,7 +1250,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 auto& frontend = ctx.getFrontend();
                 std::vector<float> samples;
                 // Jump to the starting point of the segment and make sure there's something to render
-                map.jumpTo(mbgl::CameraOptions().withCenter(startPos).withZoom(startZoom));
+                map.jumpTo(mln::CameraOptions().withCenter(startPos).withZoom(startZoom));
 
                 observer.reset();
                 while (!observer.finishRenderingMap) {
@@ -1263,13 +1263,13 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 float totalTime = 0.0;
                 bool transitionFinished = false;
 
-                mbgl::AnimationOptions animationOptions(mbgl::Milliseconds(duration * 1000));
-                animationOptions.minZoom = mbgl::util::min(startZoom, endZoom);
+                mln::AnimationOptions animationOptions(mln::Milliseconds(duration * 1000));
+                animationOptions.minZoom = mln::util::min(startZoom, endZoom);
                 animationOptions.transitionFinishFn = [&]() {
                     transitionFinished = true;
                 };
 
-                map.flyTo(mbgl::CameraOptions().withCenter(endPos).withZoom(endZoom), animationOptions);
+                map.flyTo(mln::CameraOptions().withCenter(endPos).withZoom(endZoom), animationOptions);
 
                 while (!transitionFinished) {
                     frames++;
@@ -1286,7 +1286,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 // Use 1% of the longest frames to compute the minimum fps
                 std::sort(samples.begin(), samples.end());
 
-                int sampleCount = mbgl::util::max(1, (int)samples.size() / 100);
+                int sampleCount = mln::util::max(1, (int)samples.size() / 100);
                 for (auto it = samples.rbegin(); it != samples.rbegin() + sampleCount; it++) minFrameTime += *it;
 
                 float minOnePcFps = sampleCount / minFrameTime;
@@ -1318,7 +1318,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 auto& frontend = ctx.getFrontend();
                 // Render the map and fetch rendering stats
                 try {
-                    mbgl::gfx::RenderingStats stats = frontend.render(ctx.getMap()).stats;
+                    mln::gfx::RenderingStats stats = frontend.render(ctx.getMap()).stats;
                     ctx.activeGfxProbe = GfxProbe(stats, ctx.activeGfxProbe);
                 } catch (const std::exception&) {
                     return false;
@@ -1373,7 +1373,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
             // setTileLodMode
             assert(operationArray.Size() == 2u);
             assert(operationArray[1].IsString());
-            mbgl::TileLodMode mode = mbgl::Enum<mbgl::TileLodMode>::toEnum(operationArray[1].GetString()).value();
+            mln::TileLodMode mode = mln::Enum<mln::TileLodMode>::toEnum(operationArray[1].GetString()).value();
             result.emplace_back([mode](TestContext& ctx) {
                 ctx.getMap().setTileLodMode(mode);
                 return true;
@@ -1409,17 +1409,17 @@ std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) 
     if (!metadata.renderErrored) {
         if (metadata.outputsImage) {
             if (metadata.renderTest) {
-                html.append("<img width=" + mbgl::util::toString(metadata.size.width));
-                html.append(" height=" + mbgl::util::toString(metadata.size.height));
+                html.append("<img width=" + mln::util::toString(metadata.size.width));
+                html.append(" height=" + mln::util::toString(metadata.size.height));
                 html.append(" src=\"data:image/png;base64," + encodeBase64(metadata.actual) + "\"");
                 html.append(" data-alt-src=\"data:image/png;base64," + encodeBase64(metadata.expected) + "\">\n");
 
-                html.append("<img width=" + mbgl::util::toString(metadata.size.width));
-                html.append(" height=" + mbgl::util::toString(metadata.size.height));
+                html.append("<img width=" + mln::util::toString(metadata.size.width));
+                html.append(" height=" + mln::util::toString(metadata.size.height));
                 html.append(" src=\"data:image/png;base64," + encodeBase64(metadata.diff) + "\">\n");
             } else {
-                html.append("<img width=" + mbgl::util::toString(metadata.size.width));
-                html.append(" height=" + mbgl::util::toString(metadata.size.height));
+                html.append("<img width=" + mln::util::toString(metadata.size.width));
+                html.append(" height=" + mln::util::toString(metadata.size.height));
                 html.append(" src=\"data:image/png;base64," + encodeBase64(metadata.actual) + "\">\n");
             }
         }
@@ -1436,7 +1436,7 @@ std::string createResultItem(const TestMetadata& metadata, bool hasFailedTests) 
 
     if (metadata.difference != 0.0) {
         if (metadata.renderTest) {
-            html.append("<p class=\"diff\"><strong>Diff:</strong> " + mbgl::util::toString(metadata.difference) +
+            html.append("<p class=\"diff\"><strong>Diff:</strong> " + mln::util::toString(metadata.difference) +
                         "</p>\n");
         } else {
             html.append("<p class=\"diff\"><strong>Diff:</strong> " + metadata.diff + "</p>\n");
@@ -1460,7 +1460,7 @@ std::string createResultPage(const TestStatistics& stats,
     // Header
     if (unsuccessful) {
         resultsPage.append(R"HTML(<h1 style="color: red;">)HTML");
-        resultsPage.append(mbgl::util::toString(unsuccessful) + " tests failed.");
+        resultsPage.append(mln::util::toString(unsuccessful) + " tests failed.");
     } else {
         resultsPage.append(R"HTML(<h1 style="color: green;">)HTML");
         resultsPage.append("All tests passed!");
@@ -1470,18 +1470,18 @@ std::string createResultPage(const TestStatistics& stats,
     // stats
     resultsPage.append(R"HTML(<p class="stats">)HTML");
     if (stats.ignoreFailedTests) {
-        resultsPage.append(mbgl::util::toString(stats.ignoreFailedTests) + " ignored failed, ");
+        resultsPage.append(mln::util::toString(stats.ignoreFailedTests) + " ignored failed, ");
     }
     if (stats.ignorePassedTests) {
-        resultsPage.append(mbgl::util::toString(stats.ignorePassedTests) + " ignored passed, ");
+        resultsPage.append(mln::util::toString(stats.ignorePassedTests) + " ignored passed, ");
     }
     if (stats.erroredTests) {
-        resultsPage.append(mbgl::util::toString(stats.erroredTests) + " errored, ");
+        resultsPage.append(mln::util::toString(stats.erroredTests) + " errored, ");
     }
     if (stats.failedTests) {
-        resultsPage.append(mbgl::util::toString(stats.failedTests) + " failed, ");
+        resultsPage.append(mln::util::toString(stats.failedTests) + " failed, ");
     }
-    resultsPage.append(mbgl::util::toString(stats.passedTests) + " passed.\n");
+    resultsPage.append(mln::util::toString(stats.passedTests) + " passed.\n");
     resultsPage.append("</p>\n");
 
     // Test sequence
@@ -1508,7 +1508,7 @@ std::string createResultPage(const TestStatistics& stats,
 
         // Shuffle
         if (shuffle) {
-            resultsPage.append("<p><strong>Shuffle seed</strong>: " + mbgl::util::toString(seed) + "</p>\n");
+            resultsPage.append("<p><strong>Shuffle seed</strong>: " + mln::util::toString(seed) + "</p>\n");
         }
 
         resultsPage.append("</div>\n");

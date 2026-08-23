@@ -1,13 +1,13 @@
 #include "node_request.hpp"
 #include "node_map.hpp"
-#include <mbgl/storage/response.hpp>
-#include <mbgl/util/chrono.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/util/chrono.hpp>
 
 #include <cmath>
 
 namespace node_mbgl {
 
-NodeRequest::NodeRequest(mbgl::FileSource::Callback callback_, NodeAsyncRequest* asyncRequest_)
+NodeRequest::NodeRequest(mln::FileSource::Callback callback_, NodeAsyncRequest* asyncRequest_)
     : callback(std::move(callback_)),
       asyncRequest(asyncRequest_) {
     asyncRequest->request = this;
@@ -42,7 +42,7 @@ void NodeRequest::Init(v8::Local<v8::Object> target) {
 
 void NodeRequest::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     auto target = reinterpret_cast<NodeMap*>(info[0].As<v8::External>()->Value());
-    auto callback = reinterpret_cast<mbgl::FileSource::Callback*>(info[1].As<v8::External>()->Value());
+    auto callback = reinterpret_cast<mln::FileSource::Callback*>(info[1].As<v8::External>()->Value());
     auto asyncRequest = reinterpret_cast<NodeAsyncRequest*>(info[2].As<v8::External>()->Value());
 
     auto request = new NodeRequest(*callback, asyncRequest);
@@ -71,7 +71,7 @@ void NodeRequest::HandleCallback(const Nan::FunctionCallbackInfo<v8::Value>& inf
         return info.GetReturnValue().SetUndefined();
     }
 
-    mbgl::Response response;
+    mln::Response response;
 
     if (info.Length() < 1) {
         response.noContent = true;
@@ -80,12 +80,12 @@ void NodeRequest::HandleCallback(const Nan::FunctionCallbackInfo<v8::Value>& inf
         auto msg = Nan::New("message").ToLocalChecked();
 
         if (Nan::Has(err, msg).FromJust()) {
-            response.error = std::make_unique<mbgl::Response::Error>(
-                mbgl::Response::Error::Reason::Other, *Nan::Utf8String(Nan::Get(err, msg).ToLocalChecked()));
+            response.error = std::make_unique<mln::Response::Error>(
+                mln::Response::Error::Reason::Other, *Nan::Utf8String(Nan::Get(err, msg).ToLocalChecked()));
         }
     } else if (info[0]->IsString()) {
-        response.error = std::make_unique<mbgl::Response::Error>(mbgl::Response::Error::Reason::Other,
-                                                                 *Nan::Utf8String(info[0]));
+        response.error = std::make_unique<mln::Response::Error>(mln::Response::Error::Reason::Other,
+                                                                *Nan::Utf8String(info[0]));
     } else if (info.Length() < 2 || !info[1]->IsObject()) {
         request->unrefRequest();
         return Nan::ThrowTypeError("Second argument must be a response object");
@@ -96,7 +96,7 @@ void NodeRequest::HandleCallback(const Nan::FunctionCallbackInfo<v8::Value>& inf
             const double modified =
                 Nan::To<double>(Nan::Get(res, Nan::New("modified").ToLocalChecked()).ToLocalChecked()).FromJust();
             if (!std::isnan(modified)) {
-                response.modified = mbgl::Timestamp{mbgl::Seconds(static_cast<mbgl::Seconds::rep>(modified / 1000))};
+                response.modified = mln::Timestamp{mln::Seconds(static_cast<mln::Seconds::rep>(modified / 1000))};
             }
         }
 
@@ -104,7 +104,7 @@ void NodeRequest::HandleCallback(const Nan::FunctionCallbackInfo<v8::Value>& inf
             const double expires =
                 Nan::To<double>(Nan::Get(res, Nan::New("expires").ToLocalChecked()).ToLocalChecked()).FromJust();
             if (!std::isnan(expires)) {
-                response.expires = mbgl::Timestamp{mbgl::Seconds(static_cast<mbgl::Seconds::rep>(expires / 1000))};
+                response.expires = mln::Timestamp{mln::Seconds(static_cast<mln::Seconds::rep>(expires / 1000))};
             }
         }
 

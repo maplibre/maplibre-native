@@ -19,7 +19,7 @@ const std::string kClassPath{"-Djava.class.path="};
 const std::string kDefaultDex{"/data/local/tmp/core-tests/classes.dex"};
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 bool initRuntime(int argc, char* argv[]) {
@@ -67,9 +67,9 @@ bool initRuntime(int argc, char* argv[]) {
         return false;
     }
 
-    mbgl::android::registerNatives(vm);
+    mln::android::registerNatives(vm);
     return true;
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

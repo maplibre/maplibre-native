@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
 #include "android_renderer_backend.hpp"
 #include <android/native_window.h>
 
@@ -9,7 +9,7 @@
 #include <wgpu.h>
 #endif
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AndroidWebGPURendererBackend : public AndroidRendererBackend,
@@ -20,17 +20,17 @@ public:
     ~AndroidWebGPURendererBackend() override;
 
     ANativeWindow* getWindow() { return window; }
-    mbgl::gfx::RendererBackend& getImpl() override { return *this; }
+    mln::gfx::RendererBackend& getImpl() override { return *this; }
 
     void resizeFramebuffer(int width, int height) override;
     PremultipliedImage readFramebuffer() override;
 
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
     void* getCurrentTextureView() override;
     void* getDepthStencilView() override;
-    mbgl::Size getFramebufferSize() const override;
+    mln::Size getFramebufferSize() const override;
 
     void presentSurface();
     void markNeedsPresent();
@@ -50,4 +50,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

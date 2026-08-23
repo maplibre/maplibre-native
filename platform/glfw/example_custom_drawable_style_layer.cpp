@@ -1,10 +1,10 @@
 #include "example_custom_drawable_style_layer.hpp"
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
+#include <mln/util/io.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/util/logging.hpp>
 
 #include <memory>
 #include <cmath>
@@ -34,18 +34,18 @@ void ExampleCustomDrawableStyleLayerHost::update(Interface& interface) {
     }
 }
 
-mbgl::Point<double> ExampleCustomDrawableStyleLayerHost::project(const mbgl::LatLng& c, const mbgl::TransformState& s) {
-    mbgl::LatLng unwrappedLatLng = c.wrapped();
-    unwrappedLatLng.unwrapForShortestPath(s.getLatLng(mbgl::LatLng::Wrapped));
-    return mbgl::Projection::project(unwrappedLatLng, s.getScale());
+mln::Point<double> ExampleCustomDrawableStyleLayerHost::project(const mln::LatLng& c, const mln::TransformState& s) {
+    mln::LatLng unwrappedLatLng = c.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(s.getLatLng(mln::LatLng::Wrapped));
+    return mln::Projection::project(unwrappedLatLng, s.getScale());
 }
 
 void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) {
-    constexpr float extent = mbgl::util::EXTENT;
+    constexpr float extent = mln::util::EXTENT;
 
     // add classic polylines
     {
-        using namespace mbgl;
+        using namespace mln;
 
         // set tile
         interface.setTileID({11, 327, 792});
@@ -130,7 +130,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
     // add wide vector polylines with tile coordinates
     {
-        using namespace mbgl;
+        using namespace mln;
 
         // set tile
         interface.setTileID({11, 327, 792});
@@ -225,7 +225,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
     // add fill polygon
     {
-        using namespace mbgl;
+        using namespace mln;
 
         // set tile
         interface.setTileID({11, 327, 790});
@@ -258,7 +258,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
     // add symbol
     {
-        using namespace mbgl;
+        using namespace mln;
 
         // set tile
         interface.setTileID({11, 327, 789});
@@ -267,7 +267,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
         // load image
         std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(
-            mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck_hat.png")));
+            mln::decodeImage(mln::util::read_file(assetsPath + "puck_hat.png")));
 
         // set symbol options
         Interface::SymbolOptions options;
@@ -291,13 +291,13 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
     }
 
     {
-        using namespace mbgl;
+        using namespace mln;
 
         GeometryCoordinate position{static_cast<int16_t>(extent * 1.0f), static_cast<int16_t>(extent * 0.5f)};
 
         // load image
         std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(
-            mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck_hat.png")));
+            mln::decodeImage(mln::util::read_file(assetsPath + "puck_hat.png")));
 
         // set symbol options
         Interface::SymbolOptions options;
@@ -321,7 +321,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
     // add polylines using wide vectors using geographic coordinates
     {
-        using namespace mbgl;
+        using namespace mln;
 
         // add polyline with geographic coordinates
         Interface::LineOptions options = {/*geometry=*/{},
@@ -358,7 +358,7 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
     // add polylines using wide vectors in tile coordinates
     {
-        using namespace mbgl;
+        using namespace mln;
 
         // set tile
         interface.setTileID({11, 327, 790});
@@ -408,19 +408,19 @@ void ExampleCustomDrawableStyleLayerHost::createDrawables(Interface& interface) 
 
 void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface) {
     constexpr float itemScale = 10.0f;
-    const mbgl::LatLng location{37.78, -122.47};
+    const mln::LatLng location{37.78, -122.47};
 
     Interface::GeometryOptions options;
 
     // load image
-    std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
-        mbgl::decodeImage(mbgl::util::read_file(assetsPath + "puck.png")));
+    std::shared_ptr<mln::PremultipliedImage> image = std::make_shared<mln::PremultipliedImage>(
+        mln::decodeImage(mln::util::read_file(assetsPath + "puck.png")));
 
     options.texture = interface.context.createTexture2D();
     options.texture->setImage(image);
-    options.texture->setSamplerConfiguration({.filter = mbgl::gfx::TextureFilterType::Linear,
-                                              .wrapU = mbgl::gfx::TextureWrapType::Clamp,
-                                              .wrapV = mbgl::gfx::TextureWrapType::Clamp});
+    options.texture->setSamplerConfiguration({.filter = mln::gfx::TextureFilterType::Linear,
+                                              .wrapU = mln::gfx::TextureWrapType::Clamp,
+                                              .wrapV = mln::gfx::TextureWrapType::Clamp});
 
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
@@ -434,7 +434,7 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
     vertices.emplace_back(Interface::GeometryVertex{.position = {0.0f, 0.0f, 0.0f}, .texcoords = {0.5f, 0.5f}});
 
     for (unsigned long i = 1; i <= numVtxCircumference; ++i) {
-        const float rad = mbgl::util::deg2radf((i - 1) * bearingStep);
+        const float rad = mln::util::deg2radf((i - 1) * bearingStep);
 
         Interface::GeometryVertex vertex;
         vertex.position = {sinf(rad) / 2.0f, cosf(rad) / 2.0f, 0.0f};
@@ -450,27 +450,27 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
 
     interface.setGeometryOptions(options);
 
-    interface.setGeometryTweakerCallback([=, frameCount = 0]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
-                                                             const mbgl::PaintParameters& params,
+    interface.setGeometryTweakerCallback([=, frameCount = 0]([[maybe_unused]] mln::gfx::Drawable& drawable,
+                                                             const mln::PaintParameters& params,
                                                              Interface::GeometryOptions& currentOptions) mutable {
         frameCount++;
 
-        const mbgl::Point<double>& center = project(location, params.state);
+        const mln::Point<double>& center = project(location, params.state);
 
         const float scale = itemScale * static_cast<float>(std::pow(2.f, params.state.getZoom())) *
                             params.pixelsToGLUnits[0];
 
-        mbgl::mat4 matrix = mbgl::matrix::identity4();
-        mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
-        mbgl::matrix::rotate_z(matrix, matrix, frameCount * 0.05f);
-        mbgl::matrix::scale(matrix, matrix, scale, scale, 1.0f);
-        mbgl::matrix::multiply(currentOptions.matrix, params.transformParams.nearClippedProjMatrix, matrix);
+        mln::mat4 matrix = mln::matrix::identity4();
+        mln::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
+        mln::matrix::rotate_z(matrix, matrix, frameCount * 0.05f);
+        mln::matrix::scale(matrix, matrix, scale, scale, 1.0f);
+        mln::matrix::multiply(currentOptions.matrix, params.transformParams.nearClippedProjMatrix, matrix);
 
         if (frameCount % 100 == 0) {
             if (currentOptions.color.g > 0.0f) {
-                currentOptions.color = mbgl::Color::red();
+                currentOptions.color = mln::Color::red();
             } else {
-                currentOptions.color = mbgl::Color::white();
+                currentOptions.color = mln::Color::white();
             }
         }
     });
@@ -481,25 +481,25 @@ void ExampleCustomDrawableStyleLayerHost::generateGeometry(Interface& interface)
 void ExampleCustomDrawableStyleLayerHost::loadGeometry(Interface& interface) {
     constexpr float itemScale = 0.1f;
     constexpr std::array<float, 3> itemRotation = {90.0f, 0.0f, 0.0f};
-    const mbgl::LatLng location{37.76, -122.47};
+    const mln::LatLng location{37.76, -122.47};
 
     Interface::GeometryOptions options;
 
-    interface.setGeometryTweakerCallback([=]([[maybe_unused]] mbgl::gfx::Drawable& drawable,
-                                             const mbgl::PaintParameters& params,
+    interface.setGeometryTweakerCallback([=]([[maybe_unused]] mln::gfx::Drawable& drawable,
+                                             const mln::PaintParameters& params,
                                              Interface::GeometryOptions& currentOptions) mutable {
-        const mbgl::Point<double>& center = project(location, params.state);
+        const mln::Point<double>& center = project(location, params.state);
 
         const float scale = itemScale * static_cast<float>(std::pow(2.f, params.state.getZoom())) *
                             params.pixelsToGLUnits[0];
 
-        mbgl::mat4 matrix = mbgl::matrix::identity4();
-        mbgl::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
-        mbgl::matrix::rotate_x(matrix, matrix, mbgl::util::deg2radf(itemRotation[0]));
-        mbgl::matrix::rotate_y(matrix, matrix, mbgl::util::deg2radf(itemRotation[1]));
-        mbgl::matrix::rotate_z(matrix, matrix, mbgl::util::deg2radf(itemRotation[2]));
-        mbgl::matrix::scale(matrix, matrix, scale, scale, scale);
-        mbgl::matrix::multiply(currentOptions.matrix, params.transformParams.nearClippedProjMatrix, matrix);
+        mln::mat4 matrix = mln::matrix::identity4();
+        mln::matrix::translate(matrix, matrix, center.x, center.y, 0.0);
+        mln::matrix::rotate_x(matrix, matrix, mln::util::deg2radf(itemRotation[0]));
+        mln::matrix::rotate_y(matrix, matrix, mln::util::deg2radf(itemRotation[1]));
+        mln::matrix::rotate_z(matrix, matrix, mln::util::deg2radf(itemRotation[2]));
+        mln::matrix::scale(matrix, matrix, scale, scale, scale);
+        mln::matrix::multiply(currentOptions.matrix, params.transformParams.nearClippedProjMatrix, matrix);
     });
 
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
@@ -526,7 +526,7 @@ void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
 
     if (!reader.ParseFromFile(filename, readerConfig)) {
         if (!reader.Error().empty()) {
-            mbgl::Log::Error(mbgl::Event::General, reader.Error());
+            mln::Log::Error(mln::Event::General, reader.Error());
         }
 
         assert(false);
@@ -534,14 +534,14 @@ void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
     }
 
     if (!reader.Warning().empty()) {
-        mbgl::Log::Error(mbgl::Event::General, reader.Warning());
+        mln::Log::Error(mln::Event::General, reader.Warning());
     }
 
     const tinyobj::attrib_t& attributes = reader.GetAttrib();
     const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
 
     if (attributes.texcoords.empty()) {
-        options.color = mbgl::Color::green();
+        options.color = mln::Color::green();
     } else {
         // TODO parse material
 
@@ -575,15 +575,15 @@ void ExampleCustomDrawableStyleLayerHost::importObj(Interface& interface,
     }
 }
 
-mbgl::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardTexture(
+mln::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardTexture(
     Interface& interface,
     uint16_t wb,
     uint16_t hb,
     uint16_t blockSize,
     const std::array<uint8_t, 4>& color1,
     const std::array<uint8_t, 4>& color2) {
-    std::shared_ptr<mbgl::PremultipliedImage> image = std::make_shared<mbgl::PremultipliedImage>(
-        mbgl::Size(wb * blockSize, hb * blockSize));
+    std::shared_ptr<mln::PremultipliedImage> image = std::make_shared<mln::PremultipliedImage>(
+        mln::Size(wb * blockSize, hb * blockSize));
 
     constexpr uint8_t pixelSize = sizeof(uint8_t) * 4;
 
@@ -601,9 +601,9 @@ mbgl::gfx::Texture2DPtr ExampleCustomDrawableStyleLayerHost::createCheckerboardT
     }
 
     auto texture = interface.context.createTexture2D();
-    texture->setSamplerConfiguration({.filter = mbgl::gfx::TextureFilterType::Linear,
-                                      .wrapU = mbgl::gfx::TextureWrapType::Clamp,
-                                      .wrapV = mbgl::gfx::TextureWrapType::Clamp});
+    texture->setSamplerConfiguration({.filter = mln::gfx::TextureFilterType::Linear,
+                                      .wrapU = mln::gfx::TextureWrapType::Clamp,
+                                      .wrapV = mln::gfx::TextureWrapType::Clamp});
     texture->setImage(std::move(image));
 
     return texture;
