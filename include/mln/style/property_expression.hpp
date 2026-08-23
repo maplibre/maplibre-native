@@ -58,9 +58,7 @@ public:
         return capturedGlobalState_;
     }
 
-    /// The names of the global-state properties referenced by the expression,
-    /// collected once at construction. Null if the expression does not
-    /// reference the global state.
+    /// Null if the expression does not reference the global state.
     const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs_.get(); }
 
     /// Can be used for aggregating property expressions from multiple properties(layers) into single match / case

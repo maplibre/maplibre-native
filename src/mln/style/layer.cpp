@@ -260,8 +260,7 @@ std::optional<conversion::Error> Layer::setVisibility(const conversion::Converti
     }
 
     if (isArray(value)) {
-        // Visibility given as an expression. Per the style specification such
-        // expressions are data-constant and may only use "global-state".
+        // Per the style specification, visibility expressions may only use "global-state".
         expression::ParsingContext ctx(expression::type::String);
         expression::ParseResult parsed = ctx.parseExpression(value);
         if (!parsed) {
