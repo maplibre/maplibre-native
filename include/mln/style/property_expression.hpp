@@ -58,6 +58,11 @@ public:
         return capturedGlobalState_;
     }
 
+    /// The names of the global-state properties referenced by the expression,
+    /// collected once at construction. Null if the expression does not
+    /// reference the global state.
+    const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs_.get(); }
+
     /// Can be used for aggregating property expressions from multiple properties(layers) into single match / case
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
@@ -73,6 +78,8 @@ protected:
     std::shared_ptr<const Expression> expression;
 
     std::shared_ptr<const GlobalStateMap> capturedGlobalState_;
+
+    std::shared_ptr<const std::set<std::string>> globalStateRefs_;
 
     ZoomCurvePtr zoomCurve;
 

@@ -37,6 +37,10 @@ expression::Dependency ColorReliefLayerProperties::getEvaluatedDependencies() co
     return evaluated.getDependencies();
 }
 
+void ColorReliefLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

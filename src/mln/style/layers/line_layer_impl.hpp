@@ -22,6 +22,11 @@ public:
         return layout.getDependencies() | Layer::Impl::getLayoutDependencies();
     }
 
+    void collectLayoutGlobalStateRefs(std::set<std::string>& refs) const override {
+        layout.collectGlobalStateRefs(refs);
+        Layer::Impl::collectLayoutGlobalStateRefs(refs);
+    }
+
     LineLayoutProperties::Unevaluated layout;
     LinePaintProperties::Transitionable paint;
 

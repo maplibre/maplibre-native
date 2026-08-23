@@ -235,6 +235,48 @@ TEST(GlobalStateExpression, FormatSectionOverrideUsesCapturedState) {
     EXPECT_EQ(ExprValue(*Color::parse("red")), *result);
 }
 
+TEST(GlobalStateExpression, CollectGlobalStateRefs) {
+    auto expr = parseExpression(R"(["case", ["to-boolean", ["global-state", "a"]], ["to-number", ["global-state", "b"]], 0])",
+                                {type::Number});
+    ASSERT_TRUE(expr);
+
+    std::set<std::string> refs;
+    collectGlobalStateRefs(*expr, refs);
+    EXPECT_EQ((std::set<std::string>{"a", "b"}), refs);
+
+    // Expressions without global-state references collect nothing.
+    auto plain = parseExpression(R"(["to-number", ["get", "width"]])", {type::Number});
+    ASSERT_TRUE(plain);
+    refs.clear();
+    collectGlobalStateRefs(*plain, refs);
+    EXPECT_TRUE(refs.empty());
+}
+
+TEST(GlobalStateExpression, PropertyExpressionGlobalStateRefs) {
+    auto expr = parseExpression(R"(["to-number", ["global-state", "width"]])", {type::Number});
+    ASSERT_TRUE(expr);
+    PropertyExpression<float> propertyExpression(std::move(expr));
+    ASSERT_TRUE(propertyExpression.getGlobalStateRefs());
+    EXPECT_EQ((std::set<std::string>{"width"}), *propertyExpression.getGlobalStateRefs());
+
+    auto plain = parseExpression(R"(["to-number", ["get", "width"]])", {type::Number});
+    ASSERT_TRUE(plain);
+    PropertyExpression<float> plainExpression(std::move(plain));
+    EXPECT_EQ(nullptr, plainExpression.getGlobalStateRefs());
+}
+
+TEST(GlobalStateExpression, GlobalStateRefsIntersect) {
+    const std::set<std::string> refs{"a", "b"};
+    const std::set<std::string> changedHit{"b", "c"};
+    const std::set<std::string> changedMiss{"c", "d"};
+
+    EXPECT_TRUE(globalStateRefsIntersect(&refs, &changedHit));
+    EXPECT_FALSE(globalStateRefsIntersect(&refs, &changedMiss));
+    // Unknown refs or unknown changed keys are conservatively a match.
+    EXPECT_TRUE(globalStateRefsIntersect(nullptr, &changedHit));
+    EXPECT_TRUE(globalStateRefsIntersect(&refs, nullptr));
+}
+
 TEST(GlobalStateExpression, Serialize) {
     auto expr = parseExpression(R"(["global-state", "showLabels"])");
     ASSERT_TRUE(expr);
