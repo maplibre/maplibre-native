@@ -128,6 +128,7 @@ void Map::Impl::onUpdate() {
                                .images = style->impl->getImageImpls(),
                                .sources = style->impl->getSourceImpls(),
                                .layers = style->impl->getLayerImpls(),
+                               .globalState = style->impl->getGlobalStateShared(),
                                .annotationManager = annotationManager.makeWeakPtr(),
                                .fileSource = fileSource,
                                .prefetchZoomDelta = prefetchZoomDelta,

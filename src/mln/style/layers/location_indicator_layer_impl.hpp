@@ -25,6 +25,10 @@ public:
     bool hasLayoutDifference(const Layer::Impl &) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer> &) const override;
 
+    expression::Dependency getLayoutDependencies() const noexcept override {
+        return layout.getDependencies() | Layer::Impl::getLayoutDependencies();
+    }
+
     LocationIndicatorLayoutProperties::Unevaluated layout;
     LocationIndicatorPaintProperties::Transitionable paint;
     DECLARE_LAYER_TYPE_INFO;

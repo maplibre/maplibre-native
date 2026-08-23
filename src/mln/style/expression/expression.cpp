@@ -30,6 +30,8 @@ std::ostream& operator<<(std::ostream& os, const Dependency deps) {
     add(Dependency::Bind, "Bind");
     add(Dependency::Var, "Var");
     add(Dependency::Override, "Override");
+    add(Dependency::Elevation, "Elevation");
+    add(Dependency::GlobalState, "GlobalState");
 
     return os;
 }

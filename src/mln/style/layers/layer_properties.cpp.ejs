@@ -44,6 +44,10 @@ expression::Dependency <%- camelize(type) %>LayerProperties::getDependencies() c
     return layerImpl().paint.getDependencies()<% if (layoutProperties.length) { -%> | layerImpl().layout.getDependencies()<% } -%>;
 }
 
+expression::Dependency <%- camelize(type) %>LayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
 } // namespace style
 } // namespace mln
 

@@ -55,6 +55,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
+    expression::Dependency getEvaluatedDependencies() const noexcept override;
+
     const HeatmapLayer::Impl& layerImpl() const noexcept;
     // Data members.
     HeatmapPaintProperties::PossiblyEvaluated evaluated;

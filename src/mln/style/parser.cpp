@@ -112,6 +112,10 @@ StyleParseResult Parser::parse(const std::string& json) {
         parseLight(document["light"]);
     }
 
+    if (document.HasMember("state")) {
+        parseState(document["state"]);
+    }
+
     if (document.HasMember("sources")) {
         parseSources(document["sources"]);
     }
@@ -234,6 +238,66 @@ void Parser::parseLight(const JSValue& value) {
     }
 
     light = *converted;
+}
+
+namespace {
+
+// Deep conversion of a style JSON value to an mln::Value (unlike
+// conversion::toValue, which only handles scalar values).
+mln::Value parseStateValue(const JSValue& value) {
+    switch (value.GetType()) {
+        case rapidjson::kNullType:
+            return NullValue();
+        case rapidjson::kFalseType:
+            return false;
+        case rapidjson::kTrueType:
+            return true;
+        case rapidjson::kStringType:
+            return std::string{value.GetString(), value.GetStringLength()};
+        case rapidjson::kNumberType:
+            if (value.IsUint64()) return value.GetUint64();
+            if (value.IsInt64()) return value.GetInt64();
+            return value.GetDouble();
+        case rapidjson::kArrayType: {
+            mapbox::base::ValueArray result;
+            result.reserve(value.Size());
+            for (const auto& element : value.GetArray()) {
+                result.emplace_back(parseStateValue(element));
+            }
+            return result;
+        }
+        case rapidjson::kObjectType: {
+            mapbox::base::ValueObject result;
+            for (const auto& member : value.GetObject()) {
+                result.emplace(std::string{member.name.GetString(), member.name.GetStringLength()},
+                               parseStateValue(member.value));
+            }
+            return result;
+        }
+    }
+    return NullValue();
+}
+
+} // namespace
+
+void Parser::parseState(const JSValue& value) {
+    if (!value.IsObject()) {
+        Log::Warning(Event::ParseStyle, "state must be an object");
+        return;
+    }
+
+    for (const auto& member : value.GetObject()) {
+        std::string propertyName{member.name.GetString(), member.name.GetStringLength()};
+        if (!member.value.IsObject()) {
+            Log::Warning(Event::ParseStyle, "state property \"" + propertyName + "\" must be an object");
+            continue;
+        }
+        mln::Value defaultValue;
+        if (member.value.HasMember("default")) {
+            defaultValue = parseStateValue(member.value["default"]);
+        }
+        globalStateDefaults.emplace(std::move(propertyName), std::move(defaultValue));
+    }
 }
 
 void Parser::parseSources(const JSValue& value) {

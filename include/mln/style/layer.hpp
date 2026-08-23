@@ -3,6 +3,7 @@
 #include <mln/style/conversion.hpp>
 #include <mln/style/style_property.hpp>
 #include <mln/style/types.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/immutable.hpp>
 
 #include <mapbox/std/weak.hpp>
@@ -132,6 +133,10 @@ public:
     // Visibility
     VisibilityType getVisibility() const;
     void setVisibility(VisibilityType);
+
+    /// Re-evaluates the layer's visibility expression (a "visibility" layout
+    /// value using "global-state"), if any, against the given global state.
+    void reevaluateVisibility(const GlobalStateMap&);
 
     // Zoom range
     float getMinZoom() const;

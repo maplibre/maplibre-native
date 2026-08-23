@@ -81,6 +81,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
+    expression::Dependency getEvaluatedDependencies() const noexcept override;
+
     const FillExtrusionLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;

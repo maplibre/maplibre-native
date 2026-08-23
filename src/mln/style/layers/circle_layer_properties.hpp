@@ -95,6 +95,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
+    expression::Dependency getEvaluatedDependencies() const noexcept override;
+
     const CircleLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CirclePaintProperties::PossiblyEvaluated evaluated;
