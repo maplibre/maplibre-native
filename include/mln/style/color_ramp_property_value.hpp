@@ -36,9 +36,14 @@ public:
         return {};
     }
 
-    Color evaluate(double rampEvaluationParameter) const {
-        const auto result = value->evaluate(expression::EvaluationContext({}, nullptr, {rampEvaluationParameter}));
-        return *expression::fromExpressionValue<Color>(*result);
+    Color evaluate(double rampEvaluationParameter, const GlobalStateMap* globalState = nullptr) const {
+        const auto result = value->evaluate(
+            expression::EvaluationContext({}, nullptr, {rampEvaluationParameter}).withGlobalState(globalState));
+        if (!result) {
+            return {};
+        }
+        const auto color = expression::fromExpressionValue<Color>(*result);
+        return color ? *color : Color{};
     }
 
     bool isDataDriven() const noexcept { return false; }

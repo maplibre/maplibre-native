@@ -59,6 +59,13 @@ void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
 }
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    if (colorRampGlobalState != parameters.globalState) {
+        colorRampGlobalState = parameters.globalState;
+        if (unevaluated.get<HeatmapColor>().getValue().getDependencies() & expression::Dependency::GlobalState) {
+            updateColorRamp();
+        }
+    }
+
     const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<HeatmapLayerProperties>(
         staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
@@ -92,7 +99,7 @@ void RenderHeatmapLayer::updateColorRamp() {
             colorValue = HeatmapLayer::getDefaultHeatmapColor();
         }
 
-        applyColorRamp(colorValue, *colorRamp);
+        applyColorRamp(colorValue, *colorRamp, colorRampGlobalState.get());
     }
 }
 

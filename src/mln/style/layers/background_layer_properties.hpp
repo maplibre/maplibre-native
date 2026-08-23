@@ -47,6 +47,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
+    expression::Dependency getEvaluatedDependencies() const noexcept override;
+
     const BackgroundLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;

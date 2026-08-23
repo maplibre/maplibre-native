@@ -164,6 +164,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         if (needsRelayout) {
+            tile.setGlobalState(parameters.globalState);
             tile.setLayers(layers);
         }
     };
@@ -190,6 +191,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (!tile) {
             tile = createTile(tileID, observer);
             if (!tile) return nullptr;
+            tile->setGlobalState(parameters.globalState);
             tile->setLayers(layers);
         }
 

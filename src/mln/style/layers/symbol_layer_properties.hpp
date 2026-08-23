@@ -365,6 +365,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
+    expression::Dependency getEvaluatedDependencies() const noexcept override;
+
     const SymbolLayer::Impl& layerImpl() const noexcept;
     // Data members.
     SymbolPaintProperties::PossiblyEvaluated evaluated;

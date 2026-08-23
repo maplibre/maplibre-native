@@ -5,6 +5,7 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add support for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression and the root [`state`](https://maplibre.org/maplibre-style-spec/root/#state) style property, including the runtime API `style::Style::setGlobalStateProperty` / `style::Style::getGlobalState`. The expression is supported in filters, layout and paint properties (including color ramps such as `heatmap-color` and `line-gradient`), the `visibility` layout property, and feature query filters ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
 - [core] Locally rasterized CJK glyphs now render at 2x texture resolution, preserving fine strokes. Mirrors [maplibre-gl-js#3006](https://github.com/maplibre/maplibre-gl-js/pull/3006).
 - [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)

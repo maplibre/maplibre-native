@@ -27,7 +27,17 @@ public:
         }
 
         return defaultValue.match(
-            [&context](const style::PropertyExpression<T>& e) { return e.getExpression().evaluate(context); },
+            [&context](const style::PropertyExpression<T>& e) {
+                // Fall back to the global state captured by the wrapped
+                // property expression, which would otherwise be bypassed by
+                // evaluating the raw inner expression directly.
+                if (context.globalState == nullptr && e.getCapturedGlobalState() != nullptr) {
+                    EvaluationContext contextWithState = context;
+                    contextWithState.globalState = e.getCapturedGlobalState().get();
+                    return e.getExpression().evaluate(contextWithState);
+                }
+                return e.getExpression().evaluate(context);
+            },
             [](const T& t) -> EvaluationResult { return t; });
     }
 

@@ -18,6 +18,10 @@ public:
         return layout.getDependencies() | paint.getDependencies();
     }
 
+    expression::Dependency getLayoutDependencies() const noexcept override {
+        return layout.getDependencies() | Layer::Impl::getLayoutDependencies();
+    }
+
     LineLayoutProperties::Unevaluated layout;
     LinePaintProperties::Transitionable paint;
 

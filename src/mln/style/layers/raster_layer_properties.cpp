@@ -33,6 +33,10 @@ expression::Dependency RasterLayerProperties::getDependencies() const noexcept {
     return layerImpl().paint.getDependencies();
 }
 
+expression::Dependency RasterLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
 } // namespace style
 } // namespace mln
 

@@ -71,6 +71,15 @@ Light* Style::getLight() {
     return impl->getLight();
 }
 
+GlobalStateMap Style::getGlobalState() const {
+    return impl->getGlobalState();
+}
+
+void Style::setGlobalStateProperty(const std::string& name, const Value& value) {
+    impl->mutated = true;
+    impl->setGlobalStateProperty(name, value);
+}
+
 const Light* Style::getLight() const {
     return impl->getLight();
 }

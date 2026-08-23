@@ -101,7 +101,9 @@ public:
           hasPattern(false) {
         assert(!group.empty());
         auto leaderLayerProperties = staticImmutableCast<LayerPropertiesType>(group.front());
-        layout = leaderLayerProperties->layerImpl().layout.evaluate(PropertyEvaluationParameters(zoom));
+        PropertyEvaluationParameters evaluationParameters(zoom);
+        evaluationParameters.globalState = parameters.globalState;
+        layout = leaderLayerProperties->layerImpl().layout.evaluate(evaluationParameters);
         sourceLayerID = leaderLayerProperties->layerImpl().sourceLayer;
         bucketLeaderID = leaderLayerProperties->layerImpl().id;
 
@@ -128,7 +130,8 @@ public:
             auto feature = sourceLayer->getFeature(i);
             if (!leaderLayerProperties->layerImpl().filter(
                     style::expression::EvaluationContext(this->zoom, feature.get())
-                        .withCanonicalTileID(&parameters.tileID.canonical)))
+                        .withCanonicalTileID(&parameters.tileID.canonical)
+                        .withGlobalState(parameters.globalState.get())))
                 continue;
 
             PatternLayerMap patternDependencyMap;

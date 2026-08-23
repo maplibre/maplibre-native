@@ -71,6 +71,8 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
+    expression::Dependency getEvaluatedDependencies() const noexcept override;
+
     const HillshadeLayer::Impl& layerImpl() const noexcept;
     // Data members.
     HillshadePaintProperties::PossiblyEvaluated evaluated;

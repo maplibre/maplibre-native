@@ -1,7 +1,9 @@
 #pragma once
 
 #include <mln/style/filter.hpp>
+#include <mln/util/feature.hpp>
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <optional>
@@ -22,6 +24,10 @@ public:
     std::optional<std::vector<std::string>> layerIDs;
 
     std::optional<style::Filter> filter;
+
+    /// The style's current global state, injected by the renderer so that
+    /// `global-state` expressions in the filter can be evaluated.
+    std::shared_ptr<const GlobalStateMap> globalState;
 };
 
 /**
@@ -38,6 +44,10 @@ public:
     std::optional<std::vector<std::string>> sourceLayers;
 
     std::optional<style::Filter> filter;
+
+    /// The style's current global state, injected by the renderer so that
+    /// `global-state` expressions in the filter can be evaluated.
+    std::shared_ptr<const GlobalStateMap> globalState;
 };
 
 } // namespace mln

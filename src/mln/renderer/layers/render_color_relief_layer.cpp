@@ -61,6 +61,14 @@ void RenderColorReliefLayer::transition(const TransitionParameters& parameters) 
 }
 
 void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    if (colorRampGlobalState != parameters.globalState) {
+        colorRampGlobalState = parameters.globalState;
+        if (unevaluated.get<ColorReliefColor>().getValue().getDependencies() &
+            style::expression::Dependency::GlobalState) {
+            updateColorRamp();
+        }
+    }
+
     const auto previousProperties = staticImmutableCast<ColorReliefLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<ColorReliefLayerProperties>(
         staticImmutableCast<ColorReliefLayer::Impl>(baseImpl),
@@ -134,6 +142,7 @@ void RenderColorReliefLayer::updateColorRamp() {
 
             // Create evaluation context with elevation as color ramp parameter
             expression::EvaluationContext context(std::nullopt, nullptr, static_cast<double>(elevation));
+            context.globalState = colorRampGlobalState.get();
 
             expression::EvaluationResult result = expr.evaluate(context);
 
@@ -158,7 +167,7 @@ void RenderColorReliefLayer::updateColorRamp() {
             float elevation = minElevation + t * (maxElevation - minElevation);
             elevationStopsVector.push_back(elevation);
 
-            Color color = colorValue.evaluate(static_cast<double>(elevation));
+            Color color = colorValue.evaluate(static_cast<double>(elevation), colorRampGlobalState.get());
             colorStopsVector.push_back(color);
         }
     }

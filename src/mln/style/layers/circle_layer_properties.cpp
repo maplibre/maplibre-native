@@ -33,6 +33,10 @@ expression::Dependency CircleLayerProperties::getDependencies() const noexcept {
     return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
 }
 
+expression::Dependency CircleLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
 } // namespace style
 } // namespace mln
 

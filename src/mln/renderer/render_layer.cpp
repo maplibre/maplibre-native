@@ -232,7 +232,9 @@ void RenderLayer::activateLayerGroup(const LayerGroupBasePtr& layerGroup_,
     }
 }
 
-bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue, PremultipliedImage& image) {
+bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue,
+                                 PremultipliedImage& image,
+                                 const GlobalStateMap* globalState) {
     if (colorValue.isUndefined()) {
         return false;
     }
@@ -240,7 +242,7 @@ bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue
     const auto length = image.bytes();
 
     for (uint32_t i = 0; i < length; i += 4) {
-        const auto color = colorValue.evaluate(static_cast<double>(i) / length);
+        const auto color = colorValue.evaluate(static_cast<double>(i) / length, globalState);
         image.data[i + 0] = static_cast<uint8_t>(std::floor(color.r * 255.f));
         image.data[i + 1] = static_cast<uint8_t>(std::floor(color.g * 255.f));
         image.data[i + 2] = static_cast<uint8_t>(std::floor(color.b * 255.f));

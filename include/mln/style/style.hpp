@@ -4,6 +4,7 @@
 #include <mln/map/camera.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/transition_options.hpp>
+#include <mln/util/feature.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/immutable.hpp>
 
@@ -45,6 +46,12 @@ public:
     const Light* getLight() const;
 
     void setLight(std::unique_ptr<Light>);
+
+    // Global state, used by the "global-state" expression.
+    // Setting a null value resets the property to the default defined in the
+    // style's root "state" property (or null if there is none).
+    GlobalStateMap getGlobalState() const;
+    void setGlobalStateProperty(const std::string& name, const Value& value);
 
     // Images
     std::optional<Image> getImage(const std::string&) const;
