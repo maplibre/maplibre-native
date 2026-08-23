@@ -78,6 +78,8 @@ public:
 
     expression::Dependency getEvaluatedDependencies() const noexcept override;
 
+    void collectEvaluatedGlobalStateRefs(std::set<std::string>&) const override;
+
     const FillLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;

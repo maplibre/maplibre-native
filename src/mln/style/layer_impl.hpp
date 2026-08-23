@@ -9,6 +9,7 @@
 
 #include <limits>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -60,6 +61,16 @@ public:
     expression::Dependency getFilterDependencies() const noexcept {
         return (filter.expression && *filter.expression) ? (**filter.expression).dependencies
                                                          : expression::Dependency::None;
+    }
+
+    /// Collect the names of the global-state properties referenced by
+    /// expressions that affect tile layout: the filter and the layout
+    /// properties. Derived classes with layout properties combine those with
+    /// the filter references from this base implementation.
+    virtual void collectLayoutGlobalStateRefs(std::set<std::string>& refs) const {
+        if (filter.expression && *filter.expression) {
+            expression::collectGlobalStateRefs(**filter.expression, refs);
+        }
     }
 
     // Optional expression backing the "visibility" layout value. Per the

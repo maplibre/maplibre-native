@@ -39,6 +39,10 @@ expression::Dependency BackgroundLayerProperties::getEvaluatedDependencies() con
     return evaluated.getDependencies();
 }
 
+void BackgroundLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

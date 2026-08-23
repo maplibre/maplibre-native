@@ -37,6 +37,10 @@ expression::Dependency HeatmapLayerProperties::getEvaluatedDependencies() const 
     return evaluated.getDependencies();
 }
 
+void HeatmapLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

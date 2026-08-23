@@ -1,5 +1,6 @@
 #include <mln/style/expression/compound_expression.hpp>
 #include <mln/style/expression/expression.hpp>
+#include <mln/style/expression/literal.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 
 #include <sstream>
@@ -8,6 +9,35 @@
 namespace mln {
 
 using Dependency = style::expression::Dependency;
+
+namespace style {
+namespace expression {
+
+void collectGlobalStateRefs(const Expression& expression, std::set<std::string>& refs) {
+    if (!(expression.dependencies & Dependency::GlobalState)) {
+        return;
+    }
+    if (expression.getKind() == Kind::CompoundExpression) {
+        const auto* compound = static_cast<const CompoundExpression*>(&expression);
+        if (compound->getOperator() == "global-state") {
+            // The property name argument is enforced to be a string literal
+            // at parse time.
+            expression.eachChild([&](const Expression& child) {
+                if (child.getKind() == Kind::Literal) {
+                    const auto& value = static_cast<const Literal*>(&child)->getValue();
+                    if (value.is<std::string>()) {
+                        refs.insert(value.get<std::string>());
+                    }
+                }
+            });
+            return;
+        }
+    }
+    expression.eachChild([&](const Expression& child) { collectGlobalStateRefs(child, refs); });
+}
+
+} // namespace expression
+} // namespace style
 
 std::ostream& operator<<(std::ostream& os, const Dependency deps) {
     if (deps == Dependency::None) {

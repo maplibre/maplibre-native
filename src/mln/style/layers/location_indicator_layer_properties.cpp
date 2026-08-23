@@ -37,6 +37,10 @@ expression::Dependency LocationIndicatorLayerProperties::getEvaluatedDependencie
     return evaluated.getDependencies();
 }
 
+void LocationIndicatorLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 
