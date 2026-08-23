@@ -13,6 +13,9 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Changes to the custom Metal layer to allow more flexible rendering ([#4446](https://github.com/maplibre/maplibre-native/pull/4446)).
 - feat: implement split and join expressions ([#4463](https://github.com/maplibre/maplibre-native/pull/4463)).
 - core: rename `mbgl` namespace to `mln` ([#4487](https://github.com/maplibre/maplibre-native/pull/4487)).
+- core: rename `mbgl` directories to `mln` ([#4511]((https://github.com/maplibre/maplibre-native/pull/4511))).
+- Fix surface transform ([#4495](https://github.com/maplibre/maplibre-native/pull/4495)).
+- fix(core): Fix nullptr access during custom layer pre-render ([#4496](https://github.com/maplibre/maplibre-native/pull/4496)).
 
 ## 6.28.0
 
