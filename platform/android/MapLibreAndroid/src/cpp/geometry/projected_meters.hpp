@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/geometry.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <jni/jni.hpp>
 

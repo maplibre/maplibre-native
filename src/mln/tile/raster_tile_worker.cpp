@@ -1,0 +1,27 @@
+#include <mln/tile/raster_tile_worker.hpp>
+#include <mln/tile/raster_tile.hpp>
+#include <mln/renderer/buckets/raster_bucket.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/util/premultiply.hpp>
+
+namespace mln {
+
+RasterTileWorker::RasterTileWorker(const ActorRef<RasterTileWorker>&, ActorRef<RasterTile> parent_)
+    : parent(std::move(parent_)) {}
+
+void RasterTileWorker::parse(const std::shared_ptr<const std::string>& data, uint64_t correlationID) {
+    if (!data) {
+        parent.invoke(&RasterTile::onParsed, nullptr,
+                      correlationID); // No data; empty tile.
+        return;
+    }
+
+    try {
+        auto bucket = std::make_unique<RasterBucket>(decodeImage(*data));
+        parent.invoke(&RasterTile::onParsed, std::move(bucket), correlationID);
+    } catch (...) {
+        parent.invoke(&RasterTile::onError, std::current_exception(), correlationID);
+    }
+}
+
+} // namespace mln

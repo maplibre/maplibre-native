@@ -8,17 +8,17 @@
 #import "NSValue+MLNAdditions.h"
 #import "NSValue+MLNStyleAttributeAdditions.h"
 
-#include <mbgl/style/conversion/color_ramp_property_value.hpp>
-#include <mbgl/style/conversion/position.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#import <mbgl/style/transition_options.hpp>
-#import <mbgl/style/types.hpp>
+#include <mln/style/conversion/color_ramp_property_value.hpp>
+#include <mln/style/conversion/position.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/expression/dsl.hpp>
+#import <mln/style/transition_options.hpp>
+#import <mln/style/types.hpp>
 #import "MLNConversion.h"
 #import "MLNSymbolStyleLayer.h"
 
-#import <mbgl/util/enum.hpp>
-#include <mbgl/util/interpolate.hpp>
+#import <mln/util/enum.hpp>
+#include <mln/util/interpolate.hpp>
 
 #include <memory>
 

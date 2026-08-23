@@ -1,6 +1,6 @@
 #include "vector_source.hpp"
 
-#include <mbgl/renderer/query.hpp>
+#include <mln/renderer/query.hpp>
 
 // Java -> C++ conversion
 #include "../android_conversion.hpp"
@@ -12,7 +12,7 @@
 #include "../../geojson/feature.hpp"
 #include "../conversion/url_or_tileset.hpp"
 
-#include <mbgl/util/variant.hpp>
+#include <mln/util/variant.hpp>
 
 #include <string>
 #include <vector>

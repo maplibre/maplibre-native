@@ -10,12 +10,12 @@
 #import <MetalKit/MetalKit.h>
 #endif
 
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/math/wrap.hpp>
-#include <mbgl/style/layers/custom_layer.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/math/wrap.hpp>
+#include <mln/style/layers/custom_layer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#include <mln/style/layers/mtl/custom_layer_render_parameters.hpp>
 #endif
 
 class MLNCustomLayerHost;

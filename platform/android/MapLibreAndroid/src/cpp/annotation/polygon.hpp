@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/annotation/annotation.hpp>
+#include <mln/annotation/annotation.hpp>
 
 #include "multi_point.hpp"
 

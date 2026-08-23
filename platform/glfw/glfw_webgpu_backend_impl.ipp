@@ -1,13 +1,13 @@
 #include "glfw_webgpu_backend.hpp"
 
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/webgpu/command_encoder.hpp>
-#include <mbgl/gfx/renderable.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/webgpu/command_encoder.hpp>
+#include <mln/gfx/renderable.hpp>
 
 #include <GLFW/glfw3.h>
 

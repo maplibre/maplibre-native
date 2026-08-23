@@ -1,6 +1,6 @@
-#include <mbgl/text/local_glyph_rasterizer.hpp>
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/text/local_glyph_rasterizer.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/util/platform.hpp>
 
 #include <jni/jni.hpp>
 

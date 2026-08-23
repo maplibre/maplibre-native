@@ -1,8 +1,8 @@
 #include "url_or_tileset.hpp"
 #include "../android_conversion.hpp"
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/conversion/tileset.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/conversion/tileset.hpp>
 
 namespace mln {
 namespace android {

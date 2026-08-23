@@ -1,7 +1,7 @@
 #include "custom_geometry_source.hpp"
 #include "attach_env.hpp"
 
-#include <mbgl/renderer/query.hpp>
+#include <mln/renderer/query.hpp>
 
 // Java -> C++ conversion
 #include "../android_conversion.hpp"
@@ -11,7 +11,7 @@
 #include "../../conversion/conversion.hpp"
 #include "../../conversion/collection.hpp"
 #include "../../geojson/feature.hpp"
-#include <mbgl/style/conversion/custom_geometry_source_options.hpp>
+#include <mln/style/conversion/custom_geometry_source_options.hpp>
 
 #include <string>
 

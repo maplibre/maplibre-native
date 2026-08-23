@@ -2,9 +2,9 @@
 #import "MLNFoundation.h"
 #import "MLNShape.h"
 
-#import <mbgl/style/conversion/geojson.hpp>
-#import <mbgl/util/feature.hpp>
-#import <mbgl/util/geo.hpp>
+#import <mln/style/conversion/geojson.hpp>
+#import <mln/util/feature.hpp>
+#import <mln/util/geo.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 

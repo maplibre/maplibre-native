@@ -1,7 +1,7 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/text/glyph_pbf.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/text/glyph_pbf.hpp>
+#include <mln/util/io.hpp>
 
 using namespace mln;
 

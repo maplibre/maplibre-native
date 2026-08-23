@@ -1,10 +1,10 @@
 #include "example_custom_drawable_style_layer.hpp"
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/gfx/drawable.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
+#include <mln/util/io.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/util/logging.hpp>
 
 #include <memory>
 #include <cmath>

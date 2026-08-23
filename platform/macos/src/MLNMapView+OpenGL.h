@@ -1,8 +1,8 @@
 #import "MLNMapView+Impl.h"
 #import "MLNMapView_Private.h"
 
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gl/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/gl/renderer_backend.hpp>
 
 /// Adapter responsible for bridging calls from mbgl to MLNMapView and Cocoa.
 class MLNMapViewOpenGLImpl final : public MLNMapViewImpl, public mln::gl::RendererBackend, public mln::gfx::Renderable {

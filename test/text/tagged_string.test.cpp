@@ -1,7 +1,7 @@
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/text/tagged_string.hpp>
+#include <mln/text/tagged_string.hpp>
 
 using namespace mln;
 

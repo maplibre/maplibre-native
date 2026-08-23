@@ -1,10 +1,10 @@
 #if MLN_RENDER_BACKEND_OPENGL
 
-#include <mbgl/gfx/gfx_types.hpp>
-#include <mbgl/gfx/types.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/enum.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/gfx/gfx_types.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/enum.hpp>
+#include <mln/test/util.hpp>
 
 using namespace mln;
 using namespace mln::gfx;

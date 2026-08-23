@@ -1,7 +1,7 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/projection.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/projection.hpp>
 
 #include <limits>
 

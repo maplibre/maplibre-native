@@ -1,12 +1,12 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
 
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
 
 using namespace mln;
 

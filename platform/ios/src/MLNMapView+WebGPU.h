@@ -1,8 +1,8 @@
 #import "MLNMapView+Impl.h"
 #import "MLNMapView_Private.h"
 
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/webgpu/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
 
 /// Adapter responsible for bridging calls from mbgl to MLNMapView and Cocoa (WebGPU backend).
 class MLNMapViewWebGPUImpl final : public MLNMapViewImpl,

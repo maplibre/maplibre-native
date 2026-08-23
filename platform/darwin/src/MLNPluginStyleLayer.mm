@@ -1,6 +1,6 @@
 #import "MLNPluginStyleLayer.h"
-#import <mbgl/plugin/plugin_layer.hpp>
-#import <mbgl/plugin/plugin_layer_impl.hpp>
+#import <mln/plugin/plugin_layer.hpp>
+#import <mln/plugin/plugin_layer_impl.hpp>
 #import "MLNPluginLayer.h"
 #import "MLNPluginStyleLayer_Private.h"
 

@@ -1,7 +1,7 @@
-#include <mbgl/util/tile_cover.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/math/angles.hpp>
+#include <mln/util/tile_cover.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/math/angles.hpp>
 
 #include <algorithm>
 #include <cstdlib> /* srand, rand */

@@ -220,8 +220,8 @@ const args = parseArgs({
 const root = path.dirname(import.meta.dirname);
 const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
-const outputRoot = path.join(outLocation, "include/mbgl/shaders");
-const cppOutputRoot = path.join(outLocation, "src/mbgl/shaders");
+const outputRoot = path.join(outLocation, "include/mln/shaders");
+const cppOutputRoot = path.join(outLocation, "src/mln/shaders");
 let generatedHeaders = [];
 let shaderNames = [];
 
@@ -252,7 +252,7 @@ JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json")))
             path.join(glRoot, elem.header + ".hpp"),
             `${generatedHeader}
 #pragma once
-#include <mbgl/shaders/shader_source.hpp>
+#include <mln/shaders/shader_source.hpp>
 
 namespace mln {
 namespace shaders {
@@ -267,7 +267,7 @@ struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
 } // namespace shaders
 } // namespace mln
 `);
-        generatedHeaders.push("#include <mbgl/shaders/gl/" + elem.header + ".hpp>");
+        generatedHeaders.push("#include <mln/shaders/gl/" + elem.header + ".hpp>");
         shaderNames.push(elem.name);
     }
 );
@@ -276,7 +276,7 @@ struct ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::OpenGL> {
 fs.writeFileSync(path.join(outputRoot, "shader_manifest.hpp"),
 `${generatedHeader}
 #pragma once
-#include <mbgl/shaders/shader_source.hpp>
+#include <mln/shaders/shader_source.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 ${generatedHeaders.join('\n')}
@@ -287,7 +287,7 @@ ${generatedHeaders.join('\n')}
 fs.writeFileSync(path.join(outputRoot, "shader_source.hpp"),
 `${generatedHeader}
 #pragma once
-#include <mbgl/gfx/backend.hpp>
+#include <mln/gfx/backend.hpp>
 
 namespace mln {
 namespace shaders {
@@ -322,8 +322,8 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
 // Generate shader_source.cpp
 fs.writeFileSync(path.join(cppOutputRoot, "shader_source.cpp"),
 `${generatedHeader}
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/util/enum.hpp>
 
 namespace mln {
 
