@@ -61,8 +61,6 @@ public:
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept { return value ? value->dependencies : Dependency::None; }
 
-    /// The names of the global-state properties referenced by the expression,
-    /// or null if none are referenced.
     const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs_.get(); }
 };
 

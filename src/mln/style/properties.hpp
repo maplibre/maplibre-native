@@ -279,8 +279,6 @@ public:
             return result;
         }
 
-        /// Collect the names of the global-state properties referenced by
-        /// the expressions retained in the evaluated properties.
         void collectGlobalStateRefs(std::set<std::string>& refs) const {
             util::ignore({(collectGlobalStateRefs(this->template get<Ps>(), refs), 0)...});
         }
@@ -409,8 +407,6 @@ public:
         }
 
     public:
-        /// Collect the names of the global-state properties referenced by all
-        /// contained expressions.
         void collectGlobalStateRefs(std::set<std::string>& refs) const {
             util::ignore({(collectGlobalStateRefs(this->template get<Ps>(), refs), 0)...});
         }

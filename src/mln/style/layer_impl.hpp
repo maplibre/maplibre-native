@@ -63,20 +63,17 @@ public:
                                                          : expression::Dependency::None;
     }
 
-    /// Collect the names of the global-state properties referenced by
-    /// expressions that affect tile layout: the filter and the layout
-    /// properties. Derived classes with layout properties combine those with
-    /// the filter references from this base implementation.
+    /// Collect the global-state properties referenced by expressions that
+    /// affect tile layout, mirroring getLayoutDependencies().
     virtual void collectLayoutGlobalStateRefs(std::set<std::string>& refs) const {
         if (filter.expression && *filter.expression) {
             expression::collectGlobalStateRefs(**filter.expression, refs);
         }
     }
 
-    // Optional expression backing the "visibility" layout value. Per the
-    // style specification, such expressions may only depend on the global
-    // state; the evaluated result is kept in `visibility` and re-evaluated
-    // by the style whenever the global state changes.
+    // Backs an expression-valued "visibility" layout value; the evaluated
+    // result is kept in `visibility` and re-evaluated by the style whenever
+    // the global state changes.
     std::shared_ptr<const expression::Expression> visibilityExpression;
 
     std::string id;

@@ -31,8 +31,8 @@ public:
     /// evaluation, such as data-driven paint properties).
     virtual expression::Dependency getEvaluatedDependencies() const noexcept { return expression::Dependency::None; }
 
-    /// Collect the names of the global-state properties referenced by the
-    /// expressions retained in the evaluated properties.
+    /// Collect the global-state properties referenced by the expressions
+    /// retained in the evaluated properties, mirroring getEvaluatedDependencies().
     virtual void collectEvaluatedGlobalStateRefs(std::set<std::string>&) const {}
 
 protected:

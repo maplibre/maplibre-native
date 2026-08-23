@@ -308,8 +308,7 @@ Layer* Style::Impl::addLayer(std::unique_ptr<Layer> layer, const std::optional<s
 
     layer->setObserver(this);
     Layer* result = layers.add(std::move(layer), before);
-    // Resolve any "global-state" backed visibility expression against the
-    // current global state (during parsing it could not be applied yet).
+    // The global state is not available while the layer itself is parsed.
     result->reevaluateVisibility(*globalState);
     observer->onUpdate();
 

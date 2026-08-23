@@ -391,8 +391,7 @@ private:
 void collectGlobalStateRefs(const Expression&, std::set<std::string>& refs);
 
 /// Whether any of the global-state keys referenced by an expression is among
-/// the changed keys. A null `refs` means the referenced keys are unknown and
-/// a null `changedKeys` means the changed keys are unknown; either is
+/// the changed keys. A null set on either side means "unknown" and is
 /// conservatively treated as a match.
 inline bool globalStateRefsIntersect(const std::set<std::string>* refs, const std::set<std::string>* changedKeys) {
     if (refs == nullptr || changedKeys == nullptr) {
