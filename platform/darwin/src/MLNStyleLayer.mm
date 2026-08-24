@@ -1,5 +1,5 @@
-#import "MLNStyleLayer_Private.h"
 #import "MLNConversion.h"
+#import "MLNStyleLayer_Private.h"
 #import "MLNStyleValue_Private.h"
 #import "MLNStyle_Private.h"
 #import "NSExpression+MLNPrivateAdditions.h"

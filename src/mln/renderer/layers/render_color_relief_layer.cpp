@@ -64,8 +64,8 @@ void RenderColorReliefLayer::evaluate(const PropertyEvaluationParameters& parame
     if (colorRampGlobalState != parameters.globalState) {
         const auto& rampValue = unevaluated.get<ColorReliefColor>().getValue();
         const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
-                                  style::expression::globalStateRefsIntersect(
-                                      rampValue.getGlobalStateRefs(), parameters.changedGlobalStateKeys.get());
+                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                              parameters.changedGlobalStateKeys.get());
         colorRampGlobalState = parameters.globalState;
         if (rampAffected) {
             updateColorRamp();

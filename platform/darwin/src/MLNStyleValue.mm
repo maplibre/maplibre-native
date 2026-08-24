@@ -76,7 +76,8 @@ mln::Value MLNValueFromJSONObject(id object) {
     mapbox::base::ValueObject dictionary;
     NSDictionary *dictionaryObject = (NSDictionary *)object;
     for (NSString *key in dictionaryObject) {
-      dictionary.emplace(std::string(key.UTF8String), MLNValueFromJSONObject(dictionaryObject[key]));
+      dictionary.emplace(std::string(key.UTF8String),
+                         MLNValueFromJSONObject(dictionaryObject[key]));
     }
     return dictionary;
   }

@@ -110,8 +110,7 @@ TEST(GlobalStateExpression, EvaluateArray) {
 }
 
 TEST(GlobalStateExpression, EvaluateInComposition) {
-    auto expr = parseExpression(R"(["case", ["to-boolean", ["global-state", "enabled"]], 10.0, 5.0])",
-                                {type::Number});
+    auto expr = parseExpression(R"(["case", ["to-boolean", ["global-state", "enabled"]], 10.0, 5.0])", {type::Number});
     ASSERT_TRUE(expr);
     EXPECT_TRUE(expr->dependencies & Dependency::GlobalState);
 
@@ -150,8 +149,7 @@ TEST(GlobalStateExpression, PropertyExpressionCapturesGlobalState) {
     auto state = std::make_shared<const GlobalStateMap>(GlobalStateMap{{"width", 3.0}});
 
     // State provided via the evaluation context.
-    EXPECT_EQ(3.0f,
-              propertyExpression.evaluate(EvaluationContext(0.0f).withGlobalState(state.get()), 0.0f));
+    EXPECT_EQ(3.0f, propertyExpression.evaluate(EvaluationContext(0.0f).withGlobalState(state.get()), 0.0f));
 
     // Captured state is used when the context has none.
     propertyExpression.captureGlobalState(state);
@@ -236,8 +234,8 @@ TEST(GlobalStateExpression, FormatSectionOverrideUsesCapturedState) {
 }
 
 TEST(GlobalStateExpression, CollectGlobalStateRefs) {
-    auto expr = parseExpression(R"(["case", ["to-boolean", ["global-state", "a"]], ["to-number", ["global-state", "b"]], 0])",
-                                {type::Number});
+    auto expr = parseExpression(
+        R"(["case", ["to-boolean", ["global-state", "a"]], ["to-number", ["global-state", "b"]], 0])", {type::Number});
     ASSERT_TRUE(expr);
 
     std::set<std::string> refs;
