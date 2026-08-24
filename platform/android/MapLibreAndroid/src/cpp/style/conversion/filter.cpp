@@ -1,8 +1,8 @@
 #include "filter.hpp"
 #include "../android_conversion.hpp"
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/conversion/filter.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/conversion/filter.hpp>
 
 namespace mln {
 namespace android {

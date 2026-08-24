@@ -1,13 +1,13 @@
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map_snapshotter.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/timer.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map_snapshotter.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/style.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
+#include <mln/util/io.hpp>
 
 using namespace mln;
 

@@ -2,11 +2,11 @@
 #include "node_expression.hpp"
 #include "node_feature.hpp"
 
-#include <mbgl/style/expression/parsing_context.hpp>
-#include <mbgl/style/expression/is_constant.hpp>
-#include <mbgl/style/conversion/function.hpp>
-#include <mbgl/style/conversion/geojson.hpp>
-#include <mbgl/util/geojson.hpp>
+#include <mln/style/expression/parsing_context.hpp>
+#include <mln/style/expression/is_constant.hpp>
+#include <mln/style/conversion/function.hpp>
+#include <mln/style/conversion/geojson.hpp>
+#include <mln/util/geojson.hpp>
 #include <nan.h>
 
 using namespace mln::style;

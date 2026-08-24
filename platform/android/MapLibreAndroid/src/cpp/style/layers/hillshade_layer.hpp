@@ -4,8 +4,8 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/hillshade_layer_factory.hpp>
-#include <mbgl/style/layers/hillshade_layer.hpp>
+#include <mln/layermanager/hillshade_layer_factory.hpp>
+#include <mln/style/layers/hillshade_layer.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

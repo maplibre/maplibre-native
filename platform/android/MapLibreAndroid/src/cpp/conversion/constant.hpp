@@ -2,21 +2,21 @@
 
 #include "conversion.hpp"
 
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/padding.hpp>
-#include <mbgl/util/vertical_gradient.hpp>
-#include <mbgl/util/enum.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/padding.hpp>
+#include <mln/util/vertical_gradient.hpp>
+#include <mln/util/enum.hpp>
 
-#include <mbgl/style/expression/formatted.hpp>
-#include <mbgl/style/expression/image.hpp>
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
+#include <mln/style/expression/formatted.hpp>
+#include <mln/style/expression/image.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
 
 #include <jni/jni.hpp>
 
 #include <string>
 #include <array>
 #include <vector>
-#include <mbgl/style/rotation.hpp>
+#include <mln/style/rotation.hpp>
 
 namespace mln {
 namespace android {

@@ -1,8 +1,8 @@
-#include <mbgl/storage/pmtiles_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/storage/pmtiles_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <filesystem>
 

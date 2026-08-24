@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/property_expression.hpp>
-#include <mbgl/util/vertical_gradient.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/property_expression.hpp>
+#include <mln/util/vertical_gradient.hpp>
 
 #include <stdexcept>
 #include <vector>

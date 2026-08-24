@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/renderer/renderer_frontend.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/renderer/renderer_frontend.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <functional>
 #include <memory>
 #include <vector>
 #include <string>
-#include <mbgl/util/geojson.hpp>
+#include <mln/util/geojson.hpp>
 
 #include "map_renderer.hpp"
 

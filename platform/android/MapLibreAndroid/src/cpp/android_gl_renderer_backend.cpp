@@ -1,8 +1,8 @@
 #include "android_gl_renderer_backend.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/renderable_resource.hpp>
 
 #include <EGL/egl.h>
 

@@ -308,10 +308,10 @@ console.log("Generating style code...");
 const root = path.join(import.meta.dirname, "..")
 const outLocation = args.out ? args.out : root;
 
-const layerHpp = readAndCompile(`include/mbgl/style/layers/layer.hpp.ejs`, root);
-const layerCpp = readAndCompile(`src/mbgl/style/layers/layer.cpp.ejs`, root);
-const propertiesHpp = readAndCompile(`src/mbgl/style/layers/layer_properties.hpp.ejs`, root);
-const propertiesCpp = readAndCompile(`src/mbgl/style/layers/layer_properties.cpp.ejs`, root);
+const layerHpp = readAndCompile(`include/mln/style/layers/layer.hpp.ejs`, root);
+const layerCpp = readAndCompile(`src/mln/style/layers/layer.cpp.ejs`, root);
+const propertiesHpp = readAndCompile(`src/mln/style/layers/layer_properties.hpp.ejs`, root);
+const propertiesCpp = readAndCompile(`src/mln/style/layers/layer_properties.cpp.ejs`, root);
 
 const collator = new Intl.Collator("en-US");
 
@@ -382,16 +382,16 @@ setupGlobalEjsHelpers();
 for (let layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), outLocation);
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), outLocation);
+  writeIfModified(`src/mln/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), outLocation);
+  writeIfModified(`src/mln/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), outLocation);
 
   // Remove our fake property for the external interface.
   if (layer.type === 'line') {
     layer.paintProperties = layer.paintProperties.filter(property => property.name !== 'line-floor-width');
   }
 
-  writeIfModified(`include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer), outLocation);
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), outLocation);
+  writeIfModified(`include/mln/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer), outLocation);
+  writeIfModified(`src/mln/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), outLocation);
 }
 
 // Light
@@ -408,7 +408,7 @@ const lightProperties = Object.keys(spec[`light`]).reduce((/** @type {any} **/ m
 // to get a deterministic order.
 lightProperties.sort((a, b) => collator.compare(a.name, b.name));
 
-const lightHpp = readAndCompile(`include/mbgl/style/light.hpp.ejs`, root);
-const lightCpp = readAndCompile(`src/mbgl/style/light.cpp.ejs`, root);
-writeIfModified(`include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}), outLocation);
-writeIfModified(`src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}), outLocation);
+const lightHpp = readAndCompile(`include/mln/style/light.hpp.ejs`, root);
+const lightCpp = readAndCompile(`src/mln/style/light.cpp.ejs`, root);
+writeIfModified(`include/mln/style/light.hpp`, lightHpp({properties: lightProperties}), outLocation);
+writeIfModified(`src/mln/style/light.cpp`, lightCpp({properties: lightProperties}), outLocation);

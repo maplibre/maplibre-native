@@ -1,10 +1,10 @@
 #include "map_renderer.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/util/instrumentation.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/util/instrumentation.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <string>
 #include <android/native_window_jni.h>

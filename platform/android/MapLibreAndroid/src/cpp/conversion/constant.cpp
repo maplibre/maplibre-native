@@ -2,8 +2,8 @@
 #include "collection.hpp"
 #include "../style/formatted.hpp"
 
-#include <mbgl/style/conversion/stringify.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/style/conversion/stringify.hpp>
+#include <mln/util/string.hpp>
 
 namespace mln {
 namespace android {

@@ -1,28 +1,28 @@
 #include <benchmark/benchmark.h>
 
 // Core function to benchmark
-#include <mbgl/renderer/group_by_layout.hpp>
+#include <mln/renderer/group_by_layout.hpp>
 
 // For mock layer properties
-#include <mbgl/style/layer_properties.hpp>
-#include <mbgl/style/layers/fill_layer_impl.hpp>
-#include <mbgl/style/layers/fill_layer_properties.hpp>
-#include <mbgl/style/layers/line_layer_impl.hpp>
-#include <mbgl/style/layers/line_layer_properties.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/style/layers/circle_layer_properties.hpp>
-#include <mbgl/util/immutable.hpp>
+#include <mln/style/layer_properties.hpp>
+#include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/style/layers/fill_layer_properties.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
+#include <mln/style/layers/line_layer_properties.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/layers/circle_layer_properties.hpp>
+#include <mln/util/immutable.hpp>
 
 // For real style loading
-#include <mbgl/style/style_impl.hpp>
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/layermanager/layer_manager.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/util/thread_pool.hpp>
+#include <mln/style/style_impl.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/layermanager/layer_manager.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/util/thread_pool.hpp>
 
 using namespace mln;
 using namespace mln::style;

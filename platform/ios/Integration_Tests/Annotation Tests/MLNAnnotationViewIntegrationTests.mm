@@ -7,9 +7,9 @@
 #import "MLNGeometry_Private.h"
 #import "MLNMapView_Private.h"
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map.hpp>
+#include <mln/util/geo.hpp>
 
 @interface MLNTestCalloutView : MLNCompactCalloutView
 @property (nonatomic) BOOL implementsMarginHints;

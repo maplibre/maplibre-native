@@ -7,7 +7,7 @@
 #include "../conversion/property_value.hpp"
 #include "../conversion/transition_options.hpp"
 
-#include <mbgl/style/layer_impl.hpp>
+#include <mln/style/layer_impl.hpp>
 
 namespace mln {
 namespace android {

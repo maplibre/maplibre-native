@@ -4,7 +4,7 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNShape_Private.h"
 
-#import <mbgl/style/conversion/geojson.hpp>
+#import <mln/style/conversion/geojson.hpp>
 
 @implementation MLNShapeCollection
 

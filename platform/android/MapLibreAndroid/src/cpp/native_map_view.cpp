@@ -13,27 +13,27 @@
 
 #include <jni/jni.hpp>
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/math/minmax.hpp>
-#include <mbgl/util/action_journal.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/event.hpp>
-#include <mbgl/util/exception.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/projection.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/renderer/query.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/math/minmax.hpp>
+#include <mln/util/action_journal.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/event.hpp>
+#include <mln/util/exception.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/projection.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/renderer/query.hpp>
 
 // Java -> C++ conversion
 #include "style/android_conversion.hpp"
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 // C++ -> Java conversion
 #include "conversion/conversion.hpp"

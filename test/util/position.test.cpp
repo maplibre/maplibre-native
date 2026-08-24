@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/position.hpp>
-#include <mbgl/util/constants.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/position.hpp>
+#include <mln/util/constants.hpp>
 
 using namespace mln;
 using namespace style;

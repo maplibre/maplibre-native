@@ -1,11 +1,11 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
 #include <gmock/gmock.h>
 #include <cmath>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/quaternion.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/quaternion.hpp>
 
 #include <numbers>
 

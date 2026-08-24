@@ -1,29 +1,29 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gfx/shader.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/gfx/shader.hpp>
 
 #include <string_view>
 #include <iostream>
 #include <utility>
 
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/map/map_snapshotter.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/storage/main_resource_loader.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/test/map_adapter.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/map/map_snapshotter.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/color.hpp>
+#include <mln/storage/main_resource_loader.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/test/map_adapter.hpp>
 
 #ifdef MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
+#include <mln/shaders/gl/legacy/clipping_mask_program.hpp>
 #endif
 
 using namespace mln;

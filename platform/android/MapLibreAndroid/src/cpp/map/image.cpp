@@ -1,5 +1,5 @@
-#include <mbgl/style/image.hpp>
-#include <mbgl/util/exception.hpp>
+#include <mln/style/image.hpp>
+#include <mln/util/exception.hpp>
 #include "image.hpp"
 
 namespace mln {

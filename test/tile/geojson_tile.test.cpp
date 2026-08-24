@@ -1,20 +1,20 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/fake_file_source.hpp>
-#include <mbgl/test/stub_tile_observer.hpp>
-#include <mbgl/tile/geojson_tile.hpp>
-#include <mbgl/tile/tile_loader_impl.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/fake_file_source.hpp>
+#include <mln/test/stub_tile_observer.hpp>
+#include <mln/tile/geojson_tile.hpp>
+#include <mln/tile/tile_loader_impl.hpp>
 
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/style.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/gfx/dynamic_texture_atlas.hpp>
 
 #include <memory>
 

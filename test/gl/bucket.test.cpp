@@ -1,20 +1,20 @@
 #if MLN_RENDER_BACKEND_OPENGL
 
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_geometry_tile_feature.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
-#include <mbgl/renderer/buckets/line_bucket.hpp>
-#include <mbgl/renderer/buckets/raster_bucket.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/renderer/buckets/circle_bucket.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
+#include <mln/renderer/buckets/raster_bucket.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/headless_backend.hpp>
 
-#include <mbgl/map/mode.hpp>
+#include <mln/map/mode.hpp>
 
 namespace mln {
 

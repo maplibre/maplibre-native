@@ -4,8 +4,8 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/location_indicator_layer_factory.hpp>
-#include <mbgl/style/layers/location_indicator_layer.hpp>
+#include <mln/layermanager/location_indicator_layer_factory.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

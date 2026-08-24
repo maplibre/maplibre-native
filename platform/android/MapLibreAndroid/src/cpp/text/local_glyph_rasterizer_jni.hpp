@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/image.hpp>
+#include <mln/util/image.hpp>
 
 #include <jni/jni.hpp>
 

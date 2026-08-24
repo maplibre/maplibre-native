@@ -1,7 +1,7 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/minmax.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/minmax.hpp>
 
 using namespace mln;
 

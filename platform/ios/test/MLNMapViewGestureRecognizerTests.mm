@@ -5,8 +5,8 @@
 #import "MLNMapView_Private.h"
 #import "MLNMockGestureRecognizers.h"
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map.hpp>
 
 @interface MLNMapView (MLNMapViewGestureRecognizerTests)
 

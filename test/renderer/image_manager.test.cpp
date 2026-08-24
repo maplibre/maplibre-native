@@ -1,15 +1,15 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/fixture_log_observer.hpp>
-#include <mbgl/test/stub_style_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/fixture_log_observer.hpp>
+#include <mln/test/stub_style_observer.hpp>
 
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/image_manager_observer.hpp>
-#include <mbgl/sprite/sprite_parser.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/image_manager_observer.hpp>
+#include <mln/sprite/sprite_parser.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
 
 #include <utility>
 

@@ -13,9 +13,9 @@
 #import "NSPredicate+MLNPrivateAdditions.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 
 const MLNShapeSourceOption MLNShapeSourceOptionBuffer = @"MLNShapeSourceOptionBuffer";
 const MLNShapeSourceOption MLNShapeSourceOptionClusterRadius = @"MLNShapeSourceOptionClusterRadius";

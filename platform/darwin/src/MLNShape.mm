@@ -5,7 +5,7 @@
 #import "MLNTypes.h"
 #import "NSString+MLNAdditions.h"
 
-#import <mbgl/util/geo.hpp>
+#import <mln/util/geo.hpp>
 
 bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D rhs) {
   return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude;

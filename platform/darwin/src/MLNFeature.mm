@@ -18,8 +18,8 @@
 #import "NSExpression+MLNPrivateAdditions.h"
 
 #import <mapbox/feature.hpp>
-#import <mbgl/style/conversion/geojson.hpp>
-#import <mbgl/util/geometry.hpp>
+#import <mln/style/conversion/geojson.hpp>
+#import <mln/util/geometry.hpp>
 
 // Cluster constants
 static NSString *const MLNClusterIdentifierKey = @"cluster_id";
