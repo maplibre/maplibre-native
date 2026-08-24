@@ -27,6 +27,7 @@
 
 #import "MLNAttributionInfo_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
+#import "MLNStyleValue_Private.h"
 
 #include <mln/map/map.hpp>
 #include <mln/style/image.hpp>
@@ -531,6 +532,22 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
 
   auto styleImage = self.rawStyle->getImage([name UTF8String]);
   return styleImage ? [[MLNImage alloc] initWithMLNStyleImage:*styleImage] : nil;
+}
+
+// MARK: Global state
+
+- (NSDictionary<NSString *, id> *)globalState {
+  const mln::GlobalStateMap state = self.rawStyle->getGlobalState();
+  NSMutableDictionary *globalState = [NSMutableDictionary dictionaryWithCapacity:state.size()];
+  for (const auto &property : state) {
+    globalState[@(property.first.c_str())] = MLNJSONObjectFromMBGLValue(property.second);
+  }
+  return [globalState copy];
+}
+
+- (void)setGlobalStateValue:(id)value forProperty:(NSString *)propertyName {
+  MLNLogDebug(@"Setting global state property: %@", propertyName);
+  self.rawStyle->setGlobalStateProperty(propertyName.UTF8String, MLNValueFromJSONObject(value));
 }
 
 // MARK: Style transitions
