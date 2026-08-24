@@ -108,7 +108,7 @@ VisibilityType evaluateVisibilityExpression(const expression::Expression& expres
         }
     }
     Log::Warning(Event::ParseStyle,
-                 "visibility expression did not evaluate to \"visible\" or \"none\"; defaulting to \"visible\"");
+                 R"(visibility expression did not evaluate to "visible" or "none"; defaulting to "visible")");
     return VisibilityType::Visible;
 }
 
