@@ -1,23 +1,23 @@
 #include <gmock/gmock.h>
 
 #include <algorithm>
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_observer.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_observer.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/test/util.hpp>
 
 #include <filesystem>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 using namespace ::testing;
 
 class TileLODTest {
@@ -41,7 +41,7 @@ public:
         map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
 
         style::CustomGeometrySource::Options options;
-        options.fetchTileFunction = [&](const mbgl::CanonicalTileID& tileID) {
+        options.fetchTileFunction = [&](const mln::CanonicalTileID& tileID) {
             auto source = static_cast<style::CustomGeometrySource*>(map.getStyle().getSource("custom"));
             if (!source) {
                 return;

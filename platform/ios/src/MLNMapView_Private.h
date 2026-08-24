@@ -3,7 +3,7 @@
 #import "MLNTileOperation.h"
 #import "MLNUserLocationAnnotationView.h"
 
-namespace mbgl {
+namespace mln {
 class Map;
 class Renderer;
 
@@ -11,7 +11,7 @@ namespace gfx {
 struct RenderingStats;
 }
 
-}  // namespace mbgl
+}  // namespace mln
 
 class MLNMapViewImpl;
 @class MLNSource;
@@ -22,7 +22,7 @@ FOUNDATION_EXTERN const NSTimeInterval MLNAnimationDuration;
 /// Minimum size of an annotation’s accessibility element.
 FOUNDATION_EXTERN const CGSize MLNAnnotationAccessibilityElementMinimumSize;
 
-/// Indicates that a method (that uses `mbgl::Map`) was called after app termination.
+/// Indicates that a method (that uses `mln::Map`) was called after app termination.
 FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUnavailableException;
 
 @interface MLNMapView (Private)
@@ -42,7 +42,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)mapViewDidFailLoadingMapWithError:(nonnull NSError *)error;
 - (void)mapViewWillStartRenderingFrame;
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                     renderingStats:(const mbgl::gfx::RenderingStats &)stats;
+                                     renderingStats:(const mln::gfx::RenderingStats &)stats;
 - (void)mapViewWillStartRenderingMap;
 - (void)mapViewDidFinishRenderingMapFullyRendered:(BOOL)fullyRendered;
 - (void)mapViewDidBecomeIdle;
@@ -84,8 +84,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 /// Synchronously render a frame of the map.
 - (BOOL)renderSync;
 
-- (mbgl::Map &)mbglMap;
-- (nonnull mbgl::Renderer *)renderer;
+- (mln::Map &)mbglMap;
+- (nonnull mln::Renderer *)renderer;
 
 /** Returns whether the map view is currently loading or processing any assets required to render
  * the map */

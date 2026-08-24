@@ -1,12 +1,12 @@
 #include "metal_backend.h"
 
-#include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/renderable_resource.hpp>
+#include <mln/mtl/mtl_fwd.hpp>
+#include <mln/mtl/renderable_resource.hpp>
 
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
 
-namespace mbgl {
+namespace mln {
 
 using namespace mtl;
 
@@ -19,19 +19,19 @@ public:
     swapchain->setDevice(backend.getDevice().get());
   }
 
-  void setBackendSize(mbgl::Size size_) {
+  void setBackendSize(mln::Size size_) {
     size = size_;
     swapchain->setDrawableSize(
         {static_cast<CGFloat>(size.width), static_cast<CGFloat>(size.height)});
     buffersInvalid = true;
   }
 
-  mbgl::Size getSize() const { return size; }
+  mln::Size getSize() const { return size; }
 
   void bind() override {
     surface = NS::TransferPtr(swapchain->nextDrawable());
-    auto texSize = mbgl::Size{static_cast<uint32_t>(swapchain->drawableSize().width),
-                              static_cast<uint32_t>(swapchain->drawableSize().height)};
+    auto texSize = mln::Size{static_cast<uint32_t>(swapchain->drawableSize().width),
+                             static_cast<uint32_t>(swapchain->drawableSize().height)};
 
     commandBuffer = NS::TransferPtr(commandQueue->commandBuffer());
     renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
@@ -107,33 +107,33 @@ private:
   CAMetalLayerPtr swapchain;
   gfx::Texture2DPtr depthTexture;
   gfx::Texture2DPtr stencilTexture;
-  mbgl::Size size;
+  mln::Size size;
   bool buffersInvalid = true;
 };
 
-}  // namespace mbgl
+}  // namespace mln
 
 MetalBackend::MetalBackend(NSWindow* window)
-    : mbgl::mtl::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(mbgl::Size{0, 0},
-                            std::make_unique<mbgl::MetalRenderableResource>(*this)) {
+    : mln::mtl::RendererBackend(mln::gfx::ContextMode::Unique),
+      mln::gfx::Renderable(mln::Size{0, 0}, std::make_unique<mln::MetalRenderableResource>(*this)) {
   window.contentView.layer = (__bridge CALayer*)getDefaultRenderable()
-                                 .getResource<mbgl::MetalRenderableResource>()
+                                 .getResource<mln::MetalRenderableResource>()
                                  .getSwapchain()
                                  .get();
   window.contentView.wantsLayer = YES;
 }
 
-mbgl::gfx::Renderable& MetalBackend::getDefaultRenderable() { return *this; }
+mln::gfx::Renderable& MetalBackend::getDefaultRenderable() { return *this; }
 
 void MetalBackend::activate() {}
 void MetalBackend::deactivate() {}
 void MetalBackend::updateAssumedState() {}
 
-void MetalBackend::setSize(mbgl::Size size_) {
-  getResource<mbgl::MetalRenderableResource>().setBackendSize(size_);
+void MetalBackend::setSize(mln::Size size_) {
+  size = size_;
+  getResource<mln::MetalRenderableResource>().setBackendSize(size_);
 }
 
-mbgl::Size MetalBackend::getSize() const {
-  return getResource<mbgl::MetalRenderableResource>().getSize();
+mln::Size MetalBackend::getSize() const {
+  return getResource<mln::MetalRenderableResource>().getSize();
 }

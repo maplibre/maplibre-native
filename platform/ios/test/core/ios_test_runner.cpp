@@ -1,8 +1,8 @@
 #include <unistd.h>
 
 #include <ios_test_runner.hpp>
-#include <mbgl/test.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/test.hpp>
+#include <mln/util/logging.hpp>
 #include <vector>
 
 #define EXPORT __attribute__((visibility("default")))
@@ -17,13 +17,13 @@ bool TestRunner::startTest(const std::string& basePath) {
     argv.push_back(nullptr);
 
     if (chdir(basePath.c_str())) {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to " + basePath);
+        mln::Log::Error(mln::Event::General, "Failed to change the directory to " + basePath);
         return false;
     }
 
-    mbgl::Log::Info(mbgl::Event::General, "Start TestRunner");
-    int status = mbgl::runTests(static_cast<uint32_t>(argv.size()), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "TestRunner finished with status: '" + std::to_string(status) + "'");
+    mln::Log::Info(mln::Event::General, "Start TestRunner");
+    int status = mln::runTests(static_cast<uint32_t>(argv.size()), argv.data());
+    mln::Log::Info(mln::Event::General, "TestRunner finished with status: '" + std::to_string(status) + "'");
 
     return status == 0;
 }

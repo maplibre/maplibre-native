@@ -8,8 +8,8 @@
 #import "MLNMapView+OpenGL.h"
 #endif
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/style.hpp>
 
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
 #if MLN_RENDER_BACKEND_METAL
@@ -23,15 +23,17 @@ MLNMapViewImpl::MLNMapViewImpl(MLNMapView* nativeView_) : mapView(nativeView_) {
 
 void MLNMapViewImpl::render() { [mapView renderSync]; }
 
-void MLNMapViewImpl::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode) {
-  bool animated = mode == mbgl::MapObserver::CameraChangeMode::Animated;
+void MLNMapViewImpl::display() { [mapView.layer setNeedsDisplay]; }
+
+void MLNMapViewImpl::onCameraWillChange(mln::MapObserver::CameraChangeMode mode) {
+  bool animated = mode == mln::MapObserver::CameraChangeMode::Animated;
   [mapView cameraWillChangeAnimated:animated];
 }
 
 void MLNMapViewImpl::onCameraIsChanging() { [mapView cameraIsChanging]; }
 
-void MLNMapViewImpl::onCameraDidChange(mbgl::MapObserver::CameraChangeMode mode) {
-  bool animated = mode == mbgl::MapObserver::CameraChangeMode::Animated;
+void MLNMapViewImpl::onCameraDidChange(mln::MapObserver::CameraChangeMode mode) {
+  bool animated = mode == mln::MapObserver::CameraChangeMode::Animated;
   [mapView cameraDidChangeAnimated:animated];
 }
 
@@ -39,25 +41,25 @@ void MLNMapViewImpl::onWillStartLoadingMap() { [mapView mapViewWillStartLoadingM
 
 void MLNMapViewImpl::onDidFinishLoadingMap() { [mapView mapViewDidFinishLoadingMap]; }
 
-void MLNMapViewImpl::onDidFailLoadingMap(mbgl::MapLoadError mapError, const std::string& what) {
+void MLNMapViewImpl::onDidFailLoadingMap(mln::MapLoadError mapError, const std::string& what) {
   NSString* description;
   MLNErrorCode code;
   switch (mapError) {
-    case mbgl::MapLoadError::StyleParseError:
+    case mln::MapLoadError::StyleParseError:
       code = MLNErrorCodeParseStyleFailed;
       description = NSLocalizedStringWithDefaultValue(
           @"PARSE_STYLE_FAILED_DESC", nil, nil,
           @"The map failed to load because the style is corrupted.",
           @"User-friendly error description");
       break;
-    case mbgl::MapLoadError::StyleLoadError:
+    case mln::MapLoadError::StyleLoadError:
       code = MLNErrorCodeLoadStyleFailed;
       description = NSLocalizedStringWithDefaultValue(
           @"LOAD_STYLE_FAILED_DESC", nil, nil,
           @"The map failed to load because the style can't be loaded.",
           @"User-friendly error description");
       break;
-    case mbgl::MapLoadError::NotFoundError:
+    case mln::MapLoadError::NotFoundError:
       code = MLNErrorCodeNotFound;
       description = NSLocalizedStringWithDefaultValue(
           @"STYLE_NOT_FOUND_DESC", nil, nil,
@@ -81,16 +83,16 @@ void MLNMapViewImpl::onDidFailLoadingMap(mbgl::MapLoadError mapError, const std:
 
 void MLNMapViewImpl::onWillStartRenderingFrame() { [mapView mapViewWillStartRenderingFrame]; }
 
-void MLNMapViewImpl::onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus& status) {
-  bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
+void MLNMapViewImpl::onDidFinishRenderingFrame(const mln::MapObserver::RenderFrameStatus& status) {
+  bool fullyRendered = status.mode == mln::MapObserver::RenderMode::Full;
   [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered
                                         renderingStats:status.renderingStats];
 }
 
 void MLNMapViewImpl::onWillStartRenderingMap() { [mapView mapViewWillStartRenderingMap]; }
 
-void MLNMapViewImpl::onDidFinishRenderingMap(mbgl::MapObserver::RenderMode mode) {
-  bool fullyRendered = mode == mbgl::MapObserver::RenderMode::Full;
+void MLNMapViewImpl::onDidFinishRenderingMap(mln::MapObserver::RenderMode mode) {
+  bool fullyRendered = mode == mln::MapObserver::RenderMode::Full;
   [mapView mapViewDidFinishRenderingMapFullyRendered:fullyRendered];
 }
 
@@ -98,7 +100,7 @@ void MLNMapViewImpl::onDidBecomeIdle() { [mapView mapViewDidBecomeIdle]; }
 
 void MLNMapViewImpl::onDidFinishLoadingStyle() { [mapView mapViewDidFinishLoadingStyle]; }
 
-void MLNMapViewImpl::onSourceChanged(mbgl::style::Source& source) {
+void MLNMapViewImpl::onSourceChanged(mln::style::Source& source) {
   NSString* identifier = @(source.getID().c_str());
   MLNSource* nativeSource = [mapView.style sourceWithIdentifier:identifier];
   [mapView sourceDidChange:nativeSource];
@@ -109,10 +111,10 @@ bool MLNMapViewImpl::onCanRemoveUnusedStyleImage(const std::string& imageIdentif
   return [mapView shouldRemoveStyleImage:imageName];
 }
 
-void MLNMapViewImpl::onRegisterShaders(mbgl::gfx::ShaderRegistry& shaders) {}
+void MLNMapViewImpl::onRegisterShaders(mln::gfx::ShaderRegistry& shaders) {}
 
-void MLNMapViewImpl::onPreCompileShader(mbgl::shaders::BuiltIn shaderID,
-                                        mbgl::gfx::Backend::Type backend,
+void MLNMapViewImpl::onPreCompileShader(mln::shaders::BuiltIn shaderID,
+                                        mln::gfx::Backend::Type backend,
                                         const std::string& defines) {
   NSString* definesCopy = [NSString stringWithUTF8String:defines.c_str()];
   [mapView shaderWillCompile:static_cast<int>(shaderID)
@@ -120,8 +122,8 @@ void MLNMapViewImpl::onPreCompileShader(mbgl::shaders::BuiltIn shaderID,
                      defines:definesCopy];
 }
 
-void MLNMapViewImpl::onPostCompileShader(mbgl::shaders::BuiltIn shaderID,
-                                         mbgl::gfx::Backend::Type backend,
+void MLNMapViewImpl::onPostCompileShader(mln::shaders::BuiltIn shaderID,
+                                         mln::gfx::Backend::Type backend,
                                          const std::string& defines) {
   NSString* definesCopy = [NSString stringWithUTF8String:defines.c_str()];
   [mapView shaderDidCompile:static_cast<int>(shaderID)
@@ -129,8 +131,8 @@ void MLNMapViewImpl::onPostCompileShader(mbgl::shaders::BuiltIn shaderID,
                     defines:definesCopy];
 }
 
-void MLNMapViewImpl::onShaderCompileFailed(mbgl::shaders::BuiltIn shaderID,
-                                           mbgl::gfx::Backend::Type backend,
+void MLNMapViewImpl::onShaderCompileFailed(mln::shaders::BuiltIn shaderID,
+                                           mln::gfx::Backend::Type backend,
                                            const std::string& defines) {
   NSString* definesCopy = [NSString stringWithUTF8String:defines.c_str()];
   [mapView shaderDidFailCompile:static_cast<int>(shaderID)
@@ -138,8 +140,7 @@ void MLNMapViewImpl::onShaderCompileFailed(mbgl::shaders::BuiltIn shaderID,
                         defines:definesCopy];
 }
 
-void MLNMapViewImpl::onGlyphsLoaded(const mbgl::FontStack& fontStack,
-                                    const mbgl::GlyphRange& range) {
+void MLNMapViewImpl::onGlyphsLoaded(const mln::FontStack& fontStack, const mln::GlyphRange& range) {
   NSMutableArray* fontStackCopy = [[NSMutableArray alloc] init];
   std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
     [fontStackCopy addObject:[NSString stringWithUTF8String:str.c_str()]];
@@ -148,7 +149,7 @@ void MLNMapViewImpl::onGlyphsLoaded(const mbgl::FontStack& fontStack,
   [mapView glyphsDidLoad:fontStackCopy range:NSMakeRange(range.first, range.second - range.first)];
 }
 
-void MLNMapViewImpl::onGlyphsError(const mbgl::FontStack& fontStack, const mbgl::GlyphRange& range,
+void MLNMapViewImpl::onGlyphsError(const mln::FontStack& fontStack, const mln::GlyphRange& range,
                                    std::exception_ptr error) {
   NSMutableArray* fontStackCopy = [[NSMutableArray alloc] init];
   std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
@@ -158,8 +159,8 @@ void MLNMapViewImpl::onGlyphsError(const mbgl::FontStack& fontStack, const mbgl:
   [mapView glyphsDidError:fontStackCopy range:NSMakeRange(range.first, range.second - range.first)];
 }
 
-void MLNMapViewImpl::onGlyphsRequested(const mbgl::FontStack& fontStack,
-                                       const mbgl::GlyphRange& range) {
+void MLNMapViewImpl::onGlyphsRequested(const mln::FontStack& fontStack,
+                                       const mln::GlyphRange& range) {
   NSMutableArray* fontStackCopy = [[NSMutableArray alloc] init];
   std::for_each(fontStack.begin(), fontStack.end(), ^(const std::string& str) {
     [fontStackCopy addObject:[NSString stringWithUTF8String:str.c_str()]];
@@ -168,7 +169,7 @@ void MLNMapViewImpl::onGlyphsRequested(const mbgl::FontStack& fontStack,
   [mapView glyphsWillLoad:fontStackCopy range:NSMakeRange(range.first, range.second - range.first)];
 }
 
-void MLNMapViewImpl::onTileAction(mbgl::TileOperation operation, const mbgl::OverscaledTileID& tile,
+void MLNMapViewImpl::onTileAction(mln::TileOperation operation, const mln::OverscaledTileID& tile,
                                   const std::string& sourceID) {
   [mapView tileDidTriggerAction:MLNTileOperation(static_cast<int>(operation))
                               x:tile.canonical.x
@@ -179,7 +180,7 @@ void MLNMapViewImpl::onTileAction(mbgl::TileOperation operation, const mbgl::Ove
                        sourceID:[NSString stringWithUTF8String:sourceID.c_str()]];
 }
 
-void MLNMapViewImpl::onSpriteLoaded(const std::optional<mbgl::style::Sprite>& spriteID) {
+void MLNMapViewImpl::onSpriteLoaded(const std::optional<mln::style::Sprite>& spriteID) {
   if (!spriteID.has_value()) {
     [mapView spriteDidLoad:nil url:nil];
     return;
@@ -189,7 +190,7 @@ void MLNMapViewImpl::onSpriteLoaded(const std::optional<mbgl::style::Sprite>& sp
                      url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
 
-void MLNMapViewImpl::onSpriteError(const std::optional<mbgl::style::Sprite>& spriteID,
+void MLNMapViewImpl::onSpriteError(const std::optional<mln::style::Sprite>& spriteID,
                                    std::exception_ptr error) {
   if (!spriteID.has_value()) {
     [mapView spriteDidError:nil url:nil];
@@ -200,7 +201,7 @@ void MLNMapViewImpl::onSpriteError(const std::optional<mbgl::style::Sprite>& spr
                       url:[NSString stringWithUTF8String:spriteID.value().spriteURL.c_str()]];
 }
 
-void MLNMapViewImpl::onSpriteRequested(const std::optional<mbgl::style::Sprite>& spriteID) {
+void MLNMapViewImpl::onSpriteRequested(const std::optional<mln::style::Sprite>& spriteID) {
   if (!spriteID.has_value()) {
     [mapView spriteWillLoad:nil url:nil];
     return;

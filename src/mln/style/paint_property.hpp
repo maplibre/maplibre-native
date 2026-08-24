@@ -1,0 +1,103 @@
+#pragma once
+
+#include <mln/style/color_ramp_property_value.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/renderer/cross_faded_property_evaluator.hpp>
+#include <mln/renderer/data_driven_property_evaluator.hpp>
+
+#include <array>
+#include <optional>
+#include <utility>
+
+namespace mln {
+namespace style {
+
+template <class T>
+class PaintProperty {
+public:
+    using TransitionableType = Transitionable<PropertyValue<T>>;
+    using UnevaluatedType = Transitioning<PropertyValue<T>>;
+    using EvaluatorType = PropertyEvaluator<T>;
+    using PossiblyEvaluatedType = T;
+    using Type = T;
+    static constexpr bool IsDataDriven = false;
+    static constexpr bool IsOverridable = false;
+};
+
+template <class T, class A, class U, bool isOverridable = false>
+class DataDrivenPaintProperty {
+public:
+    using TransitionableType = Transitionable<PropertyValue<T>>;
+    using UnevaluatedType = Transitioning<PropertyValue<T>>;
+    using EvaluatorType = DataDrivenPropertyEvaluator<T>;
+    using PossiblyEvaluatedType = PossiblyEvaluatedPropertyValue<T>;
+    using Type = T;
+    static constexpr bool IsDataDriven = true;
+    static constexpr bool IsOverridable = isOverridable;
+
+    using Attribute = A;
+    using AttributeList = TypeList<A>;
+    using Uniform = U;
+    using UniformList = TypeList<U>;
+
+    static constexpr const std::array<std::string_view, 1> AttributeNames = {A::name()};
+};
+
+template <class T, class A1, class U1, class A2, class U2>
+class CrossFadedDataDrivenPaintProperty {
+public:
+    using TransitionableType = Transitionable<PropertyValue<T>>;
+    using UnevaluatedType = Transitioning<PropertyValue<T>>;
+    using EvaluatorType = DataDrivenPropertyEvaluator<Faded<T>>;
+    using PossiblyEvaluatedType = PossiblyEvaluatedPropertyValue<Faded<T>>;
+    using Type = T;
+    static constexpr bool IsDataDriven = true;
+    static constexpr bool IsOverridable = false;
+
+    using Attribute = A1;
+    using AttributeList = TypeList<A1, A2>;
+    using Uniform = U1;
+    using UniformList = TypeList<U1, U2>;
+
+    static constexpr const std::array<std::string_view, 2> AttributeNames = {A1::name(), A2::name()};
+};
+
+template <class T>
+class CrossFadedPaintProperty {
+public:
+    using TransitionableType = Transitionable<PropertyValue<T>>;
+    using UnevaluatedType = Transitioning<PropertyValue<T>>;
+    using EvaluatorType = CrossFadedPropertyEvaluator<T>;
+    using PossiblyEvaluatedType = Faded<T>;
+    using Type = T;
+    static constexpr bool IsDataDriven = false;
+    static constexpr bool IsOverridable = false;
+};
+
+/*
+ * Special-case paint property traits for heatmap-color and line-gradient,
+ * needed because these values do not fit into the
+ * Undefined | Value | {Camera,Source,Composite}Function taxonomy that applies
+ * to all other paint properties.
+ *
+ * These traits are provided here--despite the fact that color ramps
+ * is not used like other paint properties--to allow the parameter-pack-based
+ * batch evaluation of paint properties to compile properly.
+ */
+class ColorRampProperty {
+public:
+    using TransitionableType = Transitionable<ColorRampPropertyValue>;
+    using UnevaluatedType = Transitioning<ColorRampPropertyValue>;
+    using EvaluatorType = PropertyEvaluator<Color>;
+    using PossiblyEvaluatedType = Color;
+    using Type = Color;
+    static constexpr bool IsDataDriven = false;
+    static constexpr bool IsOverridable = false;
+
+    static Color defaultValue() { return {}; }
+};
+
+} // namespace style
+} // namespace mln

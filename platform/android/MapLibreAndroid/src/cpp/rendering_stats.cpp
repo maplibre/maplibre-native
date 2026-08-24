@@ -1,6 +1,6 @@
 #include "rendering_stats.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void RenderingStats::registerNative(jni::JNIEnv& env) {
@@ -58,4 +58,4 @@ void RenderingStats::Update(jni::JNIEnv& env,
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

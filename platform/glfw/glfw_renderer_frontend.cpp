@@ -1,11 +1,11 @@
 #include "glfw_renderer_frontend.hpp"
 
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/util/instrumentation.hpp>
 
-GLFWRendererFrontend::GLFWRendererFrontend(std::unique_ptr<mbgl::Renderer> renderer_, GLFWView& glfwView_)
+GLFWRendererFrontend::GLFWRendererFrontend(std::unique_ptr<mln::Renderer> renderer_, GLFWView& glfwView_)
     : glfwView(glfwView_),
       renderer(std::move(renderer_)) {
     glfwView.setRenderFrontend(this);
@@ -18,17 +18,17 @@ void GLFWRendererFrontend::reset() {
     renderer.reset();
 }
 
-void GLFWRendererFrontend::setObserver(mbgl::RendererObserver& observer) {
+void GLFWRendererFrontend::setObserver(mln::RendererObserver& observer) {
     assert(renderer);
     renderer->setObserver(&observer);
 }
 
-void GLFWRendererFrontend::update(std::shared_ptr<mbgl::UpdateParameters> params) {
+void GLFWRendererFrontend::update(std::shared_ptr<mln::UpdateParameters> params) {
     updateParameters = std::move(params);
     glfwView.invalidate();
 }
 
-const mbgl::TaggedScheduler& GLFWRendererFrontend::getThreadPool() const {
+const mln::TaggedScheduler& GLFWRendererFrontend::getThreadPool() const {
     return glfwView.getRendererBackend().getThreadPool();
 }
 
@@ -39,7 +39,7 @@ void GLFWRendererFrontend::render() {
 
     if (!updateParameters) return;
 
-    mbgl::gfx::BackendScope guard{glfwView.getRendererBackend(), mbgl::gfx::BackendScope::ScopeType::Implicit};
+    mln::gfx::BackendScope guard{glfwView.getRendererBackend(), mln::gfx::BackendScope::ScopeType::Implicit};
 
     // onStyleImageMissing might be called during a render. The user implemented
     // method could trigger a call to MLNRenderFrontend#update which overwrites
@@ -49,7 +49,7 @@ void GLFWRendererFrontend::render() {
     renderer->render(updateParameters_);
 }
 
-mbgl::Renderer* GLFWRendererFrontend::getRenderer() {
+mln::Renderer* GLFWRendererFrontend::getRenderer() {
     assert(renderer);
     return renderer.get();
 }

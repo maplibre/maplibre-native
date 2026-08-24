@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace java {
 namespace util {
 
-class List : private mbgl::util::noncopyable {
+class List : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "java/util/List"; };
 
@@ -22,7 +22,7 @@ public:
     };
 };
 
-class Arrays : private mbgl::util::noncopyable {
+class Arrays : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "java/util/Arrays"; };
 
@@ -36,7 +36,7 @@ public:
     }
 };
 
-class Set : private mbgl::util::noncopyable {
+class Set : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "java/util/Set"; };
 
@@ -49,11 +49,11 @@ public:
     };
 };
 
-class Map : private mbgl::util::noncopyable {
+class Map : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "java/util/Map"; };
 
-    class Entry : private mbgl::util::noncopyable {
+    class Entry : private mln::util::noncopyable {
     public:
         static constexpr auto Name() { return "java/util/Map$Entry"; };
 
@@ -78,4 +78,4 @@ void registerNative(jni::JNIEnv&);
 } // namespace util
 } // namespace java
 } // namespace android
-} // namespace mbgl
+} // namespace mln
