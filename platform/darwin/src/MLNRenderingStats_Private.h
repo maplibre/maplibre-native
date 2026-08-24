@@ -1,6 +1,6 @@
 #import "MLNRenderingStats.h"
 
-#import <mbgl/gfx/rendering_stats.hpp>
+#import <mln/gfx/rendering_stats.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
