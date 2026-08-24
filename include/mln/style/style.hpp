@@ -33,6 +33,9 @@ public:
     std::string getJSON() const;
     std::string getURL() const;
 
+    /// False while a style passed to loadJSON/loadURL is still being fetched or parsed.
+    bool isLoaded() const;
+
     // Defaults
     std::string getName() const;
     CameraOptions getDefaultCamera() const;

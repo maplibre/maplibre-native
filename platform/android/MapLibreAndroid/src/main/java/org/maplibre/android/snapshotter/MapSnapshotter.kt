@@ -44,7 +44,13 @@ open class MapSnapshotter(context: Context, options: Options) {
     @Keep
     private val nativePtr: Long = 0
     private val context: Context
-    private var fullyLoaded = false
+    // Not cached: core resets the load state whenever a new style is set.
+    private val fullyLoaded: Boolean
+        get() = nativeIsFullyLoaded()
+
+    // Sources, layers, and images from Options.builder are applied to the
+    // first loaded style only.
+    private var builderApplied = false
     private val options: Options
     private var callback: SnapshotReadyCallback? = null
     private var errorHandler: ErrorHandler? = null
@@ -438,6 +444,9 @@ open class MapSnapshotter(context: Context, options: Options) {
     @Keep
     external fun setStyleJson(styleJson: String?)
 
+    @Keep
+    private external fun nativeIsFullyLoaded(): Boolean
+
     /**
      * Adds the layer to the map. The layer must be newly created and not added to the snapshotter before
      *
@@ -692,8 +701,8 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     protected fun onDidFinishLoadingStyle() {
-        if (!fullyLoaded) {
-            fullyLoaded = true
+        if (!builderApplied) {
+            builderApplied = true
             val builder = options.builder
             if (builder != null) {
                 for (source in builder.sources) {
