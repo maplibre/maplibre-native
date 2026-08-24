@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           persist-credentials: false
@@ -49,7 +49,7 @@ jobs:
           test -f bazel-bin/platform/ios/app-swift/MapLibreApp.ipa
 
       - name: Upload app to TestFlight
-        uses: apple-actions/upload-testflight-build@1ad58030672057aa084b4e96beb6f7a8c627f9e6 # v5.2.1
+        uses: apple-actions/upload-testflight-build@5e75ff58276689011512ba87a381d93dc67dbcf8 # v5.3.0
         with:
           app-path: bazel-bin/platform/ios/app-swift/MapLibreApp.ipa
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
