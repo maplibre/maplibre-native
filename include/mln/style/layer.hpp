@@ -138,6 +138,10 @@ public:
     /// value using "global-state"), if any, against the given global state.
     void reevaluateVisibility(const GlobalStateMap&);
 
+    /// The serialized visibility expression, or a null value when the
+    /// visibility is a constant.
+    Value getVisibilityExpression() const;
+
     // Zoom range
     float getMinZoom() const;
     float getMaxZoom() const;
