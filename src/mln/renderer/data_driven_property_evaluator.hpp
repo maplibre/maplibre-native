@@ -38,7 +38,8 @@ public:
                 return ResultType(returnExpression);
             }
             return ResultType(expression.evaluate(style::expression::EvaluationContext(std::floor(parameters.z))
-                                                      .withGlobalState(parameters.globalState.get())));
+                                                      .withGlobalState(parameters.globalState.get()),
+                                                  defaultValue));
         } else {
             if (needsFeature) {
                 auto returnExpression = expression;
@@ -46,7 +47,8 @@ public:
                 return ResultType(returnExpression);
             }
             return ResultType(expression.evaluate(
-                style::expression::EvaluationContext(parameters.z).withGlobalState(parameters.globalState.get())));
+                style::expression::EvaluationContext(parameters.z).withGlobalState(parameters.globalState.get()),
+                defaultValue));
         }
     }
 
