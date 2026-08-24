@@ -39,6 +39,10 @@ std::string Style::getURL() const {
     return impl->getURL();
 }
 
+bool Style::isLoaded() const {
+    return impl->isLoaded();
+}
+
 std::string Style::getName() const {
     return impl->getName();
 }
