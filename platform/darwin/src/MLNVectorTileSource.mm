@@ -10,15 +10,15 @@
 #import "NSPredicate+MLNPrivateAdditions.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/sources/vector_source.hpp>
 
 const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSourceOptionEncoding";
 
 @interface MLNVectorTileSource ()
 
-@property (nonatomic, readonly) mbgl::style::VectorSource *rawSource;
+@property (nonatomic, readonly) mln::style::VectorSource *rawSource;
 
 @end
 
@@ -26,7 +26,7 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
                   configurationURL:(NSURL *)configurationURL {
-  auto source = std::make_unique<mbgl::style::VectorSource>(
+  auto source = std::make_unique<mln::style::VectorSource>(
       identifier.UTF8String,
       configurationURL.mgl_URLByStandardizingScheme.absoluteString.UTF8String);
   return self = [super initWithPendingSource:std::move(source)];
@@ -34,8 +34,8 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
             configurationURLString:(NSString *)configurationURLString {
-  auto source = std::make_unique<mbgl::style::VectorSource>(identifier.UTF8String,
-                                                            configurationURLString.UTF8String);
+  auto source = std::make_unique<mln::style::VectorSource>(identifier.UTF8String,
+                                                           configurationURLString.UTF8String);
 
   return self = [super initWithPendingSource:std::move(source)];
 }
@@ -43,13 +43,13 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
 - (instancetype)initWithIdentifier:(NSString *)identifier
                   tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates
                            options:(nullable NSDictionary<MLNTileSourceOption, id> *)options {
-  mbgl::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
-  auto source = std::make_unique<mbgl::style::VectorSource>(identifier.UTF8String, tileSet);
+  mln::Tileset tileSet = MLNTileSetFromTileURLTemplates(tileURLTemplates, options);
+  auto source = std::make_unique<mln::style::VectorSource>(identifier.UTF8String, tileSet);
   return self = [super initWithPendingSource:std::move(source)];
 }
 
-- (mbgl::style::VectorSource *)rawSource {
-  return (mbgl::style::VectorSource *)super.rawSource;
+- (mln::style::VectorSource *)rawSource {
+  return (mln::style::VectorSource *)super.rawSource;
 }
 
 - (NSURL *)configurationURL {
@@ -84,12 +84,12 @@ const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSou
     optionalSourceLayerIDs = layerIDs;
   }
 
-  std::optional<mbgl::style::Filter> optionalFilter;
+  std::optional<mln::style::Filter> optionalFilter;
   if (predicate) {
     optionalFilter = predicate.mgl_filter;
   }
 
-  std::vector<mbgl::Feature> features;
+  std::vector<mln::Feature> features;
   if ([self.stylable isKindOfClass:[MLNMapView class]]) {
     MLNMapView *mapView = (MLNMapView *)self.stylable;
     features = mapView.renderer->querySourceFeatures(self.rawSource->getID(),

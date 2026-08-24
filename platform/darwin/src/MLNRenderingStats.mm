@@ -2,7 +2,7 @@
 
 @implementation MLNRenderingStats
 
-- (void)setCoreData:(const mbgl::gfx::RenderingStats&)stats {
+- (void)setCoreData:(const mln::gfx::RenderingStats&)stats {
   _encodingTime = stats.encodingTime;
   _renderingTime = stats.renderingTime;
   _numFrames = stats.numFrames;

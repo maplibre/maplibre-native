@@ -1,11 +1,11 @@
 #import <Mapbox.h>
 #import <XCTest/XCTest.h>
-#import <mbgl/storage/resource.hpp>
+#import <mln/storage/resource.hpp>
 
-namespace mbgl {
+namespace mln {
 extern NSURL *resourceURL(const Resource &resource);
 extern BOOL isValidMapboxEndpoint(NSURL *url);
-}  // namespace mbgl
+}  // namespace mln
 
 @interface MLNResourceTests : XCTestCase
 @end
@@ -13,7 +13,7 @@ extern BOOL isValidMapboxEndpoint(NSURL *url);
 @implementation MLNResourceTests
 
 - (void)testValidEndpoints {
-  using namespace mbgl;
+  using namespace mln;
 
   XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://mapbox.com"]));
   XCTAssertTrue(isValidMapboxEndpoint([NSURL URLWithString:@"https://mapbox.cn"]));
@@ -27,7 +27,7 @@ extern BOOL isValidMapboxEndpoint(NSURL *url);
 }
 
 - (void)internalTestOfflineQueryParameterIsAddedForOfflineResource:(std::string)testURL {
-  using namespace mbgl;
+  using namespace mln;
 
   // Is our test URL "correct" for subsequent checks?
   {

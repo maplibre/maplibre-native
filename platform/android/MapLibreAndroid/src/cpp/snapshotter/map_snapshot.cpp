@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 MapSnapshot::MapSnapshot(float pixelRatio_, MapSnapshot::PointForFn pointForFn_, MapSnapshot::LatLngForFn latLngForFn_)
@@ -32,8 +32,8 @@ jni::Local<jni::Object<MapSnapshot>> MapSnapshot::New(JNIEnv& env,
                                                       std::vector<std::string> attributions,
                                                       bool showLogo,
                                                       bool showAttribution,
-                                                      mbgl::MapSnapshotter::PointForFn pointForFn,
-                                                      mbgl::MapSnapshotter::LatLngForFn latLngForFn) {
+                                                      mln::MapSnapshotter::PointForFn pointForFn,
+                                                      mln::MapSnapshotter::LatLngForFn latLngForFn) {
     // Create the bitmap
     auto bitmap = Bitmap::CreateBitmap(env, std::move(image));
 
@@ -71,4 +71,4 @@ void MapSnapshot::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

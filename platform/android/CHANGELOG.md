@@ -1,5 +1,17 @@
 # Changelog MapLibre Native for Android
 
+## 13.5.1
+
+### 🐞 Bug fixes
+
+- fix(core): Fix surface transform ([#4495]https://github.com/maplibre/maplibre-native/pull/4495)
+- fix(core): Fix nullptr access during custom layer pre-render ([#4496]https://github.com/maplibre/maplibre-native/pull/4496)
+- android: reduce Android AAR size with header-only Prefab ([#4483]https://github.com/maplibre/maplibre-native/pull/4483)
+
+### ✨ Features and improvements
+
+- core: rename mbgl namespace to mln ([#4487]https://github.com/maplibre/maplibre-native/pull/4487)
+
 ## 13.5.0
 
 ### 🐞 Bug fixes
@@ -208,7 +220,7 @@ Note: this release has some changes to how icon offsets behave on pitched maps. 
 
 ### 🐞 Bug fixes
 
-- [vulkan] Prevent member variable shadowing in `mbgl::vulkan::ShaderProgram` ([#3886](https://github.com/maplibre/maplibre-native/pull/3886)).
+- [vulkan] Prevent member variable shadowing in `mln::vulkan::ShaderProgram` ([#3886](https://github.com/maplibre/maplibre-native/pull/3886)).
 - Add padding support to MapSnapshotter Android ([#3882](https://github.com/maplibre/maplibre-native/pull/3882)).
 - Fix `requestRenderAndNotify` continuous callback ([#3913](https://github.com/maplibre/maplibre-native/pull/3913)).
 - Add null check to Projection.getContentPadding() ([#3937](https://github.com/maplibre/maplibre-native/pull/3937)).
@@ -592,7 +604,7 @@ Thanks to everyone who helped test the pre-releases!
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
 - Update Android Dependencies, use [maplibre-gestures-android](https://github.com/maplibre/maplibre-gestures-android) ([#2714](https://github.com/maplibre/maplibre-native/pull/2714)).
 - Update dependency gradle to v8.10 ([#2721](https://github.com/maplibre/maplibre-native/pull/2721)).
-- Cleanup `mbgl/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Cleanup `mln/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
 - Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).
   This PR adds two new APIs to `TransitionOptions` of `LocationIndicatorLayer`: `getBearingTransition()` and `setBearingTransition()`.
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
@@ -1911,7 +1923,7 @@ Please see https://github.com/square/okhttp/issues/2679 for more information.
 - SymbolBucket, use single map for paint properties data [#13724](https://github.com/mapbox/mapbox-gl-native/pull/13724)
 - Avoid NullPointerException when quickly closing activity for attribution click handling [#13723](https://github.com/mapbox/mapbox-gl-native/pull/13723)
 - Return constexpr strings from functions to avoid ODR compile failures [#13720](https://github.com/mapbox/mapbox-gl-native/pull/13720)
-- Split layer type specific code in mbgl::Programs [#13577](https://github.com/mapbox/mapbox-gl-native/pull/13577)
+- Split layer type specific code in mln::Programs [#13577](https://github.com/mapbox/mapbox-gl-native/pull/13577)
 - Shader program must always match bucket in render symbol layer [#13667](https://github.com/mapbox/mapbox-gl-native/pull/13667)
 - Implement Google benchmark runner for Android platform [#13628](https://github.com/mapbox/mapbox-gl-native/pull/13628)
 - Avoid leaking attribution dialog when hosting context is stopped [#13673](https://github.com/mapbox/mapbox-gl-native/pull/13673)

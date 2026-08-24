@@ -204,7 +204,7 @@ android {
     prefab {
         create("maplibre") {
             headers = "../prefab-headers"
-            libraryName = "libmaplibre"
+            headerOnly = true
         }
     }
 
@@ -224,11 +224,11 @@ fun getGitRevision(shortRev: Boolean = true): String {
 val syncPrefabHeaders by tasks.registering(Sync::class) {
     val nativeRoot = rootProject.rootDir.resolve("../..")
     from(nativeRoot.resolve("include")) {
-        include("mbgl/style/layers/custom_layer_host.hpp")
-        include("mbgl/style/layers/custom_layer_init_parameters.hpp")
-        include("mbgl/style/layers/custom_layer_render_parameters.hpp")
-        include("mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp")
-        include("mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp")
+        include("mln/style/layers/custom_layer_host.hpp")
+        include("mln/style/layers/custom_layer_init_parameters.hpp")
+        include("mln/style/layers/custom_layer_render_parameters.hpp")
+        include("mln/style/layers/vulkan/custom_layer_init_parameters.hpp")
+        include("mln/style/layers/vulkan/custom_layer_render_parameters.hpp")
     }
     into(project.rootDir.resolve("prefab-headers"))
 }
@@ -237,6 +237,16 @@ tasks.configureEach {
     if (name == "syncPrefabHeaders") return@configureEach
     if (name.contains("Prefab", ignoreCase = true) || name.contains("bundleLibRuntimeTo", ignoreCase = true)) {
         dependsOn(syncPrefabHeaders)
+    }
+}
+
+// AGP 9.1.1 still adds the native build output to the AAR even when the Prefab module is
+// declared header-only. Keep the header-only metadata and omit that redundant unstripped copy.
+tasks.withType<org.gradle.api.tasks.bundling.Zip>().configureEach {
+    if (name.startsWith("bundle") && name.endsWith("Aar")) {
+        // The Prefab artifact is added under a `prefab/` destination by a nested copy spec,
+        // so its paths are still relative to the Prefab root when exclusions are evaluated.
+        exclude("modules/maplibre/libs/**")
     }
 }
 

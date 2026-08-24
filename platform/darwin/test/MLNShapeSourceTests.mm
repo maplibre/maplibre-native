@@ -5,7 +5,7 @@
 #import "MLNShapeSource_Private.h"
 #import "MLNSource_Private.h"
 
-#include <mbgl/style/sources/geojson_source.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 
 @interface MLNShapeSourceTests : XCTestCase
 @end

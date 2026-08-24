@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/renderer/style_diff.hpp>
-#include <mbgl/style/layer_impl.hpp>
+#include <mln/renderer/style_diff.hpp>
+#include <mln/style/layer_impl.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 struct TestLayerImpl : style::Layer::Impl {
     TestLayerImpl(std::string layerID, std::string sourceID)

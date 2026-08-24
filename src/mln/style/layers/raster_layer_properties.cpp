@@ -1,0 +1,39 @@
+// clang-format off
+
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
+
+#include <mln/style/layers/raster_layer_properties.hpp>
+
+#include <mln/style/layers/raster_layer_impl.hpp>
+
+namespace mln {
+namespace style {
+
+RasterLayerProperties::RasterLayerProperties(
+    Immutable<RasterLayer::Impl> impl_)
+    : LayerProperties(std::move(impl_)) {}
+
+RasterLayerProperties::RasterLayerProperties(
+    Immutable<RasterLayer::Impl> impl_,
+    RasterPaintProperties::PossiblyEvaluated evaluated_)
+  : LayerProperties(std::move(impl_)),
+    evaluated(std::move(evaluated_)) {}
+
+RasterLayerProperties::~RasterLayerProperties() = default;
+
+unsigned long RasterLayerProperties::constantsMask() const {
+    return evaluated.constantsMask();
+}
+
+const RasterLayer::Impl& RasterLayerProperties::layerImpl() const noexcept {
+    return static_cast<const RasterLayer::Impl&>(*baseImpl);
+}
+
+expression::Dependency RasterLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
+}
+
+} // namespace style
+} // namespace mln
+
+// clang-format on

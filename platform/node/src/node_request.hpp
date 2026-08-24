@@ -6,15 +6,15 @@
 #include <nan.h>
 #pragma GCC diagnostic pop
 
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/util/async_request.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/util/async_request.hpp>
 
 namespace node_mbgl {
 
 class NodeRequest;
 
-struct NodeAsyncRequest : public mbgl::AsyncRequest {
+struct NodeAsyncRequest : public mln::AsyncRequest {
     NodeAsyncRequest();
     ~NodeAsyncRequest() override;
     NodeRequest* request = nullptr;
@@ -22,7 +22,7 @@ struct NodeAsyncRequest : public mbgl::AsyncRequest {
 
 class NodeRequest : public Nan::ObjectWrap {
 public:
-    NodeRequest(mbgl::FileSource::Callback, NodeAsyncRequest*);
+    NodeRequest(mln::FileSource::Callback, NodeAsyncRequest*);
     ~NodeRequest() override;
 
     static Nan::Persistent<v8::Function> constructor;
@@ -34,7 +34,7 @@ public:
 
     void unrefRequest();
 
-    mbgl::FileSource::Callback callback;
+    mln::FileSource::Callback callback;
     NodeAsyncRequest* asyncRequest;
     Nan::AsyncResource* asyncResource = new Nan::AsyncResource("mbgl:execute");
 };

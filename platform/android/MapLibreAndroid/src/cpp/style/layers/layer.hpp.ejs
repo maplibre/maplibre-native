@@ -8,11 +8,11 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/<%- type.replace('-', '_') %>_layer_factory.hpp>
-#include <mbgl/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
+#include <mln/layermanager/<%- type.replace('-', '_') %>_layer_factory.hpp>
+#include <mln/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class <%- camelize(type) %>Layer : public Layer {
@@ -30,9 +30,9 @@ public:
     <%- camelize(type) %>Layer(jni::JNIEnv&, jni::String&, jni::String&);
 <% } -%>
 
-    <%- camelize(type) %>Layer(mbgl::style::<%- camelize(type) %>Layer&);
+    <%- camelize(type) %>Layer(mln::style::<%- camelize(type) %>Layer&);
 
-    <%- camelize(type) %>Layer(std::unique_ptr<mbgl::style::<%- camelize(type) %>Layer>);
+    <%- camelize(type) %>Layer(std::unique_ptr<mln::style::<%- camelize(type) %>Layer>);
 
     ~<%- camelize(type) %>Layer();
 
@@ -48,13 +48,13 @@ public:
 
 }; // class <%- camelize(type) %>Layer
 
-class <%- camelize(type) %>JavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::<%- camelize(type) %>LayerFactory {
+class <%- camelize(type) %>JavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::<%- camelize(type) %>LayerFactory {
 public:
     ~<%- camelize(type) %>JavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -63,4 +63,4 @@ public:
 }; // class <%- camelize(type) %>JavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

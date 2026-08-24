@@ -2,7 +2,7 @@
 #import "MLNMapViewIntegrationTest.h"
 #import "MLNMapView_Private.h"
 
-#include <mbgl/gfx/renderable.hpp>
+#include <mln/gfx/renderable.hpp>
 
 @interface MBGLIntegrationTests : MLNMapViewIntegrationTest
 @end
@@ -216,9 +216,9 @@
 
   MLNMapViewImpl *mapViewImpl = [self.mapView viewImpl];
   CGFloat scaleFactor = [UIScreen mainScreen].scale;
-  mbgl::Size renderableSize = mapViewImpl->getRendererBackend().getDefaultRenderable().getSize();
-  mbgl::Size viewSize = {static_cast<uint32_t>(self.mapView.bounds.size.width * scaleFactor),
-                         static_cast<uint32_t>(self.mapView.bounds.size.height * scaleFactor)};
+  mln::Size renderableSize = mapViewImpl->getRendererBackend().getDefaultRenderable().getSize();
+  mln::Size viewSize = {static_cast<uint32_t>(self.mapView.bounds.size.width * scaleFactor),
+                        static_cast<uint32_t>(self.mapView.bounds.size.height * scaleFactor)};
 
   // Test that mapView and default renderable have the same size.
   XCTAssertTrue(renderableSize == viewSize);

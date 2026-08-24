@@ -6,11 +6,11 @@
 #include <nan.h>
 #pragma GCC diagnostic pop
 
-#include <mbgl/util/feature.hpp>
-#include <mbgl/style/conversion/geojson.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/style/conversion/geojson.hpp>
+#include <mln/style/conversion_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
@@ -159,4 +159,4 @@ std::optional<T> convert(const v8::Local<v8::Value>& value, Error& error, Args&&
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

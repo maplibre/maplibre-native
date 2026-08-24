@@ -1,11 +1,11 @@
-#include <mbgl/benchmark.hpp>
+#include <mln/benchmark.hpp>
 #include "test_runner_common.hpp"
 
 #include <unistd.h>
 #include <thread>
 
-using namespace mbgl;
-using namespace mbgl::android;
+using namespace mln;
+using namespace mln::android;
 
 bool running = false;
 bool done = false;
@@ -24,15 +24,15 @@ void runner(const std::string& storagePath, const std::string& benchmarkFilter) 
     }
     argv.push_back(nullptr);
 
-    mbgl::Log::Info(mbgl::Event::General, "Start BenchmarkRunner");
-    int status = mbgl::runBenchmark(argv.size(), argv.data());
-    mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner finished with status: '" + std::to_string(status) + "'");
+    mln::Log::Info(mln::Event::General, "Start BenchmarkRunner");
+    int status = mln::runBenchmark(argv.size(), argv.data());
+    mln::Log::Info(mln::Event::General, "BenchmarkRunner finished with status: '" + std::to_string(status) + "'");
     running = false;
     ALooper_wake(looper);
 }
 
 void android_main(struct android_app* app) {
-    mbgl::android::theJVM = app->activity->vm;
+    mln::android::theJVM = app->activity->vm;
     JNIEnv* env = nullptr;
     std::thread benchmarkThread;
     app->activity->vm->AttachCurrentThread(&env, NULL);
@@ -44,7 +44,7 @@ void android_main(struct android_app* app) {
 
     if (copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
         if (chdir(storagePath.c_str())) {
-            mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to " + storagePath);
+            mln::Log::Error(mln::Event::General, "Failed to change the directory to " + storagePath);
             done = true;
             changeState(env, app, false);
         } else {
@@ -53,7 +53,7 @@ void android_main(struct android_app* app) {
             benchmarkThread = std::thread(runner, storagePath, benchmarkFilter);
         }
     } else {
-        mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '" + zipFile + "' to app storage");
+        mln::Log::Error(mln::Event::General, "Failed to copy zip file '" + zipFile + "' to app storage");
         done = true;
         changeState(env, app, false);
     }
@@ -68,7 +68,7 @@ void android_main(struct android_app* app) {
         }
 
         if (!running && !done) {
-            mbgl::Log::Info(mbgl::Event::General, "BenchmarkRunner done");
+            mln::Log::Info(mln::Event::General, "BenchmarkRunner done");
             done = true;
             benchmarkThread.join();
             changeState(env, app, true);
@@ -76,7 +76,7 @@ void android_main(struct android_app* app) {
 
         if (app->destroyRequested != 0) {
             app->activity->vm->DetachCurrentThread();
-            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
+            mln::Log::Info(mln::Event::General, "Close the App!");
             return;
         }
     }

@@ -1,21 +1,21 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/tile_server_options.hpp>
-#include <mbgl/util/default_style.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/tile_server_options.hpp>
+#include <mln/util/default_style.hpp>
 
 #include <jni/jni.hpp>
 
 #include "default_style.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class TileServerOptions : private mbgl::util::noncopyable {
+class TileServerOptions : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/util/TileServerOptions"; };
 
-    static jni::Local<jni::Object<TileServerOptions>> New(jni::JNIEnv&, const mbgl::TileServerOptions&);
+    static jni::Local<jni::Object<TileServerOptions>> New(jni::JNIEnv&, const mln::TileServerOptions&);
 
     static jni::Local<jni::Object<TileServerOptions>> DefaultConfiguration(jni::JNIEnv&,
                                                                            const jni::Class<TileServerOptions>&);
@@ -26,15 +26,15 @@ public:
     static jni::Local<jni::Object<TileServerOptions>> MapLibreConfiguration(jni::JNIEnv&,
                                                                             const jni::Class<TileServerOptions>&);
 
-    static mbgl::TileServerOptions getTileServerOptions(jni::JNIEnv&, const jni::Object<TileServerOptions>&);
+    static mln::TileServerOptions getTileServerOptions(jni::JNIEnv&, const jni::Object<TileServerOptions>&);
 
     static void registerNative(jni::JNIEnv&);
 
     static jni::Local<jni::Array<jni::Object<DefaultStyle>>> NewStyles(jni::JNIEnv& env,
-                                                                       const std::vector<mbgl::util::DefaultStyle>&);
-    static std::vector<mbgl::util::DefaultStyle> getDefaultStyles(jni::JNIEnv& env,
-                                                                  const jni::Array<jni::Object<DefaultStyle>>& styles_);
+                                                                       const std::vector<mln::util::DefaultStyle>&);
+    static std::vector<mln::util::DefaultStyle> getDefaultStyles(jni::JNIEnv& env,
+                                                                 const jni::Array<jni::Object<DefaultStyle>>& styles_);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

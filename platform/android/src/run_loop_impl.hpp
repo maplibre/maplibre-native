@@ -2,8 +2,8 @@
 
 #include "jni.hpp"
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <atomic>
 #include <list>
@@ -13,7 +13,7 @@
 
 struct ALooper;
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 using WatchCallback = std::function<void(int, RunLoop::Event)>;
@@ -64,4 +64,4 @@ private:
 };
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

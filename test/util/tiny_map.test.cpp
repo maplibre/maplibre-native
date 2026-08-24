@@ -1,9 +1,9 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/tiny_unordered_map.hpp>
+#include <mln/test/util.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/tiny_unordered_map.hpp>
 
 #include <algorithm>
 #include <iomanip>
@@ -13,8 +13,8 @@
 #include <random>
 #include <unordered_map>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 
 template <typename TMapIter, typename TMap2>
 void testSetDiff(TMapIter beg, TMapIter end, TMap2& map2) {

@@ -3,8 +3,8 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+WebGPU.h"
 
-#import <mbgl/util/logging.hpp>
-#import <mbgl/webgpu/renderable_resource.hpp>
+#import <mln/util/logging.hpp>
+#import <mln/webgpu/renderable_resource.hpp>
 
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
@@ -38,7 +38,7 @@
 }
 @end
 
-class MLNMapViewWebGPURenderableResource final : public mbgl::webgpu::RenderableResource {
+class MLNMapViewWebGPURenderableResource final : public mln::webgpu::RenderableResource {
 public:
   MLNMapViewWebGPURenderableResource(MLNMapViewWebGPUImpl& backend_) : backend(backend_) {}
 
@@ -46,7 +46,7 @@ public:
 
   void swap() override { backend.markNeedsPresent(); }
 
-  const mbgl::webgpu::RendererBackend& getBackend() const override { return backend; }
+  const mln::webgpu::RendererBackend& getBackend() const override { return backend; }
 
   const WGPUCommandEncoder& getCommandEncoder() const override {
     assert(false);
@@ -94,7 +94,7 @@ public:
   WGPUTextureView currentTextureView = nullptr;
   bool needsPresent = false;
 
-  mbgl::Size framebufferSize;
+  mln::Size framebufferSize;
 
   MLNWebGPUView* webGPUView = nil;
   bool presentsWithTransaction = false;
@@ -103,8 +103,8 @@ public:
 
 MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
-      mbgl::webgpu::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable({0, 0}, std::make_unique<MLNMapViewWebGPURenderableResource>(*this)),
+      mln::webgpu::RendererBackend(mln::gfx::ContextMode::Unique),
+      mln::gfx::Renderable({0, 0}, std::make_unique<MLNMapViewWebGPURenderableResource>(*this)),
       impl(std::make_unique<Impl>()) {
 #if MLN_WEBGPU_IMPL_DAWN
   // Required when not using the monolithic Dawn library.
@@ -127,7 +127,7 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
     adapters = impl->instance->EnumerateAdapters();
   }
   if (adapters.empty()) {
-    mbgl::Log::Error(mbgl::Event::Render, "WebGPU iOS: No adapters found");
+    mln::Log::Error(mln::Event::Render, "WebGPU iOS: No adapters found");
     return;
   }
 
@@ -150,7 +150,7 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
   wgpu::InstanceDescriptor instanceDesc = {};
   impl->instance = wgpu::createInstance(instanceDesc);
   if (!impl->instance) {
-    mbgl::Log::Error(mbgl::Event::Render, "WebGPU iOS: Failed to create instance");
+    mln::Log::Error(mln::Event::Render, "WebGPU iOS: Failed to create instance");
     return;
   }
 
@@ -160,7 +160,7 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
 
   impl->adapter = impl->instance.requestAdapter(adapterOpts);
   if (!impl->adapter) {
-    mbgl::Log::Error(mbgl::Event::Render, "WebGPU iOS: No adapter found");
+    mln::Log::Error(mln::Event::Render, "WebGPU iOS: No adapter found");
     return;
   }
 
@@ -202,7 +202,7 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
 #if MLN_WEBGPU_IMPL_DAWN
   WGPUDevice rawDevice = selectedAdapter.CreateDevice(&deviceDesc);
   if (!rawDevice) {
-    mbgl::Log::Error(mbgl::Event::Render, "WebGPU iOS: Failed to create device");
+    mln::Log::Error(mln::Event::Render, "WebGPU iOS: Failed to create device");
     return;
   }
 
@@ -217,7 +217,7 @@ MLNMapViewWebGPUImpl::MLNMapViewWebGPUImpl(MLNMapView* nativeView_)
 #elif MLN_WEBGPU_IMPL_WGPU
   impl->device = impl->adapter.requestDevice(deviceDesc);
   if (!impl->device) {
-    mbgl::Log::Error(mbgl::Event::Render, "WebGPU iOS: Failed to create device");
+    mln::Log::Error(mln::Event::Render, "WebGPU iOS: Failed to create device");
     return;
   }
 
@@ -354,7 +354,7 @@ void MLNMapViewWebGPUImpl::createSurface() {
 #endif
 
   if (!impl->surface) {
-    mbgl::Log::Error(mbgl::Event::Render, "WebGPU iOS: Failed to create surface");
+    mln::Log::Error(mln::Event::Render, "WebGPU iOS: Failed to create surface");
   }
 }
 
@@ -456,7 +456,7 @@ void MLNMapViewWebGPUImpl::createDepthStencilTexture(uint32_t width, uint32_t he
       wgpuDeviceCreateTexture(static_cast<WGPUDevice>(impl->device), &depthDesc);
 #endif
   if (!impl->depthStencilTexture) {
-    mbgl::Log::Warning(mbgl::Event::Render, "WebGPU iOS: Failed to create depth/stencil texture");
+    mln::Log::Warning(mln::Event::Render, "WebGPU iOS: Failed to create depth/stencil texture");
     return;
   }
 
@@ -475,7 +475,7 @@ void MLNMapViewWebGPUImpl::createDepthStencilTexture(uint32_t width, uint32_t he
 
   impl->depthStencilView = wgpuTextureCreateView(impl->depthStencilTexture, &viewDesc);
   if (!impl->depthStencilView) {
-    mbgl::Log::Warning(mbgl::Event::Render, "WebGPU iOS: Failed to create depth/stencil view");
+    mln::Log::Warning(mln::Event::Render, "WebGPU iOS: Failed to create depth/stencil view");
   }
 }
 
@@ -557,7 +557,7 @@ void MLNMapViewWebGPUImpl::presentSurface() {
 
 void* MLNMapViewWebGPUImpl::getDepthStencilView() { return impl->depthStencilView; }
 
-mbgl::Size MLNMapViewWebGPUImpl::getFramebufferSize() const { return impl->framebufferSize; }
+mln::Size MLNMapViewWebGPUImpl::getFramebufferSize() const { return impl->framebufferSize; }
 
 UIView* MLNMapViewWebGPUImpl::getView() { return impl->webGPUView; }
 

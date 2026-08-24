@@ -1,17 +1,17 @@
-#include <mbgl/util/thread.hpp>
+#include <mln/util/thread.hpp>
 
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/platform/settings.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/platform/settings.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <atomic>
 #include <memory>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 
 class TestObject {
 public:
@@ -94,7 +94,7 @@ public:
     void send(std::function<void()> cb) { cb(); }
 
     void sendDelayed(std::function<void()> cb) {
-        timer.start(Milliseconds(300), mbgl::Duration::zero(), [cb] { cb(); });
+        timer.start(Milliseconds(300), mln::Duration::zero(), [cb] { cb(); });
     }
 
 private:

@@ -28,7 +28,7 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
     )
     target_link_libraries(
@@ -43,7 +43,7 @@ if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
     )
 
     if(Vulkan_FOUND)
@@ -82,7 +82,7 @@ endif()
 
 add_executable(
     mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/test/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/test/main.cpp
 )
 
 target_include_directories(
@@ -102,7 +102,7 @@ target_link_libraries(
 
 add_executable(
     mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/benchmark/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark/main.cpp
 )
 
 target_include_directories(
@@ -117,7 +117,7 @@ target_link_libraries(
 
 add_executable(
     mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test/main.cpp
 )
 
 target_link_libraries(

@@ -2,6 +2,21 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.29.0
+
+- fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
+- fix(core): repaint feature-state-driven symbol paint properties ([#4445](https://github.com/maplibre/maplibre-native/pull/4445)).
+- Make string expressions operate on unicode ([#4344](https://github.com/maplibre/maplibre-native/pull/4344)).
+- fix(core): Add action journal exception handling ([#4438](https://github.com/maplibre/maplibre-native/pull/4438)).
+- feat: specify layer/property that has a parse error when logging ([#4292](https://github.com/maplibre/maplibre-native/pull/4292)).
+- core: Add error reporting for corrupted symbols ([#4458](https://github.com/maplibre/maplibre-native/pull/4458)).
+- Changes to the custom Metal layer to allow more flexible rendering ([#4446](https://github.com/maplibre/maplibre-native/pull/4446)).
+- feat: implement split and join expressions ([#4463](https://github.com/maplibre/maplibre-native/pull/4463)).
+- core: rename `mbgl` namespace to `mln` ([#4487](https://github.com/maplibre/maplibre-native/pull/4487)).
+- core: rename `mbgl` directories to `mln` ([#4511]((https://github.com/maplibre/maplibre-native/pull/4511))).
+- Fix surface transform ([#4495](https://github.com/maplibre/maplibre-native/pull/4495)).
+- fix(core): Fix nullptr access during custom layer pre-render ([#4496](https://github.com/maplibre/maplibre-native/pull/4496)).
+
 ## 6.28.0
 
 - core: Fix dynamic texture resource management ([#4337](https://github.com/maplibre/maplibre-native/pull/4337)).
@@ -283,7 +298,7 @@ Note: this release has some changes to how icon offsets behave on pitched maps. 
   Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)).
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
-- Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Cleanup mln/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
 - Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
 - Ensure that all depth values are rendered before any color values ([#2811](https://github.com/maplibre/maplibre-native/pull/2811)).
 - Move UBO updates from render layers to tweakers ([#2703](https://github.com/maplibre/maplibre-native/pull/2703)).

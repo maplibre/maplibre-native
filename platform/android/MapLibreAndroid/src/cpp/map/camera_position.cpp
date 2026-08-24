@@ -1,13 +1,13 @@
 #include "camera_position.hpp"
 #include "../geometry/lat_lng.hpp"
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/angles.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/angles.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
-                                                            mbgl::CameraOptions options,
+                                                            mln::CameraOptions options,
                                                             float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
     static auto constructor = javaClass.GetConstructor<jni::Object<LatLng>,
@@ -60,9 +60,9 @@ jni::Local<jni::Object<CameraPosition>> CameraPosition::New(jni::JNIEnv& env,
                          padding);
 }
 
-mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
-                                                     const jni::Object<CameraPosition>& position,
-                                                     float pixelRatio) {
+mln::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
+                                                    const jni::Object<CameraPosition>& position,
+                                                    float pixelRatio) {
     static auto& javaClass = jni::Class<CameraPosition>::Singleton(env);
     static auto bearing = javaClass.GetField<jni::jdouble>(env, "bearing");
     static auto target = javaClass.GetField<jni::Object<LatLng>>(env, "target");
@@ -76,19 +76,19 @@ mbgl::CameraOptions CameraPosition::getCameraOptions(jni::JNIEnv& env,
     auto padding = position.Get(env, paddingField);
     auto center = LatLng::getLatLng(env, position.Get(env, target));
 
-    return mbgl::CameraOptions{center,
-                               position.Get(env, centerAltitude),
-                               padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
-                                                                                padding.Get(env, 0) * pixelRatio,
-                                                                                padding.Get(env, 3) * pixelRatio,
-                                                                                padding.Get(env, 2) * pixelRatio}
-                                                                   : (EdgeInsets){},
-                               {},
-                               position.Get(env, zoom),
-                               position.Get(env, bearing),
-                               position.Get(env, tilt),
-                               position.Get(env, roll),
-                               position.Get(env, fov)};
+    return mln::CameraOptions{center,
+                              position.Get(env, centerAltitude),
+                              padding && padding.Length(env) == 4 ? EdgeInsets{padding.Get(env, 1) * pixelRatio,
+                                                                               padding.Get(env, 0) * pixelRatio,
+                                                                               padding.Get(env, 3) * pixelRatio,
+                                                                               padding.Get(env, 2) * pixelRatio}
+                                                                  : (EdgeInsets){},
+                              {},
+                              position.Get(env, zoom),
+                              position.Get(env, bearing),
+                              position.Get(env, tilt),
+                              position.Get(env, roll),
+                              position.Get(env, fov)};
 }
 
 void CameraPosition::registerNative(jni::JNIEnv& env) {
@@ -96,4 +96,4 @@ void CameraPosition::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,8 +1,8 @@
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #include <cassert>
 
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gl/headless_backend.hpp>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -11,7 +11,7 @@
 
 #include "gl_functions_wgl.h"
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the
@@ -103,10 +103,10 @@ private:
     bool extensionSupportedWGL(const char* extension) {
         const char* extensions = NULL;
 
-        extensions = mbgl::platform::wglGetExtensionsStringARB(wglGetCurrentDC());
+        extensions = mln::platform::wglGetExtensionsStringARB(wglGetCurrentDC());
 
         if (!extensions || !StringInExtensionString(extension, extensions))
-            extensions = mbgl::platform::wglGetExtensionsStringEXT();
+            extensions = mln::platform::wglGetExtensionsStringEXT();
 
         if (!extensions || !StringInExtensionString(extension, extensions))
             extensions = (const char*)wgl_glGetString(GL_EXTENSIONS);
@@ -282,29 +282,29 @@ private:
             renderingWindowDeviceContext = GetDC(renderingWindowHandle);
         }
 
-        if (!mbgl::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
-                                                     std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
-                                                                                   GL_TRUE,
-                                                                                   WGL_DOUBLE_BUFFER_ARB,
-                                                                                   GL_TRUE,
-                                                                                   WGL_ACCELERATION_ARB,
-                                                                                   WGL_FULL_ACCELERATION_ARB,
-                                                                                   WGL_PIXEL_TYPE_ARB,
-                                                                                   WGL_TYPE_RGBA_ARB,
-                                                                                   WGL_COLOR_BITS_ARB,
-                                                                                   24,
-                                                                                   WGL_ALPHA_BITS_ARB,
-                                                                                   8,
-                                                                                   WGL_DEPTH_BITS_ARB,
-                                                                                   24,
-                                                                                   WGL_STENCIL_BITS_ARB,
-                                                                                   8,
-                                                                                   NULL})
-                                                         .begin(),
-                                                     NULL,
-                                                     1,
-                                                     &pixelFormat,
-                                                     &numFormats)) {
+        if (!mln::platform::wglChoosePixelFormatARB(renderingWindowDeviceContext,
+                                                    std::initializer_list<GLint>({WGL_SUPPORT_OPENGL_ARB,
+                                                                                  GL_TRUE,
+                                                                                  WGL_DOUBLE_BUFFER_ARB,
+                                                                                  GL_TRUE,
+                                                                                  WGL_ACCELERATION_ARB,
+                                                                                  WGL_FULL_ACCELERATION_ARB,
+                                                                                  WGL_PIXEL_TYPE_ARB,
+                                                                                  WGL_TYPE_RGBA_ARB,
+                                                                                  WGL_COLOR_BITS_ARB,
+                                                                                  24,
+                                                                                  WGL_ALPHA_BITS_ARB,
+                                                                                  8,
+                                                                                  WGL_DEPTH_BITS_ARB,
+                                                                                  24,
+                                                                                  WGL_STENCIL_BITS_ARB,
+                                                                                  8,
+                                                                                  NULL})
+                                                        .begin(),
+                                                    NULL,
+                                                    1,
+                                                    &pixelFormat,
+                                                    &numFormats)) {
             Log::Error(Event::OpenGL, "Failed to choose pixel format for context");
             throw std::runtime_error("Failed to choose pixel format for context");
         }
@@ -324,7 +324,7 @@ private:
         }
 
         if (wglDisplayConfig.ARB_create_context) {
-            renderingWindowRenderingContext = mbgl::platform::wglCreateContextAttribsARB(
+            renderingWindowRenderingContext = mln::platform::wglCreateContextAttribsARB(
                 renderingWindowDeviceContext,
                 NULL,
                 std::initializer_list<int>({WGL_CONTEXT_MAJOR_VERSION_ARB,
@@ -433,4 +433,4 @@ void HeadlessBackend::createImpl() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

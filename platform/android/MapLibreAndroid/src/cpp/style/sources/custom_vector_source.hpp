@@ -1,11 +1,11 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/custom_vector_source.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/style/sources/custom_vector_source.hpp>
+#include <mln/tile/tile_id.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class CustomVectorSource : public Source {
@@ -18,11 +18,11 @@ public:
     CustomVectorSource(jni::JNIEnv&, const jni::String&, jni::jint minZoom, jni::jint maxZoom);
     ~CustomVectorSource();
 
-    bool removeFromMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map&) override;
-    void addToMap(JNIEnv&, const jni::Object<Source>&, mbgl::Map&, AndroidRendererFrontend&) override;
+    bool removeFromMap(JNIEnv&, const jni::Object<Source>&, mln::Map&) override;
+    void addToMap(JNIEnv&, const jni::Object<Source>&, mln::Map&, AndroidRendererFrontend&) override;
 
-    void fetchTile(const mbgl::CanonicalTileID& tileID);
-    void cancelTile(const mbgl::CanonicalTileID& tileID);
+    void fetchTile(const mln::CanonicalTileID& tileID);
+    void cancelTile(const mln::CanonicalTileID& tileID);
     void onAddedToMap();
     void onRemovedFromMap();
 
@@ -34,4 +34,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

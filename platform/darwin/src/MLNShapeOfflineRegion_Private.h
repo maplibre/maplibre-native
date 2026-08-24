@@ -2,7 +2,7 @@
 
 #import "MLNOfflineRegion.h"
 
-#include <mbgl/storage/offline.hpp>
+#include <mln/storage/offline.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
     offline region.
  */
 - (instancetype)initWithOfflineRegionDefinition:
-    (const mbgl::OfflineGeometryRegionDefinition &)definition;
+    (const mln::OfflineGeometryRegionDefinition &)definition;
 
 @end
 
