@@ -3,7 +3,7 @@
 	url = https://github.com/mapbox/earcut.hpp.git
 [submodule "vendor/polylabel"]
 	path = vendor/polylabel
-	url = https://github.com/mapbox/polylabel.git
+	url = https://github.com/mapnik/polylabel.git
 [submodule "vendor/protozero"]
 	path = vendor/protozero
 	url = https://github.com/mapbox/protozero.git
