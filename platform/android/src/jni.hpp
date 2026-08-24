@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/util.hpp>
+#include <mln/util/util.hpp>
 
 #include <string>
 #include <jni/jni.hpp>
@@ -9,7 +9,7 @@ typedef struct _jmethodID* jmethodID;
 typedef struct _JavaVM JavaVM;
 typedef struct _JNIEnv JNIEnv;
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 extern JavaVM* theJVM;
@@ -21,4 +21,4 @@ bool attach_jni_thread(JavaVM* vm, JNIEnv** env, std::string threadName);
 void detach_jni_thread(JavaVM* vm, JNIEnv** env, bool detach);
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1122,6 +1122,19 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
+   * Set a callback that's invoked after a corrupted symbol is detected
+   *
+   * @param listener The callback that's invoked
+   */
+  public void addOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
+    mapChangeReceiver.addOnSymbolErrorListener(callback);
+  }
+
+  public void removeOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
+    mapChangeReceiver.removeOnSymbolErrorListener(callback);
+  }
+
+  /**
    * Interface definition for a callback to be invoked when the camera will change.
    * <p>
    * {@link MapView#addOnCameraWillChangeListener(OnCameraWillChangeListener)}
@@ -1368,10 +1381,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     /**
      * Called before a shader is compiled.
      *
-     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list
+     * @param id of a shader type enumeration. See `mln::shaders::BuiltIn` for a list
      * of possible values.
      * @param type of graphics backend the shader is being compiled for. See
-     * `mbgl::gfx::Backend::Type` for a list of possible values.
+     * `mln::gfx::Backend::Type` for a list of possible values.
      * @param additionalDefines that specify the permutaion of the shader.
      */
     void onPreCompileShader(int id, int type, String additionalDefines);
@@ -1387,10 +1400,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     /**
      * Called after a shader is compiled.
      *
-     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list
+     * @param id of a shader type enumeration. See `mln::shaders::BuiltIn` for a list
      * of possible values.
      * @param type of graphics backend the shader is being compiled for. See
-     * `mbgl::gfx::Backend::Type` for a list of possible values.
+     * `mln::gfx::Backend::Type` for a list of possible values.
      * @param additionalDefines that specify the permutation of the shader.
      */
     void onPostCompileShader(int id, int type, String additionalDefines);
@@ -1406,10 +1419,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     /**
      * Called when a shader fails to compile.
      *
-     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list
+     * @param id of a shader type enumeration. See `mln::shaders::BuiltIn` for a list
      * of possible values.
      * @param type of graphics backend the shader is being compiled for. See
-     * `mbgl::gfx::Backend::Type` for a list of possible values.
+     * `mln::gfx::Backend::Type` for a list of possible values.
      * @param additionalDefines that specify the permutation of the shader.
      */
     void onShaderCompileFailed(int id, int type, String additionalDefines);
@@ -1547,6 +1560,19 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * Called when an error occurs while trying to render a layer or drawable.
      */
     void onRenderError();
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a corrupted symbol is detected
+   * <p>
+   * {@link MapView#addOnSymbolErrorListener(OnSymbolErrorListener)}
+   * </p>
+   */
+  public interface OnSymbolErrorListener {
+    /**
+     * Called when a corrupted symbol is detected.
+     */
+    void onSymbolError(@NonNull String message);
   }
 
   /**

@@ -1,12 +1,12 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/properties.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/renderer/property_evaluator.hpp>
-#include <mbgl/renderer/data_driven_property_evaluator.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/renderer/data_driven_property_evaluator.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 using namespace std::literals::chrono_literals;
 
 float evaluate(Transitioning<PropertyValue<float>>& property, Duration delta = Duration::zero()) {
@@ -83,7 +83,7 @@ TEST(TransitioningDataDrivenPropertyValue, Evaluate) {
     Transitioning<PropertyValue<float>> t0{
         PropertyValue<float>(0.0f), Transitioning<PropertyValue<float>>(), TransitionOptions(), TimePoint::min()};
 
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
     PropertyExpression<float> expression(number(get("property_name")));
 
     Transitioning<PropertyValue<float>> t1{PropertyValue<float>(expression), t0, transition, TimePoint::min()};

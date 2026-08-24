@@ -1,20 +1,20 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/mat4.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/run_loop.hpp>
 
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/io.hpp>
 
 #include <memory>
 #include <cmath>
@@ -22,7 +22,7 @@
 
 using namespace std::numbers;
 
-class LineTestDrawableLayer : public mbgl::style::CustomDrawableLayerHost {
+class LineTestDrawableLayer : public mln::style::CustomDrawableLayerHost {
 public:
     void initialize() override {}
 
@@ -35,7 +35,7 @@ public:
 
         // add polylines
         {
-            using namespace mbgl;
+            using namespace mln;
 
             constexpr auto numLines = 6;
             Interface::LineOptions options[numLines]{
@@ -128,7 +128,7 @@ public:
     void deinitialize() override {}
 };
 
-class FillTestDrawableLayer : public mbgl::style::CustomDrawableLayerHost {
+class FillTestDrawableLayer : public mln::style::CustomDrawableLayerHost {
 public:
     void initialize() override {}
 
@@ -141,7 +141,7 @@ public:
 
         // add fill polygon
         {
-            using namespace mbgl;
+            using namespace mln;
 
             GeometryCollection geometry{
                 {
@@ -176,7 +176,7 @@ public:
     void deinitialize() override {}
 };
 
-class SymbolIconTestDrawableLayer : public mbgl::style::CustomDrawableLayerHost {
+class SymbolIconTestDrawableLayer : public mln::style::CustomDrawableLayerHost {
 public:
     void initialize() override {}
 
@@ -189,7 +189,7 @@ public:
 
         // add symbol icon
         {
-            using namespace mbgl;
+            using namespace mln;
             GeometryCoordinate position{static_cast<int16_t>(util::EXTENT * 0.5f),
                                         static_cast<int16_t>(util::EXTENT * 0.5f)};
 
@@ -235,8 +235,8 @@ public:
 };
 
 TEST(CustomDrawableLayer, Line) {
-    using namespace mbgl;
-    using namespace mbgl::style;
+    using namespace mln;
+    using namespace mln::style;
 
     util::RunLoop loop;
 
@@ -259,8 +259,8 @@ TEST(CustomDrawableLayer, Line) {
 }
 
 TEST(CustomDrawableLayer, Fill) {
-    using namespace mbgl;
-    using namespace mbgl::style;
+    using namespace mln;
+    using namespace mln::style;
 
     util::RunLoop loop;
 
@@ -283,8 +283,8 @@ TEST(CustomDrawableLayer, Fill) {
 }
 
 TEST(CustomDrawableLayer, SymbolIcon) {
-    using namespace mbgl;
-    using namespace mbgl::style;
+    using namespace mln;
+    using namespace mln::style;
 
     util::RunLoop loop;
 

@@ -1,5 +1,5 @@
-#include <mbgl/gl/headless_backend.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gl/headless_backend.hpp>
+#include <mln/util/logging.hpp>
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/NSString.h>
@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the pixel format used for
@@ -124,4 +124,4 @@ void HeadlessBackend::createImpl() {
 }
 
 }  // namespace gl
-}  // namespace mbgl
+}  // namespace mln

@@ -13,9 +13,9 @@
 #import "NSPredicate+MLNPrivateAdditions.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 
 const MLNShapeSourceOption MLNShapeSourceOptionBuffer = @"MLNShapeSourceOptionBuffer";
 const MLNShapeSourceOption MLNShapeSourceOptionClusterRadius = @"MLNShapeSourceOptionClusterRadius";
@@ -37,9 +37,9 @@ const MLNShapeSourceOption MLNShapeSourceOptionLineDistanceMetrics =
 const MLNShapeSourceOption MLNShapeSourceOptionSynchronousUpdate =
     @"MLNShapeSourceOptionSynchronousUpdate";
 
-mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
+mln::Immutable<mln::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
     NSDictionary<MLNShapeSourceOption, id> *options) {
-  auto geoJSONOptions = mbgl::makeMutable<mbgl::style::GeoJSONOptions>();
+  auto geoJSONOptions = mln::makeMutable<mln::style::GeoJSONOptions>();
 
   if (NSNumber *value = options[MLNShapeSourceOptionMinimumZoomLevel]) {
     if (![value isKindOfClass:[NSNumber class]]) {
@@ -188,7 +188,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
 @interface MLNShapeSource ()
 
 @property (nonatomic, readwrite) NSDictionary *options;
-@property (nonatomic, readonly) mbgl::style::GeoJSONSource *rawSource;
+@property (nonatomic, readonly) mln::style::GeoJSONSource *rawSource;
 
 @end
 
@@ -198,8 +198,8 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
                                URL:(NSURL *)url
                            options:(NSDictionary<NSString *, id> *)options {
   auto geoJSONOptions = MLNGeoJSONOptionsFromDictionary(options);
-  auto source = std::make_unique<mbgl::style::GeoJSONSource>(identifier.UTF8String,
-                                                             std::move(geoJSONOptions));
+  auto source =
+      std::make_unique<mln::style::GeoJSONSource>(identifier.UTF8String, std::move(geoJSONOptions));
   if (self = [super initWithPendingSource:std::move(source)]) {
     self.URL = url;
   }
@@ -210,8 +210,8 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
                              shape:(nullable MLNShape *)shape
                            options:(NSDictionary<MLNShapeSourceOption, id> *)options {
   auto geoJSONOptions = MLNGeoJSONOptionsFromDictionary(options);
-  auto source = std::make_unique<mbgl::style::GeoJSONSource>(identifier.UTF8String,
-                                                             std::move(geoJSONOptions));
+  auto source =
+      std::make_unique<mln::style::GeoJSONSource>(identifier.UTF8String, std::move(geoJSONOptions));
   if (self = [super initWithPendingSource:std::move(source)]) {
     if ([shape isMemberOfClass:[MLNShapeCollection class]]) {
       static dispatch_once_t onceToken;
@@ -249,8 +249,8 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
   return [self initWithIdentifier:identifier shape:shapeCollection options:options];
 }
 
-- (mbgl::style::GeoJSONSource *)rawSource {
-  return (mbgl::style::GeoJSONSource *)super.rawSource;
+- (mln::style::GeoJSONSource *)rawSource {
+  return (mln::style::GeoJSONSource *)super.rawSource;
 }
 
 - (NSURL *)URL {
@@ -289,12 +289,12 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
 
 - (NSArray<id<MLNFeature>> *)featuresMatchingPredicate:(nullable NSPredicate *)predicate {
   MLNAssertStyleSourceIsValid();
-  std::optional<mbgl::style::Filter> optionalFilter;
+  std::optional<mln::style::Filter> optionalFilter;
   if (predicate) {
     optionalFilter = predicate.mgl_filter;
   }
 
-  std::vector<mbgl::Feature> features;
+  std::vector<mln::Feature> features;
   if ([self.stylable isKindOfClass:[MLNMapView class]]) {
     MLNMapView *mapView = (MLNMapView *)self.stylable;
     features = mapView.renderer->querySourceFeatures(self.rawSource->getID(), {{}, optionalFilter});
@@ -304,12 +304,12 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
 
 // MARK: - MLNCluster management
 
-- (std::optional<mbgl::FeatureExtensionValue>)
+- (std::optional<mln::FeatureExtensionValue>)
     featureExtensionValueOfCluster:(MLNShape<MLNCluster> *)cluster
                          extension:(std::string)extension
-                           options:(const std::map<std::string, mbgl::Value>)options {
+                           options:(const std::map<std::string, mln::Value>)options {
   MLNAssertStyleSourceIsValid();
-  std::optional<mbgl::FeatureExtensionValue> extensionValue;
+  std::optional<mln::FeatureExtensionValue> extensionValue;
 
   // Check parameters
   if (!self.rawSource || !self.stylable || !cluster) {
@@ -318,12 +318,12 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
 
   auto geoJSON = [cluster geoJSONObject];
 
-  if (!geoJSON.is<mbgl::GeoJSONFeature>()) {
+  if (!geoJSON.is<mln::GeoJSONFeature>()) {
     MLNAssert(0, @"cluster geoJSON object is not a feature.");
     return extensionValue;
   }
 
-  auto clusterFeature = geoJSON.get<mbgl::GeoJSONFeature>();
+  auto clusterFeature = geoJSON.get<mln::GeoJSONFeature>();
 
   if ([self.stylable isKindOfClass:[MLNMapView class]]) {
     MLNMapView *mapView = (MLNMapView *)self.stylable;
@@ -336,8 +336,8 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
 - (NSArray<id<MLNFeature>> *)leavesOfCluster:(MLNPointFeatureCluster *)cluster
                                       offset:(NSUInteger)offset
                                        limit:(NSUInteger)limit {
-  const std::map<std::string, mbgl::Value> options = {{"limit", static_cast<uint64_t>(limit)},
-                                                      {"offset", static_cast<uint64_t>(offset)}};
+  const std::map<std::string, mln::Value> options = {{"limit", static_cast<uint64_t>(limit)},
+                                                     {"offset", static_cast<uint64_t>(offset)}};
 
   auto featureExtension = [self featureExtensionValueOfCluster:cluster
                                                      extension:"leaves"
@@ -347,11 +347,11 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
     return @[];
   }
 
-  if (!featureExtension->is<mbgl::FeatureCollection>()) {
+  if (!featureExtension->is<mln::FeatureCollection>()) {
     return @[];
   }
 
-  std::vector<mbgl::GeoJSONFeature> leaves = featureExtension->get<mbgl::FeatureCollection>();
+  std::vector<mln::GeoJSONFeature> leaves = featureExtension->get<mln::FeatureCollection>();
   return MLNFeaturesFromMBGLFeatures(leaves);
 }
 
@@ -364,11 +364,11 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
     return @[];
   }
 
-  if (!featureExtension->is<mbgl::FeatureCollection>()) {
+  if (!featureExtension->is<mln::FeatureCollection>()) {
     return @[];
   }
 
-  std::vector<mbgl::GeoJSONFeature> leaves = featureExtension->get<mbgl::FeatureCollection>();
+  std::vector<mln::GeoJSONFeature> leaves = featureExtension->get<mln::FeatureCollection>();
   return MLNFeaturesFromMBGLFeatures(leaves);
 }
 
@@ -381,11 +381,11 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
     return -1.0;
   }
 
-  if (!featureExtension->is<mbgl::Value>()) {
+  if (!featureExtension->is<mln::Value>()) {
     return -1.0;
   }
 
-  auto value = featureExtension->get<mbgl::Value>();
+  auto value = featureExtension->get<mln::Value>();
   if (value.is<uint64_t>()) {
     auto zoom = value.get<uint64_t>();
     return static_cast<double>(zoom);

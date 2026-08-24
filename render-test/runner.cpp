@@ -1,21 +1,21 @@
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map_observer.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/renderer/renderer_observer.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/projection.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/tile_cover.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map_observer.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/renderer/renderer_observer.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/projection.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/tile_cover.hpp>
 
 #include <mapbox/pixelmatch.hpp>
 
@@ -34,10 +34,10 @@
 #include <codecvt>
 #include <locale>
 
-using namespace mbgl;
+using namespace mln;
 using namespace TestOperationNames;
 
-GfxProbe::GfxProbe(const mbgl::gfx::RenderingStats& stats, const GfxProbe& prev)
+GfxProbe::GfxProbe(const mln::gfx::RenderingStats& stats, const GfxProbe& prev)
     : numBuffers(stats.numBuffers),
       numDrawCalls(stats.numDrawCalls),
       numFrameBuffers(stats.numFrameBuffers),
@@ -99,18 +99,18 @@ TestRunner::TestRunner(Manifest manifest_, UpdateResults updateResults_)
 void TestRunner::registerProxyFileSource() {
     static std::once_flag registerProxyFlag;
     std::call_once(registerProxyFlag, [] {
-        auto* fileSourceManager = mbgl::FileSourceManager::get();
+        auto* fileSourceManager = mln::FileSourceManager::get();
 
         auto resourceLoaderFactory = fileSourceManager->unRegisterFileSourceFactory(
-            mbgl::FileSourceType::ResourceLoader);
-        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions,
-                                                                           const mbgl::ClientOptions& clientOptions) {
+            mln::FileSourceType::ResourceLoader);
+        auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mln::ResourceOptions& resourceOptions,
+                                                                           const mln::ClientOptions& clientOptions) {
             assert(defaultFactory);
             std::shared_ptr<FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
             return std::make_unique<ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
         };
 
-        fileSourceManager->registerFileSourceFactory(mbgl::FileSourceType::ResourceLoader, std::move(factory));
+        fileSourceManager->registerFileSourceFactory(mln::FileSourceType::ResourceLoader, std::move(factory));
     });
 }
 
@@ -122,13 +122,13 @@ void TestRunner::doShuffle(uint32_t seed) {
     manifest.doShuffle(seed);
 }
 
-void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
-                                       std::vector<mbgl::Feature>&& features,
+void TestRunner::checkQueryTestResults(mln::PremultipliedImage&& actualImage,
+                                       std::vector<mln::Feature>&& features,
                                        TestMetadata& metadata) {
     const std::string& base = metadata.paths.defaultExpectations();
-    const std::vector<mbgl::filesystem::path>& expectations = metadata.paths.expectations;
+    const std::vector<mln::filesystem::path>& expectations = metadata.paths.expectations;
 
-    metadata.actual = mbgl::encodePNG(actualImage);
+    metadata.actual = mln::encodePNG(actualImage);
 
     if (actualImage.size.isEmpty()) {
         metadata.errorMessage = "Invalid size for actual image";
@@ -145,22 +145,22 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
     }
 
     if (updateResults == UpdateResults::PLATFORM) {
-        mbgl::filesystem::create_directories(expectations.back());
-        mbgl::util::write_file(expectations.back().string() + "/expected.json", metadata.actualJson);
+        mln::filesystem::create_directories(expectations.back());
+        mln::util::write_file(expectations.back().string() + "/expected.json", metadata.actualJson);
         metadata.renderErrored++;
         return;
     } else if (updateResults == UpdateResults::DEFAULT) {
-        mbgl::util::write_file(base + "/expected.json", metadata.actualJson);
+        mln::util::write_file(base + "/expected.json", metadata.actualJson);
         metadata.renderErrored++;
         return;
     }
 
-    mbgl::util::write_file(base + "/actual.json", metadata.actualJson);
+    mln::util::write_file(base + "/actual.json", metadata.actualJson);
 
     std::vector<std::string> expectedJsonPaths;
-    mbgl::filesystem::path expectedMetricsPath;
+    mln::filesystem::path expectedMetricsPath;
     for (auto rit = expectations.rbegin(); rit != expectations.rend(); ++rit) {
-        if (mbgl::filesystem::exists(*rit)) {
+        if (mln::filesystem::exists(*rit)) {
             expectedJsonPaths = readExpectedJSONEntries(*rit);
             if (!expectedJsonPaths.empty()) break;
         }
@@ -174,10 +174,10 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
 
     for (const auto& entry : expectedJsonPaths) {
         auto maybeExpectedJson = readJson(entry);
-        if (maybeExpectedJson.is<mbgl::JSDocument>()) {
-            auto& expected = maybeExpectedJson.get<mbgl::JSDocument>();
+        if (maybeExpectedJson.is<mln::JSDocument>()) {
+            auto& expected = maybeExpectedJson.get<mln::JSDocument>();
 
-            mbgl::JSDocument actual;
+            mln::JSDocument actual;
             actual.Parse<0>(metadata.actualJson);
             if (actual.HasParseError()) {
                 metadata.errorMessage = "Error parsing actual JSON for: " + metadata.paths.stylePath.string();
@@ -204,12 +204,12 @@ void TestRunner::checkQueryTestResults(mbgl::PremultipliedImage&& actualImage,
     }
 }
 
-void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, TestMetadata& metadata) {
+void TestRunner::checkRenderTestResults(mln::PremultipliedImage&& actualImage, TestMetadata& metadata) {
     const std::string& base = metadata.paths.defaultExpectations();
-    const std::vector<mbgl::filesystem::path>& expectations = metadata.paths.expectations;
+    const std::vector<mln::filesystem::path>& expectations = metadata.paths.expectations;
 
     if (metadata.outputsImage) {
-        metadata.actual = mbgl::encodePNG(actualImage);
+        metadata.actual = mln::encodePNG(actualImage);
 
         if (actualImage.size.isEmpty()) {
             metadata.errorMessage = "Invalid size for actual image";
@@ -218,25 +218,25 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
         }
 
         if (updateResults == UpdateResults::PLATFORM) {
-            mbgl::filesystem::create_directories(expectations.back());
-            mbgl::util::write_file(expectations.back().string() + "/expected.png", mbgl::encodePNG(actualImage));
+            mln::filesystem::create_directories(expectations.back());
+            mln::util::write_file(expectations.back().string() + "/expected.png", mln::encodePNG(actualImage));
             metadata.renderErrored++;
             return;
         } else if (updateResults == UpdateResults::DEFAULT) {
-            mbgl::util::write_file(base + "/expected.png", mbgl::encodePNG(actualImage));
+            mln::util::write_file(base + "/expected.png", mln::encodePNG(actualImage));
             metadata.renderErrored++;
             return;
         }
 
-        mbgl::util::write_file(base + "/actual.png", metadata.actual);
+        mln::util::write_file(base + "/actual.png", metadata.actual);
 
-        mbgl::PremultipliedImage expectedImage{actualImage.size};
-        mbgl::PremultipliedImage imageDiff{actualImage.size};
+        mln::PremultipliedImage expectedImage{actualImage.size};
+        mln::PremultipliedImage imageDiff{actualImage.size};
 
         double pixels = 0.0;
         std::vector<std::string> expectedImagesPaths;
         for (auto rit = expectations.rbegin(); rit != expectations.rend(); ++rit) {
-            if (mbgl::filesystem::exists(*rit)) {
+            if (mln::filesystem::exists(*rit)) {
                 expectedImagesPaths = readExpectedImageEntries(*rit);
                 if (!expectedImagesPaths.empty()) break;
             }
@@ -249,7 +249,7 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
         }
 
         for (const auto& entry : expectedImagesPaths) {
-            std::optional<std::string> maybeExpectedImage = mbgl::util::readFile(entry);
+            std::optional<std::string> maybeExpectedImage = mln::util::readFile(entry);
             if (!maybeExpectedImage) {
                 metadata.errorMessage = "Failed to load expected image " + entry;
                 metadata.renderErrored++;
@@ -258,7 +258,7 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
             metadata.expected = *maybeExpectedImage;
 
-            expectedImage = mbgl::decodeImage(*maybeExpectedImage);
+            expectedImage = mln::decodeImage(*maybeExpectedImage);
 
             pixels = static_cast<double>(mapbox::pixelmatch(actualImage.data.get(),
                                                             expectedImage.data.get(),
@@ -268,9 +268,9 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
                                                             0.1285) // Defined in GL JS
             );
 
-            metadata.diff = mbgl::encodePNG(imageDiff);
+            metadata.diff = mln::encodePNG(imageDiff);
 
-            mbgl::util::write_file(base + "/diff.png", metadata.diff);
+            mln::util::write_file(base + "/diff.png", metadata.diff);
 
             metadata.difference = pixels / expectedImage.size.area();
             if (metadata.difference <= metadata.allowed) {
@@ -286,13 +286,13 @@ void TestRunner::checkRenderTestResults(mbgl::PremultipliedImage&& actualImage, 
 
 void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     if (resultMetadata.metrics.isEmpty()) return;
-    const auto writeMetrics = [&resultMetadata](const mbgl::filesystem::path& path,
+    const auto writeMetrics = [&resultMetadata](const mln::filesystem::path& path,
                                                 const std::string& message = std::string()) {
         try {
-            mbgl::filesystem::create_directories(path);
-            mbgl::util::write_file((path / "metrics.json").generic_string(), serializeMetrics(resultMetadata.metrics));
+            mln::filesystem::create_directories(path);
+            mln::util::write_file((path / "metrics.json").generic_string(), serializeMetrics(resultMetadata.metrics));
             resultMetadata.errorMessage += message;
-        } catch (mbgl::filesystem::filesystem_error& ex) {
+        } catch (mln::filesystem::filesystem_error& ex) {
             const auto msg = "Failed to write metrics. path='" + path.string() + "' err='" + ex.what() +
                              "' msg=" + message;
             resultMetadata.errorMessage += msg;
@@ -300,7 +300,7 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
         }
     };
 
-    const std::vector<mbgl::filesystem::path>& expectedMetrics = resultMetadata.paths.expectedMetrics;
+    const std::vector<mln::filesystem::path>& expectedMetrics = resultMetadata.paths.expectedMetrics;
     if (updateResults == UpdateResults::METRICS) {
         writeMetrics(expectedMetrics.back(), " Updated expected metrics.");
         resultMetadata.metricsErrored++;
@@ -311,7 +311,7 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     // the test style will only be checked in the very end.
     std::vector<std::string> expectedMetricsPaths;
     for (auto rit = expectedMetrics.rbegin(); rit != expectedMetrics.rend(); ++rit) {
-        if (mbgl::filesystem::exists(*rit)) {
+        if (mln::filesystem::exists(*rit)) {
             expectedMetricsPaths = readExpectedMetricEntries(*rit);
             if (!expectedMetricsPaths.empty()) break;
         }
@@ -659,7 +659,7 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
     ctx.getFrontend().setSize(metadata.size);
     auto& map = ctx.getMap();
     map.setSize(metadata.size);
-    map.setProjectionMode(mbgl::ProjectionMode()
+    map.setProjectionMode(mln::ProjectionMode()
                               .withAxonometric(metadata.axonometric)
                               .withXSkew(metadata.xSkew)
                               .withYSkew(metadata.ySkew));
@@ -690,15 +690,15 @@ uint32_t getImageTileOffset(const std::set<uint32_t>& dims, uint32_t dim, float 
 } // namespace
 
 TestRunner::Impl::Impl(const TestMetadata& metadata,
-                       const mbgl::ResourceOptions& resourceOptions,
-                       const mbgl::ClientOptions& clientOptions)
+                       const mln::ResourceOptions& resourceOptions,
+                       const mln::ClientOptions& clientOptions)
     : observer(std::make_unique<TestRunnerMapObserver>()),
       frontend(metadata.size, metadata.pixelRatio, swapBehavior(metadata.mapMode)),
-      fileSource(mbgl::FileSourceManager::get()->getFileSource(
-          mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
+      fileSource(mln::FileSourceManager::get()->getFileSource(
+          mln::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
       map(frontend,
           *observer,
-          mbgl::MapOptions()
+          mln::MapOptions()
               .withMapMode(metadata.mapMode)
               .withSize(metadata.size)
               .withPixelRatio(metadata.pixelRatio)
@@ -752,15 +752,14 @@ void TestRunner::run(TestMetadata& metadata) {
         }
     }
 
-    std::string key = mbgl::util::toString(uint32_t(metadata.mapMode)) + "/" +
-                      mbgl::util::toString(metadata.pixelRatio) + "/" +
-                      mbgl::util::toString(uint32_t(metadata.crossSourceCollisions));
+    std::string key = mln::util::toString(uint32_t(metadata.mapMode)) + "/" + mln::util::toString(metadata.pixelRatio) +
+                      "/" + mln::util::toString(uint32_t(metadata.crossSourceCollisions));
 
     if (maps.find(key) == maps.end()) {
         maps[key] = std::make_unique<TestRunner::Impl>(
             metadata,
-            mbgl::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()),
-            mbgl::ClientOptions());
+            mln::ResourceOptions().withCachePath(manifest.getCachePath()).withApiKey(manifest.getApiKey()),
+            mln::ClientOptions());
     }
 
     ctx.runnerImpl = maps[key].get();
@@ -908,7 +907,7 @@ void TestRunner::run(TestMetadata& metadata) {
         appendLabelCutOffResults(metadata, cutOffLabelsReport, duplicationsReport);
         checkRenderTestResults(std::move(result.image), metadata);
     } else {
-        std::vector<mbgl::Feature> features;
+        std::vector<mln::Feature> features;
         assert(metadata.document["metadata"]["test"]["queryGeometry"].IsArray());
         if (metadata.document["metadata"]["test"]["queryGeometry"][0].IsNumber() &&
             metadata.document["metadata"]["test"]["queryGeometry"][1].IsNumber()) {
@@ -933,7 +932,7 @@ void TestRunner::appendLabelCutOffResults(TestMetadata& resultMetadata,
     }
 }
 
-mbgl::HeadlessFrontend::RenderResult TestRunner::runTest(TestMetadata& metadata, TestContext& ctx) {
+mln::HeadlessFrontend::RenderResult TestRunner::runTest(TestMetadata& metadata, TestContext& ctx) {
     HeadlessFrontend::RenderResult result{};
     for (const auto& operation : parseTestOperations(metadata)) {
         if (!operation(ctx)) return result;

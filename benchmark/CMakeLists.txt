@@ -9,7 +9,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/benchmark/parse/tile_mask.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/parse/vector_tile.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/renderer/group_layers.benchmark.cpp
-    ${PROJECT_SOURCE_DIR}/benchmark/src/mbgl/benchmark/benchmark.cpp
+    ${PROJECT_SOURCE_DIR}/benchmark/src/mln/benchmark/benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/storage/offline_database.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/util/tilecover.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/util/color.benchmark.cpp

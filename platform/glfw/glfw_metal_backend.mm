@@ -9,8 +9,8 @@
 GLFWMetalBackend::GLFWMetalBackend(GLFWwindow* window_, [[maybe_unused]] const bool capFrameRate)
     : window(glfwGetCocoaWindow(window_)), rendererBackend(window) {}
 
-mbgl::gfx::RendererBackend& GLFWMetalBackend::getRendererBackend() { return rendererBackend; }
+mln::gfx::RendererBackend& GLFWMetalBackend::getRendererBackend() { return rendererBackend; }
 
-void GLFWMetalBackend::setSize(mbgl::Size size) { rendererBackend.setSize(size); }
+void GLFWMetalBackend::setSize(mln::Size size) { rendererBackend.setSize(size); }
 
-mbgl::Size GLFWMetalBackend::getSize() const { return rendererBackend.getSize(); }
+mln::Size GLFWMetalBackend::getSize() const { return rendererBackend.getSize(); }

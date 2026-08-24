@@ -1,20 +1,20 @@
 #pragma once
 
-#include <mbgl/annotation/annotation.hpp>
+#include <mln/annotation/annotation.hpp>
 
 #include "multi_point.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class Polygon : private MultiPoint {
 public:
     static constexpr auto Name() { return "org/maplibre/android/annotations/Polygon"; };
 
-    static mbgl::FillAnnotation toAnnotation(jni::JNIEnv&, const jni::Object<Polygon>&);
+    static mln::FillAnnotation toAnnotation(jni::JNIEnv&, const jni::Object<Polygon>&);
 
     static void registerNative(jni::JNIEnv&);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

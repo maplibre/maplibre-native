@@ -2,9 +2,9 @@
 #include <optional>
 #include <string>
 
-#include <mbgl/util/color.hpp>
+#include <mln/util/color.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 void logUnexpectedValidResult(const std::string& input, const Color& color) {
     std::cerr << "Unexpected valid result for input: " << input << "\n";

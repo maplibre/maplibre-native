@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/util/size.hpp>
-#include <mbgl/gfx/backend.hpp>
+#include <mln/util/size.hpp>
+#include <mln/gfx/backend.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 class RendererBackend;
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln
 
 struct GLFWwindow;
 
@@ -19,10 +19,10 @@ public:
     virtual ~GLFWBackend() = default;
 
     static std::unique_ptr<GLFWBackend> Create(GLFWwindow* window, bool capFrameRate) {
-        return mbgl::gfx::Backend::Create<GLFWBackend, GLFWwindow*, bool>(window, capFrameRate);
+        return mln::gfx::Backend::Create<GLFWBackend, GLFWwindow*, bool>(window, capFrameRate);
     }
 
-    virtual mbgl::gfx::RendererBackend& getRendererBackend() = 0;
-    virtual mbgl::Size getSize() const = 0;
-    virtual void setSize(mbgl::Size) = 0;
+    virtual mln::gfx::RendererBackend& getRendererBackend() = 0;
+    virtual mln::Size getSize() const = 0;
+    virtual void setSize(mln::Size) = 0;
 };

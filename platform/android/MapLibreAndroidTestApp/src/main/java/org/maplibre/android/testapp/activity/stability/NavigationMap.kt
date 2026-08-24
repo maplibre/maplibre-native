@@ -3,7 +3,6 @@ package org.maplibre.android.testapp.activity.stability
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
@@ -45,8 +44,9 @@ import org.maplibre.navigation.android.navigation.v5.routeprogress.RouteProgress
 import java.util.Locale
 import java.util.logging.Logger
 import kotlin.random.Random
+import io.sentry.Sentry
 
-class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEventListener {
+class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEventListener, MapView.OnSymbolErrorListener {
     private lateinit var map: MapLibreMap
     private lateinit var mapView: MapView
 
@@ -105,6 +105,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
 
         this.map = maplibreMap
         this.mapView = view as MapView
+        this.mapView.addOnSymbolErrorListener(this)
 
         LOG.info("NavigationMap seed $RANDOM_SEED")
         run()
@@ -174,6 +175,7 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
             LocationComponentActivationOptions
                 .builder(requireContext(), map.style!!)
                 .useDefaultLocationEngine(false)
+                .useSpecializedLocationLayer(true)
                 .build()
         )
 
@@ -356,6 +358,11 @@ class NavigationMap : SupportMapFragment(), ProgressChangeListener, MilestoneEve
         if (milestone.bannerInstructions.primary().type() == "arrive") {
             startNewRoute()
         }
+    }
+
+    override fun onSymbolError(message: String) {
+        Sentry.captureMessage("NavigationMap: $message")
+        //Bugsnag.notify(RuntimeException(message))
     }
 }
 

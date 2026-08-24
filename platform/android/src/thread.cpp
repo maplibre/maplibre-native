@@ -1,6 +1,6 @@
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/platform/thread.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/platform/thread.hpp>
 
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -10,7 +10,7 @@
 
 // Implementation based on Chromium's platform_thread_android.cc.
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 thread_local static JNIEnv* env;
@@ -61,4 +61,4 @@ void detachThread() {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

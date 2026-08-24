@@ -1,13 +1,13 @@
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(DatabaseFileSource, PauseResume) {
     util::RunLoop loop;
@@ -34,7 +34,7 @@ TEST(DatabaseFileSource, VolatileResource) {
     Resource resource{Resource::Unknown, "http://127.0.0.1:3000/test", {}, Resource::LoadingMethod::CacheOnly};
     Response response{};
     response.data = std::make_shared<std::string>("Cached value");
-    std::unique_ptr<mbgl::AsyncRequest> req;
+    std::unique_ptr<mln::AsyncRequest> req;
 
     dbfs->forward(resource, response, [&] {
         req = dbfs->request(resource, [&](Response res1) {

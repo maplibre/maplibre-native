@@ -1,10 +1,10 @@
-#include <mbgl/util/async_task.hpp>
+#include <mln/util/async_task.hpp>
 
 #include <CoreFoundation/CoreFoundation.h>
 
 #include <atomic>
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 class AsyncTask::Impl {
@@ -55,4 +55,4 @@ void AsyncTask::send() {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

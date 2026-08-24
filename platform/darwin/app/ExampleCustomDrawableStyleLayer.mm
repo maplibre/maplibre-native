@@ -4,17 +4,17 @@
 
 #import <UIKit/UIKit.h>
 
-#include <mbgl/layermanager/layer_factory.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/image+MLNAdditions.hpp>
+#include <mln/layermanager/layer_factory.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layers/custom_drawable_layer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/image+MLNAdditions.hpp>
 
 #include <cmath>
 #include <memory>
 
 @interface MLNCustomDrawableStyleLayer (Internal)
-- (instancetype)initWithPendingLayer:(std::unique_ptr<mbgl::style::Layer>)pendingLayer;
+- (instancetype)initWithPendingLayer:(std::unique_ptr<mln::style::Layer>)pendingLayer;
 @end
 
 class ExampleCustomDrawableStyleLayerHost;
@@ -22,14 +22,14 @@ class ExampleCustomDrawableStyleLayerHost;
 @implementation ExampleCustomDrawableStyleLayer
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
-  auto layer = std::make_unique<mbgl::style::CustomDrawableLayer>(
+  auto layer = std::make_unique<mln::style::CustomDrawableLayer>(
       identifier.UTF8String, std::make_unique<ExampleCustomDrawableStyleLayerHost>(self));
   return self = [super initWithPendingLayer:std::move(layer)];
 }
 
 @end
 
-class ExampleCustomDrawableStyleLayerHost : public mbgl::style::CustomDrawableLayerHost {
+class ExampleCustomDrawableStyleLayerHost : public mln::style::CustomDrawableLayerHost {
 public:
   ExampleCustomDrawableStyleLayerHost(ExampleCustomDrawableStyleLayer *styleLayer) {
     layerRef = styleLayer;
@@ -47,11 +47,11 @@ public:
     // if we have built our drawable(s) already, either update or skip
     if (interface.getDrawableCount()) return;
 
-    constexpr float extent = mbgl::util::EXTENT;
+    constexpr float extent = mln::util::EXTENT;
 
     // add classic polylines
     {
-      using namespace mbgl;
+      using namespace mln;
 
       // set tile
       interface.setTileID({11, 327, 792});
@@ -99,7 +99,7 @@ public:
 
     // add wide vector polylines with tile coordinates
     {
-      using namespace mbgl;
+      using namespace mln;
 
       // set tile
       interface.setTileID({11, 327, 792});
@@ -157,7 +157,7 @@ public:
 
     // add fill polygon
     {
-      using namespace mbgl;
+      using namespace mln;
 
       // set tile
       interface.setTileID({11, 327, 790});
@@ -190,7 +190,7 @@ public:
 
     // add symbol
     {
-      using namespace mbgl;
+      using namespace mln;
 
       // set tile
       interface.setTileID({11, 327, 789});
@@ -230,7 +230,7 @@ public:
 
     // add polylines using wide vectors using geographic coordinates
     {
-      using namespace mbgl;
+      using namespace mln;
 
       // add polyline with geographic coordinates
       Interface::LineOptions options = {/*geometry=*/{},
@@ -266,7 +266,7 @@ public:
 
     // add polylines using wide vectors in tile coordinates
     {
-      using namespace mbgl;
+      using namespace mln;
 
       // set tile
       interface.setTileID({11, 327, 790});

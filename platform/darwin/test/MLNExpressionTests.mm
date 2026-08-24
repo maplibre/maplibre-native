@@ -171,7 +171,7 @@ using namespace std::string_literals;
 }
 
 - (void)testIntegerValuation {
-  // Negative integers should always come back as int64_t per mbgl::Value definition.
+  // Negative integers should always come back as int64_t per mln::Value definition.
   MLNAssertConstantEqualsValue(@SHRT_MIN, static_cast<int64_t>(SHRT_MIN),
                                @"Negative short NSNumber should convert to int64_t.");
   MLNAssertConstantEqualsValue(@INT_MIN, static_cast<int64_t>(INT_MIN),
@@ -183,7 +183,7 @@ using namespace std::string_literals;
   MLNAssertConstantEqualsValue(@NSIntegerMin, static_cast<int64_t>(NSIntegerMin),
                                @"Negative NSInteger NSNumber should convert to int64_t.");
 
-  // Positive integers should always come back as uint64_t per mbgl::Value definition.
+  // Positive integers should always come back as uint64_t per mln::Value definition.
   MLNAssertConstantEqualsValue(@SHRT_MAX, static_cast<uint64_t>(SHRT_MAX),
                                @"Positive short NSNumber should convert to uint64_t.");
   MLNAssertConstantEqualsValue(@INT_MAX, static_cast<uint64_t>(INT_MAX),
@@ -197,7 +197,7 @@ using namespace std::string_literals;
 }
 
 - (void)testUnsignedIntegerValuation {
-  // Zero-value integers should always come back as uint64_t per mbgl::Value definition
+  // Zero-value integers should always come back as uint64_t per mln::Value definition
   // (using the interpretation that zero is not negative). We use the unsigned long long
   // value just for parity with the positive integer test.
   MLNAssertConstantEqualsValue(@(static_cast<unsigned short>(0)), static_cast<uint64_t>(0),
@@ -211,7 +211,7 @@ using namespace std::string_literals;
   MLNAssertConstantEqualsValue(@(static_cast<NSUInteger>(0)), static_cast<uint64_t>(0),
                                @"Unsigned NSUInteger NSNumber should convert to uint64_t.");
 
-  // Positive integers should always come back as uint64_t per mbgl::Value definition.
+  // Positive integers should always come back as uint64_t per mln::Value definition.
   // We use the unsigned long long value because it can store the highest number on
   // both 32- and 64-bit and won't overflow.
   MLNAssertConstantEqualsValue(@USHRT_MAX, static_cast<uint64_t>(USHRT_MAX),
@@ -227,40 +227,40 @@ using namespace std::string_literals;
 }
 
 - (void)testNullValuation {
-  mbgl::NullValue nullValue;
+  mln::NullValue nullValue;
   MLNAssertConstantEqualsValue([NSNull null], nullValue,
-                               @"NSNull should convert to mbgl::NullValue.");
+                               @"NSNull should convert to mln::NullValue.");
 }
 
 // MARK: - Feature type tests
 
 - (void)testFeatureType {
   XCTAssertEqual([NSExpression expressionForConstantValue:@"Point"].mgl_featureType,
-                 mbgl::FeatureType::Point);
+                 mln::FeatureType::Point);
   XCTAssertEqual([NSExpression expressionForConstantValue:@"LineString"].mgl_featureType,
-                 mbgl::FeatureType::LineString);
+                 mln::FeatureType::LineString);
   XCTAssertEqual([NSExpression expressionForConstantValue:@"Polygon"].mgl_featureType,
-                 mbgl::FeatureType::Polygon);
+                 mln::FeatureType::Polygon);
   XCTAssertEqual([NSExpression expressionForConstantValue:@"Unknown"].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
   XCTAssertEqual([NSExpression expressionForConstantValue:@""].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
 
   XCTAssertEqual([NSExpression expressionForConstantValue:@1].mgl_featureType,
-                 mbgl::FeatureType::Point);
+                 mln::FeatureType::Point);
   XCTAssertEqual([NSExpression expressionForConstantValue:@2].mgl_featureType,
-                 mbgl::FeatureType::LineString);
+                 mln::FeatureType::LineString);
   XCTAssertEqual([NSExpression expressionForConstantValue:@3].mgl_featureType,
-                 mbgl::FeatureType::Polygon);
+                 mln::FeatureType::Polygon);
   XCTAssertEqual([NSExpression expressionForConstantValue:@0].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
   XCTAssertEqual([NSExpression expressionForConstantValue:@-1].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
   XCTAssertEqual([NSExpression expressionForConstantValue:@4].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
 
   XCTAssertEqual([NSExpression expressionForConstantValue:nil].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
 }
 
 // MARK: - JSON expression object tests

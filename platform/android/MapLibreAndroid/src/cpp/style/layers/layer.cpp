@@ -3,43 +3,43 @@
 
 #include <jni/jni.hpp>
 
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/filter.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/util/logging.hpp>
 
 // Java -> C++ conversion
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion/layer.hpp>
-#include <mbgl/style/conversion/source.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/layer.hpp>
+#include <mln/style/conversion/source.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 // C++ -> Java conversion
 #include "../conversion/property_value.hpp"
 #include "custom_layer.hpp"
 #include "background_layer.hpp"
-#include <mbgl/style/filter.hpp>
+#include <mln/style/filter.hpp>
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 /**
  * Invoked when the construction is initiated from the jvm through a subclass
  */
-Layer::Layer(std::unique_ptr<mbgl::style::Layer> coreLayer)
+Layer::Layer(std::unique_ptr<mln::style::Layer> coreLayer)
     : ownedLayer(std::move(coreLayer)),
       layerPtr(ownedLayer->makeWeakPtr()) {}
 
 /**
  * Takes a non-owning reference. For lookup methods
  */
-Layer::Layer(mbgl::style::Layer& coreLayer)
+Layer::Layer(mln::style::Layer& coreLayer)
     : layerPtr(coreLayer.makeWeakPtr()) {}
 
 Layer::~Layer() {}
 
-void Layer::addToStyle(mbgl::style::Style& style, std::optional<std::string> before) {
+void Layer::addToStyle(mln::style::Style& style, std::optional<std::string> before) {
     // Check to see if we own the layer first
     if (!ownedLayer) {
         throw std::runtime_error("Cannot add layer twice");
@@ -49,11 +49,11 @@ void Layer::addToStyle(mbgl::style::Style& style, std::optional<std::string> bef
     style.addLayer(releaseCoreLayer(), before);
 }
 
-void Layer::setLayer(std::unique_ptr<mbgl::style::Layer> sourceLayer) {
+void Layer::setLayer(std::unique_ptr<mln::style::Layer> sourceLayer) {
     this->ownedLayer = std::move(sourceLayer);
 }
 
-std::unique_ptr<mbgl::style::Layer> Layer::releaseCoreLayer() {
+std::unique_ptr<mln::style::Layer> Layer::releaseCoreLayer() {
     assert(ownedLayer != nullptr);
     return std::move(ownedLayer);
 }
@@ -78,18 +78,18 @@ void Layer::setProperty(jni::JNIEnv& env, const jni::String& jname, const jni::O
     }
 
     // Convert and set property
-    std::optional<mbgl::style::conversion::Error> error = layer->setProperty(jni::Make<std::string>(env, jname),
-                                                                             Value(env, jvalue));
+    std::optional<mln::style::conversion::Error> error = layer->setProperty(jni::Make<std::string>(env, jname),
+                                                                            Value(env, jvalue));
     if (error) {
-        mbgl::Log::Error(mbgl::Event::JNI,
-                         "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
+        mln::Log::Error(mln::Event::JNI,
+                        "Error setting property: " + jni::Make<std::string>(env, jname) + " " + error->message);
         return;
     }
 }
 
 void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto layer = layerPtr.get();
     if (!layer) {
@@ -99,7 +99,7 @@ void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter
     Error error;
     std::optional<Filter> converted = convert<Filter>(Value(env, jfilter), error);
     if (!converted) {
-        mbgl::Log::Error(mbgl::Event::JNI, "Error setting filter: " + error.message);
+        mln::Log::Error(mln::Event::JNI, "Error setting filter: " + error.message);
         return;
     }
 
@@ -107,8 +107,8 @@ void Layer::setFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter
 }
 
 jni::Local<jni::Object<gson::JsonElement>> Layer::getFilter(jni::JNIEnv& env) {
-    using namespace mbgl::style;
-    using namespace mbgl::style::conversion;
+    using namespace mln::style;
+    using namespace mln::style::conversion;
 
     auto layer = layerPtr.get();
     if (!layer) {
@@ -117,7 +117,7 @@ jni::Local<jni::Object<gson::JsonElement>> Layer::getFilter(jni::JNIEnv& env) {
 
     Filter filter = layer->getFilter();
     if (filter.expression) {
-        mbgl::Value expressionValue = (*filter.expression)->serialize();
+        mln::Value expressionValue = (*filter.expression)->serialize();
         return gson::JsonElement::New(env, expressionValue);
     } else {
         return jni::Local<jni::Object<gson::JsonElement>>(env, nullptr);
@@ -188,7 +188,7 @@ void Layer::setMaxZoom(jni::JNIEnv&, jni::jfloat zoom) {
 }
 
 jni::Local<jni::Object<>> Layer::getVisibility(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
 
     auto layer = layerPtr.get();
     if (!layer) {
@@ -226,4 +226,4 @@ void Layer::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

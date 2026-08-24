@@ -12,10 +12,10 @@
 #import "NSValue+MLNAdditions.h"
 #import "MLNLoggingConfiguration_Private.h"
 
-#import <mbgl/style/light.hpp>
-#import <mbgl/style/types.hpp>
+#import <mln/style/light.hpp>
+#import <mln/style/types.hpp>
 
-namespace mbgl {
+namespace mln {
 
     MBGL_DEFINE_ENUM(MLNLightAnchor, {
 <% for (const property of properties) { -%>
@@ -35,7 +35,7 @@ namespace mbgl {
 
 @implementation MLNLight
 
-- (instancetype)initWithMBGLLight:(const mbgl::style::Light *)mbglLight
+- (instancetype)initWithMBGLLight:(const mln::style::Light *)mbglLight
 {
     if (self = [super init]) {
         MLNLogInfo(@"Initializing %@.", NSStringFromClass([self class]));
@@ -45,10 +45,10 @@ namespace mbgl {
         auto <%- camelizeWithLeadingLowercase(property.name) -%> = mbglLight->get<%- camelize(property.name) -%>();
         NSExpression *<%- camelizeWithLeadingLowercase(property.name) -%>Expression;
         if (<%- camelizeWithLeadingLowercase(property.name) -%>.isUndefined()) {
-            mbgl::style::PropertyValue<mbgl::style::Light<%- camelize(property.name) -%>Type> default<%- camelize(property.name) -%> = mbglLight->getDefault<%- camelize(property.name) -%>();
-            <%- camelizeWithLeadingLowercase(property.name) -%>Expression = MLNStyleValueTransformer<mbgl::style::LightAnchorType, NSValue *, mbgl::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toExpression(default<%- camelize(property.name) -%>);
+            mln::style::PropertyValue<mln::style::Light<%- camelize(property.name) -%>Type> default<%- camelize(property.name) -%> = mbglLight->getDefault<%- camelize(property.name) -%>();
+            <%- camelizeWithLeadingLowercase(property.name) -%>Expression = MLNStyleValueTransformer<mln::style::LightAnchorType, NSValue *, mln::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toExpression(default<%- camelize(property.name) -%>);
         } else {
-            <%- camelizeWithLeadingLowercase(property.name) -%>Expression = MLNStyleValueTransformer<mbgl::style::Light<%- camelize(property.name) -%>Type, NSValue *, mbgl::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toExpression(<%- camelizeWithLeadingLowercase(property.name) -%>);
+            <%- camelizeWithLeadingLowercase(property.name) -%>Expression = MLNStyleValueTransformer<mln::style::Light<%- camelize(property.name) -%>Type, NSValue *, mln::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toExpression(<%- camelizeWithLeadingLowercase(property.name) -%>);
         }
 
         _<%- camelizeWithLeadingLowercase(property.name) -%> = <%- camelizeWithLeadingLowercase(property.name) -%>Expression;
@@ -75,17 +75,17 @@ namespace mbgl {
     return self;
 }
 
-- (mbgl::style::Light)mbglLight
+- (mln::style::Light)mbglLight
 {
-    mbgl::style::Light mbglLight;
+    mln::style::Light mbglLight;
 <% if (properties.length) { -%>
 <% for (const property of properties) { -%>
 <% if (property.type == "enum") { -%>
-    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<mbgl::style::Light<%- camelize(property.name) -%>Type, NSValue *, mbgl::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
+    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<mln::style::Light<%- camelize(property.name) -%>Type, NSValue *, mln::style::Light<%- camelize(property.name) -%>Type, MLNLight<%- camelize(property.name) -%>>().toPropertyValue<mln::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
     mbglLight.set<%- camelize(property.name) -%>(<%- camelizeWithLeadingLowercase(property.name) -%>);
 
 <% } else {-%>
-    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mbgl::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
+    auto <%- camelizeWithLeadingLowercase(property.name) -%> = MLNStyleValueTransformer<<%- valueTransformerArguments(property).join(', ') %>>().toPropertyValue<mln::style::PropertyValue<<%- valueTransformerArguments(property)[0] %>>>(self.<%- camelizeWithLeadingLowercase(property.name) -%>, false);
     mbglLight.set<%- camelize(property.name) -%>(<%- camelizeWithLeadingLowercase(property.name) -%>);
 
 <% } -%>

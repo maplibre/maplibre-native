@@ -1,9 +1,9 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/wrap.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/wrap.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(Math, WrapHigherValue) {
     ASSERT_DOUBLE_EQ(4.0, util::wrap(16.0, 0.0, 12.0));
