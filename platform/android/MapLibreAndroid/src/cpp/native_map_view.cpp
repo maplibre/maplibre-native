@@ -1068,6 +1068,21 @@ void NativeMapView::removeFeatureState(JNIEnv& env,
     map->triggerRepaint();
 }
 
+void NativeMapView::setGlobalStateProperty(JNIEnv& env,
+                                           const jni::String& name,
+                                           const jni::Object<gson::JsonElement>& value) {
+    if (!name) {
+        return;
+    }
+
+    map->getStyle().setGlobalStateProperty(jni::Make<std::string>(env, name),
+                                           value ? gson::JsonElement::convert(env, value) : mln::Value());
+}
+
+jni::Local<jni::Object<gson::JsonObject>> NativeMapView::getGlobalState(JNIEnv& env) {
+    return gson::JsonObject::New(env, map->getStyle().getGlobalState());
+}
+
 jni::Local<jni::Object<Light>> NativeMapView::getLight(JNIEnv& env) {
     mln::style::Light* light = map->getStyle().getLight();
     if (light) {
@@ -1484,6 +1499,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setFeatureState, "nativeSetFeatureState"),
         METHOD(&NativeMapView::getFeatureState, "nativeGetFeatureState"),
         METHOD(&NativeMapView::removeFeatureState, "nativeRemoveFeatureState"),
+        METHOD(&NativeMapView::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
+        METHOD(&NativeMapView::getGlobalState, "nativeGetGlobalState"),
         METHOD(&NativeMapView::getLight, "nativeGetLight"),
         METHOD(&NativeMapView::getLayers, "nativeGetLayers"),
         METHOD(&NativeMapView::getLayer, "nativeGetLayer"),
