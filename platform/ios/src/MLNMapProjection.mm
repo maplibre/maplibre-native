@@ -1,7 +1,7 @@
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_projection.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/projection.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_projection.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 
 #import "MLNGeometry_Private.h"
 #import "MLNMapProjection.h"

@@ -1,7 +1,7 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/clamp.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/clamp.hpp>
 
 using namespace mln;
 

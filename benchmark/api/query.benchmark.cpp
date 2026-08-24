@@ -1,15 +1,15 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/storage/network_status.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/image.hpp>
+#include <mln/storage/network_status.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
 
 using namespace mln;
 

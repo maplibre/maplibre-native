@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/size.hpp>
-#include <mbgl/gfx/backend.hpp>
+#include <mln/util/size.hpp>
+#include <mln/gfx/backend.hpp>
 
 namespace mln {
 namespace gfx {

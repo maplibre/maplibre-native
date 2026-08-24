@@ -5,8 +5,8 @@
 #import <UIKit/UIKit.h>
 #endif
 
-#import <mbgl/util/geo.hpp>
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/geo.hpp>
+#import <mln/util/geometry.hpp>
 
 #import <array>
 typedef double MLNLocationRadians;

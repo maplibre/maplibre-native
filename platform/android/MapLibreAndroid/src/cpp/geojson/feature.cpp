@@ -2,7 +2,7 @@
 #include "geometry.hpp"
 #include "../gson/json_object.hpp"
 
-#include <mbgl/util/string.hpp>
+#include <mln/util/string.hpp>
 
 namespace mln {
 namespace android {

@@ -1,6 +1,6 @@
 #include "node_logging.hpp"
 
-#include <mbgl/util/enum.hpp>
+#include <mln/util/enum.hpp>
 
 namespace node_mbgl {
 

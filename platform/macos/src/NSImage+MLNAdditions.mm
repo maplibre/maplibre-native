@@ -1,6 +1,6 @@
 #import "NSImage+MLNAdditions.h"
 
-#include <mbgl/util/image+MLNAdditions.hpp>
+#include <mln/util/image+MLNAdditions.hpp>
 
 BOOL MLNEdgeInsetsIsZero(NSEdgeInsets edgeInsets) {
   return edgeInsets.left == 0 && edgeInsets.top == 0 && edgeInsets.right == 0 &&

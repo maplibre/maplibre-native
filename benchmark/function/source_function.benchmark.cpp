@@ -1,10 +1,10 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/benchmark/stub_geometry_tile_feature.hpp>
+#include <mln/benchmark/stub_geometry_tile_feature.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 using namespace mln;
 using namespace mln::style;

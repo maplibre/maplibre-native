@@ -1,15 +1,15 @@
 #include "geojson_source.hpp"
-#include <mbgl/style/sources/geojson_source_impl.hpp>
+#include <mln/style/sources/geojson_source_impl.hpp>
 #include "attach_env.hpp"
 
-#include <mbgl/renderer/query.hpp>
+#include <mln/renderer/query.hpp>
 
 // Java -> C++ conversion
 #include "../android_conversion.hpp"
 #include "../conversion/filter.hpp"
-#include <mbgl/style/conversion/geojson.hpp>
-#include <mbgl/style/conversion/geojson_options.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/geojson.hpp>
+#include <mln/style/conversion/geojson_options.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 // C++ -> Java conversion
 #include "../../conversion/conversion.hpp"

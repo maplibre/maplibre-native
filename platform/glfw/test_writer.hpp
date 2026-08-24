@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/size.hpp>
 
 #include <memory>
 #include <string>

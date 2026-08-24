@@ -2,16 +2,16 @@
 #define NOMINMAX
 #endif
 
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/getrss.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/map_adapter.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/getrss.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/map_adapter.hpp>
 
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/style/style.hpp>
 
 #include <algorithm>
 #include <iostream>

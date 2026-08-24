@@ -1,17 +1,17 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/test/stub_geometry_tile_feature.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 
-#include <mbgl/util/rapidjson.hpp>
+#include <mln/util/rapidjson.hpp>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
-#include <mbgl/style/conversion/stringify.hpp>
+#include <mln/style/conversion/stringify.hpp>
 
-#include <mbgl/style/filter.hpp>
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/util/rapidjson.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/util/rapidjson.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>

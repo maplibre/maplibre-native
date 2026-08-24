@@ -2,8 +2,8 @@
 
 #include "metadata.hpp"
 
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/variant.hpp>
 
 #include <string>
 #include <tuple>

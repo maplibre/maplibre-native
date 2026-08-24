@@ -1,6 +1,6 @@
 #include <QGuiApplication>
 
-#include <mbgl/test.hpp>
+#include <mln/test.hpp>
 #include <cstring>
 #include <cerrno>
 #include <cstdio>

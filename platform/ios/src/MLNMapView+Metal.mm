@@ -3,7 +3,7 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+Metal.h"
 
-#import <mbgl/mtl/renderable_resource.hpp>
+#import <mln/mtl/renderable_resource.hpp>
 
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>

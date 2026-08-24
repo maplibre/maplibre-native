@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/math/angles.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/math/angles.hpp>
 
 namespace mln {
 

@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/tile/vector_mvt_tile_data.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/tile/vector_mvt_tile_data.hpp>
+#include <mln/util/io.hpp>
 
 using namespace mln;
 

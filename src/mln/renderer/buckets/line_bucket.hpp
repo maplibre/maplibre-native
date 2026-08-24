@@ -6,7 +6,7 @@
 #include <mln/shaders/segment.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/layers/line_layer_properties.hpp>
-#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/style/image_impl.hpp>
 
 namespace mln {
 

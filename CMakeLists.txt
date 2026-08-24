@@ -968,6 +968,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/mat3.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/mat4.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/mat4.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/math.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/padding.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/premultiply.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/quaternion.cpp

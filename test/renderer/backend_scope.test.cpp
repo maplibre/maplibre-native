@@ -1,8 +1,8 @@
 #if MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/gl/renderer_backend.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
+#include <mln/gl/renderer_backend.hpp>
+#include <mln/gfx/backend_scope.hpp>
 
 #include <functional>
 

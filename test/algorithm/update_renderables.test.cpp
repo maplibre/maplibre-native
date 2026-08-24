@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/mock.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/mock.hpp>
+#include <mln/util/variant.hpp>
 
 #include <mapbox/variant_io.hpp>
 
-#include <mbgl/algorithm/update_renderables.hpp>
+#include <mln/algorithm/update_renderables.hpp>
 
 using namespace mln;
 

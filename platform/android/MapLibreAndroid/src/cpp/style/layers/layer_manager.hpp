@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/layermanager/layer_manager.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/layer.hpp>
+#include <mln/layermanager/layer_manager.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/layer.hpp>
 
 #include "layer.hpp"
 

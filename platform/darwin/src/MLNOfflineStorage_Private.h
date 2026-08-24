@@ -2,8 +2,8 @@
 
 #import "MLNOfflinePack.h"
 
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/storage/online_file_source.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/storage/online_file_source.hpp>
 
 #include "MLNSettings_Private.h"
 

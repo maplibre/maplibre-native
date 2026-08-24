@@ -1,8 +1,8 @@
 #include "android_vulkan_renderer_backend.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/renderable_resource.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
 
 #include <cassert>
 #include <vulkan/vulkan_android.h>

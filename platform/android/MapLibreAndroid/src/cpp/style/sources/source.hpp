@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/source.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/source.hpp>
 
 #include "../value.hpp"
 #include "../../android_renderer_frontend.hpp"

@@ -1,4 +1,4 @@
-#include <mbgl/benchmark.hpp>
+#include <mln/benchmark.hpp>
 #include "test_runner_common.hpp"
 
 #include <unistd.h>

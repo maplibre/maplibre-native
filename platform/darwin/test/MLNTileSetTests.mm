@@ -5,7 +5,7 @@
 #import "MLNTileSource_Private.h"
 #import "MLNVectorTileSource.h"
 
-#include <mbgl/util/tileset.hpp>
+#include <mln/util/tileset.hpp>
 
 @interface MLNTileSetTests : XCTestCase
 

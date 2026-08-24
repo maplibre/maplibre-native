@@ -1,6 +1,7 @@
 #include <mln/renderer/layer_tweaker.hpp>
 
 #include <mln/map/transform_state.hpp>
+#include <mln/style/layer_properties.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/shaders/layer_ubo.hpp>

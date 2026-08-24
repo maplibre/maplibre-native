@@ -1,7 +1,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <Foundation/Foundation.h>
 
-#import <mbgl/util/feature.hpp>
+#import <mln/util/feature.hpp>
 
 @interface NSCoder (MLNAdditions)
 

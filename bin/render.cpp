@@ -1,11 +1,11 @@
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/run_loop.hpp>
 
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/style/style.hpp>
 
 #include <args.hxx>
 
