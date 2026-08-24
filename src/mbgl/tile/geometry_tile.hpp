@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/actor/optional_actor.hpp>
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/tile/geometry_tile_worker.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/actor/optional_actor.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/gfx/dynamic_texture_atlas.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/tile/geometry_tile_worker.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/containers.hpp>
 
 #include <atomic>
 #include <memory>

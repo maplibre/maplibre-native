@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/storage/file_source.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/map/map.hpp>
+#include <mln/storage/file_source.hpp>
 
 #include "manifest_parser.hpp"
 

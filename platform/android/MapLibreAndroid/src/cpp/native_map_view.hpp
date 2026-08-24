@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/map/change.hpp>
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/storage/network_status.hpp>
+#include <mln/map/change.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/tile/tile_operation.hpp>
+#include <mln/storage/network_status.hpp>
 
 #include "annotation/marker.hpp"
 #include "annotation/polygon.hpp"

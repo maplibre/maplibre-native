@@ -1,22 +1,22 @@
-#include <mbgl/layout/symbol_layout.hpp>
+#include <mln/layout/symbol_layout.hpp>
 
-#include <mbgl/layout/clip_lines.hpp>
-#include <mbgl/layout/merge_lines.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/renderer/bucket_parameters.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/text/get_anchors.hpp>
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/text/shaping.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/tile/tile.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/utf.hpp>
+#include <mln/layout/clip_lines.hpp>
+#include <mln/layout/merge_lines.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
+#include <mln/text/get_anchors.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/text/shaping.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/utf.hpp>
 
 #include <mapbox/polylabel.hpp>
 

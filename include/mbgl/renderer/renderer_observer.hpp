@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/text/glyph_range.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/util/font_stack.hpp>
-#include <mbgl/util/symbol_error_observer.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/rendering_stats.hpp>
+#include <mln/shaders/shader_source.hpp>
+#include <mln/text/glyph_range.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile_operation.hpp>
+#include <mln/util/font_stack.hpp>
+#include <mln/util/symbol_error_observer.hpp>
 
 #include <cstdint>
 #include <exception>

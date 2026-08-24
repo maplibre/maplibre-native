@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/tile/tile_id.hpp>
 
 namespace mln {
 namespace style {

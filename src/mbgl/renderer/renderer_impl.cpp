@@ -1,31 +1,31 @@
-#include <mbgl/renderer/renderer_impl.hpp>
+#include <mln/renderer/renderer_impl.hpp>
 
-#include <mbgl/geometry/line_atlas.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/context.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/pattern_atlas.hpp>
-#include <mbgl/renderer/renderer_observer.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/geometry/line_atlas.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/pattern_atlas.hpp>
+#include <mln/renderer/renderer_observer.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/program_parameters.hpp>
+#include <mln/util/convert.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/instrumentation.hpp>
 
-#include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/renderer/render_target.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
+#include <mln/renderer/render_target.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/mtl/renderer_backend.hpp>
+#include <mln/mtl/renderer_backend.hpp>
 #include <Metal/MTLCaptureManager.hpp>
 #include <Metal/MTLCaptureScope.hpp>
 /// Enable programmatic Metal frame captures for specific frame numbers.
@@ -34,8 +34,8 @@ constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
 #elif MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/drawable_gl.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/drawable_gl.hpp>
 #endif // !MLN_RENDER_BACKEND_METAL
 
 namespace mln {

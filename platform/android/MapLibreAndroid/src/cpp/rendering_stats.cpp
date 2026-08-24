@@ -2,8 +2,8 @@
 
 #include "java/util.hpp"
 
-#include <mbgl/gfx/rendering_stats.hpp>
-#include <mbgl/util/containers.hpp>
+#include <mln/gfx/rendering_stats.hpp>
+#include <mln/util/containers.hpp>
 
 namespace mln::android {
 

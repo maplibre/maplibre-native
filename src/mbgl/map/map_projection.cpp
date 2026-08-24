@@ -1,7 +1,7 @@
-#include <mbgl/map/map_projection.hpp>
-#include <mbgl/map/map_impl.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/math/angles.hpp>
+#include <mln/map/map_projection.hpp>
+#include <mln/map/map_impl.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/math/angles.hpp>
 
 namespace mln {
 

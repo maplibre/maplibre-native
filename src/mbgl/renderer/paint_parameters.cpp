@@ -1,35 +1,35 @@
-#include <mbgl/renderer/paint_parameters.hpp>
+#include <mln/renderer/paint_parameters.hpp>
 
-#include <mbgl/gfx/command_encoder.hpp>
-#include <mbgl/gfx/cull_face_mode.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/render_source.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/gfx/command_encoder.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/renderer/render_source.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/util/convert.hpp>
+#include <mln/util/logging.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/gl/context.hpp>
-#include <mbgl/shaders/gl/legacy/clipping_mask_program.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/shaders/gl/legacy/clipping_mask_program.hpp>
 #endif
 
 #if MLN_RENDER_BACKEND_WEBGPU
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/shaders/webgpu/clipping_mask.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/shaders/webgpu/clipping_mask.hpp>
 #endif
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/mtl/context.hpp>
-#include <mbgl/shaders/mtl/clipping_mask.hpp>
+#include <mln/mtl/context.hpp>
+#include <mln/shaders/mtl/clipping_mask.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 #if MLN_RENDER_BACKEND_VULKAN
-#include <mbgl/vulkan/render_pass.hpp>
-#include <mbgl/shaders/vulkan/clipping_mask.hpp>
-#include <mbgl/vulkan/context.hpp>
+#include <mln/vulkan/render_pass.hpp>
+#include <mln/shaders/vulkan/clipping_mask.hpp>
+#include <mln/vulkan/context.hpp>
 #endif // MLN_RENDER_BACKEND_VULKAN
 
 namespace mln {

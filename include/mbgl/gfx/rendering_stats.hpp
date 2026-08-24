@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/hash.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/hash.hpp>
 
 #include <cstddef>
 #include <string>

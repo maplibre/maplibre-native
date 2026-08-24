@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/actor/scheduler.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/actor/scheduler.hpp>
 
 #include <memory>
 #include <numbers>

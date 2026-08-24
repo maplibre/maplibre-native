@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/geojson.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geojson.hpp>
 
 #include <memory>
 #include <string>

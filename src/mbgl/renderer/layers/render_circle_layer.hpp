@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/style/layers/circle_layer_properties.hpp>
+#include <mln/renderer/buckets/circle_bucket.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/layers/circle_layer_properties.hpp>
 
 namespace mln {
 

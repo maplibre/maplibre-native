@@ -1,12 +1,12 @@
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/map_observer.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/map/map_observer.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/style.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <gtest/gtest.h>
 

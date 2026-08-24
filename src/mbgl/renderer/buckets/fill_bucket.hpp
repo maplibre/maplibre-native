@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/style/layers/fill_layer_properties.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/style/layers/fill_layer_properties.hpp>
 
 /**
     Control how the fill outlines are being generated:
@@ -16,7 +16,7 @@
 #define MLN_TRIANGULATE_FILL_OUTLINES (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU)
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-#include <mbgl/renderer/buckets/line_bucket.hpp>
+#include <mln/renderer/buckets/line_bucket.hpp>
 #endif
 
 namespace mln {

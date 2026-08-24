@@ -2,7 +2,7 @@
 
 #include <jni.h>
 #include <jni/jni.hpp>
-#include <mbgl/util/action_journal_options.hpp>
+#include <mln/util/action_journal_options.hpp>
 
 namespace mln {
 namespace android {

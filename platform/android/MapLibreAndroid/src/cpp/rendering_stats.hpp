@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/gfx/rendering_stats.hpp>
+#include <mln/gfx/rendering_stats.hpp>
 
 #include <jni.h>
 #include <jni/jni.hpp>

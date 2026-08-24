@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/math.hpp>
+#include <mln/util/math.hpp>
 
 #include <array>
 #include <algorithm>

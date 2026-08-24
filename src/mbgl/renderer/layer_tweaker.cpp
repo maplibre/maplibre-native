@@ -1,12 +1,12 @@
-#include <mbgl/renderer/layer_tweaker.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
 
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/renderer/render_tree.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/shaders/layer_ubo.hpp>
-#include <mbgl/style/layer_properties.hpp>
-#include <mbgl/util/containers.hpp>
-#include <mbgl/util/mat4.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/shaders/layer_ubo.hpp>
+#include <mln/style/layer_properties.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/mat4.hpp>
 
 namespace mln {
 

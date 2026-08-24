@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/vertex_buffer.hpp>
-#include <mbgl/layout/symbol_feature.hpp>
-#include <mbgl/layout/symbol_instance.hpp>
-#include <mbgl/map/mode.hpp>
-#include <mbgl/shaders/segment.hpp>
-#include <mbgl/renderer/bucket.hpp>
-#include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/style/layers/symbol_layer_properties.hpp>
-#include <mbgl/text/glyph_range.hpp>
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
+#include <mln/layout/symbol_feature.hpp>
+#include <mln/layout/symbol_instance.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/shaders/segment.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer_properties.hpp>
+#include <mln/text/glyph_range.hpp>
 
 #include <memory>
 #include <vector>
