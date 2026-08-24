@@ -183,6 +183,45 @@ TEST(Style, GlobalStateVisibility) {
     EXPECT_EQ(VisibilityType::None, layer->getVisibility());
 }
 
+TEST(Style, VisibilityExpressionSetAtRuntime) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "state": {"showBackground": {"default": false}},
+        "sources": {},
+        "layers": [{"id": "background", "type": "background"}]
+    })STYLE");
+
+    Layer* layer = style.getLayer("background");
+    ASSERT_TRUE(layer);
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    // A visibility expression set after the style has loaded must be
+    // evaluated against the current global state right away.
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    document.Parse<0>(R"(["case", ["to-boolean", ["global-state", "showBackground"]], "visible", "none"])");
+    ASSERT_FALSE(document.HasParseError());
+    const JSValue* json = &document;
+    auto error = layer->setProperty("visibility", conversion::Convertible(json));
+    EXPECT_FALSE(error);
+    EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+
+    // Runtime global state (not only style defaults) applies as well.
+    style.setGlobalStateProperty("showBackground", true);
+    ASSERT_TRUE(layer);
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    document.Parse<0>(R"(["case", ["to-boolean", ["global-state", "showBackground"]], "none", "visible"])");
+    ASSERT_FALSE(document.HasParseError());
+    error = layer->setProperty("visibility", conversion::Convertible(json));
+    EXPECT_FALSE(error);
+    EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+}
+
 TEST(Style, VisibilityExpressionRejectsOtherDependencies) {
     util::RunLoop loop;
 

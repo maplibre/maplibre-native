@@ -501,6 +501,7 @@ void Style::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) 
 }
 
 void Style::Impl::onLayerChanged(Layer& layer) {
+    layer.reevaluateVisibility(*globalState);
     layers.update(layer);
     observer->onUpdate();
 }
