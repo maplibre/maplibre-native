@@ -71,6 +71,9 @@ public abstract class Layer {
     return nativeGetId();
   }
 
+  /**
+   * When the visibility was set as an expression, this returns the current evaluated value.
+   */
   @NonNull
   public PropertyValue<String> getVisibility() {
     checkThread();

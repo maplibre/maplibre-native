@@ -11,6 +11,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
+import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.BackgroundLayer;
 import org.maplibre.android.style.layers.CircleLayer;
@@ -77,6 +78,32 @@ public class RuntimeStyleTests extends EspressoTest {
   public void testGetAddRemoveLayer() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new AddRemoveLayerAction());
+  }
+
+  @Test
+  public void testVisibilityExpression() {
+    validateTestSetup();
+    onView(withId(R.id.mapView)).perform(new BaseViewAction() {
+      @Override
+      public void perform(UiController uiController, View view) {
+        Style style = maplibreMap.getStyle();
+        assertNotNull(style);
+        Layer layer = style.getLayers().get(0);
+
+        layer.setProperties(PropertyFactory.visibility(
+          Expression.switchCase(
+            Expression.toBool(Expression.globalState("showLayer")),
+            Expression.literal(Property.VISIBLE),
+            Expression.literal(Property.NONE))));
+        assertEquals(Property.NONE, layer.getVisibility().getValue());
+
+        style.setGlobalStateProperty("showLayer", new JsonPrimitive(true));
+        assertEquals(Property.VISIBLE, layer.getVisibility().getValue());
+
+        style.setGlobalStateProperty("showLayer", new JsonPrimitive(false));
+        assertEquals(Property.NONE, layer.getVisibility().getValue());
+      }
+    });
   }
 
   @Test
