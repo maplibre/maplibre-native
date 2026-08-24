@@ -3061,12 +3061,12 @@
       ],
       "sdk-support": {
         "basic functionality": {
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/644",
+          "js": "6.6.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/1929",
           "ios": "https://github.com/maplibre/maplibre-native/issues/1929"
         },
         "data-driven styling": {
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/644",
+          "js": "6.6.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/1929",
           "ios": "https://github.com/maplibre/maplibre-native/issues/1929"
         }

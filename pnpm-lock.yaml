@@ -12,8 +12,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.1
       '@maplibre/maplibre-gl-style-spec':
-        specifier: ^26.4.0
-        version: 26.4.0
+        specifier: https://codeload.github.com/maplibre/maplibre-style-spec/tar.gz/e60ee6f71a76074415ae4da1e50d89b5194407eb
+        version: https://codeload.github.com/maplibre/maplibre-style-spec/tar.gz/e60ee6f71a76074415ae4da1e50d89b5194407eb
       minimatch:
         specifier: ^10.2.4
         version: 10.2.5
@@ -287,8 +287,9 @@ packages:
   '@mapbox/vector-tile@1.3.1':
     resolution: {integrity: sha512-MCEddb8u44/xfQ3oD+Srl/tNcQoqTw3goGk2oLsrFxOTc3dUp+kAnby3PvAeeBYSMSjSPD1nd1AJA6W49WnoUw==}
 
-  '@maplibre/maplibre-gl-style-spec@26.4.0':
-    resolution: {integrity: sha512-FHR/9P4g2MrO4+yAQvhIWJEQ34vEBwupoTyGXH4OUAPSeApoOq0Mqc53i4tU4UfTOWxr5KxGM74w9oxK+Snklw==}
+  '@maplibre/maplibre-gl-style-spec@https://codeload.github.com/maplibre/maplibre-style-spec/tar.gz/e60ee6f71a76074415ae4da1e50d89b5194407eb':
+    resolution: {gitHosted: true, integrity: sha512-14xJMs4P/LZ7Jjmf4lJ6KF+BRO8FwZj9b5QSQ6s5vQRQmmpluv+9DLBruXE/jaf6qCFEviVbwcBSXAxBKV4D+g==, tarball: https://codeload.github.com/maplibre/maplibre-style-spec/tar.gz/e60ee6f71a76074415ae4da1e50d89b5194407eb}
+    version: 26.4.0
     hasBin: true
 
   '@nodable/entities@2.1.0':
@@ -1672,7 +1673,7 @@ snapshots:
     dependencies:
       '@mapbox/point-geometry': 0.1.0
 
-  '@maplibre/maplibre-gl-style-spec@26.4.0':
+  '@maplibre/maplibre-gl-style-spec@https://codeload.github.com/maplibre/maplibre-style-spec/tar.gz/e60ee6f71a76074415ae4da1e50d89b5194407eb':
     dependencies:
       '@mapbox/jsonlint-lines-primitives': 2.0.3
       '@mapbox/unitbezier': 1.0.0
