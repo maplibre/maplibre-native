@@ -1,5 +1,8 @@
 #import "MLNStyleLayer_Private.h"
+#import "MLNConversion.h"
+#import "MLNStyleValue_Private.h"
 #import "MLNStyle_Private.h"
+#import "NSExpression+MLNPrivateAdditions.h"
 
 #include <mln/style/layer.hpp>
 #include <mln/style/style.hpp>
@@ -72,6 +75,32 @@ const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerExc
 
   mln::style::VisibilityType v = self.rawLayer->getVisibility();
   return (v == mln::style::VisibilityType::Visible);
+}
+
+- (void)setVisibilityExpression:(NSExpression *)expression {
+  MLNAssertStyleLayerIsValid();
+
+  if (!expression) {
+    self.rawLayer->setVisibility(mln::style::VisibilityType::Visible);
+    return;
+  }
+
+  const auto error = self.rawLayer->setProperty(
+      "visibility", mln::style::conversion::makeConvertible(expression.mgl_jsonExpressionObject));
+  if (error) {
+    [NSException raise:NSInvalidArgumentException
+                format:@"Invalid visibility expression: %@", @(error->message.c_str())];
+  }
+}
+
+- (NSExpression *)visibilityExpression {
+  MLNAssertStyleLayerIsValid();
+
+  const mln::Value serialized = self.rawLayer->getVisibilityExpression();
+  if (serialized.is<mln::NullValue>()) {
+    return nil;
+  }
+  return [NSExpression expressionWithMLNJSONObject:MLNJSONObjectFromMBGLValue(serialized)];
 }
 
 - (void)setMaximumZoomLevel:(float)maximumZoomLevel {

@@ -556,6 +556,47 @@
   XCTAssertEqualObjects(self.style.globalState[@"showLabels"], [NSNull null]);
 }
 
+- (void)testVisibilityExpression {
+  MLNBackgroundStyleLayer *layer = [[MLNBackgroundStyleLayer alloc] initWithIdentifier:@"bg"];
+  [self.style addLayer:layer];
+  XCTAssertNil(layer.visibilityExpression);
+  XCTAssertTrue(layer.visible);
+
+  // The expression is evaluated against the current global state right away.
+  [self.style setGlobalStateValue:@NO forProperty:@"show"];
+  NSArray *json = @[ @"case", @[ @"to-boolean", @[ @"global-state", @"show" ] ], @"visible", @"none" ];
+  layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:json];
+  XCTAssertFalse(layer.visible);
+  XCTAssertNotNil(layer.visibilityExpression);
+
+  [self.style setGlobalStateValue:@YES forProperty:@"show"];
+  XCTAssertTrue(layer.visible);
+
+  // Round trip of a plain global-state expression; parsing coerces the
+  // untyped state value to the expected string type.
+  NSArray *stateJson = @[ @"global-state", @"vis" ];
+  layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:stateJson];
+  NSArray *coercedStateJson = @[ @"to-string", stateJson ];
+  XCTAssertEqualObjects(layer.visibilityExpression.mgl_jsonExpressionObject, coercedStateJson);
+
+  // Setting a constant visibility removes the expression.
+  layer.visible = NO;
+  XCTAssertNil(layer.visibilityExpression);
+  XCTAssertFalse(layer.visible);
+
+  // nil resets the layer to visible.
+  layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:json];
+  layer.visibilityExpression = nil;
+  XCTAssertNil(layer.visibilityExpression);
+  XCTAssertTrue(layer.visible);
+
+  // Only global-state may be used.
+  NSArray *zoomJson = @[ @"case", @[ @">", @[ @"zoom" ], @10 ], @"visible", @"none" ];
+  XCTAssertThrowsSpecificNamed(
+      layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:zoomJson],
+      NSException, NSInvalidArgumentException);
+}
+
 - (void)testTransition {
   MLNTransition transitionTest = MLNTransitionMake(5, 4);
 
