@@ -87,10 +87,6 @@ void HeadlessBackend::ensureResource() {
     }
 }
 
-void HeadlessBackend::updateAssumedState() {
-    // no-op
-}
-
 PremultipliedImage HeadlessBackend::readStillImage() {
     return getResource<HeadlessRenderableResource>().readStillImage();
 }
