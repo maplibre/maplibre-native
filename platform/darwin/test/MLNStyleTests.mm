@@ -540,6 +540,22 @@
 
 // MARK: Transition tests
 
+- (void)testGlobalState {
+  XCTAssertEqualObjects(self.style.globalState, @{},
+                        @"A style without a root state property should have an empty global state.");
+
+  [self.style setGlobalStateValue:@YES forProperty:@"showLabels"];
+  XCTAssertEqualObjects(self.style.globalState[@"showLabels"], @YES);
+
+  [self.style setGlobalStateValue:@[ @"CCS", @"CHAdeMO" ] forProperty:@"chargerType"];
+  XCTAssertEqualObjects(self.style.globalState[@"chargerType"], (@[ @"CCS", @"CHAdeMO" ]));
+
+  // A nil value resets the property to the style's default, which is null
+  // since this style defines no root state property.
+  [self.style setGlobalStateValue:nil forProperty:@"showLabels"];
+  XCTAssertEqualObjects(self.style.globalState[@"showLabels"], [NSNull null]);
+}
+
 - (void)testTransition {
   MLNTransition transitionTest = MLNTransitionMake(5, 4);
 
