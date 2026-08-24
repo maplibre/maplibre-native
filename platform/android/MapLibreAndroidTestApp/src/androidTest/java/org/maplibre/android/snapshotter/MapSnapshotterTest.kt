@@ -2,6 +2,7 @@ package org.maplibre.android.snapshotter
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import com.google.gson.JsonPrimitive
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Style
@@ -54,6 +55,48 @@ class MapSnapshotterTest {
                 {
                     assertNotNull(it)
                     assertNotNull(it.bitmap)
+                    countDownLatch.countDown()
+                },
+                {
+                    Assert.fail(it)
+                }
+            )
+        }
+        if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
+            throw TimeoutException()
+        }
+    }
+
+    @Test
+    fun mapSnapshotterGlobalState() {
+        var mapSnapshotter: MapSnapshotter?
+        rule.activity.runOnUiThread {
+            val styleJson = """
+                {
+                    "version": 8,
+                    "state": {"showLabels": {"default": true}},
+                    "sources": {},
+                    "layers": []
+                }
+            """.trimIndent()
+            val options = MapSnapshotter.Options(64, 64)
+                .withPixelRatio(1.0f)
+                .withStyleBuilder(Style.Builder().fromJson(styleJson))
+            mapSnapshotter = MapSnapshotter(rule.activity, options)
+            mapSnapshotter!!.start(
+                {
+                    // The style is fully loaded once the snapshot is ready;
+                    // the default from the style's root "state" property applies.
+                    Assert.assertEquals(
+                        JsonPrimitive(true),
+                        mapSnapshotter!!.getGlobalState().get("showLabels")
+                    )
+
+                    mapSnapshotter!!.setGlobalStateProperty("showLabels", JsonPrimitive(false))
+                    Assert.assertEquals(
+                        JsonPrimitive(false),
+                        mapSnapshotter!!.getGlobalState().get("showLabels")
+                    )
                     countDownLatch.countDown()
                 },
                 {

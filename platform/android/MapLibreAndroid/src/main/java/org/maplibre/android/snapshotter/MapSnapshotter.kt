@@ -14,6 +14,8 @@ import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import org.maplibre.android.R
 import org.maplibre.android.attribution.AttributionLayout
 import org.maplibre.android.attribution.AttributionMeasure
@@ -741,6 +743,38 @@ open class MapSnapshotter(context: Context, options: Options) {
     }
 
     /**
+     * Set a global state property on the style that is used by the snapshotter, used by the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
+     *
+     * Setting a null value (or [com.google.gson.JsonNull]) resets the property to the default
+     * defined in the style's root `state` property, or to null if there is none.
+     *
+     * Only takes effect once the style is fully loaded; when the style is set by URL, call this
+     * from [Observer.onDidFinishLoadingStyle].
+     *
+     * @param name the name of the state property
+     * @param value the new value of the state property
+     */
+    fun setGlobalStateProperty(name: String, value: JsonElement?) {
+        checkThread()
+        if (fullyLoaded) {
+            nativeSetGlobalStateProperty(name, value)
+        }
+    }
+
+    /**
+     * Get a snapshot of the current global state of the style that is used by the snapshotter,
+     * used by the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
+     *
+     * @return the current global state, or an empty object if the style is not fully loaded yet
+     */
+    fun getGlobalState(): JsonObject {
+        checkThread()
+        return if (fullyLoaded) nativeGetGlobalState() else JsonObject()
+    }
+
+    /**
      * Called by JNI peer when snapshot style image is missing.
      */
     @Keep
@@ -805,6 +839,12 @@ open class MapSnapshotter(context: Context, options: Options) {
 
     @Keep
     private external fun nativeGetSource(sourceId: String): Source
+
+    @Keep
+    private external fun nativeSetGlobalStateProperty(name: String, value: JsonElement?)
+
+    @Keep
+    private external fun nativeGetGlobalState(): JsonObject
 
     @Keep
     @Throws(Throwable::class)
