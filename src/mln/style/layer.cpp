@@ -114,6 +114,10 @@ VisibilityType evaluateVisibilityExpression(const expression::Expression& expres
 
 } // namespace
 
+Value Layer::getVisibilityExpression() const {
+    return baseImpl->visibilityExpression ? baseImpl->visibilityExpression->serialize() : Value();
+}
+
 void Layer::reevaluateVisibility(const GlobalStateMap& globalState) {
     if (!baseImpl->visibilityExpression) return;
     const VisibilityType value = evaluateVisibilityExpression(*baseImpl->visibilityExpression, &globalState);
