@@ -102,6 +102,19 @@ public class RuntimeStyleTests extends EspressoTest {
 
         style.setGlobalStateProperty("showLayer", new JsonPrimitive(false));
         assertEquals(Property.NONE, layer.getVisibility().getValue());
+
+        // The expression can be read back; parsing wraps the untyped state
+        // value with a string type assertion.
+        layer.setProperties(PropertyFactory.visibility(Expression.globalState("vis")));
+        Expression expression = layer.getVisibilityExpression();
+        assertNotNull(expression);
+        assertEquals(
+          java.util.Arrays.deepToString(new Object[] {"string", new Object[] {"global-state", "vis"}}),
+          java.util.Arrays.deepToString(expression.toArray()));
+
+        // A constant visibility has no expression.
+        layer.setProperties(PropertyFactory.visibility(Property.VISIBLE));
+        assertNull(layer.getVisibilityExpression());
       }
     });
   }
