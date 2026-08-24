@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/style/filter.hpp>
+#include <mln/style/filter.hpp>
 
 #include <jni/jni.hpp>
 

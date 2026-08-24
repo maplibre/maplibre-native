@@ -1,17 +1,17 @@
 #include <algorithm>
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/map_adapter.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/map_adapter.hpp>
 
-#include <mbgl/annotation/annotation.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
+#include <mln/annotation/annotation.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/image.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/color.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/gfx/headless_frontend.hpp>
 
 #include <algorithm>
 

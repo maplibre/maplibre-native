@@ -1,5 +1,5 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/http_header.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/http_header.hpp>
 
 TEST(HTTPHeader, Parsing) {
     using namespace mln;

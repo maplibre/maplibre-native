@@ -6,10 +6,10 @@
 #import "MLNShape_Private.h"
 #import "MLNSource_Private.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/tile/tile_id.hpp>
-#include <mbgl/util/geojson.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/geojson.hpp>
 
 const MLNExceptionName MLNInvalidDatasourceException = @"MLNInvalidDatasourceException";
 

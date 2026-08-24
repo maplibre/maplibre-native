@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
+#include <mln/util/variant.hpp>
 
 #include <jni/jni.hpp>
 

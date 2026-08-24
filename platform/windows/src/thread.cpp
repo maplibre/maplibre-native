@@ -1,6 +1,6 @@
-#include <mbgl/util/platform.hpp>
-#include <mbgl/platform/thread.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/platform/thread.hpp>
+#include <mln/util/logging.hpp>
 
 #include <string>
 

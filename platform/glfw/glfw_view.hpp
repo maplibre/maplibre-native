@@ -1,10 +1,10 @@
 #pragma once
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/map/map_snapshotter.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/map/map.hpp>
+#include <mln/map/map_snapshotter.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <utility>
 #include <optional>
@@ -16,7 +16,7 @@
 #endif
 
 #ifdef ENABLE_LOCATION_INDICATOR
-#include <mbgl/style/layers/location_indicator_layer.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
 #endif
 
 struct GLFWwindow;

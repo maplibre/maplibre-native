@@ -2,7 +2,7 @@
 
 #import "MLNTypes.h"
 
-#include <mbgl/style/image.hpp>
+#include <mln/style/image.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 

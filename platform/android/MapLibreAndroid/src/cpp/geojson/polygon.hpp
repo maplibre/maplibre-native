@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include "geometry.hpp"
 #include "../java/util.hpp"

@@ -2,7 +2,7 @@
 
 #include "util/async_queue.hpp"
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

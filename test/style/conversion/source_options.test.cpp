@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/source_options.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/source_options.hpp>
+#include <mln/util/tileset.hpp>
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 using namespace mln;
 using namespace mln::style;

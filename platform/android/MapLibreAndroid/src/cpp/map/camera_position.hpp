@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/map/camera.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/map/camera.hpp>
 
 #include <jni/jni.hpp>
 

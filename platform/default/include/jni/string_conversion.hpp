@@ -2,7 +2,7 @@
 
 // This file replaces the default implementation in jni.hpp.
 
-#include <mbgl/util/utf.hpp>
+#include <mln/util/utf.hpp>
 
 namespace jni {
 

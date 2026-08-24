@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/layermanager/layer_factory.hpp>
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/layermanager/layer_factory.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/style.hpp>
 #include "../../gson/json_array.hpp"
 #include "../../gson/json_element.hpp"
 #include "../value.hpp"

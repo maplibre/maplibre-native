@@ -1,7 +1,7 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/renderer/style_diff.hpp>
-#include <mbgl/style/layer_impl.hpp>
+#include <mln/renderer/style_diff.hpp>
+#include <mln/style/layer_impl.hpp>
 
 using namespace mln;
 using namespace mln::style;

@@ -9,7 +9,7 @@
 #import "NSBundle+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
 
-#include <mbgl/util/constants.hpp>
+#include <mln/util/constants.hpp>
 
 @interface MLNAnnotationView () <UIGestureRecognizerDelegate>
 

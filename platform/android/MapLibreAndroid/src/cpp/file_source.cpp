@@ -3,15 +3,15 @@
 #include "attach_env.hpp"
 #include "maplibre.hpp"
 
-#include <mbgl/actor/actor.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/resource_transform.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/actor/actor.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/resource_transform.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/logging.hpp>
 
-#include <mbgl/storage/sqlite3.hpp>
+#include <mln/storage/sqlite3.hpp>
 
 #include "asset_manager_file_source.hpp"
 

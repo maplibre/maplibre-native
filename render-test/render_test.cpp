@@ -1,10 +1,10 @@
 #include "allocation_index.hpp"
 
-#include <mbgl/render_test.hpp>
-#include <mbgl/storage/network_status.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/render_test.hpp>
+#include <mln/storage/network_status.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <args.hxx>
 
@@ -15,7 +15,7 @@
 #include "runner.hpp"
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/gfx/backend.hpp>
+#include <mln/gfx/backend.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 #ifdef SHOW_ANSI_COLORS

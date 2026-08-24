@@ -1,6 +1,6 @@
-#import <mbgl/gfx/renderer_backend.hpp>
-#import <mbgl/map/map_observer.hpp>
-#import <mbgl/util/image.hpp>
+#import <mln/gfx/renderer_backend.hpp>
+#import <mln/map/map_observer.hpp>
+#import <mln/util/image.hpp>
 
 #import "MLNBackendResource.h"
 

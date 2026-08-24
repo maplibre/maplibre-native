@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/premultiply.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/io.hpp>
+#include <mln/util/premultiply.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/io.hpp>
 
 using namespace mln;
 

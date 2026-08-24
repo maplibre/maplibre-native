@@ -1,7 +1,7 @@
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gl/headless_backend.hpp>
 
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
 
 #include <EGL/egl.h>
 
