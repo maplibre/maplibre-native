@@ -276,6 +276,10 @@ public:
                             const jni::String& featureId,
                             const jni::String& stateKey);
 
+    void setGlobalStateProperty(JNIEnv&, const jni::String& name, const jni::Object<gson::JsonElement>& value);
+
+    jni::Local<jni::Object<gson::JsonObject>> getGlobalState(JNIEnv&);
+
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
 
     jni::Local<jni::Array<jni::Object<Layer>>> getLayers(JNIEnv&);
