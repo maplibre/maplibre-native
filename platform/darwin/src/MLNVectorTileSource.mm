@@ -10,9 +10,9 @@
 #import "NSPredicate+MLNPrivateAdditions.h"
 #import "NSURL+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/sources/vector_source.hpp>
 
 const MLNTileSourceOption MLNVectorTileSourceOptionEncoding = @"MLNVectorTileSourceOptionEncoding";
 

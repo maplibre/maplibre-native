@@ -2,7 +2,7 @@
 #import "MLNMapViewIntegrationTest.h"
 #import "MLNMapView_Private.h"
 
-#include <mbgl/gfx/renderable.hpp>
+#include <mln/gfx/renderable.hpp>
 
 @interface MBGLIntegrationTests : MLNMapViewIntegrationTest
 @end

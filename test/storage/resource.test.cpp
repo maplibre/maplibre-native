@@ -1,4 +1,4 @@
-#include <mbgl/storage/resource.hpp>
+#include <mln/storage/resource.hpp>
 
 #include <gtest/gtest.h>
 

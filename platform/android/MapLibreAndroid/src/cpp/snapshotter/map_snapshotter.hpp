@@ -2,8 +2,8 @@
 
 #include <jni/jni.hpp>
 #include <mapbox/std/weak.hpp>
-#include <mbgl/map/map_snapshotter.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/map/map_snapshotter.hpp>
+#include <mln/util/util.hpp>
 
 #include <memory>
 

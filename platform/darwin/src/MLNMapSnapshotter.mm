@@ -1,14 +1,14 @@
 #import "MLNMapSnapshotter.h"
 
-#import <mbgl/actor/actor.hpp>
-#import <mbgl/actor/scheduler.hpp>
-#import <mbgl/map/camera.hpp>
-#import <mbgl/map/map_options.hpp>
-#import <mbgl/map/map_snapshotter.hpp>
-#import <mbgl/storage/resource_options.hpp>
-#import <mbgl/util/client_options.hpp>
-#import <mbgl/util/geo.hpp>
-#import <mbgl/util/string.hpp>
+#import <mln/actor/actor.hpp>
+#import <mln/actor/scheduler.hpp>
+#import <mln/map/camera.hpp>
+#import <mln/map/map_options.hpp>
+#import <mln/map/map_snapshotter.hpp>
+#import <mln/storage/resource_options.hpp>
+#import <mln/util/client_options.hpp>
+#import <mln/util/geo.hpp>
+#import <mln/util/string.hpp>
 
 #import "MLNAnnotationImage_Private.h"
 #import "MLNAttributionInfo_Private.h"

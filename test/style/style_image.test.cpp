@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/image.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/exception.hpp>
+#include <mln/style/image.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/exception.hpp>
 
 using namespace mln;
 

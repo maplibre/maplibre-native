@@ -1,9 +1,9 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/util/padding.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/util/padding.hpp>
 
 #include <array>
 

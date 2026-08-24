@@ -6,7 +6,7 @@
 #import "NSExpression+MLNPrivateAdditions.h"
 #import "NSPredicate+MLNPrivateAdditions.h"
 
-#include <mbgl/style/conversion/property_value.hpp>
+#include <mln/style/conversion/property_value.hpp>
 
 @implementation NSCompoundPredicate (MLNAdditions)
 

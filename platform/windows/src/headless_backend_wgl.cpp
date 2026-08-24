@@ -1,8 +1,8 @@
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #include <cassert>
 
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gl/headless_backend.hpp>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1

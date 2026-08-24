@@ -1,4 +1,4 @@
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 #define GL_GLEXT_PROTOTYPES
 

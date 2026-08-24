@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 #ifndef _gl_functions_wgl_
 #define _gl_functions_wgl_ 1

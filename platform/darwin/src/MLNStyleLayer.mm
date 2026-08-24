@@ -1,8 +1,8 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNStyle_Private.h"
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/style.hpp>
 
 const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerException";
 

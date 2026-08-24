@@ -1,5 +1,5 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/shaders/webgpu/wgsl_preprocessor.hpp>
+#include <mln/test/util.hpp>
+#include <mln/shaders/webgpu/wgsl_preprocessor.hpp>
 
 using namespace mln;
 using namespace mln::webgpu::detail;

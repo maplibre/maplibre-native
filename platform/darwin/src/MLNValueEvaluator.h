@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
-#import <mbgl/util/feature.hpp>
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/feature.hpp>
+#import <mln/util/geometry.hpp>
 
 /**
  Recursively transforms a C++ type into the corresponding Foundation type.

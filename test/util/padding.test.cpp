@@ -1,18 +1,18 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/renderer/property_evaluator.hpp>
-#include <mbgl/renderer/property_evaluation_parameters.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/renderer/property_evaluation_parameters.hpp>
 
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/style/property_expression.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/style/property_expression.hpp>
 
-#include <mbgl/style/conversion/function.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/function.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion_impl.hpp>
 
-#include <mbgl/test/stub_geometry_tile_feature.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 
 using namespace mln;
 using namespace style;

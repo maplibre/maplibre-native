@@ -1,5 +1,5 @@
-#include <mbgl/i18n/number_format.hpp>
-#include <mbgl/text/language_tag.hpp>
+#include <mln/i18n/number_format.hpp>
+#include <mln/text/language_tag.hpp>
 
 #include <jni/jni.hpp>
 

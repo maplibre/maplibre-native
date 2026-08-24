@@ -546,7 +546,7 @@ drawable builds; the drape re-render cap in `Renderer::Impl::render` via
 deferred work catches up. Because the trade (initial-load sharpness / a bit of
 progressive fill-in vs smoother interaction) is hardware-dependent, it is a
 per-map API knob, not a style property: `Map::setTerrainLoadMode` /
-`TerrainLoadMode { Quality, Balanced, Performance }` (`include/mbgl/map/mode.hpp`,
+`TerrainLoadMode { Quality, Balanced, Performance }` (`include/mln/map/mode.hpp`,
 `terrainLoadBudget()` maps each mode to a budget pair). Default **Quality =
 unlimited** = the historical sharp snap-load, so nothing regresses; Balanced =
 32 tiles / 16 drapes per frame, Performance = 8 / 4. Exposed on Android

@@ -16,7 +16,7 @@
 
 #import <objc/runtime.h>
 
-#import <mbgl/style/expression/expression.hpp>
+#import <mln/style/expression/expression.hpp>
 
 const MLNExpressionInterpolationMode MLNExpressionInterpolationModeLinear = @"linear";
 const MLNExpressionInterpolationMode MLNExpressionInterpolationModeExponential = @"exponential";

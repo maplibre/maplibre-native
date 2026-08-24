@@ -10,7 +10,7 @@ Not wired up yet — this is the "is it something we can do?" writeup.
 it is feasible on GL/PowerVR. It already contains the infra this doc calls for — so **build on
 it rather than re-deriving the depth half here**:
 
-- `src/mbgl/gl/texture_2d_array.{cpp,hpp}` — a GL-only `GL_TEXTURE_2D_ARRAY` of RGBA8 layers
+- `src/mln/gl/texture_2d_array.{cpp,hpp}` — a GL-only `GL_TEXTURE_2D_ARRAY` of RGBA8 layers
   (pieces §1 below), packing the per-tile DEMs so one instanced draw samples a layer per tile.
 - `TerrainDepthInstanceUBO[TERRAIN_MAX_INSTANCES=64]` indexed by `gl_InstanceID` (not a per-
   instance vertex attribute — the GL backend never binds divisor-1 attributes), with a

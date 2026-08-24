@@ -1,18 +1,18 @@
-#include <mbgl/util/action_journal.hpp>
-#include <mbgl/util/action_journal_impl.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/map/map_impl.hpp>
+#include <mln/util/action_journal.hpp>
+#include <mln/util/action_journal_impl.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/map/map_impl.hpp>
 
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/stub_map_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_map_observer.hpp>
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock-more-matchers.h>

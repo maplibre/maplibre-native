@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/map/mode.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/map/mode.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/size.hpp>
 
 #include "filesystem.hpp"
 

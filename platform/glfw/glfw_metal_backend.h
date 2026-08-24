@@ -3,8 +3,8 @@
 #include "glfw_backend.hpp"
 #include "metal_backend.h"
 
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/mtl/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/mtl/renderer_backend.hpp>
 
 struct GLFWwindow;
 @class NSWindow;

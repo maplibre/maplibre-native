@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <jni/jni.hpp>
-#include <mbgl/style/light.hpp>
+#include <mln/style/light.hpp>
 #include "transition_options.hpp"
 #include "position.hpp"
-#include <mbgl/style/types.hpp>
-#include <mbgl/style/property_value.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/property_value.hpp>
 
 namespace mln {
 namespace android {

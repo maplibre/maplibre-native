@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/map/map_snapshotter.hpp>
+#include <mln/map/map_snapshotter.hpp>
 
 #include <jni/jni.hpp>
 
