@@ -68,6 +68,53 @@ class MapSnapshotterTest {
     }
 
     @Test
+    fun mapSnapshotterStyleReloadResetsGlobalState() {
+        var mapSnapshotter: MapSnapshotter?
+        rule.activity.runOnUiThread {
+            val styleJson = """
+                {
+                    "version": 8,
+                    "state": {"showLabels": {"default": true}},
+                    "sources": {},
+                    "layers": []
+                }
+            """.trimIndent()
+            val options = MapSnapshotter.Options(64, 64)
+                .withPixelRatio(1.0f)
+                .withStyleBuilder(Style.Builder().fromJson(styleJson))
+            mapSnapshotter = MapSnapshotter(rule.activity, options)
+            mapSnapshotter!!.start(
+                {
+                    Assert.assertEquals(
+                        JsonPrimitive(true),
+                        mapSnapshotter!!.getGlobalState().get("showLabels")
+                    )
+
+                    mapSnapshotter!!.setObserver(object : MapSnapshotter.Observer {
+                        override fun onDidFinishLoadingStyle() {
+                            // The new style defines no state.
+                            Assert.assertEquals(0, mapSnapshotter!!.getGlobalState().entrySet().size)
+                            countDownLatch.countDown()
+                        }
+
+                        override fun onStyleImageMissing(imageName: String) {}
+                    })
+                    mapSnapshotter!!.setStyleUrl("asset://fill_color_style.json")
+                    // While the new style is loading, the previous style's
+                    // state must not be visible.
+                    Assert.assertEquals(0, mapSnapshotter!!.getGlobalState().entrySet().size)
+                },
+                {
+                    Assert.fail(it)
+                }
+            )
+        }
+        if (!countDownLatch.await(30, TimeUnit.SECONDS)) {
+            throw TimeoutException()
+        }
+    }
+
+    @Test
     fun mapSnapshotterGlobalState() {
         var mapSnapshotter: MapSnapshotter?
         rule.activity.runOnUiThread {
