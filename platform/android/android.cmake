@@ -49,39 +49,39 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/string_util.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/thread.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/database_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/file_source_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_request.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/local_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/mbtiles_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/main_resource_loader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/filesystem.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_writer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_backend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gfx/headless_frontend.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/platform/time.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/asset_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/database_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_manager.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/file_source_request.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_request.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/local_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/mbtiles_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/main_resource_loader.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_database.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/offline_download.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/sqlite3.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/bidi.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/utf.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/layermanager/layer_manager.cpp
 )
 
 if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
             ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
     )
@@ -91,7 +91,7 @@ if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
     )
 endif()
 
@@ -99,7 +99,7 @@ if(MLN_WITH_WEBGPU)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mln/webgpu/headless_backend.cpp
     )
 endif()
 
@@ -168,7 +168,7 @@ add_library(
     ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner_common.cpp
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
 )
@@ -202,7 +202,7 @@ target_link_libraries(
 
 target_sources(
     mbgl-test-runner
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mln/storage/http_file_source.cpp
 )
 
 add_custom_command(
@@ -233,7 +233,7 @@ add_library(
     ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/benchmark_runner.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner_common.cpp
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp
@@ -280,7 +280,7 @@ add_library(
     ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/render_test_runner.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/test_runner_common.cpp
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/local_glyph_rasterizer.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/local_glyph_rasterizer.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/collator_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/src/test/number_format_test_stub.cpp
     ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp

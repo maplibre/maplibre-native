@@ -1,0 +1,48 @@
+#pragma once
+
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/expression/parsing_context.hpp>
+#include <mln/style/conversion.hpp>
+
+#include <memory>
+#include <utility>
+#include <vector>
+
+namespace mln {
+namespace style {
+namespace expression {
+
+class Case : public Expression {
+public:
+    using Branch = std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>;
+
+    Case(type::Type type_, std::vector<Branch> branches_, std::unique_ptr<Expression> otherwise_)
+        : Expression(Kind::Case, std::move(type_), collectDependencies(branches_) | depsOf(otherwise_)),
+          branches(std::move(branches_)),
+          otherwise(std::move(otherwise_)) {}
+
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
+
+    EvaluationResult evaluate(const EvaluationContext& params) const override;
+    void eachChild(const std::function<void(const Expression&)>& visit) const override;
+
+    bool operator==(const Expression& e) const noexcept override;
+
+    std::vector<std::optional<Value>> possibleOutputs() const override;
+
+    std::string getOperator() const override { return "case"; }
+
+protected:
+    using Expression::collectDependencies;
+    static Dependency collectDependencies(const std::vector<Branch>& branches) {
+        return collectDependencies(branches, [](const Branch& v) { return depsOf(v.first) | depsOf(v.second); });
+    }
+
+private:
+    std::vector<Branch> branches;
+    std::unique_ptr<Expression> otherwise;
+};
+
+} // namespace expression
+} // namespace style
+} // namespace mln

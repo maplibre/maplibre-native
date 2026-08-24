@@ -1,52 +1,52 @@
 #include <gmock/gmock.h>
 
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/stub_map_observer.hpp>
-#include <mbgl/test/fake_file_source.hpp>
-#include <mbgl/test/fixture_log_observer.hpp>
-#include <mbgl/test/map_adapter.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_map_observer.hpp>
+#include <mln/test/fake_file_source.hpp>
+#include <mln/test/fixture_log_observer.hpp>
+#include <mln/test/map_adapter.hpp>
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/math/log2.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/main_resource_loader.hpp>
-#include <mbgl/storage/network_status.hpp>
-#include <mbgl/storage/online_file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/style/image_impl.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/raster_layer.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
-#include <mbgl/style/style_impl.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/async_task.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/math/log2.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/main_resource_loader.hpp>
+#include <mln/storage/network_status.hpp>
+#include <mln/storage/online_file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/style/image_impl.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/raster_layer.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/style/sources/vector_source.hpp>
+#include <mln/style/style_impl.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/async_task.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <atomic>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 using namespace std::literals::string_literals;
 
 template <class FileSource = StubFileSource, class Frontend = HeadlessFrontend>
@@ -1686,7 +1686,7 @@ TEST(Map, ResourceError) {
         test.frontend.render(test.map);
     } catch (...) {
         auto error = std::current_exception(); // captur
-        EXPECT_EQ(mbgl::util::toString(error), "Font file Server failed");
+        EXPECT_EQ(mln::util::toString(error), "Font file Server failed");
     }
 }
 
@@ -1946,7 +1946,7 @@ TEST(Map, ObserveTileLifecycle) {
 }
 
 TEST(BackgroundLayer, StyleUpdateZoomDependency) {
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
 
     MapTest<> test;
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/map/style_update_zoom_dependency/style.json"));

@@ -6,27 +6,27 @@
 #import "NSDictionary+MLNAdditions.h"
 #import "NSException+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/feature.hpp>
+#include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/feature.hpp>
 
 const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceException";
 
 @interface MLNSource ()
 
 // Even though this class is abstract, MLNStyle uses it to represent some
-// special internal source types like mbgl::AnnotationSource.
-@property (nonatomic, readonly) mbgl::style::Source *rawSource;
+// special internal source types like mln::AnnotationSource.
+@property (nonatomic, readonly) mln::style::Source *rawSource;
 
 @property (nonatomic, readonly, weak) id<MLNStylable> stylable;
 
 @end
 
 @implementation MLNSource {
-  std::unique_ptr<mbgl::style::Source> _pendingSource;
-  mapbox::base::WeakPtr<mbgl::style::Source> _weakSource;
+  std::unique_ptr<mln::style::Source> _pendingSource;
+  mapbox::base::WeakPtr<mln::style::Source> _weakSource;
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier {
@@ -36,7 +36,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   return self;
 }
 
-- (instancetype)initWithRawSource:(mbgl::style::Source *)rawSource
+- (instancetype)initWithRawSource:(mln::style::Source *)rawSource
                          stylable:(id<MLNStylable>)stylable {
   NSString *identifier = @(rawSource->getID().c_str());
   if (self = [self initWithIdentifier:identifier]) {
@@ -47,11 +47,11 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   return self;
 }
 
-- (mbgl::style::Source *)rawSource {
+- (mln::style::Source *)rawSource {
   return _weakSource.get();
 }
 
-- (instancetype)initWithPendingSource:(std::unique_ptr<mbgl::style::Source>)pendingSource {
+- (instancetype)initWithPendingSource:(std::unique_ptr<mln::style::Source>)pendingSource {
   if (self = [self initWithRawSource:pendingSource.get() stylable:nil]) {
     _pendingSource = std::move(pendingSource);
   }
@@ -120,7 +120,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
  source is not attached to a map view. Feature state lives in the renderer, so
  it can only be manipulated while the source is attached.
  */
-- (mbgl::Renderer *)mgl_renderer {
+- (mln::Renderer *)mgl_renderer {
   if ([self.stylable isKindOfClass:[MLNMapView class]]) {
     return ((MLNMapView *)self.stylable).renderer;
   }
@@ -133,12 +133,12 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   MLNAssertIsMainThread();
   MLNAssertStyleSourceIsValid();
 
-  mbgl::Renderer *renderer = self.mgl_renderer;
+  mln::Renderer *renderer = self.mgl_renderer;
   if (!renderer || !featureID || !state) {
     return NO;
   }
 
-  mbgl::FeatureState featureState = [state mgl_propertyMap];
+  mln::FeatureState featureState = [state mgl_propertyMap];
 
   renderer->setFeatureState(
       self.rawSource->getID(),
@@ -155,12 +155,12 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   MLNAssertIsMainThread();
   MLNAssertStyleSourceIsValid();
 
-  mbgl::Renderer *renderer = self.mgl_renderer;
+  mln::Renderer *renderer = self.mgl_renderer;
   if (!renderer || !featureID) {
     return nil;
   }
 
-  mbgl::FeatureState featureState;
+  mln::FeatureState featureState;
   renderer->getFeatureState(
       featureState, self.rawSource->getID(),
       sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
@@ -184,7 +184,7 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   MLNAssertIsMainThread();
   MLNAssertStyleSourceIsValid();
 
-  mbgl::Renderer *renderer = self.mgl_renderer;
+  mln::Renderer *renderer = self.mgl_renderer;
   if (!renderer) {
     return NO;
   }

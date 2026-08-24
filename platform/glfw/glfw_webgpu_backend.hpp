@@ -1,10 +1,10 @@
 #pragma once
 
 #include "glfw_backend.hpp"
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/context.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/context.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/gfx/renderer_backend.hpp>
 #include <memory>
 #include <webgpu/webgpu_cpp.h>
 #include <queue>
@@ -24,7 +24,7 @@ class Adapter;
 
 // Multiple inheritance: GLFWBackend for window management,
 // webgpu::RendererBackend for rendering, gfx::Renderable for framebuffer
-class GLFWWebGPUBackend final : public GLFWBackend, public mbgl::webgpu::RendererBackend, public mbgl::gfx::Renderable {
+class GLFWWebGPUBackend final : public GLFWBackend, public mln::webgpu::RendererBackend, public mln::gfx::Renderable {
 public:
     GLFWWebGPUBackend(GLFWwindow* window, bool capFrameRate);
     ~GLFWWebGPUBackend() override;
@@ -33,13 +33,13 @@ public:
 
     // GLFWBackend implementation
 public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override;
-    mbgl::Size getSize() const override;
-    void setSize(mbgl::Size) override;
+    mln::gfx::RendererBackend& getRendererBackend() override;
+    mln::Size getSize() const override;
+    void setSize(mln::Size) override;
 
-    // mbgl::gfx::RendererBackend implementation
+    // mln::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override;
+    mln::gfx::Renderable& getDefaultRenderable() override;
 
 protected:
     void activate() override;
@@ -50,7 +50,7 @@ public:
     // Override virtual methods from RendererBackend
     void* getCurrentTextureView() override;
     void* getDepthStencilView() override;
-    mbgl::Size getFramebufferSize() const override;
+    mln::Size getFramebufferSize() const override;
 
 private:
     class SpinLock {
@@ -101,7 +101,7 @@ private:
     // Surface state tracking
     std::atomic<bool> surfaceConfigured{false};
     std::atomic<bool> surfaceNeedsReconfigure{false};
-    mbgl::Size lastConfiguredSize{0, 0};
+    mln::Size lastConfiguredSize{0, 0};
 
     // Error recovery
     std::atomic<int> consecutiveErrors{0};

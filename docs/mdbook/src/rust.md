@@ -55,22 +55,22 @@ To create a new module:
 
 1. Add a new source file to `rustutils/src/example.rs`.
 2. Implement it, see the [CXX documentation](https://cxx.rs/index.html) or see `rustutils/src/color.rs` for an example.
-3. Create a C++ source file that will use the generated C++ header. See `src/mbgl/util/color.rs.cpp` for an example. Import the generated header with
+3. Create a C++ source file that will use the generated C++ header. See `src/mln/util/color.rs.cpp` for an example. Import the generated header with
     ```cpp
     #include <rustutils/example.hpp>
     ```
 4. Conditionally include either the `*.rs.cpp` file or the `*.cpp` file it replaces in CMake and Bazel. Here is what it looks like for CMake:
     ```cmake
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
+    ${PROJECT_SOURCE_DIR}/src/mln/util/color$<IF:$<BOOL:${MLN_USE_RUST}>,.rs.cpp,.cpp>
     ```
     And here for Bazel:
     ```bazel
     select({
       "//:rust": [
-          "src/mbgl/util/color.rs.cpp",
+          "src/mln/util/color.rs.cpp",
       ],
       "//conditions:default": [
-          "src/mbgl/util/color.cpp",
+          "src/mln/util/color.cpp",
       ],
     })
     ```

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/storage/file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/map/map.hpp>
+#include <mln/storage/file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/image.hpp>
 
 #include <exception>
 
@@ -15,14 +15,14 @@
 #include <nan.h>
 #pragma GCC diagnostic pop
 
-namespace mbgl {
+namespace mln {
 class HeadlessFrontend;
-} // namespace mbgl
+} // namespace mln
 
 namespace node_mbgl {
 
-struct NodeMapObserver : public mbgl::MapObserver {
-    void onDidFailLoadingMap(mbgl::MapLoadError, const std::string&) final;
+struct NodeMapObserver : public mln::MapObserver {
+    void onDidFailLoadingMap(mln::MapLoadError, const std::string&) final;
 };
 
 class RenderRequest;
@@ -83,14 +83,14 @@ public:
     static RenderOptions ParseOptions(v8::Local<v8::Object>);
 
     const float pixelRatio;
-    mbgl::MapMode mode;
+    mln::MapMode mode;
     bool crossSourceCollisions;
     NodeMapObserver mapObserver;
-    std::unique_ptr<mbgl::HeadlessFrontend> frontend;
-    std::unique_ptr<mbgl::Map> map;
+    std::unique_ptr<mln::HeadlessFrontend> frontend;
+    std::unique_ptr<mln::Map> map;
 
     std::exception_ptr error;
-    mbgl::PremultipliedImage image;
+    mln::PremultipliedImage image;
     std::unique_ptr<RenderRequest> req;
 
     // Async for delivering the notifications of render completion.
@@ -99,19 +99,19 @@ public:
     bool loaded = false;
 };
 
-struct NodeFileSource : public mbgl::FileSource {
+struct NodeFileSource : public mln::FileSource {
     NodeFileSource(NodeMap* nodeMap_)
         : nodeMap(nodeMap_) {}
     ~NodeFileSource() override = default;
-    std::unique_ptr<mbgl::AsyncRequest> request(const mbgl::Resource&, mbgl::FileSource::Callback) final;
-    bool canRequest(const mbgl::Resource&) const override;
-    void setResourceOptions(mbgl::ResourceOptions) override;
-    mbgl::ResourceOptions getResourceOptions() override;
-    void setClientOptions(mbgl::ClientOptions) override;
-    mbgl::ClientOptions getClientOptions() override;
+    std::unique_ptr<mln::AsyncRequest> request(const mln::Resource&, mln::FileSource::Callback) final;
+    bool canRequest(const mln::Resource&) const override;
+    void setResourceOptions(mln::ResourceOptions) override;
+    mln::ResourceOptions getResourceOptions() override;
+    void setClientOptions(mln::ClientOptions) override;
+    mln::ClientOptions getClientOptions() override;
     NodeMap* nodeMap;
-    mbgl::ResourceOptions _resourceOptions;
-    mbgl::ClientOptions _clientOptions;
+    mln::ResourceOptions _resourceOptions;
+    mln::ClientOptions _clientOptions;
 };
 
 } // namespace node_mbgl

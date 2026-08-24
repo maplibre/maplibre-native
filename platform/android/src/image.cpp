@@ -1,12 +1,12 @@
-#include <mbgl/util/image.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/string.hpp>
 
 #include <string>
 
 #include "attach_env.hpp"
 #include "bitmap_factory.hpp"
 
-namespace mbgl {
+namespace mln {
 
 PremultipliedImage decodeImage(const std::string& string) {
     auto env{android::AttachEnv()};
@@ -17,4 +17,4 @@ PremultipliedImage decodeImage(const std::string& string) {
     return android::Bitmap::GetImage(*env, android::BitmapFactory::DecodeByteArray(*env, array, 0, string.size()));
 }
 
-} // namespace mbgl
+} // namespace mln

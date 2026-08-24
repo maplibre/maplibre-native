@@ -32,9 +32,9 @@ add_library(mbgl-node-loop STATIC)
 target_sources(
     mbgl-node-loop
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/async_task.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/run_loop.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/timer.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/run_loop.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/timer.cpp
 )
 
 target_include_directories(

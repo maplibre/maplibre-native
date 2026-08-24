@@ -1,0 +1,21 @@
+#pragma once
+
+#include <mln/renderer/layer_tweaker.hpp>
+
+namespace mln {
+
+/**
+    Heatmap texture layer specific tweaker
+ */
+class HeatmapTextureLayerTweaker : public LayerTweaker {
+public:
+    HeatmapTextureLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
+        : LayerTweaker(std::move(id_), properties) {}
+
+public:
+    ~HeatmapTextureLayerTweaker() override = default;
+
+    void execute(LayerGroupBase&, const PaintParameters&) override;
+};
+
+} // namespace mln

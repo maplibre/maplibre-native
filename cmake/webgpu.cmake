@@ -17,98 +17,98 @@ target_include_directories(
 
 list(APPEND
         SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/draw_scope_resource.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/dynamic_texture.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/wgsl_preprocessor.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/background.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/circle.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/clipping_mask.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/collision.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/custom_geometry.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/custom_symbol_icon.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/debug.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/fill.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/fill_extrusion.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/heatmap_texture.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/hillshade_prepare.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/color_relief.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/line.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/location_indicator.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/raster.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/symbol.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/widevector.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_attribute.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/offscreen_texture.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/tile_layer_group.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/context.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/command_encoder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/renderer_backend.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/drawable.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/draw_scope_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/dynamic_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/uniform_buffer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/shader_program.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/wgsl_preprocessor.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/background.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/circle.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/clipping_mask.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/collision.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/custom_geometry.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/custom_symbol_icon.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/debug.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/heatmap.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/heatmap_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/hillshade.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/hillshade_prepare.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/color_relief.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/line.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/location_indicator.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/symbol.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/widevector.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/vertex_buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/vertex_attribute.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/offscreen_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/tile_layer_group.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/layer_group.cpp
 )
 
 list(APPEND
         INCLUDE_FILES
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/buffer_resource.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/command_encoder.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/context.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/drawable_builder.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/dynamic_texture.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/index_buffer_resource.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/render_pass.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/renderer_backend.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/shader_program.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/background.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/circle.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/clipping_mask.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/collision.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/common.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/custom_geometry.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/custom_symbol_icon.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/debug.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/fill.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/fill_extrusion.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/heatmap_texture.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/hillshade_prepare.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/color_relief.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/line.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/location_indicator.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/raster.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/symbol.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/webgpu/widevector.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/texture2d.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/uniform_buffer.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/upload_pass.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/webgpu/vertex_buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/command_encoder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/context.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/drawable.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/drawable_builder.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/dynamic_texture.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/index_buffer_resource.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/render_pass.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/renderer_backend.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/shader_program.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/background.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/circle.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/clipping_mask.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/collision.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/common.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/custom_geometry.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/custom_symbol_icon.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/debug.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill_extrusion.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/heatmap.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/heatmap_texture.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/hillshade.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/hillshade_prepare.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/color_relief.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/line.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/location_indicator.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/symbol.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/widevector.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/texture2d.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/uniform_buffer.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/upload_pass.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/webgpu/vertex_buffer_resource.hpp
 )
 
 list(APPEND
         SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/buffer_resource.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/command_encoder.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/context.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/drawable_builder.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/dynamic_texture.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/index_buffer_resource.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/render_pass.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/renderer_backend.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/webgpu/shader_program.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/texture2d.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/uniform_buffer.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/upload_pass.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/vertex_buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/command_encoder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/context.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/drawable.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/drawable_builder.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/dynamic_texture.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/index_buffer_resource.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/render_pass.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/renderer_backend.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/shader_program.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/texture2d.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/uniform_buffer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/upload_pass.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/webgpu/vertex_buffer_resource.cpp
 )
 
 # Include WebGPU vendor configuration (Dawn or wgpu)
@@ -132,11 +132,11 @@ elseif(MLN_WEBGPU_IMPL_WGPU OR MLN_WEBGPU_IMPL_FFI)
     if(TARGET mbgl-vendor-wgpu)
         target_link_libraries(mbgl-core PRIVATE mbgl-vendor-wgpu)
         # Add WebGPU-Cpp implementation file (required for wgpu-native backend)
-        list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/webgpu_cpp_impl.cpp)
+        list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mln/webgpu/webgpu_cpp_impl.cpp)
     endif()
 endif()
 
 # Headless backend uses Dawn native / wgpu-native bootstrap; skip for emdawnwebgpu.
 if(NOT MLN_WEBGPU_EMDAWN)
-    list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mbgl/webgpu/headless_backend.cpp)
+    list(APPEND SRC_FILES ${PROJECT_SOURCE_DIR}/src/mln/webgpu/headless_backend.cpp)
 endif()

@@ -1,13 +1,13 @@
-#include <mbgl/storage/http_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/exception.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/storage/resource_options.hpp>
+#include <mln/storage/http_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/exception.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/storage/resource_options.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(HTTPFileSource, TEST_REQUIRES_SERVER(Cancel)) {
     util::RunLoop loop;

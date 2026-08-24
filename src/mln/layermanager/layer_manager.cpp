@@ -1,0 +1,59 @@
+#include <mln/layermanager/layer_manager.hpp>
+
+#include <mln/layout/layout.hpp>
+#include <mln/layermanager/layer_factory.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/layer_impl.hpp>
+#include <mln/style/conversion_impl.hpp>
+
+namespace mln {
+
+void LayerManager::addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>) {}
+
+std::unique_ptr<style::Layer> LayerManager::createLayer(const std::string& type,
+                                                        const std::string& id,
+                                                        const style::conversion::Convertible& value,
+                                                        style::conversion::Error& error) noexcept {
+    LayerFactory* factory = getFactory(type);
+    if (factory) {
+        auto layer = factory->createLayer(id, value);
+        if (!layer) {
+            error.message = "Error parsing layer " + id + " of type: " + type;
+        }
+        return layer;
+    } else {
+        error.message = "Null factory for type: " + type;
+    }
+    error.message = "Unsupported layer type! " + error.message;
+    return nullptr;
+}
+
+std::unique_ptr<Bucket> LayerManager::createBucket(const BucketParameters& parameters,
+                                                   const std::vector<Immutable<style::LayerProperties>>& layers) {
+    assert(!layers.empty());
+    assert(parameters.layerType->layout == style::LayerTypeInfo::Layout::NotRequired);
+    LayerFactory* factory = getFactory(parameters.layerType);
+    assert(factory);
+    return factory->createBucket(parameters, layers);
+}
+
+std::unique_ptr<Layout> LayerManager::createLayout(const LayoutParameters& parameters,
+                                                   std::unique_ptr<GeometryTileLayer> tileLayer,
+                                                   const std::vector<Immutable<style::LayerProperties>>& layers) {
+    assert(!layers.empty());
+    assert(parameters.bucketParameters.layerType->layout == style::LayerTypeInfo::Layout::Required);
+    LayerFactory* factory = getFactory(parameters.bucketParameters.layerType);
+    assert(factory);
+    return factory->createLayout(parameters, std::move(tileLayer), layers);
+}
+
+std::unique_ptr<RenderLayer> LayerManager::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
+    LayerFactory* factory = getFactory(impl->getTypeInfo());
+    assert(factory);
+    return factory->createRenderLayer(std::move(impl));
+}
+
+} // namespace mln

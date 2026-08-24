@@ -1,18 +1,18 @@
 #include "asset_manager_file_source.hpp"
 
-#include <mbgl/platform/settings.hpp>
-#include <mbgl/storage/file_source_request.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/response.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/url.hpp>
-#include <mbgl/util/util.hpp>
+#include <mln/platform/settings.hpp>
+#include <mln/storage/file_source_request.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/util/thread.hpp>
+#include <mln/util/url.hpp>
+#include <mln/util/util.hpp>
 
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
-namespace mbgl {
+namespace mln {
 
 class AssetManagerFileSource::Impl {
 public:
@@ -26,7 +26,7 @@ public:
 
     void request(const std::string& url, ActorRef<FileSourceRequest> req) {
         // Note: AssetManager already prepends "assets" to the filename.
-        const std::string path = mbgl::util::percentDecode(url.substr(8));
+        const std::string path = mln::util::percentDecode(url.substr(8));
 
         Response response;
 
@@ -79,7 +79,7 @@ std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& re
 }
 
 bool AssetManagerFileSource::canRequest(const Resource& resource) const {
-    return 0 == resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
+    return 0 == resource.url.rfind(mln::util::ASSET_PROTOCOL, 0);
 }
 
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
@@ -98,4 +98,4 @@ ClientOptions AssetManagerFileSource::getClientOptions() {
     return impl->actor().ask(&Impl::getClientOptions).get();
 }
 
-} // namespace mbgl
+} // namespace mln

@@ -80,12 +80,12 @@
       auto stretchX = styleImage->getStretchX();
       XCTAssertEqual(stretchX.size(), 1UL);
       if (!stretchX.empty()) {
-        XCTAssertEqual(stretchX.front(), mbgl::style::ImageStretch(0, 24 * scale));
+        XCTAssertEqual(stretchX.front(), mln::style::ImageStretch(0, 24 * scale));
       }
       auto stretchY = styleImage->getStretchY();
       XCTAssertEqual(stretchY.size(), 1UL);
       if (!stretchY.empty()) {
-        XCTAssertEqual(stretchY.front(), mbgl::style::ImageStretch(0, 24 * scale));
+        XCTAssertEqual(stretchY.front(), mln::style::ImageStretch(0, 24 * scale));
       }
 
       MLNImage *imageAfter = [[MLNImage alloc] initWithMLNStyleImage:*styleImage];
@@ -119,12 +119,12 @@
       auto stretchX = styleImage->getStretchX();
       XCTAssertEqual(stretchX.size(), 1UL);
       if (!stretchX.empty()) {
-        XCTAssertEqual(stretchX.front(), mbgl::style::ImageStretch(2 * scale, 20 * scale));
+        XCTAssertEqual(stretchX.front(), mln::style::ImageStretch(2 * scale, 20 * scale));
       }
       auto stretchY = styleImage->getStretchY();
       XCTAssertEqual(stretchY.size(), 1UL);
       if (!stretchY.empty()) {
-        XCTAssertEqual(stretchY.front(), mbgl::style::ImageStretch(1 * scale, 21 * scale));
+        XCTAssertEqual(stretchY.front(), mln::style::ImageStretch(1 * scale, 21 * scale));
       }
 
       MLNImage *imageAfter = [[MLNImage alloc] initWithMLNStyleImage:*styleImage];

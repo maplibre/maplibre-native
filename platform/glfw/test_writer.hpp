@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/size.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/size.hpp>
 
 #include <memory>
 #include <string>
@@ -15,9 +15,9 @@ public:
     TestWriter();
     ~TestWriter();
 
-    TestWriter& withCameraOptions(const mbgl::CameraOptions&);
-    TestWriter& withStyle(const mbgl::style::Style&);
-    TestWriter& withInitialSize(const mbgl::Size&);
+    TestWriter& withCameraOptions(const mln::CameraOptions&);
+    TestWriter& withStyle(const mln::style::Style&);
+    TestWriter& withInitialSize(const mln::Size&);
 
     bool write(const std::string& dir) const;
 
