@@ -70,8 +70,8 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     if (colorRampGlobalState != parameters.globalState) {
         const auto& rampValue = unevaluated.get<LineGradient>().getValue();
         const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
-                                  style::expression::globalStateRefsIntersect(
-                                      rampValue.getGlobalStateRefs(), parameters.changedGlobalStateKeys.get());
+                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                              parameters.changedGlobalStateKeys.get());
         colorRampGlobalState = parameters.globalState;
         if (rampAffected) {
             updateColorRamp();

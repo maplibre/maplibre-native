@@ -541,8 +541,9 @@
 // MARK: Transition tests
 
 - (void)testGlobalState {
-  XCTAssertEqualObjects(self.style.globalState, @{},
-                        @"A style without a root state property should have an empty global state.");
+  XCTAssertEqualObjects(
+      self.style.globalState, @{},
+      @"A style without a root state property should have an empty global state.");
 
   [self.style setGlobalStateValue:@YES forProperty:@"showLabels"];
   XCTAssertEqualObjects(self.style.globalState[@"showLabels"], @YES);
@@ -564,7 +565,8 @@
 
   // The expression is evaluated against the current global state right away.
   [self.style setGlobalStateValue:@NO forProperty:@"show"];
-  NSArray *json = @[ @"case", @[ @"to-boolean", @[ @"global-state", @"show" ] ], @"visible", @"none" ];
+  NSArray *json =
+      @[ @"case", @[ @"to-boolean", @[ @"global-state", @"show" ] ], @"visible", @"none" ];
   layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:json];
   XCTAssertFalse(layer.visible);
   XCTAssertNotNil(layer.visibilityExpression);
@@ -593,8 +595,8 @@
   // Only global-state may be used.
   NSArray *zoomJson = @[ @"case", @[ @">", @[ @"zoom" ], @10 ], @"visible", @"none" ];
   XCTAssertThrowsSpecificNamed(
-      layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:zoomJson],
-      NSException, NSInvalidArgumentException);
+      layer.visibilityExpression = [NSExpression expressionWithMLNJSONObject:zoomJson], NSException,
+      NSInvalidArgumentException);
 }
 
 - (void)testTransition {
