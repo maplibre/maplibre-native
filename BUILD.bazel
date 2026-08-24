@@ -28,6 +28,22 @@ load(
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
+# Bazel 9 distinguishes checked-in source snapshots from generated outputs
+# during include validation, so keep the outputs in a separate tree.
+_GENERATED_ROOT = "__generated__"
+
+_GENERATED_OPENGL_SHADER_HEADERS = [_GENERATED_ROOT + "/" + path for path in MLN_GENERATED_OPENGL_SHADER_HEADERS]
+
+_GENERATED_PRIVATE_STYLE_HEADERS = [_GENERATED_ROOT + "/" + path for path in MLN_PRIVATE_GENERATED_STYLE_HEADERS]
+
+_GENERATED_PUBLIC_STYLE_HEADERS = [_GENERATED_ROOT + "/" + path for path in MLN_PUBLIC_GENERATED_STYLE_HEADERS]
+
+_GENERATED_SHADER_HEADERS = [_GENERATED_ROOT + "/" + path for path in MLN_GENERATED_SHADER_HEADERS]
+
+_GENERATED_SHADER_SOURCE = [_GENERATED_ROOT + "/" + path for path in MLN_GENERATED_SHADER_SOURCE]
+
+_GENERATED_STYLE_SOURCE = [_GENERATED_ROOT + "/" + path for path in MLN_GENERATED_STYLE_SOURCE]
+
 # Generate code required by the core
 
 js_run_binary(
@@ -36,9 +52,13 @@ js_run_binary(
         ["**/*.ejs"],
         allow_empty = False,
     ),
-    outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_PRIVATE_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_STYLE_SOURCE,
+    outs = _GENERATED_PUBLIC_STYLE_HEADERS +
+           _GENERATED_PRIVATE_STYLE_HEADERS +
+           _GENERATED_STYLE_SOURCE,
+    args = [
+        "--out",
+        "./" + _GENERATED_ROOT,
+    ],
     tool = ":generate-style-code-script",
 )
 
@@ -48,24 +68,27 @@ js_run_binary(
         ["shaders/*.glsl"],
         allow_empty = False,
     ),
-    outs = MLN_GENERATED_SHADER_HEADERS +
-           MLN_GENERATED_SHADER_SOURCE +
-           MLN_GENERATED_OPENGL_SHADER_HEADERS,
+    outs = _GENERATED_SHADER_HEADERS +
+           _GENERATED_SHADER_SOURCE +
+           _GENERATED_OPENGL_SHADER_HEADERS,
+    args = [
+        "--out",
+        "./" + _GENERATED_ROOT,
+    ],
     tool = ":generate-shader-code-script",
 )
 
-# This header only target strips the __generated__ prefix for the compiler
-# search paths, making the location of generated code transparent to the build
+# Export generated headers under their normal logical include paths.
 cc_library(
     name = "mbgl-core-generated-public-artifacts",
     hdrs = [
                ":generated_shaders",
                ":generated_style_code",
-           ] + MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_SHADER_HEADERS +
+           ] + _GENERATED_PUBLIC_STYLE_HEADERS +
+           _GENERATED_SHADER_HEADERS +
            select({
                "//:metal_renderer": [],
-               "//conditions:default": MLN_GENERATED_OPENGL_SHADER_HEADERS,
+               "//conditions:default": _GENERATED_OPENGL_SHADER_HEADERS,
            }),
     visibility = ["//visibility:public"],
 )
@@ -73,7 +96,7 @@ cc_library(
 # ditto, but for private headers (under the src/ path)
 cc_library(
     name = "mbgl-core-generated-private-artifacts",
-    hdrs = [":generated_style_code"] + MLN_PRIVATE_GENERATED_STYLE_HEADERS,
+    hdrs = [":generated_style_code"] + _GENERATED_PRIVATE_STYLE_HEADERS,
     visibility = ["//visibility:private"],
 )
 
@@ -83,8 +106,8 @@ cc_library(
     name = "mbgl-core",
     srcs = MLN_LAYER_PLUGIN_SOURCE +
            MLN_CORE_SOURCE +
-           MLN_GENERATED_SHADER_SOURCE +
-           MLN_GENERATED_STYLE_SOURCE + select({
+           _GENERATED_SHADER_SOURCE +
+           _GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
         ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
         ":webgpu_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_WEBGPU_SOURCE,
@@ -118,6 +141,8 @@ cc_library(
         "//conditions:default": [],
     }),
     includes = [
+        _GENERATED_ROOT + "/include",
+        _GENERATED_ROOT + "/src",
         "include",
         "src",
     ] + select({
