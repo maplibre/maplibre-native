@@ -301,7 +301,6 @@ public:
         }
 
     public:
-
         unsigned long constantsMask() const noexcept { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
     };
 
@@ -412,7 +411,6 @@ public:
         }
 
     protected:
-
         template <typename P>
         bool updateGPUExpression(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
             constexpr auto index = TypeIndex<P, Ps...>::value;

@@ -1411,11 +1411,12 @@ mln::Value toGlobalStateValue(const mln::style::conversion::Convertible& value) 
     }
     if (isObject(value)) {
         mapbox::base::ValueObject object;
-        eachMember(value,
-                   [&](const std::string& key, const Convertible& member) -> std::optional<mln::style::conversion::Error> {
-                       object.emplace(key, toGlobalStateValue(member));
-                       return std::nullopt;
-                   });
+        eachMember(
+            value,
+            [&](const std::string& key, const Convertible& member) -> std::optional<mln::style::conversion::Error> {
+                object.emplace(key, toGlobalStateValue(member));
+                return std::nullopt;
+            });
         return object;
     }
     return toValue(value).value_or(mln::Value());
