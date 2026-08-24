@@ -1,8 +1,8 @@
 #pragma once
 
 #include <jni/jni.hpp>
-#include <mbgl/style/layers/custom_layer.hpp>
-#include <mbgl/layermanager/custom_layer_factory.hpp>
+#include <mln/style/layers/custom_layer.hpp>
+#include <mln/layermanager/custom_layer_factory.hpp>
 #include "layer.hpp"
 
 namespace mln {

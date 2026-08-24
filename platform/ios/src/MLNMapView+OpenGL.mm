@@ -2,7 +2,7 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+OpenGL.h"
 
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mln/gl/renderable_resource.hpp>
 
 #import <GLKit/GLKit.h>
 #import <OpenGLES/EAGL.h>

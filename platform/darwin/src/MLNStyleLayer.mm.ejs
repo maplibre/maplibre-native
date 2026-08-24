@@ -16,8 +16,8 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLN<%- camelize(type) %>StyleLayer_Private.h"
 
-#include <mbgl/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
-#include <mbgl/style/transition_options.hpp>
+#include <mln/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
+#include <mln/style/transition_options.hpp>
 
 <% if (enumProperties) { -%>
 

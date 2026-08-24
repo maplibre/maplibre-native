@@ -1,8 +1,8 @@
 #include "glfw_gl_backend.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#include <mbgl/util/instrumentation.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/util/instrumentation.hpp>
 
 #include <GLFW/glfw3.h>
 

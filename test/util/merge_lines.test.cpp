@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_geometry_tile_feature.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 
-#include <mbgl/layout/merge_lines.hpp>
-#include <mbgl/layout/symbol_feature.hpp>
+#include <mln/layout/merge_lines.hpp>
+#include <mln/layout/symbol_feature.hpp>
 #include <utility>
 
 const std::u16string aaa = u"a";

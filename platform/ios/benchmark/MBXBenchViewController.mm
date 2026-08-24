@@ -9,10 +9,10 @@
 
 #include <chrono>
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/style.hpp>
 
 @protocol BenchMapDelegate <NSObject>
 - (void)mapDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered

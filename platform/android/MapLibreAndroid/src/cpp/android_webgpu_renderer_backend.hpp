@@ -1,7 +1,7 @@
 #pragma once
 
-#include <mbgl/webgpu/renderer_backend.hpp>
-#include <mbgl/webgpu/renderable_resource.hpp>
+#include <mln/webgpu/renderer_backend.hpp>
+#include <mln/webgpu/renderable_resource.hpp>
 #include "android_renderer_backend.hpp"
 #include <android/native_window.h>
 

@@ -2,8 +2,8 @@
 
 #include "jni.hpp"
 
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <atomic>
 #include <list>

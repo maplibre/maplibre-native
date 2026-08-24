@@ -1,16 +1,16 @@
 #if MLN_RENDER_BACKEND_OPENGL
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/platform/gl_functions.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/gfx/render_pass.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/defines.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
-#include <mbgl/gl/headless_backend.hpp>
-#include <mbgl/gl/offscreen_texture.hpp>
+#include <mln/platform/gl_functions.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/render_pass.hpp>
+#include <mln/gl/context.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/headless_backend.hpp>
+#include <mln/gl/offscreen_texture.hpp>
 
-#include <mbgl/gl/texture2d.hpp>
+#include <mln/gl/texture2d.hpp>
 
 using namespace mln;
 using namespace mln::platform;

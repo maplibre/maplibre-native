@@ -2,7 +2,7 @@
 
 #import "MLNFoundation.h"
 
-#import <mbgl/util/projection.hpp>
+#import <mln/util/projection.hpp>
 
 #if !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
 #import <Cocoa/Cocoa.h>

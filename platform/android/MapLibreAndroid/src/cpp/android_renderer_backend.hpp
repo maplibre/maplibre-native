@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/util/image.hpp>
 
 #include <android/native_window.h>
 

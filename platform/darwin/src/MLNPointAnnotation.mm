@@ -4,7 +4,7 @@
 #import "MLNShape_Private.h"
 #import "NSCoder+MLNAdditions.h"
 
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/geometry.hpp>
 
 @implementation MLNPointAnnotation
 

@@ -3,7 +3,7 @@
 
 #import "MLNStyleLayer_Private.h"
 
-#include <mbgl/style/layers/heatmap_layer.hpp>
+#include <mln/style/layers/heatmap_layer.hpp>
 
 @interface MLNHeatmapColorTests : XCTestCase <MLNMapViewDelegate>
 @end

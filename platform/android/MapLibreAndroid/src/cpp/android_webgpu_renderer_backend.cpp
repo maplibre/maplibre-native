@@ -1,9 +1,9 @@
 #include "android_webgpu_renderer_backend.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/scoped.hpp>
-#include <mbgl/webgpu/context.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/scoped.hpp>
+#include <mln/webgpu/context.hpp>
 
 #include <webgpu/webgpu.h>
 

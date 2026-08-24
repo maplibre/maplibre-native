@@ -3,8 +3,8 @@
 #import "MLNPointCollection_Private.h"
 #import "NSArray+MLNAdditions.h"
 
-#import <mbgl/util/geojson.hpp>
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/geojson.hpp>
+#import <mln/util/geometry.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 

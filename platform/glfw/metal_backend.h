@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/mtl/renderer_backend.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/mtl/texture2d.hpp>
-#include <mbgl/gfx/context.hpp>
+#include <mln/mtl/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/mtl/texture2d.hpp>
+#include <mln/gfx/context.hpp>
 
 #import <Cocoa/Cocoa.h>
 

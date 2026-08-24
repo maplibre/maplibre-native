@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mbgl/actor/actor_ref.hpp>
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/actor/actor_ref.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/image.hpp>
 
 #include <memory>
 #include <mutex>

@@ -4,12 +4,12 @@
 
 #include <jni/jni.hpp>
 
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/logging.hpp>
 
 // Java -> C++ conversion
-#include <mbgl/style/conversion/source.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/style/conversion/source.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 // C++ -> Java conversion
 #include "../conversion/property_value.hpp"
@@ -17,11 +17,11 @@
 #include <string>
 
 // Core Sources
-#include <mbgl/style/sources/custom_vector_source.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/style/sources/raster_source.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
+#include <mln/style/sources/custom_vector_source.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/style/sources/raster_source.hpp>
+#include <mln/style/sources/vector_source.hpp>
 
 // Android Source peers
 #include "geojson_source.hpp"

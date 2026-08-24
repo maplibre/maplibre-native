@@ -3,7 +3,7 @@
 #include "../../conversion/conversion.hpp"
 #include "../../gson/json_element.hpp"
 
-#include <mbgl/style/property_expression.hpp>
+#include <mln/style/property_expression.hpp>
 
 #include <jni/jni.hpp>
 

@@ -1,5 +1,5 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/tile/geometry_tile_data.hpp>
+#include <mln/test/util.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
 using namespace mln;
 

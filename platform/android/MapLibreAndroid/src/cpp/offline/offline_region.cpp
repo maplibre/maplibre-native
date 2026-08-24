@@ -2,10 +2,10 @@
 
 #include <variant>
 
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/variant.hpp>
 
 #include "offline_region_definition.hpp"
 #include "offline_region_error.hpp"

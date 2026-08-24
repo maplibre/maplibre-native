@@ -1,9 +1,9 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/properties.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/renderer/property_evaluator.hpp>
-#include <mbgl/renderer/data_driven_property_evaluator.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/renderer/data_driven_property_evaluator.hpp>
 
 using namespace mln;
 using namespace mln::style;

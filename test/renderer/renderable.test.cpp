@@ -1,6 +1,6 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/gfx/renderable.hpp>
+#include <mln/gfx/renderable.hpp>
 
 namespace {
 

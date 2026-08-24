@@ -1,7 +1,7 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/raster_source.hpp>
+#include <mln/style/sources/raster_source.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

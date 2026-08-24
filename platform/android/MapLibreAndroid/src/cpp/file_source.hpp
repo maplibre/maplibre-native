@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/storage/online_file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/resource_transform.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/storage/online_file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/resource_transform.hpp>
 
 #include "asset_manager.hpp"
 

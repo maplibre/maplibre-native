@@ -1,7 +1,7 @@
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/text/bidi.hpp>
+#include <mln/text/bidi.hpp>
 
 using namespace mln;
 

@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/tile/tile_id.hpp>
 
 using namespace mln;
 

@@ -1,8 +1,8 @@
 #if MLN_RENDER_BACKEND_OPENGL
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/platform/gl_functions.hpp>
+#include <mln/platform/gl_functions.hpp>
 
 using namespace mln::platform;
 

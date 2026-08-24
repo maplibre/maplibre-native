@@ -1,7 +1,7 @@
 #include "connectivity_listener.hpp"
 
-#include <mbgl/storage/network_status.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/storage/network_status.hpp>
+#include <mln/util/logging.hpp>
 
 #include <jni/jni.hpp>
 

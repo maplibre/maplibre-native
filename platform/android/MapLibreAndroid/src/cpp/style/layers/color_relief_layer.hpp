@@ -4,8 +4,8 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/color_relief_layer_factory.hpp>
-#include <mbgl/style/layers/color_relief_layer.hpp>
+#include <mln/layermanager/color_relief_layer_factory.hpp>
+#include <mln/style/layers/color_relief_layer.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

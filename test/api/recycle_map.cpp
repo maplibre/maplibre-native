@@ -1,19 +1,19 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/map_adapter.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/map_adapter.hpp>
 
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/exception.hpp>
-#include <mbgl/util/geometry.hpp>
-#include <mbgl/util/geojson.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/exception.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/geojson.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
 
 using namespace mln;
 using namespace mln::style;

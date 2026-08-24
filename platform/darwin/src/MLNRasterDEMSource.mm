@@ -3,7 +3,7 @@
 #import "MLNRasterTileSource_Private.h"
 #import "NSURL+MLNAdditions.h"
 
-#import <mbgl/style/sources/raster_dem_source.hpp>
+#import <mln/style/sources/raster_dem_source.hpp>
 
 const MLNTileSourceOption MLNTileSourceOptionDEMEncoding = @"MLNTileSourceOptionDEMEncoding";
 
