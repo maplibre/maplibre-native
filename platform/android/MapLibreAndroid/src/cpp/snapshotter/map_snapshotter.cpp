@@ -319,6 +319,21 @@ jni::Local<jni::Object<Source>> MapSnapshotter::getSource(JNIEnv& env, const jni
     return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource));
 }
 
+void MapSnapshotter::setGlobalStateProperty(JNIEnv& env,
+                                            const jni::String& name,
+                                            const jni::Object<gson::JsonElement>& value) {
+    if (!name) {
+        return;
+    }
+
+    snapshotter->getStyle().setGlobalStateProperty(jni::Make<std::string>(env, name),
+                                                   value ? gson::JsonElement::convert(env, value) : mln::Value());
+}
+
+jni::Local<jni::Object<gson::JsonObject>> MapSnapshotter::getGlobalState(JNIEnv& env) {
+    return gson::JsonObject::New(env, snapshotter->getStyle().getGlobalState());
+}
+
 // Static methods //
 
 void MapSnapshotter::registerNative(jni::JNIEnv& env) {
@@ -358,6 +373,9 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
                                             METHOD(&MapSnapshotter::addImages, "nativeAddImages"),
                                             METHOD(&MapSnapshotter::getLayer, "nativeGetLayer"),
                                             METHOD(&MapSnapshotter::getSource, "nativeGetSource"),
+                                            METHOD(&MapSnapshotter::setGlobalStateProperty,
+                                                   "nativeSetGlobalStateProperty"),
+                                            METHOD(&MapSnapshotter::getGlobalState, "nativeGetGlobalState"),
                                             METHOD(&MapSnapshotter::setStyleJson, "setStyleJson"),
                                             METHOD(&MapSnapshotter::setSize, "setSize"),
                                             METHOD(&MapSnapshotter::setCameraPosition, "setCameraPosition"),
