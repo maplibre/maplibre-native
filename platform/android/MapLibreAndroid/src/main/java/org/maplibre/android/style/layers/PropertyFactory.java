@@ -66,7 +66,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param value a int color value
    * @return property wrapper around String color
@@ -76,7 +76,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -86,7 +86,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -126,7 +126,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.
    *
    * @param value a Float[] value
    * @return property wrapper around Float[]
@@ -136,7 +136,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -236,7 +236,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.
    *
    * @param value a Float[] value
    * @return property wrapper around Float[]
@@ -246,7 +246,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -356,7 +356,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to density-independent pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to density-independent pixels, multiply the length by the current line width. GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Zoom-dependent expressions will be evaluated only at integer zoom levels. The only way to create an array value is using `["literal", [...]]`; arrays cannot be read from or derived from feature properties.
    *
    * @param value a Float[] value
    * @return property wrapper around Float[]
@@ -366,7 +366,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to density-independent pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels.
+   * Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to density-independent pixels, multiply the length by the current line width. GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Zoom-dependent expressions will be evaluated only at integer zoom levels. The only way to create an array value is using `["literal", [...]]`; arrays cannot be read from or derived from feature properties.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -840,7 +840,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.
    *
    * @param value a Float[] value
    * @return property wrapper around Float[]
@@ -850,7 +850,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1150,7 +1150,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up (on the flat plane), respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up (on the flat plane), respectively.
    *
    * @param value a Float[] value
    * @return property wrapper around Float[]
@@ -1160,7 +1160,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The geometry's offset. Values are [x, y] where negatives indicate left and up (on the flat plane), respectively.
+   * The geometry's offset. Values are `[x, y]` where negatives indicate left and up (on the flat plane), respectively.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1390,7 +1390,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter. It is advised to use the generic `resampling` paint property instead.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -1400,7 +1400,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter. It is advised to use the generic `resampling` paint property instead.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1580,7 +1580,8 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
+   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`.
+![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
    *
    * @param value a String value
    * @return property wrapper around String
@@ -1590,7 +1591,8 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
+   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`.
+![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -2768,7 +2770,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The distance from the corner that will be cut and replaced with rounded corner.
+   * The distance from each fill extrusion corner, measured along the adjacent edges, that is replaced by a rounded corner. A value of `0` disables rounded corners.
    *
    * @param value a Float value
    * @return property wrapper around Float
@@ -2778,7 +2780,7 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The distance from the corner that will be cut and replaced with rounded corner.
+   * The distance from each fill extrusion corner, measured along the adjacent edges, that is replaced by a rounded corner. A value of `0` disables rounded corners.
    *
    * @param value a Float value
    * @return property wrapper around Float
