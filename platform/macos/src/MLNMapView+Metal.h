@@ -26,11 +26,6 @@ private:
   void deactivate() override;
   // End implementation of mln::gfx::RendererBackend
 
-  // Implementation of mln::gl::RendererBackend
-public:
-  void updateAssumedState() override;
-  // End implementation of mln::gl::Rendererbackend
-
   // Implementation of MLNMapViewImpl
 public:
   mln::gfx::RendererBackend& getRendererBackend() override { return *this; }
