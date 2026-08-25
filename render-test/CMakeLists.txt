@@ -7,7 +7,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/render-test/file_source.cpp
     ${PROJECT_SOURCE_DIR}/render-test/file_source.hpp
     ${PROJECT_SOURCE_DIR}/render-test/filesystem.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/include/mbgl/render_test.hpp
+    ${PROJECT_SOURCE_DIR}/render-test/include/mln/render_test.hpp
     ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.cpp
     ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.hpp
     ${PROJECT_SOURCE_DIR}/render-test/metadata.hpp

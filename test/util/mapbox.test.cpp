@@ -1,11 +1,11 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/mapbox.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/tileset.hpp>
-#include <mbgl/util/tile_server_options.hpp>
-#include <mbgl/storage/resource_options.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/mapbox.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/tileset.hpp>
+#include <mln/util/tile_server_options.hpp>
+#include <mln/storage/resource_options.hpp>
 #include <stdexcept>
 
 using namespace mln;

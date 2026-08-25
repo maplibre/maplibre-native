@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#include <mbgl/i18n/number_format.hpp>
+#include <mln/i18n/number_format.hpp>
 
 namespace mln {
 namespace platform {

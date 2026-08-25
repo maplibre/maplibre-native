@@ -14,9 +14,9 @@
 
 #import "MLNStyleLayer_Private.h"
 
-#include <mbgl/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/style/expression/dsl.hpp>
+#include <mln/style/layers/<%- type.replace('-', '_') %>_layer.hpp>
+#include <mln/style/transition_options.hpp>
+#include <mln/style/expression/dsl.hpp>
 
 @interface MLN<%- camelize(type) %>LayerTests : MLNStyleLayerTests
 @end

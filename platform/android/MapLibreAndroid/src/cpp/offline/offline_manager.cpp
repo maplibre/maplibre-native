@@ -1,8 +1,8 @@
 #include "offline_manager.hpp"
 
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/util/string.hpp>
 
 #include "attach_env.hpp"
 

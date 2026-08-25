@@ -1,6 +1,6 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/geometry/line_atlas.hpp>
+#include <mln/geometry/line_atlas.hpp>
 
 #include <random>
 

@@ -4,12 +4,12 @@
 #undef GetObject
 #endif
 
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/variant.hpp>
-#include <mbgl/style/conversion/function.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
-#include <mbgl/style/expression/parsing_context.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/style/conversion/function.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
+#include <mln/style/expression/parsing_context.hpp>
 
 #include <mapbox/geojson/rapidjson.hpp>
 #include <rapidjson/writer.h>

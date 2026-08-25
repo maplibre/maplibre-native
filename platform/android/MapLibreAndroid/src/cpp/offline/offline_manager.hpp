@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/storage/offline.hpp>
+#include <mln/storage/offline.hpp>
 #include <jni/jni.hpp>
 
 #include "../file_source.hpp"

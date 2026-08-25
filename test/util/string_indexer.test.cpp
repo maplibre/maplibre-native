@@ -1,6 +1,6 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/string_indexer.hpp>
+#include <mln/util/string_indexer.hpp>
 
 #include <cstdint>
 

@@ -3,8 +3,8 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNMapView+WebGPU.h"
 
-#import <mbgl/util/logging.hpp>
-#import <mbgl/webgpu/renderable_resource.hpp>
+#import <mln/util/logging.hpp>
+#import <mln/webgpu/renderable_resource.hpp>
 
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>

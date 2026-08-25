@@ -1,12 +1,12 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/fixture_log_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/fixture_log_observer.hpp>
 
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/style/parser.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/enum.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/style/parser.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/enum.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <rapidjson/document.h>
 

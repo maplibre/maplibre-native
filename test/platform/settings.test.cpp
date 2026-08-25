@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <mbgl/platform/settings.hpp>
+#include <mln/platform/settings.hpp>
 
 using namespace mln;
 using namespace mln::platform;

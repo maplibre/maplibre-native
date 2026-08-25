@@ -1,11 +1,11 @@
 #include <benchmark/benchmark.h>
 
-#include <mbgl/storage/offline_database.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/response.hpp>
-#include <mbgl/storage/sqlite3.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/storage/offline_database.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/response.hpp>
+#include <mln/storage/sqlite3.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
 
 #include <random>
 

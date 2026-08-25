@@ -2,7 +2,7 @@
 #import "MLNMapViewIntegrationTest.h"
 #import "MLNTestUtility.h"
 
-#include <mbgl/map/camera.hpp>
+#include <mln/map/camera.hpp>
 
 @interface MLNCameraTransitionFinishTests : MLNMapViewIntegrationTest
 @end

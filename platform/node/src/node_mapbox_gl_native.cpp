@@ -5,9 +5,9 @@
 #include <nan.h>
 #pragma GCC diagnostic pop
 
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/backend_scope.hpp>
 
 #include "node_map.hpp"
 #include "node_logging.hpp"

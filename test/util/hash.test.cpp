@@ -1,6 +1,6 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/hash.hpp>
+#include <mln/util/hash.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -10,24 +10,24 @@
 #include <vector>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/mtl/background.hpp>
-#include <mbgl/shaders/mtl/circle.hpp>
-#include <mbgl/shaders/mtl/clipping_mask.hpp>
-#include <mbgl/shaders/mtl/collision.hpp>
-#include <mbgl/shaders/mtl/custom_geometry.hpp>
-#include <mbgl/shaders/mtl/custom_symbol_icon.hpp>
-#include <mbgl/shaders/mtl/debug.hpp>
-#include <mbgl/shaders/mtl/fill.hpp>
-#include <mbgl/shaders/mtl/fill_extrusion.hpp>
-#include <mbgl/shaders/mtl/heatmap.hpp>
-#include <mbgl/shaders/mtl/heatmap_texture.hpp>
-#include <mbgl/shaders/mtl/hillshade.hpp>
-#include <mbgl/shaders/mtl/hillshade_prepare.hpp>
-#include <mbgl/shaders/mtl/line.hpp>
-#include <mbgl/shaders/mtl/location_indicator.hpp>
-#include <mbgl/shaders/mtl/fill.hpp>
-#include <mbgl/shaders/mtl/raster.hpp>
-#include <mbgl/shaders/mtl/symbol.hpp>
+#include <mln/shaders/mtl/background.hpp>
+#include <mln/shaders/mtl/circle.hpp>
+#include <mln/shaders/mtl/clipping_mask.hpp>
+#include <mln/shaders/mtl/collision.hpp>
+#include <mln/shaders/mtl/custom_geometry.hpp>
+#include <mln/shaders/mtl/custom_symbol_icon.hpp>
+#include <mln/shaders/mtl/debug.hpp>
+#include <mln/shaders/mtl/fill.hpp>
+#include <mln/shaders/mtl/fill_extrusion.hpp>
+#include <mln/shaders/mtl/heatmap.hpp>
+#include <mln/shaders/mtl/heatmap_texture.hpp>
+#include <mln/shaders/mtl/hillshade.hpp>
+#include <mln/shaders/mtl/hillshade_prepare.hpp>
+#include <mln/shaders/mtl/line.hpp>
+#include <mln/shaders/mtl/location_indicator.hpp>
+#include <mln/shaders/mtl/fill.hpp>
+#include <mln/shaders/mtl/raster.hpp>
+#include <mln/shaders/mtl/symbol.hpp>
 #endif
 
 using namespace mln;

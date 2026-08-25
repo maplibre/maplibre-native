@@ -3,9 +3,9 @@
 #import "MLNStyle_Private.h"
 #import "NSBundle+MLNAdditions.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/source.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/source.hpp>
+#include <mln/style/style.hpp>
 
 const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceException";
 

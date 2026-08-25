@@ -4,7 +4,7 @@
 
 #import <CoreLocation/CoreLocation.h>
 
-#include <mbgl/math/wrap.hpp>
+#include <mln/math/wrap.hpp>
 
 @implementation MLNMapCamera
 

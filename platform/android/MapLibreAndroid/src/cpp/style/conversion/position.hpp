@@ -3,7 +3,7 @@
 #include "../../conversion/conversion.hpp"
 #include "../position.hpp"
 
-#include <mbgl/style/position.hpp>
+#include <mln/style/position.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

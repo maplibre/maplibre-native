@@ -8,8 +8,8 @@
 #import "MLNMapView+OpenGL.h"
 #endif
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/style.hpp>
 
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
 #if MLN_RENDER_BACKEND_METAL

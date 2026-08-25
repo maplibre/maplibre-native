@@ -28,15 +28,15 @@
 #import "MLNAttributionInfo_Private.h"
 #import "MLNLoggingConfiguration_Private.h"
 
-#include <mbgl/map/map.hpp>
-#include <mbgl/style/image.hpp>
-#include <mbgl/style/light.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/style/sources/raster_dem_source.hpp>
-#include <mbgl/style/sources/raster_source.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/map/map.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/light.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/style/sources/raster_dem_source.hpp>
+#include <mln/style/sources/raster_source.hpp>
+#include <mln/style/sources/vector_source.hpp>
+#include <mln/style/style.hpp>
 
 #import "NSDate+MLNAdditions.h"
 

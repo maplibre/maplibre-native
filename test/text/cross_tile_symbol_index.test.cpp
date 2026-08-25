@@ -1,8 +1,8 @@
-#include <mbgl/map/transform_state.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/style/variable_anchor_offset_collection.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/text/cross_tile_symbol_index.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/style/variable_anchor_offset_collection.hpp>
+#include <mln/test/util.hpp>
+#include <mln/text/cross_tile_symbol_index.hpp>
 
 using namespace mln;
 

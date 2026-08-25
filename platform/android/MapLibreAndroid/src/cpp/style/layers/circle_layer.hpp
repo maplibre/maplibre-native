@@ -4,8 +4,8 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/circle_layer_factory.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
+#include <mln/layermanager/circle_layer_factory.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <jni/jni.hpp>
 
 namespace mln {

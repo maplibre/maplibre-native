@@ -10,9 +10,9 @@
 
 #import "NSValue+MLNAdditions.h"
 
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/util/variant.hpp>
 
 const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackException";
 

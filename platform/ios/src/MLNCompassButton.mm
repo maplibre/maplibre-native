@@ -7,7 +7,7 @@
 #import "NSBundle+MLNAdditions.h"
 #import "UIImage+MLNAdditions.h"
 
-#include <mbgl/math/wrap.hpp>
+#include <mln/math/wrap.hpp>
 
 @interface MLNCompassButton ()
 
