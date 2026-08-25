@@ -60,6 +60,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 @vertex
@@ -68,7 +69,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let clip = projectTile(vec2<f32>(f32(in.position.x), f32(in.position.y)), projectionVector[globalIndex.value]);
     out.position = clip;
 
     var color: vec4<f32>;
@@ -197,6 +198,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(6) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 @vertex
@@ -205,7 +207,7 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let clip = projectTile(vec2<f32>(f32(in.position.x), f32(in.position.y)), projectionVector[globalIndex.value]);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
     out.position = clip;
@@ -353,6 +355,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(5) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
 @group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -398,7 +401,7 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = projectTile(pos, projectionVector[globalIndex.value]);
     out.position = clip;
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
@@ -600,6 +603,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(5) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
 @group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -645,7 +649,7 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = projectTile(pos, projectionVector[globalIndex.value]);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
 
@@ -820,6 +824,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineTriangulatedDrawableUnionUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -848,7 +853,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let extrude_vec = dist / ratio;
 
     let projected_extrude = matrix * vec4<f32>(extrude_vec, 0.0, 0.0);
-    let base = matrix * vec4<f32>(pos, 0.0, 1.0);
+    let base = projectTile(pos, projectionVector[globalIndex.value]);
     let clip = base + projected_extrude;
     out.position = clip;
 
