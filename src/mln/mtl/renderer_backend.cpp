@@ -60,22 +60,6 @@ PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {
     return PremultipliedImage(size);
 }
 
-void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID) {}
-
-void RendererBackend::assumeViewport(int32_t, int32_t, const Size&) {}
-
-void RendererBackend::assumeScissorTest(bool) {}
-
-bool RendererBackend::implicitFramebufferBound() {
-    return false;
-}
-
-void RendererBackend::setFramebufferBinding(const mtl::FramebufferID) {}
-
-void RendererBackend::setViewport(int32_t, int32_t, const Size&) {}
-
-void RendererBackend::setScissorTest(bool) {}
-
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs
 /// @param registry A shader registry instance
