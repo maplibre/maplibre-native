@@ -238,6 +238,10 @@ struct alignas(16) ProjectionUBO {
 };
 static_assert(sizeof(ProjectionUBO) == 11 * 16, "wrong size");
 
+inline float4 projectTile(float2 pos, device const ProjectionUBO& projection) {
+    return projection.matrix * float4(pos, 0.0, 1.0);
+}
+
 enum {
     idGlobalPaintParamsUBO,
     idGlobalUBOIndex,
