@@ -122,6 +122,21 @@ layout(set = GLOBAL_SET_INDEX, binding = 1) uniform GlobalPlatformParamsUBO {
 } platformParams;
 #endif
 
+struct ProjectionUBO {
+    mat4 matrix;
+    mat4 fallback_matrix;
+    vec4 tile_mercator_coords;
+    vec4 clipping_plane;
+    float projection_transition;
+    float pad1;
+    float pad2;
+    float pad3;
+};
+
+vec4 projectTile(vec2 pos, ProjectionUBO projection) {
+    return projection.matrix * vec4(pos, 0.0, 1.0);
+}
+
 void applySurfaceTransform() {
 #ifdef USE_SURFACE_TRANSFORM
     const mat2 rotation = {

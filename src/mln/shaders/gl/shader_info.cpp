@@ -140,6 +140,7 @@ const std::vector<TextureInfo> DebugShaderInfo::textures = {
 using FillShaderInfo = ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"FillDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
@@ -155,6 +156,7 @@ using FillOutlineShaderInfo = ShaderInfo<BuiltIn::FillOutlineShader, gfx::Backen
 
 const std::vector<UniformBlockInfo> FillOutlineShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"FillOutlineDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
@@ -170,6 +172,7 @@ using FillPatternShaderInfo = ShaderInfo<BuiltIn::FillPatternShader, gfx::Backen
 
 const std::vector<UniformBlockInfo> FillPatternShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"FillPatternDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillPatternTilePropsUBO", idFillTilePropsUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
@@ -189,6 +192,7 @@ using FillOutlinePatternShaderInfo = ShaderInfo<BuiltIn::FillOutlinePatternShade
 
 const std::vector<UniformBlockInfo> FillOutlinePatternShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"FillOutlinePatternDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillOutlinePatternTilePropsUBO", idFillTilePropsUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
@@ -209,6 +213,7 @@ using FillOutlineTriangulatedShaderInfo =
 
 const std::vector<UniformBlockInfo> FillOutlineTriangulatedShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillDrawableUBO},
     UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
