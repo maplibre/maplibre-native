@@ -127,7 +127,6 @@ mln::gfx::Renderable& MetalBackend::getDefaultRenderable() { return *this; }
 
 void MetalBackend::activate() {}
 void MetalBackend::deactivate() {}
-void MetalBackend::updateAssumedState() {}
 
 void MetalBackend::setSize(mln::Size size_) {
   size = size_;
