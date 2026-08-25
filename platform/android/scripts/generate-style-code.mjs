@@ -8,6 +8,13 @@ import { writeIfModified, camelize, snakeCaseUpper, iff, camelizeWithLeadingLowe
 
 if (!import.meta.dirname) throw new Error("import.meta.dirname is undefined");
 
+// Style specification documentation is Markdown and may span multiple lines.
+// Flatten it before inserting it into a Java // comment so that subsequent
+// lines cannot become Java source.
+function singleLineComment(value) {
+  return value.replace(/\s*[\r\n]+\s*/g, " ");
+}
+
 function absPath(relativePath) {
   return path.join(import.meta.dirname, "..", relativePath);
 }
@@ -17,7 +24,8 @@ function setupGlobalEjsHelpers() {
     camelize,
     snakeCaseUpper,
     iff,
-    camelizeWithLeadingLowercase
+    camelizeWithLeadingLowercase,
+    singleLineComment
   };
   for (const [funcName, func] of Object.entries(funcs)) {
     // @ts-ignore

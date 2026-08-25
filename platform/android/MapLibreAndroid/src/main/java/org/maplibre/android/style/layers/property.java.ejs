@@ -34,17 +34,17 @@ public final class Property {
   public @interface VISIBILITY {}
 
 <% for (const property of properties) { -%>
-  // <%- snakeCaseUpper(property.name) %>: <%- property.doc %>
+  // <%- snakeCaseUpper(property.name) %>: <%- singleLineComment(property.doc) %>
 
 <% for (const value in property.values) { -%>
   /**
-   * <%- propertyValueDoc(property, value) %>
+   * <%- singleLineComment(propertyValueDoc(property, value)) %>
    */
   public static final String <%- snakeCaseUpper(property.name) %>_<%- snakeCaseUpper(value) %> = "<%- value %>";
 <% } -%>
 
   /**
-   * <%- property.doc %>
+   * <%- singleLineComment(property.doc) %>
    */
   @StringDef({
   <% for (const value of Object.keys(property.values)) { -%>

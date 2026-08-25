@@ -648,8 +648,7 @@ public final class Property {
   @Retention(RetentionPolicy.SOURCE)
   public @interface HILLSHADE_ILLUMINATION_ANCHOR {}
 
-  // HILLSHADE_METHOD: The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`.
-![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
+  // HILLSHADE_METHOD: The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
 
   /**
    * The legacy hillshade method.
@@ -673,8 +672,7 @@ public final class Property {
   public static final String HILLSHADE_METHOD_MULTIDIRECTIONAL = "multidirectional";
 
   /**
-   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`.
-![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
+   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
    */
   @StringDef({
       HILLSHADE_METHOD_STANDARD,
