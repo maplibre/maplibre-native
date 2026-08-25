@@ -83,6 +83,21 @@ fn get_pattern_pos(pixel_coord_upper: vec2<f32>, pixel_coord_lower: vec2<f32>,
     let offset = gl_mod(offset_b, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
+
+struct ProjectionUBO {
+    matrix: mat4x4<f32>,
+    fallback_matrix: mat4x4<f32>,
+    tile_mercator_coords: vec4<f32>,
+    clipping_plane: vec4<f32>,
+    projection_transition: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
+};
+
+fn projectTile(pos: vec2<f32>, projection: ProjectionUBO) -> vec4<f32> {
+    return projection.matrix * vec4<f32>(pos, 0.0, 1.0);
+}
 )";
 };
 
