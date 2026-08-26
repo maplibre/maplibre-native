@@ -50,6 +50,9 @@
     "render-tests/projection/globe/fill-translate": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/line-translate": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/fill-extrusion-translate": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/image": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/image-non-parallelogram": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/raster-warped": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/antimeridian-lod": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/debug-tile-borders": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
 }
