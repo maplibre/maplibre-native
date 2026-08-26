@@ -974,12 +974,14 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    bool has3D = false;
     gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
     allFeatures.reserve(items.size());
 
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
         const auto& layerId = renderLayer.getId();
+        has3D = has3D || renderLayer.is3D();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -1008,6 +1010,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         }
     }
     addChanges(changes);
+
+    globeDepthPass.update(shaders, context, state, *updateParameters, has3D);
 
     std::swap(frameRenderedFeatures, allFeatures);
 }
