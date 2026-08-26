@@ -40,7 +40,7 @@ std::string Style::getURL() const {
 }
 
 bool Style::isLoaded() const {
-    return impl->isLoaded();
+    return impl->loaded;
 }
 
 std::string Style::getName() const {

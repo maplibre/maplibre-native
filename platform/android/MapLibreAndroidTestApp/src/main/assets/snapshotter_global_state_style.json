@@ -1,0 +1,18 @@
+{
+  "version": 8,
+  "state": {
+    "reloadState": {
+      "default": true
+    }
+  },
+  "sources": {
+    "pending": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    }
+  },
+  "layers": []
+}

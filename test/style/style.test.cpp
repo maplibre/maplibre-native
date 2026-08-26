@@ -348,6 +348,31 @@ TEST(Style, LoadJSONCancelsPendingLoadURL) {
     ASSERT_NE("Streets", style.getName());
 }
 
+TEST(Style, PublicLoadStateDoesNotWaitForResources) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<::StubFileSource>(
+        ResourceOptions::Default(), ClientOptions(), StubFileSource::ResponseType::Manual);
+    style::Style style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    EXPECT_FALSE(style.isLoaded());
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "sources": {
+            "pending": {
+                "type": "geojson",
+                "data": { "type": "FeatureCollection", "features": [] }
+            }
+        },
+        "layers": []
+    })STYLE");
+    EXPECT_TRUE(style.isLoaded());
+
+    style.loadURL("http://some-url");
+    EXPECT_FALSE(style.isLoaded());
+}
+
 TEST(Style, SourceImplsOrder) {
     util::RunLoop loop;
     auto fileSource = std::make_shared<StubFileSource>();

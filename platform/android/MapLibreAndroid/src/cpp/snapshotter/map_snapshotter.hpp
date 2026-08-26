@@ -68,7 +68,7 @@ public:
     jni::Local<jni::Object<Layer>> getLayer(JNIEnv&, const jni::String&);
     jni::Local<jni::Object<Source>> getSource(JNIEnv&, const jni::String&);
 
-    jni::jboolean isFullyLoaded(JNIEnv&);
+    jni::jboolean isStyleLoaded(JNIEnv&);
 
     void setGlobalStateProperty(JNIEnv&, const jni::String& name, const jni::Object<gson::JsonElement>& value);
     jni::Local<jni::Object<gson::JsonObject>> getGlobalState(JNIEnv&);
