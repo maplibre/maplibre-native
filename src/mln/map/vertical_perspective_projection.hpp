@@ -23,6 +23,7 @@ public:
                                         const UnwrappedTileID&,
                                         const Point<double>&) const override;
     double circleRadiusCorrection(const TransformState&) const override;
+    double pixelScale(const TransformState&) const override;
     double pitchedTextCorrection(const TransformState&, const Point<double>&, const UnwrappedTileID&) const override;
 
     /// Globe radius in pixels at the given world size and center latitude, so zoom means the same on both projections.
