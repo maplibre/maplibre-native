@@ -4,6 +4,7 @@
     "render-tests/icon-text-fit/textFit-grid-long": "Needs investigation (Diff: 0.00507716049382716)",
     "render-tests/regressions/mapbox-gl-js#5642": "Needs investigation (Diff: 0.01416015625)",
     "render-tests/regressions/mapbox-gl-js#7066": "Needs investigation (Diff: 0.0002777777777777778)",
+    "render-tests/projection/globe/fill-planet-pole": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/fill-planet-tiles": "fill outline anti-aliasing differs from the Metal expectation",
     "render-tests/projection/globe/fill-grid": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/fill-grid-pitched": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",

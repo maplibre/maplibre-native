@@ -16,5 +16,6 @@
     "render-tests/projection/globe/fill-grid-pitched": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/background": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/fill-planet-solid": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
-    "render-tests/projection/globe/fill-planet-tiles": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
+    "render-tests/projection/globe/fill-planet-tiles": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/fill-planet-pole": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
 }
