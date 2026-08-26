@@ -107,10 +107,13 @@ gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
     return std::make_unique<UniformBufferArray>();
 }
 
-gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registry, const std::string& name) {
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registry,
+                                                    const std::string& name,
+                                                    gfx::ProjectionVariant variant) {
     // Align with Metal - just get shader from registry without caching
     const auto shaderGroup = registry.getShaderGroup(name);
-    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}, "a_pos", variant)
+                              : gfx::ShaderProgramBasePtr{};
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 

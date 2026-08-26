@@ -2,6 +2,7 @@
 
 #include <mln/shaders/segment.hpp>
 #include <mln/renderer/render_layer.hpp>
+#include <mln/gfx/shader_group.hpp>
 #include <mln/style/layers/background_layer_impl.hpp>
 #include <mln/style/layers/background_layer_properties.hpp>
 
@@ -46,6 +47,7 @@ private:
     SegmentVector segments;
 
     // Drawable shaders
+    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
     gfx::ShaderProgramBasePtr plainShader;
     gfx::ShaderProgramBasePtr patternShader;
 };

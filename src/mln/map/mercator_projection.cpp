@@ -26,25 +26,18 @@ void MercatorProjection::tileMatrix(mat4& matrix, const UnwrappedTileID& tileID,
     matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
 }
 
-ProjectionData MercatorProjection::getProjectionData(const UnwrappedTileID& tileID,
-                                                     double scale,
-                                                     const mat4& projMatrix) const {
-    mat4 mainMatrix;
-    tileMatrix(mainMatrix, tileID, scale);
-    matrix::multiply(mainMatrix, projMatrix, mainMatrix);
-    return getProjectionData(tileID, mainMatrix);
-}
-
-ProjectionData MercatorProjection::getProjectionData(const UnwrappedTileID& tileID, const mat4& mainMatrix) const {
+ProjectionData MercatorProjection::getProjectionData(const TransformState&,
+                                                     const UnwrappedTileID& tileID,
+                                                     const mat4& mercatorMatrix) const {
     const double tileScale = static_cast<double>(1ull << tileID.canonical.z);
-    return {.mainMatrix = mainMatrix,
+    return {.mainMatrix = mercatorMatrix,
             .tileMercatorCoords = {{tileID.canonical.x / tileScale,
                                     tileID.canonical.y / tileScale,
                                     1.0 / tileScale / util::EXTENT,
                                     1.0 / tileScale / util::EXTENT}},
             .clippingPlane = {{0, 0, 0, 0}},
             .projectionTransition = 0,
-            .fallbackMatrix = mainMatrix,
+            .fallbackMatrix = mercatorMatrix,
             .clipAntimeridian = false};
 }
 
