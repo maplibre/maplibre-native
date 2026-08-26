@@ -149,6 +149,7 @@ public:
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
+    const ProjectionBase& getProjection() const { return *projection; }
     ProjectionData getProjectionData(const UnwrappedTileID&, const mat4& projMatrix) const;
     ProjectionData getProjectionData(const UnwrappedTileID&) const;
     ProjectionData getProjectionDataForMatrix(const UnwrappedTileID&, const mat4& mercatorMatrix) const;
