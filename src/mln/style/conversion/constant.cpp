@@ -140,22 +140,21 @@ std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(cons
 
 std::optional<ProjectionDefinition> Converter<ProjectionDefinition>::operator()(const Convertible& value,
                                                                                 Error& error) const {
-    const auto isProjectionName = [](const std::string& name) {
-        return name == "mercator" || name == "vertical-perspective" || name == "globe";
-    };
-    if (const std::optional<std::string> type = toString(value)) {
-        if (isProjectionName(*type)) {
+    if (const std::optional<std::string> name = toString(value)) {
+        if (const auto type = projectionTypeFromName(*name)) {
             return ProjectionDefinition(*type);
         }
         error.message = "projection type must be mercator, vertical-perspective or globe";
         return std::nullopt;
     }
     if (isArray(value) && arrayLength(value) == 3) {
-        const std::optional<std::string> from = toString(arrayMember(value, 0));
-        const std::optional<std::string> to = toString(arrayMember(value, 1));
+        const std::optional<std::string> fromName = toString(arrayMember(value, 0));
+        const std::optional<std::string> toName = toString(arrayMember(value, 1));
         const std::optional<double> transition = toDouble(arrayMember(value, 2));
-        if (from && to && transition) {
-            if (isProjectionName(*from) && isProjectionName(*to)) {
+        if (fromName && toName && transition) {
+            const auto from = projectionTypeFromName(*fromName);
+            const auto to = projectionTypeFromName(*toName);
+            if (from && to) {
                 return ProjectionDefinition(*from, *to, *transition);
             }
             error.message = "projection type must be mercator, vertical-perspective or globe";
