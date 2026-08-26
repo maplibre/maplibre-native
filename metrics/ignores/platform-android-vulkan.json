@@ -1,4 +1,6 @@
 {
   "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847",
-  "render-tests/combinations/fill-opaque--image-translucent": "investigate"
+  "render-tests/combinations/fill-opaque--image-translucent": "investigate",
+  "render-tests/projection/globe/fill-grid": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/fill-grid-pitched": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525"
 }

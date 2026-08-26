@@ -553,14 +553,17 @@ gfx::UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
     return std::make_unique<UniformBufferArrayGL>();
 }
 
-gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders,
+                                                    const std::string& name,
+                                                    gfx::ProjectionVariant variant) {
     MLN_TRACE_FUNC();
 
     auto shaderGroup = shaders.getShaderGroup(name);
     if (!shaderGroup) {
         return nullptr;
     }
-    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, {}));
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(
+        shaderGroup->getOrCreateShader(*this, {}, "a_pos", variant));
 }
 
 TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {

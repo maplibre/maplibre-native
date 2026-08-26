@@ -1,1 +1,4 @@
-{}
+{
+  "render-tests/projection/globe/fill-grid": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/fill-grid-pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+}

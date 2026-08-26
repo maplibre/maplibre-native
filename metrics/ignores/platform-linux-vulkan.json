@@ -1,5 +1,7 @@
 {
   "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847",
   "render-tests/tilejson-bounds/default": "flaky on CI",
-  "render-tests/icon-text-fit/textFit-grid-long": "Needs to be investigated"
+  "render-tests/icon-text-fit/textFit-grid-long": "Needs to be investigated",
+  "render-tests/projection/globe/fill-grid": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/fill-grid-pitched": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
 }

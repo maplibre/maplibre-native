@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/actor/scheduler.hpp>
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/gfx/backend.hpp>
 #include <mln/gfx/command_encoder.hpp>
 #include <mln/gfx/context_observer.hpp>
@@ -133,7 +134,9 @@ public:
     virtual UniqueUniformBufferArray createLayerUniformBufferArray() = 0;
 
     /// Get the generic shader with the specified name
-    virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
+    virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&,
+                                                       const std::string& name,
+                                                       ProjectionVariant = ProjectionVariant::Mercator) = 0;
 
     /// Create a tile layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,

@@ -11,8 +11,9 @@ public:
 
     void tileMatrix(mat4&, const UnwrappedTileID&, double scale) const override;
 
-    ProjectionData getProjectionData(const UnwrappedTileID&, double scale, const mat4& projMatrix) const override;
-    ProjectionData getProjectionData(const UnwrappedTileID&, const mat4& mainMatrix) const override;
+    ProjectionData getProjectionData(const TransformState&,
+                                     const UnwrappedTileID&,
+                                     const mat4& mercatorMatrix) const override;
 };
 
 } // namespace mln
