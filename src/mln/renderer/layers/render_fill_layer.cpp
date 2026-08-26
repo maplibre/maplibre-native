@@ -150,11 +150,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
-    const auto variant = state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
-    if (variant != projectionVariant) {
-        projectionVariant = variant;
-        removeAllDrawables();
-    }
+    updateProjectionVariant(state);
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));

@@ -119,7 +119,7 @@ public:
 
         const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
         const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         const shaders::LineEvaluatedPropsUBO propsUBO = {.color = options.color,
@@ -244,7 +244,7 @@ public:
         mat4 projMatrix = parameters.transformParams.projMatrix;
         const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
         const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         matf4 mvpMatrix, mvpMatrixDiff, mvMatrix, mvMatrixDiff, pMatrix, pMatrixDiff;
@@ -319,7 +319,7 @@ public:
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
         const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ .color = options.color,
@@ -406,7 +406,7 @@ public:
 
         const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
         const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(

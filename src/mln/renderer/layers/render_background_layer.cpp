@@ -170,12 +170,9 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
-    const auto variant = state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
-    if (variant != projectionVariant) {
-        projectionVariant = variant;
+    if (updateProjectionVariant(state)) {
         plainShader.reset();
         patternShader.reset();
-        removeAllDrawables();
     }
 
     if (!hasPattern && !plainShader) {

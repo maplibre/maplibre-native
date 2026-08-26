@@ -50,7 +50,7 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         constexpr bool inViewportPixelUnits = false;
         const auto projection = getProjectionData(
             tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
         const auto projectionUBO = toProjectionUBO(projection);
 
         // extrude scale
