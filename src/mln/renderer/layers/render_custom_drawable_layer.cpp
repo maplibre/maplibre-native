@@ -70,6 +70,9 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
         host->initialize();
     }
 
+    // The host rebuilds its drawables when it finds none, so a projection change empties the group.
+    updateProjectionVariant(state);
+
     // delegate the call to the custom layer
     if (host) {
         CustomDrawableLayerHost::Interface interface(

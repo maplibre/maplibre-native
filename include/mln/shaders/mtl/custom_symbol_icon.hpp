@@ -69,8 +69,11 @@ float2 ellipseRotateVec2(float2 v, float angle, float radiusRatio /* A/B */) {
 }
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CustomSymbolIconDrawableUBO& drawable [[buffer(idCustomSymbolDrawableUBO)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const CustomSymbolIconDrawableUBO& drawable [[buffer(idCustomSymbolDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]]) {
 
+    device const ProjectionUBO& projection = projectionVector[uboIndex];
     const float2 extrude = glMod(float2(vertx.a_pos), 2.0) * 2.0 - 1.0;
     const float2 anchor = (drawable.anchor - float2(0.5, 0.5)) * 2.0;
     const float2 center = floor(float2(vertx.a_pos) * 0.5);
@@ -82,13 +85,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         if (drawable.scale_with_map) {
             corner *= drawable.extrude_scale;
         } else {
-            float4 projected_center = drawable.matrix * float4(center, 0, 1);
+            float4 projected_center = projectTile(center, projection);
             corner *= drawable.extrude_scale * (projected_center.w / drawable.camera_to_center_distance);
         }
         corner = center + rotateVec2(corner, angle);
-        position = drawable.matrix * float4(corner, 0, 1);
+        position = projectTile(corner, projection);
     } else {
-        position = drawable.matrix * float4(center, 0, 1);
+        position = projectTile(center, projection);
         const float factor = drawable.scale_with_map ? drawable.camera_to_center_distance : position.w;
         position.xy += ellipseRotateVec2(corner * drawable.extrude_scale * factor, angle, drawable.aspect_ratio);
     }
