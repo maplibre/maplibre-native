@@ -11,13 +11,15 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <map>
 #include <memory>
+#include <tuple>
 #include <vector>
 
 namespace mln {
 
 /// The pole-capped globe grid for a tile, as position + texture-position vertices; texture positions stay inside
-/// the tile so the pole rows sample the tile's edge. `layoutVertex(Point<int16_t>, Point<uint16_t>)` is the bucket's.
+/// the tile so the pole rows sample the tile's edge.
 template <typename Vertex, typename LayoutVertexFn>
 struct GlobeTileMesh {
     std::shared_ptr<gfx::VertexVector<Vertex>> vertices;
