@@ -55,7 +55,6 @@ private:
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;
 
-    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
     gfx::ShaderGroupPtr fillShaderGroup;
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
