@@ -1,5 +1,6 @@
 #include <mln/map/transform_state.hpp>
 #include <mln/map/mercator_projection.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/math/clamp.hpp>
 #include <mln/math/log2.hpp>
@@ -114,8 +115,38 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
 
 // MARK: - Projection
 
+namespace {
+
+// GL JS `GlobeProjection.transitionState`
+double transitionStateFor(const ProjectionDefinition& definition) {
+    if (definition.from == definition.to) {
+        return definition.from == "mercator" ? 0 : 1;
+    }
+    if (definition.from == "vertical-perspective" && definition.to == "mercator") {
+        return 1 - definition.transition;
+    }
+    if (definition.from == "mercator" && definition.to == "vertical-perspective") {
+        return definition.transition;
+    }
+    return 1;
+}
+
+} // namespace
+
 void TransformState::setProjectionDefinition(const ProjectionDefinition& definition) {
     projectionDefinition = definition;
+    const double transition = transitionStateFor(definition);
+    if (transition == projectionTransition) {
+        return;
+    }
+    if ((transition > 0) != (projectionTransition > 0)) {
+        if (transition > 0) {
+            projection = std::make_shared<VerticalPerspectiveProjection>();
+        } else {
+            projection = std::make_shared<MercatorProjection>();
+        }
+    }
+    projectionTransition = transition;
 }
 
 // MARK: - Matrix
@@ -125,15 +156,19 @@ void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) cons
 }
 
 ProjectionData TransformState::getProjectionData(const UnwrappedTileID& tileID, const mat4& projMatrix) const {
-    return projection->getProjectionData(tileID, scale, projMatrix);
+    mat4 mercatorMatrix;
+    projection->tileMatrix(mercatorMatrix, tileID, scale);
+    matrix::multiply(mercatorMatrix, projMatrix, mercatorMatrix);
+    return projection->getProjectionData(*this, tileID, mercatorMatrix);
 }
 
 ProjectionData TransformState::getProjectionData(const UnwrappedTileID& tileID) const {
     return getProjectionData(tileID, getProjectionMatrix());
 }
 
-ProjectionData TransformState::getProjectionDataForMatrix(const UnwrappedTileID& tileID, const mat4& mainMatrix) const {
-    return projection->getProjectionData(tileID, mainMatrix);
+ProjectionData TransformState::getProjectionDataForMatrix(const UnwrappedTileID& tileID,
+                                                          const mat4& mercatorMatrix) const {
+    return projection->getProjectionData(*this, tileID, mercatorMatrix);
 }
 
 void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligned) const {
