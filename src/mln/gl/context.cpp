@@ -897,6 +897,10 @@ Texture2DPool& Context::getTexturePool() {
     return *texturePool;
 }
 
+void Context::releaseGlobeClipMasks() {
+    globeClipMaskDrawables.clear();
+}
+
 bool Context::renderGlobeTileClippingMasks(PaintParameters& parameters,
                                            RenderStaticData& staticData,
                                            const std::vector<shaders::GlobeClipMask>& masks) {

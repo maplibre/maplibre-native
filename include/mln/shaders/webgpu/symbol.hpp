@@ -214,8 +214,16 @@ fn main(in: VertexInput) -> VertexOutput {
         projected_pos = drawable.label_plane_matrix * projectTileWithElevation(in.projected_pos.xy + drawable.translation, 0.0, projection);
     }
     let z = select(0.0, projected_pos.z / projected_pos.w, drawable.pitch_with_map != 0u);
+
+    var projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map != 0u) {
+        let anchor_pos_tile_y = (drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     let posOffset = a_offset * max(a_minFontScale, vec2<f32>(fontScale)) / 32.0 + a_pxoffset / 16.0;
-    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset, z, 1.0);
+    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset * projectionScaling, z, 1.0);
     if (drawable.pitch_with_map != 0u) {
         position = projectTileWithElevation(position.xy, position.z, projection);
     }
@@ -402,8 +410,16 @@ fn main(in: VertexInput) -> VertexOutput {
         projected_pos = drawable.label_plane_matrix * projectTileWithElevation(in.projected_pos.xy + drawable.translation, 0.0, projection);
     }
     let z = select(0.0, projected_pos.z / projected_pos.w, drawable.pitch_with_map != 0u);
+
+    var projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map != 0u) {
+        let anchor_pos_tile_y = (drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     let pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
-    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot, z, 1.0);
+    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
     if (drawable.pitch_with_map != 0u) {
         position = projectTileWithElevation(position.xy, position.z, projection);
     }
@@ -665,8 +681,16 @@ fn main(in: VertexInput) -> VertexOutput {
         projected_pos = drawable.label_plane_matrix * projectTileWithElevation(in.projected_pos.xy + drawable.translation, 0.0, projection);
     }
     let z = select(0.0, projected_pos.z / projected_pos.w, drawable.pitch_with_map != 0u);
+
+    var projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map != 0u && drawable.is_along_line == 0u) {
+        let anchor_pos_tile_y = (drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     let pos_rot = a_offset / 32.0 * fontScale;
-    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot, z, 1.0);
+    var position = drawable.coord_matrix * vec4<f32>(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
     if (drawable.pitch_with_map != 0u) {
         position = projectTileWithElevation(position.xy, position.z, projection);
     }
