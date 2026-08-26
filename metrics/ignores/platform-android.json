@@ -41,6 +41,7 @@
     "render-tests/projection/globe/icon-text-translate-map": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/icon-text-translate-viewport": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-line-equator": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/zoom-transition": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/background-opacity": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/background-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/line-gradient": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",

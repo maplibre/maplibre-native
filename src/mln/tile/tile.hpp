@@ -81,6 +81,7 @@ public:
     // tile (and i.e. it was successfully updated); returns `false` otherwise.
     virtual bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) = 0;
     virtual void setShowCollisionBoxes(const bool) {}
+    /// Takes effect with the next `setLayers`, so a relayout costs one parse.
     virtual void setSubdivisionGranularity(const SubdivisionGranularitySetting&) {}
     virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}
     virtual void setMask(TileMask&&) {}

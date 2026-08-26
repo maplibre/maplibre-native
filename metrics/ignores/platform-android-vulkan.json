@@ -26,5 +26,6 @@
   "render-tests/projection/globe/raster-planet": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/raster-pole": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/raster-warped": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
-  "render-tests/projection/globe/fill-extrusion": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525"
+  "render-tests/projection/globe/fill-extrusion": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/zoom-transition": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525"
 }
