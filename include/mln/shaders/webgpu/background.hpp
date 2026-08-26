@@ -51,17 +51,15 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundDrawableUnionUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(5) var<uniform> props: BackgroundPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[globalIndex.value];
-    let matrix = mat4x4<f32>(drawable.matrix_col0,
-                             drawable.matrix_col1,
-                             drawable.matrix_col2,
-                             drawable.matrix_col3);
-    let clip = matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let clip = projectTileWithPoles(pos, pos, projectionVector[globalIndex.value]);
     out.position = clip;
     return out;
 }
@@ -138,6 +136,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundPatternDrawableUnionUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;
 
 @vertex
@@ -145,10 +144,6 @@ fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     let drawable = drawableVector[globalIndex.value];
-    let matrix = mat4x4<f32>(drawable.matrix_col0,
-                             drawable.matrix_col1,
-                             drawable.matrix_col2,
-                             drawable.matrix_col3);
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
 
@@ -169,7 +164,7 @@ fn main(in: VertexInput) -> VertexOutput {
         pos
     );
 
-    let clip = matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = projectTileWithPoles(pos, pos, projectionVector[globalIndex.value]);
     out.position = clip;
     return out;
 }

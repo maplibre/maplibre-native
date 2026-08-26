@@ -116,6 +116,9 @@ public:
     /// Sets dirty state
     virtual void setDirtyState() = 0;
 
+    /// Drops the meshes and drawables kept for the globe's tile clipping masks; a Mercator frame calls it.
+    virtual void releaseGlobeClipMasks() = 0;
+
     /// Create a new vertex attribute array
     virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
 

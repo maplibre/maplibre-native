@@ -52,13 +52,15 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<RasterDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(5) var<uniform> props: RasterEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     let drawable = drawableVector[globalIndex.value];
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let clip = projectTileWithPoles(pos, pos, projectionVector[globalIndex.value]);
     out.position = clip;
 
     let tex = vec2<f32>(f32(in.texcoord.x), f32(in.texcoord.y));

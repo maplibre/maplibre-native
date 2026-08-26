@@ -203,6 +203,9 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                     UniqueChangeRequestVec& changes) {
     if (updateProjectionVariant(state)) {
         colorReliefShader.reset();
+        if (projectionVariant == gfx::ProjectionVariant::Mercator) {
+            globeMeshes.clear();
+        }
     }
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
