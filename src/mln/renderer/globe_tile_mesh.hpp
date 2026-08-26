@@ -72,9 +72,12 @@ struct RawGlobeTileMesh {
     SegmentVector segments;
 };
 
-inline RawGlobeTileMesh rawGlobeTileMesh(const CanonicalTileID& canonical, bool generateBorders) {
+inline RawGlobeTileMesh rawGlobeTileMesh(
+    const CanonicalTileID& canonical,
+    bool generateBorders,
+    const SubdivisionGranularityExpression& granularity = SubdivisionGranularitySetting::globe().tile) {
     const util::TileMesh mesh = util::createTileMesh(
-        {.granularity = SubdivisionGranularitySetting::globe().tile.getGranularityForZoomLevel(canonical.z),
+        {.granularity = granularity.getGranularityForZoomLevel(canonical.z),
          .generateBorders = generateBorders,
          .extendToNorthPole = canonical.y == 0,
          .extendToSouthPole = canonical.y == (1u << canonical.z) - 1});
