@@ -52,7 +52,7 @@
     "render-tests/projection/globe/fill-extrusion-translate": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/image": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/image-non-parallelogram": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-    "render-tests/projection/globe/raster-warped": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/raster-warped": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/antimeridian-lod": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/debug-tile-borders": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/antimeridian-overdraw/geojson-crossing-z0": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
@@ -67,5 +67,12 @@
     "render-tests/projection/globe/antimeridian-overdraw/wide-band-pole-view": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/antimeridian-overdraw/wide-band-zoomed-out": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/fill-seams/checkerboard": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-    "render-tests/projection/globe/fill-seams/ocean": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+    "render-tests/projection/globe/fill-seams/ocean": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-always-overlap-occluded/line": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-always-overlap-occluded/point": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-always-overlap-occluded/point-icon": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-variable-anchor/base": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-variable-anchor/pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-variable-anchor/pitched-and-rotated": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/text-variable-anchor/rotated": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
 }
