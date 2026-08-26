@@ -148,6 +148,7 @@ TEST(Style, GlobalStateNumericEquality) {
 
 TEST(Style, GlobalStateVisibility) {
     util::RunLoop loop;
+    FixtureLog log;
 
     auto fileSource = std::make_shared<StubFileSource>();
     Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
@@ -167,6 +168,9 @@ TEST(Style, GlobalStateVisibility) {
 
     Layer* layer = style.getLayer("background");
     ASSERT_TRUE(layer);
+    // Parsing the layer happens before it has access to the style's global
+    // state, but a valid expression must not emit a spurious warning.
+    EXPECT_TRUE(log.empty()) << log.unchecked();
     // The default from the root "state" property applies.
     EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
 
@@ -185,6 +189,7 @@ TEST(Style, GlobalStateVisibility) {
 
 TEST(Style, VisibilityExpressionSetAtRuntime) {
     util::RunLoop loop;
+    FixtureLog log;
 
     auto fileSource = std::make_shared<StubFileSource>();
     Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
@@ -220,6 +225,7 @@ TEST(Style, VisibilityExpressionSetAtRuntime) {
     error = layer->setProperty("visibility", conversion::Convertible(json));
     EXPECT_FALSE(error);
     EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+    EXPECT_TRUE(log.empty()) << log.unchecked();
 }
 
 TEST(Style, VisibilityExpressionRejectsOtherDependencies) {

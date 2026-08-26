@@ -97,9 +97,9 @@ void Layer::setVisibility(VisibilityType value) {
 namespace {
 
 VisibilityType evaluateVisibilityExpression(const expression::Expression& expression,
-                                            const GlobalStateMap* globalState) {
+                                            const GlobalStateMap& globalState) {
     const expression::EvaluationResult result = expression.evaluate(
-        expression::EvaluationContext().withGlobalState(globalState));
+        expression::EvaluationContext().withGlobalState(&globalState));
     if (result) {
         if (const auto string = expression::fromExpressionValue<std::string>(*result)) {
             if (const auto visibility = Enum<VisibilityType>::toEnum(*string)) {
@@ -120,7 +120,7 @@ Value Layer::getVisibilityExpression() const {
 
 void Layer::reevaluateVisibility(const GlobalStateMap& globalState) {
     if (!baseImpl->visibilityExpression) return;
-    const VisibilityType value = evaluateVisibilityExpression(*baseImpl->visibilityExpression, &globalState);
+    const VisibilityType value = evaluateVisibilityExpression(*baseImpl->visibilityExpression, globalState);
     if (value == baseImpl->visibility) return;
     auto impl_ = mutableBaseImpl();
     impl_->visibility = value;
@@ -276,11 +276,11 @@ std::optional<conversion::Error> Layer::setVisibility(const conversion::Converti
             return Error{"visibility expressions may only use the \"global-state\" expression"};
         }
 
-        std::shared_ptr<const expression::Expression> expression = std::move(*parsed);
-        const VisibilityType visibility = evaluateVisibilityExpression(*expression, nullptr);
         auto impl_ = mutableBaseImpl();
-        impl_->visibilityExpression = std::move(expression);
-        impl_->visibility = visibility;
+        // The layer may not belong to a style yet, so its global state is not
+        // available here. The style reevaluates the expression when the layer
+        // is added or when this change reaches its observer.
+        impl_->visibilityExpression = std::move(*parsed);
         baseImpl = std::move(impl_);
         observer->onLayerChanged(*this);
         return std::nullopt;
