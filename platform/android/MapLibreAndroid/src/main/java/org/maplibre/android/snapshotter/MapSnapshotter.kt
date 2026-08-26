@@ -45,8 +45,8 @@ open class MapSnapshotter(context: Context, options: Options) {
     private val nativePtr: Long = 0
     private val context: Context
     // Not cached: core resets the load state whenever a new style is set.
-    private val fullyLoaded: Boolean
-        get() = nativeIsFullyLoaded()
+    private val styleLoaded: Boolean
+        get() = nativeIsStyleLoaded()
 
     // Sources, layers, and images from Options.builder are applied to the
     // first loaded style only.
@@ -445,7 +445,7 @@ open class MapSnapshotter(context: Context, options: Options) {
     external fun setStyleJson(styleJson: String?)
 
     @Keep
-    private external fun nativeIsFullyLoaded(): Boolean
+    private external fun nativeIsStyleLoaded(): Boolean
 
     /**
      * Adds the layer to the map. The layer must be newly created and not added to the snapshotter before
@@ -737,7 +737,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     fun getLayer(layerId: String): Layer? {
         checkThread()
-        return if (fullyLoaded) nativeGetLayer(layerId) else null
+        return if (styleLoaded) nativeGetLayer(layerId) else null
     }
 
     /**
@@ -748,7 +748,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     fun getSource(sourceId: String): Source? {
         checkThread()
-        return if (fullyLoaded) nativeGetSource(sourceId) else null
+        return if (styleLoaded) nativeGetSource(sourceId) else null
     }
 
     /**
@@ -758,7 +758,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      * Setting a null value (or [com.google.gson.JsonNull]) resets the property to the default
      * defined in the style's root `state` property, or to null if there is none.
      *
-     * Only takes effect once the style is fully loaded; when the style is set by URL, call this
+     * Only takes effect once the style is loaded; when the style is set by URL, call this
      * from [Observer.onDidFinishLoadingStyle].
      *
      * @param name the name of the state property
@@ -766,7 +766,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     fun setGlobalStateProperty(name: String, value: JsonElement?) {
         checkThread()
-        if (fullyLoaded) {
+        if (styleLoaded) {
             nativeSetGlobalStateProperty(name, value)
         }
     }
@@ -776,11 +776,11 @@ open class MapSnapshotter(context: Context, options: Options) {
      * used by the
      * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
      *
-     * @return the current global state, or an empty object if the style is not fully loaded yet
+     * @return the current global state, or an empty object if the style is not loaded yet
      */
     fun getGlobalState(): JsonObject {
         checkThread()
-        return if (fullyLoaded) nativeGetGlobalState() else JsonObject()
+        return if (styleLoaded) nativeGetGlobalState() else JsonObject()
     }
 
     /**

@@ -92,17 +92,24 @@ class MapSnapshotterTest {
 
                     mapSnapshotter!!.setObserver(object : MapSnapshotter.Observer {
                         override fun onDidFinishLoadingStyle() {
-                            // The new style defines no state.
-                            Assert.assertEquals(0, mapSnapshotter!!.getGlobalState().entrySet().size)
+                            Assert.assertEquals(
+                                JsonPrimitive(true),
+                                mapSnapshotter!!.getGlobalState().get("reloadState")
+                            )
+                            mapSnapshotter!!.setGlobalStateProperty("reloadState", JsonPrimitive(false))
+                            Assert.assertEquals(
+                                JsonPrimitive(false),
+                                mapSnapshotter!!.getGlobalState().get("reloadState")
+                            )
                             countDownLatch.countDown()
                         }
 
                         override fun onStyleImageMissing(imageName: String) {}
                     })
-                    mapSnapshotter!!.setStyleUrl("asset://fill_color_style.json")
-                    // While the new style is loading, the previous style's
-                    // state must not be visible.
-                    Assert.assertEquals(0, mapSnapshotter!!.getGlobalState().entrySet().size)
+                    mapSnapshotter!!.setStyleUrl("asset://snapshotter_global_state_style.json")
+                    // The previous style's state must not be visible, whether
+                    // the asset finished loading synchronously or not.
+                    Assert.assertNull(mapSnapshotter!!.getGlobalState().get("showLabels"))
                 },
                 {
                     Assert.fail(it)
