@@ -1099,5 +1099,293 @@ void main() {
 )";
 };
 
+template <>
+struct ShaderSource<BuiltIn::LineGradientSDFShader, gfx::Backend::Type::Vulkan> {
+    static constexpr const char* name = "LineGradientSDFShader";
+
+    static const std::array<AttributeInfo, 8> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<TextureInfo, 2> textures;
+
+    static constexpr auto prelude = lineShadePrelude;
+    static constexpr auto vertex = R"(
+
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
+
+#if !defined(HAS_UNIFORM_u_blur)
+layout(location = 2) in vec2 in_blur;
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 3) in vec2 in_opacity;
+#endif
+
+#if !defined(HAS_UNIFORM_u_gapwidth)
+layout(location = 4) in vec2 in_gapwidth;
+#endif
+
+#if !defined(HAS_UNIFORM_u_offset)
+layout(location = 5) in vec2 in_offset;
+#endif
+
+#if !defined(HAS_UNIFORM_u_width)
+layout(location = 6) in vec2 in_width;
+#endif
+
+#if !defined(HAS_UNIFORM_u_floorwidth)
+layout(location = 7) in vec2 in_floorwidth;
+#endif
+
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineSDFDrawableUBO {
+    mat4 matrix;
+    vec2 patternscale_a;
+    vec2 patternscale_b;
+    float tex_y_a;
+    float tex_y_b;
+    float ratio;
+    // Interpolations
+    float color_t;
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float floorwidth_t;
+    float pad1;
+    float pad2;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LineSDFDrawableUBOVector {
+    LineSDFDrawableUBO drawable_ubo[];
+} drawableVector;
+
+layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
+    vec4 color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float floorwidth;
+    uint expressionMask;
+    float pad1;
+} props;
+
+layout(location = 0) out lowp vec2 frag_normal;
+layout(location = 1) out lowp vec2 frag_width2;
+layout(location = 2) out lowp float frag_gamma_scale;
+layout(location = 3) out vec2 frag_tex_a;
+layout(location = 4) out vec2 frag_tex_b;
+layout(location = 5) out float frag_lineprogress;
+
+#if !defined(HAS_UNIFORM_u_blur)
+layout(location = 6) out lowp float frag_blur;
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 7) out lowp float frag_opacity;
+#endif
+
+#if !defined(HAS_UNIFORM_u_floorwidth)
+layout(location = 8) out mediump float frag_floorwidth;
+#endif
+
+void main() {
+    const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
+
+#ifndef HAS_UNIFORM_u_blur
+    frag_blur = unpack_mix_float(in_blur, drawable.blur_t);
+#endif
+
+#ifndef HAS_UNIFORM_u_opacity
+    frag_opacity = unpack_mix_float(in_opacity, drawable.opacity_t);
+#endif
+
+#ifndef HAS_UNIFORM_u_floorwidth
+    const float floorwidth = unpack_mix_float(in_floorwidth, drawable.floorwidth_t);
+    frag_floorwidth = floorwidth;
+#else
+    const float floorwidth = props.floorwidth;
+#endif
+
+#ifndef HAS_UNIFORM_u_offset
+    const mediump float offset = unpack_mix_float(in_offset, drawable.offset_t) * -1.0;
+#else
+    const mediump float offset = props.offset * -1.0;
+#endif
+
+#ifndef HAS_UNIFORM_u_width
+    const mediump float width = unpack_mix_float(in_width, drawable.width_t);
+#else
+    const mediump float width = props.width;
+#endif
+
+#ifndef HAS_UNIFORM_u_gapwidth
+    const mediump float gapwidth = unpack_mix_float(in_gapwidth, drawable.gapwidth_t) / 2.0;
+#else
+    const mediump float gapwidth = props.gapwidth / 2.0;
+#endif
+
+    // the distance over which the line edge fades out.
+    // Retina devices need a smaller distance to avoid aliasing.
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
+    const float LINE_DISTANCE_SCALE = 2.0;
+
+    vec2 a_extrude = in_data.xy - 128.0;
+    float a_direction = mod(in_data.z, 4.0) - 1.0;
+    float linesofar = (floor(in_data.z / 4.0) + in_data.w * 64.0) * LINE_DISTANCE_SCALE;
+    frag_lineprogress = (floor(in_data.z / 4.0) + in_data.w * 64.0) * 2.0 / MAX_LINE_DISTANCE;
+    vec2 pos = floor(in_pos_normal * 0.5);
+
+    // x is 1 if it's a round cap, 0 otherwise
+    // y is 1 if the normal points up, and -1 if it points down
+    // We store these in the least significant bit of in_pos_normal
+    mediump vec2 normal = in_pos_normal - 2.0 * pos;
+    frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
+
+    // these transformations used to be applied in the JS and native code bases.
+    // moved them into the shader for clarity and simplicity.
+    float halfwidth = width / 2.0;
+
+    float inset = gapwidth + (gapwidth > 0.0 ? ANTIALIASING : 0.0);
+    float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
+
+    // Scale the extrusion vector down to a normal and then up by the line width
+    // of this vertex.
+    mediump vec2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
+
+    // Calculate the offset when drawing a line that is to the side of the actual line.
+    // We do this by creating a vector that points towards the extrude, but rotate
+    // it when we're drawing round end points (a_direction = -1 or 1) since their
+    // extrude vector points in another direction.
+    mediump float u = 0.5 * a_direction;
+    mediump float t = 1.0 - abs(u);
+    mediump vec2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * frag_normal.y * mat2(t, -u, u, t);
+
+    vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
+    gl_Position = drawable.matrix * vec4(pos + offset2 / drawable.ratio, 0.0, 1.0) + projected_extrude;
+    applySurfaceTransform();
+
+    // calculate how much the perspective view squishes or stretches the extrude
+    float extrude_length_without_perspective = length(dist);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * paintParams.units_to_pixels);
+    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
+
+    frag_width2 = vec2(outset, inset);
+
+    frag_tex_a = vec2(linesofar * drawable.patternscale_a.x / floorwidth, frag_normal.y * drawable.patternscale_a.y + drawable.tex_y_a);
+    frag_tex_b = vec2(linesofar * drawable.patternscale_b.x / floorwidth, frag_normal.y * drawable.patternscale_b.y + drawable.tex_y_b);
+}
+)";
+
+    static constexpr auto fragment = R"(
+
+layout(location = 0) in lowp vec2 frag_normal;
+layout(location = 1) in lowp vec2 frag_width2;
+layout(location = 2) in lowp float frag_gamma_scale;
+layout(location = 3) in vec2 frag_tex_a;
+layout(location = 4) in vec2 frag_tex_b;
+layout(location = 5) in float frag_lineprogress;
+
+#if !defined(HAS_UNIFORM_u_blur)
+layout(location = 6) in lowp float frag_blur;
+#endif
+
+#if !defined(HAS_UNIFORM_u_opacity)
+layout(location = 7) in lowp float frag_opacity;
+#endif
+
+#if !defined(HAS_UNIFORM_u_floorwidth)
+layout(location = 8) in mediump float frag_floorwidth;
+#endif
+
+layout(location = 0) out vec4 out_color;
+
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct LineSDFTilePropsUBO {
+    float sdfgamma;
+    float mix;
+    float pad1;
+    float pad2;
+    vec4 pad3;
+    vec4 pad4;
+    vec4 pad5;
+};
+
+layout(std140, set = LAYER_SET_INDEX, binding = idLineTilePropsUBO) readonly buffer LineSDFTilePropsUBOVector {
+    LineSDFTilePropsUBO tile_props_ubo[];
+} tilePropsVector;
+
+layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEvaluatedPropsUBO {
+    vec4 color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float floorwidth;
+    uint expressionMask;
+    float pad1;
+} props;
+
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 1) uniform sampler2D image1_sampler;
+
+void main() {
+
+#ifdef OVERDRAW_INSPECTOR
+    out_color = vec4(1.0);
+    return;
+#endif
+
+    const LineSDFTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
+
+#ifdef HAS_UNIFORM_u_blur
+    const lowp float blur = props.blur;
+#else
+    const lowp float blur = frag_blur;
+#endif
+
+#ifdef HAS_UNIFORM_u_opacity
+    const lowp float opacity = props.opacity;
+#else
+    const lowp float opacity = frag_opacity;
+#endif
+
+#ifdef HAS_UNIFORM_u_floorwidth
+    const lowp float floorwidth = props.floorwidth;
+#else
+    const lowp float floorwidth = frag_floorwidth;
+#endif
+
+    // Calculate the distance of the pixel from the line in pixels.
+    const float dist = length(frag_normal) * frag_width2.x;
+
+    // Calculate the antialiasing fade factor. This is either when fading in the
+    // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
+    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
+
+    const float sdfdist_a = texture(image1_sampler, frag_tex_a).a;
+    const float sdfdist_b = texture(image1_sampler, frag_tex_b).a;
+    const float sdfdist = mix(sdfdist_a, sdfdist_b, tileProps.mix);
+    const float alpha = clamp(min(dist - (frag_width2.y - blur2), frag_width2.x - dist) / blur2, 0.0, 1.0) *
+                        smoothstep(0.5 - tileProps.sdfgamma / floorwidth, 0.5 + tileProps.sdfgamma / floorwidth, sdfdist);
+
+    // The gradient ramp is stored in a texture indexed by the ratio along the entire line.
+    const vec4 color = texture(image0_sampler, vec2(frag_lineprogress, 0.5));
+
+    out_color = color * (alpha * opacity);
+}
+)";
+};
+
 } // namespace shaders
 } // namespace mln
