@@ -181,6 +181,7 @@ swift_library(
     data = [
         "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
+        "test/globe.json",
         "test/one-liner.json",
     ],
     visibility = [

@@ -1842,3 +1842,25 @@ TEST(TileProjector, GlobeOccludesTheFarSideAndCorrectsForLatitude) {
     EXPECT_NEAR(cos40 / std::cos(util::deg2rad(60.0)), projector.pitchedTextCorrection({100.0, tileY}), 1e-6);
     EXPECT_NEAR(cos40, projector.pitchedTextCorrection({100.0, util::EXTENT}), 1e-6);
 }
+
+TEST(Transform, GlobeLocationOcclusion) {
+    Transform transform;
+    setUpGlobe(transform, {0, 0}, 1);
+    EXPECT_FALSE(transform.isLocationOccluded({0, 0}));
+    EXPECT_FALSE(transform.isLocationOccluded({0, 60}));
+    EXPECT_FALSE(transform.isLocationOccluded({-60, 0}));
+    EXPECT_TRUE(transform.isLocationOccluded({0, 100}));
+    EXPECT_TRUE(transform.isLocationOccluded({0, 180}));
+    EXPECT_TRUE(transform.isLocationOccluded({-30, -120}));
+
+    setUpGlobe(transform, {0, 180}, 1);
+    EXPECT_TRUE(transform.isLocationOccluded({0, 0}));
+    EXPECT_FALSE(transform.isLocationOccluded({0, 180}));
+
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    EXPECT_FALSE(transform.isLocationOccluded({0, 0}));
+
+    Transform unsized;
+    unsized.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    EXPECT_FALSE(unsized.isLocationOccluded({0, 180}));
+}
