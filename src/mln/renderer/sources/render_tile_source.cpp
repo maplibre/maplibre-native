@@ -103,6 +103,7 @@ public:
 #if MLN_UBO_CONSOLIDATION
         int i = 0;
         std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
+        std::vector<shaders::ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getTileID().has_value()) {
@@ -114,8 +115,15 @@ public:
             mat4 tileMatrix;
             parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
-            const auto matrix = LayerTweaker::getTileMatrix(
+            const auto projection = getProjectionData(
                 tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+            const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+            projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+            const auto projectionUBO = toProjectionUBO(projection);
+            drawable.mutableUniformBuffers().createOrUpdate(shaders::idProjectionUBO, &projectionUBO, context);
+#endif
 
 #if MLN_UBO_CONSOLIDATION
             drawableUBOVector[i].lineDrawableUBO = {
@@ -150,6 +158,7 @@ public:
             drawableUniformBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
         }
         layerUniforms.set(idLineDrawableUBO, drawableUniformBuffer);
+        uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
     }
 

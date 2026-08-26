@@ -48,8 +48,10 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const auto anchor = data.translateAnchor;
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.mainMatrix;
+        const auto projectionUBO = toProjectionUBO(projection);
 
         // extrude scale
         const auto pixelRatio = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
@@ -68,6 +70,7 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCollisionDrawableUBO, &drawableUBO, context);
         drawableUniforms.createOrUpdate(idCollisionTilePropsUBO, &tilePropsUBO, context);
+        drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, context);
     });
 }
 
