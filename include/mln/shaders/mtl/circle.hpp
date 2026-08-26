@@ -150,7 +150,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float4 position;
     if (props.pitch_with_map) {
 #if defined(PROJECTION_GLOBE)
-        const float3 center_vector = projectToSphere(circle_center, float2(0.0, 0.0), projectionVector[uboIndex]);
+        const float3 center_vector = projectToSphere(circle_center + projectionVector[uboIndex].translate, float2(0.0, 0.0), projectionVector[uboIndex]);
         float angle_scale = drawable.globe_extrude_scale;
 #endif
         float2 corner_position = circle_center;

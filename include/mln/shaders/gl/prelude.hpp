@@ -91,8 +91,7 @@ layout (std140) uniform ProjectionUBO {
     highp vec4 u_projection_clipping_plane;
     highp float u_projection_transition;
     highp float u_projection_depth_offset;
-    lowp float projection_pad1;
-    lowp float projection_pad2;
+    highp vec2 u_projection_translate;
 };
 
 // Pole vertices carry these sentinel Y values in their raw position.
@@ -102,13 +101,14 @@ layout (std140) uniform ProjectionUBO {
 #ifdef PROJECTION_GLOBE
 
 #define GLOBE_RADIUS 6371008.8
+#define GLOBE_PI 3.1415926535897932384626433832795
 
 // Tile position (0..EXTENT) to a point on the unit sphere; the pole sentinels in rawPos map to the poles.
 vec3 projectToSphere(vec2 translatedPos, vec2 rawPos) {
     vec2 mercator_pos = u_projection_tile_mercator_coords.xy + u_projection_tile_mercator_coords.zw * translatedPos;
-    float spherical_x = mercator_pos.x * PI * 2.0 + PI;
+    float spherical_x = mercator_pos.x * GLOBE_PI * 2.0 + GLOBE_PI;
     // sin/cos of the latitude from the Mercator Y via the tangent half-angle identities: no atan, and float32 precision survives near the equator.
-    float t = exp(PI - (mercator_pos.y * PI * 2.0));
+    float t = exp(GLOBE_PI - (mercator_pos.y * GLOBE_PI * 2.0));
     float t2 = t * t;
     float denom = t2 + 1.0;
     float sin_sy = (t2 - 1.0) / denom;
@@ -135,7 +135,7 @@ vec3 globeRotateVector(vec3 vec, vec2 angles) {
 // cos(latitude) at a tile Y, from the same exp() form as projectToSphere.
 float circumferenceRatioAtTileY(float tileY) {
     float mercator_pos_y = u_projection_tile_mercator_coords.y + u_projection_tile_mercator_coords.w * tileY;
-    float t = exp(PI - (mercator_pos_y * PI * 2.0));
+    float t = exp(GLOBE_PI - (mercator_pos_y * GLOBE_PI * 2.0));
     return (2.0 * t) / (t * t + 1.0);
 }
 
@@ -186,20 +186,20 @@ vec4 interpolateProjectionFor3D(vec2 posInTile, vec3 spherePos, float elevation)
 }
 
 vec4 projectTile(vec2 pos) {
-    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0)), 0.0);
+    return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, vec2(0.0, 0.0)), 0.0);
 }
 
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 vec4 projectTile(vec2 pos, vec2 rawPos) {
-    return interpolateProjection(pos, projectToSphere(pos, rawPos), 0.0);
+    return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, rawPos), 0.0);
 }
 
 vec4 projectTileWithElevation(vec2 pos, float elevation) {
-    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0)), elevation);
+    return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, vec2(0.0, 0.0)), elevation);
 }
 
 vec4 projectTileFor3D(vec2 pos, float elevation) {
-    return interpolateProjectionFor3D(pos, projectToSphere(pos, pos), elevation);
+    return interpolateProjectionFor3D(pos, projectToSphere(pos + u_projection_translate, pos), elevation);
 }
 
 #else
