@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <cmath>
 #include <mln/map/mercator_projection.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
@@ -1600,4 +1601,51 @@ TEST(GlobeTransform, ZoomAdjustment) {
     EXPECT_DOUBLE_EQ(0.0, VerticalPerspectiveProjection::zoomAdjustment(20.0, 20.0));
     EXPECT_NEAR(-1.0, VerticalPerspectiveProjection::zoomAdjustment(0.0, 60.0), 1e-12);
     EXPECT_NEAR(1.0, VerticalPerspectiveProjection::zoomAdjustment(60.0, 0.0), 1e-12);
+}
+
+TEST(TileProjector, MercatorMatchesTheTileMatrix) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1.0).withBearing(30.0).withPitch(20.0));
+    const TransformState& state = transform.getState();
+    ASSERT_FALSE(state.isGlobeRendering());
+
+    // The bottom-right corner of tile 1/0/0 is lat 0, lng 0: the map center.
+    const UnwrappedTileID tileID(1, 0, 0);
+    const TileProjector projector(state, tileID);
+    const Point<double> corner{util::EXTENT, util::EXTENT};
+    vec4 pos = {{corner.x, corner.y, 0, 1}};
+    matrix::transformMat4(pos, pos, state.getProjectionData(tileID).mainMatrix);
+
+    const auto projected = projector.project(corner);
+    EXPECT_NEAR(pos[0] / pos[3], projected.point.x, 1e-9);
+    EXPECT_NEAR(pos[1] / pos[3], projected.point.y, 1e-9);
+    EXPECT_NEAR(0.0, projected.point.x, 1e-6);
+    EXPECT_NEAR(0.0, projected.point.y, 1e-6);
+    EXPECT_DOUBLE_EQ(pos[3], projected.signedDistanceFromCamera);
+    EXPECT_FALSE(projected.occluded);
+    EXPECT_FALSE(projector.project({0.0, 0.0}).occluded);
+    EXPECT_DOUBLE_EQ(1.0, projector.circleRadiusCorrection());
+    EXPECT_DOUBLE_EQ(1.0, projector.pitchedTextCorrection({100.0, 100.0}));
+}
+
+TEST(TileProjector, GlobeOccludesTheFarSideAndCorrectsForLatitude) {
+    Transform transform;
+    setUpGlobe(transform, {40.0, 0.0}, 1.0);
+    const TransformState& state = transform.getState();
+    const UnwrappedTileID tileID(1, 0, 0);
+    const TileProjector projector(state, tileID);
+
+    // The bottom-right corner (lat 0, lng 0) faces the camera; the bottom-left one (lng -180, lat 0) is behind it.
+    EXPECT_FALSE(projector.project({util::EXTENT, util::EXTENT}).occluded);
+    EXPECT_TRUE(projector.project({0.0, util::EXTENT}).occluded);
+
+    const double cos40 = std::cos(util::deg2rad(40.0));
+    EXPECT_NEAR(cos40, projector.circleRadiusCorrection(), 1e-12);
+    // Tile y of latitude 60 in tile 1/0/0.
+    const double mercatorY = 0.5 - std::log(std::tan(std::numbers::pi / 4 + util::deg2rad(60.0) / 2)) /
+                                       (2 * std::numbers::pi);
+    const double tileY = mercatorY * 2 * util::EXTENT;
+    EXPECT_NEAR(cos40 / std::cos(util::deg2rad(60.0)), projector.pitchedTextCorrection({100.0, tileY}), 1e-6);
+    EXPECT_NEAR(cos40, projector.pitchedTextCorrection({100.0, util::EXTENT}), 1e-6);
 }

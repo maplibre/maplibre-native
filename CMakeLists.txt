@@ -551,6 +551,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/projection_base.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/tile_projector.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/vertical_perspective_projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/vertical_perspective_projection.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.cpp
