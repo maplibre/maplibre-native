@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/renderer/globe_depth_pass.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/renderer/renderer.hpp>
@@ -107,6 +108,8 @@ public:
     bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
+
+    LayerGroupBase* getGlobeDepthLayerGroup() const { return globeDepthPass.getLayerGroup(); }
 
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroups(Func f) {
@@ -246,6 +249,7 @@ private:
 
     std::vector<RenderTargetPtr> renderTargets;
     RenderItem::DebugLayerGroupMap debugLayerGroups;
+    GlobeDepthPass globeDepthPass;
 };
 
 } // namespace mln

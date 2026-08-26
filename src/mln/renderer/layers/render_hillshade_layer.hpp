@@ -2,6 +2,7 @@
 
 #include <mln/renderer/render_layer.hpp>
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/style/layers/hillshade_layer_impl.hpp>
 #include <mln/style/layers/hillshade_layer_properties.hpp>
 #include <mln/tile/tile_id.hpp>
@@ -59,6 +60,7 @@ private:
 
     using HillshadeVertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
     std::shared_ptr<HillshadeVertexVector> staticDataSharedVertices;
+    GlobeTileMeshCache<HillshadeLayoutVertex, decltype(&HillshadeBucket::layoutVertex)> globeMeshes;
 
     LayerTweakerPtr prepareLayerTweaker;
 };
