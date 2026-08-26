@@ -162,6 +162,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
                                    std::set<std::string> availableImages_,
+                                   const SubdivisionGranularitySetting& subdivisionGranularity_,
                                    uint64_t correlationID_) {
     MLN_TRACE_FUNC();
 
@@ -169,6 +170,7 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
         layers = std::move(layers_);
         correlationID = correlationID_;
         availableImages = std::move(availableImages_);
+        subdivisionGranularity = subdivisionGranularity_;
 
         switch (state) {
             case Idle:
@@ -227,33 +229,6 @@ void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_
                 break;
 
             case NeedsSymbolLayout:
-            case NeedsParse:
-                break;
-        }
-    } catch (...) {
-        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
-    }
-}
-
-void GeometryTileWorker::setSubdivisionGranularity(const SubdivisionGranularitySetting& subdivisionGranularity_,
-                                                   uint64_t correlationID_) {
-    MLN_TRACE_FUNC();
-
-    try {
-        subdivisionGranularity = subdivisionGranularity_;
-        correlationID = correlationID_;
-
-        switch (state) {
-            case Idle:
-                parse();
-                coalesce();
-                break;
-
-            case Coalescing:
-            case NeedsSymbolLayout:
-                state = NeedsParse;
-                break;
-
             case NeedsParse:
                 break;
         }

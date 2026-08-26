@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/style/layer_properties.hpp>
 #include <mln/style/source_impl.hpp>
 #include <mln/style/types.hpp>
@@ -77,7 +78,7 @@ private:
 
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     TileCache cache;
-    bool lastGlobeRendering = false;
+    SubdivisionGranularitySetting lastSubdivisionGranularity = SubdivisionGranularitySetting::none();
 
     std::map<UnwrappedTileID, std::reference_wrapper<Tile>> renderedTiles; // Sorted by tile id.
     TileObserver* observer = nullptr;

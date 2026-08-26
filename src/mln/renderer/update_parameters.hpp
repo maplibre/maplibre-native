@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/map/mode.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/style/light.hpp>
 #include <mln/style/image.hpp>
@@ -55,6 +56,8 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+
+    SubdivisionGranularitySetting subdivisionGranularity = SubdivisionGranularitySetting::none();
 };
 
 } // namespace mln

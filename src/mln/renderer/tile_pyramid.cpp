@@ -55,21 +55,19 @@ const Tile* TilePyramid::getRenderedTile(const UnwrappedTileID& tileID) const {
 
 void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& layers,
                          const bool needsRendering,
-                         const bool needsRelayoutForLayers,
+                         const bool needsRelayout,
                          const TileParameters& parameters,
                          const style::Source::Impl& sourceImpl,
                          const uint16_t tileSize,
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
-    const bool globeRendering = parameters.transformState.isGlobeRendering();
-    const auto subdivisionGranularity = globeRendering ? SubdivisionGranularitySetting::globe()
-                                                       : SubdivisionGranularitySetting::none();
-    const bool needsRelayout = needsRelayoutForLayers || globeRendering != lastGlobeRendering;
-    lastGlobeRendering = globeRendering;
+    const auto& subdivisionGranularity = parameters.subdivisionGranularity;
+    const bool relayout = needsRelayout || subdivisionGranularity != lastSubdivisionGranularity;
+    lastSubdivisionGranularity = subdivisionGranularity;
 
     // If we need a relayout, abandon any cached tiles; they're now stale.
-    if (needsRelayout) {
+    if (relayout) {
         cache.clear();
     }
 
@@ -77,7 +75,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // the cache (if they're not stale) or abandon them, and return.
     if (!needsRendering) {
         for (auto& entry : tiles) {
-            if (!needsRelayout) {
+            if (!relayout) {
                 // These tiles are invisible, we set optional necessity
                 // for them and thus suppress network requests on
                 // tiles expiration (see `OnlineFileRequest`).
@@ -169,7 +167,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             tile.setNecessity(necessity);
         }
 
-        if (needsRelayout) {
+        if (relayout) {
             tile.setSubdivisionGranularity(subdivisionGranularity);
             tile.setLayers(layers);
         }
@@ -268,7 +266,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                 // If it requires re-layout, discard it asynchronously, otherwise keep it in the cache
                 const auto key = tilesIt->first;
                 if (std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped())) {
-                    if (needsRelayout) {
+                    if (relayout) {
                         cache.deferredRelease(std::move(tile));
                     } else {
                         tile->setNecessity(TileNecessity::Optional);
