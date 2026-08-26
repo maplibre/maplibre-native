@@ -25,6 +25,7 @@
     "render-tests/projection/globe/hillshade": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/raster-planet": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/raster-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/fill-extrusion": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-point-pole-to-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-pitched-rotated": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/icon-text-translate-map": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
