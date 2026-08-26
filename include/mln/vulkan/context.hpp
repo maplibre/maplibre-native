@@ -6,6 +6,7 @@
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gfx/context.hpp>
+#include <mln/shaders/layer_ubo.hpp>
 #include <mln/util/noncopyable.hpp>
 #include <mln/util/containers.hpp>
 #include <mln/vulkan/dynamic_texture.hpp>
@@ -15,9 +16,11 @@
 #include <mln/vulkan/descriptor_set.hpp>
 #include <mln/util/util.hpp>
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <tuple>
 #include <vector>
 
 namespace mln {
@@ -138,6 +141,9 @@ public:
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
 
+    bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<shaders::GlobeClipMask>& masks);
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
@@ -213,6 +219,17 @@ private:
 
         PipelineInfo pipelineInfo;
     } clipping;
+
+    struct GlobeClipMesh {
+        BufferResource vertices;
+        BufferResource indices;
+        uint32_t indexCount;
+    };
+    struct {
+        gfx::ShaderProgramBasePtr shader;
+        std::map<std::tuple<uint8_t, bool, bool>, GlobeClipMesh> meshes;
+        PipelineInfo pipelineInfo;
+    } globeClipping;
 
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::mutex graphicsQueueSubmitMutex;
