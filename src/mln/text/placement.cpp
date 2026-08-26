@@ -1504,9 +1504,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
         NeighborTileData(const CollisionIndex& collisionIndex, UnwrappedTileID id_, Point<float> shift_)
             : id(id_),
               shift(shift_),
-              matrix() {
-            collisionIndex.getTransformState().matrixFor(matrix, id);
-            matrix::multiply(matrix, collisionIndex.getTransformState().getProjectionMatrix(), matrix);
+              matrix(collisionIndex.getTransformState().getProjectionData(id).mainMatrix) {
             borders = collisionIndex.projectTileBoundaries(matrix);
         }
 

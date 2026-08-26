@@ -135,10 +135,8 @@ void RenderTile::prepare(const SourcePrepareParameters& parameters) {
     // nearClippedMatrix has near plane moved further, to enhance depth buffer
     // precision
     const auto& transform = parameters.transform;
-    transform.state.matrixFor(matrix, id);
-    transform.state.matrixFor(nearClippedMatrix, id);
-    matrix::multiply(matrix, transform.projMatrix, matrix);
-    matrix::multiply(nearClippedMatrix, transform.nearClippedProjMatrix, nearClippedMatrix);
+    matrix = transform.state.getProjectionData(id, transform.projMatrix).mainMatrix;
+    nearClippedMatrix = transform.state.getProjectionData(id, transform.nearClippedProjMatrix).mainMatrix;
 }
 
 void RenderTile::setFeatureState(const LayerFeatureStates& states) {

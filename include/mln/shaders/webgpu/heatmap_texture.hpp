@@ -40,7 +40,7 @@ struct GlobalPaintParamsUBO {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(4) var<uniform> ubo: HeatmapTextureUBO;
+@group(0) @binding(5) var<uniform> ubo: HeatmapTextureUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -69,7 +69,7 @@ struct HeatmapTextureUBO {
     pad3: f32,
 };
 
-@group(0) @binding(4) var<uniform> ubo: HeatmapTextureUBO;
+@group(0) @binding(5) var<uniform> ubo: HeatmapTextureUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var heatmap_texture: texture_2d<f32>;
 @group(1) @binding(2) var color_ramp_texture: texture_2d<f32>;

@@ -1,4 +1,6 @@
 #include <mln/renderer/layer_tweaker.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/drawable.hpp>
 
 #include <mln/map/transform_state.hpp>
 #include <mln/style/layer_properties.hpp>
@@ -7,6 +9,7 @@
 #include <mln/shaders/layer_ubo.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/containers.hpp>
+#include <mln/util/convert.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/util/monotonic_timer.hpp>
@@ -43,6 +46,44 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     return RenderTile::translateVtxMatrix(
         tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
+
+ProjectionData LayerTweaker::getProjectionData(const UnwrappedTileID& tileID,
+                                               const PaintParameters& parameters,
+                                               const std::array<float, 2>& translation,
+                                               style::TranslateAnchorType anchor,
+                                               bool nearClipped,
+                                               bool inViewportPixelUnits,
+                                               const gfx::Drawable& drawable,
+                                               bool aligned) {
+    return parameters.state.getProjectionDataForMatrix(
+        tileID,
+        getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable, aligned));
+}
+
+shaders::ProjectionUBO LayerTweaker::toProjectionUBO(const ProjectionData& data) {
+    return {.matrix = util::cast<float>(data.mainMatrix),
+            .fallback_matrix = util::cast<float>(data.fallbackMatrix),
+            .tile_mercator_coords = util::cast<float>(data.tileMercatorCoords),
+            .clipping_plane = util::cast<float>(data.clippingPlane),
+            .projection_transition = static_cast<float>(data.projectionTransition),
+            .pad1 = 0,
+            .pad2 = 0,
+            .pad3 = 0};
+}
+
+#if MLN_UBO_CONSOLIDATION
+void LayerTweaker::uploadProjectionUBOs(gfx::UniformBufferArray& layerUniforms,
+                                        const std::vector<shaders::ProjectionUBO>& ubos,
+                                        gfx::Context& context) {
+    const size_t size = sizeof(shaders::ProjectionUBO) * ubos.size();
+    if (!projectionUniformBuffer || projectionUniformBuffer->getSize() < size) {
+        projectionUniformBuffer = context.createUniformBuffer(ubos.data(), size, false, true);
+    } else {
+        projectionUniformBuffer->update(ubos.data(), size);
+    }
+    layerUniforms.set(shaders::idProjectionUBO, projectionUniformBuffer);
+}
+#endif
 
 void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
     evaluatedProperties = std::move(newProps);
