@@ -328,6 +328,7 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
                          std::move(impls),
                          std::move(globalState),
                          imageManager->getAvailableImages(),
+                         subdivisionGranularity,
                          correlationID);
 }
 
@@ -344,11 +345,7 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
 void GeometryTile::setSubdivisionGranularity(const SubdivisionGranularitySetting& subdivisionGranularity_) {
     MLN_TRACE_FUNC();
 
-    if (subdivisionGranularity != subdivisionGranularity_) {
-        subdivisionGranularity = subdivisionGranularity_;
-        ++correlationID;
-        worker.self().invoke(&GeometryTileWorker::setSubdivisionGranularity, subdivisionGranularity, correlationID);
-    }
+    subdivisionGranularity = subdivisionGranularity_;
 }
 
 void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64_t resultCorrelationID) {
