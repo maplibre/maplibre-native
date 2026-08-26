@@ -47,6 +47,7 @@ public:
     PlacedFeatureResult placeFeature(
         const CollisionFeature& feature,
         Point<float> shift,
+        Point<float> translation,
         const TileProjector& tileProjector,
         const LabelPlaneProjector& labelPlane,
         float textPixelRatio,
@@ -137,7 +138,8 @@ private:
                                      bool pitchWithMap,
                                      bool rotateWithMap,
                                      const ProjectedAnchor& projectedPoint,
-                                     Point<float> shift) const;
+                                     Point<float> shift,
+                                     Point<float> translation) const;
 
     const TransformState transformState;
 
