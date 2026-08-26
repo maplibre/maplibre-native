@@ -63,11 +63,22 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+
+    bool is_along_line;
+    bool is_variable_anchor;
+    float pitched_scale;
+    vec2 translation;
+    float pad1;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
 
 struct SymbolInstance {
     int pos_scale[2];
@@ -122,6 +133,7 @@ void main() {
     const SymbolInstance symbol = symbolInstanceVector.instance[instance];
     const DynamicInstance dynamic = dynamicInstanceVector.instance[instance];
     const OpacityInstance opacity = opacityInstanceVector.instance[instance];
+    const ProjectionUBO projection = projectionVector.projection_ubo[constant.ubo_index];
 
     const vec2 a_pos = unpack_int(symbol.pos_scale[0]);
     const vec2 offset_tb[2] = {unpack_int(symbol.offset_tltr[in_pos.x]), unpack_int(symbol.offset_blbr[in_pos.x])};
@@ -145,7 +157,8 @@ void main() {
         size = drawable.size;
     }
 
-    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, 0, 1);
+    const vec2 translated_a_pos = a_pos + drawable.translation;
+    const vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = drawable.pitch_with_map ?
@@ -165,7 +178,7 @@ void main() {
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
         // See comments in symbol_sdf.vertex
-        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        const vec4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2(1, 0), 0.0, projection);
 
         const vec2 a = projectedPoint.xy / projectedPoint.w;
         const vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -176,10 +189,21 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
-    const vec2 pos0 = projected_pos.xy / projected_pos.w;
+    const vec2 projected_pos_xy = vec2(dynamic.projected_pos[0], dynamic.projected_pos[1]);
+    vec4 projected_pos;
+    if (drawable.is_along_line || drawable.is_variable_anchor) {
+        projected_pos = vec4(projected_pos_xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map) {
+        projected_pos = drawable.label_plane_matrix * vec4(projected_pos_xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
+    }
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
-    gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset, z, 1.0);
+    if (drawable.pitch_with_map) {
+        gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z, projection);
+    }
     applySurfaceTransform();
 
     const vec2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
@@ -299,11 +323,22 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+
+    bool is_along_line;
+    bool is_variable_anchor;
+    float pitched_scale;
+    vec2 translation;
+    float pad1;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
 
 struct SymbolInstance {
     int pos_scale[2];
@@ -394,6 +429,7 @@ void main() {
     const SymbolInstance symbol = symbolInstanceVector.instance[instance];
     const DynamicInstance dynamic = dynamicInstanceVector.instance[instance];
     const OpacityInstance opacity = opacityInstanceVector.instance[instance];
+    const ProjectionUBO projection = projectionVector.projection_ubo[constant.ubo_index];
 
     const vec2 a_pos = unpack_int(symbol.pos_scale[0]);
     const vec2 offset_tb[2] = {unpack_int(symbol.offset_tltr[in_pos.x]), unpack_int(symbol.offset_blbr[in_pos.x])};
@@ -415,7 +451,8 @@ void main() {
         size = drawable.size;
     }
 
-    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, 0, 1);
+    const vec2 translated_a_pos = a_pos + drawable.translation;
+    const vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -442,7 +479,7 @@ void main() {
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        const vec4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2(1, 0), 0.0, projection);
 
         const vec2 a = projectedPoint.xy / projectedPoint.w;
         const vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -453,10 +490,21 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const vec2 projected_pos_xy = vec2(dynamic.projected_pos[0], dynamic.projected_pos[1]);
+    vec4 projected_pos;
+    if (drawable.is_along_line || drawable.is_variable_anchor) {
+        projected_pos = vec4(projected_pos_xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map) {
+        projected_pos = drawable.label_plane_matrix * vec4(projected_pos_xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
+    }
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
-    const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot, z, 1.0);
+    if (drawable.pitch_with_map) {
+        gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z, projection);
+    }
     applySurfaceTransform();
 
     const vec2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
@@ -653,11 +701,22 @@ struct SymbolDrawableUBO {
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
+
+    bool is_along_line;
+    bool is_variable_anchor;
+    float pitched_scale;
+    vec2 translation;
+    float pad1;
+    float pad2;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idSymbolDrawableUBO) readonly buffer SymbolDrawableUBOVector {
     SymbolDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
 
 struct SymbolInstance {
     int pos_scale[2];
@@ -750,6 +809,7 @@ void main() {
     const SymbolInstance symbol = symbolInstanceVector.instance[instance];
     const DynamicInstance dynamic = dynamicInstanceVector.instance[instance];
     const OpacityInstance opacity = opacityInstanceVector.instance[instance];
+    const ProjectionUBO projection = projectionVector.projection_ubo[constant.ubo_index];
 
     const vec2 a_pos = unpack_int(symbol.pos_scale[0]);
     const vec2 offset_tb[2] = {unpack_int(symbol.offset_tltr[in_pos.x]), unpack_int(symbol.offset_blbr[in_pos.x])};
@@ -771,7 +831,8 @@ void main() {
         size = drawable.size;
     }
 
-    const vec4 projectedPoint = drawable.matrix * vec4(a_pos, 0, 1);
+    const vec2 translated_a_pos = a_pos + drawable.translation;
+    const vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -798,7 +859,7 @@ void main() {
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const vec4 offsetProjectedPoint = drawable.matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        const vec4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2(1, 0), 0.0, projection);
 
         const vec2 a = projectedPoint.xy / projectedPoint.w;
         const vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -809,10 +870,21 @@ void main() {
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const vec4 projected_pos = drawable.label_plane_matrix * vec4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const vec2 projected_pos_xy = vec2(dynamic.projected_pos[0], dynamic.projected_pos[1]);
+    vec4 projected_pos;
+    if (drawable.is_along_line || drawable.is_variable_anchor) {
+        projected_pos = vec4(projected_pos_xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map) {
+        projected_pos = drawable.label_plane_matrix * vec4(projected_pos_xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
+    }
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const vec2 pos_rot = a_offset / 32.0 * fontScale;
-    const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot, z, 1.0);
+    if (drawable.pitch_with_map) {
+        gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z, projection);
+    }
     applySurfaceTransform();
 
     const vec2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);

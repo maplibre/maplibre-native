@@ -16,6 +16,7 @@
 #include <mln/shaders/symbol_layer_ubo.hpp>
 #include <mln/style/layers/symbol_layer_properties.hpp>
 #include <mln/util/convert.hpp>
+#include <mln/util/math.hpp>
 #include <mln/util/std.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -160,9 +161,22 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                           (isText || symbolData.textFit != IconTextFitType::None);
         const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement)
                                           ? matrix::identity4()
-                                          : getLabelPlaneMatrix(
-                                                matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+                                          : getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 glCoordMatrix = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+
+        // On the globe the main matrix is untranslated and the shader adds the translation in tile units;
+        // on Mercator it stays baked into the matrix.
+        std::array<float, 2> tileTranslation = {0.f, 0.f};
+        if (state.isGlobeRendering() && !isScreenSpace && (translate[0] != 0 || translate[1] != 0)) {
+            const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                       : evaluated.get<style::IconTranslateAnchor>();
+            const float angle = anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing())
+                                                                        : 0.0f;
+            const Point<float> rotated = util::rotate(Point<float>{translate[0], translate[1]}, angle);
+            tileTranslation = {tileID.pixelsToTileUnits(rotated.x, currentZoom),
+                               tileID.pixelsToTileUnits(rotated.y, currentZoom)};
+        }
+        const auto pitchedScale = static_cast<float>(state.getProjection().circleRadiusCorrection(state));
 
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
@@ -203,6 +217,13 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
+
+            .is_along_line = alongLine,
+            .is_variable_anchor = hasVariablePlacement,
+            .pitched_scale = pitchedScale,
+            .translation = tileTranslation,
+            .pad1 = 0,
+            .pad2 = 0,
         };
 
 #if MLN_UBO_CONSOLIDATION

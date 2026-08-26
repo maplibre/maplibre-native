@@ -447,6 +447,7 @@ using SymbolIconShaderInfo = ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backend:
 
 const std::vector<UniformBlockInfo> SymbolIconShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
     UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
     UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
@@ -468,6 +469,7 @@ using SymbolSDFShaderInfo = ShaderInfo<BuiltIn::SymbolSDFShader, gfx::Backend::T
 
 const std::vector<UniformBlockInfo> SymbolSDFShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
     UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
     UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
@@ -493,6 +495,7 @@ using SymbolTextAndIconShaderInfo = ShaderInfo<BuiltIn::SymbolTextAndIconShader,
 
 const std::vector<UniformBlockInfo> SymbolTextAndIconShaderInfo::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
+    UniformBlockInfo{"ProjectionUBO", idProjectionUBO},
     UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
     UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
     UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},

@@ -107,13 +107,9 @@ public:
     bool pitchIconWithMap = getLayout().get<IconPitchAlignment>() == AlignmentType::Map;
     SymbolPlacementType placementType = getLayout().get<SymbolPlacement>();
 
-    mat4 textLabelPlaneMatrix = getLabelPlaneMatrix(
-        renderTile.get().matrix, pitchTextWithMap, rotateTextWithMap, state, pixelsToTileUnits);
-    mat4 iconLabelPlaneMatrix =
-        (rotateTextWithMap == rotateIconWithMap && pitchTextWithMap == pitchIconWithMap)
-            ? textLabelPlaneMatrix
-            : getLabelPlaneMatrix(
-                  renderTile.get().matrix, pitchIconWithMap, rotateIconWithMap, state, pixelsToTileUnits);
+    TileProjector tileProjector{state, renderTile.get().id, renderTile.get().projection};
+    LabelPlaneProjector textLabelPlane{tileProjector, pitchTextWithMap, rotateTextWithMap, pixelsToTileUnits};
+    LabelPlaneProjector iconLabelPlane{tileProjector, pitchIconWithMap, rotateIconWithMap, pixelsToTileUnits};
 
     CollisionGroups::CollisionGroup collisionGroup;
     ZoomEvaluatedSize partiallyEvaluatedTextSize;
@@ -278,6 +274,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
     const SymbolBucket& bucket = ctx.getBucket();
     const mat4& posMatrix = ctx.getRenderTile().matrix;
+    const TileProjector& tileProjector = ctx.tileProjector;
     const auto& collisionGroup = ctx.collisionGroup;
     auto variableTextAnchors = symbolInstance.getTextAnchors();
     textBoxes.clear();
@@ -286,9 +283,10 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     bool placeText = false;
     bool placeIcon = false;
     bool offscreen = true;
-    std::pair<bool, bool> placed{false, false};
-    std::pair<bool, bool> placedVerticalText{false, false};
-    std::pair<bool, bool> placedVerticalIcon{false, false};
+    bool iconOccluded = false;
+    PlacedFeatureResult placed;
+    PlacedFeatureResult placedVerticalText;
+    PlacedFeatureResult placedVerticalIcon;
     Point<float> shift{0.0f, 0.0f};
     std::optional<size_t> horizontalTextIndex = symbolInstance.getDefaultHorizontalPlacedTextIndex();
     if (horizontalTextIndex) {
@@ -314,7 +312,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                         placed = placeHorizontalFn();
                     }
 
-                    if (placed.first) {
+                    if (placed.placed) {
                         break;
                     }
                 }
@@ -330,19 +328,20 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 textBoxes.clear();
                 auto placedFeature = collisionIndex.placeFeature(collisionFeature,
                                                                  {},
-                                                                 posMatrix,
-                                                                 ctx.textLabelPlaneMatrix,
+                                                                 tileProjector,
+                                                                 ctx.textLabelPlane,
                                                                  ctx.pixelRatio,
                                                                  placedSymbol,
                                                                  ctx.scale,
                                                                  fontSize,
                                                                  ctx.textAllowOverlap,
                                                                  ctx.pitchTextWithMap,
+                                                                 ctx.rotateTextWithMap,
                                                                  showCollisionBoxes,
                                                                  ctx.avoidEdges,
                                                                  collisionGroup.second,
                                                                  textBoxes);
-                if (placedFeature.first) {
+                if (placedFeature.placed) {
                     placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
                 }
                 return placedFeature;
@@ -357,14 +356,14 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     return placeFeature(*symbolInstance.getVerticalTextCollisionFeature(),
                                         style::TextWritingModeType::Vertical);
                 }
-                return std::pair<bool, bool>{false, false};
+                return PlacedFeatureResult{};
             };
 
             placeTextForPlacementModes(placeHorizontal, placeVertical);
-            updatePreviousOrientationIfNotPlaced(placed.first);
+            updatePreviousOrientationIfNotPlaced(placed.placed);
 
-            placeText = placed.first;
-            offscreen &= placed.second;
+            placeText = placed.placed;
+            offscreen &= placed.offscreen;
         } else if (!symbolInstance.getTextCollisionFeature().alongLine &&
                    !symbolInstance.getTextCollisionFeature().boxes.empty()) {
             // If this symbol was in the last placement, shift the previously
@@ -398,7 +397,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                 const float width = textBox.x2 - textBox.x1;
                 const float height = textBox.y2 - textBox.y1;
                 const float textBoxScale = symbolInstance.getTextBoxScale();
-                std::pair<bool, bool> placedFeature = {false, false};
+                PlacedFeatureResult placedFeature;
                 const size_t anchorsSize = variableTextAnchors.size();
                 const size_t placementAttempts = ctx.textAllowOverlap ? anchorsSize * 2 : anchorsSize;
                 for (size_t i = 0u; i < placementAttempts; ++i) {
@@ -424,14 +423,15 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 
                     placedFeature = collisionIndex.placeFeature(textCollisionFeature,
                                                                 shift,
-                                                                posMatrix,
-                                                                mat4(),
+                                                                tileProjector,
+                                                                ctx.textLabelPlane,
                                                                 ctx.pixelRatio,
                                                                 placedSymbol,
                                                                 ctx.scale,
                                                                 fontSize,
                                                                 allowOverlap,
                                                                 ctx.pitchTextWithMap,
+                                                                ctx.rotateTextWithMap,
                                                                 showCollisionBoxes,
                                                                 ctx.avoidEdges,
                                                                 collisionGroup.second,
@@ -441,23 +441,24 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                         auto placedIconFeature = collisionIndex.placeFeature(
                             iconCollisionFeature,
                             shift,
-                            posMatrix,
-                            ctx.iconLabelPlaneMatrix,
+                            tileProjector,
+                            ctx.iconLabelPlane,
                             ctx.pixelRatio,
                             placedSymbol,
                             ctx.scale,
                             fontSize,
                             ctx.iconAllowOverlap,
                             ctx.pitchTextWithMap, // TODO: shall it be pitchIconWithMap?
+                            ctx.rotateIconWithMap,
                             showCollisionBoxes,
                             ctx.avoidEdges,
                             collisionGroup.second,
                             iconBoxes);
                         iconBoxes.clear();
-                        if (!placedIconFeature.first) continue;
+                        if (!placedIconFeature.placed) continue;
                     }
 
-                    if (placedFeature.first) {
+                    if (placedFeature.placed) {
                         assert(symbolInstance.getCrossTileID() != 0u);
                         std::optional<style::TextVariableAnchorType> prevAnchor;
 
@@ -499,7 +500,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
             };
 
             const auto placeVertical = [&] {
-                if (bucket.allowVerticalPlacement && !placed.first &&
+                if (bucket.allowVerticalPlacement && !placed.placed &&
                     symbolInstance.getVerticalTextCollisionFeature()) {
                     return placeFeatureForVariableAnchors(*symbolInstance.getVerticalTextCollisionFeature(),
                                                           style::TextWritingModeType::Vertical,
@@ -507,15 +508,15 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                               ? *symbolInstance.getVerticalTextCollisionFeature()
                                                               : symbolInstance.getIconCollisionFeature());
                 }
-                return std::pair<bool, bool>{false, false};
+                return PlacedFeatureResult{};
             };
 
             placeTextForPlacementModes(placeHorizontal, placeVertical);
 
-            placeText = placed.first;
-            offscreen &= placed.second;
+            placeText = placed.placed;
+            offscreen &= placed.offscreen;
 
-            updatePreviousOrientationIfNotPlaced(placed.first);
+            updatePreviousOrientationIfNotPlaced(placed.placed);
 
             // If we didn't get placed, we still need to copy our position from
             // the last placement for fade animations
@@ -539,28 +540,30 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         const auto& placeIconFeature = [&](const CollisionFeature& collisionFeature) {
             return collisionIndex.placeFeature(collisionFeature,
                                                shift,
-                                               posMatrix,
-                                               ctx.iconLabelPlaneMatrix,
+                                               tileProjector,
+                                               ctx.iconLabelPlane,
                                                ctx.pixelRatio,
                                                placedSymbol,
                                                ctx.scale,
                                                fontSize,
                                                ctx.iconAllowOverlap,
                                                ctx.pitchTextWithMap,
+                                               ctx.rotateIconWithMap,
                                                showCollisionBoxes,
                                                ctx.avoidEdges,
                                                collisionGroup.second,
                                                iconBoxes);
         };
 
-        std::pair<bool, bool> placedIcon;
-        if (placedVerticalText.first && symbolInstance.getVerticalIconCollisionFeature()) {
+        PlacedFeatureResult placedIcon;
+        if (placedVerticalText.placed && symbolInstance.getVerticalIconCollisionFeature()) {
             placedIcon = placedVerticalIcon = placeIconFeature(*symbolInstance.getVerticalIconCollisionFeature());
         } else {
             placedIcon = placeIconFeature(symbolInstance.getIconCollisionFeature());
         }
-        placeIcon = placedIcon.first;
-        offscreen &= placedIcon.second;
+        placeIcon = placedIcon.placed;
+        iconOccluded = placedIcon.occluded;
+        offscreen &= placedIcon.offscreen;
     }
 
     const bool iconWithoutText = !symbolInstance.hasText() || ctx.getLayout().get<TextOptional>();
@@ -576,7 +579,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
 
     if (placeText) {
-        if (placedVerticalText.first && symbolInstance.getVerticalTextCollisionFeature()) {
+        if (placedVerticalText.placed && symbolInstance.getVerticalTextCollisionFeature()) {
             collisionIndex.insertFeature(*symbolInstance.getVerticalTextCollisionFeature(),
                                          textBoxes,
                                          ctx.getLayout().get<TextIgnorePlacement>(),
@@ -592,7 +595,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     }
 
     if (placeIcon) {
-        if (placedVerticalIcon.first && symbolInstance.getVerticalIconCollisionFeature()) {
+        if (placedVerticalIcon.placed && symbolInstance.getVerticalIconCollisionFeature()) {
             collisionIndex.insertFeature(*symbolInstance.getVerticalIconCollisionFeature(),
                                          iconBoxes,
                                          ctx.getLayout().get<IconIgnorePlacement>(),
@@ -635,8 +638,10 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         return kUnplaced;
     }
 
-    JointPlacement result(
-        placeText || ctx.alwaysShowText, placeIcon || ctx.alwaysShowIcon, offscreen || bucket.justReloaded);
+    // Symbols behind the planet's horizon stay hidden even when overlap is allowed.
+    JointPlacement result((placeText || ctx.alwaysShowText) && !placed.occluded,
+                          (placeIcon || ctx.alwaysShowIcon) && !iconOccluded,
+                          offscreen || bucket.justReloaded);
     placements.emplace(symbolInstance.getCrossTileID(), result);
     newSymbolPlaced(symbolInstance, ctx, result, ctx.placementType, textBoxes, iconBoxes);
     return result;
@@ -784,6 +789,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                    (bucket.allowVerticalPlacement || hasVariableAnchors) &&
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
     bool result = false;
+    const TileProjector tileProjector(state, tile.id, tile.projection);
 
     if (alongLine) {
         if (layout.get<IconRotationAlignment>() == AlignmentType::Map) {
@@ -792,7 +798,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             if (bucket.hasSdfIconData()) {
                 reprojectLineLabels(bucket.sdfIcon.dynamicAttributeData(),
                                     bucket.sdfIcon.placedSymbols,
-                                    tile.matrix,
+                                    tileProjector,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
@@ -804,7 +810,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             if (bucket.hasIconData()) {
                 reprojectLineLabels(bucket.icon.dynamicAttributeData(),
                                     bucket.icon.placedSymbols,
-                                    tile.matrix,
+                                    tileProjector,
                                     pitchWithMap,
                                     true /*rotateWithMap*/,
                                     keepUpright,
@@ -820,7 +826,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
             const bool keepUpright = layout.get<style::TextKeepUpright>();
             reprojectLineLabels(bucket.text.dynamicAttributeData(),
                                 bucket.text.placedSymbols,
-                                tile.matrix,
+                                tileProjector,
                                 pitchWithMap,
                                 true /*rotateWithMap*/,
                                 keepUpright,
@@ -839,8 +845,7 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         const bool rotateWithMap = layout.get<TextRotationAlignment>() == AlignmentType::Map;
         const bool pitchWithMap = layout.get<TextPitchAlignment>() == AlignmentType::Map;
         const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
-        const auto labelPlaneMatrix = getLabelPlaneMatrix(
-            tile.matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const LabelPlaneProjector labelPlane(tileProjector, pitchWithMap, rotateWithMap, pixelsToTileUnits);
         std::unordered_map<std::size_t, std::pair<std::size_t, Point<float>>> placedTextShifts;
 
         for (std::size_t i = 0; i < bucket.text.placedSymbols.size(); ++i) {
@@ -862,9 +867,12 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicAttributeData());
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
-                const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
-                const float perspectiveRatio = 0.5f +
-                                               0.5f * (state.getCameraToCenterDistance() / projectedAnchor.second);
+                const ProjectedTilePoint projected = pitchWithMap ? labelPlane.toClipSpaceFromTile(tileAnchor)
+                                                                  : labelPlane.project(tileAnchor);
+                const Point<float> projectedAnchor{static_cast<float>(projected.point.x),
+                                                   static_cast<float>(projected.point.y)};
+                const float perspectiveRatio = 0.5f + 0.5f * (state.getCameraToCenterDistance() /
+                                                              static_cast<float>(projected.signedDistanceFromCamera));
                 float renderTextSize = evaluateSizeForFeature(partiallyEvaluatedSize, symbol) * perspectiveRatio /
                                        util::ONE_EM;
                 if (pitchWithMap) {
@@ -886,14 +894,18 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 // plane.
                 Point<float> shiftedAnchor;
                 if (pitchWithMap) {
-                    shiftedAnchor =
-                        project(Point<float>(tileAnchor.x + shift.x, tileAnchor.y + shift.y), labelPlaneMatrix).first;
+                    const auto correction = static_cast<float>(
+                        tileProjector.pitchedTextCorrection({tileAnchor.x, tileAnchor.y}));
+                    const auto shifted = labelPlane
+                                             .project(Point<float>(tileAnchor.x + shift.x * correction,
+                                                                   tileAnchor.y + shift.y * correction))
+                                             .point;
+                    shiftedAnchor = Point<float>(static_cast<float>(shifted.x), static_cast<float>(shifted.y));
                 } else if (rotateWithMap) {
                     auto rotated = util::rotate(shift, -state.getPitch());
-                    shiftedAnchor = Point<float>(projectedAnchor.first.x + rotated.x,
-                                                 projectedAnchor.first.y + rotated.y);
+                    shiftedAnchor = Point<float>(projectedAnchor.x + rotated.x, projectedAnchor.y + rotated.y);
                 } else {
-                    shiftedAnchor = Point<float>(projectedAnchor.first.x + shift.x, projectedAnchor.first.y + shift.y);
+                    shiftedAnchor = Point<float>(projectedAnchor.x + shift.x, projectedAnchor.y + shift.y);
                 }
 
                 if (updateTextFitIcon && symbol.placedIconIndex) {
@@ -1504,7 +1516,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
         NeighborTileData(const CollisionIndex& collisionIndex, UnwrappedTileID id_, Point<float> shift_)
             : id(id_),
               shift(shift_),
-              matrix(collisionIndex.getTransformState().getProjectionData(id).mainMatrix) {
+              matrix(collisionIndex.getTransformState().getProjectionData(id).fallbackMatrix) {
             borders = collisionIndex.projectTileBoundaries(matrix);
         }
 

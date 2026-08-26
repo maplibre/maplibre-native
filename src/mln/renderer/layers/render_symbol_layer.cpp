@@ -586,18 +586,27 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto u_size = evaluatedSize.size;
         const auto u_size_t = evaluatedSize.sizeT;
 
-        const mat4 textLabelPlaneMatrix =
-            (alongLine || hasVariablePlacement)
-                ? matrix::identity4()
-                : getLabelPlaneMatrix(textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 iconLabelPlaneMatrix =
-            (alongLine || hasVariablePlacement)
-                ? matrix::identity4()
-                : getLabelPlaneMatrix(iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 textGLCoordMatrix = getGlCoordMatrix(
-            textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 iconGLCoordMatrix = getGlCoordMatrix(
-            iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        // Viewport labels reach the label plane through the tile matrix; pitched labels leave it through the same.
+        const auto labelPlaneMatrixFor = [&](const mat4& drawableMatrix) {
+            mat4 m = getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+            if (!pitchWithMap) {
+                matrix::multiply(m, m, drawableMatrix);
+            }
+            return m;
+        };
+        const auto glCoordMatrixFor = [&](const mat4& drawableMatrix) {
+            mat4 m = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+            if (pitchWithMap) {
+                matrix::multiply(m, drawableMatrix, m);
+            }
+            return m;
+        };
+        const mat4 textLabelPlaneMatrix = (alongLine || hasVariablePlacement) ? matrix::identity4()
+                                                                              : labelPlaneMatrixFor(textDrawableMatrix);
+        const mat4 iconLabelPlaneMatrix = (alongLine || hasVariablePlacement) ? matrix::identity4()
+                                                                              : labelPlaneMatrixFor(iconDrawableMatrix);
+        const mat4 textGLCoordMatrix = glCoordMatrixFor(textDrawableMatrix);
+        const mat4 iconGLCoordMatrix = glCoordMatrixFor(iconDrawableMatrix);
 
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
@@ -760,6 +769,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                const PaintParameters&,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     stats.renderedFeatures.clear();
 
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -1142,7 +1152,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, propertiesAsUniforms, posOffsetAttribName));
+                shaderGroup->getOrCreateShader(context, propertiesAsUniforms, posOffsetAttribName, projectionVariant));
             if (!shader) {
                 return;
             }
