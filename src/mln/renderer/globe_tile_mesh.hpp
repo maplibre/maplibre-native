@@ -59,6 +59,7 @@ public:
         }
         return it->second;
     }
+    void clear() { meshes.clear(); }
 
 private:
     std::map<std::tuple<uint8_t, bool, bool>, GlobeTileMesh<Vertex, LayoutVertexFn>> meshes;
