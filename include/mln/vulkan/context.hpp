@@ -6,6 +6,7 @@
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
 #include <mln/shaders/layer_ubo.hpp>
 #include <mln/util/noncopyable.hpp>
 #include <mln/util/containers.hpp>
@@ -145,7 +146,7 @@ public:
 
     bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
                                       RenderStaticData& staticData,
-                                      const std::vector<shaders::GlobeClipMask>& masks);
+                                      const std::vector<gfx::GlobeClipMask>& masks);
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
