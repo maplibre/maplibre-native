@@ -5,5 +5,6 @@
   "render-tests/projection/globe/fill-grid-pitched": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/background": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/fill-planet-solid": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
-  "render-tests/projection/globe/fill-planet-tiles": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525"
+  "render-tests/projection/globe/fill-planet-tiles": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/minzoom-pole": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525"
 }
