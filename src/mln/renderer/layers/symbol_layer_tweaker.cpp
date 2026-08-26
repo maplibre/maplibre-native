@@ -102,6 +102,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
                                                             : SymbolScreenSpace::defaultValue();
 
+    const auto pitchedScale = static_cast<float>(state.getProjection().circleRadiusCorrection(state));
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -125,6 +127,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
+        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                   : evaluated.get<style::IconTranslateAnchor>();
 
         ProjectionData projection;
 
@@ -137,12 +141,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         } else {
             constexpr bool nearClipped = false;
             constexpr bool inViewportPixelUnits = false;
-            const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
-                                       : evaluated.get<style::IconTranslateAnchor>();
             projection = getProjectionData(
                 tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
         }
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
 #if MLN_UBO_CONSOLIDATION
         projectionUBOVector[i] = toProjectionUBO(projection);
 #else
@@ -168,16 +170,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // on Mercator it stays baked into the matrix.
         std::array<float, 2> tileTranslation = {0.f, 0.f};
         if (state.isGlobeRendering() && !isScreenSpace && (translate[0] != 0 || translate[1] != 0)) {
-            const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
-                                       : evaluated.get<style::IconTranslateAnchor>();
             const float angle = anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing())
                                                                         : 0.0f;
             const Point<float> rotated = util::rotate(Point<float>{translate[0], translate[1]}, angle);
             tileTranslation = {tileID.pixelsToTileUnits(rotated.x, currentZoom),
                                tileID.pixelsToTileUnits(rotated.y, currentZoom)};
         }
-        const auto pitchedScale = static_cast<float>(state.getProjection().circleRadiusCorrection(state));
-
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
