@@ -15,6 +15,73 @@ double vec4Dot(const vec4& a, const vec4& b) noexcept {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
 }
 
+std::optional<double> rayPlaneIntersection(const vec3& origin, const vec3& direction, const vec4& plane) noexcept {
+    const vec3 normal = {{plane[0], plane[1], plane[2]}};
+    const double along = vec3Dot(direction, normal);
+    if (along == 0) {
+        return std::nullopt;
+    }
+    return (-vec3Dot(origin, normal) - plane[3]) / along;
+}
+
+vec4 planeThrough(const vec3& p0, const vec3& p1, const vec3& p2) noexcept {
+    const vec3 n = vec3Normalize(vec3Cross(vec3Sub(p0, p1), vec3Sub(p2, p1)));
+    return {{n[0], n[1], n[2], -vec3Dot(n, p1)}};
+}
+
+// The distance from the near plane to the point of the horizon circle farthest along the view direction, if the
+// camera is not looking straight down.
+std::optional<double> idealNearFarPlaneDistance(const vec4& horizonPlane, const vec4& nearPlane) noexcept {
+    const vec3 view = {{nearPlane[0], nearPlane[1], nearPlane[2]}};
+    const double horizonLength = vec3Length({{horizonPlane[0], horizonPlane[1], horizonPlane[2]}});
+    const vec3 horizonNormal = vec3Scale({{horizonPlane[0], horizonPlane[1], horizonPlane[2]}}, 1.0 / horizonLength);
+    const double horizonDistance = horizonPlane[3] / horizonLength;
+    const vec3 projectedView = vec3Sub(view, vec3Scale(horizonNormal, vec3Dot(view, horizonNormal)));
+    const double projectedLength = vec3Length(projectedView);
+    if (projectedLength <= 0) {
+        return std::nullopt;
+    }
+    const double circleRadius = std::sqrt(1.0 - horizonDistance * horizonDistance);
+    const vec3 circleCenter = vec3Scale(horizonNormal, -horizonDistance);
+    const vec3 farthest = vec3Add(circleCenter, vec3Scale(projectedView, circleRadius / projectedLength));
+    return vec3Dot(view, farthest) + nearPlane[3];
+}
+
+// Moves the far corners in along the frustum's edges until the far plane reaches no further than the horizon;
+// port of GL JS `adjustFarPlaneByHorizonPlane`. The near corners are the first four.
+void adjustFarPlaneByHorizonPlane(std::array<vec4, 8>& corners,
+                                  const std::array<int, 3>& nearPlaneIndices,
+                                  const vec4& horizonPlane) noexcept {
+    constexpr std::size_t nearOffset = 0;
+    constexpr std::size_t farOffset = 4;
+    std::array<double, 4> rayLengths{};
+    std::array<vec3, 4> rayDirections{};
+    double maxDistance = 0;
+    for (std::size_t i = 0; i < 4; i++) {
+        const vec3 ray = vec3Sub(toVec3(corners[i + farOffset]), toVec3(corners[i + nearOffset]));
+        rayLengths[i] = vec3Length(ray);
+        rayDirections[i] = vec3Scale(ray, 1.0 / rayLengths[i]);
+    }
+    for (std::size_t i = 0; i < 4; i++) {
+        const auto distance = rayPlaneIntersection(toVec3(corners[i + nearOffset]), rayDirections[i], horizonPlane);
+        // Rays parallel to the horizon or pointing away from it keep their length.
+        maxDistance = std::max(maxDistance, distance && *distance >= 0 ? *distance : rayLengths[i]);
+    }
+    const vec4 nearPlane = planeThrough(toVec3(corners[nearPlaneIndices[0]]),
+                                        toVec3(corners[nearPlaneIndices[1]]),
+                                        toVec3(corners[nearPlaneIndices[2]]));
+    if (const auto ideal = idealNearFarPlaneDistance(horizonPlane, nearPlane)) {
+        // The rays make the same angle with the near plane at all four corners.
+        maxDistance = std::min(maxDistance,
+                               *ideal / vec3Dot(rayDirections[0], {{nearPlane[0], nearPlane[1], nearPlane[2]}}));
+    }
+    for (std::size_t i = 0; i < 4; i++) {
+        const vec3 far = vec3Add(toVec3(corners[i + nearOffset]),
+                                 vec3Scale(rayDirections[i], std::min(maxDistance, rayLengths[i])));
+        corners[i + farOffset] = {{far[0], far[1], far[2], 1.0}};
+    }
+}
+
 template <size_t N>
 Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3& origin, const vec3& axis) noexcept {
     double min = std::numeric_limits<double>::max();
@@ -136,7 +203,8 @@ Frustum::Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& 
     }
 }
 
-Frustum Frustum::fromInvProjMatrix(const mat4& invProj, double worldSize, double zoom, bool flippedY) {
+Frustum Frustum::fromInvProjMatrix(
+    const mat4& invProj, double worldSize, double zoom, bool flippedY, const std::optional<vec4>& horizonPlane) {
     // Define frustum corner points in normalized clip space
     std::array<vec4, 8> cornerCoords = {{vec4{{-1.0, 1.0, -1.0, 1.0}},
                                          vec4{{1.0, 1.0, -1.0, 1.0}},
@@ -168,21 +236,16 @@ Frustum Frustum::fromInvProjMatrix(const mat4& invProj, double worldSize, double
         std::ranges::for_each(frustumPlanePointIndices, [](vec3i& tri) { std::swap(tri[1], tri[2]); });
     }
 
+    if (horizonPlane) {
+        adjustFarPlaneByHorizonPlane(cornerCoords, frustumPlanePointIndices[4], *horizonPlane);
+    }
+
     std::array<vec4, 6> frustumPlanes;
 
     for (std::size_t i = 0; i < frustumPlanePointIndices.size(); i++) {
         const vec3i indices = frustumPlanePointIndices[i];
-
-        // Compute plane equation using 3 points on the plane
-        const vec3 p0 = toVec3(cornerCoords[indices[0]]);
-        const vec3 p1 = toVec3(cornerCoords[indices[1]]);
-        const vec3 p2 = toVec3(cornerCoords[indices[2]]);
-
-        const vec3 a = vec3Sub(p0, p1);
-        const vec3 b = vec3Sub(p2, p1);
-        const vec3 n = vec3Normalize(vec3Cross(a, b));
-
-        frustumPlanes[i] = {{n[0], n[1], n[2], -vec3Dot(n, p1)}};
+        frustumPlanes[i] = planeThrough(
+            toVec3(cornerCoords[indices[0]]), toVec3(cornerCoords[indices[1]]), toVec3(cornerCoords[indices[2]]));
     }
 
     std::array<vec3, 8> frustumPoints;

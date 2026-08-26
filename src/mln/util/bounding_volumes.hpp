@@ -4,6 +4,8 @@
 #include <mln/util/mat3.hpp>
 #include <mln/util/mat4.hpp>
 
+#include <optional>
+
 namespace mln {
 namespace util {
 
@@ -39,7 +41,12 @@ class Frustum {
 public:
     Frustum(const std::array<vec3, 8>& points_, const std::array<vec4, 6>& planes_);
 
-    static Frustum fromInvProjMatrix(const mat4& invProj, double worldSize, double zoom, bool flippedY = false);
+    /// With `horizonPlane`, the far plane is pulled in to the horizon so nothing behind it counts as visible.
+    static Frustum fromInvProjMatrix(const mat4& invProj,
+                                     double worldSize,
+                                     double zoom,
+                                     bool flippedY = false,
+                                     const std::optional<vec4>& horizonPlane = std::nullopt);
 
     // Performs conservative intersection test using separating axis theorem.
     // Some accuracy is traded for better performance. False positive rate is < 1%

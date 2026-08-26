@@ -4,6 +4,7 @@
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/style/projection_definition.hpp>
 
 using namespace mln;
 
@@ -18,19 +19,29 @@ static void TileCountBounds(benchmark::State& state) {
     benchmark::DoNotOptimize(length);
 }
 
-static void TileCoverPitchedViewport(benchmark::State& state) {
+static void tileCoverViewport(benchmark::State& state, const char* projection, double zoom) {
     Transform transform;
     transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition(projection));
     // slightly offset center so that tile order is better defined
-    transform.jumpTo(CameraOptions().withCenter(LatLng{0.1, -0.1}).withZoom(8.0).withBearing(5.0).withPitch(40.0));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.1, -0.1}).withZoom(zoom).withBearing(5.0).withPitch(40.0));
 
     std::size_t length = 0;
     const Range<uint8_t> zoomRange(0, 14);
+    const auto z = static_cast<uint8_t>(zoom);
     while (state.KeepRunning()) {
-        auto tiles = util::tileCover({transform.getState()}, 8, zoomRange);
+        auto tiles = util::tileCover({transform.getState()}, z, zoomRange);
         length += tiles.size();
     }
     benchmark::DoNotOptimize(length);
+}
+
+static void TileCoverPitchedViewport(benchmark::State& state) {
+    tileCoverViewport(state, "mercator", 8.0);
+}
+
+static void TileCoverGlobe(benchmark::State& state) {
+    tileCoverViewport(state, "vertical-perspective", static_cast<double>(state.range(0)));
 }
 
 static void TileCoverBounds(benchmark::State& state) {
@@ -79,5 +90,6 @@ static void TileCountPolygon(benchmark::State& state) {
 BENCHMARK(TileCountBounds);
 BENCHMARK(TileCountPolygon);
 BENCHMARK(TileCoverPitchedViewport);
+BENCHMARK(TileCoverGlobe)->Arg(3)->Arg(8);
 BENCHMARK(TileCoverBounds);
 BENCHMARK(TileCoverPolygon);
