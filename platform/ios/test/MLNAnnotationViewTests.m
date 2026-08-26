@@ -7,6 +7,7 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
 @interface MLNMapView (Tests)
 @property (nonatomic) MLNCameraChangeReason cameraChangeReasonBitmask;
+- (void)updateAnnotationViews;
 @end
 
 
@@ -63,6 +64,7 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
 @interface MLNAnnotationViewTests : XCTestCase <MLNMapViewDelegate>
 @property (nonatomic) XCTestExpectation *expectation;
+@property (nonatomic) XCTestExpectation *styleLoadingExpectation;
 @property (nonatomic) MLNMapView *mapView;
 @property (nonatomic, weak) MLNAnnotationView *annotationView;
 @property (nonatomic) NSInteger annotationSelectedCount;
@@ -100,6 +102,41 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
     XCTAssert(_mapView.annotations.count == 0, @"number of annotations should be 0");
     XCTAssertNil(_annotationView.annotation, @"annotation property should be nil");
+}
+
+- (void)testAnnotationViewBehindTheGlobeIsOffscreen
+{
+    _mapView.delegate = nil;
+    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"globe" withExtension:@"json"];
+    _styleLoadingExpectation = [self expectationWithDescription:@"globe style"];
+    _mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 400, 400) styleURL:styleURL];
+    _mapView.delegate = self;
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+
+    // With the bearing at 45°, the viewport corners land on the horizon due north, east, south and west, so both
+    // annotations fall inside the visible coordinate bounds; only the second is behind the globe.
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+
+    MLNTestAnnotation *front = [[MLNTestAnnotation alloc] init];
+    front.coordinate = CLLocationCoordinate2DMake(50, 50);
+    _expectation = [self expectationWithDescription:@"front annotation view"];
+    [_mapView addAnnotation:front];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    MLNAnnotationView *frontView = _annotationView;
+
+    MLNTestAnnotation *back = [[MLNTestAnnotation alloc] init];
+    back.coordinate = CLLocationCoordinate2DMake(70, 70);
+    _expectation = [self expectationWithDescription:@"back annotation view"];
+    [_mapView addAnnotation:back];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    MLNAnnotationView *backView = _annotationView;
+    XCTAssertNotEqual(frontView, backView);
+
+    [_mapView updateAnnotationViews];
+    XCTAssertEqualObjects(frontView.annotation, front);
+    XCTAssertTrue(CGRectContainsPoint(_mapView.bounds, frontView.center), @"the annotation facing the camera is on screen");
+    XCTAssertNil(backView.annotation, @"the annotation behind the globe is offscreen and its view recycled");
+    XCTAssertFalse(CGRectIntersectsRect(_mapView.bounds, backView.frame));
 }
 
 - (void)testCustomAnnotationView
@@ -263,6 +300,14 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 - (void)mapView:(MLNMapView *)mapView didAddAnnotationViews:(NSArray<MLNAnnotationView *> *)annotationViews
 {
     [_expectation fulfill];
+}
+
+- (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style
+{
+    if (mapView == _mapView) {
+        [_styleLoadingExpectation fulfill];
+        _styleLoadingExpectation = nil;
+    }
 }
 
 - (void)mapView:(MLNMapView *)mapView didSelectAnnotation:(id<MLNAnnotation>)annotation
