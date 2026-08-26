@@ -76,12 +76,20 @@ EvaluationResult toColor(const Value& colorValue) {
 EvaluationResult toProjectionDefinition(const Value& value) {
     return value.match(
         [](const ProjectionDefinition& projection) -> EvaluationResult { return projection; },
-        [](const std::string& type) -> EvaluationResult { return ProjectionDefinition(type); },
+        [&](const std::string& name) -> EvaluationResult {
+            if (const auto type = projectionTypeFromName(name)) {
+                return ProjectionDefinition(*type);
+            }
+            return EvaluationError{"Could not parse projectionDefinition from value '" + stringify(value) + "'"};
+        },
         [&](const std::vector<Value>& components) -> EvaluationResult {
             if (components.size() == 3 && components[0].is<std::string>() && components[1].is<std::string>() &&
                 components[2].is<double>()) {
-                return ProjectionDefinition(
-                    components[0].get<std::string>(), components[1].get<std::string>(), components[2].get<double>());
+                const auto from = projectionTypeFromName(components[0].get<std::string>());
+                const auto to = projectionTypeFromName(components[1].get<std::string>());
+                if (from && to) {
+                    return ProjectionDefinition(*from, *to, components[2].get<double>());
+                }
             }
             return EvaluationError{"Could not parse projectionDefinition from value '" + stringify(value) + "'"};
         },
