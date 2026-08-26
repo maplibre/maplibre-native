@@ -2542,6 +2542,13 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleURLs addObject:url];
   }
 
+  /// The same style again with `"projection": {"type": "globe"}`, so the map renders as a globe.
+  NSURL *globeURL = [[NSBundle mainBundle] URLForResource:@"globe.json" withExtension:nil];
+  if (globeURL) {
+    [self.styleNames addObject:@"MapLibre Basic - Globe"];
+    [self.styleURLs addObject:globeURL];
+  }
+
   /// Add MapLibre Styles if an `apiKey` exists
   NSString *apiKey = [MLNSettings apiKey];
   if (apiKey.length) {
