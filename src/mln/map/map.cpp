@@ -548,6 +548,10 @@ LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
     return impl->transform.screenCoordinateToLatLng(pixel);
 }
 
+bool Map::isLocationOccluded(const LatLng& latLng) const {
+    return impl->transform.isLocationOccluded(latLng);
+}
+
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
     std::vector<ScreenCoordinate> ret;
     ret.reserve(latLngs.size());

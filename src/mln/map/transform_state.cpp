@@ -877,6 +877,15 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, 
     return {p[0] / p[3], size.height - p[1] / p[3]};
 }
 
+bool TransformState::isLocationOccluded(const LatLng& latLng) const {
+    if (size.isEmpty() || !isGlobeRendering()) {
+        return false;
+    }
+    const vec3 surface = VerticalPerspectiveProjection::surfaceVector(latLng);
+    const vec4& plane = getGlobeClippingPlane();
+    return plane[0] * surface[0] + plane[1] * surface[1] + plane[2] * surface[2] + plane[3] < 0.0;
+}
+
 TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point, uint8_t atZoom) const {
     if (size.isEmpty()) {
         return {.p = {}, .z = 0};

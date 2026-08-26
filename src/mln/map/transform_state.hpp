@@ -153,10 +153,12 @@ public:
     ProjectionData getProjectionData(const UnwrappedTileID&, const mat4& projMatrix) const;
     ProjectionData getProjectionData(const UnwrappedTileID&) const;
     ProjectionData getProjectionDataForMatrix(const UnwrappedTileID&, const mat4& mercatorMatrix) const;
-    ScreenCoordinate getCenterOffset() const;
 
     // Dimensions
     Size getSize() const;
+    // Viewport center offset, from [size.width / 2, size.height / 2], defined
+    // by |edgeInsets| in screen coordinates, with top left origin.
+    ScreenCoordinate getCenterOffset() const;
     void setSize(const Size& size_);
 
     EdgeInsets getFrustumOffset() const;
@@ -255,6 +257,8 @@ public:
     // Conversion
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
+    /// Whether the globe hides a location from the camera; a Mercator map hides nothing.
+    bool isLocationOccluded(const LatLng&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
     TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
@@ -285,9 +289,6 @@ public:
 
 private:
     bool rotatedNorth() const;
-
-    // Viewport center offset, from [size.width / 2, size.height / 2], defined
-    // by |edgeInsets| in screen coordinates, with top left origin.
 
     LatLngBounds bounds;
 
