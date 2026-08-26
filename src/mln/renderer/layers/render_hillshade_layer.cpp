@@ -161,6 +161,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   UniqueChangeRequestVec& changes) {
     if (updateProjectionVariant(state)) {
         hillshadeShader.reset();
+        if (projectionVariant == gfx::ProjectionVariant::Mercator) {
+            globeMeshes.clear();
+        }
     }
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
