@@ -47,8 +47,8 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
                                      const StringIDSetsPair& propertiesAsUniforms,
-                                     std::string_view /*firstAttribName*/,
-                                     gfx::ProjectionVariant variant) override {
+                                     gfx::ProjectionVariant variant,
+                                     std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::WebGPU>;
         constexpr auto& name = ShaderSource::name;
         constexpr auto& vert = ShaderSource::vertex;

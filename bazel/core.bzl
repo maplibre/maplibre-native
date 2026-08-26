@@ -675,6 +675,7 @@ MLN_CORE_HEADERS = [
     "include/mln/gfx/draw_scope.hpp",
     "include/mln/gfx/fill_generator.hpp",
     "include/mln/gfx/gfx_types.hpp",
+    "include/mln/gfx/globe_clip_mask.hpp",
     "include/mln/gfx/polyline_generator.hpp",
     "include/mln/gfx/renderbuffer.hpp",
     "include/mln/gfx/projection_variant.hpp",

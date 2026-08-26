@@ -255,7 +255,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
         const auto circleShader = circleShaderGroup->getOrCreateShader(
-            context, propertiesAsUniforms, "a_pos", projectionVariant);
+            context, propertiesAsUniforms, projectionVariant);
         if (!circleShader) {
             continue;
         }

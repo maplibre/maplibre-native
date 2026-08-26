@@ -352,7 +352,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms, "a_pos", projectionVariant));
+                fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
@@ -361,7 +361,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     {idLineColorVertexAttribute, idLineOpacityVertexAttribute, idLineWidthVertexAttribute}};
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
                     outlineTriangulatedShaderGroup->getOrCreateShader(
-                        context, outlinePropertiesAsUniforms, "a_pos", projectionVariant));
+                        context, outlinePropertiesAsUniforms, projectionVariant));
             }()
                 : nullptr;
 
@@ -380,7 +380,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 #endif
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
                                                        outlineShaderGroup->getOrCreateShader(
-                                                           context, propertiesAsUniforms, "a_pos", projectionVariant))
+                                                           context, propertiesAsUniforms, projectionVariant))
                                                  : nullptr;
 
             if (!fillBuilder && fillShader) {
@@ -469,10 +469,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, "a_pos", projectionVariant));
+                patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
                                                        outlinePatternShaderGroup->getOrCreateShader(
-                                                           context, propertiesAsUniforms, "a_pos", projectionVariant))
+                                                           context, propertiesAsUniforms, projectionVariant))
                                                  : nullptr;
 
             if (!patternBuilder) {

@@ -139,7 +139,7 @@ public:
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&,
                                                        const std::string& name,
-                                                       ProjectionVariant = ProjectionVariant::Mercator) = 0;
+                                                       ProjectionVariant) = 0;
 
     /// Create a tile layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
