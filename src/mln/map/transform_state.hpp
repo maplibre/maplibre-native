@@ -136,13 +136,17 @@ public:
     // Projection
     const ProjectionDefinition& getProjectionDefinition() const { return projectionDefinition; }
     void setProjectionDefinition(const ProjectionDefinition&);
+    /// 0 is Mercator, 1 is the globe, in between is the transition.
+    double getProjectionTransition() const { return projectionTransition; }
+    bool isGlobeRendering() const { return projectionTransition > 0; }
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
     void getProjMatrix(mat4& matrix, uint16_t nearZ = 1, bool aligned = false) const;
     ProjectionData getProjectionData(const UnwrappedTileID&, const mat4& projMatrix) const;
     ProjectionData getProjectionData(const UnwrappedTileID&) const;
-    ProjectionData getProjectionDataForMatrix(const UnwrappedTileID&, const mat4& mainMatrix) const;
+    ProjectionData getProjectionDataForMatrix(const UnwrappedTileID&, const mat4& mercatorMatrix) const;
+    ScreenCoordinate getCenterOffset() const;
 
     // Dimensions
     Size getSize() const;
@@ -272,7 +276,6 @@ private:
 
     // Viewport center offset, from [size.width / 2, size.height / 2], defined
     // by |edgeInsets| in screen coordinates, with top left origin.
-    ScreenCoordinate getCenterOffset() const;
 
     LatLngBounds bounds;
 
@@ -311,6 +314,7 @@ private:
 private:
     std::shared_ptr<const ProjectionBase> projection;
     ProjectionDefinition projectionDefinition;
+    double projectionTransition = 0;
 
     ConstrainMode constrainMode;
     ViewportMode viewportMode;

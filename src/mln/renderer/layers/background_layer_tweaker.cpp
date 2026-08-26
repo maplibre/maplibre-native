@@ -15,10 +15,6 @@ namespace mln {
 using namespace style;
 using namespace shaders;
 
-#ifndef NDEBUG
-constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
-#endif
-
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
         return;
@@ -84,10 +80,6 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
-
-        // We assume that drawables don't change between pattern and non-pattern.
-        assert(hasPattern == (drawable.getShader() ==
-                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto projection = getProjectionData(

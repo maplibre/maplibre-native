@@ -5,7 +5,8 @@
     ],
     "ignore_paths": [
         "ignores/platform-all.json",
-        "ignores/platform-linux.json"
+        "ignores/platform-linux.json",
+        "ignores/platform-linux-opengl.json"
     ],
     "metric_path": "linux-clang8-release",
     "probes": [

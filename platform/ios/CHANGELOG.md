@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
 
 ## 6.31.0

@@ -45,7 +45,8 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
                                      const StringIDSetsPair& propertiesAsUniforms,
-                                     std::string_view /*firstAttribName*/) override {
+                                     std::string_view /*firstAttribName*/,
+                                     gfx::ProjectionVariant variant) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
         constexpr auto& name = ShaderSource::name;
         constexpr auto& prelude = ShaderSource::prelude;
@@ -56,12 +57,16 @@ public:
         std::size_t seed = 0;
         mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
         mln::util::hash_combine(seed, programParameters.getDefinesHash());
+        mln::util::hash_combine(seed, static_cast<uint8_t>(variant));
         const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
             DefinesMap additionalDefines;
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
+            if (variant == gfx::ProjectionVariant::Globe) {
+                additionalDefines.emplace(globeDefine, std::string());
+            }
 
             auto& context = static_cast<Context&>(gfxContext);
             const auto shaderSource = std::string(shaders::prelude) + prelude + source;
