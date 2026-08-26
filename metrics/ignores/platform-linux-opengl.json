@@ -27,5 +27,6 @@
   "render-tests/projection/globe/raster-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/raster-warped": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/background-opacity": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-  "render-tests/projection/globe/background-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+  "render-tests/projection/globe/background-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/fill-extrusion": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
 }

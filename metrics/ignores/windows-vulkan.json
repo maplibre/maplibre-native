@@ -26,5 +26,6 @@
     "render-tests/projection/globe/hillshade": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/raster-planet": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/raster-pole": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
-    "render-tests/projection/globe/raster-warped": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
+    "render-tests/projection/globe/raster-warped": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/fill-extrusion": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
 }
