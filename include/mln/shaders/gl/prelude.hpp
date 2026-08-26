@@ -98,6 +98,10 @@ layout (std140) uniform ProjectionUBO {
 vec4 projectTile(vec2 pos) {
     return u_projection_matrix * vec4(pos, 0.0, 1.0);
 }
+
+vec4 projectTileWithElevation(vec2 pos, float elevation) {
+    return u_projection_matrix * vec4(pos, elevation, 1.0);
+}
 )";
     static constexpr const char* fragment = R"(#ifdef GL_ES
 precision mediump float;

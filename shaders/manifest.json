@@ -131,6 +131,13 @@
         "uses_ubos": true
     },
     {
+        "name": "GlobeDepthShader",
+        "header": "globe_depth",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "HeatmapShader",
         "header": "heatmap",
         "glsl_vert": "heatmap.vertex.glsl",

@@ -137,6 +137,10 @@ vec4 projectTile(vec2 pos, ProjectionUBO projection) {
     return projection.matrix * vec4(pos, 0.0, 1.0);
 }
 
+vec4 projectTileWithElevation(vec2 pos, float elevation, ProjectionUBO projection) {
+    return projection.matrix * vec4(pos, elevation, 1.0);
+}
+
 void applySurfaceTransform() {
 #ifdef USE_SURFACE_TRANSFORM
     const mat2 rotation = {

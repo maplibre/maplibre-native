@@ -80,6 +80,12 @@ shaders::ProjectionUBO LayerTweaker::toProjectionUBO(const ProjectionData& data)
             .pad2 = 0};
 }
 
+float LayerTweaker::globeExtrudeScale(const UnwrappedTileID& tileID, float zoom, double latitudeScale) {
+    return static_cast<float>(tileID.pixelsToTileUnits(1.0f, zoom) /
+                              (util::EXTENT * static_cast<double>(1ull << tileID.canonical.z)) * util::M2PI *
+                              latitudeScale);
+}
+
 #if MLN_UBO_CONSOLIDATION
 void LayerTweaker::uploadProjectionUBOs(gfx::UniformBufferArray& layerUniforms,
                                         const std::vector<shaders::ProjectionUBO>& ubos,

@@ -121,16 +121,7 @@ LatLng VerticalPerspectiveProjection::unproject(const Point<double>& point,
 }
 
 void VerticalPerspectiveProjection::tileMatrix(mat4& matrix, const UnwrappedTileID& tileID, double scale) const {
-    const uint64_t tileScale = 1ull << tileID.canonical.z;
-    const double s = Projection::worldSize(scale) / tileScale;
-
-    matrix::identity(matrix);
-    matrix::translate(matrix,
-                      matrix,
-                      static_cast<int64_t>(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
-                      static_cast<int64_t>(tileID.canonical.y) * s,
-                      0);
-    matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
+    mercatorTileMatrix(matrix, tileID, scale);
 }
 
 double VerticalPerspectiveProjection::globeRadiusPixels(double worldSize, double centerLatitude) {
@@ -142,11 +133,13 @@ vec3 VerticalPerspectiveProjection::tileCoordinatesToSphere(const Point<double>&
     const double scale = 1.0 / static_cast<double>(1ull << tileID.canonical.z);
     const double mercatorX = tilePoint.x / util::EXTENT * scale + tileID.canonical.x * scale;
     const double mercatorY = tilePoint.y / util::EXTENT * scale + tileID.canonical.y * scale;
-    const double sphericalX = std::fmod(mercatorX * std::numbers::pi * 2.0 + std::numbers::pi, std::numbers::pi * 2.0);
-    const double sphericalY = 2.0 * std::atan(std::exp(std::numbers::pi - (mercatorY * std::numbers::pi * 2.0))) -
-                              std::numbers::pi * 0.5;
-    const double len = std::cos(sphericalY);
-    return {{std::sin(sphericalX) * len, std::sin(sphericalY), std::cos(sphericalX) * len}};
+    const double sphericalX = mercatorX * std::numbers::pi * 2.0 + std::numbers::pi;
+    // sin/cos of the latitude from the Mercator Y through the tangent half-angle identities, as the shaders do.
+    const double t = std::exp(std::numbers::pi - (mercatorY * std::numbers::pi * 2.0));
+    const double t2 = t * t;
+    const double sinY = (t2 - 1.0) / (t2 + 1.0);
+    const double cosY = (2.0 * t) / (t2 + 1.0);
+    return {{std::sin(sphericalX) * cosY, sinY, std::cos(sphericalX) * cosY}};
 }
 
 mat4 VerticalPerspectiveProjection::globeViewProjectionMatrix(const TransformState& state, double radius) {
@@ -338,16 +331,36 @@ double VerticalPerspectiveProjection::zoomAdjustment(double fromLatitude, double
 ProjectionData VerticalPerspectiveProjection::getProjectionData(const TransformState& state,
                                                                 const UnwrappedTileID& tileID,
                                                                 const mat4& mercatorMatrix) const {
-    const double tileScale = static_cast<double>(1ull << tileID.canonical.z);
     return {.mainMatrix = state.getGlobeViewProjectionMatrix(),
-            .tileMercatorCoords = {{tileID.canonical.x / tileScale,
-                                    tileID.canonical.y / tileScale,
-                                    1.0 / tileScale / util::EXTENT,
-                                    1.0 / tileScale / util::EXTENT}},
+            .tileMercatorCoords = mercatorTileCoords(tileID),
             .clippingPlane = state.getGlobeClippingPlane(),
             .projectionTransition = state.getProjectionTransition(),
-            .fallbackMatrix = mercatorMatrix,
-            .clipAntimeridian = tileID.canonical.z == 0};
+            .fallbackMatrix = mercatorMatrix};
+}
+
+ProjectedTilePoint VerticalPerspectiveProjection::projectTilePoint(const ProjectionData& data,
+                                                                   const UnwrappedTileID& tileID,
+                                                                   const Point<double>& point) const {
+    const vec3 sphere = tileCoordinatesToSphere(point, tileID);
+    vec4 pos = {{sphere[0], sphere[1], sphere[2], 1}};
+    matrix::transformMat4(pos, pos, data.mainMatrix);
+    const auto& plane = data.clippingPlane;
+    const double side = plane[0] * sphere[0] + plane[1] * sphere[1] + plane[2] * sphere[2] + plane[3];
+    return {.point = {pos[0] / pos[3], pos[1] / pos[3]}, .signedDistanceFromCamera = pos[3], .occluded = side < 0.0};
+}
+
+double VerticalPerspectiveProjection::circleRadiusCorrection(const TransformState& state) const {
+    return std::cos(util::deg2rad(state.getLatLng().latitude()));
+}
+
+double VerticalPerspectiveProjection::pitchedTextCorrection(const TransformState& state,
+                                                            const Point<double>& tileAnchor,
+                                                            const UnwrappedTileID& tileID) const {
+    const double scale = 1.0 / static_cast<double>(1ull << tileID.canonical.z);
+    const double mercatorY = tileAnchor.y / util::EXTENT * scale + tileID.canonical.y * scale;
+    const double latitude = 2.0 * std::atan(std::exp(std::numbers::pi - (mercatorY * std::numbers::pi * 2.0))) -
+                            std::numbers::pi * 0.5;
+    return circleRadiusCorrection(state) / std::cos(latitude);
 }
 
 } // namespace mln
