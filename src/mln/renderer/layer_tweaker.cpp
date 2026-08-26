@@ -55,9 +55,18 @@ ProjectionData LayerTweaker::getProjectionData(const UnwrappedTileID& tileID,
                                                bool inViewportPixelUnits,
                                                const gfx::Drawable& drawable,
                                                bool aligned) {
-    return parameters.state.getProjectionDataForMatrix(
+    auto data = parameters.state.getProjectionDataForMatrix(
         tileID,
         getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable, aligned));
+#if MLN_GLOBE_DEPTH_OFFSET_IN_SHADER
+    // The same per-layer shift `multiplyWithProjectionMatrix` bakes into the Mercator matrix.
+    if (!drawable.getIs3D() && drawable.getEnableDepth()) {
+        data.depthOffset = ((1 + parameters.currentLayer) * PaintParameters::numSublayers -
+                            drawable.getSubLayerIndex()) *
+                           PaintParameters::depthEpsilon;
+    }
+#endif
+    return data;
 }
 
 shaders::ProjectionUBO LayerTweaker::toProjectionUBO(const ProjectionData& data) {
@@ -66,9 +75,9 @@ shaders::ProjectionUBO LayerTweaker::toProjectionUBO(const ProjectionData& data)
             .tile_mercator_coords = util::cast<float>(data.tileMercatorCoords),
             .clipping_plane = util::cast<float>(data.clippingPlane),
             .projection_transition = static_cast<float>(data.projectionTransition),
+            .depth_offset = static_cast<float>(data.depthOffset),
             .pad1 = 0,
-            .pad2 = 0,
-            .pad3 = 0};
+            .pad2 = 0};
 }
 
 #if MLN_UBO_CONSOLIDATION

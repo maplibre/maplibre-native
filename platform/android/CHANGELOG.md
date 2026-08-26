@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+- feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#TBD](https://github.com/maplibre/maplibre-native/pull/TBD)).
+
 ## 13.6.0
 
 ### ✨ Features and improvements

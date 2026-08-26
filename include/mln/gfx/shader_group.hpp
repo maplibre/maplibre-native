@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/gfx/shader.hpp>
 #include <mln/util/containers.hpp>
 #include <mln/util/hash.hpp>
@@ -157,7 +158,8 @@ public:
     /// @return A `gfx::ShaderPtr`
     virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
                                              [[maybe_unused]] const StringIDSetsPair& propertiesAsUniforms,
-                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
+                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos",
+                                             [[maybe_unused]] ProjectionVariant variant = ProjectionVariant::Mercator) {
         return {};
     }
 
@@ -167,6 +169,8 @@ protected:
     std::string getShaderName(const std::string_view& name, const PropertyHashType key) {
         return (std::ostringstream() << name << '#' << std::hex << key).str();
     }
+
+    static constexpr auto globeDefine = "PROJECTION_GLOBE";
 
     /// Generate a map key for the specified combination of properties
     PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {

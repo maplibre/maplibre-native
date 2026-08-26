@@ -59,9 +59,9 @@ struct alignas(16) ProjectionUBO {
     /* 128 */ std::array<float, 4> tile_mercator_coords;
     /* 144 */ std::array<float, 4> clipping_plane;
     /* 160 */ float projection_transition;
-    /* 164 */ float pad1;
-    /* 168 */ float pad2;
-    /* 172 */ float pad3;
+    /* 164 */ float depth_offset;
+    /* 168 */ float pad1;
+    /* 172 */ float pad2;
     /* 176 */
 };
 static_assert(sizeof(ProjectionUBO) == 11 * 16);

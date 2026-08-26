@@ -239,6 +239,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/rendering_stats.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/gfx/projection_variant.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/shader_registry.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/gfx/shader.hpp
@@ -547,6 +548,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/mercator_projection.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/projection_base.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/vertical_perspective_projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/map/vertical_perspective_projection.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/map/transform_state.cpp
