@@ -91,8 +91,7 @@ struct ProjectionUBO {
     clipping_plane: vec4<f32>,
     projection_transition: f32,
     depth_offset: f32,
-    pad1: f32,
-    pad2: f32,
+    translate: vec2<f32>,
 };
 
 // Pole vertices carry these sentinel Y values in their raw position.
@@ -189,20 +188,20 @@ fn interpolateProjectionFor3D(posInTile: vec2<f32>, spherePos: vec3<f32>, elevat
 }
 
 fn projectTile(pos: vec2<f32>, projection: ProjectionUBO) -> vec4<f32> {
-    return interpolateProjection(pos, projectToSphere(pos, vec2<f32>(0.0, 0.0), projection), 0.0, projection);
+    return interpolateProjection(pos, projectToSphere(pos + projection.translate, vec2<f32>(0.0, 0.0), projection), 0.0, projection);
 }
 
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 fn projectTileWithPoles(pos: vec2<f32>, rawPos: vec2<f32>, projection: ProjectionUBO) -> vec4<f32> {
-    return interpolateProjection(pos, projectToSphere(pos, rawPos, projection), 0.0, projection);
+    return interpolateProjection(pos, projectToSphere(pos + projection.translate, rawPos, projection), 0.0, projection);
 }
 
 fn projectTileWithElevation(pos: vec2<f32>, elevation: f32, projection: ProjectionUBO) -> vec4<f32> {
-    return interpolateProjection(pos, projectToSphere(pos, vec2<f32>(0.0, 0.0), projection), elevation, projection);
+    return interpolateProjection(pos, projectToSphere(pos + projection.translate, vec2<f32>(0.0, 0.0), projection), elevation, projection);
 }
 
 fn projectTileFor3D(pos: vec2<f32>, elevation: f32, projection: ProjectionUBO) -> vec4<f32> {
-    return interpolateProjectionFor3D(pos, projectToSphere(pos, pos, projection), elevation, projection);
+    return interpolateProjectionFor3D(pos, projectToSphere(pos + projection.translate, pos, projection), elevation, projection);
 }
 
 #else

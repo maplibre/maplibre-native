@@ -60,8 +60,8 @@ struct alignas(16) ProjectionUBO {
     /* 144 */ std::array<float, 4> clipping_plane;
     /* 160 */ float projection_transition;
     /* 164 */ float depth_offset;
-    /* 168 */ float pad1;
-    /* 172 */ float pad2;
+    /// Tile-unit translation the sphere path adds; the fallback matrix carries its own.
+    /* 168 */ std::array<float, 2> translate;
     /* 176 */
 };
 static_assert(sizeof(ProjectionUBO) == 11 * 16);
@@ -87,6 +87,8 @@ enum {
 };
 
 #define MLN_UBO_CONSOLIDATION (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_WEBGPU)
+// The globe separates its layers by shifting their clip Z in the vertex shader; OpenGL keeps its depth range for that.
+#define MLN_GLOBE_DEPTH_OFFSET_IN_SHADER (!MLN_RENDER_BACKEND_OPENGL)
 #define MLN_USE_FILL_EXTRUSION_INSTANCING (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
 #define MLN_USE_SYMBOL_INSTANCING (MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN)
 
