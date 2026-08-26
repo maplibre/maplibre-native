@@ -1,4 +1,6 @@
 #include <mln/renderer/layers/render_hillshade_layer.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
+
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/sources/render_raster_dem_source.hpp>
@@ -313,7 +315,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices;
         auto* segments = &staticDataSegments;
 
-        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+        std::optional<GlobeTileMesh<HillshadeLayoutVertex, decltype(&HillshadeBucket::layoutVertex)>> globeMesh;
+        if (projectionVariant == gfx::ProjectionVariant::Globe) {
+            globeMesh.emplace(tileID.canonical, &HillshadeBucket::layoutVertex);
+            vertices = globeMesh->vertices;
+            indices = globeMesh->indices;
+            segments = &globeMesh->segments;
+        } else if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
             vertices = bucket.sharedVertices;
             indices = bucket.sharedIndices;
             segments = &bucket.segments;
