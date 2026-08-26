@@ -93,6 +93,7 @@ public:
     gfx::ColorMode colorModeForRenderPass() const;
 
     mat4 matrixForTile(const UnwrappedTileID&, bool aligned = false) const;
+    ProjectionData projectionDataForTile(const UnwrappedTileID&, bool aligned = false) const;
 
     // Stencil handling
 public:

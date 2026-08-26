@@ -51,7 +51,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundDrawableUnionUBO>;
-@group(0) @binding(4) var<uniform> props: BackgroundPropsUBO;
+@group(0) @binding(5) var<uniform> props: BackgroundPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -76,7 +76,7 @@ struct BackgroundPropsUBO {
     pad3: f32,
 };
 
-@group(0) @binding(4) var<uniform> props: BackgroundPropsUBO;
+@group(0) @binding(5) var<uniform> props: BackgroundPropsUBO;
 
 @fragment
 fn main() -> @location(0) vec4<f32> {
@@ -138,7 +138,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<BackgroundPatternDrawableUnionUBO>;
-@group(0) @binding(4) var<uniform> props: BackgroundPatternPropsUBO;
+@group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -202,7 +202,7 @@ struct GlobalPaintParamsUBO {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(4) var<uniform> props: BackgroundPatternPropsUBO;
+@group(0) @binding(5) var<uniform> props: BackgroundPatternPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
 

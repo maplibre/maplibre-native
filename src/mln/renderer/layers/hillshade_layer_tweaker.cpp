@@ -163,6 +163,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     int i = 0;
     std::vector<HillshadeDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<HillshadeTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -172,8 +173,15 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
+        const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, parameters.context);
+#endif
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
@@ -226,6 +234,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
     layerUniforms.set(idHillshadeDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idHillshadeTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

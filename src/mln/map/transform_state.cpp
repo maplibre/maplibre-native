@@ -1,4 +1,5 @@
 #include <mln/map/transform_state.hpp>
+#include <mln/map/mercator_projection.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/math/clamp.hpp>
 #include <mln/math/log2.hpp>
@@ -44,6 +45,7 @@ double roundForAccuracy(double x) {
 
 TransformState::TransformState(ConstrainMode constrainMode_, ViewportMode viewportMode_)
     : bounds(LatLngBounds()),
+      projection(std::make_shared<MercatorProjection>()),
       constrainMode(constrainMode_),
       viewportMode(viewportMode_) {}
 
@@ -113,16 +115,19 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
 // MARK: - Matrix
 
 void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) const {
-    const uint64_t tileScale = 1ull << tileID.canonical.z;
-    const double s = Projection::worldSize(scale) / tileScale;
+    projection->tileMatrix(matrix, tileID, scale);
+}
 
-    matrix::identity(matrix);
-    matrix::translate(matrix,
-                      matrix,
-                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
-                      int64_t(tileID.canonical.y) * s,
-                      0);
-    matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
+ProjectionData TransformState::getProjectionData(const UnwrappedTileID& tileID, const mat4& projMatrix) const {
+    return projection->getProjectionData(tileID, scale, projMatrix);
+}
+
+ProjectionData TransformState::getProjectionData(const UnwrappedTileID& tileID) const {
+    return getProjectionData(tileID, getProjectionMatrix());
+}
+
+ProjectionData TransformState::getProjectionDataForMatrix(const UnwrappedTileID& tileID, const mat4& mainMatrix) const {
+    return projection->getProjectionData(tileID, mainMatrix);
 }
 
 void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligned) const {
@@ -769,7 +774,7 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, 
         return {};
     }
 
-    Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
+    Point<double> pt = projection->project(latLng, scale) / util::tileSize_D;
     vec4 c = {{pt.x, pt.y, 0, 1}};
     matrix::transformMat4(p, c, getCoordMatrix());
     return {p[0] / p[3], size.height - p[1] / p[3]};
@@ -811,7 +816,7 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {
     auto coord = screenCoordinateToTileCoordinate(point, 0);
-    return Projection::unproject(coord.p, 1. / util::tileSize_D, wrapMode);
+    return projection->unproject(coord.p, 1. / util::tileSize_D, wrapMode);
 }
 
 mat4 TransformState::coordinatePointMatrix(const mat4& projMatrix) const {

@@ -48,6 +48,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
     std::vector<HeatmapDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -66,8 +67,15 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
@@ -99,6 +107,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     }
 
     layerUniforms.set(idHeatmapDrawableUBO, drawableUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

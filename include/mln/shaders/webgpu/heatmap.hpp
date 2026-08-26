@@ -53,7 +53,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<HeatmapDrawableUBO>;
-@group(0) @binding(4) var<uniform> props: HeatmapEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: HeatmapEvaluatedPropsUBO;
 
 const ZERO: f32 = 1.0 / 255.0 / 16.0;
 const GAUSS_COEF: f32 = 0.3989422804014327;
@@ -108,7 +108,7 @@ struct HeatmapEvaluatedPropsUBO {
 
 const GAUSS_COEF: f32 = 0.3989422804014327;
 
-@group(0) @binding(4) var<uniform> props: HeatmapEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: HeatmapEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

@@ -60,7 +60,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -102,7 +102,7 @@ struct FillEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 struct FragmentInput {
     @location(0) color: vec4<f32>,
@@ -197,7 +197,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlineDrawableUnionUBO>;
-@group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -242,7 +242,7 @@ struct FillOutlineEvaluatedPropsUBO {
     to_scale: f32,
 };
 
-@group(0) @binding(5) var<uniform> props: FillOutlineEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillOutlineEvaluatedPropsUBO;
 
 struct FragmentInput {
     @location(0) color: vec4<f32>,
@@ -353,8 +353,8 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillPatternDrawableUBO>;
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -465,8 +465,8 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillPatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
@@ -600,8 +600,8 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillOutlinePatternDrawableUBO>;
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -717,8 +717,8 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<FillOutlinePatternTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var pattern_texture: texture_2d<f32>;
@@ -893,7 +893,7 @@ struct GlobalPaintParamsUBO {
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
-@group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
+@group(0) @binding(6) var<uniform> props: FillEvaluatedPropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
