@@ -93,6 +93,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
@@ -124,19 +125,29 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
 
-        mat4 matrix;
+        ProjectionData projection;
 
         if (isScreenSpace) {
-            matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
-            matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
-            matrix::translate(matrix, matrix, translate[0], translate[1], 0);
+            mat4 screenMatrix;
+            matrix::ortho(screenMatrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+            matrix::translate(screenMatrix, screenMatrix, 0, -util::EXTENT, 0);
+            matrix::translate(screenMatrix, screenMatrix, translate[0], translate[1], 0);
+            projection = parameters.state.getProjectionDataForMatrix(tileID, screenMatrix);
         } else {
             constexpr bool nearClipped = false;
             constexpr bool inViewportPixelUnits = false;
             const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
                                        : evaluated.get<style::IconTranslateAnchor>();
-            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+            projection = getProjectionData(
+                tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
         }
+        const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());
@@ -233,6 +244,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     layerUniforms.set(idSymbolDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idSymbolTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 
