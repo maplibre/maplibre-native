@@ -40,12 +40,16 @@ layout(std140, set = LAYER_SET_INDEX, binding = idHillshadeDrawableUBO) readonly
     HillshadeDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(location = 0) out vec2 frag_position;
 
 void main() {
     const HillshadeDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
     frag_position = vec2(in_texture_position) / 8192.0;
