@@ -84,7 +84,7 @@ struct LineDrawableEntry {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineDrawableEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -303,7 +303,7 @@ struct LineGradientDrawableEntry {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineGradientDrawableEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -526,7 +526,7 @@ struct LinePatternTilePropsEntry {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LinePatternDrawableEntry>;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LinePatternTilePropsEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex
@@ -838,7 +838,7 @@ struct LineSDFTilePropsEntry {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<LineSDFDrawableEntry>;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<LineSDFTilePropsEntry>;
-@group(0) @binding(4) var<uniform> props: LineEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: LineEvaluatedPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
 @vertex

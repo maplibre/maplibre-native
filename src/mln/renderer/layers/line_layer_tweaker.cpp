@@ -199,6 +199,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     int i = 0;
     std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<LineTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -224,8 +225,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const auto anchor = evaluated.get<LineTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
 #if !MLN_UBO_CONSOLIDATION
         auto& drawableUniforms = drawable.mutableUniformBuffers();
@@ -416,6 +424,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     layerUniforms.set(idLineDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idLineTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

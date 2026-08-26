@@ -393,8 +393,7 @@ void populatePosMatrix(mat4& posMatrix, const OverscaledTileID& tileId, double l
     TransformState transformState;
     transformState.setSize({512, 512});
     transformState.setLatLngZoom(LatLng(lat, lon), zoom);
-    transformState.matrixFor(posMatrix, tileId.toUnwrapped());
-    matrix::multiply(posMatrix, transformState.getProjectionMatrix(), posMatrix);
+    posMatrix = transformState.getProjectionData(tileId.toUnwrapped()).mainMatrix;
 }
 
 } // namespace

@@ -2,9 +2,11 @@
 
 #include <gmock/gmock.h>
 #include <cmath>
+#include <mln/map/mercator_projection.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/quaternion.hpp>
 
 #include <numbers>
@@ -1242,4 +1244,113 @@ TEST(Camera, SetOrientationWithRollNoPitch) {
     EXPECT_NEAR(bearing - roll, bearing_, 1.0e-9);
     EXPECT_NEAR(pitch, pitch_, 1.0e-9);
     EXPECT_NEAR(0.0, roll_, 1.0e-9);
+}
+
+namespace {
+
+// The tile matrix as TransformState::matrixFor computed it before the projection seam.
+mat4 referenceTileMatrix(double scale, const UnwrappedTileID& tileID) {
+    const uint64_t tileScale = 1ull << tileID.canonical.z;
+    const double s = Projection::worldSize(scale) / tileScale;
+
+    mat4 matrix;
+    matrix::identity(matrix);
+    matrix::translate(matrix,
+                      matrix,
+                      static_cast<double>(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      static_cast<double>(tileID.canonical.y) * s,
+                      0);
+    matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
+    return matrix;
+}
+
+} // namespace
+
+TEST(MercatorProjection, MatchesStaticProjection) {
+    const MercatorProjection projection;
+    for (const double zoom : {0.0, 1.0, 3.5, 7.25, 12.0, 18.0}) {
+        const double scale = std::pow(2.0, zoom);
+        for (const double lat : {-85.0, -45.0, 0.0, 30.0, 80.0}) {
+            for (const double lon : {-180.0, -90.0, 0.0, 45.0, 179.0}) {
+                const LatLng latLng{lat, lon};
+                const Point<double> expected = Projection::project(latLng, scale);
+                const Point<double> actual = projection.project(latLng, scale);
+                EXPECT_EQ(expected.x, actual.x);
+                EXPECT_EQ(expected.y, actual.y);
+
+                const LatLng unprojected = projection.unproject(actual, scale, LatLng::Wrapped);
+                const LatLng expectedUnprojected = Projection::unproject(expected, scale, LatLng::Wrapped);
+                EXPECT_EQ(expectedUnprojected.latitude(), unprojected.latitude());
+                EXPECT_EQ(expectedUnprojected.longitude(), unprojected.longitude());
+            }
+        }
+    }
+}
+
+TEST(TransformState, ProjectionDataMatchesTileMatrix) {
+    Transform transform;
+    const std::vector<UnwrappedTileID> tileIDs{
+        {0, 0, 0}, {1, 0, 1}, {3, 5, 2}, {10, 512, 340}, {14, 16000, 8000}, {-1, CanonicalTileID{2, 1, 1}}};
+
+    for (const Size size : {Size{1, 1}, Size{512, 512}, Size{1024, 768}, Size{333, 777}}) {
+        transform.resize(size);
+        for (const double zoom : {0.0, 2.5, 6.0, 11.75, 16.0}) {
+            for (const double pitch : {0.0, 30.0, 60.0}) {
+                for (const double bearing : {0.0, 45.0, 210.0}) {
+                    for (const double roll : {0.0, 15.0}) {
+                        transform.jumpTo(CameraOptions()
+                                             .withCenter(LatLng{37.7749, -122.4194})
+                                             .withZoom(zoom)
+                                             .withPitch(pitch)
+                                             .withBearing(bearing)
+                                             .withRoll(roll));
+                        const TransformState& state = transform.getState();
+                        const double scale = std::pow(2.0, state.getZoom());
+
+                        for (const bool aligned : {false, true}) {
+                            mat4 projMatrix;
+                            state.getProjMatrix(projMatrix, 1, aligned);
+
+                            for (const auto& tileID : tileIDs) {
+                                const mat4 tileMatrix = referenceTileMatrix(scale, tileID);
+                                mat4 actualTileMatrix;
+                                state.matrixFor(actualTileMatrix, tileID);
+                                EXPECT_EQ(tileMatrix, actualTileMatrix);
+
+                                mat4 expected;
+                                matrix::multiply(expected, projMatrix, tileMatrix);
+                                EXPECT_EQ(expected, state.getProjectionData(tileID, projMatrix).mainMatrix);
+                            }
+                        }
+
+                        for (const auto& tileID : tileIDs) {
+                            mat4 expected;
+                            matrix::multiply(expected, state.getProjectionMatrix(), referenceTileMatrix(scale, tileID));
+                            EXPECT_EQ(expected, state.getProjectionData(tileID).mainMatrix);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+TEST(TransformState, ProjectionDataMercatorFields) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20}).withZoom(5.0).withPitch(20.0).withBearing(30.0));
+    const TransformState& state = transform.getState();
+
+    for (const auto& tileID :
+         {UnwrappedTileID{0, 0, 0}, UnwrappedTileID{3, 5, 2}, UnwrappedTileID{-1, CanonicalTileID{2, 1, 1}}}) {
+        const ProjectionData data = state.getProjectionData(tileID);
+        const double tileScale = static_cast<double>(1u << tileID.canonical.z);
+        EXPECT_EQ(data.mainMatrix, data.fallbackMatrix);
+        EXPECT_EQ(tileID.canonical.x / tileScale, data.tileMercatorCoords[0]);
+        EXPECT_EQ(tileID.canonical.y / tileScale, data.tileMercatorCoords[1]);
+        EXPECT_EQ(1.0 / tileScale / util::EXTENT, data.tileMercatorCoords[2]);
+        EXPECT_EQ(1.0 / tileScale / util::EXTENT, data.tileMercatorCoords[3]);
+        EXPECT_EQ((vec4{{0, 0, 0, 0}}), data.clippingPlane);
+        EXPECT_EQ(0.0, data.projectionTransition);
+    }
 }

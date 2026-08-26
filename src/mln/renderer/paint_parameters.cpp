@@ -109,10 +109,11 @@ void PaintParameters::updateStencilBufferAvailability() {
 #endif
 
 mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned) const {
-    mat4 matrix;
-    state.matrixFor(matrix, tileID);
-    matrix::multiply(matrix, aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix, matrix);
-    return matrix;
+    return projectionDataForTile(tileID, aligned).mainMatrix;
+}
+
+ProjectionData PaintParameters::projectionDataForTile(const UnwrappedTileID& tileID, bool aligned) const {
+    return state.getProjectionData(tileID, aligned ? transformParams.alignedProjMatrix : transformParams.projMatrix);
 }
 
 gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {

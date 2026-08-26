@@ -64,7 +64,7 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<CircleDrawableUBO>;
-@group(0) @binding(4) var<uniform> props: CircleEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: CircleEvaluatedPropsUBO;
 )";
 
     static constexpr auto vertex = R"(
