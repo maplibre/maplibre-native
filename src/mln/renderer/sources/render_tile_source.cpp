@@ -25,6 +25,9 @@
 #include <mln/shaders/line_layer_ubo.hpp>
 #include <mln/gfx/drawable_tweaker.hpp>
 #include <mln/renderer/layer_tweaker.hpp>
+#include <mln/util/subdivision_granularity.hpp>
+
+#include <map>
 
 #if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_WEBGPU || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
 #define MLN_ENABLE_POLYLINE_DRAWABLES 1
@@ -185,8 +188,11 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // initialize debug builder
     constexpr auto DebugShaderName = "DebugShader";
+    const bool globe = parameters.state.isGlobeRendering();
     gfx::ShaderProgramBasePtr debugShader = context.getGenericShader(
-        shaders, std::string(DebugShaderName), gfx::ProjectionVariant::Mercator);
+        shaders,
+        std::string(DebugShaderName),
+        globe ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator);
     if (!debugShader) {
         return;
     }
@@ -218,7 +224,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
              idLineGapWidthVertexAttribute,
              idLineOffsetVertexAttribute,
              idLineWidthVertexAttribute}};
-        return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator);
+        return shaderGroup->getOrCreateShader(
+            context, propertiesAsUniforms, globe ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator);
     };
 
     std::unique_ptr<gfx::DrawableBuilder> polylineBuilder;
@@ -268,6 +275,87 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                           .wrapU = gfx::TextureWrapType::Clamp,
                                           .wrapV = gfx::TextureWrapType::Clamp});
     }
+
+    // a drawable built for the other projection keeps its shader; it goes with the tiles that left
+    const auto staleWith = [&](const gfx::Shader* shader) {
+        return [&, shader](const gfx::Drawable& drawable) {
+            return drawable.getName() == drawableName &&
+                   (!(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID())) ||
+                    drawable.getShader().get() != shader);
+        };
+    };
+
+    struct Border {
+        std::vector<gfx::Vertex<PositionOnlyLayoutAttributes>> vertices;
+        std::vector<uint16_t> indexes;
+        SegmentVector segments;
+    };
+    const Border tileBorder{.vertices = RenderStaticData::tileVertices().vector(),
+                            .indexes = RenderStaticData::tileLineStripIndices().vector(),
+                            .segments = RenderStaticData::tileBorderSegments()};
+    // On the globe the edges bend with the sphere: a ring at the tile mesh's granularity, one per zoom.
+    std::map<uint8_t, Border> globeBorders;
+    const auto borderFor = [&](const OverscaledTileID& tileID) -> const Border& {
+        if (!globe) {
+            return tileBorder;
+        }
+        const auto z = tileID.canonical.z;
+        auto it = globeBorders.find(z);
+        if (it == globeBorders.end()) {
+            const auto steps = static_cast<int32_t>(
+                SubdivisionGranularitySetting::globe().tile.getGranularityForZoomLevel(z));
+            Border ring;
+            const auto add = [&](int32_t x, int32_t y) {
+                ring.indexes.push_back(static_cast<uint16_t>(ring.vertices.size()));
+                ring.vertices.emplace_back(
+                    gfx::Vertex<PositionOnlyLayoutAttributes>({{{static_cast<int16_t>(x), static_cast<int16_t>(y)}}}));
+            };
+            for (int32_t i = 0; i < steps; ++i) add(util::EXTENT * i / steps, 0);
+            for (int32_t i = 0; i < steps; ++i) add(util::EXTENT, util::EXTENT * i / steps);
+            for (int32_t i = 0; i < steps; ++i) add(util::EXTENT - util::EXTENT * i / steps, util::EXTENT);
+            for (int32_t i = 0; i < steps; ++i) add(0, util::EXTENT - util::EXTENT * i / steps);
+            ring.indexes.push_back(0);
+            ring.segments.emplace_back(0, 0, ring.vertices.size(), ring.indexes.size());
+            it = globeBorders.emplace(z, std::move(ring)).first;
+        }
+        return it->second;
+    };
+
+    // every debug drawable projects through the tile's projection block
+    const auto uploadProjections = [&](TileLayerGroup* tileLayerGroup) {
+#if MLN_UBO_CONSOLIDATION
+        std::vector<ProjectionUBO> projectionUBOs;
+        projectionUBOs.reserve(tileLayerGroup->getDrawableCount());
+        tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) {
+            if (!drawable.getTileID()) {
+                return;
+            }
+            drawable.setUBOIndex(static_cast<int32_t>(projectionUBOs.size()));
+            projectionUBOs.push_back(
+                LayerTweaker::toProjectionUBO(parameters.projectionDataForTile(drawable.getTileID()->toUnwrapped())));
+        });
+        if (projectionUBOs.empty()) {
+            return;
+        }
+        const std::size_t size = sizeof(ProjectionUBO) * projectionUBOs.size();
+        auto& layerUniforms = tileLayerGroup->mutableUniformBuffers();
+        const auto& buffer = layerUniforms.get(idProjectionUBO);
+        if (!buffer || buffer->getSize() < size) {
+            layerUniforms.set(idProjectionUBO, context.createUniformBuffer(projectionUBOs.data(), size, false, true));
+        } else {
+            buffer->update(projectionUBOs.data(), size);
+        }
+#else
+        tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) {
+            if (!drawable.getTileID()) {
+                return;
+            }
+            const auto projectionUBO = LayerTweaker::toProjectionUBO(
+                parameters.projectionDataForTile(drawable.getTileID()->toUnwrapped()));
+            drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+        });
+#endif
+    };
 
     // function to update existing tile drawables with UBO value. return number of updated drawables
     const auto updateDrawables =
@@ -323,7 +411,13 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
-        GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
+        const auto& border = borderFor(tile.getOverscaledTileID());
+        GeometryCoordinates coords;
+        coords.reserve(border.indexes.size());
+        for (const auto index : border.indexes) {
+            const auto& position = border.vertices[index].a1;
+            coords.emplace_back(position[0], position[1]);
+        }
         gfx::PolylineGeneratorOptions options;
         options.type = FeatureType::Polygon;
 
@@ -356,10 +450,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // erase drawables that are not in the current tile set
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
-            lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
-                return drawable.getName() == drawableName &&
-                       !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
-            });
+            lg->removeDrawablesIf(staleWith(debugShader.get()));
         }
 
         // add new drawables and update existing ones
@@ -400,6 +491,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                             debugBucket->segments);
             }
         }
+        uploadProjections(outlineLayerGroup);
+        uploadProjections(textLayerGroup);
     } else {
         // tile texts are not required, erase layer groups
         debugLayerGroups.erase(DebugType::TextOutline);
@@ -412,15 +505,14 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             addOrGetLayerGroupForType(DebugType::Border, "debug-border")->second.get());
 
         // erase drawables that are not in the current tile set
-        tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return drawable.getName() == drawableName &&
-                   !(drawable.getTileID().has_value() && newTiles.contains(*drawable.getTileID()));
-        });
+#if MLN_ENABLE_POLYLINE_DRAWABLES
+        if (!polylineShader) polylineShader = createPolylineShader();
+        tileLayerGroup->removeDrawablesIf(staleWith(polylineShader.get()));
+#else
+        tileLayerGroup->removeDrawablesIf(staleWith(debugShader.get()));
+#endif
 
         // add new drawables and update existing ones
-        auto vertices = RenderStaticData::tileVertices().vector();
-        auto indexes = RenderStaticData::tileLineStripIndices().vector();
-        auto segments = RenderStaticData::tileBorderSegments();
         for (auto& tile : *renderTiles) {
             const auto tileID = tile.getOverscaledTileID();
             const auto& debugBucket = tile.debugBucket;
@@ -439,16 +531,20 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                        /* .pad3 = */ 0};
 
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
+                const auto& border = borderFor(tileID);
                 addDrawable(tileLayerGroup,
                             tileID,
                             debugUBO,
                             gfx::LineStrip(4.0f * parameters.pixelRatio),
-                            vertices,
-                            indexes,
-                            segments);
+                            border.vertices,
+                            border.indexes,
+                            border.segments);
             }
 #endif
         }
+#if !MLN_ENABLE_POLYLINE_DRAWABLES
+        uploadProjections(tileLayerGroup);
+#endif
     } else {
         // if tile borders are not required, erase layer group
         debugLayerGroups.erase(DebugType::Border);
