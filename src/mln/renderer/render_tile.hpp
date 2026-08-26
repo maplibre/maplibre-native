@@ -69,6 +69,12 @@ public:
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
 
+    /// The layer's translation in tile units, rotated for its anchor.
+    static std::array<float, 2> tileUnitTranslation(const UnwrappedTileID& id,
+                                                    const std::array<float, 2>& translation,
+                                                    style::TranslateAnchorType anchor,
+                                                    const TransformState& state);
+
     static mat4 translateVtxMatrix(const UnwrappedTileID& id,
                                    const mat4& tileMatrix,
                                    const std::array<float, 2>& translation,

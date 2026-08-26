@@ -144,6 +144,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             projection = getProjectionData(
                 tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
         }
+        // The symbol shader adds the translation itself, where the label plane needs it too; on Mercator it
+        // stays baked into the matrix.
+        const std::array<float, 2> tileTranslation = state.isGlobeRendering() ? util::cast<float>(projection.translate)
+                                                                              : std::array<float, 2>{0.f, 0.f};
+        projection.translate = {};
         const auto& matrix = projection.fallbackMatrix;
 #if MLN_UBO_CONSOLIDATION
         projectionUBOVector[i] = toProjectionUBO(projection);
@@ -166,16 +171,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                           : getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 glCoordMatrix = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
-        // On the globe the main matrix is untranslated and the shader adds the translation in tile units;
-        // on Mercator it stays baked into the matrix.
-        std::array<float, 2> tileTranslation = {0.f, 0.f};
-        if (state.isGlobeRendering() && !isScreenSpace && (translate[0] != 0 || translate[1] != 0)) {
-            const float angle = anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing())
-                                                                        : 0.0f;
-            const Point<float> rotated = util::rotate(Point<float>{translate[0], translate[1]}, angle);
-            tileTranslation = {tileID.pixelsToTileUnits(rotated.x, currentZoom),
-                               tileID.pixelsToTileUnits(rotated.y, currentZoom)};
-        }
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
