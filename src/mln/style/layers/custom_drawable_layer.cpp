@@ -877,14 +877,14 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
                                                  idLineOffsetVertexAttribute,
                                                  idLineWidthVertexAttribute}};
 
-    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator);
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderWideVector() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("WideVectorShader");
     if (!shaderGroup) return gfx::ShaderPtr();
 
-    return shaderGroup->getOrCreateShader(context, {});
+    return shaderGroup->getOrCreateShader(context, {}, gfx::ProjectionVariant::Mercator);
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
@@ -893,15 +893,15 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_opacity"},
                                                 {idFillColorVertexAttribute, idFillOpacityVertexAttribute}};
 
-    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator);
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
-    return context.getGenericShader(shaders, "CustomSymbolIconShader");
+    return context.getGenericShader(shaders, "CustomSymbolIconShader", gfx::ProjectionVariant::Mercator);
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::geometryShaderDefault() const {
-    return context.getGenericShader(shaders, "CustomGeometryShader");
+    return context.getGenericShader(shaders, "CustomGeometryShader", gfx::ProjectionVariant::Mercator);
 }
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,

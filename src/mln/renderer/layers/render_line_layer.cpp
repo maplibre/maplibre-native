@@ -384,7 +384,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto shader = lineSDFShaderGroup->getOrCreateShader(
-                context, propertiesAsUniforms, posNormalAttribName, projectionVariant);
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -409,7 +409,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto shader = linePatternShaderGroup->getOrCreateShader(
-                context, propertiesAsUniforms, posNormalAttribName, projectionVariant);
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -450,7 +450,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto shader = lineGradientShaderGroup->getOrCreateShader(
-                context, propertiesAsUniforms, posNormalAttribName, projectionVariant);
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -490,7 +490,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto shader = lineShaderGroup->getOrCreateShader(
-                context, propertiesAsUniforms, posNormalAttribName, projectionVariant);
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }

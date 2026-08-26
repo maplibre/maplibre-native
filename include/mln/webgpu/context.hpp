@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
 #include <mln/shaders/layer_ubo.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/webgpu/renderer_backend.hpp>
@@ -93,7 +94,7 @@ public:
     // Get reusable buffers (aligned with Metal)
     bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
                                       RenderStaticData& staticData,
-                                      const std::vector<shaders::GlobeClipMask>& masks);
+                                      const std::vector<gfx::GlobeClipMask>& masks);
 
     const BufferResource& getTileVertexBuffer();
     const BufferResource& getTileIndexBuffer();

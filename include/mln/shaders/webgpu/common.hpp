@@ -106,7 +106,7 @@ const GLOBE_RADIUS: f32 = 6371008.8;
 // Tile position (0..EXTENT) to a point on the unit sphere; the pole sentinels in rawPos map to the poles.
 fn projectToSphere(translatedPos: vec2<f32>, rawPos: vec2<f32>, projection: ProjectionUBO) -> vec3<f32> {
     let mercator_pos = projection.tile_mercator_coords.xy + projection.tile_mercator_coords.zw * translatedPos;
-    let spherical_x = mercator_pos.x * GLOBE_PI * 2.0 + GLOBE_PI;
+    let spherical_x = mercator_pos.x * PI * 2.0 + PI;
     // sin/cos of the latitude from the Mercator Y via the tangent half-angle identities: no atan, and float32 precision survives near the equator.
     let t = exp(PI - (mercator_pos.y * PI * 2.0));
     let t2 = t * t;

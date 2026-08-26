@@ -5,6 +5,7 @@
 #include <mln/gfx/stencil_mode.hpp>
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
 #include <mln/gfx/scissor_rect.hpp>
 #include <mln/gl/object.hpp>
 #include <mln/gl/state.hpp>
@@ -100,7 +101,7 @@ public:
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 
     /// Writes each tile's clip value into the stencil buffer over its pole-capped globe mesh.
-    bool renderGlobeTileClippingMasks(PaintParameters&, RenderStaticData&, const std::vector<shaders::GlobeClipMask>&);
+    bool renderGlobeTileClippingMasks(PaintParameters&, RenderStaticData&, const std::vector<gfx::GlobeClipMask>&);
 
     void finish();
 

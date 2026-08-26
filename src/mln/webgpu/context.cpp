@@ -114,8 +114,7 @@ gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& registr
                                                     gfx::ProjectionVariant variant) {
     // Align with Metal - just get shader from registry without caching
     const auto shaderGroup = registry.getShaderGroup(name);
-    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}, "a_pos", variant)
-                              : gfx::ShaderProgramBasePtr{};
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}, variant) : gfx::ShaderProgramBasePtr{};
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
@@ -251,7 +250,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     if (!clipMaskShader) {
         if (auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
-            clipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+            clipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Mercator));
         }
     }
     if (!clipMaskShader) {
@@ -428,17 +428,17 @@ void Context::releaseGlobeClipMasks() {
 
 bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
                                            RenderStaticData& staticData,
-                                           const std::vector<shaders::GlobeClipMask>& masks) {
+                                           const std::vector<gfx::GlobeClipMask>& masks) {
     using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::WebGPU>;
 
     if (masks.empty()) {
-        return false;
+        return true;
     }
 
     if (!globeClipMaskShader) {
         if (auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
             globeClipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                group->getOrCreateShader(*this, {}, "a_pos", gfx::ProjectionVariant::Globe));
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Globe));
         }
     }
     if (!globeClipMaskShader) {

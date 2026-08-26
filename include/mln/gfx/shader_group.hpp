@@ -158,8 +158,8 @@ public:
     /// @return A `gfx::ShaderPtr`
     virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
                                              [[maybe_unused]] const StringIDSetsPair& propertiesAsUniforms,
-                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos",
-                                             [[maybe_unused]] ProjectionVariant variant = ProjectionVariant::Mercator) {
+                                             [[maybe_unused]] ProjectionVariant variant,
+                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
 

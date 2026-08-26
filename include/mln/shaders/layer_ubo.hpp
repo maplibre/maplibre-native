@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mln/tile/tile_id.hpp>
 #include <mln/util/color.hpp>
 
 #include <array>
@@ -66,13 +65,6 @@ struct alignas(16) ProjectionUBO {
     /* 176 */
 };
 static_assert(sizeof(ProjectionUBO) == 11 * 16);
-
-/// A tile clipping mask on the globe: the tile's projection block, drawn over its pole-capped mesh.
-struct GlobeClipMask {
-    ProjectionUBO projection;
-    uint32_t stencilRef;
-    CanonicalTileID tile;
-};
 
 #if MLN_RENDER_BACKEND_VULKAN
 struct alignas(16) GlobalPlatformParamsUBO {
