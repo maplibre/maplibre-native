@@ -144,7 +144,7 @@ struct ProjectionUBO {
 // Tile position (0..EXTENT) to a point on the unit sphere; the pole sentinels in rawPos map to the poles.
 vec3 projectToSphere(vec2 translatedPos, vec2 rawPos, ProjectionUBO projection) {
     const vec2 mercator_pos = projection.tile_mercator_coords.xy + projection.tile_mercator_coords.zw * translatedPos;
-    const float spherical_x = mercator_pos.x * GLOBE_PI * 2.0 + GLOBE_PI;
+    const float spherical_x = mercator_pos.x * M_PI * 2.0 + M_PI;
     // sin/cos of the latitude from the Mercator Y via the tangent half-angle identities: no atan, and float32 precision survives near the equator.
     const float t = exp(M_PI - (mercator_pos.y * M_PI * 2.0));
     const float t2 = t * t;
