@@ -237,6 +237,27 @@ TEST(Style, VisibilityExpressionSetAtRuntime) {
     EXPECT_TRUE(log.empty()) << log.unchecked();
 }
 
+TEST(Style, LayerAddedAfterGlobalStateUpdateUsesCurrentState) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"STYLE({"version": 8, "sources": {}, "layers": []})STYLE");
+    style.setGlobalStateProperty("showLayer", false);
+
+    auto layer = std::make_unique<LineLayer>("line", "source");
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    document.Parse<0>(R"(["case", ["to-boolean", ["global-state", "showLayer"]], "visible", "none"])");
+    ASSERT_FALSE(document.HasParseError());
+    const JSValue* json = &document;
+    ASSERT_FALSE(layer->setProperty("visibility", conversion::Convertible(json)));
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    Layer* addedLayer = style.addLayer(std::move(layer));
+    ASSERT_NE(addedLayer, nullptr);
+    EXPECT_EQ(VisibilityType::None, addedLayer->getVisibility());
+}
+
 TEST(Style, VisibilityExpressionRejectsOtherDependencies) {
     util::RunLoop loop;
 
