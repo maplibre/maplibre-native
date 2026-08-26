@@ -284,8 +284,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 #endif
 
         if (!heatmapShader) {
-            heatmapShader = heatmapShaderGroup->getOrCreateShader(
-                context, *propertiesAsUniforms, "a_pos", projectionVariant);
+            heatmapShader = heatmapShaderGroup->getOrCreateShader(context, *propertiesAsUniforms, projectionVariant);
             if (!heatmapShader) {
                 continue;
             }
@@ -339,7 +338,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!heatmapTextureShader) {
-        heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);
+        heatmapTextureShader = context.getGenericShader(
+            shaders, HeatmapTextureShaderGroupName, gfx::ProjectionVariant::Mercator);
     }
     if (!heatmapTextureShader) {
         removeAllDrawables();

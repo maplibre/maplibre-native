@@ -171,7 +171,7 @@ void PaintParameters::clearStencil() {
 #endif
 
     if (state.isGlobeRendering()) {
-        const std::vector<shaders::GlobeClipMask> masks = {
+        const std::vector<gfx::GlobeClipMask> masks = {
             {.projection = LayerTweaker::toProjectionUBO(projectionDataForTile({0, 0, 0})),
              .stencilRef = 0,
              .tile = CanonicalTileID(0, 0, 0)}};
@@ -220,7 +220,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 #if MLN_RENDER_BACKEND_WEBGPU
     const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
-    std::vector<shaders::GlobeClipMask> globeMasks;
+    std::vector<gfx::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -267,7 +267,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     // Assign a stencil ID and build a UBO for each tile in the set
     const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
-    std::vector<shaders::GlobeClipMask> globeMasks;
+    std::vector<gfx::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -318,7 +318,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
     const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
-    std::vector<shaders::GlobeClipMask> globeMasks;
+    std::vector<gfx::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -362,7 +362,7 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 
 #elif MLN_RENDER_BACKEND_OPENGL
     if (state.isGlobeRendering()) {
-        std::vector<shaders::GlobeClipMask> globeMasks;
+        std::vector<gfx::GlobeClipMask> globeMasks;
         for (const auto& tileRef : *renderTiles) {
             const auto& tileID = tileRef.get().id;
             const int32_t stencilID = nextStencilID;

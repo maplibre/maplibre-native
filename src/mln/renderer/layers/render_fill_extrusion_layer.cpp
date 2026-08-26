@@ -246,7 +246,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             binders, evaluated, propertiesAsUniforms, idFillExtrusionBaseVertexAttribute);
 
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-            shaderGroup->getOrCreateShader(context, propertiesAsUniforms, "a_pos", projectionVariant));
+            shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
         if (!shader) {
             continue;
         }
@@ -270,7 +270,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             binders, evaluated, instancePropertiesAsUniforms, idFillExtrusionBaseVertexAttribute);
 
         const auto instancedShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-            instancedShaderGroup->getOrCreateShader(context, instancePropertiesAsUniforms, "a_pos", projectionVariant));
+            instancedShaderGroup->getOrCreateShader(context, instancePropertiesAsUniforms, projectionVariant));
         if (!instancedShader) {
             continue;
         }
