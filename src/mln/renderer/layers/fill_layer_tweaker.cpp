@@ -61,6 +61,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     int i = 0;
     std::vector<FillDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<FillTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -85,8 +86,15 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
         // from FillPatternProgram::layoutUniformValues
         const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);
@@ -265,6 +273,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     layerUniforms.set(idFillDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idFillTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

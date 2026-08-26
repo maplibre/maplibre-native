@@ -50,6 +50,22 @@ struct alignas(16) GlobalPaintParamsUBO {
 };
 static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
 
+//
+// Projection (per drawable; see ProjectionData)
+
+struct alignas(16) ProjectionUBO {
+    /*   0 */ std::array<float, 4 * 4> matrix;
+    /*  64 */ std::array<float, 4 * 4> fallback_matrix;
+    /* 128 */ std::array<float, 4> tile_mercator_coords;
+    /* 144 */ std::array<float, 4> clipping_plane;
+    /* 160 */ float projection_transition;
+    /* 164 */ float pad1;
+    /* 168 */ float pad2;
+    /* 172 */ float pad3;
+    /* 176 */
+};
+static_assert(sizeof(ProjectionUBO) == 11 * 16);
+
 #if MLN_RENDER_BACKEND_VULKAN
 struct alignas(16) GlobalPlatformParamsUBO {
     /*  0 */ std::array<float, 4> surfaceRotation;
