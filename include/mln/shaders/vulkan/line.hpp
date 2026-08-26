@@ -536,8 +536,11 @@ struct LinePatternDrawableUBO {
     float width_t;
     float pattern_from_t;
     float pattern_to_t;
-    vec4 pad1;
-    vec4 pad2;
+    float floorwidth_t;
+    float pad1;
+    float pad2;
+    float pad3;
+    vec4 pad4;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idLineDrawableUBO) readonly buffer LinePatternDrawableUBOVector {
@@ -576,6 +579,7 @@ layout(location = 6) out mediump vec4 frag_pattern_from;
 #if !defined(HAS_UNIFORM_u_pattern_to)
 layout(location = 7) out mediump vec4 frag_pattern_to;
 #endif
+layout(location = 8) out mediump float frag_floorwidth;
 
 void main() {
     const LinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
@@ -612,6 +616,11 @@ void main() {
 
 #ifndef HAS_UNIFORM_u_pattern_to
     frag_pattern_to = in_pattern_to;
+#endif
+#ifndef HAS_UNIFORM_u_width
+    frag_floorwidth = unpack_mix_float(in_width, drawable.floorwidth_t);
+#else
+    frag_floorwidth = props.floorwidth;
 #endif
 
     // the distance over which the line edge fades out.
@@ -684,6 +693,7 @@ layout(location = 6) in mediump vec4 frag_pattern_from;
 #if !defined(HAS_UNIFORM_u_pattern_to)
 layout(location = 7) in mediump vec4 frag_pattern_to;
 #endif
+layout(location = 8) in mediump float frag_floorwidth;
 
 layout(location = 0) out vec4 out_color;
 
@@ -767,6 +777,9 @@ void main() {
     const vec2 pattern_size_a = vec2(display_size_a.x * fromScale / tileZoomRatio, display_size_a.y);
     const vec2 pattern_size_b = vec2(display_size_b.x * toScale / tileZoomRatio, display_size_b.y);
 
+    const float aspect_a = display_size_a.y / frag_floorwidth;
+    const float aspect_b = display_size_b.y / frag_floorwidth;
+
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(frag_normal) * frag_width2.x;
 
@@ -776,18 +789,17 @@ void main() {
     const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
     const float alpha = clamp(min(dist - (frag_width2.y - blur2), frag_width2.x - dist) / blur2, 0.0, 1.0);
 
-    const float x_a = mod(frag_linesofar / pattern_size_a.x, 1.0);
-    const float x_b = mod(frag_linesofar / pattern_size_b.x, 1.0);
+    const float x_a = mod(frag_linesofar / pattern_size_a.x * aspect_a, 1.0);
+    const float x_b = mod(frag_linesofar / pattern_size_b.x * aspect_b, 1.0);
 
-    // frag_normal.y is 0 at the midpoint of the line, -1 at the lower edge, 1 at the upper edge
-    // we clamp the line width outset to be between 0 and half the pattern height plus padding (2.0)
-    // to ensure we don't sample outside the designated symbol on the sprite sheet.
-    // 0.5 is added to shift the component to be bounded between 0 and 1 for interpolation of
-    // the texture coordinate
-    const float y_a = 0.5 + (frag_normal.y * clamp(frag_width2.x, 0.0, (pattern_size_a.y + 2.0) / 2.0) / pattern_size_a.y);
-    const float y_b = 0.5 + (frag_normal.y * clamp(frag_width2.x, 0.0, (pattern_size_b.y + 2.0) / 2.0) / pattern_size_b.y);
-    const vec2 pos_a = mix(pattern_tl_a / tileProps.texsize, pattern_br_a / tileProps.texsize, vec2(x_a, y_a));
-    const vec2 pos_b = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, vec2(x_b, y_b));
+    const float y = 0.5 * frag_normal.y + 0.5;
+
+    const vec2 texel_size = 1.0 / tileProps.texsize;
+    const vec2 half_texel = 0.5 * texel_size;
+    vec2 pos_a = mix(pattern_tl_a * texel_size - texel_size, pattern_br_a * texel_size + texel_size, vec2(x_a, y));
+    pos_a = clamp(pos_a, (pattern_tl_a - 1.0) * texel_size + half_texel, (pattern_br_a + 1.0) * texel_size - half_texel);
+    vec2 pos_b = mix(pattern_tl_b * texel_size - texel_size, pattern_br_b * texel_size + texel_size, vec2(x_b, y));
+    pos_b = clamp(pos_b, (pattern_tl_b - 1.0) * texel_size + half_texel, (pattern_br_b + 1.0) * texel_size - half_texel);
 
     const vec4 color = mix(texture(image0_sampler, pos_a), texture(image0_sampler, pos_b), tileProps.fade);
 
