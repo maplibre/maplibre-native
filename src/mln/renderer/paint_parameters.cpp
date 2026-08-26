@@ -4,6 +4,7 @@
 #include <mln/gfx/cull_face_mode.hpp>
 #include <mln/gfx/render_pass.hpp>
 #include <mln/map/transform_state.hpp>
+#include <mln/renderer/layer_tweaker.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -167,9 +168,17 @@ void PaintParameters::clearStencil() {
     const auto debugGroup = renderPass->createDebugGroup("tile-clip-mask-clear");
 #endif
 
-    const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
-        .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
-    mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    if (state.isGlobeRendering()) {
+        const std::vector<mtl::Context::GlobeClipMask> masks = {
+            {.projection = LayerTweaker::toProjectionUBO(projectionDataForTile({0, 0, 0})),
+             .stencilRef = 0,
+             .tile = CanonicalTileID(0, 0, 0)}};
+        mtlContext.renderGlobeTileClippingMasks(*renderPass, staticData, masks);
+    } else {
+        const std::vector<shaders::ClipUBO> tileUBO = {shaders::ClipUBO{
+            .matrix = util::cast<float>(matrixForTile({0, 0, 0})), .stencil_ref = 0, .pad1 = 0, .pad2 = 0, .pad3 = 0}};
+        mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
+    }
     context.renderingStats().stencilClears++;
 #elif MLN_RENDER_BACKEND_VULKAN
     const auto& vulkanRenderPass = static_cast<vulkan::RenderPass&>(*renderPass);
@@ -185,10 +194,12 @@ void PaintParameters::clearStencil() {
 }
 
 bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    // The clip masks are Mercator tile quads; on the globe they arrive with the tile meshes.
+#if !MLN_RENDER_BACKEND_METAL
+    // The globe clip masks land per backend after Metal; until then these backends draw the globe unclipped.
     if (state.isGlobeRendering()) {
         return true;
     }
+#endif
 
     // We can avoid updating the mask if it already contains the same set of tiles.
     if (!renderTiles || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
@@ -243,7 +254,9 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     }
 #elif MLN_RENDER_BACKEND_METAL
     // Assign a stencil ID and build a UBO for each tile in the set
+    const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
+    std::vector<mtl::Context::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -254,6 +267,13 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             nextStencilID++;
         } else {
             // already present
+            continue;
+        }
+
+        if (globe) {
+            globeMasks.push_back({.projection = LayerTweaker::toProjectionUBO(projectionDataForTile(tileID)),
+                                  .stencilRef = static_cast<uint32_t>(stencilID),
+                                  .tile = tileID.canonical});
             continue;
         }
 
@@ -268,13 +288,17 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                                                .pad3 = 0});
     }
 
-    if (!tileUBOs.empty()) {
+    if (!tileUBOs.empty() || !globeMasks.empty()) {
 #if !defined(NDEBUG)
         const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
 #endif
 
         auto& mtlContext = static_cast<mtl::Context&>(context);
-        mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        if (globe) {
+            mtlContext.renderGlobeTileClippingMasks(*renderPass, staticData, globeMasks);
+        } else {
+            mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        }
 
         mtlContext.renderingStats().stencilUpdates++;
     }
@@ -370,9 +394,11 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {
+#if !MLN_RENDER_BACKEND_METAL
     if (state.isGlobeRendering()) {
         return gfx::StencilMode::disabled();
     }
+#endif
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
     const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
