@@ -22,5 +22,9 @@
     "render-tests/projection/globe/text-point-pole-to-pole": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/text-pitched-rotated": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
     "render-tests/projection/globe/icon-text-translate-map": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
-    "render-tests/projection/globe/icon-text-translate-viewport": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
+    "render-tests/projection/globe/icon-text-translate-viewport": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/hillshade": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/raster-planet": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/raster-pole": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+    "render-tests/projection/globe/raster-warped": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
 }
