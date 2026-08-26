@@ -1,4 +1,5 @@
 {
+  "render-tests/projection/globe/debug-tile-borders": "The tile border is a hardware wide line on OpenGL and an anti-aliased polyline in the Metal expectation.",
   "render-tests/projection/globe/fill-grid": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/fill-grid-pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/background": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
