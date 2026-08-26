@@ -14,7 +14,6 @@
 #include <mln/util/logging.hpp>
 
 #include <mln/renderer/layers/raster_layer_tweaker.hpp>
-#include <mln/gfx/image_drawable_data.hpp>
 #include <mln/gfx/drawable_impl.hpp>
 #include <mln/gfx/drawable_builder.hpp>
 #include <mln/renderer/layer_group.hpp>
@@ -275,10 +274,10 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 activateLayerGroup(imageLayerGroup, isRenderable, changes);
             }
 
-            // Create a drawable for each transformation
+            // Create a drawable for each tile the image is drawn in
             // TODO: Share textures
             builder = createBuilder();
-            for (const auto& matrix_ : imageData->matrices) {
+            for (const auto& tileID : imageData->tileIds) {
                 buildVertexData(builder, /*drawable=*/nullptr, bucket, std::nullopt);
                 setTextures(builder, bucket);
 
@@ -286,7 +285,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder->flush(context);
 
                 for (auto& drawable : builder->clearDrawables()) {
-                    drawable->setData(std::make_unique<gfx::ImageDrawableData>(matrix_));
+                    drawable->setTileID(OverscaledTileID(tileID.canonical.z, tileID.wrap, tileID.canonical));
                     drawable->setLayerTweaker(layerTweaker);
                     imageLayerGroup->addDrawable(std::move(drawable));
                     ++stats.drawablesAdded;
