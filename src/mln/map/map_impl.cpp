@@ -2,8 +2,8 @@
 #include <mln/map/map_impl.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
-#include <mln/style/style_impl.hpp>
 #include <mln/style/projection_impl.hpp>
+#include <mln/style/style_impl.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/traits.hpp>
@@ -117,31 +117,33 @@ void Map::Impl::onUpdate() {
     transform.setProjectionDefinition(
         style->impl->getProjection()->impl->evaluate(static_cast<float>(transform.getZoom())));
 
-    UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
-                               .mode = mode,
-                               .pixelRatio = pixelRatio,
-                               .debugOptions = debugOptions,
-                               .timePoint = timePoint,
-                               .transformState = transform.getState(),
-                               .glyphURL = style->impl->getGlyphURL(),
-                               .fontFaces = style->impl->getFontFaces(),
-                               .spriteLoaded = style->impl->areSpritesLoaded(),
-                               .transitionOptions = style->impl->getTransitionOptions(),
-                               .light = style->impl->getLight()->impl,
-                               .images = style->impl->getImageImpls(),
-                               .sources = style->impl->getSourceImpls(),
-                               .layers = style->impl->getLayerImpls(),
-                               .annotationManager = annotationManager.makeWeakPtr(),
-                               .fileSource = fileSource,
-                               .prefetchZoomDelta = prefetchZoomDelta,
-                               .stillImageRequest = bool(stillImageRequest),
-                               .crossSourceCollisions = crossSourceCollisions,
-                               .fastPFOREnabled = fastPFOREnabled,
-                               .tileLodMinRadius = tileLodMinRadius,
-                               .tileLodScale = tileLodScale,
-                               .tileLodPitchThreshold = tileLodPitchThreshold,
-                               .tileLodZoomShift = tileLodZoomShift,
-                               .tileLodMode = tileLodMode};
+    UpdateParameters params = {
+        .styleLoaded = style->impl->isLoaded(),
+        .mode = mode,
+        .pixelRatio = pixelRatio,
+        .debugOptions = debugOptions,
+        .timePoint = timePoint,
+        .transformState = transform.getState(),
+        .glyphURL = style->impl->getGlyphURL(),
+        .fontFaces = style->impl->getFontFaces(),
+        .spriteLoaded = style->impl->areSpritesLoaded(),
+        .transitionOptions = style->impl->getTransitionOptions(),
+        .light = style->impl->getLight()->impl,
+        .images = style->impl->getImageImpls(),
+        .sources = style->impl->getSourceImpls(),
+        .layers = style->impl->getLayerImpls(),
+        .annotationManager = annotationManager.makeWeakPtr(),
+        .fileSource = fileSource,
+        .prefetchZoomDelta = prefetchZoomDelta,
+        .stillImageRequest = bool(stillImageRequest),
+        .crossSourceCollisions = crossSourceCollisions,
+        .fastPFOREnabled = fastPFOREnabled,
+        .tileLodMinRadius = tileLodMinRadius,
+        .tileLodScale = tileLodScale,
+        .tileLodPitchThreshold = tileLodPitchThreshold,
+        .tileLodZoomShift = tileLodZoomShift,
+        .tileLodMode = tileLodMode,
+        .subdivisionGranularity = style->impl->getProjection()->impl->getSubdivisionGranularity()};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }

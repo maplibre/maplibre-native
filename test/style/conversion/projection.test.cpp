@@ -30,7 +30,12 @@ TEST(StyleConversion, Projection) {
         ASSERT_TRUE(projection);
         ASSERT_TRUE(projection->getType().isConstant());
         ASSERT_EQ(ProjectionDefinition("globe"), projection->getType().asConstant());
-        ASSERT_EQ(ProjectionDefinition("globe", "globe", 1), projection->impl->evaluate(3.f));
+        // The preset is the vertical perspective until zoom 11, Mercator from zoom 12, and blends in between.
+        ASSERT_EQ(ProjectionDefinition("vertical-perspective"), projection->impl->evaluate(3.f));
+        ASSERT_EQ(ProjectionDefinition("vertical-perspective"), projection->impl->evaluate(11.f));
+        ASSERT_EQ(ProjectionDefinition("vertical-perspective", "mercator", 0.5), projection->impl->evaluate(11.5f));
+        ASSERT_EQ(ProjectionDefinition("mercator"), projection->impl->evaluate(12.f));
+        ASSERT_EQ(ProjectionDefinition("mercator"), projection->impl->evaluate(16.f));
     }
 
     {
@@ -45,10 +50,11 @@ TEST(StyleConversion, Projection) {
             R"({"type":["interpolate",["linear"],["zoom"],10,"vertical-perspective",12,"mercator"]})");
         ASSERT_TRUE(projection);
         ASSERT_TRUE(projection->getType().isExpression());
-        ASSERT_EQ(ProjectionDefinition("vertical-perspective", "vertical-perspective", 1),
-                  projection->impl->evaluate(9.f));
+        ASSERT_EQ(ProjectionDefinition("vertical-perspective"), projection->impl->evaluate(9.f));
+        ASSERT_EQ(ProjectionDefinition("vertical-perspective"), projection->impl->evaluate(10.f));
         ASSERT_EQ(ProjectionDefinition("vertical-perspective", "mercator", 0.5), projection->impl->evaluate(11.f));
-        ASSERT_EQ(ProjectionDefinition("mercator", "mercator", 1), projection->impl->evaluate(13.f));
+        ASSERT_EQ(ProjectionDefinition("mercator"), projection->impl->evaluate(12.f));
+        ASSERT_EQ(ProjectionDefinition("mercator"), projection->impl->evaluate(13.f));
     }
 
     {
@@ -71,4 +77,21 @@ TEST(StyleConversion, Projection) {
         ASSERT_FALSE(parseProjection(R"({"type":3})"));
         ASSERT_EQ("value must be a string or an array of [from, to, transition]", error.message);
     }
+}
+
+TEST(StyleConversion, ProjectionSubdivisionGranularity) {
+    Error error;
+    auto granularity = [&](const std::string& src) {
+        auto projection = convertJSON<Projection>(src, error);
+        EXPECT_TRUE(projection) << error.message;
+        return projection->impl->getSubdivisionGranularity();
+    };
+    // Only a style that never renders a globe keeps the flat, unsubdivided geometry.
+    EXPECT_EQ(SubdivisionGranularitySetting::none(), granularity("{}"));
+    EXPECT_EQ(SubdivisionGranularitySetting::none(), granularity(R"({"type":"mercator"})"));
+    EXPECT_EQ(SubdivisionGranularitySetting::globe(), granularity(R"({"type":"globe"})"));
+    EXPECT_EQ(SubdivisionGranularitySetting::globe(), granularity(R"({"type":"vertical-perspective"})"));
+    EXPECT_EQ(SubdivisionGranularitySetting::globe(), granularity(R"({"type":["mercator","vertical-perspective",0]})"));
+    EXPECT_EQ(SubdivisionGranularitySetting::globe(),
+              granularity(R"({"type":["interpolate",["linear"],["zoom"],10,"vertical-perspective",12,"mercator"]})"));
 }
