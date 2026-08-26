@@ -464,6 +464,10 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     return true;
 }
 
+void Context::releaseGlobeClipMasks() {
+    globeClipMeshes.clear();
+}
+
 bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
                                            RenderStaticData& staticData,
                                            const std::vector<shaders::GlobeClipMask>& masks) {

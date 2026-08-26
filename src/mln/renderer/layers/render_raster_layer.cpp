@@ -109,6 +109,9 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     if (updateProjectionVariant(state)) {
         rasterShader.reset();
+        if (projectionVariant == gfx::ProjectionVariant::Mercator) {
+            globeMeshes.clear();
+        }
     }
     if ((!renderTiles || renderTiles->empty()) && !imageData) {
         if (layerGroup) {
