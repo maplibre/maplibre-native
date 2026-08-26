@@ -81,8 +81,7 @@ layout (std140) uniform ProjectionUBO {
     highp vec4 u_projection_clipping_plane;
     highp float u_projection_transition;
     highp float u_projection_depth_offset;
-    lowp float projection_pad1;
-    lowp float projection_pad2;
+    highp vec2 u_projection_translate;
 };
 
 // Pole vertices carry these sentinel Y values in their raw position.
@@ -177,20 +176,20 @@ vec4 interpolateProjectionFor3D(vec2 posInTile, vec3 spherePos, float elevation)
 }
 
 vec4 projectTile(vec2 pos) {
-    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0)), 0.0);
+    return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, vec2(0.0, 0.0)), 0.0);
 }
 
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 vec4 projectTile(vec2 pos, vec2 rawPos) {
-    return interpolateProjection(pos, projectToSphere(pos, rawPos), 0.0);
+    return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, rawPos), 0.0);
 }
 
 vec4 projectTileWithElevation(vec2 pos, float elevation) {
-    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0)), elevation);
+    return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, vec2(0.0, 0.0)), elevation);
 }
 
 vec4 projectTileFor3D(vec2 pos, float elevation) {
-    return interpolateProjectionFor3D(pos, projectToSphere(pos, pos), elevation);
+    return interpolateProjectionFor3D(pos, projectToSphere(pos + u_projection_translate, pos), elevation);
 }
 
 #else
