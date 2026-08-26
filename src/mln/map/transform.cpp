@@ -617,7 +617,7 @@ double Transform::getFieldOfView() const {
     return state.getFieldOfView();
 }
 
-// MARK: - North Orientation
+// MARK: - Projection
 
 void Transform::setProjectionDefinition(const ProjectionDefinition& definition) {
     state.setProjectionDefinition(definition);

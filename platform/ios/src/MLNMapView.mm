@@ -4587,6 +4587,12 @@ static void *windowScreenContext = &windowScreenContext;
   return [self convertPoint:CGPointMake(pixel.x, pixel.y) toView:view];
 }
 
+/// Whether the globe hides the coordinate from the camera.
+- (BOOL)isCoordinateOccluded:(CLLocationCoordinate2D)coordinate {
+  return CLLocationCoordinate2DIsValid(coordinate) &&
+         self.mbglMap.isLocationOccluded(MLNLatLngFromLocationCoordinate2D(coordinate));
+}
+
 - (MLNCoordinateBounds)convertRect:(CGRect)rect toCoordinateBoundsFromView:(nullable UIView *)view {
   return MLNCoordinateBoundsFromLatLngBounds([self convertRect:rect toLatLngBoundsFromView:view]);
 }
@@ -5446,6 +5452,8 @@ static void *windowScreenContext = &windowScreenContext;
   if (!annotation) return;
 
   if (annotation == self.selectedAnnotation) return;
+
+  if ([self isCoordinateOccluded:annotation.coordinate]) return;
 
   [self deselectAnnotation:self.selectedAnnotation animated:NO];
 
@@ -7137,7 +7145,12 @@ static void *windowScreenContext = &windowScreenContext;
   CGFloat heightAdjustment = self.camera.pitch > 0.0 ? 0.0 : -largestHeight * 2.0;
   CGRect viewPort = CGRectInset(self.bounds, widthAdjustment, heightAdjustment);
 
-  NSArray *visibleAnnotations = [self visibleAnnotationsInRect:viewPort];
+  NSMutableArray *visibleAnnotations = [NSMutableArray array];
+  for (id<MLNAnnotation> annotation in [self visibleAnnotationsInRect:viewPort]) {
+    if (![self isCoordinateOccluded:annotation.coordinate]) {
+      [visibleAnnotations addObject:annotation];
+    }
+  }
   NSMutableArray *offscreenAnnotations = [self.annotations mutableCopy];
   [offscreenAnnotations removeObjectsInArray:visibleAnnotations];
 
@@ -7202,7 +7215,8 @@ static void *windowScreenContext = &windowScreenContext;
       // view center is moved and the enqueue operation is avoided. This allows us to keep the
       // performance benefit of using the mbgl query result. It also forces views that have just
       // gone offscreen to be cleared fully from view.
-      if (MLNCoordinateInCoordinateBounds(coordinate, coordinateBounds)) {
+      if (MLNCoordinateInCoordinateBounds(coordinate, coordinateBounds) &&
+          ![self isCoordinateOccluded:coordinate]) {
         annotationView.center = [self convertCoordinate:annotationContext.annotation.coordinate
                                           toPointToView:self];
       } else {
@@ -7236,6 +7250,11 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)updateCalloutView {
   UIView<MLNCalloutView> *calloutView = self.calloutViewForSelectedAnnotation;
   id<MLNAnnotation> annotation = calloutView.representedObject;
+
+  if (annotation && [self isCoordinateOccluded:annotation.coordinate]) {
+    [self deselectAnnotation:annotation animated:YES];
+    return;
+  }
 
   BOOL isAnchoredToAnnotation =
       (calloutView && annotation &&
@@ -7327,7 +7346,8 @@ static void *windowScreenContext = &windowScreenContext;
     annotationView.center = userPoint;
   }
 
-  if (CGRectContainsPoint(CGRectInset(self.bounds, -MLNAnnotationUpdateViewportOutset.width,
+  if (![self isCoordinateOccluded:self.userLocation.coordinate] &&
+      CGRectContainsPoint(CGRectInset(self.bounds, -MLNAnnotationUpdateViewportOutset.width,
                                       -MLNAnnotationUpdateViewportOutset.height),
                           userPoint)) {
     // Smoothly move the user location annotation view and callout view to
