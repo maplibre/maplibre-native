@@ -4,14 +4,15 @@
     "test": {
       "height": 256,
       "width": 256,
-      "allowed": 0.05
+      "allowed": 0.05,
+      "description": "GL JS's globe hillshade test at zoom 5 instead of 4.5: native loads raster-dem tiles at floor(zoom) where GL JS rounds, and the z5 tile is the one both have."
     }
   },
   "center": [
     -118.12,
     36.6
   ],
-  "zoom": 4.5,
+  "zoom": 5,
   "projection": {
     "type": "globe"
   },
