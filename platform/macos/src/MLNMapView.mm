@@ -2708,6 +2708,10 @@ public:
     return;
   }
 
+  if ([self isCoordinateOccluded:annotation.coordinate]) {
+    return;
+  }
+
   // Deselect the annotation before reselecting it.
   [self deselectAnnotation:selectedAnnotation];
 
@@ -2984,6 +2988,11 @@ public:
 - (void)updateAnnotationCallouts {
   NSPopover *callout = self.calloutForSelectedAnnotation;
   if (callout) {
+    if ([self isCoordinateOccluded:self.selectedAnnotation.coordinate]) {
+      [self deselectAnnotation:self.selectedAnnotation];
+      return;
+    }
+
     NSRect rect = [self positioningRectForCalloutForAnnotationWithTag:_selectedAnnotationTag];
 
     NSAssert(!NSEqualRects(rect, NSZeroRect), @"Positioning rect should be non-zero");
@@ -3319,6 +3328,12 @@ public:
   // Cocoa origin is at the lower-left corner.
   pixel.y = NSHeight(self.bounds) - pixel.y;
   return [self convertPoint:NSMakePoint(pixel.x, pixel.y) toView:view];
+}
+
+/// Whether the globe hides the coordinate from the camera.
+- (BOOL)isCoordinateOccluded:(CLLocationCoordinate2D)coordinate {
+  return CLLocationCoordinate2DIsValid(coordinate) &&
+         _mbglMap->isLocationOccluded(MLNLatLngFromLocationCoordinate2D(coordinate));
 }
 
 - (CLLocationCoordinate2D)convertPoint:(NSPoint)point toCoordinateFromView:(nullable NSView *)view {
