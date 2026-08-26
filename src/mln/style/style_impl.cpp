@@ -213,10 +213,7 @@ void Style::Impl::setGlobalStateProperty(const std::string& property, const Valu
     }
 
     const auto current = globalState->find(property);
-    // A missing property already evaluates to null, so setting an absent
-    // property to null is a no-op as well.
-    const bool unchanged = current != globalState->end() ? stateValuesEqual(current->second, *newValue)
-                                                         : newValue->is<NullValue>();
+    const bool unchanged = current != globalState->end() && stateValuesEqual(current->second, *newValue);
     if (unchanged) {
         return;
     }
