@@ -633,6 +633,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_source.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_source_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_static_data.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/globe_tile_mesh.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_static_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_tile.hpp
