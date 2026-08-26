@@ -1,6 +1,7 @@
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/style/projection_definition.hpp>
 #include <mln/math/angles.hpp>
 
 #include <algorithm>
@@ -628,4 +629,107 @@ TEST(TileCover, DISABLED_FuzzLine) {
         while (tc.next()) {
         };
     }
+}
+
+namespace {
+
+void setUpGlobe(
+    Transform& transform, const Size& size, const LatLng& center, double zoom, double pitch = 0, double bearing = 0) {
+    transform.resize(size);
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.setMaxPitch(80.0);
+    transform.jumpTo(CameraOptions().withCenter(center).withZoom(zoom).withPitch(pitch).withBearing(bearing));
+    EXPECT_TRUE(transform.getState().isGlobeRendering());
+}
+
+} // namespace
+
+// The globe cases of GL JS `covering_tiles.test.ts`, same cameras, same tiles in the same order.
+TEST(TileCover, GlobeZoomedOut) {
+    Transform transform;
+    setUpGlobe(transform, {128, 128}, {0.0, 0.0}, -1.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{{0, 0, 0}}), util::tileCover({transform.getState()}, 0, zoomRange));
+}
+
+TEST(TileCover, GlobeZoomedIn) {
+    Transform transform;
+    setUpGlobe(transform, {128, 128}, {0.01, -0.02}, 3.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{{3, 3, 3}, {3, 3, 4}, {3, 4, 3}, {3, 4, 4}}),
+              util::tileCover({transform.getState()}, 3, zoomRange));
+}
+
+TEST(TileCover, GlobeZoomedInLargeViewport) {
+    Transform transform;
+    setUpGlobe(transform, {512, 512}, {0.01, -0.02}, 3.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{
+                  {3, 3, 3}, {3, 3, 4}, {3, 4, 3}, {3, 4, 4}, {3, 2, 3}, {3, 2, 4}, {3, 5, 3}, {3, 5, 4}}),
+              util::tileCover({transform.getState()}, 3, zoomRange));
+}
+
+TEST(TileCover, GlobePitched) {
+    Transform transform;
+    setUpGlobe(transform, {128, 128}, {0.001, -0.002}, 8.0, 80.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{
+                  {6, 32, 31}, {6, 31, 31}, {10, 511, 512}, {10, 512, 512}, {10, 511, 513}, {10, 512, 513}}),
+              util::tileCover({transform.getState()}, 8, zoomRange));
+}
+
+TEST(TileCover, GlobePitchedAndRotated) {
+    Transform transform;
+    setUpGlobe(transform, {128, 128}, {0.001, -0.002}, 8.0, 80.0, 45.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{
+                  {7, 64, 64}, {7, 64, 63}, {7, 63, 63}, {10, 510, 512}, {10, 511, 512}, {10, 511, 513}}),
+              util::tileCover({transform.getState()}, 8, zoomRange));
+}
+
+TEST(TileCover, GlobeAntimeridian) {
+    Transform east;
+    setUpGlobe(east, {128, 128}, {-0.001, 179.99}, 5.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{
+                  {5, 31, 16}, {5, 31, 15}, {5, 1, CanonicalTileID{5, 0, 16}}, {5, 1, CanonicalTileID{5, 0, 15}}}),
+              util::tileCover({east.getState()}, 5, zoomRange));
+
+    Transform west;
+    setUpGlobe(west, {128, 128}, {0.001, -179.99}, 5.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{
+                  {5, 0, 15}, {5, 0, 16}, {5, -1, CanonicalTileID{5, 31, 15}}, {5, -1, CanonicalTileID{5, 31, 16}}}),
+              util::tileCover({west.getState()}, 5, zoomRange));
+}
+
+TEST(TileCover, GlobeBelowZoomZero) {
+    Transform transform;
+    setUpGlobe(transform, {128, 128}, {80.0, 0.0}, -0.5);
+    EXPECT_EQ(0, transform.getState().getIntegerZoom());
+    EXPECT_EQ((std::vector<OverscaledTileID>{{0, 0, 0}}),
+              util::tileCover({transform.getState()}, 0, Range<uint8_t>(0, 0)));
+}
+
+TEST(TileCover, GlobeAtTheHandOffZoom) {
+    Transform transform;
+    setUpGlobe(transform, {128, 128}, {-0.087, -179.73}, 11.0);
+    EXPECT_EQ((std::vector<OverscaledTileID>{{11, 1, 1024}}),
+              util::tileCover({transform.getState()}, 11, Range<uint8_t>(0, 15)));
+}
+
+TEST(TileCover, GlobeHidesTheFarSide) {
+    Transform transform;
+    setUpGlobe(transform, {512, 512}, {0.0, 0.0}, 3.0);
+    const auto cover = util::tileCover({transform.getState()}, 3, zoomRange);
+    const auto has = [&](uint32_t x, uint32_t y) {
+        return std::ranges::find(cover, OverscaledTileID{3, x, y}) != cover.end();
+    };
+    EXPECT_TRUE(has(3, 3));
+    EXPECT_TRUE(has(4, 4));
+    // Tiles on the far side of the planet (lng 135..180 at the equator) are not covered.
+    EXPECT_FALSE(has(7, 3));
+    EXPECT_FALSE(has(0, 4));
+    EXPECT_LT(cover.size(), 64u);
+}
+
+TEST(TileCover, GlobeZoomZeroIsTheWholePlanet) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{40.0, 10.0}).withZoom(0.0));
+    EXPECT_EQ((std::vector<OverscaledTileID>{{0, 0, 0}}), util::tileCover({transform.getState()}, 0, zoomRange));
 }
