@@ -10,5 +10,15 @@
   "render-tests/projection/globe/fill-planet-solid": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/line-spiral": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
   "render-tests/projection/globe/line-dasharray": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
-  "render-tests/projection/globe/text-line-equator": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
+  "render-tests/projection/globe/text-line-equator": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/circle-pitch-alignment/map-scale-map": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/circle-pitch-alignment/map-scale-viewport": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/circle-pitch-alignment/viewport-scale-map": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/circle-pitch-alignment/viewport-scale-viewport": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/circle-planet": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/heatmap": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/text-point-pole-to-pole": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/text-pitched-rotated": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/icon-text-translate-map": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525",
+  "render-tests/projection/globe/icon-text-translate-viewport": "globe rendering lands per backend after Metal; https://github.com/maplibre/maplibre-native/pull/4525"
 }
