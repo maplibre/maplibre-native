@@ -65,9 +65,32 @@ StyleProperty Projection::getProperty(const std::string& name) const {
     return {};
 }
 
+SubdivisionGranularitySetting Projection::Impl::getSubdivisionGranularity() const {
+    if (type.isUndefined() ||
+        (type.isConstant() && type.asConstant() == ProjectionDefinition(ProjectionType::Mercator))) {
+        return SubdivisionGranularitySetting::none();
+    }
+    return SubdivisionGranularitySetting::globe();
+}
+
 ProjectionDefinition Projection::Impl::evaluate(float zoom) const {
     const PropertyEvaluationParameters parameters(zoom);
-    return type.evaluate(PropertyEvaluator<ProjectionDefinition>(parameters, Projection::getDefaultType()));
+    const auto definition = type.evaluate(
+        PropertyEvaluator<ProjectionDefinition>(parameters, Projection::getDefaultType()));
+    // `globe` is the vertical perspective up to the first zoom and Mercator from the second, blended in between.
+    constexpr float globeToMercatorStartZoom = 11;
+    constexpr float globeToMercatorEndZoom = 12;
+    if (definition.from == ProjectionType::Globe && definition.to == ProjectionType::Globe) {
+        if (zoom <= globeToMercatorStartZoom) {
+            return ProjectionDefinition(ProjectionType::VerticalPerspective);
+        }
+        if (zoom >= globeToMercatorEndZoom) {
+            return ProjectionDefinition(ProjectionType::Mercator);
+        }
+        return ProjectionDefinition(
+            ProjectionType::VerticalPerspective, ProjectionType::Mercator, zoom - globeToMercatorStartZoom);
+    }
+    return definition;
 }
 
 } // namespace style

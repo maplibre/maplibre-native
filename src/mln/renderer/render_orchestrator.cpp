@@ -202,6 +202,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                   .tileLodMode = updateParameters->tileLodMode,
+                                  .subdivisionGranularity = updateParameters->subdivisionGranularity,
                                   .dynamicTextureAtlas = dynamicTextureAtlas,
                                   .captureRenderedFeatures = updateParameters->captureRenderedFeatures};
 
