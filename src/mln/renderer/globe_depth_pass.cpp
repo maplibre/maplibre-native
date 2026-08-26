@@ -54,6 +54,9 @@ void GlobeDepthPass::update(gfx::ShaderRegistry& shaders,
         if (layerGroup) {
             layerGroup->clearDrawables();
         }
+        if (!state.isGlobeRendering()) {
+            meshes.clear();
+        }
         return;
     }
 

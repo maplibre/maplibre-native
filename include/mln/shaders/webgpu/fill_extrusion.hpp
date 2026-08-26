@@ -69,6 +69,7 @@ struct GlobalIndexUBO {
 };
 
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(6) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 
@@ -95,7 +96,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let z = select(baseValue, heightValue, t > 0.0);
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
-    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    out.position = projectTileFor3D(vec2<f32>(in.position) + decimals, z, projectionVector[globalIndex.value]);
 
 #ifdef OVERDRAW_INSPECTOR
     out.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -231,6 +232,7 @@ struct GlobalIndexUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillExtrusionPatternDrawableUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 @group(0) @binding(5) var<storage, read> tilePropsVector: array<FillExtrusionPatternTilePropsUBO>;
 @group(0) @binding(6) var<uniform> props: FillExtrusionPropsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
@@ -260,7 +262,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let z = select(baseValue, heightValue, t > 0.0);
     let decimals = unpack_float(f32(in.decimals_ed.x / 2)) / 128.0;
 
-    out.position = drawable.matrix * vec4<f32>(vec2<f32>(in.position) + decimals, z, 1.0);
+    out.position = projectTileFor3D(vec2<f32>(in.position) + decimals, z, projectionVector[globalIndex.value]);
 
     var patternPos: vec2<f32>;
     if (normal.z == 1.0) {
