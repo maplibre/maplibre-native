@@ -61,10 +61,17 @@ struct FragmentResult {
     half4 color [[color(0)]];
 };
 
+#if defined(PROJECTION_GLOBE)
+FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
+                                device const ProjectionUBO& projection [[buffer(idClippingMaskUBO)]]) {
+    return { projectTile(float2(in.position.xy), float2(in.position.xy), projection) };
+}
+#else
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                 device const ClipUBO& clipUBO [[buffer(idClippingMaskUBO)]]) {
     return { clipUBO.matrix * float4(float2(in.position.xy), 0, 1) };
 }
+#endif
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
     return half4(1.0);
