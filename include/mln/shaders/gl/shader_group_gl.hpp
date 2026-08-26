@@ -19,8 +19,8 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
-                                     std::string_view firstAttribName,
-                                     gfx::ProjectionVariant variant) override {
+                                     gfx::ProjectionVariant variant,
+                                     std::string_view firstAttribName) override {
         constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name;
         constexpr auto& vert = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex;
         constexpr auto& frag = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::fragment;
