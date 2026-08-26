@@ -733,3 +733,17 @@ TEST(TileCover, GlobeZoomZeroIsTheWholePlanet) {
     transform.jumpTo(CameraOptions().withCenter(LatLng{40.0, 10.0}).withZoom(0.0));
     EXPECT_EQ((std::vector<OverscaledTileID>{{0, 0, 0}}), util::tileCover({transform.getState()}, 0, zoomRange));
 }
+
+TEST(TileCover, GlobeCoverSurvivesTheAntimeridian) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179}).withZoom(1.0));
+    auto before = util::tileCover({transform.getState()}, 1, Range<uint8_t>(0, 14));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}).withZoom(1.0));
+    auto after = util::tileCover({transform.getState()}, 1, Range<uint8_t>(0, 14));
+    std::sort(before.begin(), before.end());
+    std::sort(after.begin(), after.end());
+    EXPECT_EQ(before, after);
+    EXPECT_EQ(4u, after.size());
+}
