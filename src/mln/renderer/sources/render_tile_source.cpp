@@ -117,7 +117,7 @@ public:
 
             const auto projection = getProjectionData(
                 tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-            const auto& matrix = projection.mainMatrix;
+            const auto& matrix = projection.fallbackMatrix;
 #if MLN_UBO_CONSOLIDATION
             projectionUBOVector[i] = toProjectionUBO(projection);
 #else
