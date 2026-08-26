@@ -84,7 +84,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto projection = getProjectionData(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
 #if MLN_UBO_CONSOLIDATION
         projectionUBOVector[i] = toProjectionUBO(projection);
 #else

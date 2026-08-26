@@ -69,7 +69,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         constexpr bool inViewportPixelUnits = false;
         const auto projection = getProjectionData(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
-        const auto& matrix = projection.mainMatrix;
+        const auto& matrix = projection.fallbackMatrix;
 #if MLN_UBO_CONSOLIDATION
         projectionUBOVector[i] = toProjectionUBO(projection);
 #else
