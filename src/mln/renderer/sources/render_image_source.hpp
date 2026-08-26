@@ -11,13 +11,15 @@ class RasterBucket;
 
 class ImageSourceRenderData final : public RenderItem {
 public:
-    ImageSourceRenderData(std::shared_ptr<RasterBucket> bucket_, std::vector<mat4> matrices_, std::string name_)
+    ImageSourceRenderData(std::shared_ptr<RasterBucket> bucket_,
+                          std::vector<UnwrappedTileID> tileIds_,
+                          std::string name_)
         : bucket(std::move(bucket_)),
-          matrices(std::move(matrices_)),
+          tileIds(std::move(tileIds_)),
           name(std::move(name_)) {}
     ~ImageSourceRenderData() override;
     const std::shared_ptr<RasterBucket> bucket;
-    const std::vector<mat4> matrices;
+    const std::vector<UnwrappedTileID> tileIds;
 
 private:
     void upload(gfx::UploadPass&) const override;
@@ -67,6 +69,8 @@ private:
     std::shared_ptr<RasterBucket> bucket;
     std::unique_ptr<ImageSourceRenderData> renderData;
     std::vector<UnwrappedTileID> tileIds;
+    GeometryCoordinates meshCorners;
+    uint32_t meshCells = 0;
 };
 
 } // namespace mln

@@ -8,8 +8,6 @@
 #include <mln/shaders/raster_layer_ubo.hpp>
 #include <mln/style/layers/raster_layer_properties.hpp>
 #include <mln/util/convert.hpp>
-#include <mln/gfx/image_drawable_data.hpp>
-#include <mln/util/logging.hpp>
 
 namespace mln {
 
@@ -76,35 +74,19 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-        if (!checkTweakDrawable(drawable)) {
+        if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
 
-        ProjectionData projection;
-        if (!drawable.getTileID()) {
-            // this is an image drawable
-            if (const auto& data = drawable.getData()) {
-                const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data);
-                mat4 imageMatrix = imageData.matrix;
-                multiplyWithProjectionMatrix(
-                    /*in-out*/ imageMatrix, parameters, drawable, /*nearClipped*/ false, /*aligned*/ true);
-                projection = parameters.state.getProjectionDataForMatrix(UnwrappedTileID(0, 0, 0), imageMatrix);
-            } else {
-                Log::Error(Event::General, "Invalid raster layer drawable: neither tile id nor image data is set.");
-                return;
-            }
-        } else {
-            // this is a tile drawable
-            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            projection = getProjectionData(tileID,
-                                           parameters,
-                                           {0.f, 0.f},
-                                           TranslateAnchorType::Viewport,
-                                           false,
-                                           false,
-                                           drawable,
-                                           !parameters.state.isChanging());
-        }
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        const auto projection = getProjectionData(tileID,
+                                                  parameters,
+                                                  {0.f, 0.f},
+                                                  TranslateAnchorType::Viewport,
+                                                  false,
+                                                  false,
+                                                  drawable,
+                                                  !parameters.state.isChanging());
         const auto& matrix = projection.fallbackMatrix;
 #if MLN_UBO_CONSOLIDATION
         projectionUBOVector[i] = toProjectionUBO(projection);
