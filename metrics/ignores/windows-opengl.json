@@ -22,11 +22,17 @@
     "render-tests/projection/globe/circle-pitch-alignment/viewport-scale-viewport": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/circle-planet": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/heatmap": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/hillshade": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/raster-planet": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/raster-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-point-pole-to-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-pitched-rotated": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/icon-text-translate-map": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/icon-text-translate-viewport": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-line-equator": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/background-opacity": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/background-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/line-gradient": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-    "render-tests/projection/globe/line-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+    "render-tests/projection/globe/line-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/raster-warped": "globe expectations pending a run on this platform's CI; https://github.com/maplibre/maplibre-native/pull/4525"
 }
