@@ -33,24 +33,29 @@ mat4 RenderTile::translateVtxMatrix(const UnwrappedTileID& id,
 
     mat4 vtxMatrix;
 
-    const float angle = inViewportPixelUnits
-                            ? (anchor == TranslateAnchorType::Map ? static_cast<float>(state.getBearing()) : 0.0f)
-                            : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing())
-                                                                       : 0.0f);
-
-    Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
-
     if (inViewportPixelUnits) {
+        const float angle = anchor == TranslateAnchorType::Map ? static_cast<float>(state.getBearing()) : 0.0f;
+        const Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
         matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
     } else {
-        matrix::translate(vtxMatrix,
-                          tileMatrix,
-                          id.pixelsToTileUnits(translate.x, static_cast<float>(state.getZoom())),
-                          id.pixelsToTileUnits(translate.y, static_cast<float>(state.getZoom())),
-                          0);
+        const auto translate = tileUnitTranslation(id, translation, anchor, state);
+        matrix::translate(vtxMatrix, tileMatrix, translate[0], translate[1], 0);
     }
 
     return vtxMatrix;
+}
+
+std::array<float, 2> RenderTile::tileUnitTranslation(const UnwrappedTileID& id,
+                                                     const std::array<float, 2>& translation,
+                                                     TranslateAnchorType anchor,
+                                                     const TransformState& state) {
+    if (translation[0] == 0 && translation[1] == 0) {
+        return {0.f, 0.f};
+    }
+    const float angle = anchor == TranslateAnchorType::Viewport ? static_cast<float>(-state.getBearing()) : 0.0f;
+    const Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
+    const auto zoom = static_cast<float>(state.getZoom());
+    return {id.pixelsToTileUnits(translate.x, zoom), id.pixelsToTileUnits(translate.y, zoom)};
 }
 
 mat4 RenderTile::translateVtxMatrix(const mat4& tileMatrix,
