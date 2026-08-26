@@ -53,6 +53,9 @@ public:
     /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center.
     virtual double circleRadiusCorrection(const TransformState&) const { return 1.0; }
 
+    /// Ratio of a screen pixel at the map center to one at the same zoom on Mercator.
+    virtual double pixelScale(const TransformState&) const { return 1.0; }
+
     /// `circleRadiusCorrection` extended to a point away from the center, by its latitude.
     virtual double pitchedTextCorrection(const TransformState&, const Point<double>&, const UnwrappedTileID&) const {
         return 1.0;

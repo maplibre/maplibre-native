@@ -5,5 +5,11 @@
   "render-tests/projection/globe/fill-planet-solid": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/fill-planet-tiles": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/minzoom-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-  "render-tests/projection/globe/fill-planet-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+  "render-tests/projection/globe/fill-planet-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/line-spiral": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/line-dasharray": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/text-line-equator": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/line-width-pole": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/line-gradient": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/line-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
 }
