@@ -319,7 +319,7 @@ jni::Local<jni::Object<Source>> MapSnapshotter::getSource(JNIEnv& env, const jni
     return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource));
 }
 
-jni::jboolean MapSnapshotter::isFullyLoaded(JNIEnv&) {
+jni::jboolean MapSnapshotter::isStyleLoaded(JNIEnv&) {
     return snapshotter->getStyle().isLoaded();
 }
 
@@ -378,7 +378,7 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
         METHOD(&MapSnapshotter::addImages, "nativeAddImages"),
         METHOD(&MapSnapshotter::getLayer, "nativeGetLayer"),
         METHOD(&MapSnapshotter::getSource, "nativeGetSource"),
-        METHOD(&MapSnapshotter::isFullyLoaded, "nativeIsFullyLoaded"),
+        METHOD(&MapSnapshotter::isStyleLoaded, "nativeIsStyleLoaded"),
         METHOD(&MapSnapshotter::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
         METHOD(&MapSnapshotter::getGlobalState, "nativeGetGlobalState"),
         METHOD(&MapSnapshotter::setStyleJson, "setStyleJson"),
