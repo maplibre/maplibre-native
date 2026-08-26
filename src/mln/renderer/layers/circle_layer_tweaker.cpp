@@ -61,6 +61,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
     std::vector<CircleDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -80,8 +81,15 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.mainMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, zoom);
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
@@ -125,6 +133,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     }
 
     layerUniforms.set(idCircleDrawableUBO, drawableUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

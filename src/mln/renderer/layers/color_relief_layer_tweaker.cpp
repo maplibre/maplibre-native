@@ -38,6 +38,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
     int i = 0;
     std::vector<ColorReliefDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<ColorReliefTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -46,9 +47,11 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        const auto projection = parameters.projectionDataForTile(tileID);
 
 #if MLN_UBO_CONSOLIDATION
-        drawableUBOVector[i].matrix = util::cast<float>(parameters.matrixForTile(tileID));
+        drawableUBOVector[i].matrix = util::cast<float>(projection.mainMatrix);
+        projectionUBOVector[i] = toProjectionUBO(projection);
 
         // Get tile props from drawable data (set during creation)
         if (const auto& drawableData = drawable.getData()) {
@@ -60,10 +63,12 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         drawable.setUBOIndex(i++);
 #else
         ColorReliefDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(parameters.matrixForTile(tileID));
+        drawableUBO.matrix = util::cast<float>(projection.mainMatrix);
+        const auto projectionUBO = toProjectionUBO(projection);
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idColorReliefDrawableUBO, &drawableUBO, context);
+        drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, context);
         // Tile props UBO is set during drawable creation, doesn't change per frame
 #endif
     });
@@ -87,6 +92,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
 
     layerUniforms.set(idColorReliefDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idColorReliefTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

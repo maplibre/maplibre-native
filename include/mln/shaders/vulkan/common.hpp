@@ -95,13 +95,14 @@ vec2 unpack_uint(uint value) {
 #define DRAWABLE_IMAGE_SET_INDEX            3
 
 #define layerSSBOStartId                    0
-#define layerUBOStartId                     3
+#define layerUBOStartId                     4
 #define drawableSSBOStartId                 0
 #define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
-#define drawableReservedUBOCount            idDrawableReservedFragmentOnlyUBO + 1
+#define idProjectionUBO                     idDrawableReservedFragmentOnlyUBO + 1
+#define drawableReservedUBOCount            idProjectionUBO + 1
 
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
@@ -146,13 +147,14 @@ void applySurfaceTransform() {
 #define DRAWABLE_IMAGE_SET_INDEX            3
 
 #define layerSSBOStartId                    0
-#define layerUBOStartId                     3
+#define layerUBOStartId                     4
 #define drawableSSBOStartId                 0
 #define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
-#define drawableReservedUBOCount            idDrawableReservedFragmentOnlyUBO + 1
+#define idProjectionUBO                     idDrawableReservedFragmentOnlyUBO + 1
+#define drawableReservedUBOCount            idProjectionUBO + 1
 
 layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;

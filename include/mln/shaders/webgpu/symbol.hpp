@@ -222,7 +222,7 @@ struct FragmentInput {
 
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var image: texture_2d<f32>;
 
@@ -299,7 +299,7 @@ struct VertexOutput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<SymbolDrawableUBO>;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -426,7 +426,7 @@ struct FragmentInput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var glyph_atlas: texture_2d<f32>;
 
@@ -683,7 +683,7 @@ struct FragmentInput {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(3) var<storage, read> tilePropsVector: array<SymbolTilePropsUBO>;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<uniform> props: SymbolEvaluatedPropsUBO;
+@group(0) @binding(5) var<uniform> props: SymbolEvaluatedPropsUBO;
 @group(1) @binding(0) var glyph_sampler: sampler;
 @group(1) @binding(1) var glyph_image: texture_2d<f32>;
 @group(1) @binding(2) var icon_sampler: sampler;

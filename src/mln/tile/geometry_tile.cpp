@@ -517,9 +517,7 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
 
     const float queryPadding = getQueryPadding(layers);
 
-    mat4 posMatrix;
-    transformState.matrixFor(posMatrix, id.toUnwrapped());
-    matrix::multiply(posMatrix, projMatrix, posMatrix);
+    const mat4 posMatrix = transformState.getProjectionData(id.toUnwrapped(), projMatrix).mainMatrix;
 
     layoutResult->featureIndex->query(result,
                                       queryGeometry,
