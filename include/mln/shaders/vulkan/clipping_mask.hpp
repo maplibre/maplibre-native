@@ -25,19 +25,23 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
         layout(location = 0) in ivec2 position;
 
 #ifdef PROJECTION_GLOBE
+        // The two matrices fill the guaranteed 128 bytes of push constants; the per-tile vectors ride as instance
+        // attributes, so each mask sees the same projection block the layers do.
+        layout(location = 1) in vec4 tile_mercator_coords;
+        layout(location = 2) in vec4 clipping_plane;
+        layout(location = 3) in vec4 transition;
         layout(push_constant) uniform constants {
             mat4 matrix;
-            vec4 tile_mercator_coords;
-            vec4 clipping_plane;
+            mat4 fallback_matrix;
         } constant;
 
         void main() {
             ProjectionUBO projection;
             projection.matrix = constant.matrix;
-            projection.fallback_matrix = mat4(0.0);
-            projection.tile_mercator_coords = constant.tile_mercator_coords;
-            projection.clipping_plane = constant.clipping_plane;
-            projection.projection_transition = 1.0;
+            projection.fallback_matrix = constant.fallback_matrix;
+            projection.tile_mercator_coords = tile_mercator_coords;
+            projection.clipping_plane = clipping_plane;
+            projection.projection_transition = transition.x;
             projection.depth_offset = 0.0;
             projection.pad1 = 0.0;
             projection.pad2 = 0.0;

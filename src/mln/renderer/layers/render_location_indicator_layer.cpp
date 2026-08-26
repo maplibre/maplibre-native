@@ -1087,7 +1087,8 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!quadShader) {
-        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
+        quadShader = context.getGenericShader(
+            shaders, "LocationIndicatorTexturedShader", gfx::ProjectionVariant::Mercator);
     }
 
     if (!quadShader) {
@@ -1096,7 +1097,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!circleShader) {
-        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader");
+        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader", gfx::ProjectionVariant::Mercator);
     }
 
     if (!circleShader) {

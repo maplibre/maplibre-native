@@ -93,8 +93,8 @@ public:
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
-                                     std::string_view,
-                                     gfx::ProjectionVariant) override {
+                                     gfx::ProjectionVariant,
+                                     std::string_view) override {
         const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;
         const auto pluginPrelude = resourcePrelude(*definition) + propertyPrelude(*definition, propertiesAsUniforms);
