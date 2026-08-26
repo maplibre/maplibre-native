@@ -205,6 +205,12 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     placementData.clear();
 
+    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
+    const SymbolTranslate textTranslate{.offset = evaluated.get<style::TextTranslate>(),
+                                        .anchor = evaluated.get<style::TextTranslateAnchor>()};
+    const SymbolTranslate iconTranslate{.offset = evaluated.get<style::IconTranslate>(),
+                                        .anchor = evaluated.get<style::IconTranslateAnchor>()};
+
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
         if (bucket && bucket->bucketLeaderID == getID() && static_cast<Bucket*>(bucket)->check(SYM_GUARD_LOC)) {
@@ -220,14 +226,18 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                                          .tile = renderTile,
                                          .featureIndex = featureIndex,
                                          .sourceId = baseImpl->source,
-                                         .sortKeyRange = std::nullopt});
+                                         .sortKeyRange = std::nullopt,
+                                         .textTranslate = textTranslate,
+                                         .iconTranslate = iconTranslate});
             } else {
                 for (const auto& sortKeyRange : bucket->sortKeyRanges) {
                     BucketPlacementData layerData{.bucket = *bucket,
                                                   .tile = renderTile,
                                                   .featureIndex = featureIndex,
                                                   .sourceId = baseImpl->source,
-                                                  .sortKeyRange = sortKeyRange};
+                                                  .sortKeyRange = sortKeyRange,
+                                                  .textTranslate = textTranslate,
+                                                  .iconTranslate = iconTranslate};
                     auto sortPosition = std::upper_bound( // NOLINT(modernize-use-ranges)
                         placementData.cbegin(),
                         placementData.cend(),
