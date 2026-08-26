@@ -199,8 +199,16 @@ void main() {
         projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
     }
     const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map) {
+        const float anchor_pos_tile_y = (drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
-    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset, z, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset * projectionScaling, z, 1.0);
     if (drawable.pitch_with_map) {
         gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z, projection);
     }
@@ -500,8 +508,16 @@ void main() {
         projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
     }
     const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map) {
+        const float anchor_pos_tile_y = (drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
-    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot, z, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
     if (drawable.pitch_with_map) {
         gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z, projection);
     }
@@ -880,8 +896,16 @@ void main() {
         projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
     }
     const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (drawable.pitch_with_map && !drawable.is_along_line) {
+        const float anchor_pos_tile_y = (drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
     const vec2 pos_rot = a_offset / 32.0 * fontScale;
-    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot, z, 1.0);
+    gl_Position = drawable.coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
     if (drawable.pitch_with_map) {
         gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z, projection);
     }
