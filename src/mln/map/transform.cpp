@@ -1,5 +1,6 @@
 #include <mln/map/camera.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/math.hpp>
@@ -117,6 +118,10 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     }
 
     double zoom = camera.zoom.value_or(getZoom());
+    if (!camera.zoom && camera.center && state.isGlobeRendering()) {
+        zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
+                                                              state.constrainedCenter(*camera.center).latitude());
+    }
     state.constrainCameraAndZoomToBounds(camera, zoom);
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
@@ -156,7 +161,7 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     const Point<double> endPoint = Projection::project(latLng, state.getScale());
 
     // Constrain camera options.
-    zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
+    zoom = util::clamp(zoom, state.getMinZoomAtLatitude(latLng.latitude()), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
     fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
@@ -250,7 +255,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     const Point<double> endPoint = Projection::project(latLng, state.getScale());
 
     // Constrain camera options.
-    zoom = util::clamp(zoom, state.getMinZoom(), state.getMaxZoom());
+    zoom = util::clamp(zoom, state.getMinZoomAtLatitude(latLng.latitude()), state.getMaxZoom());
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
     fov = util::clamp(fov, state.getMinFieldOfView(), state.getMaxFieldOfView());
 
@@ -286,7 +291,7 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     double rho = 1.42;
     if (animation.minZoom || linearZoomInterpolation) {
         double minZoom = util::min(animation.minZoom.value_or(startZoom), startZoom, zoom);
-        minZoom = util::clamp(minZoom, state.getMinZoom(), state.getMaxZoom());
+        minZoom = util::clamp(minZoom, state.getMinZoomAtLatitude(latLng.latitude()), state.getMaxZoom());
         /// w<sub>m</sub>: Maximum visible span, measured in pixels with respect
         /// to the initial scale.
         double wMax = w0 / state.zoomScale(minZoom - startZoom);

@@ -316,6 +316,9 @@ void Map::Impl::onDidFinishRenderingMap() {
 
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
+    // The style's projection decides how the camera is constrained, so it has to be in place first.
+    transform.setProjectionDefinition(
+        style->impl->getProjection()->impl->evaluate(static_cast<float>(camera.zoom.value_or(transform.getZoom()))));
     transform.jumpTo(camera);
     onUpdate();
 }
