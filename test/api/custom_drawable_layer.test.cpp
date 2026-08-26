@@ -24,6 +24,9 @@ using namespace std::numbers;
 
 class LineTestDrawableLayer : public mln::style::CustomDrawableLayerHost {
 public:
+    explicit LineTestDrawableLayer(mln::OverscaledTileID tile_ = {11, 327, 791})
+        : tile(tile_) {}
+
     void initialize() override {}
 
     void update(Interface& interface) override {
@@ -31,7 +34,7 @@ public:
         if (interface.getDrawableCount()) return;
 
         // set tile
-        interface.setTileID({11, 327, 791});
+        interface.setTileID(tile);
 
         // add polylines
         {
@@ -126,10 +129,16 @@ public:
     }
 
     void deinitialize() override {}
+
+private:
+    mln::OverscaledTileID tile;
 };
 
 class FillTestDrawableLayer : public mln::style::CustomDrawableLayerHost {
 public:
+    explicit FillTestDrawableLayer(mln::OverscaledTileID tile_ = {11, 327, 791})
+        : tile(tile_) {}
+
     void initialize() override {}
 
     void update(Interface& interface) override {
@@ -137,7 +146,7 @@ public:
         if (interface.getDrawableCount()) return;
 
         // set tile
-        interface.setTileID({11, 327, 791});
+        interface.setTileID(tile);
 
         // add fill polygon
         {
@@ -174,10 +183,16 @@ public:
     }
 
     void deinitialize() override {}
+
+private:
+    mln::OverscaledTileID tile;
 };
 
 class SymbolIconTestDrawableLayer : public mln::style::CustomDrawableLayerHost {
 public:
+    explicit SymbolIconTestDrawableLayer(mln::OverscaledTileID tile_ = {11, 327, 791})
+        : tile(tile_) {}
+
     void initialize() override {}
 
     void update(Interface& interface) override {
@@ -185,7 +200,7 @@ public:
         if (interface.getDrawableCount()) return;
 
         // set tile
-        interface.setTileID({11, 327, 791});
+        interface.setTileID(tile);
 
         // add symbol icon
         {
@@ -232,6 +247,9 @@ public:
     }
 
     void deinitialize() override {}
+
+private:
+    mln::OverscaledTileID tile;
 };
 
 TEST(CustomDrawableLayer, Line) {
@@ -304,4 +322,44 @@ TEST(CustomDrawableLayer, SymbolIcon) {
 
     // render and test
     test::checkImage("test/fixtures/custom_drawable_layer/symbol_icon", frontend.render(map).image, 0.000657, 0.1);
+}
+
+namespace {
+
+// The same hosts on the globe, in a zoom 2 tile so the sphere's curvature shows.
+template <class Host>
+void renderOnGlobe(const std::string& fixture) {
+    using namespace mln;
+    using namespace mln::style;
+
+    util::RunLoop loop;
+
+    HeadlessFrontend frontend{1};
+    Map map(frontend,
+            MapObserver::nullObserver(),
+            MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()),
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"));
+
+    map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"globe"},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
+    map.jumpTo(CameraOptions().withCenter(LatLng{33.0, 45.0}).withZoom(2.0));
+
+    map.getStyle().addLayer(
+        std::make_unique<CustomDrawableLayer>("custom-drawable", std::make_unique<Host>(OverscaledTileID{2, 2, 1})));
+
+    test::checkImage(fixture, frontend.render(map).image, 0.000657, 0.1);
+}
+
+} // namespace
+
+TEST(CustomDrawableLayer, LineGlobe) {
+    renderOnGlobe<LineTestDrawableLayer>("test/fixtures/custom_drawable_layer/line_globe");
+}
+
+TEST(CustomDrawableLayer, FillGlobe) {
+    renderOnGlobe<FillTestDrawableLayer>("test/fixtures/custom_drawable_layer/fill_globe");
+}
+
+TEST(CustomDrawableLayer, SymbolIconGlobe) {
+    renderOnGlobe<SymbolIconTestDrawableLayer>("test/fixtures/custom_drawable_layer/symbol_icon_globe");
 }

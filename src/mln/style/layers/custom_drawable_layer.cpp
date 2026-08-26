@@ -435,12 +435,32 @@ public:
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
+#if MLN_UBO_CONSOLIDATION
+        if (!layerUniforms) {
+            layerUniforms = parameters.context.createLayerUniformBufferArray();
+        }
+        if (!projectionUniformBuffer) {
+            projectionUniformBuffer = parameters.context.createUniformBuffer(
+                &projectionUBO, sizeof(projectionUBO), false, true);
+            layerUniforms->set(idProjectionUBO, projectionUniformBuffer);
+            drawable.setUBOIndex(0);
+        } else {
+            projectionUniformBuffer->update(&projectionUBO, sizeof(projectionUBO));
+        }
+        layerUniforms->bind(*parameters.renderPass);
+#else
         drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, parameters.context);
+#endif
     };
 
 private:
     CustomDrawableLayerHost::Interface::SymbolOptions options;
     CustomDrawableLayerHost::Interface::SymbolTweakerCallback callback;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniqueUniformBufferArray layerUniforms;
+    gfx::UniformBufferPtr projectionUniformBuffer;
+#endif
 };
 
 class GeometryDrawableTweaker : public gfx::DrawableTweaker {
@@ -864,6 +884,14 @@ void CustomDrawableLayerHost::Interface::removeDrawable(const util::SimpleIdenti
     tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.getID() == id; });
 }
 
+namespace {
+
+gfx::ProjectionVariant projectionVariantFor(const TransformState& state) {
+    return state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
+}
+
+} // namespace
+
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
     assert(shaderGroup);
@@ -877,7 +905,7 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
                                                  idLineOffsetVertexAttribute,
                                                  idLineWidthVertexAttribute}};
 
-    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariantFor(state));
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderWideVector() const {
@@ -893,11 +921,11 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_opacity"},
                                                 {idFillColorVertexAttribute, idFillOpacityVertexAttribute}};
 
-    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, gfx::ProjectionVariant::Mercator);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariantFor(state));
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
-    return context.getGenericShader(shaders, "CustomSymbolIconShader", gfx::ProjectionVariant::Mercator);
+    return context.getGenericShader(shaders, "CustomSymbolIconShader", projectionVariantFor(state));
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::geometryShaderDefault() const {
