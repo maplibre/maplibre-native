@@ -17,6 +17,7 @@
 #include <mln/shaders/webgpu/debug.hpp>
 #include <mln/shaders/webgpu/fill.hpp>
 #include <mln/shaders/webgpu/fill_extrusion.hpp>
+#include <mln/shaders/webgpu/globe_depth.hpp>
 #include <mln/shaders/webgpu/heatmap.hpp>
 #include <mln/shaders/webgpu/heatmap_texture.hpp>
 #include <mln/shaders/webgpu/hillshade.hpp>
@@ -107,6 +108,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,

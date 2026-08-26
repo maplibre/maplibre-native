@@ -1,4 +1,6 @@
 #include <mln/webgpu/context.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
+#include <mln/gfx/projection_variant.hpp>
 
 #include <webgpu/webgpu.h>
 
@@ -417,6 +419,183 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     renderStats.numDrawCalls += tileUBOs.size();
     renderStats.totalDrawCalls += tileUBOs.size();
 
+    return true;
+}
+
+void Context::releaseGlobeClipMasks() {
+    globeClipMeshes.clear();
+}
+
+bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                           RenderStaticData& staticData,
+                                           const std::vector<shaders::GlobeClipMask>& masks) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::WebGPU>;
+
+    if (masks.empty()) {
+        return false;
+    }
+
+    if (!globeClipMaskShader) {
+        if (auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
+            globeClipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, "a_pos", gfx::ProjectionVariant::Globe));
+        }
+    }
+    if (!globeClipMaskShader) {
+        Log::Error(Event::Render, "WebGPU: Failed to acquire globe clipping mask shader");
+        return false;
+    }
+
+    auto& shader = static_cast<webgpu::ShaderProgram&>(*globeClipMaskShader);
+    auto& webgpuRenderPass = static_cast<webgpu::RenderPass&>(renderPass);
+    const auto encoder = webgpuRenderPass.getEncoder();
+    if (!encoder) {
+        return false;
+    }
+
+    const auto& renderable = webgpuRenderPass.getDescriptor().renderable;
+    if (clipMaskRenderable != &renderable) {
+        clipMaskPipelineHash.reset();
+        globeClipMaskPipelineHash.reset();
+        clipMaskRenderable = &renderable;
+    }
+
+    const gfx::ColorMode colorMode = gfx::ColorMode::disabled();
+
+    WGPUVertexAttribute vertexAttribute{};
+    vertexAttribute.format = WGPUVertexFormat_Sint16x2;
+    vertexAttribute.offset = 0;
+    vertexAttribute.shaderLocation = static_cast<uint32_t>(ShaderClass::attributes[0].index);
+
+    WGPUVertexBufferLayout vertexLayout{};
+    vertexLayout.arrayStride = sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>);
+    vertexLayout.attributeCount = 1;
+    vertexLayout.attributes = &vertexAttribute;
+    vertexLayout.stepMode = WGPUVertexStepMode_Vertex;
+
+    if (!globeClipMaskPipelineHash) {
+        globeClipMaskPipelineHash = util::hash(colorMode.hash(),
+                                               vertexLayout.arrayStride,
+                                               static_cast<uint32_t>(vertexAttribute.format),
+                                               vertexAttribute.shaderLocation,
+                                               static_cast<uint8_t>(gfx::ProjectionVariant::Globe));
+    }
+
+    const auto pipeline = shader.getRenderPipeline(
+        renderable,
+        &vertexLayout,
+        1,
+        colorMode,
+        clipMaskDepthMode,
+        clipMaskStencilMode,
+        gfx::DrawModeType::Triangles,
+        globeClipMaskPipelineHash,
+        // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
+        gfx::CullFaceMode::backCCW());
+    if (!pipeline) {
+        Log::Error(Event::Render, "WebGPU: Failed to create globe clipping mask pipeline");
+        return false;
+    }
+
+    wgpuRenderPassEncoderSetPipeline(encoder, pipeline);
+
+    const uint64_t uboSize = sizeof(shaders::ProjectionUBO);
+    clipMaskUniformBuffers.clear();
+    clipMaskUniformBuffers.reserve(masks.size());
+    for (const auto& mask : masks) {
+        auto buffer = createBuffer(&mask.projection, uboSize, WGPUBufferUsage_Uniform, false, false);
+        if (!buffer.getBuffer()) {
+            return false;
+        }
+        clipMaskUniformBuffers.emplace_back(std::move(buffer));
+    }
+
+    auto& rendererBackend = static_cast<RendererBackend&>(getBackend());
+    WGPUDevice device = static_cast<WGPUDevice>(rendererBackend.getDevice());
+    if (!device) {
+        return false;
+    }
+
+    const auto& bindGroupOrder = shader.getBindGroupOrder();
+    if (bindGroupOrder.empty()) {
+        return false;
+    }
+    const uint32_t bindGroupIndex = bindGroupOrder.front();
+    const auto layout = shader.getBindGroupLayout(bindGroupIndex);
+    if (!layout) {
+        return false;
+    }
+    uint32_t uniformBinding = 0;
+    bool bindingFound = false;
+    for (const auto& info : shader.getBindingInfosForGroup(bindGroupIndex)) {
+        if (info.type == webgpu::ShaderProgram::BindingType::UniformBuffer) {
+            uniformBinding = info.binding;
+            bindingFound = true;
+            break;
+        }
+    }
+    if (!bindingFound) {
+        return false;
+    }
+
+    clipMaskActiveBindGroups.clear();
+    clipMaskActiveBindGroups.reserve(masks.size());
+
+    for (std::size_t i = 0; i < masks.size(); ++i) {
+        const auto& tile = masks[i].tile;
+        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
+        auto it = globeClipMeshes.find(key);
+        if (it == globeClipMeshes.end()) {
+            const auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
+            auto vertices = createBuffer(
+                mesh.vertices.data(), mesh.vertices.size(), WGPUBufferUsage_Vertex, false, true);
+            auto indices = createBuffer(
+                mesh.indices.data(), mesh.indices.size() * sizeof(uint16_t), WGPUBufferUsage_Index, true, true);
+            it = globeClipMeshes
+                     .emplace(key,
+                              GlobeClipMesh{.vertices = std::move(vertices),
+                                            .indices = std::move(indices),
+                                            .indexCount = static_cast<uint32_t>(mesh.indices.size())})
+                     .first;
+        }
+        const auto& mesh = it->second;
+
+        WGPUBindGroupEntry entry{};
+        entry.binding = uniformBinding;
+        entry.buffer = clipMaskUniformBuffers[i].getBuffer();
+        entry.offset = 0;
+        entry.size = uboSize;
+
+        WGPUBindGroupDescriptor descriptor{};
+        descriptor.layout = layout;
+        descriptor.entryCount = 1;
+        descriptor.entries = &entry;
+
+        const auto bindGroup = wgpuDeviceCreateBindGroup(device, &descriptor);
+        if (!bindGroup) {
+            continue;
+        }
+        clipMaskActiveBindGroups.push_back(bindGroup);
+
+        wgpuRenderPassEncoderSetBindGroup(encoder, bindGroupIndex, bindGroup, 0, nullptr);
+        wgpuRenderPassEncoderSetStencilReference(encoder, masks[i].stencilRef);
+        wgpuRenderPassEncoderSetVertexBuffer(
+            encoder, /*slot=*/0, mesh.vertices.getBuffer(), /*offset=*/0, mesh.vertices.getSizeInBytes());
+        wgpuRenderPassEncoderSetIndexBuffer(
+            encoder, mesh.indices.getBuffer(), WGPUIndexFormat_Uint16, /*offset=*/0, mesh.indices.getSizeInBytes());
+        wgpuRenderPassEncoderDrawIndexed(encoder, mesh.indexCount, 1, 0, 0, 0);
+    }
+
+    for (auto bindGroup : clipMaskActiveBindGroups) {
+        if (bindGroup) {
+            wgpuBindGroupRelease(bindGroup);
+        }
+    }
+    clipMaskActiveBindGroups.clear();
+
+    auto& renderStats = renderingStats();
+    renderStats.numDrawCalls += masks.size();
+    renderStats.totalDrawCalls += masks.size();
     return true;
 }
 

@@ -211,9 +211,14 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
     if (nextStencilID + count > maxStencilValue) {
         clearStencil();
     }
+    if (!state.isGlobeRendering()) {
+        context.releaseGlobeClipMasks();
+    }
 
 #if MLN_RENDER_BACKEND_WEBGPU
+    const bool globe = state.isGlobeRendering();
     std::vector<shaders::ClipUBO> tileUBOs;
+    std::vector<shaders::GlobeClipMask> globeMasks;
     for (const auto& tileRef : *renderTiles) {
         const auto& tileID = tileRef.get().id;
 
@@ -222,6 +227,13 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         if (result.second) {
             nextStencilID++;
         } else {
+            continue;
+        }
+
+        if (globe) {
+            globeMasks.push_back({.projection = LayerTweaker::toProjectionUBO(projectionDataForTile(tileID)),
+                                  .stencilRef = static_cast<uint32_t>(stencilID),
+                                  .tile = tileID.canonical});
             continue;
         }
 
@@ -236,13 +248,17 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
                                                /* .pad3 = */ 0});
     }
 
-    if (!tileUBOs.empty()) {
+    if (!tileUBOs.empty() || !globeMasks.empty()) {
 #if !defined(NDEBUG)
         const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
 #endif
 
         auto& webgpuContext = static_cast<webgpu::Context&>(context);
-        webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        if (globe) {
+            webgpuContext.renderGlobeTileClippingMasks(*renderPass, staticData, globeMasks);
+        } else {
+            webgpuContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        }
         webgpuContext.renderingStats().stencilUpdates++;
     }
 #elif MLN_RENDER_BACKEND_METAL
