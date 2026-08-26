@@ -5,8 +5,8 @@
 #include <mln/map/map_impl.hpp>
 #include <mln/map/mercator_projection.hpp>
 #include <mln/map/tile_projector.hpp>
-#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/map/transform.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/projection.hpp>
@@ -1863,4 +1863,21 @@ TEST(Transform, GlobeLocationOcclusion) {
     Transform unsized;
     unsized.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
     EXPECT_FALSE(unsized.isLocationOccluded({0, 180}));
+}
+
+TEST(Transform, GlobeCenterLongitudeStaysContinuous) {
+    Transform transform;
+    setUpGlobe(transform, {0, 179}, 1);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
+    EXPECT_NEAR(181, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    EXPECT_NEAR(-179, transform.getLatLng(LatLng::Wrapped).longitude(), 1e-9);
+    transform.moveBy({-40, 0});
+    EXPECT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 181);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 179}));
+    EXPECT_NEAR(179, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+
+    // Mercator keeps its wrapped center.
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
+    EXPECT_NEAR(-179, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
 }
