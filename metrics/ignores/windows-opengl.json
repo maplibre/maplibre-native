@@ -5,5 +5,7 @@
     "render-tests/regressions/mapbox-gl-native#9976": "Needs investigation (Diff: 0.00769805908203125 in Legacy, 0.00756072998046875 in Drawable)",
     "render-tests/runtime-styling/image-add-pattern": "Needs investigation (Diff: 0.001953125)",
     "render-tests/runtime-styling/image-update-pattern": "Needs investigation (Diff: 0.001953125)",
-    "render-tests/sprites/2x-screen-2x-pattern": "Needs investigation (Diff: 0.00042724609375)"
+    "render-tests/sprites/2x-screen-2x-pattern": "Needs investigation (Diff: 0.00042724609375)",
+    "render-tests/projection/globe/fill-grid": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/fill-grid-pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
 }

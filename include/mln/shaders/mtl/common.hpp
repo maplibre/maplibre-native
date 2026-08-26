@@ -231,16 +231,77 @@ struct alignas(16) ProjectionUBO {
     /* 128 */ float4 tile_mercator_coords;
     /* 144 */ float4 clipping_plane;
     /* 160 */ float projection_transition;
-    /* 164 */ float pad1;
-    /* 168 */ float pad2;
-    /* 172 */ float pad3;
+    /* 164 */ float depth_offset;
+    /* 168 */ float pad1;
+    /* 172 */ float pad2;
     /* 176 */
 };
 static_assert(sizeof(ProjectionUBO) == 11 * 16, "wrong size");
 
+#ifdef PROJECTION_GLOBE
+
+#define GLOBE_RADIUS 6371008.8
+
+// Tile position (0..EXTENT) to a point on the unit sphere; the pole sentinels in rawPos map to the poles.
+inline float3 projectToSphere(float2 translatedPos, float2 rawPos, device const ProjectionUBO& projection) {
+    const float2 mercator_pos = projection.tile_mercator_coords.xy + projection.tile_mercator_coords.zw * translatedPos;
+    const float spherical_x = mercator_pos.x * M_PI_F * 2.0 + M_PI_F;
+    // sin/cos of the latitude from the Mercator Y via the tangent half-angle identities: no atan, and float32 precision survives near the equator.
+    const float t = exp(M_PI_F - (mercator_pos.y * M_PI_F * 2.0));
+    const float t2 = t * t;
+    const float denom = t2 + 1.0;
+    const float sin_sy = (t2 - 1.0) / denom;
+    const float cos_sy = (2.0 * t) / denom;
+    float3 pos = float3(sin(spherical_x) * cos_sy, sin_sy, cos(spherical_x) * cos_sy);
+    if (rawPos.y < -32767.5) {
+        pos = float3(0.0, 1.0, 0.0);
+    }
+    if (rawPos.y > 32766.5) {
+        pos = float3(0.0, -1.0, 0.0);
+    }
+    return pos;
+}
+
+inline float globeComputeClippingZ(float3 spherePos, device const ProjectionUBO& projection) {
+    return 1.0 - (dot(spherePos, projection.clipping_plane.xyz) + projection.clipping_plane.w);
+}
+
+inline float4 interpolateProjection(float2 posInTile, float3 spherePos, float elevation, device const ProjectionUBO& projection) {
+    const float3 elevatedPos = spherePos * (1.0 + elevation / GLOBE_RADIUS);
+    float4 globePosition = projection.matrix * float4(elevatedPos, 1.0);
+    // Clip the far side of the globe through Z; the layer's depth shift keeps layer order.
+    // The layer offset is subtracted in clip space on purpose: the separation it buys grows as the camera nears the
+    // sphere, where the hemisphere's Z gradient is steepest; a constant NDC offset z-fights fill against outline.
+    globePosition.z = globeComputeClippingZ(elevatedPos, projection) * globePosition.w - projection.depth_offset;
+
+    if (projection.projection_transition > 0.999) {
+        return globePosition;
+    }
+
+    const float4 flatPosition = projection.fallback_matrix * float4(posInTile, elevation, 1.0);
+    const float z_globeness_threshold = 0.2;
+    float4 result = globePosition;
+    result.z = mix(0.0, globePosition.z, clamp((projection.projection_transition - z_globeness_threshold) / (1.0 - z_globeness_threshold), 0.0, 1.0));
+    result.xyw = mix(flatPosition.xyw, globePosition.xyw, projection.projection_transition);
+    if ((posInTile.y < -32767.5) || (posInTile.y > 32766.5)) {
+        result = globePosition;
+        const float poles_hidden_anim_percentage = 0.02;
+        result.z = mix(globePosition.z, 100.0, pow(max((1.0 - projection.projection_transition) / poles_hidden_anim_percentage, 0.0), 8.0));
+    }
+    return result;
+}
+
+inline float4 projectTile(float2 pos, device const ProjectionUBO& projection) {
+    return interpolateProjection(pos, projectToSphere(pos, float2(0.0, 0.0), projection), 0.0, projection);
+}
+
+#else
+
 inline float4 projectTile(float2 pos, device const ProjectionUBO& projection) {
     return projection.matrix * float4(pos, 0.0, 1.0);
 }
+
+#endif
 
 enum {
     idGlobalPaintParamsUBO,
