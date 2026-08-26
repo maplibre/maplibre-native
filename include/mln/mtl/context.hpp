@@ -9,11 +9,15 @@
 #include <mln/mtl/buffer_resource.hpp>
 #include <mln/mtl/mtl_fwd.hpp>
 #include <mln/mtl/uniform_buffer.hpp>
+#include <mln/shaders/layer_ubo.hpp>
+#include <mln/tile/tile_id.hpp>
 #include <mln/util/noncopyable.hpp>
 #include <mln/util/containers.hpp>
 
+#include <map>
 #include <memory>
 #include <optional>
+#include <tuple>
 #include <vector>
 
 namespace mln {
@@ -143,6 +147,16 @@ public:
     /// Get a buffer to be bound to unused vertex buffers
     const UniqueVertexBufferResource& getEmptyVertexBuffer();
 
+    /// A globe clip mask: the tile's projection block, drawn over its pole-capped mesh.
+    struct GlobeClipMask {
+        shaders::ProjectionUBO projection;
+        uint32_t stencilRef;
+        CanonicalTileID tile;
+    };
+    bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<GlobeClipMask>& masks);
+
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
@@ -174,6 +188,17 @@ private:
     MTLRenderPipelineStatePtr clipMaskPipelineState;
     std::optional<BufferResource> clipMaskUniformsBuffer;
     bool clipMaskUniformsBufferUsed = false;
+
+    struct GlobeClipMesh {
+        BufferResource vertices;
+        BufferResource indices;
+        std::size_t indexCount;
+    };
+    gfx::ShaderProgramBasePtr globeClipMaskShader;
+    MTLRenderPipelineStatePtr globeClipMaskPipelineState;
+    std::optional<BufferResource> globeClipMaskUniformsBuffer;
+    bool globeClipMaskUniformsBufferUsed = false;
+    std::map<std::tuple<uint8_t, bool, bool>, GlobeClipMesh> globeClipMeshes;
     const gfx::Renderable* stencilStateRenderable = nullptr;
 
     UniformBufferArray globalUniformBuffers;
