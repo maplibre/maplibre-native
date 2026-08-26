@@ -6,6 +6,7 @@
 
 namespace mln {
 
+class TransformState;
 class UnwrappedTileID;
 
 struct ProjectionData {
@@ -15,6 +16,8 @@ struct ProjectionData {
     double projectionTransition = 0;
     mat4 fallbackMatrix{};
     bool clipAntimeridian = false;
+    /// Clip-space Z shift for this drawable's layer, the same one the Mercator matrix carries.
+    double depthOffset = 0;
 };
 
 class ProjectionBase {
@@ -26,8 +29,10 @@ public:
 
     virtual void tileMatrix(mat4&, const UnwrappedTileID&, double scale) const = 0;
 
-    virtual ProjectionData getProjectionData(const UnwrappedTileID&, double scale, const mat4& projMatrix) const = 0;
-    virtual ProjectionData getProjectionData(const UnwrappedTileID&, const mat4& mainMatrix) const = 0;
+    /// The per-tile projection contract, given the Mercator tile-to-clip matrix the renderer already computed.
+    virtual ProjectionData getProjectionData(const TransformState&,
+                                             const UnwrappedTileID&,
+                                             const mat4& mercatorMatrix) const = 0;
 };
 
 } // namespace mln

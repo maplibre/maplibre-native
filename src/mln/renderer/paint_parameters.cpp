@@ -184,6 +184,11 @@ void PaintParameters::clearStencil() {
 }
 
 bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
+    // The clip masks are Mercator tile quads; on the globe they arrive with the tile meshes.
+    if (state.isGlobeRendering()) {
+        return true;
+    }
+
     // We can avoid updating the mask if it already contains the same set of tiles.
     if (!renderTiles || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         return true;
@@ -364,6 +369,9 @@ bool PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {
+    if (state.isGlobeRendering()) {
+        return gfx::StencilMode::disabled();
+    }
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
     const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;

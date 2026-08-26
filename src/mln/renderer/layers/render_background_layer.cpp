@@ -168,11 +168,19 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
+    const auto variant = state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
+    if (variant != projectionVariant) {
+        projectionVariant = variant;
+        plainShader.reset();
+        patternShader.reset();
+        removeAllDrawables();
+    }
+
     if (!hasPattern && !plainShader) {
-        plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
+        plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName), projectionVariant);
     }
     if (hasPattern && !patternShader) {
-        patternShader = context.getGenericShader(shaders, std::string(BackgroundPatternShaderName));
+        patternShader = context.getGenericShader(shaders, std::string(BackgroundPatternShaderName), projectionVariant);
     }
 
     const auto& curShader = hasPattern ? patternShader : plainShader;

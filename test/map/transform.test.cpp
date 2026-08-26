@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 #include <cmath>
 #include <mln/map/mercator_projection.hpp>
+#include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/util/geo.hpp>
@@ -1361,4 +1362,46 @@ TEST(Transform, ProjectionDefinition) {
     transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective", "mercator", 0.5));
     ASSERT_EQ(ProjectionDefinition("vertical-perspective", "mercator", 0.5),
               transform.getState().getProjectionDefinition());
+}
+
+TEST(VerticalPerspectiveProjection, TileCoordinatesToSphere) {
+    const auto near = [](const vec3& a, const vec3& b) {
+        return std::abs(a[0] - b[0]) < 1e-9 && std::abs(a[1] - b[1]) < 1e-9 && std::abs(a[2] - b[2]) < 1e-9;
+    };
+    const UnwrappedTileID world{0, 0, 0};
+    const double half = util::EXTENT / 2.0;
+    // (0°, 0°) is the +Z axis; the equator runs through ±X; latitude is Y.
+    EXPECT_TRUE(near({{0, 0, 1}}, VerticalPerspectiveProjection::tileCoordinatesToSphere({half, half}, world)));
+    EXPECT_TRUE(near({{1, 0, 0}}, VerticalPerspectiveProjection::tileCoordinatesToSphere({half * 1.5, half}, world)));
+    EXPECT_TRUE(near({{-1, 0, 0}}, VerticalPerspectiveProjection::tileCoordinatesToSphere({half * 0.5, half}, world)));
+    const vec3 north = VerticalPerspectiveProjection::tileCoordinatesToSphere({half, 0}, world);
+    EXPECT_GT(north[1], 0.99);
+    const vec3 south = VerticalPerspectiveProjection::tileCoordinatesToSphere({half, util::EXTENT}, world);
+    EXPECT_LT(south[1], -0.99);
+}
+
+TEST(VerticalPerspectiveProjection, CenterProjectsToScreenCenter) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.jumpTo(CameraOptions().withCenter(LatLng{37.0, -122.0}).withZoom(3.0).withBearing(20.0).withPitch(30.0));
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    const TransformState& state = transform.getState();
+    ASSERT_TRUE(state.isGlobeRendering());
+
+    const double radius = VerticalPerspectiveProjection::globeRadiusPixels(Projection::worldSize(state.getScale()),
+                                                                           state.getLatLng().latitude());
+    const mat4 matrix = VerticalPerspectiveProjection::globeViewProjectionMatrix(state, radius);
+    const LatLng center = state.getLatLng();
+    const double lat = util::deg2rad(center.latitude());
+    const double lng = util::deg2rad(center.longitude());
+    const vec4 surface = {{std::sin(lng) * std::cos(lat), std::sin(lat), std::cos(lng) * std::cos(lat), 1}};
+    vec4 clip;
+    matrix::transformMat4(clip, surface, matrix);
+    EXPECT_NEAR(0.0, clip[0] / clip[3], 1e-6);
+    EXPECT_NEAR(0.0, clip[1] / clip[3], 1e-6);
+
+    const vec4 plane = VerticalPerspectiveProjection::clippingPlane(state, radius);
+    EXPECT_GT(plane[0] * surface[0] + plane[1] * surface[1] + plane[2] * surface[2] + plane[3], 0.0);
+    const vec4 antipode = {{-surface[0], -surface[1], -surface[2], 1}};
+    EXPECT_LT(plane[0] * antipode[0] + plane[1] * antipode[1] + plane[2] * antipode[2] + plane[3], 0.0);
 }
