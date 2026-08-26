@@ -47,7 +47,6 @@ private:
     SegmentVector segments;
 
     // Drawable shaders
-    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
     gfx::ShaderProgramBasePtr plainShader;
     gfx::ShaderProgramBasePtr patternShader;
 };

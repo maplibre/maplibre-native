@@ -353,6 +353,10 @@ double VerticalPerspectiveProjection::circleRadiusCorrection(const TransformStat
     return std::cos(util::deg2rad(state.getLatLng().latitude()));
 }
 
+double VerticalPerspectiveProjection::pixelScale(const TransformState& state) const {
+    return 1.0 / std::cos(util::deg2rad(state.getLatLng().latitude()));
+}
+
 double VerticalPerspectiveProjection::pitchedTextCorrection(const TransformState& state,
                                                             const Point<double>& tileAnchor,
                                                             const UnwrappedTileID& tileID) const {

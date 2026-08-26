@@ -153,11 +153,14 @@ static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
-                                  [[maybe_unused]] const TransformState& state,
+                                  const TransformState& state,
                                   const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const PaintParameters& paintParameters,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
+    if (updateProjectionVariant(state)) {
+        hillshadeShader.reset();
+    }
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -184,7 +187,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!hillshadeShader) {
-        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
+        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName, projectionVariant);
     }
 
     if (!hillshadePrepareShader || !hillshadeShader) {

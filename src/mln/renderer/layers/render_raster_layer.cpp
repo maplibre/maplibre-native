@@ -100,11 +100,14 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
 
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
-                               const TransformState& /*state*/,
+                               const TransformState& state,
                                const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const PaintParameters& paintParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
+    if (updateProjectionVariant(state)) {
+        rasterShader.reset();
+    }
     if ((!renderTiles || renderTiles->empty()) && !imageData) {
         if (layerGroup) {
             stats.drawablesRemoved += layerGroup->clearDrawables();
@@ -118,7 +121,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     constexpr auto renderPass = RenderPass::Translucent;
 
     if (!rasterShader) {
-        rasterShader = context.getGenericShader(shaders, "RasterShader");
+        rasterShader = context.getGenericShader(shaders, "RasterShader", projectionVariant);
         if (!rasterShader) {
             return;
         }

@@ -207,11 +207,14 @@ static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
 
 void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                     gfx::Context& context,
-                                    const TransformState&,
+                                    const TransformState& state,
                                     const std::shared_ptr<UpdateParameters>&,
                                     const PaintParameters&,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
+    if (updateProjectionVariant(state)) {
+        colorReliefShader.reset();
+    }
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -234,7 +237,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!colorReliefShader) {
-        colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName);
+        colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName, projectionVariant);
     }
 
     if (!colorReliefShader) {

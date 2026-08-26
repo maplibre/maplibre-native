@@ -50,7 +50,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         const auto projection = parameters.projectionDataForTile(tileID);
 
 #if MLN_UBO_CONSOLIDATION
-        drawableUBOVector[i].matrix = util::cast<float>(projection.mainMatrix);
+        drawableUBOVector[i].matrix = util::cast<float>(projection.fallbackMatrix);
         projectionUBOVector[i] = toProjectionUBO(projection);
 
         // Get tile props from drawable data (set during creation)
@@ -63,7 +63,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         drawable.setUBOIndex(i++);
 #else
         ColorReliefDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(projection.mainMatrix);
+        drawableUBO.matrix = util::cast<float>(projection.fallbackMatrix);
         const auto projectionUBO = toProjectionUBO(projection);
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
