@@ -143,7 +143,7 @@ fn main(in: VertexInput) -> VertexOutput {
     var position: vec4<f32>;
     if (pitch_with_map) {
 #ifdef PROJECTION_GLOBE
-        let center_vector = projectToSphere(circle_center, vec2<f32>(0.0, 0.0), projection);
+        let center_vector = projectToSphere(circle_center + projection.translate, vec2<f32>(0.0, 0.0), projection);
         var angle_scale = drawable.globe_extrude_scale;
 #endif
         var corner_position = circle_center;

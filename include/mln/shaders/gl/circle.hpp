@@ -126,7 +126,7 @@ lowp float stroke_opacity = u_stroke_opacity;
     vec2 circle_center = floor(a_pos * 0.5);
     if (u_pitch_with_map) {
 #ifdef PROJECTION_GLOBE
-        vec3 center_vector = projectToSphere(circle_center, vec2(0.0, 0.0));
+        vec3 center_vector = projectToSphere(circle_center + u_projection_translate, vec2(0.0, 0.0));
         float angle_scale = u_globe_extrude_scale;
 #endif
         vec2 corner_position = circle_center;

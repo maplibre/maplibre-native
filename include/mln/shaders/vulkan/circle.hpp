@@ -153,7 +153,7 @@ void main() {
 #endif
     if (props.pitch_with_map) {
 #ifdef PROJECTION_GLOBE
-        const vec3 center_vector = projectToSphere(circle_center, vec2(0.0, 0.0), projection);
+        const vec3 center_vector = projectToSphere(circle_center + projection.translate, vec2(0.0, 0.0), projection);
         float angle_scale = drawable.globe_extrude_scale;
 #endif
         vec2 corner_position = circle_center;

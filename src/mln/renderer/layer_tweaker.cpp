@@ -58,6 +58,10 @@ ProjectionData LayerTweaker::getProjectionData(const UnwrappedTileID& tileID,
     auto data = parameters.state.getProjectionDataForMatrix(
         tileID,
         getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable, aligned));
+    if (!inViewportPixelUnits) {
+        data.translate = util::cast<double>(
+            RenderTile::tileUnitTranslation(tileID, translation, anchor, parameters.state));
+    }
 #if MLN_GLOBE_DEPTH_OFFSET_IN_SHADER
     // The same per-layer shift `multiplyWithProjectionMatrix` bakes into the Mercator matrix.
     if (!drawable.getIs3D() && drawable.getEnableDepth()) {
@@ -76,8 +80,7 @@ shaders::ProjectionUBO LayerTweaker::toProjectionUBO(const ProjectionData& data)
             .clipping_plane = util::cast<float>(data.clippingPlane),
             .projection_transition = static_cast<float>(data.projectionTransition),
             .depth_offset = static_cast<float>(data.depthOffset),
-            .pad1 = 0,
-            .pad2 = 0};
+            .translate = util::cast<float>(data.translate)};
 }
 
 float LayerTweaker::globeExtrudeScale(const UnwrappedTileID& tileID, float zoom, double latitudeScale) {
