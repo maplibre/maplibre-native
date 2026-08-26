@@ -14,6 +14,10 @@ public:
     ProjectionData getProjectionData(const TransformState&,
                                      const UnwrappedTileID&,
                                      const mat4& mercatorMatrix) const override;
+
+    ProjectedTilePoint projectTilePoint(const ProjectionData&,
+                                        const UnwrappedTileID&,
+                                        const Point<double>&) const override;
 };
 
 } // namespace mln

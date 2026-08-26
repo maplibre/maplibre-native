@@ -1,4 +1,5 @@
 #include <mln/renderer/render_layer.hpp>
+#include <mln/map/transform_state.hpp>
 
 #include <mln/gfx/context.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -144,6 +145,16 @@ std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileI
         return n;
     }
     return 0;
+}
+
+bool RenderLayer::updateProjectionVariant(const TransformState& state) {
+    const auto variant = state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
+    if (variant == projectionVariant) {
+        return false;
+    }
+    projectionVariant = variant;
+    removeAllDrawables();
+    return true;
 }
 
 std::size_t RenderLayer::removeAllDrawables() {

@@ -7,6 +7,7 @@
 #include <mln/util/mat4.hpp>
 
 #include <mln/gfx/drawable.hpp>
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/util/tiny_unordered_map.hpp>
@@ -89,6 +90,9 @@ protected:
 
 public:
     virtual ~RenderLayer() = default;
+
+    /// The shader variant for the current projection; drawables are rebuilt when it changes.
+    gfx::ProjectionVariant getProjectionVariant() const { return projectionVariant; }
 
     // Begin transitions for any properties that have changed since the last frame.
     virtual void transition(const TransitionParameters&) = 0;
@@ -298,6 +302,10 @@ protected:
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;
+    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
+
+    /// Picks the shader variant for the state's projection; returns true and drops the drawables when it changed.
+    bool updateProjectionVariant(const TransformState&);
 
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;

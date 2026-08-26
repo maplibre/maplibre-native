@@ -98,6 +98,10 @@ struct ProjectionUBO {
 fn projectTile(pos: vec2<f32>, projection: ProjectionUBO) -> vec4<f32> {
     return projection.matrix * vec4<f32>(pos, 0.0, 1.0);
 }
+
+fn projectTileWithElevation(pos: vec2<f32>, elevation: f32, projection: ProjectionUBO) -> vec4<f32> {
+    return projection.matrix * vec4<f32>(pos, elevation, 1.0);
+}
 )";
 };
 

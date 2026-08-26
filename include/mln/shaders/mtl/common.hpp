@@ -266,6 +266,30 @@ inline float3 projectToSphere(float2 translatedPos, float2 rawPos, device const 
     return pos;
 }
 
+inline float3 globeRotateVector(float3 vec, float2 angles) {
+    float3 axisRight = float3(vec.z, 0.0, -vec.x);
+    float3 axisUp = cross(axisRight, vec);
+    axisRight = normalize(axisRight);
+    axisUp = normalize(axisUp);
+    const float2 t = tan(angles);
+    return normalize(vec + axisRight * t.x + axisUp * t.y);
+}
+
+// cos(latitude) at a tile Y, from the same exp() form as projectToSphere.
+inline float circumferenceRatioAtTileY(float tileY, device const ProjectionUBO& projection) {
+    const float mercator_pos_y = projection.tile_mercator_coords.y + projection.tile_mercator_coords.w * tileY;
+    const float t = exp(M_PI_F - (mercator_pos_y * M_PI_F * 2.0));
+    return (2.0 * t) / (t * t + 1.0);
+}
+
+inline float projectLineThickness(float tileY, device const ProjectionUBO& projection) {
+    const float thickness = 1.0 / circumferenceRatioAtTileY(tileY, projection);
+    if (projection.projection_transition < 0.999) {
+        return mix(1.0, thickness, projection.projection_transition);
+    }
+    return thickness;
+}
+
 inline float globeComputeClippingZ(float3 spherePos, device const ProjectionUBO& projection) {
     return 1.0 - (dot(spherePos, projection.clipping_plane.xyz) + projection.clipping_plane.w);
 }
@@ -295,8 +319,27 @@ inline float4 interpolateProjection(float2 posInTile, float3 spherePos, float el
     return result;
 }
 
+// Keeps the matrix Z, for geometry that needs the depth buffer.
+inline float4 interpolateProjectionFor3D(float2 posInTile, float3 spherePos, float elevation, device const ProjectionUBO& projection) {
+    const float3 elevatedPos = spherePos * (1.0 + elevation / GLOBE_RADIUS);
+    const float4 globePosition = projection.matrix * float4(elevatedPos, 1.0);
+    if (projection.projection_transition > 0.999) {
+        return globePosition;
+    }
+    const float4 fallbackPosition = projection.fallback_matrix * float4(posInTile, elevation, 1.0);
+    return mix(fallbackPosition, globePosition, projection.projection_transition);
+}
+
 inline float4 projectTile(float2 pos, device const ProjectionUBO& projection) {
     return interpolateProjection(pos, projectToSphere(pos, float2(0.0, 0.0), projection), 0.0, projection);
+}
+
+inline float4 projectTileWithElevation(float2 pos, float elevation, device const ProjectionUBO& projection) {
+    return interpolateProjection(pos, projectToSphere(pos, float2(0.0, 0.0), projection), elevation, projection);
+}
+
+inline float4 projectTileFor3D(float2 pos, float elevation, device const ProjectionUBO& projection) {
+    return interpolateProjectionFor3D(pos, projectToSphere(pos, pos, projection), elevation, projection);
 }
 
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
@@ -317,6 +360,18 @@ inline float4 projectTile(float2 pos, float2 rawPos, device const ProjectionUBO&
         result.z = -10000000.0;
     }
     return result;
+}
+
+inline float4 projectTileWithElevation(float2 pos, float elevation, device const ProjectionUBO& projection) {
+    return projection.matrix * float4(pos, elevation, 1.0);
+}
+
+inline float4 projectTileFor3D(float2 pos, float elevation, device const ProjectionUBO& projection) {
+    return projection.matrix * float4(pos, elevation, 1.0);
+}
+
+inline float projectLineThickness(float, device const ProjectionUBO&) {
+    return 1.0;
 }
 
 #endif
