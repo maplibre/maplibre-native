@@ -92,10 +92,10 @@ TEST(Style, GlobalState) {
     })STYLE");
 
     auto state = style.getGlobalState();
-    ASSERT_EQ(3u, state.size());
+    ASSERT_EQ(2u, state.size());
     EXPECT_EQ(Value(true), state.at("showLabels"));
     EXPECT_EQ(Value(mapbox::base::ValueArray({Value("restaurant"), Value("hotel")})), state.at("categories"));
-    EXPECT_EQ(Value(NullValue()), state.at("noDefault"));
+    EXPECT_EQ(state.end(), state.find("noDefault"));
 
     // Setting a property updates the state.
     style.setGlobalStateProperty("showLabels", false);
@@ -117,10 +117,19 @@ TEST(Style, GlobalState) {
     style.loadJSON(R"STYLE({"version": 8, "sources": {}, "layers": []})STYLE");
     EXPECT_TRUE(style.getGlobalState().empty());
 
-    // Setting an absent property to null is a no-op: a missing property
-    // already evaluates to null.
+    // As in GL JS, setting an absent property to null creates an observable
+    // null-valued entry even though both forms evaluate to null in expressions.
+    const auto beforeNull = style.getGlobalStateShared();
     style.setGlobalStateProperty("neverSet", NullValue());
-    EXPECT_TRUE(style.getGlobalState().empty());
+    EXPECT_NE(beforeNull, style.getGlobalStateShared());
+    state = style.getGlobalState();
+    ASSERT_EQ(1u, state.size());
+    EXPECT_EQ(Value(NullValue()), state.at("neverSet"));
+
+    // Repeating the same null assignment remains a no-op.
+    const auto afterNull = style.getGlobalStateShared();
+    style.setGlobalStateProperty("neverSet", NullValue());
+    EXPECT_EQ(afterNull, style.getGlobalStateShared());
 }
 
 TEST(Style, GlobalStateNumericEquality) {

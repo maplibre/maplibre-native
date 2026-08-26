@@ -292,11 +292,10 @@ void Parser::parseState(const JSValue& value) {
             Log::Warning(Event::ParseStyle, "state property \"" + propertyName + "\" must be an object");
             continue;
         }
-        mln::Value defaultValue;
-        if (member.value.HasMember("default")) {
-            defaultValue = parseStateValue(member.value["default"]);
+        if (!member.value.HasMember("default")) {
+            continue;
         }
-        globalStateDefaults.emplace(std::move(propertyName), std::move(defaultValue));
+        globalStateDefaults.emplace(std::move(propertyName), parseStateValue(member.value["default"]));
     }
 }
 
