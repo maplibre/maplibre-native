@@ -129,8 +129,7 @@ struct ProjectionUBO {
     vec4 clipping_plane;
     float projection_transition;
     float depth_offset;
-    float pad1;
-    float pad2;
+    vec2 translate;
 };
 
 // Pole vertices carry these sentinel Y values in their raw position.
@@ -224,20 +223,20 @@ vec4 interpolateProjectionFor3D(vec2 posInTile, vec3 spherePos, float elevation,
 }
 
 vec4 projectTile(vec2 pos, ProjectionUBO projection) {
-    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0), projection), 0.0, projection);
+    return interpolateProjection(pos, projectToSphere(pos + projection.translate, vec2(0.0, 0.0), projection), 0.0, projection);
 }
 
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 vec4 projectTile(vec2 pos, vec2 rawPos, ProjectionUBO projection) {
-    return interpolateProjection(pos, projectToSphere(pos, rawPos, projection), 0.0, projection);
+    return interpolateProjection(pos, projectToSphere(pos + projection.translate, rawPos, projection), 0.0, projection);
 }
 
 vec4 projectTileWithElevation(vec2 pos, float elevation, ProjectionUBO projection) {
-    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0), projection), elevation, projection);
+    return interpolateProjection(pos, projectToSphere(pos + projection.translate, vec2(0.0, 0.0), projection), elevation, projection);
 }
 
 vec4 projectTileFor3D(vec2 pos, float elevation, ProjectionUBO projection) {
-    return interpolateProjectionFor3D(pos, projectToSphere(pos, pos, projection), elevation, projection);
+    return interpolateProjectionFor3D(pos, projectToSphere(pos + projection.translate, pos, projection), elevation, projection);
 }
 
 #else
