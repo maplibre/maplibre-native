@@ -23,7 +23,7 @@
     },
     "outputs": [
       [1, 0, 0, 1],
-      [0.599999, 7.22057e-8, 0.4, 1],
+      [0.814095, 0, 0.444772, 1],
       [0, 0, 1, 1],
       {"error": "Could not parse color from value 'oops blue'"}
     ],

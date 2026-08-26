@@ -5,6 +5,7 @@
 #include <mln/style/expression/get_covering_stops.hpp>
 #include <mln/style/expression/interpolator.hpp>
 #include <mln/style/conversion.hpp>
+#include <mln/util/color.hpp>
 
 #include <memory>
 #include <map>
@@ -21,11 +22,13 @@ class Interpolate : public Expression {
 public:
     Interpolate(const type::Type& type_,
                 Interpolator interpolator_,
+                ColorSpace colorSpace_,
                 std::unique_ptr<Expression> input_,
                 std::map<double, std::unique_ptr<Expression>> stops_);
 
     const std::unique_ptr<Expression>& getInput() const noexcept { return input; }
     const Interpolator& getInterpolator() const noexcept { return interpolator; }
+    ColorSpace getColorSpace() const noexcept { return colorSpace; }
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override {
         visit(*input);
@@ -55,7 +58,8 @@ public:
     bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Interpolate) {
             const auto* rhs = static_cast<const Interpolate*>(&e);
-            if (interpolator != rhs->interpolator || *input != *(rhs->input) || stops.size() != rhs->stops.size()) {
+            if (interpolator != rhs->interpolator || colorSpace != rhs->colorSpace || *input != *(rhs->input) ||
+                stops.size() != rhs->stops.size()) {
                 return false;
             }
 
@@ -66,16 +70,18 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
     mln::Value serialize() const override;
-    std::string getOperator() const override { return "interpolate"; }
+    std::string getOperator() const override;
 
 protected:
     const Interpolator interpolator;
+    const ColorSpace colorSpace;
     const std::unique_ptr<Expression> input;
     const std::map<double, std::unique_ptr<Expression>> stops;
 };
 
 ParseResult createInterpolate(type::Type type,
                               Interpolator interpolator,
+                              ColorSpace colorSpace,
                               std::unique_ptr<Expression> input,
                               std::map<double, std::unique_ptr<Expression>> stops,
                               ParsingContext& ctx);
