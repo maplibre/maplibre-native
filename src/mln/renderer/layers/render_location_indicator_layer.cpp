@@ -522,7 +522,7 @@ public:
 #endif
 
         projectionCircle = params.projectionMatrix;
-        const Point<double> positionMercator = project(params.puckPosition, *params.state);
+        positionMercator = project(params.puckPosition, *params.state);
         matrix::identity(translation);
         matrix::translate(translation, translation, positionMercator.x, positionMercator.y, 0.0);
         matrix::multiply(projectionCircle, projectionCircle, translation);
@@ -569,6 +569,7 @@ public:
 
     const auto& getProjectionCircle() const { return projectionCircle; }
     const auto& getProjectionPuck() const { return projectionPuck; }
+    const auto& getPositionMercator() const { return positionMercator; }
 
     auto getPuckGeometry() const {
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -878,6 +879,7 @@ protected:
     mln::mat4 translation{};
     mln::mat4 projectionCircle{};
     mln::mat4 projectionPuck{};
+    Point<double> positionMercator{};
 
     bool positionChanged = false;
     bool radiusChanged = false;
@@ -1065,7 +1067,7 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures() {
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,
-                                          const TransformState&,
+                                          const TransformState& state,
                                           const std::shared_ptr<UpdateParameters>& updateParameters,
                                           [[maybe_unused]] const PaintParameters& paintParameters,
                                           const RenderTree&,
@@ -1080,9 +1082,17 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    if (updateProjectionVariant(state)) {
+        quadShader.reset();
+        circleShader.reset();
+        // the drawables were built with the other projection's shaders
+        if (layerGroup) {
+            static_cast<LayerGroup*>(layerGroup.get())->clearDrawables();
+        }
+    }
+
     if (!quadShader) {
-        quadShader = context.getGenericShader(
-            shaders, "LocationIndicatorTexturedShader", gfx::ProjectionVariant::Mercator);
+        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader", projectionVariant);
     }
 
     if (!quadShader) {
@@ -1091,7 +1101,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!circleShader) {
-        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader", gfx::ProjectionVariant::Mercator);
+        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader", projectionVariant);
     }
 
     if (!circleShader) {
@@ -1108,8 +1118,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
-            getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
+        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(getID(),
+                                                                       evaluatedProperties,
+                                                                       renderImpl->getProjectionCircle(),
+                                                                       renderImpl->getProjectionPuck(),
+                                                                       renderImpl->getPositionMercator());
         layerGroup->addLayerTweaker(layerTweaker);
     }
 

@@ -20,7 +20,7 @@ out vec2 frag_uv;
 
 void main() {
     frag_uv = a_uv;
-    gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);
+    gl_Position = projectTile(a_pos);
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LocationIndicatorDrawableUBO {
