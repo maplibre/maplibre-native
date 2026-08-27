@@ -33,6 +33,9 @@ struct VertexOutput {
     @location(3) v_color: vec4<f32>,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
+#ifdef PROJECTION_GLOBE
+    @location(6) v_tile_x: f32,
+#endif
 };
 
 struct LineDrawableUBO {
@@ -158,7 +161,9 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef PROJECTION_GLOBE
     let adjustedThickness = projectLineThickness(pos.y, projectionVector[globalIndex.value]);
     let projected_no_extrude = projectTile(pos + offset2 / ratio * adjustedThickness, projectionVector[globalIndex.value]);
-    let base = projectTile(pos + (offset2 + dist) / ratio * adjustedThickness, projectionVector[globalIndex.value]);
+    let extrudedPos = pos + (offset2 + dist) / ratio * adjustedThickness;
+    let base = projectTile(extrudedPos, projectionVector[globalIndex.value]);
+    out.v_tile_x = antimeridianClipX(extrudedPos, projectionVector[globalIndex.value]);
     let projected_extrude = base - projected_no_extrude;
 #else
     let projected_extrude = drawable.matrix * vec4<f32>(dist / ratio, 0.0, 0.0);
@@ -192,6 +197,9 @@ struct FragmentInput {
     @location(3) v_color: vec4<f32>,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
+#ifdef PROJECTION_GLOBE
+    @location(6) v_tile_x: f32,
+#endif
 };
 
 struct GlobalPaintParamsUBO {
@@ -210,6 +218,11 @@ struct GlobalPaintParamsUBO {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(in.v_tile_x)) {
+        discard;
+    }
+#endif
     // Calculate the distance of the pixel from the line in pixels
     let dist = length(in.v_normal) * in.v_width2.x;
 
@@ -250,6 +263,9 @@ struct VertexOutput {
     @location(3) v_lineprogress: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
+#ifdef PROJECTION_GLOBE
+    @location(6) v_tile_x: f32,
+#endif
 };
 
 struct LineGradientDrawableUBO {
@@ -378,7 +394,9 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef PROJECTION_GLOBE
     let adjustedThickness = projectLineThickness(pos.y, projectionVector[globalIndex.value]);
     let projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[globalIndex.value]);
-    let position_globe = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector[globalIndex.value]);
+    let extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    let position_globe = projectTile(extrudedPos, projectionVector[globalIndex.value]);
+    out.v_tile_x = antimeridianClipX(extrudedPos, projectionVector[globalIndex.value]);
     let projected_extrude = position_globe - projected_no_extrude;
     let position = position_globe;
 #else
@@ -410,6 +428,9 @@ struct FragmentInput {
     @location(3) v_lineprogress: f32,
     @location(4) v_blur: f32,
     @location(5) v_opacity: f32,
+#ifdef PROJECTION_GLOBE
+    @location(6) v_tile_x: f32,
+#endif
 };
 
 struct GlobalPaintParamsUBO {
@@ -430,6 +451,11 @@ struct GlobalPaintParamsUBO {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(in.v_tile_x)) {
+        discard;
+    }
+#endif
     // Calculate the distance of the pixel from the line
     let dist = length(in.v_normal) * in.v_width2.x;
 
@@ -476,6 +502,9 @@ struct VertexOutput {
     @location(5) v_opacity: f32,
     @location(6) v_pattern_from: vec4<f32>,
     @location(7) v_pattern_to: vec4<f32>,
+#ifdef PROJECTION_GLOBE
+    @location(8) v_tile_x: f32,
+#endif
 };
 
 struct LinePatternDrawableUBO {
@@ -614,7 +643,9 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef PROJECTION_GLOBE
     let adjustedThickness = projectLineThickness(pos.y, projectionVector[globalIndex.value]);
     let projected_no_extrude = projectTile(pos + offset2 / ratio * adjustedThickness, projectionVector[globalIndex.value]);
-    let position_globe = projectTile(pos + (offset2 + dist) / ratio * adjustedThickness, projectionVector[globalIndex.value]);
+    let extrudedPos = pos + (offset2 + dist) / ratio * adjustedThickness;
+    let position_globe = projectTile(extrudedPos, projectionVector[globalIndex.value]);
+    out.v_tile_x = antimeridianClipX(extrudedPos, projectionVector[globalIndex.value]);
     let projected_extrude = position_globe - projected_no_extrude;
     let position = position_globe;
 #else
@@ -650,6 +681,9 @@ struct FragmentInput {
     @location(5) v_opacity: f32,
     @location(6) v_pattern_from: vec4<f32>,
     @location(7) v_pattern_to: vec4<f32>,
+#ifdef PROJECTION_GLOBE
+    @location(8) v_tile_x: f32,
+#endif
 };
 
 struct GlobalPaintParamsUBO {
@@ -690,6 +724,11 @@ struct LinePatternTilePropsEntry {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(in.v_tile_x)) {
+        discard;
+    }
+#endif
     let tileProps = tilePropsVector[globalIndex.value].data;
 
     var pattern_from = in.v_pattern_from;
@@ -784,6 +823,9 @@ struct VertexOutput {
     @location(6) v_blur: f32,
     @location(7) v_opacity: f32,
     @location(8) v_floorwidth: f32,
+#ifdef PROJECTION_GLOBE
+    @location(9) v_tile_x: f32,
+#endif
 };
 
 struct LineSDFDrawableUBO {
@@ -944,7 +986,9 @@ fn main(in: VertexInput) -> VertexOutput {
 #ifdef PROJECTION_GLOBE
     let adjustedThickness = projectLineThickness(pos.y, projectionVector[globalIndex.value]);
     let projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[globalIndex.value]);
-    let position_globe = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector[globalIndex.value]);
+    let extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    let position_globe = projectTile(extrudedPos, projectionVector[globalIndex.value]);
+    out.v_tile_x = antimeridianClipX(extrudedPos, projectionVector[globalIndex.value]);
     let projected_extrude = position_globe - projected_no_extrude;
     let position = position_globe;
 #else
@@ -992,6 +1036,9 @@ struct FragmentInput {
     @location(6) v_blur: f32,
     @location(7) v_opacity: f32,
     @location(8) v_floorwidth: f32,
+#ifdef PROJECTION_GLOBE
+    @location(9) v_tile_x: f32,
+#endif
 };
 
 struct LineSDFTilePropsUBO {
@@ -1033,6 +1080,11 @@ struct LineSDFTilePropsEntry {
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(in.v_tile_x)) {
+        discard;
+    }
+#endif
     let tileProps = tilePropsVector[globalIndex.value].data;
 
     // Calculate the distance of the pixel from the line

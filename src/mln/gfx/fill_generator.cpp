@@ -1,5 +1,6 @@
 #include <mln/gfx/fill_generator.hpp>
 #include <mln/gfx/polyline_generator.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/subdivision.hpp>
 
 #ifdef _MSC_VER
@@ -13,6 +14,7 @@
 #pragma warning(pop)
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <limits>
 
@@ -103,6 +105,39 @@ void addOutlineIndices(const std::size_t base,
 
     lineSegment.vertexLength += nVertices;
     lineSegment.indexLength += nVertices * 2;
+}
+
+bool insideTileX(const GeometryCoordinate& point) {
+    return point.x >= 0 && point.x <= util::EXTENT;
+}
+
+/// On zoom 0 the tile's buffer wraps around the planet onto the tile itself, so the outline keeps only the runs
+/// of vertices inside the tile's X extent, the way the subdivided fill drops its triangles.
+template <class Generator>
+void generateOutline(Generator& generator,
+                     const GeometryCoordinates& ring,
+                     const CanonicalTileID& canonical,
+                     const gfx::PolylineGeneratorOptions& ringOptions) {
+    if (canonical.z != 0 || std::all_of(ring.begin(), ring.end(), insideTileX)) {
+        generator.generate(ring, ringOptions);
+        return;
+    }
+    gfx::PolylineGeneratorOptions runOptions = ringOptions;
+    runOptions.type = FeatureType::LineString;
+    GeometryCoordinates run;
+    for (const auto& point : ring) {
+        if (insideTileX(point)) {
+            run.push_back(point);
+            continue;
+        }
+        if (run.size() > 1) {
+            generator.generate(run, runOptions);
+        }
+        run.clear();
+    }
+    if (run.size() > 1) {
+        generator.generate(run, runOptions);
+    }
 }
 
 void addSubdividedPolygon(const util::SubdivisionResult& subdivided,
@@ -283,8 +318,10 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         if (subdivisionGranularity >= 2) {
             for (const auto& ring : polygon) {
-                lineGenerator.generate(util::subdivideVertexLine(ring, subdivisionGranularity, /*isRing=*/true),
-                                       lineOptions);
+                generateOutline(lineGenerator,
+                                util::subdivideVertexLine(ring, subdivisionGranularity, /*isRing=*/true),
+                                canonical,
+                                lineOptions);
             }
             addSubdividedPolygon(util::subdividePolygonWithinLimit(polygon,
                                                                    canonical,

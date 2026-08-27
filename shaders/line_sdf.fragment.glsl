@@ -31,7 +31,16 @@ in float v_gamma_scale;
 #pragma mapbox: define mediump float width
 #pragma mapbox: define lowp float floorwidth
 
+#ifdef PROJECTION_GLOBE
+in float v_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(v_tile_x)) {
+        discard;
+    }
+#endif
     #pragma mapbox: initialize highp vec4 color
     #pragma mapbox: initialize lowp float blur
     #pragma mapbox: initialize lowp float opacity

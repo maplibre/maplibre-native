@@ -99,6 +99,10 @@ layout (location = 8) in lowp vec2 a_floorwidth;
 out lowp float floorwidth;
 #endif
 
+#ifdef PROJECTION_GLOBE
+out float v_tile_x;
+#endif
+
 void main() {
     #ifndef HAS_UNIFORM_u_color
 color = unpack_mix_color(a_color, u_color_t);
@@ -177,7 +181,9 @@ lowp float floorwidth = u_floorwidth;
 #ifdef PROJECTION_GLOBE
     float adjustedThickness = projectLineThickness(pos.y);
     vec4 projected_no_extrude = projectTile(pos + offset2 / u_ratio * adjustedThickness);
-    gl_Position = projectTile(pos + (offset2 + dist) / u_ratio * adjustedThickness);
+    vec2 extrudedPos = pos + (offset2 + dist) / u_ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos);
+    v_tile_x = antimeridianClipX(extrudedPos);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
@@ -238,7 +244,16 @@ in mediump float width;
 in lowp float floorwidth;
 #endif
 
+#ifdef PROJECTION_GLOBE
+in float v_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(v_tile_x)) {
+        discard;
+    }
+#endif
     #ifdef HAS_UNIFORM_u_color
 highp vec4 color = u_color;
 #endif

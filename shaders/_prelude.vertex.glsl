@@ -179,6 +179,12 @@ vec4 projectTile(vec2 pos) {
     return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, vec2(0.0, 0.0)), 0.0);
 }
 
+// The zoom 0 tile's buffer wraps around the planet onto the tile itself, so the line shaders discard the fragments
+// beyond its X extent; every other tile (a mercator width below the whole world's) hands on a value inside it.
+float antimeridianClipX(vec2 posInTile) {
+    return u_projection_tile_mercator_coords.z * 8192.0 >= 1.0 ? posInTile.x : 0.0;
+}
+
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 vec4 projectTile(vec2 pos, vec2 rawPos) {
     return interpolateProjection(pos, projectToSphere(pos + u_projection_translate, rawPos), 0.0);
