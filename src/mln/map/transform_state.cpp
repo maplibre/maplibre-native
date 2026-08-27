@@ -112,6 +112,12 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     }
 }
 
+// MARK: - Projection
+
+void TransformState::setProjectionDefinition(const ProjectionDefinition& definition) {
+    projectionDefinition = definition;
+}
+
 // MARK: - Matrix
 
 void TransformState::matrixFor(mat4& matrix, const UnwrappedTileID& tileID) const {
