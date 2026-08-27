@@ -8,6 +8,7 @@
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/io.hpp>
@@ -72,6 +73,28 @@ TEST(Style, Properties) {
     ASSERT_EQ(0, *style.getDefaultCamera().zoom);
     ASSERT_EQ(0, *style.getDefaultCamera().bearing);
     ASSERT_EQ(0, *style.getDefaultCamera().pitch);
+}
+
+TEST(Style, Projection) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    style.loadJSON(R"STYLE({"projection": {"type": "globe"}})STYLE");
+    ASSERT_EQ(ProjectionDefinition("globe"), style.getProjection()->getType().asConstant());
+
+    style.loadJSON(R"STYLE({})STYLE");
+    ASSERT_TRUE(style.getProjection()->getType().isUndefined());
+
+    auto projection = std::make_unique<Projection>();
+    projection->setType(ProjectionDefinition("vertical-perspective"));
+    style.setProjection(std::move(projection));
+    ASSERT_EQ(ProjectionDefinition("vertical-perspective"), style.getProjection()->getType().asConstant());
+
+    // A name that is not a projection keeps the default, with a warning.
+    style.loadJSON(R"STYLE({"projection": {"type": "orthographic"}})STYLE");
+    ASSERT_TRUE(style.getProjection()->getType().isUndefined());
 }
 
 TEST(Style, GlobalState) {

@@ -95,6 +95,7 @@ public:
     double getFieldOfView() const;
 
     // North Orientation
+    void setProjectionDefinition(const ProjectionDefinition&);
     void setNorthOrientation(NorthOrientation);
     NorthOrientation getNorthOrientation() const;
 

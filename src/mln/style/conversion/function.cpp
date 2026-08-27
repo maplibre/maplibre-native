@@ -135,6 +135,8 @@ template std::optional<PropertyExpression<Color>> convertFunctionToExpression<Co
 template std::optional<PropertyExpression<Padding>> convertFunctionToExpression<Padding>(const Convertible&,
                                                                                          Error&,
                                                                                          bool);
+template std::optional<PropertyExpression<ProjectionDefinition>> convertFunctionToExpression<ProjectionDefinition>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<VariableAnchorOffsetCollection>>
 convertFunctionToExpression<VariableAnchorOffsetCollection>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Position>> convertFunctionToExpression<Position>(const Convertible&,
@@ -220,6 +222,7 @@ bool interpolatable(type::Type type) noexcept {
     return type.match([&](const type::NumberType&) { return true; },
                       [&](const type::ColorType&) { return true; },
                       [&](const type::PaddingType&) { return true; },
+                      [&](const type::ProjectionDefinitionType&) { return true; },
                       [&](const type::VariableAnchorOffsetCollectionType&) { return true; },
                       [&](const type::Array& array) {
                           // Arrays are interpolatable if they have a fixed size and item type is Number,
@@ -272,6 +275,13 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
         },
         [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
             auto result = convert<Padding>(value, error);
+            if (!result) {
+                return std::nullopt;
+            }
+            return literal(*result);
+        },
+        [&](const type::ProjectionDefinitionType&) -> std::optional<std::unique_ptr<Expression>> {
+            auto result = convert<ProjectionDefinition>(value, error);
             if (!result) {
                 return std::nullopt;
             }
@@ -872,6 +882,9 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             },
             [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toPadding(get(literal(*property)), defaultExpr());
+            },
+            [&](const type::ProjectionDefinitionType&) -> std::optional<std::unique_ptr<Expression>> {
+                return toProjectionDefinition(get(literal(*property)), defaultExpr());
             },
             [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toVariableAnchorOffset(get(literal(*property)), defaultExpr());
