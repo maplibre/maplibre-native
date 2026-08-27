@@ -226,6 +226,12 @@ vec4 projectTile(vec2 pos, ProjectionUBO projection) {
     return interpolateProjection(pos, projectToSphere(pos + projection.translate, vec2(0.0, 0.0), projection), 0.0, projection);
 }
 
+// The zoom 0 tile's buffer wraps around the planet onto the tile itself, so the line shaders discard the fragments
+// beyond its X extent; every other tile (a mercator width below the whole world's) hands on a value inside it.
+float antimeridianClipX(vec2 posInTile, ProjectionUBO projection) {
+    return projection.tile_mercator_coords.z * 8192.0 >= 1.0 ? posInTile.x : 0.0;
+}
+
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 vec4 projectTile(vec2 pos, vec2 rawPos, ProjectionUBO projection) {
     return interpolateProjection(pos, projectToSphere(pos + projection.translate, rawPos, projection), 0.0, projection);
@@ -286,6 +292,13 @@ void applySurfaceTransform() {
 
 #define M_PI 3.1415926535897932384626433832795
 #define SDF_PX 8.0
+
+#ifdef PROJECTION_GLOBE
+// The line fragments beyond the zoom 0 tile's X extent; see antimeridianClipX in the vertex prelude.
+bool clippedAtAntimeridian(float tileX) {
+    return tileX < 0.0 || tileX >= 8192.0;
+}
+#endif
 
 #define GLOBAL_SET_INDEX                    0
 #define LAYER_SET_INDEX                     1

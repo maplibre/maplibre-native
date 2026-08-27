@@ -70,6 +70,10 @@ out float v_gamma_scale;
 #pragma mapbox: define mediump float width
 #pragma mapbox: define lowp float floorwidth
 
+#ifdef PROJECTION_GLOBE
+out float v_tile_x;
+#endif
+
 void main() {
     #pragma mapbox: initialize highp vec4 color
     #pragma mapbox: initialize lowp float blur
@@ -120,7 +124,9 @@ void main() {
 #ifdef PROJECTION_GLOBE
     float adjustedThickness = projectLineThickness(pos.y);
     vec4 projected_no_extrude = projectTile(pos + offset2 / u_ratio * adjustedThickness);
-    gl_Position = projectTile(pos + (offset2 + dist) / u_ratio * adjustedThickness);
+    vec2 extrudedPos = pos + (offset2 + dist) / u_ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos);
+    v_tile_x = antimeridianClipX(extrudedPos);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
