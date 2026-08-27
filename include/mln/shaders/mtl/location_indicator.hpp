@@ -45,10 +45,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LocationIndicatorDrawableUBO& drawable [[buffer(idLocationIndicatorUBO)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]]) {
 
     return {
-        .position = drawable.matrix * float4(vertx.position, 1.0)
+        .position = projectTile(vertx.position, projectionVector[uboIndex])
     };
 }
 
@@ -83,10 +84,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LocationIndicatorDrawableUBO& drawable [[buffer(idLocationIndicatorUBO)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]]) {
 
     return {
-        .position = drawable.matrix * float4(vertx.position, 1.0),
+        .position = projectTile(vertx.position, projectionVector[uboIndex]),
         .uv = vertx.uv
     };
 }
