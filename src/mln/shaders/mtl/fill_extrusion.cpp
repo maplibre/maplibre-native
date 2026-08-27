@@ -15,8 +15,8 @@ const std::array<AttributeInfo, 6> FillExtrusionShaderSource::attributes = {
 
     // Data driven
     AttributeInfo{2, gfx::AttributeDataType::Float4, fillExtrusionUBOCount + 1, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 1, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 1, idFillExtrusionHeightVertexAttribute},
 
     // Polygon centroid for the terrain elevation lookup. Interleaved in the same
     // shared vertex buffer as pos/decimals_ed, so it shares their buffer index.
@@ -43,8 +43,8 @@ const std::array<AttributeInfo, 5> FillExtrusionInstancedShaderSource::instanceA
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float4, fillExtrusionUBOCount + 2, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 2, idFillExtrusionHeightVertexAttribute},
 };
 const std::array<TextureInfo, 1> FillExtrusionInstancedShaderSource::textures = {
     TextureInfo{0, idFillExtrusionDEMTexture},
@@ -60,8 +60,8 @@ const std::array<AttributeInfo, 6> FillExtrusionPatternShaderSource::attributes 
     AttributeInfo{1, gfx::AttributeDataType::UShort2, fillExtrusionUBOCount + 0, idFillExtrusionDecimalsEdAttribute},
 
     // Data driven
-    AttributeInfo{2, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 1, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 1, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 1, idFillExtrusionHeightVertexAttribute},
     AttributeInfo{
         4, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 1, idFillExtrusionPatternFromVertexAttribute},
     AttributeInfo{
@@ -85,8 +85,8 @@ const std::array<AttributeInfo, 6> FillExtrusionPatternInstancedShaderSource::in
     AttributeInfo{2, gfx::AttributeDataType::UShort2, fillExtrusionUBOCount + 1, idFillExtrusionDecimalsEdAttribute},
 
     // Data driven
-    AttributeInfo{3, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, fillExtrusionUBOCount + 2, idFillExtrusionHeightVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 2, idFillExtrusionBaseVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, fillExtrusionUBOCount + 2, idFillExtrusionHeightVertexAttribute},
     AttributeInfo{
         5, gfx::AttributeDataType::UShort4, fillExtrusionUBOCount + 2, idFillExtrusionPatternFromVertexAttribute},
     AttributeInfo{

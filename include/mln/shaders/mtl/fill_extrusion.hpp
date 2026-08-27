@@ -92,10 +92,10 @@ struct VertexStage {
     float4 color [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(3)]];
+    float2 base [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(4)]];
+    float2 height [[attribute(4)]];
 #endif
 
     // Polygon centroid, for the terrain elevation lookup
@@ -229,10 +229,10 @@ struct VertexStage {
     float4 color [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(4)]];
+    float2 base [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(5)]];
+    float2 height [[attribute(5)]];
 #endif
 };
 
@@ -383,10 +383,10 @@ struct VertexStage {
     ushort2 decimals_ed [[attribute(1)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(2)]];
+    float2 base [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(3)]];
+    float2 height [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
     ushort4 pattern_from [[attribute(4)]];
@@ -569,10 +569,10 @@ struct VertexStage {
     short2 pos [[attribute(0)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(3)]];
+    float2 base [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(4)]];
+    float2 height [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
     ushort4 pattern_from [[attribute(5)]];

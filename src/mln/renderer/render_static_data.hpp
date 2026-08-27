@@ -7,6 +7,7 @@
 #include <mln/renderer/buckets/heatmap_bucket.hpp>
 #include <mln/renderer/buckets/raster_bucket.hpp>
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
 
 #include <string>
 #include <optional>
@@ -30,16 +31,19 @@ public:
     static gfx::VertexVector<RasterLayoutVertex> rasterVertices();
     static gfx::VertexVector<HeatmapTextureLayoutVertex> heatmapTextureVertices();
     static gfx::VertexVector<FillExtrusionStaticVertex> fillExtrusionVertices();
+    static gfx::VertexVector<SymbolStaticVertexAttributes> symbolVertices();
 
     static gfx::IndexVector<gfx::Triangles> quadTriangleIndices();
     static gfx::IndexVector<gfx::LineStrip> tileLineStripIndices();
     static gfx::IndexVector<gfx::Triangles> fillExtrusionTriangleIndices();
+    static gfx::IndexVector<gfx::Triangles> symbolTriangleIndices();
 
     static SegmentVector tileTriangleSegments();
     static SegmentVector tileBorderSegments();
     static SegmentVector rasterSegments();
     static SegmentVector heatmapTextureSegments();
-    static SegmentVector fillExtrusionSegments();
+    static SegmentBase fillExtrusionSegment();
+    static SegmentBase symbolSegment(std::size_t baseInstance, float sortKey);
 
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;

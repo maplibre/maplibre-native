@@ -120,6 +120,8 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
             seg.indexOffset,
             seg.vertexLength,
             seg.indexLength,
+            seg.baseInstance,
+            seg.instanceCount,
             seg.sortKey,
         };
         drawSegs.push_back(std::make_unique<Drawable::DrawSegment>(mode, std::move(segCopy)));
@@ -345,8 +347,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
-    const auto instances = instanceAttributes ? instanceAttributes->getMinCount() : 1;
-
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();
 
@@ -362,16 +362,16 @@ void Drawable::draw(PaintParameters& parameters) const {
 
         if (segment.indexLength) {
             commandBuffer->drawIndexed(static_cast<uint32_t>(segment.indexLength),
-                                       static_cast<uint32_t>(instances),
+                                       static_cast<uint32_t>(segment.instanceCount),
                                        static_cast<uint32_t>(segment.indexOffset),
                                        static_cast<int32_t>(segment.vertexOffset),
-                                       0,
+                                       static_cast<uint32_t>(segment.baseInstance),
                                        dispatcher);
         } else {
             commandBuffer->draw(static_cast<uint32_t>(segment.vertexLength),
-                                static_cast<uint32_t>(instances),
+                                static_cast<uint32_t>(segment.instanceCount),
                                 static_cast<uint32_t>(segment.vertexOffset),
-                                0,
+                                static_cast<uint32_t>(segment.baseInstance),
                                 dispatcher);
         }
 
@@ -419,7 +419,7 @@ void Drawable::setSharedBuffers(const gfx::VertexAttributeArray& attribs, const 
         const auto& vkAttrib = static_cast<const VertexAttribute&>(attrib);
         int ubo = vkAttrib.getUBO();
 
-        if (ubo == -1 || impl->uniformBuffers.get(ubo) != nullptr) {
+        if (ubo == -1) {
             return;
         }
 

@@ -9,12 +9,12 @@ namespace shaders {
 using SymbolIconShaderSource = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 6> SymbolIconShaderSource::attributes = {
-    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolPosOffsetAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UShort4, idSymbolDataAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Short4, idSymbolPixelOffsetAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float3, idSymbolProjectedPosAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolFadeOpacityAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Float, idSymbolOpacityAttribute},
 };
 
 const std::array<TextureInfo, 3> SymbolIconShaderSource::textures = {
@@ -27,16 +27,16 @@ const std::array<TextureInfo, 3> SymbolIconShaderSource::textures = {
 using SymbolSDFShaderSource = ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 10> SymbolSDFShaderSource::attributes = {
-    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
-    AttributeInfo{9, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
-    AttributeInfo{10, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
-    AttributeInfo{11, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{12, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolPosOffsetAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UShort4, idSymbolDataAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Short4, idSymbolPixelOffsetAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float3, idSymbolProjectedPosAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolFadeOpacityAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Float4, idSymbolColorAttribute},
+    AttributeInfo{9, gfx::AttributeDataType::Float4, idSymbolHaloColorAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float, idSymbolOpacityAttribute},
+    AttributeInfo{11, gfx::AttributeDataType::Float, idSymbolHaloWidthAttribute},
+    AttributeInfo{12, gfx::AttributeDataType::Float, idSymbolHaloBlurAttribute},
 };
 
 const std::array<TextureInfo, 3> SymbolSDFShaderSource::textures = {
@@ -49,15 +49,15 @@ const std::array<TextureInfo, 3> SymbolSDFShaderSource::textures = {
 using SymbolTextAndIconShaderSource = ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::WebGPU>;
 
 const std::array<AttributeInfo, 9> SymbolTextAndIconShaderSource::attributes = {
-    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{5, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{6, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
-    AttributeInfo{7, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
-    AttributeInfo{8, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
-    AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
-    AttributeInfo{10, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{11, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Short4, idSymbolPosOffsetAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::UShort4, idSymbolDataAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float3, idSymbolProjectedPosAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float, idSymbolFadeOpacityAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float4, idSymbolColorAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Float4, idSymbolHaloColorAttribute},
+    AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolOpacityAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float, idSymbolHaloWidthAttribute},
+    AttributeInfo{11, gfx::AttributeDataType::Float, idSymbolHaloBlurAttribute},
 };
 
 const std::array<TextureInfo, 4> SymbolTextAndIconShaderSource::textures = {

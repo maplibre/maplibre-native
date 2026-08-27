@@ -8,6 +8,7 @@
 #include <mln/layout/symbol_projection.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/layers/render_symbol_layer.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/renderer/render_terrain.hpp>

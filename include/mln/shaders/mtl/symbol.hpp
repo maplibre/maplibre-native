@@ -84,8 +84,6 @@ static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
 #define c_offscreen_degenerate_triangle_location -2.0
 
-
-
 )";
 
 template <>
@@ -94,22 +92,41 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 10> instanceAttributes;
     static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float4 pixeloffset [[attribute(2)]];
-    float3 projected_pos [[attribute(3)]];
-    float fade_opacity [[attribute(4)]];
+    float2 pos [[attribute(0)]];
 
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+    ushort sorted_instance [[attribute(1)]];
+#endif
+};
+
+struct SymbolInstance {
+    short2 pos_scale[2];
+    short2 offset_tltr[2];
+    short2 offset_blbr[2];
+    ushort2 texture_rect[2];
+    short2 pixeloffset[2];
+    ushort2 size_sdf;
+};
+
+struct DynamicInstance {
+    float projected_pos[3];
+};
+
+struct OpacityInstance {
+    float fade_opacity;
+};
+
+struct DataInstance {
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(5)]];
+    float opacity[2];
 #endif
 };
 
@@ -130,21 +147,36 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
+                                uint instanceID [[ instance_id ]],
+                                device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
+                                device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
+                                device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
+                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]],
                                 texture2d<float, access::sample> demTexture [[texture(1)]],
                                 sampler demSampler [[sampler(1)]],
                                 texture2d<float, access::sample> depthTexture [[texture(2)]],
                                 sampler depthSampler [[sampler(2)]]) {
 
-    device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+#if defined(HAS_UNIFORM_u_sorted_instance)
+    const uint instance = instanceID;
+#else
+    const uint instance = vertx.sorted_instance;
+#endif
 
-    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
+    device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolInstance& symbol = symbolInstances[instance];
+    device const DynamicInstance& dynamic = dynamicInstances[instance];
+    device const OpacityInstance& opacity = opacityInstances[instance];
+    device const DataInstance& data = dataInstances[instance];
+
+    const float2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
 #if defined(HAS_UNIFORM_u_opacity)
     const half fo = half(fade_opacity);
 #else
-    const half fo = half(unpack_mix_float(vertx.opacity, drawable.opacity_t) * fade_opacity);
+    const half fo = half(unpack_mix_float(data.opacity, drawable.opacity_t) * fade_opacity);
 #endif
 
     // This will check to see if the opacity is zero and push the triangle offscreen if it is
@@ -157,17 +189,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             };
         }
 
-    const float2 a_pos = vertx.pos_offset.xy;
-    const float2 a_offset = vertx.pos_offset.zw;
+    const float2 a_pos = float2(symbol.pos_scale[0]);
+    const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
 
-    const float2 a_tex = vertx.data.xy;
-    const float2 a_size = vertx.data.zw;
+    const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
+    const float2 a_size = float2(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const float2 a_pxoffset = vertx.pixeloffset.xy;
-    const float2 a_minFontScale = vertx.pixeloffset.zw / 256.0;
+    const float2 a_pxoffset = float2(symbol.pixeloffset[0]) + vertx.pos * float2(symbol.pixeloffset[1] - symbol.pixeloffset[0]);
+    const float2 a_minFontScale = float2(symbol.pos_scale[1]) / 256.0;
 
-    const float segment_angle = -vertx.projected_pos[2];
+    const float segment_angle = -dynamic.projected_pos[2];
 
     float size;
     if (!drawable.is_size_zoom_constant && !drawable.is_size_feature_constant) {
@@ -211,7 +243,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const float4 projected_pos = drawable.label_plane_matrix * float4(vertx.projected_pos.xy, ele, 1.0);
+    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], ele, 1.0);
     const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const float2 pos0 = projected_pos.xy / projected_pos.w;
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
@@ -259,34 +291,53 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 10> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 14> instanceAttributes;
     static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
 
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float4 pixeloffset [[attribute(2)]];
-    float3 projected_pos [[attribute(3)]];
-    float fade_opacity [[attribute(4)]];
+    float2 pos [[attribute(0)]];
 
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+    ushort sorted_instance [[attribute(1)]];
+#endif
+};
+
+struct SymbolInstance {
+    short2 pos_scale[2];
+    short2 offset_tltr[2];
+    short2 offset_blbr[2];
+    ushort2 texture_rect[2];
+    short2 pixeloffset[2];
+    ushort2 size_sdf;
+};
+
+struct DynamicInstance {
+    float projected_pos[3];
+};
+
+struct OpacityInstance {
+    float fade_opacity;
+};
+
+struct DataInstance {
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(5)]];
+    float fill_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(6)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(7)]];
+    float halo_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(8)]];
+    float halo_width[2];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(9)]];
+    float halo_blur[2];
 #endif
 };
 
@@ -320,14 +371,29 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
+                                uint instanceID [[ instance_id ]],
+                                device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
+                                device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
+                                device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
+                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]],
                                 texture2d<float, access::sample> demTexture [[texture(1)]],
                                 sampler demSampler [[sampler(1)]],
                                 texture2d<float, access::sample> depthTexture [[texture(2)]],
                                 sampler depthSampler [[sampler(2)]]) {
 
-    device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+#if defined(HAS_UNIFORM_u_sorted_instance)
+    const uint instance = instanceID;
+#else
+    const uint instance = vertx.sorted_instance;
+#endif
 
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
+    device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolInstance& symbol = symbolInstances[instance];
+    device const DynamicInstance& dynamic = dynamicInstances[instance];
+    device const OpacityInstance& opacity = opacityInstances[instance];
+    device const DataInstance& data = dataInstances[instance];
+
+    const float2 fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
 
@@ -341,16 +407,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
-    const float2 a_pos = vertx.pos_offset.xy;
-    const float2 a_offset = vertx.pos_offset.zw;
+    const float2 a_pos = float2(symbol.pos_scale[0]);
+    const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
 
-    const float2 a_tex = vertx.data.xy;
-    const float2 a_size = vertx.data.zw;
+    const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
+    const float2 a_size = float2(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
-    const float2 a_pxoffset = vertx.pixeloffset.xy;
+    const float2 a_pxoffset = float2(symbol.pixeloffset[0]) + vertx.pos * float2(symbol.pixeloffset[1] - symbol.pixeloffset[0]);
 
-    const float segment_angle = -vertx.projected_pos[2];
+    const float segment_angle = -dynamic.projected_pos[2];
 
     float size;
     if (!drawable.is_size_zoom_constant && !drawable.is_size_feature_constant) {
@@ -401,7 +467,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_sin = sin(segment_angle + symbol_rotation);
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const auto rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
-    const float4 projected_pos = drawable.label_plane_matrix * float4(vertx.projected_pos.xy, ele, 1.0);
+    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], ele, 1.0);
     const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
@@ -412,19 +478,19 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position     = position,
 #if !defined(HAS_UNIFORM_u_fill_color)
-        .fill_color   = half4(unpack_mix_color(vertx.fill_color, drawable.fill_color_t)),
+        .fill_color   = half4(unpack_mix_color(data.fill_color, drawable.fill_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-        .halo_color   = half4(unpack_mix_color(vertx.halo_color, drawable.halo_color_t)),
+        .halo_color   = half4(unpack_mix_color(data.halo_color, drawable.halo_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-        .halo_width   = half(unpack_mix_float(vertx.halo_width, drawable.halo_width_t)),
+        .halo_width   = half(unpack_mix_float(data.halo_width, drawable.halo_width_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-        .halo_blur    = half(unpack_mix_float(vertx.halo_blur, drawable.halo_blur_t)),
+        .halo_blur    = half(unpack_mix_float(data.halo_blur, drawable.halo_blur_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity      = half(unpack_mix_float(data.opacity, drawable.opacity_t)),
 #endif
         .tex          = half2(a_tex / drawable.texsize),
         .gamma_scale  = half(position.w),
@@ -501,8 +567,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<AttributeInfo, 1> attributes;
+    static const std::array<AttributeInfo, 14> instanceAttributes;
     static const std::array<TextureInfo, 4> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
@@ -512,25 +578,45 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 #define ICON 0.0
 
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float3 projected_pos [[attribute(2)]];
-    float fade_opacity [[attribute(3)]];
+    float2 pos [[attribute(0)]];
 
+#if !defined(HAS_UNIFORM_u_sorted_instance)
+    ushort sorted_instance [[attribute(1)]];
+#endif
+};
+
+struct SymbolInstance {
+    short2 pos_scale[2];
+    short2 offset_tltr[2];
+    short2 offset_blbr[2];
+    ushort2 texture_rect[2];
+    short2 pixeloffset[2];
+    ushort2 size_sdf;
+};
+
+struct DynamicInstance {
+    float projected_pos[3];
+};
+
+struct OpacityInstance {
+    float fade_opacity;
+};
+
+struct DataInstance {
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity[2];
+#endif
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(4)]];
+    float fill_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(5)]];
-#endif
-#if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(6)]];
+    float halo_color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(7)]];
+    float halo_width[2];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(8)]];
+    float halo_blur[2];
 #endif
 };
 
@@ -566,14 +652,29 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
-                                texture2d<float, access::sample> demTexture [[texture(2)]],
-                                sampler demSampler [[sampler(2)]],
-                                texture2d<float, access::sample> depthTexture [[texture(3)]],
-                                sampler depthSampler [[sampler(3)]]) {
+                                uint instanceID [[ instance_id ]],
+                                device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
+                                device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
+                                device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
+                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]],
+                                texture2d<float, access::sample> demTexture [[texture(1)]],
+                                sampler demSampler [[sampler(1)]],
+                                texture2d<float, access::sample> depthTexture [[texture(2)]],
+                                sampler depthSampler [[sampler(2)]]) {
+
+#if defined(HAS_UNIFORM_u_sorted_instance)
+    const uint instance = instanceID;
+#else
+    const uint instance = vertx.sorted_instance;
+#endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolInstance& symbol = symbolInstances[instance];
+    device const DynamicInstance& dynamic = dynamicInstances[instance];
+    device const OpacityInstance& opacity = opacityInstances[instance];
+    device const DataInstance& data = dataInstances[instance];
 
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float2 fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const half fo = half(max(0.0, min(1.0, fade_opacity[0] + fade_change)));
 
@@ -587,16 +688,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         };
     }
 
-    const float2 a_pos = vertx.pos_offset.xy;
-    const float2 a_offset = vertx.pos_offset.zw;
+    const float2 a_pos = float2(symbol.pos_scale[0]);
+    const float2 a_offset = float2(select(symbol.offset_tltr[uint(vertx.pos.x)], symbol.offset_blbr[uint(vertx.pos.x)], uint(vertx.pos.y)));
 
-    const float2 a_tex = vertx.data.xy;
-    const float2 a_size = vertx.data.zw;
+    const float2 a_tex = float2(symbol.texture_rect[0]) + vertx.pos * float2(symbol.texture_rect[1]);
+    const float2 a_size = float2(symbol.size_sdf);
 
     const float a_size_min = floor(a_size[0] * 0.5);
     const float is_sdf = a_size[0] - 2.0 * a_size_min;
 
-    const float segment_angle = -vertx.projected_pos[2];
+    const float segment_angle = -dynamic.projected_pos[2];
 
     float size;
     if (!drawable.is_size_zoom_constant && !drawable.is_size_feature_constant) {
@@ -648,15 +749,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const float4 projected_pos = drawable.label_plane_matrix * float4(vertx.projected_pos.xy, ele, 1.0);
+    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], ele, 1.0);
     const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const float2 pos_rot = a_offset / 32.0 * fontScale;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
-    // Fade out symbols hidden behind the terrain (see calculate_visibility)
-    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
     const float gamma_scale = position.w;
     const bool is_icon = (is_sdf == ICON);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
 
     return {
         .position     = position,
@@ -667,19 +768,19 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .is_icon      = is_icon,
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-        .fill_color = half(unpack_mix_color(vertx.fill_color, drawable.fill_color_t));
+        .fill_color = half(unpack_mix_color(data.fill_color, drawable.fill_color_t));
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-        .halo_color = half(unpack_mix_color(vertx.halo_color, drawable.halo_color_t));
+        .halo_color = half(unpack_mix_color(data.halo_color, drawable.halo_color_t));
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity    = half(unpack_mix_float(vertx.opacity, drawable.opacity_t));
+        .opacity    = half(unpack_mix_float(data.opacity, drawable.opacity_t));
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-        .halo_width = half(unpack_mix_float(vertx.halo_width, drawable.halo_width_t));
+        .halo_width = half(unpack_mix_float(data.halo_width, drawable.halo_width_t));
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-        .halo_blur  = half(unpack_mix_float(vertx.halo_blur, drawable.halo_blur_t));
+        .halo_blur  = half(unpack_mix_float(data.halo_blur, drawable.halo_blur_t));
 #endif
     };
 }

@@ -115,6 +115,7 @@ public:
     TriangleIndexVector& triangles = *sharedTriangles;
 
     SegmentVector triangleSegments;
+    SegmentVector instanceSegments;
 
     std::unordered_map<std::string, FillExtrusionBinders> paintPropertyBinders;
 };

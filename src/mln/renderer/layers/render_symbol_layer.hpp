@@ -2,6 +2,7 @@
 
 #include <mln/text/glyph.hpp>
 #include <mln/renderer/render_layer.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/layers/symbol_layer_impl.hpp>
 #include <mln/style/layers/symbol_layer_properties.hpp>
@@ -11,25 +12,6 @@
 namespace mln {
 
 namespace style {
-
-// {icon,text}-specific paint-property packs for use in the symbol Programs.
-// Since each program deals either with icons or text, using a smaller property set
-// lets us avoid unnecessarily binding attributes for properties the program wouldn't use.
-class IconPaintProperties : public Properties<IconOpacity,
-                                              IconColor,
-                                              IconHaloColor,
-                                              IconHaloWidth,
-                                              IconHaloBlur,
-                                              IconTranslate,
-                                              IconTranslateAnchor> {};
-
-class TextPaintProperties : public Properties<TextOpacity,
-                                              TextColor,
-                                              TextHaloColor,
-                                              TextHaloWidth,
-                                              TextHaloBlur,
-                                              TextTranslate,
-                                              TextTranslateAnchor> {};
 
 // Repackaging evaluated values from SymbolLayoutProperties +
 // SymbolPaintProperties for genericity over icons vs. text.
@@ -63,11 +45,6 @@ class RenderSymbolLayer final : public RenderLayer {
 public:
     explicit RenderSymbolLayer(Immutable<style::SymbolLayer::Impl>);
     ~RenderSymbolLayer() override;
-
-    static style::IconPaintProperties::PossiblyEvaluated iconPaintProperties(
-        const style::SymbolPaintProperties::PossiblyEvaluated &);
-    static style::TextPaintProperties::PossiblyEvaluated textPaintProperties(
-        const style::SymbolPaintProperties::PossiblyEvaluated &);
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry &,
@@ -126,6 +103,14 @@ private:
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
 
     LayerTweakerPtr collisionLayerTweaker;
+
+#if MLN_USE_SYMBOL_INSTANCING
+    using SymbolVertexVector = gfx::VertexVector<SymbolStaticVertexAttributes>;
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+
+    std::shared_ptr<SymbolVertexVector> staticDataVertices;
+    std::shared_ptr<TriangleIndexVector> staticDataIndices;
+#endif
 };
 
 } // namespace mln

@@ -28,6 +28,15 @@ MBGL_DEFINE_ATTRIBUTE(int16_t, 2, normal2d);
 // per building so extrusions don't shear across a slope (see fill_extrusion)
 MBGL_DEFINE_ATTRIBUTE(int16_t, 2, centroid);
 
+#if MLN_USE_SYMBOL_INSTANCING
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 1, sorted_instance);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, pos_scale);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_tltr);
+MBGL_DEFINE_ATTRIBUTE(int16_t, 4, offset_blbr);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 4, texture_rect);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, size_sdf);
+#endif
+
 template <typename T, std::size_t N>
 struct data {
     using Type = gfx::AttributeType<T, N>;

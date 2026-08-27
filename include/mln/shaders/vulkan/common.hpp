@@ -49,11 +49,19 @@ vec4 decode_color(const vec2 encodedColor) {
 }
 
 // Unpack a pair of paint values and interpolate between them.
+float unpack_mix_float(const float packedValue[2], const float t) {
+    return mix(packedValue[0], packedValue[1], t);
+}
 float unpack_mix_float(const vec2 packedValue, const float t) {
     return mix(packedValue[0], packedValue[1], t);
 }
 
 // Unpack a pair of paint values and interpolate between them.
+vec4 unpack_mix_color(const float packedColors[4], const float t) {
+    vec4 minColor = decode_color(vec2(packedColors[0], packedColors[1]));
+    vec4 maxColor = decode_color(vec2(packedColors[2], packedColors[3]));
+    return mix(minColor, maxColor, t);
+}
 vec4 unpack_mix_color(const vec4 packedColors, const float t) {
     vec4 minColor = decode_color(vec2(packedColors[0], packedColors[1]));
     vec4 maxColor = decode_color(vec2(packedColors[2], packedColors[3]));
@@ -89,7 +97,7 @@ vec2 unpack_uint(uint value) {
 #define layerSSBOStartId                    0
 #define layerUBOStartId                     3
 #define drawableSSBOStartId                 0
-#define drawableUBOStartId                  1
+#define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
@@ -269,7 +277,7 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
 #define layerSSBOStartId                    0
 #define layerUBOStartId                     3
 #define drawableSSBOStartId                 0
-#define drawableUBOStartId                  1
+#define drawableUBOStartId                  4
 
 #define idDrawableReservedVertexOnlyUBO     layerSSBOStartId
 #define idDrawableReservedFragmentOnlyUBO   idDrawableReservedVertexOnlyUBO + 1
