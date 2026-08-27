@@ -8,8 +8,16 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::GlobeDepthShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "GlobeDepthShader";
-    static constexpr const char* vertex = R"()";
-    static constexpr const char* fragment = R"()";
+    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+void main() {
+    gl_Position = projectTileFor3D(a_pos, 0.0);
+}
+)";
+    static constexpr const char* fragment = R"(void main() {
+    fragColor = vec4(0.0);
+}
+)";
 };
 
 } // namespace shaders

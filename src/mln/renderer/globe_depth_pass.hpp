@@ -1,11 +1,12 @@
 #pragma once
 
+#include <mln/gfx/uniform_buffer.hpp>
 #include <mln/renderer/globe_tile_mesh.hpp>
-#include <map>
-#include <tuple>
-
 #include <mln/renderer/layer_group.hpp>
 #include <mln/shaders/shader_program_base.hpp>
+
+#include <map>
+#include <tuple>
 
 namespace mln {
 
@@ -29,6 +30,7 @@ public:
 private:
     TileLayerGroupPtr layerGroup;
     gfx::ShaderProgramBasePtr shader;
+    gfx::UniformBufferPtr projectionUniformBuffer;
     std::map<std::tuple<uint8_t, bool, bool>, RawGlobeTileMesh> meshes;
 };
 

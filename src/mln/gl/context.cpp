@@ -11,6 +11,15 @@
 #include <mln/gl/debugging_extension.hpp>
 #include <mln/gl/timestamp_query_extension.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/projection_variant.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
+#include <mln/renderer/render_pass.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/shaders/layer_ubo.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/util/traits.hpp>
 #include <mln/util/std.hpp>
 #include <mln/util/logging.hpp>
@@ -100,6 +109,9 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+
+        globeClipMaskDrawables.clear();
+        globeClipMaskShader.reset();
 
         glUseProgram(0);
 
@@ -883,6 +895,52 @@ void Context::clearStencilBuffer(const int32_t bits) {
 Texture2DPool& Context::getTexturePool() {
     assert(texturePool);
     return *texturePool;
+}
+
+bool Context::renderGlobeTileClippingMasks(PaintParameters& parameters,
+                                           RenderStaticData& staticData,
+                                           const std::vector<shaders::GlobeClipMask>& masks) {
+    if (!globeClipMaskShader) {
+        // The globe depth shader projects a tile mesh onto the sphere and writes nothing else, which is a clip mask.
+        globeClipMaskShader = getGenericShader(*staticData.shaders, "GlobeDepthShader", gfx::ProjectionVariant::Globe);
+    }
+    if (!globeClipMaskShader || !parameters.renderPass) {
+        return false;
+    }
+
+    const auto uploadPass = parameters.encoder->createUploadPass("globe-clip-masks",
+                                                                 parameters.backend.getDefaultRenderable());
+    for (const auto& mask : masks) {
+        const auto& tile = mask.tile;
+        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
+        auto it = globeClipMaskDrawables.find(key);
+        if (it == globeClipMaskDrawables.end()) {
+            auto builder = createDrawableBuilder("globe-clip-mask");
+            builder->setShader(globeClipMaskShader);
+            builder->setRenderPass(mln::RenderPass::Opaque);
+            builder->setEnableColor(false);
+            builder->setEnableDepth(false);
+            builder->setEnableStencil(false);
+            // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
+            builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+            builder->setVertexAttrId(shaders::idGlobeDepthPosVertexAttribute);
+            auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
+            builder->setRawVertices(std::move(mesh.vertices), mesh.vertexCount, gfx::AttributeDataType::Short2);
+            builder->setSegments(gfx::Triangles(), std::move(mesh.indices), mesh.segments.data(), mesh.segments.size());
+            builder->flush(*this);
+            auto drawables = builder->clearDrawables();
+            if (drawables.empty()) {
+                return false;
+            }
+            it = globeClipMaskDrawables.emplace(key, std::move(drawables.front())).first;
+        }
+        auto& drawable = static_cast<DrawableGL&>(*it->second);
+        drawable.setStencilWriteRef(static_cast<int32_t>(mask.stencilRef));
+        drawable.mutableUniformBuffers().createOrUpdate(shaders::idProjectionUBO, &mask.projection, *this);
+        drawable.upload(*uploadPass);
+        drawable.draw(parameters);
+    }
+    return true;
 }
 
 } // namespace gl

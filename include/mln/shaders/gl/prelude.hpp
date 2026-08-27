@@ -90,18 +90,146 @@ layout (std140) uniform ProjectionUBO {
     highp vec4 u_projection_tile_mercator_coords;
     highp vec4 u_projection_clipping_plane;
     highp float u_projection_transition;
+    highp float u_projection_depth_offset;
     lowp float projection_pad1;
     lowp float projection_pad2;
-    lowp float projection_pad3;
 };
+
+// Pole vertices carry these sentinel Y values in their raw position.
+#define GLOBE_POLE_NORTH_Y -32767.5
+#define GLOBE_POLE_SOUTH_Y 32766.5
+
+#ifdef PROJECTION_GLOBE
+
+#define GLOBE_RADIUS 6371008.8
+
+// Tile position (0..EXTENT) to a point on the unit sphere; the pole sentinels in rawPos map to the poles.
+vec3 projectToSphere(vec2 translatedPos, vec2 rawPos) {
+    vec2 mercator_pos = u_projection_tile_mercator_coords.xy + u_projection_tile_mercator_coords.zw * translatedPos;
+    float spherical_x = mercator_pos.x * GLOBE_PI * 2.0 + GLOBE_PI;
+    // sin/cos of the latitude from the Mercator Y via the tangent half-angle identities: no atan, and float32 precision survives near the equator.
+    float t = exp(PI - (mercator_pos.y * PI * 2.0));
+    float t2 = t * t;
+    float denom = t2 + 1.0;
+    float sin_sy = (t2 - 1.0) / denom;
+    float cos_sy = (2.0 * t) / denom;
+    vec3 pos = vec3(sin(spherical_x) * cos_sy, sin_sy, cos(spherical_x) * cos_sy);
+    if (rawPos.y < GLOBE_POLE_NORTH_Y) {
+        pos = vec3(0.0, 1.0, 0.0);
+    }
+    if (rawPos.y > GLOBE_POLE_SOUTH_Y) {
+        pos = vec3(0.0, -1.0, 0.0);
+    }
+    return pos;
+}
+
+vec3 globeRotateVector(vec3 vec, vec2 angles) {
+    vec3 axisRight = vec3(vec.z, 0.0, -vec.x);
+    vec3 axisUp = cross(axisRight, vec);
+    axisRight = normalize(axisRight);
+    axisUp = normalize(axisUp);
+    vec2 t = tan(angles);
+    return normalize(vec + axisRight * t.x + axisUp * t.y);
+}
+
+// cos(latitude) at a tile Y, from the same exp() form as projectToSphere.
+float circumferenceRatioAtTileY(float tileY) {
+    float mercator_pos_y = u_projection_tile_mercator_coords.y + u_projection_tile_mercator_coords.w * tileY;
+    float t = exp(PI - (mercator_pos_y * PI * 2.0));
+    return (2.0 * t) / (t * t + 1.0);
+}
+
+float projectLineThickness(float tileY) {
+    float thickness = 1.0 / circumferenceRatioAtTileY(tileY);
+    if (u_projection_transition < 0.999) {
+        return mix(1.0, thickness, u_projection_transition);
+    }
+    return thickness;
+}
+
+float globeComputeClippingZ(vec3 spherePos) {
+    return 1.0 - (dot(spherePos, u_projection_clipping_plane.xyz) + u_projection_clipping_plane.w);
+}
+
+vec4 interpolateProjection(vec2 posInTile, vec3 spherePos, float elevation) {
+    vec3 elevatedPos = spherePos * (1.0 + elevation / GLOBE_RADIUS);
+    vec4 globePosition = u_projection_matrix * vec4(elevatedPos, 1.0);
+    // Clip the far side of the globe through Z; the layer's depth shift keeps layer order.
+    globePosition.z = globeComputeClippingZ(elevatedPos) * globePosition.w - u_projection_depth_offset;
+
+    if (u_projection_transition > 0.999) {
+        return globePosition;
+    }
+
+    vec4 flatPosition = u_projection_fallback_matrix * vec4(posInTile, elevation, 1.0);
+    const float z_globeness_threshold = 0.2;
+    vec4 result = globePosition;
+    result.z = mix(0.0, globePosition.z, clamp((u_projection_transition - z_globeness_threshold) / (1.0 - z_globeness_threshold), 0.0, 1.0));
+    result.xyw = mix(flatPosition.xyw, globePosition.xyw, u_projection_transition);
+    if ((posInTile.y < GLOBE_POLE_NORTH_Y) || (posInTile.y > GLOBE_POLE_SOUTH_Y)) {
+        result = globePosition;
+        const float poles_hidden_anim_percentage = 0.02;
+        result.z = mix(globePosition.z, 100.0, pow(max((1.0 - u_projection_transition) / poles_hidden_anim_percentage, 0.0), 8.0));
+    }
+    return result;
+}
+
+// Keeps the matrix Z, for geometry that needs the depth buffer.
+vec4 interpolateProjectionFor3D(vec2 posInTile, vec3 spherePos, float elevation) {
+    vec3 elevatedPos = spherePos * (1.0 + elevation / GLOBE_RADIUS);
+    vec4 globePosition = u_projection_matrix * vec4(elevatedPos, 1.0);
+    if (u_projection_transition > 0.999) {
+        return globePosition;
+    }
+    vec4 fallbackPosition = u_projection_fallback_matrix * vec4(posInTile, elevation, 1.0);
+    return mix(fallbackPosition, globePosition, u_projection_transition);
+}
+
+vec4 projectTile(vec2 pos) {
+    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0)), 0.0);
+}
+
+// The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
+vec4 projectTile(vec2 pos, vec2 rawPos) {
+    return interpolateProjection(pos, projectToSphere(pos, rawPos), 0.0);
+}
+
+vec4 projectTileWithElevation(vec2 pos, float elevation) {
+    return interpolateProjection(pos, projectToSphere(pos, vec2(0.0, 0.0)), elevation);
+}
+
+vec4 projectTileFor3D(vec2 pos, float elevation) {
+    return interpolateProjectionFor3D(pos, projectToSphere(pos, pos), elevation);
+}
+
+#else
 
 vec4 projectTile(vec2 pos) {
     return u_projection_matrix * vec4(pos, 0.0, 1.0);
 }
 
+// Pole vertices only exist on the globe; put them behind the near plane so their triangles are clipped.
+vec4 projectTile(vec2 pos, vec2 rawPos) {
+    vec4 result = u_projection_matrix * vec4(pos, 0.0, 1.0);
+    if (rawPos.y < GLOBE_POLE_NORTH_Y || rawPos.y > GLOBE_POLE_SOUTH_Y) {
+        result.z = -10000000.0;
+    }
+    return result;
+}
+
 vec4 projectTileWithElevation(vec2 pos, float elevation) {
     return u_projection_matrix * vec4(pos, elevation, 1.0);
 }
+
+vec4 projectTileFor3D(vec2 pos, float elevation) {
+    return u_projection_matrix * vec4(pos, elevation, 1.0);
+}
+
+float projectLineThickness(float tileY) {
+    return 1.0;
+}
+
+#endif
 )";
     static constexpr const char* fragment = R"(#ifdef GL_ES
 precision mediump float;
