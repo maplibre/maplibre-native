@@ -23,7 +23,7 @@ const std::optional<Tileset>& RenderRasterDEMSource::getTileset() const {
 }
 
 uint16_t RenderRasterDEMSource::getTileSize() const {
-    return impl().getTileSize();
+    return resolveTileSize(impl().getTileSize());
 }
 
 void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
@@ -36,7 +36,7 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                        needsRelayout,
                        parameters,
                        *baseImpl,
-                       impl().getTileSize(),
+                       resolveTileSize(impl().getTileSize()),
                        tileset.zoomRange,
                        tileset.bounds,
                        [&](const OverscaledTileID& tileID, TileObserver* observer_) {

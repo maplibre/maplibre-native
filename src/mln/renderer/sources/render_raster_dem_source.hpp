@@ -18,8 +18,8 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
 
-    /// The declared tile size the pyramid selects DEM tiles with, so terrain can
-    /// mesh on the same tile grid (a DEM may decode to a different pixel size).
+    /// The tile size the pyramid selects DEM tiles with, so terrain can mesh on the
+    /// same tile grid (a DEM may decode to a different pixel size than it declares).
     uint16_t getTileSize() const override;
 
 private:

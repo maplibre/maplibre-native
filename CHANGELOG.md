@@ -29,6 +29,8 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Honour `tileSize` from a raster/raster-dem source's TileJSON, as maplibre-gl-js does. It was parsed off the wire and discarded, so a style entry that omitted or mis-stated the size tiled at the wrong zoom.
+- [core] Mesh 3D terrain at the tile size the DEM source selects tiles with, not the decoded DEM's pixel dimension. When the two disagreed the mesh covered a shallower zoom than the DEM loaded, every per-tile DEM lookup missed, and the terrain rendered flat off the placeholder DEM.
 - [core] Repaint data-driven symbol paint properties after feature-state updates.
 - [core] Accept alpha values in legacy comma-separated `hsl()` colors ([#4434](https://github.com/maplibre/maplibre-native/issues/4434)).
 - [core] Fix thread-unsafe headless OpenGL display singleton initialization [#4332](https://github.com/maplibre/maplibre-native/pull/4332)

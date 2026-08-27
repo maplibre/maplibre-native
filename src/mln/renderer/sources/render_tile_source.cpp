@@ -577,6 +577,13 @@ RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, c
 
 RenderTileSetSource::~RenderTileSetSource() = default;
 
+uint16_t RenderTileSetSource::resolveTileSize(uint16_t declared) const {
+    if (cachedTileset && cachedTileset->tileSize) {
+        return *cachedTileset->tileSize;
+    }
+    return declared;
+}
+
 uint8_t RenderTileSetSource::getMaxZoom() const {
     return cachedTileset ? cachedTileset->zoomRange.max : util::TERRAIN_RGB_MAXZOOM;
 }
