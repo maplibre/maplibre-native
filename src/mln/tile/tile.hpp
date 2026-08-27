@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/util/noncopyable.hpp>
 #include <mln/util/chrono.hpp>
 #include <mln/util/feature.hpp>
@@ -80,6 +81,7 @@ public:
     // tile (and i.e. it was successfully updated); returns `false` otherwise.
     virtual bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) = 0;
     virtual void setShowCollisionBoxes(const bool) {}
+    virtual void setSubdivisionGranularity(const SubdivisionGranularitySetting&) {}
     virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}
     virtual void setMask(TileMask&&) {}
 

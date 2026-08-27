@@ -183,7 +183,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
     return {
-        .position = projectTile(float2(vertx.position), projectionVector[uboIndex]),
+        .position = projectTile(float2(vertx.position), float2(vertx.position), projectionVector[uboIndex]),
 #if !defined(HAS_UNIFORM_u_color)
         .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
@@ -254,7 +254,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const FillOutlineDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineDrawableUBO;
 
-    const float4 position = projectTile(float2(vertx.position), projectionVector[uboIndex]);
+    const float4 position = projectTile(float2(vertx.position), float2(vertx.position), projectionVector[uboIndex]);
     return {
         .position       = position,
         .pos            = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
@@ -377,7 +377,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 postion = float2(vertx.position);
 
     return {
-        .position       = projectTile(postion, projectionVector[uboIndex]),
+        .position       = projectTile(postion, postion, projectionVector[uboIndex]),
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 #if !defined(HAS_UNIFORM_u_pattern_from)
@@ -524,7 +524,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
     const float2 pos2 = float2(vertx.position);
-    const float4 position = projectTile(pos2, projectionVector[uboIndex]);
+    const float4 position = projectTile(pos2, pos2, projectionVector[uboIndex]);
 
     return {
         .position       = position,
@@ -649,8 +649,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // Scale the extrusion vector down to a normal and then up by the line width of this vertex.
     const float2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
-    const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = projectTile(pos, projectionVector[uboIndex]) + projected_extrude;
+    const float4 projected_extrude = projectionVector[uboIndex].fallback_matrix * float4(dist / drawable.ratio, 0.0, 0.0);
+    const float4 position = projectTile(pos, pos, projectionVector[uboIndex]) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);

@@ -77,6 +77,7 @@ private:
 
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     TileCache cache;
+    bool lastGlobeRendering = false;
 
     std::map<UnwrappedTileID, std::reference_wrapper<Tile>> renderedTiles; // Sorted by tile id.
     TileObserver* observer = nullptr;
