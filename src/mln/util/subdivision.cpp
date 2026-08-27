@@ -368,7 +368,7 @@ private:
     std::vector<uint32_t> removeTrianglesOutsideTileX(const std::vector<uint32_t>& indices) const {
         std::vector<uint32_t> result;
         for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
-            if (vertexOutsideTileX(indices[i]) && vertexOutsideTileX(indices[i + 1]) &&
+            if (vertexOutsideTileX(indices[i]) || vertexOutsideTileX(indices[i + 1]) ||
                 vertexOutsideTileX(indices[i + 2])) {
                 continue;
             }
@@ -380,7 +380,7 @@ private:
     std::vector<uint32_t> removeLinesOutsideTileX(const std::vector<uint32_t>& indices) const {
         std::vector<uint32_t> result;
         for (std::size_t i = 0; i + 1 < indices.size(); i += 2) {
-            if (vertexOutsideTileX(indices[i]) && vertexOutsideTileX(indices[i + 1])) {
+            if (vertexOutsideTileX(indices[i]) || vertexOutsideTileX(indices[i + 1])) {
                 continue;
             }
             result.insert(result.end(), {indices[i], indices[i + 1]});
