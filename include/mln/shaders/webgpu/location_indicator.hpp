@@ -23,17 +23,18 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
 };
 
-struct LocationIndicatorUBO {
-    matrix: mat4x4<f32>,
-    color: vec4<f32>,
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    out.position = ubo.matrix * vec4<f32>(in.position, 0.0, 1.0);
+    out.position = projectTile(in.position, projectionVector[globalIndex.value]);
     return out;
 }
 )";
@@ -44,7 +45,7 @@ struct LocationIndicatorUBO {
     color: vec4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(5) var<uniform> ubo: LocationIndicatorUBO;
 
 @fragment
 fn main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
@@ -71,17 +72,18 @@ struct VertexOutput {
     @location(0) uv: vec2<f32>,
 };
 
-struct LocationIndicatorUBO {
-    matrix: mat4x4<f32>,
-    color: vec4<f32>,
+struct GlobalIndexUBO {
+    value: u32,
+    pad0: vec3<u32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
+@group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
-    out.position = ubo.matrix * vec4<f32>(in.position, 0.0, 1.0);
+    out.position = projectTile(in.position, projectionVector[globalIndex.value]);
     out.uv = in.uv;
     return out;
 }
@@ -93,9 +95,9 @@ struct LocationIndicatorUBO {
     color: vec4<f32>,
 };
 
-@group(0) @binding(0) var<uniform> ubo: LocationIndicatorUBO;
-@group(0) @binding(1) var colorTexture: texture_2d<f32>;
-@group(0) @binding(2) var colorSampler: sampler;
+@group(0) @binding(5) var<uniform> ubo: LocationIndicatorUBO;
+@group(1) @binding(0) var colorSampler: sampler;
+@group(1) @binding(1) var colorTexture: texture_2d<f32>;
 
 @fragment
 fn main(@location(0) uv: vec2<f32>) -> @location(0) vec4<f32> {
