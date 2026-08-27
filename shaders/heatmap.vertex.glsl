@@ -7,7 +7,7 @@ layout (std140) uniform HeatmapDrawableUBO {
     // Interpolations
     lowp float u_weight_t;
     lowp float u_radius_t;
-    lowp float drawable_pad1;
+    highp float u_globe_extrude_scale;
 };
 
 layout (std140) uniform HeatmapEvaluatedPropsUBO {
@@ -57,7 +57,14 @@ void main(void) {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
+#ifdef PROJECTION_GLOBE
+    vec2 circle_center = floor(a_pos * 0.5);
+    vec3 center_vector = projectToSphere(circle_center, vec2(0.0, 0.0));
+    vec3 corner_vector = globeRotateVector(center_vector, v_extrude * radius * u_globe_extrude_scale);
+    gl_Position = interpolateProjection(circle_center + extrude, corner_vector, 0.0);
+#else
     vec4 pos = vec4(floor(a_pos * 0.5) + extrude, 0, 1);
 
     gl_Position = u_matrix * pos;
+#endif
 }
