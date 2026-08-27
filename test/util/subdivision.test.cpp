@@ -210,13 +210,18 @@ TEST(Subdivision, PoleTilesGetPoleQuads) {
 TEST(Subdivision, ZoomZeroDropsGeometryOutsideTheTile) {
     const auto wide = square(-2000, 1000, EXTENT + 2000, 2000);
     const auto result = subdividePolygon(wide, CanonicalTileID(0, 0, 0), 8);
-    for (std::size_t i = 0; i + 2 < result.triangleIndices.size(); i += 3) {
-        bool inside = false;
-        for (std::size_t k = 0; k < 3; k++) {
-            const int16_t x = result.vertices[result.triangleIndices[i + k] * 2];
-            inside |= x >= 0 && x <= EXTENT;
+    // A triangle with any vertex in the buffer is a wrapped copy of geometry the tile itself draws.
+    for (const uint32_t index : result.triangleIndices) {
+        const int16_t x = result.vertices[index * 2];
+        EXPECT_GE(x, 0);
+        EXPECT_LE(x, EXTENT);
+    }
+    for (const auto& line : result.lineIndexLists) {
+        for (const uint32_t index : line) {
+            const int16_t x = result.vertices[index * 2];
+            EXPECT_GE(x, 0);
+            EXPECT_LE(x, EXTENT);
         }
-        EXPECT_TRUE(inside);
     }
     expectSoundMesh(result, true);
 }

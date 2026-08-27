@@ -191,6 +191,16 @@ fn projectTile(pos: vec2<f32>, projection: ProjectionUBO) -> vec4<f32> {
     return interpolateProjection(pos, projectToSphere(pos + projection.translate, vec2<f32>(0.0, 0.0), projection), 0.0, projection);
 }
 
+// The zoom 0 tile's buffer wraps around the planet onto the tile itself, so the line shaders discard the fragments
+// beyond its X extent; every other tile (a mercator width below the whole world's) hands on a value inside it.
+fn antimeridianClipX(posInTile: vec2<f32>, projection: ProjectionUBO) -> f32 {
+    return select(0.0, posInTile.x, projection.tile_mercator_coords.z * 8192.0 >= 1.0);
+}
+
+fn clippedAtAntimeridian(tileX: f32) -> bool {
+    return tileX < 0.0 || tileX >= 8192.0;
+}
+
 // The variant for geometry that can carry pole vertices; rawPos is the untranslated position.
 fn projectTileWithPoles(pos: vec2<f32>, rawPos: vec2<f32>, projection: ProjectionUBO) -> vec4<f32> {
     return interpolateProjection(pos, projectToSphere(pos + projection.translate, rawPos, projection), 0.0, projection);
