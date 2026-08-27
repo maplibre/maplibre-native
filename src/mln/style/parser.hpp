@@ -4,6 +4,7 @@
 #include <mln/style/sprite.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/projection.hpp>
 
 #include <mln/text/glyph.hpp>
 
@@ -39,6 +40,7 @@ public:
 
     TransitionOptions transition{{util::DEFAULT_TRANSITION_DURATION}};
     Light light;
+    Projection projection;
 
     std::string name;
     LatLng latLng;
@@ -54,6 +56,7 @@ public:
 private:
     void parseTransition(const JSValue&);
     void parseLight(const JSValue&);
+    void parseProjection(const JSValue&);
     void parseSources(const JSValue&);
     void parseSprites(const JSValue&);
     void parseLayers(const JSValue&);

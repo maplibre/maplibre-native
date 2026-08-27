@@ -306,6 +306,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/get_json_type.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/property_value.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/rotation.hpp
@@ -372,6 +373,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/raster_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/layers/symbol_layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/projection.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/projection_definition.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/property_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/property_value.hpp
@@ -695,6 +698,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/json.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/light.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/projection.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/position.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/hillshade_conversions.cpp
@@ -811,7 +815,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_definition.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/light_observer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/projection_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/paint_property.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/parser.cpp

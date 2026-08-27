@@ -526,6 +526,10 @@ double Transform::getFieldOfView() const {
 
 // MARK: - North Orientation
 
+void Transform::setProjectionDefinition(const ProjectionDefinition& definition) {
+    state.setProjectionDefinition(definition);
+}
+
 void Transform::setNorthOrientation(NorthOrientation orientation) {
     state.setNorthOrientation(orientation);
     double scale{state.getScale()};

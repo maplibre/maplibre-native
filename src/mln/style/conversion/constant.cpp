@@ -138,6 +138,34 @@ std::optional<std::vector<Color>> Converter<std::vector<Color>>::operator()(cons
     return result;
 }
 
+std::optional<ProjectionDefinition> Converter<ProjectionDefinition>::operator()(const Convertible& value,
+                                                                                Error& error) const {
+    const auto isProjectionName = [](const std::string& name) {
+        return name == "mercator" || name == "vertical-perspective" || name == "globe";
+    };
+    if (const std::optional<std::string> type = toString(value)) {
+        if (isProjectionName(*type)) {
+            return ProjectionDefinition(*type);
+        }
+        error.message = "projection type must be mercator, vertical-perspective or globe";
+        return std::nullopt;
+    }
+    if (isArray(value) && arrayLength(value) == 3) {
+        const std::optional<std::string> from = toString(arrayMember(value, 0));
+        const std::optional<std::string> to = toString(arrayMember(value, 1));
+        const std::optional<double> transition = toDouble(arrayMember(value, 2));
+        if (from && to && transition) {
+            if (isProjectionName(*from) && isProjectionName(*to)) {
+                return ProjectionDefinition(*from, *to, *transition);
+            }
+            error.message = "projection type must be mercator, vertical-perspective or globe";
+            return std::nullopt;
+        }
+    }
+    error.message = "value must be a string or an array of [from, to, transition]";
+    return std::nullopt;
+}
+
 std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {
     std::optional<Padding> result;
     if (isArray(value)) {

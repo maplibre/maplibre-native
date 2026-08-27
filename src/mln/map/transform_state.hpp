@@ -3,6 +3,7 @@
 #include <mln/map/camera.hpp>
 #include <mln/map/mode.hpp>
 #include <mln/map/projection_base.hpp>
+#include <mln/style/projection_definition.hpp>
 #include <mln/util/camera.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
@@ -131,6 +132,10 @@ public:
     TransformState(ConstrainMode = ConstrainMode::HeightOnly, ViewportMode = ViewportMode::Default);
 
     void setProperties(const TransformStateProperties& properties);
+
+    // Projection
+    const ProjectionDefinition& getProjectionDefinition() const { return projectionDefinition; }
+    void setProjectionDefinition(const ProjectionDefinition&);
 
     // Matrix
     void matrixFor(mat4&, const UnwrappedTileID&) const;
@@ -305,6 +310,7 @@ private:
 
 private:
     std::shared_ptr<const ProjectionBase> projection;
+    ProjectionDefinition projectionDefinition;
 
     ConstrainMode constrainMode;
     ViewportMode viewportMode;

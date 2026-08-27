@@ -1354,3 +1354,11 @@ TEST(TransformState, ProjectionDataMercatorFields) {
         EXPECT_EQ(0.0, data.projectionTransition);
     }
 }
+
+TEST(Transform, ProjectionDefinition) {
+    Transform transform;
+    ASSERT_EQ(ProjectionDefinition("mercator"), transform.getState().getProjectionDefinition());
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective", "mercator", 0.5));
+    ASSERT_EQ(ProjectionDefinition("vertical-perspective", "mercator", 0.5),
+              transform.getState().getProjectionDefinition());
+}

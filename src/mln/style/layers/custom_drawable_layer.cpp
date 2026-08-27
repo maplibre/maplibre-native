@@ -562,7 +562,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
             constexpr int32_t zoom = 0;
             GeometryCoordinates tileCoordinates;
             for (const auto& coord : coordinates) {
-                const auto point = Projection::project(LatLng(coord.y, coord.x), zoom);
+                const auto point = mln::Projection::project(LatLng(coord.y, coord.x), zoom);
                 tileCoordinates.push_back(Point<int16_t>(static_cast<int16_t>(point.x * mln::util::EXTENT),
                                                          static_cast<int16_t>(point.y * mln::util::EXTENT)));
             }
