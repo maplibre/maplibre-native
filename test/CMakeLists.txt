@@ -12,6 +12,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/api/recycle_map.cpp
     ${PROJECT_SOURCE_DIR}/test/geometry/dem_data.test.cpp
     ${PROJECT_SOURCE_DIR}/test/geometry/line_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/gfx/fill_generator.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/map.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/prefetch.test.cpp
     ${PROJECT_SOURCE_DIR}/test/map/transform.test.cpp
@@ -113,6 +114,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/run_loop.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/string.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/string_indexer.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/subdivision.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/text_conversions.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/thread.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/thread_local.test.cpp

@@ -211,6 +211,9 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+#if defined(PROJECTION_GLOBE)
+    float tile_x;
+#endif
     float2 width2;
     float2 normal;
     half gamma_scale;
@@ -289,7 +292,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(PROJECTION_GLOBE)
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector[uboIndex]);
     const float4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
-    const float4 position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
+    const float2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    const float4 position = projectTile(extrudedPos, projectionVector[uboIndex]);
     const float4 projected_extrude = position - projected_no_extrude;
 #else
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
@@ -302,6 +306,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position    = position,
+#if defined(PROJECTION_GLOBE)
+        .tile_x      = antimeridianClipX(extrudedPos, projectionVector[uboIndex]),
+#endif
         .width2      = float2(outset, inset),
         .normal      = v_normal,
         .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
@@ -322,6 +329,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                             device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                             device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
+#if defined(PROJECTION_GLOBE)
+    if (clippedAtAntimeridian(in.tile_x)) {
+        discard_fragment();
+    }
+#endif
+
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -395,6 +408,9 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+#if defined(PROJECTION_GLOBE)
+    float tile_x;
+#endif
     float2 width2;
     half2 normal;
     half gamma_scale;
@@ -472,7 +488,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(PROJECTION_GLOBE)
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector[uboIndex]);
     const float4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
-    const float4 position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
+    const float2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    const float4 position = projectTile(extrudedPos, projectionVector[uboIndex]);
     const float4 projected_extrude = position - projected_no_extrude;
 #else
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
@@ -485,6 +502,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position     = position,
+#if defined(PROJECTION_GLOBE)
+        .tile_x       = antimeridianClipX(extrudedPos, projectionVector[uboIndex]),
+#endif
         .width2       = float2(outset, inset),
         .normal       = half2(v_normal),
         .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
@@ -502,6 +522,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
+#if defined(PROJECTION_GLOBE)
+    if (clippedAtAntimeridian(in.tile_x)) {
+        discard_fragment();
+    }
+#endif
+
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -577,6 +603,9 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+#if defined(PROJECTION_GLOBE)
+    float tile_x;
+#endif
     float2 width2;
     float linesofar;
     half2 normal;
@@ -661,7 +690,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(PROJECTION_GLOBE)
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector[uboIndex]);
     const float4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
-    const float4 position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
+    const float2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    const float4 position = projectTile(extrudedPos, projectionVector[uboIndex]);
     const float4 projected_extrude = position - projected_no_extrude;
 #else
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
@@ -674,6 +704,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position     = position,
+#if defined(PROJECTION_GLOBE)
+        .tile_x       = antimeridianClipX(extrudedPos, projectionVector[uboIndex]),
+#endif
         .width2       = float2(outset, inset),
         .normal       = half2(v_normal),
         .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
@@ -702,6 +735,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
+
+#if defined(PROJECTION_GLOBE)
+    if (clippedAtAntimeridian(in.tile_x)) {
+        discard_fragment();
+    }
+#endif
 
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
@@ -822,6 +861,9 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+#if defined(PROJECTION_GLOBE)
+    float tile_x;
+#endif
     float2 width2;
     float2 normal;
     float2 tex_a;
@@ -914,7 +956,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(PROJECTION_GLOBE)
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector[uboIndex]);
     const float4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
-    const float4 position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector[uboIndex]);
+    const float2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    const float4 position = projectTile(extrudedPos, projectionVector[uboIndex]);
     const float4 projected_extrude = position - projected_no_extrude;
 #else
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
@@ -927,6 +970,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position     = position,
+#if defined(PROJECTION_GLOBE)
+        .tile_x       = antimeridianClipX(extrudedPos, projectionVector[uboIndex]),
+#endif
         .width2       = float2(outset, inset),
         .normal       = v_normal,
         .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
@@ -956,6 +1002,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
+
+#if defined(PROJECTION_GLOBE)
+    if (clippedAtAntimeridian(in.tile_x)) {
+        discard_fragment();
+    }
+#endif
 
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
