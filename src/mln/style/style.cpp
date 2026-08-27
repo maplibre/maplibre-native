@@ -2,6 +2,7 @@
 #include <mln/style/image_impl.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/style_impl.hpp>
@@ -73,6 +74,18 @@ Light* Style::getLight() {
 
 const Light* Style::getLight() const {
     return impl->getLight();
+}
+
+void Style::setProjection(std::unique_ptr<Projection> projection) {
+    impl->setProjection(std::move(projection));
+}
+
+Projection* Style::getProjection() {
+    return impl->getProjection();
+}
+
+const Projection* Style::getProjection() const {
+    return impl->getProjection();
 }
 
 std::optional<Image> Style::getImage(const std::string& name) const {

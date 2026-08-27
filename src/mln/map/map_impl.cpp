@@ -3,6 +3,7 @@
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/storage/file_source.hpp>
 #include <mln/style/style_impl.hpp>
+#include <mln/style/projection_impl.hpp>
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/traits.hpp>
@@ -113,6 +114,8 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
+    transform.setProjectionDefinition(
+        style->impl->getProjection()->impl->evaluate(static_cast<float>(transform.getZoom())));
 
     UpdateParameters params = {.styleLoaded = style->impl->isLoaded(),
                                .mode = mode,

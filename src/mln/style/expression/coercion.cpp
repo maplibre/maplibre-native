@@ -73,6 +73,23 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
+EvaluationResult toProjectionDefinition(const Value& value) {
+    return value.match(
+        [](const ProjectionDefinition& projection) -> EvaluationResult { return projection; },
+        [](const std::string& type) -> EvaluationResult { return ProjectionDefinition(type); },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            if (components.size() == 3 && components[0].is<std::string>() && components[1].is<std::string>() &&
+                components[2].is<double>()) {
+                return ProjectionDefinition(
+                    components[0].get<std::string>(), components[1].get<std::string>(), components[2].get<double>());
+            }
+            return EvaluationError{"Could not parse projectionDefinition from value '" + stringify(value) + "'"};
+        },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse projectionDefinition from value '" + stringify(value) + "'"};
+        });
+}
+
 EvaluationResult toPadding(const Value& paddingValue) {
     return paddingValue.match(
         [](const Padding& padding) -> EvaluationResult { return padding; },
@@ -159,6 +176,8 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
         return toColor;
     } else if (t.is<type::PaddingType>()) {
         return toPadding;
+    } else if (t.is<type::ProjectionDefinitionType>()) {
+        return toProjectionDefinition;
     } else if (t.is<type::VariableAnchorOffsetCollectionType>()) {
         return toVariableAnchorOffset;
     } else if (t.is<type::NumberType>()) {
@@ -209,6 +228,7 @@ std::string Coercion::getOperator() const {
         [](const type::BooleanType&) -> std::string_view { return "to-boolean"; },
         [](const type::ColorType&) -> std::string_view { return "to-color"; },
         [](const type::PaddingType&) -> std::string_view { return "to-padding"; },
+        [](const type::ProjectionDefinitionType&) -> std::string_view { return "to-projection-definition"; },
         [](const type::NumberType&) -> std::string_view { return "to-number"; },
         [](const type::StringType&) -> std::string_view { return "to-string"; },
         [](const type::VariableAnchorOffsetCollectionType&) -> std::string_view { return "to-variableanchoroffset"; },
@@ -225,6 +245,7 @@ ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
         {"to-boolean", type::Boolean},
         {"to-color", type::Color},
         {"to-padding", type::Padding},
+        {"to-projection-definition", type::ProjectionDefinition},
         {"to-number", type::Number},
         {"to-string", type::String},
         {"to-variableanchoroffset", type::VariableAnchorOffsetCollection}};
