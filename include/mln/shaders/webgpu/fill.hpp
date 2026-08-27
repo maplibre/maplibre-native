@@ -872,7 +872,7 @@ fn main(in: VertexInput) -> VertexOutput {
     let projected_extrude = matrix * vec4<f32>(extrude_vec, 0.0, 0.0);
     let base = matrix * vec4<f32>(pos, 0.0, 1.0);
     let raw_clip = base + projected_extrude;
-    let clip = apply_drape_transform(raw_clip, drawable.matrix, paintParams.drape_tile);
+    let clip = apply_drape_transform(raw_clip, matrix, paintParams.drape_tile);
     out.position = clip;
 
     let extrude_length_without_perspective = length(dist);
