@@ -22,6 +22,10 @@ const std::optional<Tileset>& RenderRasterDEMSource::getTileset() const {
     return impl().tileset;
 }
 
+uint16_t RenderRasterDEMSource::getTileSize() const {
+    return impl().getTileSize();
+}
+
 void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                                            const std::vector<Immutable<LayerProperties>>& layers,
                                            const bool needsRendering,

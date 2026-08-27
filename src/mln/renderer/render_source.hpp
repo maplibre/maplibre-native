@@ -114,6 +114,11 @@ public:
 
     virtual uint8_t getMaxZoom() const;
 
+    /// The tile size the source selects tiles with, i.e. the size that decides which
+    /// zoom its cover lands on. Terrain meshes at this size so its cover matches the
+    /// DEM source's own tile set; the decoded DEM's pixel dimension can differ.
+    virtual uint16_t getTileSize() const;
+
     void setObserver(RenderSourceObserver*);
 
     Immutable<style::Source::Impl> baseImpl;
