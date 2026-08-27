@@ -604,13 +604,21 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto& staticVertices = buffer.attributeData();
         const auto& dynamicVertices = buffer.dynamicAttributeData();
 
+#if MLN_USE_SYMBOL_INSTANCING
+        int vertexOffset = 0;
+#endif
+
         for (const auto& symbol : buffer.placedSymbols) {
             if (symbol.hidden || !symbol.featureId) {
                 continue;
             }
 
+#if MLN_USE_SYMBOL_INSTANCING
+            const auto vertexCount = symbol.glyphOffsets.size();
+#else
             const auto vertexOffset = symbol.startIndex;
             const auto vertexCount = symbol.glyphOffsets.size() * 4;
+#endif
 
             // Consider the dynamic opacity and color of the first vertex.  If either is zero, skip the symbol.
             const auto& opacityProperty = isText ? textOpacity : iconOpacity;
@@ -694,6 +702,9 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             if (const auto bound = computeFeatureNDCBound(vertexCount, getVertex)) {
                 stats.addRenderedFeature(*symbol.featureId, *bound, {tile.getOverscaledTileID()});
             }
+#if MLN_USE_SYMBOL_INSTANCING
+            vertexOffset += vertexCount;
+#endif
         }
     };
 
