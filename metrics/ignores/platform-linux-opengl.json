@@ -37,5 +37,18 @@
   "render-tests/projection/globe/background-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/fill-planet-pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
   "render-tests/projection/globe/line-gradient": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-  "render-tests/projection/globe/line-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+  "render-tests/projection/globe/line-pattern": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+  "render-tests/projection/globe/antimeridian-overdraw/geojson-crossing-z0": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/geojson-crossing-z3": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/geojson-z0": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/line-dasharray": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/line-gradient": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/line-gradient-dasharray": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/line-pattern": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/vector-tiles-z0": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/wide-band-closeup": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/wide-band-pole-view": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/antimeridian-overdraw/wide-band-zoomed-out": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/fill-seams/checkerboard": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet.",
+  "render-tests/projection/globe/fill-seams/ocean": "The globe expected images were rendered on Metal; Linux OpenGL has not rendered this test yet."
 }
