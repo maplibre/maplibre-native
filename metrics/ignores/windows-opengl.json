@@ -7,5 +7,8 @@
     "render-tests/runtime-styling/image-update-pattern": "Needs investigation (Diff: 0.001953125)",
     "render-tests/sprites/2x-screen-2x-pattern": "Needs investigation (Diff: 0.00042724609375)",
     "render-tests/projection/globe/fill-grid": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
-    "render-tests/projection/globe/fill-grid-pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
+    "render-tests/projection/globe/fill-grid-pitched": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/background": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/fill-planet-solid": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/fill-planet-tiles": "The globe expected images were rendered on Metal; this platform has no expectation of its own."
 }

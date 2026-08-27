@@ -389,12 +389,23 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        // draw layer groups, opaque pass
-        parameters.currentLayer = 0;
-        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
-        });
+        // draw layer groups, opaque pass: front to back with the depth buffer, except on the globe,
+        // where 2D layers carry no depth and are painted bottom to top.
+        if (renderTreeParameters.transformParams.state.isGlobeRendering()) {
+            parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
+            orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+                layerGroup.render(orchestrator, parameters);
+                if (parameters.currentLayer > 0) {
+                    parameters.currentLayer--;
+                }
+            });
+        } else {
+            parameters.currentLayer = 0;
+            orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
+                layerGroup.render(orchestrator, parameters);
+                parameters.currentLayer++;
+            });
+        }
     };
 
     const auto drawableTranslucentPass = [&] {

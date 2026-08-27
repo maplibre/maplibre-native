@@ -235,6 +235,33 @@ void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_
     }
 }
 
+void GeometryTileWorker::setSubdivisionGranularity(const SubdivisionGranularitySetting& subdivisionGranularity_,
+                                                   uint64_t correlationID_) {
+    MLN_TRACE_FUNC();
+
+    try {
+        subdivisionGranularity = subdivisionGranularity_;
+        correlationID = correlationID_;
+
+        switch (state) {
+            case Idle:
+                parse();
+                coalesce();
+                break;
+
+            case Coalescing:
+            case NeedsSymbolLayout:
+                state = NeedsParse;
+                break;
+
+            case NeedsParse:
+                break;
+        }
+    } catch (...) {
+        parent.invoke(&GeometryTile::onError, std::current_exception(), correlationID);
+    }
+}
+
 void GeometryTileWorker::symbolDependenciesChanged() {
     MLN_TRACE_FUNC();
 
@@ -456,8 +483,11 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{
-            .tileID = id, .mode = mode, .pixelRatio = pixelRatio, .layerType = leaderImpl.getTypeInfo()};
+        BucketParameters parameters{.tileID = id,
+                                    .mode = mode,
+                                    .pixelRatio = pixelRatio,
+                                    .layerType = leaderImpl.getTypeInfo(),
+                                    .subdivisionGranularity = subdivisionGranularity};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {

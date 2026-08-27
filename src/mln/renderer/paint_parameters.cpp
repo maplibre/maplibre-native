@@ -119,7 +119,8 @@ ProjectionData PaintParameters::projectionDataForTile(const UnwrappedTileID& til
 }
 
 gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {
-    if (currentLayer < opaquePassCutoff) {
+    // On the globe, 2D layers are ordered by draw order alone; their Z is the back-hemisphere clip.
+    if (currentLayer < opaquePassCutoff || state.isGlobeRendering()) {
         return gfx::DepthMode::disabled();
     }
 

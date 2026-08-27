@@ -1,4 +1,7 @@
 #include <mln/renderer/layers/render_background_layer.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/subdivision_granularity.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/gfx/context.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
 #include <mln/map/transform_state.hpp>
@@ -12,7 +15,6 @@
 #include <mln/style/layer_properties.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/convert.hpp>
-#include <mln/util/logging.hpp>
 
 #include <mln/renderer/layers/background_layer_tweaker.hpp>
 #include <mln/gfx/drawable_builder.hpp>
@@ -226,10 +228,17 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                                                         : gfx::ColorMode::unblended());
         }
 
-        auto verticesCopy = rawVertices;
         builder->setVertexAttrId(idBackgroundPosVertexAttribute);
-        builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
-        builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
+        if (projectionVariant == gfx::ProjectionVariant::Globe) {
+            // The background is not depth tested, so it needs no tile border.
+            auto mesh = rawGlobeTileMesh(tileID.canonical, false);
+            builder->setRawVertices(std::move(mesh.vertices), mesh.vertexCount, gfx::AttributeDataType::Short2);
+            builder->setSegments(gfx::Triangles(), std::move(mesh.indices), mesh.segments.data(), mesh.segments.size());
+        } else {
+            auto verticesCopy = rawVertices;
+            builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
+            builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
+        }
         builder->flush(context);
 
         for (auto& drawable : builder->clearDrawables()) {
