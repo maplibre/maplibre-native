@@ -130,6 +130,16 @@ public:
 };
 
 template <>
+struct Interpolator<ProjectionDefinition> {
+public:
+    ProjectionDefinition operator()(const ProjectionDefinition& a,
+                                    const ProjectionDefinition& b,
+                                    const double t) const {
+        return {a.from, b.to, t};
+    }
+};
+
+template <>
 struct Interpolator<Padding> {
 public:
     Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {
