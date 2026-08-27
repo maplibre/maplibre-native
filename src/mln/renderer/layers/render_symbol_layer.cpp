@@ -16,6 +16,7 @@
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/property_evaluation_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
+#include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/tile_render_data.hpp>
@@ -196,30 +197,6 @@ bool RenderSymbolLayer::hasCrossfade() const {
     return false;
 }
 
-// static
-style::IconPaintProperties::PossiblyEvaluated RenderSymbolLayer::iconPaintProperties(
-    const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_) {
-    return style::IconPaintProperties::PossiblyEvaluated{evaluated_.get<style::IconOpacity>(),
-                                                         evaluated_.get<style::IconColor>(),
-                                                         evaluated_.get<style::IconHaloColor>(),
-                                                         evaluated_.get<style::IconHaloWidth>(),
-                                                         evaluated_.get<style::IconHaloBlur>(),
-                                                         evaluated_.get<style::IconTranslate>(),
-                                                         evaluated_.get<style::IconTranslateAnchor>()};
-}
-
-// static
-style::TextPaintProperties::PossiblyEvaluated RenderSymbolLayer::textPaintProperties(
-    const style::SymbolPaintProperties::PossiblyEvaluated& evaluated_) {
-    return style::TextPaintProperties::PossiblyEvaluated{evaluated_.get<style::TextOpacity>(),
-                                                         evaluated_.get<style::TextColor>(),
-                                                         evaluated_.get<style::TextHaloColor>(),
-                                                         evaluated_.get<style::TextHaloWidth>(),
-                                                         evaluated_.get<style::TextHaloBlur>(),
-                                                         evaluated_.get<style::TextTranslate>(),
-                                                         evaluated_.get<style::TextTranslateAnchor>()};
-}
-
 void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
 
@@ -269,6 +246,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 namespace {
 const SegmentVector emptySegmentVector;
 constexpr auto posOffsetAttribName = "a_pos_offset";
+[[maybe_unused]] constexpr auto sortedInstanceUniformName = "sorted_instance";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
@@ -276,51 +254,106 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
                           StringIDSetsPair* propertiesAsUniforms) {
-    if (const auto& attr = attribs.set(idSymbolPosOffsetVertexAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-    if (const auto& attr = attribs.set(idSymbolDataVertexAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a2),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::UShort4);
-    }
-    if (const auto& attr = attribs.set(idSymbolPixelOffsetVertexAttribute)) {
-        attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(SymbolLayoutVertex, a3),
-                               /*vertexOffset=*/0,
-                               sizeof(SymbolLayoutVertex),
-                               gfx::AttributeDataType::Short4);
-    }
-
-    if (const auto& attr = attribs.set(idSymbolProjectedPosVertexAttribute)) {
-        using Vertex = gfx::Vertex<SymbolDynamicLayoutAttributes>;
-        attr->setSharedRawData(buffer.sharedDynamicVertices,
-                               offsetof(Vertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(Vertex),
-                               gfx::AttributeDataType::Float3);
-    }
-    if (const auto& attr = attribs.set(idSymbolFadeOpacityVertexAttribute)) {
-        using Vertex = gfx::Vertex<SymbolOpacityAttributes>;
-        attr->setSharedRawData(buffer.sharedOpacityVertices,
-                               offsetof(Vertex, a1),
-                               /*vertexOffset=*/0,
-                               sizeof(Vertex),
-                               gfx::AttributeDataType::Float);
-    }
-
     if (isText) {
         attribs.readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(
-            paintProps.textBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
+            paintProps.textBinders, evaluated, propertiesAsUniforms, idSymbolOpacityAttribute);
     } else {
         attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
-            paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
+            paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityAttribute);
+    }
+
+#if MLN_USE_SYMBOL_INSTANCING
+    if (!buffer.sortedInstances().empty()) {
+        if (const auto& attr = attribs.set(idSymbolSortedInstanceAttribute)) {
+            attr->setSharedRawData(buffer.sharedSortedInstances,
+                                   offsetof(SymbolSortedInstance, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(SymbolSortedInstance),
+                                   gfx::AttributeDataType::UShort);
+        }
+    } else if (propertiesAsUniforms) {
+        propertiesAsUniforms->first.emplace(sortedInstanceUniformName);
+        propertiesAsUniforms->second.emplace(idSymbolSortedInstanceAttribute);
+    }
+    if (const auto& attr = attribs.set(idSymbolPosScaleAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolOffsetTlTrAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolOffsetBlBrAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a3),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolTextureRectAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a4),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::UShort4);
+    }
+    if (const auto& attr = attribs.set(idSymbolPixelOffsetAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a5),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolSizeSdfAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a6),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::UShort2);
+    }
+#else
+    if (const auto& attr = attribs.set(idSymbolPosOffsetAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+    if (const auto& attr = attribs.set(idSymbolDataAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::UShort4);
+    }
+    if (const auto& attr = attribs.set(idSymbolPixelOffsetAttribute)) {
+        attr->setSharedRawData(buffer.sharedAttributeData,
+                               offsetof(SymbolLayoutAttributes, a3),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolLayoutAttributes),
+                               gfx::AttributeDataType::Short4);
+    }
+#endif
+
+    if (const auto& attr = attribs.set(idSymbolProjectedPosAttribute)) {
+        attr->setSharedRawData(buffer.sharedDynamicAttributeData,
+                               offsetof(SymbolDynamicLayoutAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolDynamicLayoutAttributes),
+                               gfx::AttributeDataType::Float3);
+    }
+    if (const auto& attr = attribs.set(idSymbolFadeOpacityAttribute)) {
+        attr->setSharedRawData(buffer.sharedOpacityAttributeData,
+                               offsetof(SymbolOpacityAttributes, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(SymbolOpacityAttributes),
+                               gfx::AttributeDataType::Float);
     }
 }
 
@@ -340,59 +373,62 @@ void updateTileDrawable(gfx::Drawable& drawable,
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
-    const auto vertexCount = buffer.vertices().elements();
 
+#if MLN_USE_SYMBOL_INSTANCING
+    if (auto& instanceAttribs = drawable.getInstanceAttributes()) {
+        updateTileAttributes(buffer, isText, paintProps, evaluated, *instanceAttribs, nullptr);
+    }
+#else
+    const auto vertexCount = buffer.attributeData().elements();
     drawable.setVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
     // TODO: detect whether anything has actually changed
-    // See `Placement::updateBucketDynamicVertices`
+    // See `Placement::updateBucketDynamicAttributeData`
 
     if (auto& attribs = drawable.getVertexAttributes()) {
         updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, nullptr);
     }
+#endif
 }
 
 gfx::VertexAttributeArrayPtr getCollisionVertexAttributes(gfx::Context& context,
                                                           const SymbolBucket::CollisionBuffer& buffer) {
     auto vertexAttrs = context.createVertexAttributeArray();
-    using LayoutVertex = gfx::Vertex<CollisionBoxLayoutAttributes>;
 
     if (const auto& attr = vertexAttrs->set(idCollisionPosVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(LayoutVertex, a1),
+                               offsetof(CollisionBoxLayoutVertexAttributes, a1),
                                /*vertexOffset=*/0,
-                               sizeof(LayoutVertex),
+                               sizeof(CollisionBoxLayoutVertexAttributes),
                                gfx::AttributeDataType::Short2);
     }
     if (const auto& attr = vertexAttrs->set(idCollisionAnchorPosVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(LayoutVertex, a2),
+                               offsetof(CollisionBoxLayoutVertexAttributes, a2),
                                /*vertexOffset=*/0,
-                               sizeof(LayoutVertex),
+                               sizeof(CollisionBoxLayoutVertexAttributes),
                                gfx::AttributeDataType::Short2);
     }
     if (const auto& attr = vertexAttrs->set(idCollisionExtrudeVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
-                               offsetof(LayoutVertex, a3),
+                               offsetof(CollisionBoxLayoutVertexAttributes, a3),
                                /*vertexOffset=*/0,
-                               sizeof(LayoutVertex),
+                               sizeof(CollisionBoxLayoutVertexAttributes),
                                gfx::AttributeDataType::Short2);
     }
 
-    using DynamicVertex = gfx::Vertex<CollisionBoxDynamicAttributes>;
-
     if (const auto& attr = vertexAttrs->set(idCollisionPlacedVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedDynamicVertices,
-                               offsetof(DynamicVertex, a1),
+                               offsetof(CollisionBoxDynamicVertexAttributes, a1),
                                /*vertexOffset=*/0,
-                               sizeof(DynamicVertex),
+                               sizeof(CollisionBoxDynamicVertexAttributes),
                                gfx::AttributeDataType::UShort2);
     }
     if (const auto& attr = vertexAttrs->set(idCollisionShiftVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedDynamicVertices,
-                               offsetof(DynamicVertex, a2),
+                               offsetof(CollisionBoxDynamicVertexAttributes, a2),
                                /*vertexOffset=*/0,
-                               sizeof(DynamicVertex),
+                               sizeof(CollisionBoxDynamicVertexAttributes),
                                gfx::AttributeDataType::Float2);
     }
 
@@ -565,15 +601,15 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
 
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const auto& staticVertices = buffer.vertices();
-        const auto& dynamicVertices = buffer.dynamicVertices();
+        const auto& staticVertices = buffer.attributeData();
+        const auto& dynamicVertices = buffer.dynamicAttributeData();
 
         for (const auto& symbol : buffer.placedSymbols) {
             if (symbol.hidden || !symbol.featureId) {
                 continue;
             }
 
-            const auto vertexOffset = symbol.vertexStartIndex;
+            const auto vertexOffset = symbol.startIndex;
             const auto vertexCount = symbol.glyphOffsets.size() * 4;
 
             // Consider the dynamic opacity and color of the first vertex.  If either is zero, skip the symbol.
@@ -736,6 +772,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         collisionCircleGroup = shaders.getShaderGroup(std::string(CollisionCircleShaderName));
     }
 
+#if MLN_USE_SYMBOL_INSTANCING
+    if (!staticDataVertices) {
+        staticDataVertices = std::make_shared<SymbolVertexVector>(RenderStaticData::symbolVertices());
+    }
+    if (!staticDataIndices) {
+        staticDataIndices = std::make_shared<TriangleIndexVector>(RenderStaticData::symbolTriangleIndices());
+    }
+#endif
+
     // remove drawables that are dropped out of scope
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
@@ -897,7 +942,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             if (sortFeaturesByKey) {
                 // Features need to be rendered in a specific order, so we add each segment individually
                 for (const auto& segment : buffer.segments) {
-                    assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices().elements());
+#if MLN_USE_SYMBOL_INSTANCING
+                    assert(segment.baseInstance + segment.instanceCount <= buffer.attributeData().elements());
+#else
+                    assert(segment.vertexOffset + segment.vertexLength <= buffer.attributeData().elements());
+#endif
                     renderableSegments.emplace(SegmentGroup{
                         .renderable = {segment, tile, renderData, bucketPaintProperties, segment.sortKey, type},
                         .segments = emptySegmentVector});
@@ -954,9 +1003,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto& bucket = static_cast<SymbolBucket&>(*renderable.renderData.bucket);
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
+#if MLN_USE_SYMBOL_INSTANCING
+        if (!buffer.attributeData().elements()) {
+            continue;
+        }
+#else
         if (!buffer.sharedTriangles->elements()) {
             continue;
         }
+#endif
 
         const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderable.renderData.layerProperties);
         auto& bucketPaintProperties = bucket.paintProperties.at(getID());
@@ -973,13 +1028,25 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         auto& tileInfo = tileCache[tile.id];
 
-        const auto vertexCount = buffer.vertices().elements();
-
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
 
-        auto attribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, &propertiesAsUniforms);
+#if MLN_USE_SYMBOL_INSTANCING
+        auto vertexAttribs = context.createVertexAttributeArray();
+        if (const auto& attr = vertexAttribs->set(idSymbolPosAttribute)) {
+            attr->setSharedRawData(staticDataVertices,
+                                   offsetof(SymbolStaticVertexAttributes, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(SymbolStaticVertexAttributes),
+                                   gfx::AttributeDataType::Short2);
+        }
+
+        auto instanceAttribs = context.createVertexAttributeArray();
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *instanceAttribs, &propertiesAsUniforms);
+#else
+        auto vertexAttribs = context.createVertexAttributeArray();
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *vertexAttribs, &propertiesAsUniforms);
+#endif
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1045,14 +1112,24 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             builder->clearTweakers();
             builder->addTweaker(isText ? tileInfo.textTweaker : tileInfo.iconTweaker);
-            builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
             builder->setDrawableName(layerPrefix + std::string(suffix));
-            builder->setVertexAttributes(attribs);
+            builder->setVertexAttributes(vertexAttribs);
+
+#if MLN_USE_SYMBOL_INSTANCING
+            builder->setInstanceAttributes(instanceAttribs);
+            builder->setRawVertices({}, staticDataVertices->elements(), gfx::AttributeDataType::Short2);
+
+            auto& triangleIndices = staticDataIndices;
+#else
+            builder->setRawVertices({}, buffer.attributeData().elements(), gfx::AttributeDataType::Short4);
+
+            auto& triangleIndices = buffer.sharedTriangles;
+#endif
 
             if (segments.empty()) {
-                builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
+                builder->setSegments(gfx::Triangles(), triangleIndices, &renderable.segment.get(), 1);
             } else {
-                builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, segments.data(), segments.size());
+                builder->setSegments(gfx::Triangles(), triangleIndices, segments.data(), segments.size());
             }
 
             builder->flush(context);

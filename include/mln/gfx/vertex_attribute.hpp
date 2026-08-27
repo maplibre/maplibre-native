@@ -288,7 +288,7 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeVector = std::array<std::unique_ptr<VertexAttribute>, shaders::maxVertexAttributeCountPerShader>;
+    using AttributeVector = std::array<std::unique_ptr<VertexAttribute>, shaders::maxAttributeCountPerShader>;
     VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
     VertexAttributeArray(const VertexAttributeArray&) = delete; // Would need to use the virtual assignment operator
