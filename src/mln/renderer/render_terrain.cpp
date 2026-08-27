@@ -95,14 +95,11 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
     // DEM height rather than the z=0 plane (as util::tileCover / gl-js do).
     DEMElevationProvider elevationProvider(demSource, getExaggeration());
 
-    // Cover at the tile size the DEM source selects tiles with, so the mesh lands on the same
-    // zoom as the DEM tiles it samples. A 256px DEM covers one zoom deeper than a 512px one;
-    // meshing coarser than the DEM undersamples it - the fixed 128x128 mesh aliases the relief
-    // into waves (seen on the 256px debug-tiles "ruffles" DEM). It must be the source's declared
-    // tile size, not the decoded DEM's pixel dimension (demDim): a source declaring 256 while
-    // serving 512px images loads a zoom deeper than a demDim cover meshes, so every DEM lookup
-    // misses and the mesh renders flat off the placeholder. The cover is still the elevation-aware
-    // ideal cover from the view, not the DEM's loaded tile set.
+    // Cover at the tile size the DEM source selects tiles with, so the mesh lands on the zoom its
+    // DEM tiles are on. Meshing shallower than the DEM leaves its tiles descendants, which the
+    // per-tile lookup cannot match, so the mesh renders flat off the placeholder; it also
+    // undersamples the DEM, aliasing the relief into waves on the fixed 128x128 mesh. Still the
+    // elevation-aware ideal cover from the view, not the DEM's loaded tile set.
     const uint16_t terrainCoverTileSize = demSource->getTileSize();
     const Range<uint8_t> zoomRange{0, demSource->getMaxZoom()};
 
@@ -376,11 +373,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
     for (const auto& unwrapped : meshTiles) {
         const OverscaledTileID tileID(unwrapped.canonical.z, unwrapped.wrap, unwrapped.canonical);
 
-        // Skip if the tile already has a drawable bound to its own DEM, but keep that DEM
-        // marked as used: the cache evicts least-recently-used entries, and this early-out
-        // is the only path a tier-2 tile takes, so its DEM would otherwise go untouched and
-        // be evicted out from under the drawable still sampling it (taking its depth-pass
-        // array layer with it).
+        // Skip if the tile already has a drawable bound to its own DEM, but mark that DEM used:
+        // this early-out is a tier-2 tile's only path, so the LRU could otherwise evict the
+        // texture from under the drawable still sampling it.
         if (const auto existing = tilesWithDrawables.find(tileID);
             existing != tilesWithDrawables.end() && existing->second == 2) {
             if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {

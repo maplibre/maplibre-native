@@ -34,9 +34,7 @@ public:
     std::optional<RasterEncoding> rasterEncoding;
     std::optional<VectorEncoding> vectorEncoding;
     std::optional<LatLngBounds> bounds;
-    // Tile size the TileJSON declares, if any. Not part of the TileJSON spec proper, but
-    // servers do publish it and maplibre-gl-js honours it, so a source whose style entry
-    // says nothing (or says the wrong thing) still tiles at the size it actually serves.
+    // Not in the TileJSON spec, but servers publish it and maplibre-gl-js honours it.
     std::optional<uint16_t> tileSize;
 
     Tileset(std::vector<std::string> tiles_ = std::vector<std::string>(),

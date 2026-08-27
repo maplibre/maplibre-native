@@ -75,9 +75,8 @@ protected:
                                 bool needsRendering,
                                 bool needsRelayout,
                                 const TileParameters&) = 0;
-    /// Tile size to select tiles with: the fetched TileJSON's own `tileSize` when it declares
-    /// one, else `declared` (the size on the style source). TileJSON wins, as in maplibre-gl-js,
-    /// so a server that publishes its real tile size corrects a style that guessed wrong.
+    /// The fetched TileJSON's `tileSize` when it declares one, else `declared`: TileJSON wins,
+    /// as in maplibre-gl-js.
     uint16_t resolveTileSize(uint16_t declared) const;
 
     // Returns tileset from the current impl.
