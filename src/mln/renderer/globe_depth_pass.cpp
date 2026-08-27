@@ -14,6 +14,7 @@
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_pass.hpp>
 #include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/layer_ubo.hpp>
 #include <mln/shaders/shader_defines.hpp>
 #include <mln/util/tile_cover.hpp>
 
@@ -26,6 +27,7 @@ namespace {
 
 constexpr std::string_view GlobeDepthShaderName = "GlobeDepthShader";
 
+#if !MLN_UBO_CONSOLIDATION
 class GlobeDepthTweaker : public gfx::DrawableTweaker {
 public:
     void init(gfx::Drawable&) override {}
@@ -39,6 +41,7 @@ public:
         drawable.mutableUniformBuffers().createOrUpdate(shaders::idProjectionUBO, &ubo, parameters.context);
     }
 };
+#endif
 
 } // namespace
 
@@ -93,7 +96,9 @@ void GlobeDepthPass::update(gfx::ShaderRegistry& shaders,
             builder->setDepthType(gfx::DepthMaskType::ReadWrite);
             builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
             builder->setVertexAttrId(shaders::idGlobeDepthPosVertexAttribute);
+#if !MLN_UBO_CONSOLIDATION
             builder->addTweaker(std::make_shared<GlobeDepthTweaker>());
+#endif
         }
 
         // The grid depends only on the zoom and whether the tile touches a pole.
@@ -113,6 +118,29 @@ void GlobeDepthPass::update(gfx::ShaderRegistry& shaders,
             layerGroup->addDrawable(RenderPass::Translucent, tileID, std::move(drawable));
         }
     }
+
+#if MLN_UBO_CONSOLIDATION
+    // The projection blocks live in one layer-level array, indexed like the other consolidated UBOs.
+    std::vector<shaders::ProjectionUBO> projectionUBOs;
+    projectionUBOs.reserve(layerGroup->getDrawableCount());
+    layerGroup->visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID()) {
+            return;
+        }
+        drawable.setUBOIndex(static_cast<int32_t>(projectionUBOs.size()));
+        projectionUBOs.push_back(
+            LayerTweaker::toProjectionUBO(state.getProjectionData(drawable.getTileID()->toUnwrapped())));
+    });
+    if (!projectionUBOs.empty()) {
+        const std::size_t size = sizeof(shaders::ProjectionUBO) * projectionUBOs.size();
+        if (!projectionUniformBuffer || projectionUniformBuffer->getSize() < size) {
+            projectionUniformBuffer = context.createUniformBuffer(projectionUBOs.data(), size, false, true);
+        } else {
+            projectionUniformBuffer->update(projectionUBOs.data(), size);
+        }
+        layerGroup->mutableUniformBuffers().set(shaders::idProjectionUBO, projectionUniformBuffer);
+    }
+#endif
 }
 
 } // namespace mln
