@@ -336,6 +336,16 @@ void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
     }
 }
 
+void GeometryTile::setSubdivisionGranularity(const SubdivisionGranularitySetting& subdivisionGranularity_) {
+    MLN_TRACE_FUNC();
+
+    if (subdivisionGranularity != subdivisionGranularity_) {
+        subdivisionGranularity = subdivisionGranularity_;
+        ++correlationID;
+        worker.self().invoke(&GeometryTileWorker::setSubdivisionGranularity, subdivisionGranularity, correlationID);
+    }
+}
+
 void GeometryTile::onLayout(std::shared_ptr<LayoutResult>&& result, const uint64_t resultCorrelationID) {
     MLN_TRACE_FUNC();
 

@@ -2,6 +2,7 @@
 
 #include <mln/map/mode.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/text/glyph_manager.hpp>
@@ -58,6 +59,7 @@ public:
                  uint64_t correlationID);
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
+    void setSubdivisionGranularity(const SubdivisionGranularitySetting&, uint64_t correlationID_);
 
     void onGlyphsAvailable(GlyphMap glyphs, HBShapeResults requests);
 
@@ -121,6 +123,7 @@ private:
     std::set<std::string> availableImages;
 
     bool showCollisionBoxes;
+    SubdivisionGranularitySetting subdivisionGranularity;
     bool firstLoad = true;
 
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;

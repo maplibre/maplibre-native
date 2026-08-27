@@ -401,7 +401,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
             // Handle layers without source.
             if (layerIsVisible && zoomFitsLayer && sourceImpl.get() == sourceImpls->at(0).get()) {
-                if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
+                // On the globe the background is a sphere mesh, not the backdrop, so it stays a layer.
+                if (backgroundLayerAsColor && !updateParameters->transformState.isGlobeRendering() &&
+                    layer.baseImpl == layerImpls->front()) {
                     const auto& solidBackground = layer.getSolidBackground();
                     if (solidBackground) {
                         renderTreeParameters->backgroundColor = *solidBackground;

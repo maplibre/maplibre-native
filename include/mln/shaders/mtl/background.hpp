@@ -102,7 +102,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
     device const BackgroundDrawableUBO& drawable = drawableVector[uboIndex].backgroundDrawableUBO;
 
     return {
-        .position = projectTile(float2(in.position.xy), projectionVector[uboIndex])
+        .position = projectTile(float2(in.position.xy), float2(in.position.xy), projectionVector[uboIndex])
     };
 }
 
@@ -160,7 +160,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                          drawable.tile_units_to_pixels,
                                          pos);
     return {
-        .position = projectTile(float2(in.position.xy), projectionVector[uboIndex]),
+        .position = projectTile(float2(in.position.xy), float2(in.position.xy), projectionVector[uboIndex]),
         .pos_a = pos_a,
         .pos_b = pos_b,
     };
