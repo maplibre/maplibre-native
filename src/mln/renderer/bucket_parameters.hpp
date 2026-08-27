@@ -4,6 +4,7 @@
 #include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/feature.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 
 #include <memory>
 
@@ -21,6 +22,7 @@ public:
     // The style's global state, used by "global-state" expressions.
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     const bool retainFeaturesById = false;
+    const SubdivisionGranularitySetting subdivisionGranularity{};
 };
 
 } // namespace mln

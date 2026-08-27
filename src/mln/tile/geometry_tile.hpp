@@ -44,6 +44,7 @@ public:
     void setLayers(const std::vector<Immutable<style::LayerProperties>>&,
                    std::shared_ptr<const GlobalStateMap>) override;
     void setShowCollisionBoxes(bool showCollisionBoxes) override;
+    void setSubdivisionGranularity(const SubdivisionGranularitySetting&) override;
 
     void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
     void onImagesAvailable(ImageMap, ImageMap, ImageVersionMap versionMap, uint64_t imageCorrelationID) override;
@@ -134,6 +135,7 @@ private:
     const MapMode mode;
 
     bool showCollisionBoxes;
+    SubdivisionGranularitySetting subdivisionGranularity;
 
     enum class FadeState {
         Loaded,
