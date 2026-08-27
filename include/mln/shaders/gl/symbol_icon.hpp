@@ -154,7 +154,16 @@ lowp float opacity = u_opacity;
         projected_pos = u_label_plane_matrix * projectTileWithElevation(a_projected_pos.xy + u_translation, 0.0);
     }
     float z = float(u_pitch_with_map) * projected_pos.z / projected_pos.w;
-    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * max(a_minFontScale, fontScale) + a_pxoffset / 16.0), z, 1.0);
+
+    float projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (u_pitch_with_map) {
+        float anchor_pos_tile_y = (u_coord_matrix * vec4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y) * u_pitched_scale, u_projection_transition);
+    }
+#endif
+
+    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * max(a_minFontScale, fontScale) + a_pxoffset / 16.0) * projectionScaling, z, 1.0);
     if (u_pitch_with_map) {
         gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z);
     }
