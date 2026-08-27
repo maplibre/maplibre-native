@@ -55,13 +55,19 @@ const Tile* TilePyramid::getRenderedTile(const UnwrappedTileID& tileID) const {
 
 void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& layers,
                          const bool needsRendering,
-                         const bool needsRelayout,
+                         const bool needsRelayoutForLayers,
                          const TileParameters& parameters,
                          const style::Source::Impl& sourceImpl,
                          const uint16_t tileSize,
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
+    const bool globeRendering = parameters.transformState.isGlobeRendering();
+    const auto subdivisionGranularity = globeRendering ? SubdivisionGranularitySetting::globe()
+                                                       : SubdivisionGranularitySetting::none();
+    const bool needsRelayout = needsRelayoutForLayers || globeRendering != lastGlobeRendering;
+    lastGlobeRendering = globeRendering;
+
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -164,6 +170,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         if (needsRelayout) {
+            tile.setSubdivisionGranularity(subdivisionGranularity);
             tile.setLayers(layers);
         }
     };
@@ -190,6 +197,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (!tile) {
             tile = createTile(tileID, observer);
             if (!tile) return nullptr;
+            tile->setSubdivisionGranularity(subdivisionGranularity);
             tile->setLayers(layers);
         }
 
