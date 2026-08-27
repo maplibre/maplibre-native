@@ -107,6 +107,10 @@ layout(location = 4) out lowp float frag_blur;
 layout(location = 5) out lowp float frag_opacity;
 #endif
 
+#ifdef PROJECTION_GLOBE
+layout(location = 6) out float frag_tile_x;
+#endif
+
 void main() {
     const LineDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -176,7 +180,9 @@ void main() {
 #ifdef PROJECTION_GLOBE
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector.projection_ubo[constant.ubo_index]);
     const vec4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
-    gl_Position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
+    const vec2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
+    frag_tile_x = antimeridianClipX(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
@@ -225,7 +231,16 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float pad1;
 } props;
 
+#ifdef PROJECTION_GLOBE
+layout(location = 6) in float frag_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(frag_tile_x)) {
+        discard;
+    }
+#endif
 
 #ifdef OVERDRAW_INSPECTOR
     out_color = vec4(1.0);
@@ -350,6 +365,10 @@ layout(location = 4) out lowp float frag_blur;
 layout(location = 5) out lowp float frag_opacity;
 #endif
 
+#ifdef PROJECTION_GLOBE
+layout(location = 6) out float frag_tile_x;
+#endif
+
 void main() {
     const LineGradientDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -416,7 +435,9 @@ void main() {
 #ifdef PROJECTION_GLOBE
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector.projection_ubo[constant.ubo_index]);
     const vec4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
-    gl_Position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
+    const vec2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
+    frag_tile_x = antimeridianClipX(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
@@ -464,7 +485,16 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
     float pad1;
 } props;
 
+#ifdef PROJECTION_GLOBE
+layout(location = 6) in float frag_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(frag_tile_x)) {
+        discard;
+    }
+#endif
 
 #ifdef OVERDRAW_INSPECTOR
     out_color = vec4(1.0);
@@ -603,6 +633,10 @@ layout(location = 6) out mediump vec4 frag_pattern_from;
 layout(location = 7) out mediump vec4 frag_pattern_to;
 #endif
 
+#ifdef PROJECTION_GLOBE
+layout(location = 8) out float frag_tile_x;
+#endif
+
 void main() {
     const LinePatternDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -677,7 +711,9 @@ void main() {
 #ifdef PROJECTION_GLOBE
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector.projection_ubo[constant.ubo_index]);
     const vec4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
-    gl_Position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
+    const vec2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
+    frag_tile_x = antimeridianClipX(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
@@ -751,7 +787,16 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
+#ifdef PROJECTION_GLOBE
+layout(location = 8) in float frag_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(frag_tile_x)) {
+        discard;
+    }
+#endif
 
 #ifdef OVERDRAW_INSPECTOR
     out_color = vec4(1.0);
@@ -936,6 +981,10 @@ layout(location = 7) out lowp float frag_opacity;
 layout(location = 8) out mediump float frag_floorwidth;
 #endif
 
+#ifdef PROJECTION_GLOBE
+layout(location = 9) out float frag_tile_x;
+#endif
+
 void main() {
     const LineSDFDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
@@ -1014,7 +1063,9 @@ void main() {
 #ifdef PROJECTION_GLOBE
     const float adjustedThickness = projectLineThickness(pos.y, projectionVector.projection_ubo[constant.ubo_index]);
     const vec4 projected_no_extrude = projectTile(pos + offset2 / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
-    gl_Position = projectTile(pos + (offset2 + dist) / drawable.ratio * adjustedThickness, projectionVector.projection_ubo[constant.ubo_index]);
+    const vec2 extrudedPos = pos + (offset2 + dist) / drawable.ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
+    frag_tile_x = antimeridianClipX(extrudedPos, projectionVector.projection_ubo[constant.ubo_index]);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
@@ -1092,7 +1143,16 @@ layout(set = LAYER_SET_INDEX, binding = idLineEvaluatedPropsUBO) uniform LineEva
 
 layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
+#ifdef PROJECTION_GLOBE
+layout(location = 9) in float frag_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(frag_tile_x)) {
+        discard;
+    }
+#endif
 
 #ifdef OVERDRAW_INSPECTOR
     out_color = vec4(1.0);

@@ -99,6 +99,10 @@ layout (location = 8) in lowp vec4 a_pattern_to;
 out lowp vec4 pattern_to;
 #endif
 
+#ifdef PROJECTION_GLOBE
+out float v_tile_x;
+#endif
+
 void main() {
     #ifndef HAS_UNIFORM_u_blur
 blur = unpack_mix_vec2(a_blur, u_blur_t);
@@ -177,7 +181,9 @@ mediump vec4 pattern_to = u_pattern_to;
 #ifdef PROJECTION_GLOBE
     float adjustedThickness = projectLineThickness(pos.y);
     vec4 projected_no_extrude = projectTile(pos + offset2 / u_ratio * adjustedThickness);
-    gl_Position = projectTile(pos + (offset2 + dist) / u_ratio * adjustedThickness);
+    vec2 extrudedPos = pos + (offset2 + dist) / u_ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos);
+    v_tile_x = antimeridianClipX(extrudedPos);
     vec4 projected_extrude = gl_Position - projected_no_extrude;
 #else
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
@@ -234,7 +240,16 @@ in lowp float blur;
 in lowp float opacity;
 #endif
 
+#ifdef PROJECTION_GLOBE
+in float v_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(v_tile_x)) {
+        discard;
+    }
+#endif
     #ifdef HAS_UNIFORM_u_pattern_from
 mediump vec4 pattern_from = u_pattern_from;
 #endif
