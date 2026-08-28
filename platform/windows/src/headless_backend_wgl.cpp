@@ -40,7 +40,7 @@ private:
         GetModuleHandleExA(0, NULL, &helperWindowClass.hInstance);
 
         if (!RegisterClassExA(&helperWindowClass)) {
-            Log::Error(Event::OpenGL, "Failed to register helper window class");
+            Log::Error(Event::GraphicsBackend, "Failed to register helper window class");
             throw std::runtime_error("Failed to register helper window class");
         }
 
@@ -58,7 +58,7 @@ private:
                                              NULL);
 
         if (!helperWindowHandle) {
-            Log::Error(Event::OpenGL, "Failed to create helper window");
+            Log::Error(Event::GraphicsBackend, "Failed to create helper window");
             throw std::runtime_error("Failed to create helper window");
         }
 
@@ -141,14 +141,14 @@ public:
         // the default surface anyway; all rendering will be directed to
         // framebuffers which have their own configuration.
         if (!SetPixelFormat(dummyDC, ChoosePixelFormat(dummyDC, &pfd), &pfd)) {
-            Log::Error(Event::OpenGL, "Failed to set pixel format for dummy context");
+            Log::Error(Event::GraphicsBackend, "Failed to set pixel format for dummy context");
             throw std::runtime_error("Failed to set pixel format for dummy context");
         }
 
         dummyRC = wglCreateContext(dummyDC);
 
         if (!dummyRC) {
-            Log::Error(Event::OpenGL, "Failed to create dummy context");
+            Log::Error(Event::GraphicsBackend, "Failed to create dummy context");
             throw std::runtime_error("Failed to create dummy context");
         }
 
@@ -161,7 +161,7 @@ public:
 
             DestroyHelperWindow();
 
-            Log::Error(Event::OpenGL, "Failed to make dummy context current");
+            Log::Error(Event::GraphicsBackend, "Failed to make dummy context current");
             throw std::runtime_error("Failed to make dummy context current");
         }
 
@@ -173,7 +173,7 @@ public:
         ARB_ES3_compatibility = extensionSupportedWGL("GL_ARB_ES3_compatibility");
 
         if (!ARB_create_context || !ARB_create_context_profile || !ARB_ES3_compatibility) {
-            Log::Error(Event::OpenGL, "OpenGL ES 3.0 is unavailable");
+            Log::Error(Event::GraphicsBackend, "OpenGL ES 3.0 is unavailable");
             throw std::runtime_error("OpenGL ES 3.0 is unavailable");
         }
 
@@ -187,7 +187,7 @@ public:
         GetModuleHandleExA(0, NULL, &renderingWindowClass.hInstance);
 
         if (!RegisterClassExA(&renderingWindowClass)) {
-            Log::Error(Event::OpenGL, "Failed to register rendering window class");
+            Log::Error(Event::GraphicsBackend, "Failed to register rendering window class");
             throw std::runtime_error("Failed to register rendering window class");
         }
     }
@@ -236,7 +236,7 @@ private:
                                                 NULL);
 
         if (!renderingWindowHandle) {
-            Log::Error(Event::OpenGL, "Failed to create helper window");
+            Log::Error(Event::GraphicsBackend, "Failed to create helper window");
             throw std::runtime_error("Failed to create helper window");
         }
 
@@ -262,7 +262,7 @@ private:
 
     HGLRC GetContext() {
         if (!(renderingWindowRenderingContext || CreateRenderingContext())) {
-            Log::Error(Event::OpenGL, "Failed to create rendering context");
+            Log::Error(Event::GraphicsBackend, "Failed to create rendering context");
             throw std::runtime_error("Failed to create rendering context");
         }
 
@@ -305,7 +305,7 @@ private:
                                                     1,
                                                     &pixelFormat,
                                                     &numFormats)) {
-            Log::Error(Event::OpenGL, "Failed to choose pixel format for context");
+            Log::Error(Event::GraphicsBackend, "Failed to choose pixel format for context");
             throw std::runtime_error("Failed to choose pixel format for context");
         }
 
@@ -314,12 +314,12 @@ private:
         pfd.nSize = sizeof(pfd);
 
         if (!DescribePixelFormat(renderingWindowDeviceContext, pixelFormat, sizeof(pfd), &pfd)) {
-            Log::Error(Event::OpenGL, "Failed to retrieve pixel format for context");
+            Log::Error(Event::GraphicsBackend, "Failed to retrieve pixel format for context");
             throw std::runtime_error("Failed to retrieve pixel format for context");
         }
 
         if (!SetPixelFormat(renderingWindowDeviceContext, pixelFormat, &pfd)) {
-            Log::Error(Event::OpenGL, "Failed to set pixel format for context");
+            Log::Error(Event::GraphicsBackend, "Failed to set pixel format for context");
             throw std::runtime_error("Failed to set pixel format for context");
         }
 
@@ -340,20 +340,20 @@ private:
                 const DWORD error = GetLastError();
 
                 if (error == (0xc0070000 | ERROR_INVALID_VERSION_ARB)) {
-                    Log::Error(Event::OpenGL, "Driver does not support OpenGL ES version 2.0");
+                    Log::Error(Event::GraphicsBackend, "Driver does not support OpenGL ES version 2.0");
                     throw std::runtime_error("Driver does not support OpenGL ES version 2.0");
                 } else if (error == (0xc0070000 | ERROR_INVALID_PROFILE_ARB)) {
-                    Log::Error(Event::OpenGL, "Driver does not support the requested OpenGL profile");
+                    Log::Error(Event::GraphicsBackend, "Driver does not support the requested OpenGL profile");
                     throw std::runtime_error("Driver does not support the requested OpenGL profile");
                 } else if (error == (0xc0070000 | ERROR_INCOMPATIBLE_DEVICE_CONTEXTS_ARB)) {
-                    Log::Error(Event::OpenGL,
+                    Log::Error(Event::GraphicsBackend,
                                "The share context is not compatible with the "
                                "requested context");
                     throw std::runtime_error(
                         "The share context is not compatible with the "
                         "requested context");
                 } else {
-                    Log::Error(Event::OpenGL, "Failed to create OpenGL ES context");
+                    Log::Error(Event::GraphicsBackend, "Failed to create OpenGL ES context");
                     throw std::runtime_error("Failed to create OpenGL ES context");
                 }
 
@@ -363,7 +363,7 @@ private:
             renderingWindowRenderingContext = wglCreateContext(renderingWindowDeviceContext);
 
             if (!renderingWindowRenderingContext) {
-                Log::Error(Event::OpenGL, "Failed to create OpenGL context");
+                Log::Error(Event::GraphicsBackend, "Failed to create OpenGL context");
                 throw std::runtime_error("Failed to create OpenGL context");
             }
         }
@@ -380,13 +380,13 @@ private:
 
     bool DestroyRenderingContext() {
         if (renderingWindowRenderingContext && !wglMakeCurrent(renderingWindowDeviceContext, NULL)) {
-            Log::Error(Event::OpenGL, "Failed to make context current");
+            Log::Error(Event::GraphicsBackend, "Failed to make context current");
             // throw std::runtime_error("Failed to make context current");
             return false;
         }
 
         if (renderingWindowRenderingContext && !wglDeleteContext(renderingWindowRenderingContext)) {
-            Log::Error(Event::OpenGL, "Failed to delete current context");
+            Log::Error(Event::GraphicsBackend, "Failed to delete current context");
             // throw std::runtime_error("Failed to delete current context");
             return false;
         }
@@ -414,14 +414,14 @@ public:
     void activateContext() final {
         if (renderingWindowRenderingContext &&
             !wglMakeCurrent(renderingWindowDeviceContext, renderingWindowRenderingContext)) {
-            Log::Error(Event::OpenGL, "Switching OpenGL context failed");
+            Log::Error(Event::GraphicsBackend, "Switching OpenGL context failed");
             // throw std::runtime_error("Switching OpenGL context failed");
         }
     }
 
     void deactivateContext() final {
         if (renderingWindowRenderingContext && !wglMakeCurrent(NULL, NULL)) {
-            Log::Error(Event::OpenGL, "Removing OpenGL context failed");
+            Log::Error(Event::GraphicsBackend, "Removing OpenGL context failed");
             // throw std::runtime_error("Removing OpenGL context failed");
         }
     }
