@@ -104,6 +104,8 @@ void DrawableGL::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
             seg.indexOffset,
             seg.vertexLength,
             seg.indexLength,
+            seg.baseInstance,
+            seg.instanceCount,
             seg.sortKey,
         };
         auto drawSeg = std::make_unique<DrawableGL::DrawSegmentGL>(

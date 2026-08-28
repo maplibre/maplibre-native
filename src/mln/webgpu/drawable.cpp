@@ -1029,8 +1029,14 @@ void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
         drawSegs.reserve(segmentCount);
         for (std::size_t i = 0; i < segmentCount; ++i) {
             const auto& seg = segments[i];
-            drawSegs.push_back(std::make_unique<DrawSegment>(
-                mode, SegmentBase{seg.vertexOffset, seg.indexOffset, seg.vertexLength, seg.indexLength, seg.sortKey}));
+            drawSegs.push_back(std::make_unique<DrawSegment>(mode,
+                                                             SegmentBase{seg.vertexOffset,
+                                                                         seg.indexOffset,
+                                                                         seg.vertexLength,
+                                                                         seg.indexLength,
+                                                                         seg.baseInstance,
+                                                                         seg.instanceCount,
+                                                                         seg.sortKey}));
         }
     }
 

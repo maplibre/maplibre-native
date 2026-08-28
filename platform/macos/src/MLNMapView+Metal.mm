@@ -158,15 +158,6 @@ void MLNMapViewMetalImpl::deactivate() {
   }
 }
 
-/// This function is called before we start rendering, when iOS invokes our rendering method.
-/// iOS already sets the correct framebuffer and viewport for us, so we need to update the
-/// context state with the anticipated values.
-void MLNMapViewMetalImpl::updateAssumedState() {
-  auto& resource = getResource<MLNMapViewMetalRenderableResource>();
-  assumeFramebufferBinding(ImplicitFramebufferBinding);
-  assumeViewport(0, 0, resource.framebufferSize());
-}
-
 mln::PremultipliedImage MLNMapViewMetalImpl::readStillImage() {
   // return readFramebuffer(mapView.framebufferSize); // TODO: RendererBackend::readFramebuffer
   return {};

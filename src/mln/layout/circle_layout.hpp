@@ -115,7 +115,7 @@ private:
                 if (segments.empty() ||
                     segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max()) {
                     // Move to a new segments because the old one can't hold the geometry.
-                    segments.emplace_back(vertices.elements(), triangles.elements(), 0ul, 0ul, sortKey);
+                    segments.emplace_back(vertices.elements(), triangles.elements(), 0ul, 0ul, 0ul, 1ul, sortKey);
                 }
 
                 // this geometry will be of the Point type, and we'll derive
