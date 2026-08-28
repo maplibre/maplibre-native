@@ -1,0 +1,68 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Sky colors and horizon blend interpolate from zoom expressions at the current zoom.",
+      "width": 256,
+      "height": 256,
+      "maxPitch": 85
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 5,
+  "pitch": 82,
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#202020"
+      }
+    }
+  ],
+  "sky": {
+    "sky-color": [
+      "interpolate",
+      [
+        "linear"
+      ],
+      [
+        "zoom"
+      ],
+      4,
+      "#e53e3e",
+      6,
+      "#315ee8"
+    ],
+    "horizon-color": [
+      "interpolate",
+      [
+        "linear"
+      ],
+      [
+        "zoom"
+      ],
+      4,
+      "#ffdc72",
+      6,
+      "#62e8de"
+    ],
+    "sky-horizon-blend": [
+      "interpolate",
+      [
+        "linear"
+      ],
+      [
+        "zoom"
+      ],
+      4,
+      0.2,
+      6,
+      1
+    ]
+  }
+}

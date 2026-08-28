@@ -9,9 +9,11 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
 #include <mln/style/projection.hpp>
+#include <mln/style/sky.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/client_options.hpp>
+#include <mln/util/color.hpp>
 
 #include <memory>
 
@@ -92,6 +94,43 @@ TEST(Style, Projection) {
     // A name that is not a projection keeps the default, with a warning.
     style.loadJSON(R"STYLE({"projection": {"type": "orthographic"}})STYLE");
     ASSERT_TRUE(style.getProjection()->getType().isUndefined());
+}
+
+TEST(Style, SkyPresenceAndReplacement) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    EXPECT_EQ(nullptr, style.getSky());
+
+    style.loadJSON(R"STYLE({"sky":{}})STYLE");
+    ASSERT_NE(nullptr, style.getSky());
+    EXPECT_TRUE(style.getSky()->getSkyColor().isUndefined());
+
+    style.loadJSON(R"STYLE({"sky":{"sky-color":"blue","atmosphere-blend":0.4}})STYLE");
+    ASSERT_NE(nullptr, style.getSky());
+    EXPECT_EQ(Color::blue(), style.getSky()->getSkyColor().asConstant());
+    EXPECT_FLOAT_EQ(0.4f, style.getSky()->getAtmosphereBlend().asConstant());
+
+    auto replacement = std::make_unique<Sky>();
+    replacement->setFogColor(Color::red());
+    style.setSky(std::move(replacement));
+    ASSERT_NE(nullptr, style.getSky());
+    EXPECT_TRUE(style.getSky()->getSkyColor().isUndefined());
+    EXPECT_TRUE(style.getSky()->getAtmosphereBlend().isUndefined());
+    EXPECT_EQ(Color::red(), style.getSky()->getFogColor().asConstant());
+
+    style.setSky(nullptr);
+    EXPECT_EQ(nullptr, style.getSky());
+
+    style.loadJSON(R"STYLE({"sky":{"sky-color":"white"}})STYLE");
+    ASSERT_NE(nullptr, style.getSky());
+    style.loadJSON(R"STYLE({})STYLE");
+    EXPECT_EQ(nullptr, style.getSky());
+
+    style.loadJSON(R"STYLE({"sky":[]})STYLE");
+    EXPECT_EQ(nullptr, style.getSky());
 }
 
 TEST(Style, DuplicateSource) {

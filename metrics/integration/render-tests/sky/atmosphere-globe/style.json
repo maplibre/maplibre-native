@@ -1,0 +1,41 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A physical atmosphere surrounds and optically tints the globe using the configured map-anchored light.",
+      "width": 256,
+      "height": 256,
+      "allowed": 0.00075
+    }
+  },
+  "center": [
+    160,
+    0
+  ],
+  "zoom": 1,
+  "bearing": 35,
+  "projection": {
+    "type": "globe"
+  },
+  "light": {
+    "anchor": "map",
+    "position": [
+      1.5,
+      90,
+      90
+    ]
+  },
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#16385f"
+      }
+    }
+  ],
+  "sky": {
+    "atmosphere-blend": 1
+  }
+}
