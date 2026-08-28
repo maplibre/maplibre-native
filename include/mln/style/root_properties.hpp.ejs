@@ -1,5 +1,7 @@
 <%
   const properties = locals.properties;
+  const className = locals.className;
+  const observerName = `${className}Observer`;
 -%>
 // clang-format off
 
@@ -17,12 +19,12 @@
 namespace mln {
 namespace style {
 
-class LightObserver;
+class <%- observerName %>;
 
-class Light {
+class <%- className %> {
 public:
-    Light();
-    ~Light();
+    <%- className %>();
+    ~<%- className %>();
 
     // Dynamic properties
     std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
@@ -38,11 +40,11 @@ public:
 <% } -%>
     class Impl;
     Immutable<Impl> impl;
-    explicit Light(Immutable<Impl>);
+    explicit <%- className %>(Immutable<Impl>);
     Mutable<Impl> mutableImpl() const;
 
-    LightObserver* observer = nullptr;
-    void setObserver(LightObserver*);
+    <%- observerName %>* observer = nullptr;
+    void setObserver(<%- observerName %>*);
 };
 
 } // namespace style

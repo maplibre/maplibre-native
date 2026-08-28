@@ -3,6 +3,7 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/light.hpp>
 #include <mln/style/projection.hpp>
+#include <mln/style/sky.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/style_impl.hpp>
@@ -74,6 +75,20 @@ Light* Style::getLight() {
 
 const Light* Style::getLight() const {
     return impl->getLight();
+}
+
+void Style::setSky(std::unique_ptr<Sky> sky) {
+    impl->mutated = true;
+    impl->setSky(std::move(sky));
+}
+
+Sky* Style::getSky() {
+    impl->mutated = true;
+    return impl->getSky();
+}
+
+const Sky* Style::getSky() const {
+    return impl->getSky();
 }
 
 void Style::setProjection(std::unique_ptr<Projection> projection) {
