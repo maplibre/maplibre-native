@@ -17,6 +17,7 @@
 
 #import "MLNImageSource.h"
 #import "MLNLight_Private.h"
+#import "MLNSky_Private.h"
 #import "MLNRasterDEMSource.h"
 #import "MLNRasterTileSource.h"
 #import "MLNShapeSource.h"
@@ -31,6 +32,7 @@
 #include <mln/map/map.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/sky.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/sources/image_source.hpp>
 #include <mln/style/sources/raster_dem_source.hpp>
@@ -568,6 +570,23 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
   auto mbglLight = self.rawStyle->getLight();
   MLNLight *light = [[MLNLight alloc] initWithMBGLLight:mbglLight];
   return light;
+}
+
+// MARK: Style sky
+
+- (void)setSky:(MLNSky *)sky {
+  if (!sky) {
+    self.rawStyle->setSky(nullptr);
+    return;
+  }
+
+  auto mbglSky = std::make_unique<mln::style::Sky>([sky mbglSky]);
+  self.rawStyle->setSky(std::move(mbglSky));
+}
+
+- (MLNSky *)sky {
+  auto mbglSky = self.rawStyle->getSky();
+  return mbglSky ? [[MLNSky alloc] initWithMBGLSky:mbglSky] : nil;
 }
 
 - (NSString *)description {

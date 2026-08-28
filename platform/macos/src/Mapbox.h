@@ -30,6 +30,7 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "MLNHillshadeStyleLayer.h"
 #import "MLNImageSource.h"
 #import "MLNLight.h"
+#import "MLNSky.h"
 #import "MLNLineStyleLayer.h"
 #import "MLNLoggingConfiguration.h"
 #import "MLNMapCamera.h"
