@@ -2,6 +2,7 @@
 
 #include <gmock/gmock.h>
 #include <cmath>
+#include <mln/map/map_impl.hpp>
 #include <mln/map/mercator_projection.hpp>
 #include <mln/map/tile_projector.hpp>
 #include <mln/map/vertical_perspective_projection.hpp>
@@ -1398,6 +1399,25 @@ void setUpGlobe(Transform& transform, const LatLng& center, double zoom, double 
     transform.jumpTo(CameraOptions().withCenter(center).withZoom(zoom).withBearing(bearing).withPitch(pitch));
 }
 
+// The GL JS camera tests run on a 512 by 512 globe.
+void setUpGlobeCamera(Transform& transform, const LatLng& center, double zoom) {
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(center).withZoom(zoom));
+}
+
+// One second with a linear easing, so a frame at half time is the frame at k = 0.5.
+AnimationOptions linearSecond() {
+    AnimationOptions animation;
+    animation.duration = Milliseconds(1000);
+    animation.easing.emplace(0, 0, 1, 1);
+    return animation;
+}
+
+void runTo(Transform& transform, double k) {
+    transform.updateTransitions(transform.getTransitionStart() + Milliseconds(static_cast<int64_t>(k * 1000)));
+}
+
 } // namespace
 
 TEST(VerticalPerspectiveProjection, CenterProjectsToScreenCenter) {
@@ -1516,6 +1536,27 @@ TEST(GlobeTransform, AnchoredZoomKeepsTheAnchorInPlace) {
     EXPECT_NEAR(anchor.y, after.y, 0.5);
 }
 
+TEST(GlobeTransform, ZoomingOutAroundAnAnchorNearTheHorizonStaysContinuous) {
+    // A fast pinch-out with the focal point drifting off the planet: the exact re-anchoring jumped the center by
+    // ten degrees of latitude and the zoom by half a level for one frame (a much larger globe); GL JS blends in a
+    // damped heuristic near the horizon.
+    Transform transform;
+    setUpGlobe(transform, {48.0, 10.0}, 6.0);
+    const ScreenCoordinate anchor{600, 200};
+    double lastRadius = transform.getState().getGlobeRadiusPixels();
+    LatLng lastCenter = transform.getLatLng();
+    for (int i = 1; i <= 60; ++i) {
+        transform.easeTo(CameraOptions().withZoom(6.0 - i * 0.1).withAnchor(anchor));
+        if (i % 3 == 0) transform.moveBy({-7, 4});
+        const double radius = transform.getState().getGlobeRadiusPixels();
+        const LatLng center = transform.getLatLng();
+        EXPECT_LE(radius, lastRadius * 1.005) << "step " << i;
+        EXPECT_LT(std::abs(center.latitude() - lastCenter.latitude()), 5.0) << "step " << i;
+        lastRadius = radius;
+        lastCenter = center;
+    }
+}
+
 TEST(GlobeTransform, PolesAreReachableAndZoomFollowsLatitude) {
     Transform transform;
     setUpGlobe(transform, {0.0, 0.0}, 0.0);
@@ -1601,6 +1642,158 @@ TEST(GlobeTransform, ZoomAdjustment) {
     EXPECT_DOUBLE_EQ(0.0, VerticalPerspectiveProjection::zoomAdjustment(20.0, 20.0));
     EXPECT_NEAR(-1.0, VerticalPerspectiveProjection::zoomAdjustment(0.0, 60.0), 1e-12);
     EXPECT_NEAR(1.0, VerticalPerspectiveProjection::zoomAdjustment(60.0, 0.0), 1e-12);
+}
+
+// The expected numbers below come from GL JS's own camera (`camera.test.ts`, "globe projection" suites, and its
+// `VerticalPerspectiveCameraHelper`) run on the same 512 by 512 viewport with a linear easing.
+
+TEST(GlobeTransform, EaseAdjustsTheZoomToTheNewLatitude) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 1.0);
+    transform.easeTo(CameraOptions().withCenter(LatLng{40.0, 0.0}), linearSecond());
+    runTo(transform, 1.0);
+    EXPECT_FALSE(transform.inTransition());
+    EXPECT_NEAR(40.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.61549999962236379, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, FlyAdjustsTheZoomToTheNewLatitude) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 1.0);
+    transform.flyTo(CameraOptions().withCenter(LatLng{40.0, 0.0}), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(20.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.87493158146277261, transform.getZoom(), 1e-9);
+    runTo(transform, 1.0);
+    EXPECT_FALSE(transform.inTransition());
+    EXPECT_NEAR(40.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.61549999962236379, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, EaseKeepsThePlanetSizeAcrossLatitudes) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+    const double radius = transform.getState().getGlobeRadiusPixels();
+    transform.easeTo(CameraOptions().withCenter(LatLng{60.0, 0.0}), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(30.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(0.0, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(2.7924812503605780, transform.getZoom(), 1e-9);
+    EXPECT_NEAR(radius, transform.getState().getGlobeRadiusPixels(), 1e-6);
+    runTo(transform, 1.0);
+    EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(2.0, transform.getZoom(), 1e-9);
+    EXPECT_NEAR(radius, transform.getState().getGlobeRadiusPixels(), 1e-6);
+}
+
+TEST(GlobeTransform, EaseFollowsTheLongitudeSpeedCurve) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+    transform.easeTo(CameraOptions().withCenter(LatLng{60.0, 60.0}), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(25.026136930423718, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(30.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(2.7924812503605780, transform.getZoom(), 1e-9);
+    runTo(transform, 1.0);
+    EXPECT_NEAR(60.0, transform.getLatLng().longitude(), 1e-9);
+    EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(2.0, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, EaseWithZoomSpeedsUpTheCenter) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+    transform.easeTo(CameraOptions().withCenter(LatLng{60.0, 0.0}).withZoom(5.0), linearSecond());
+    runTo(transform, 0.5);
+    EXPECT_NEAR(42.426406871192853, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(4.0619751435424885, transform.getZoom(), 1e-9);
+    runTo(transform, 1.0);
+    EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-9);
+    EXPECT_NEAR(5.0, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, FlyFollowsTheGlobePath) {
+    {
+        Transform transform;
+        setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+        transform.flyTo(CameraOptions().withCenter(LatLng{60.0, 60.0}), linearSecond());
+        runTo(transform, 0.5);
+        EXPECT_NEAR(25.026136930425196, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(30.0, transform.getLatLng().latitude(), 1e-8);
+        EXPECT_NEAR(1.8176209209717085, transform.getZoom(), 1e-9);
+        runTo(transform, 1.0);
+        EXPECT_NEAR(60.0, transform.getLatLng().longitude(), 1e-8);
+        EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-8);
+        EXPECT_NEAR(2.0, transform.getZoom(), 1e-9);
+    }
+    {
+        Transform transform;
+        setUpGlobeCamera(transform, {0.0, 0.0}, 3.0);
+        transform.flyTo(CameraOptions().withCenter(LatLng{60.0, 60.0}).withZoom(6.0), linearSecond());
+        runTo(transform, 0.5);
+        EXPECT_NEAR(54.663652625664554, transform.getLatLng().longitude(), 1e-9);
+        EXPECT_NEAR(56.470588235293114, transform.getLatLng().latitude(), 1e-9);
+        EXPECT_NEAR(2.4045752372957860, transform.getZoom(), 1e-9);
+        runTo(transform, 1.0);
+        EXPECT_NEAR(60.0, transform.getLatLng().longitude(), 1e-8);
+        EXPECT_NEAR(60.0, transform.getLatLng().latitude(), 1e-8);
+        EXPECT_NEAR(6.0, transform.getZoom(), 1e-9);
+    }
+}
+
+TEST(GlobeTransform, FlyStaysAboveTheMinimumZoom) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 20.0);
+    AnimationOptions animation = linearSecond();
+    animation.minZoom = 10.0;
+    transform.flyTo(CameraOptions().withCenter(LatLng{0.0, 1.0}).withZoom(20.0), animation);
+    double lowest = 20.0;
+    for (int frame = 1; frame <= 10; ++frame) {
+        runTo(transform, frame / 10.0);
+        lowest = std::min(lowest, transform.getZoom());
+    }
+    // GL JS bottoms out at 9.9999993 on the same frames.
+    EXPECT_GE(lowest, 10.0 - 1e-5);
+    EXPECT_LE(lowest, 10.01);
+    EXPECT_NEAR(20.0, transform.getZoom(), 1e-9);
+}
+
+TEST(GlobeTransform, CameraForBoundsFitsTheGlobe) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 0.0);
+    const LatLngBounds bounds = LatLngBounds::hull({16.0, -133.0}, {50.0, -68.0});
+    const std::vector<LatLng> corners = {
+        bounds.northwest(), bounds.southwest(), bounds.southeast(), bounds.northeast()};
+
+    // The flat fit the globe starts from is 1.4e-8 zoom from GL JS's 2.4694852833012204 on Mercator already, and the
+    // globe fit inherits that; the zooms below are GL JS's to within 1.6e-8.
+    {
+        Transform flat;
+        flat.resize({512, 512});
+        flat.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(0.0));
+        const CameraOptions flatFit = cameraForLatLngs(corners, flat, {});
+        ASSERT_TRUE(flatFit.zoom);
+        EXPECT_NEAR(2.4694852833012204, *flatFit.zoom, 1e-7);
+    }
+
+    CameraOptions fit = cameraForLatLngs(corners, transform, {});
+    ASSERT_TRUE(fit.center && fit.zoom);
+    EXPECT_NEAR(-100.5, fit.center->longitude(), 1e-9);
+    EXPECT_NEAR(34.717077774070773, fit.center->latitude(), 1e-9);
+    EXPECT_NEAR(2.4964711163134550, *fit.zoom, 1e-7);
+
+    fit = cameraForLatLngs(corners, transform, {15.0, 15.0, 15.0, 15.0});
+    ASSERT_TRUE(fit.center && fit.zoom);
+    EXPECT_NEAR(-100.5, fit.center->longitude(), 1e-9);
+    EXPECT_NEAR(34.717077774070773, fit.center->latitude(), 1e-9);
+    EXPECT_NEAR(2.3985253272853888, *fit.zoom, 1e-7);
+
+    transform.jumpTo(CameraOptions().withBearing(45.0));
+    fit = cameraForLatLngs(corners, transform, {});
+    ASSERT_TRUE(fit.center && fit.zoom);
+    EXPECT_NEAR(-100.5, fit.center->longitude(), 1e-9);
+    EXPECT_NEAR(34.717077774070773, fit.center->latitude(), 1e-9);
+    EXPECT_NEAR(2.4499189488903967, *fit.zoom, 1e-7);
 }
 
 TEST(TileProjector, MercatorMatchesTheTileMatrix) {

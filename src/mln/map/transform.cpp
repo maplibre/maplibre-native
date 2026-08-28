@@ -109,16 +109,17 @@ void Transform::jumpTo(const CameraOptions& camera) {
  */
 void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animation) {
     CameraOptions camera = inputCamera;
+    const bool globe = state.isGlobeRendering();
 
     Duration duration = animation.duration.value_or(Duration::zero());
-    if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
+    if (!globe && state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
         flyTo(camera, animation, true);
         return;
     }
 
     double zoom = camera.zoom.value_or(getZoom());
-    if (!camera.zoom && camera.center && state.isGlobeRendering()) {
+    if (!camera.zoom && camera.center && globe) {
         zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
                                                               state.constrainedCenter(*camera.center).latitude());
     }
@@ -180,14 +181,46 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
                             .withRotatingInProgress(bearing != startBearing));
     const EdgeInsets startEdgeInsets = state.getEdgeInsets();
 
+    // On the globe the zoom is eased in equator terms so the planet holds its size as the latitude changes, and the
+    // center moves the way GL JS moves it: longitude paced at 1 / cos(latitude), sped up ahead of a zoom in.
+    const double normalizedStartZoom = globe ? startZoom + VerticalPerspectiveProjection::zoomAdjustment(
+                                                               startLatLng.latitude(), 0)
+                                             : startZoom;
+    const double normalizedZoom = globe ? zoom + VerticalPerspectiveProjection::zoomAdjustment(latLng.latitude(), 0)
+                                        : zoom;
+    const double finalScale = state.zoomScale(normalizedZoom - normalizedStartZoom);
+    const double base = normalizedZoom > normalizedStartZoom ? std::min(2.0, finalScale) : std::max(0.5, finalScale);
+    const double deltaLatitude = globe ? VerticalPerspectiveProjection::differenceOfAnglesDegrees(
+                                             startLatLng.latitude(), latLng.latitude())
+                                       : 0.0;
+    const double deltaLongitude = globe ? VerticalPerspectiveProjection::differenceOfAnglesDegrees(
+                                              startLatLng.longitude(), latLng.longitude())
+                                        : 0.0;
+
     startTransition(
         camera,
         animation,
         [=, this](double t) {
-            Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
-            LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
-            double frameZoom = util::interpolate(startZoom, zoom, t);
-            state.setLatLngZoom(frameLatLng, frameZoom);
+            if (globe) {
+                LatLng frameLatLng = latLng;
+                double frameZoom = zoom;
+                if (t < 1.0) {
+                    const double factor = t * std::pow(base, 1.0 - t);
+                    frameLatLng = VerticalPerspectiveProjection::interpolateLatLng(
+                                      startLatLng, deltaLatitude, deltaLongitude, factor)
+                                      .wrapped();
+                    frameZoom = zoom != startZoom
+                                    ? util::interpolate(normalizedStartZoom, normalizedZoom, t) +
+                                          VerticalPerspectiveProjection::zoomAdjustment(0, frameLatLng.latitude())
+                                    : startZoom;
+                }
+                state.setLatLngZoom(frameLatLng, frameZoom);
+            } else {
+                Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
+                LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
+                double frameZoom = util::interpolate(startZoom, zoom, t);
+                state.setLatLngZoom(frameLatLng, frameZoom);
+            }
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, t));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
@@ -226,8 +259,13 @@ void Transform::flyTo(const CameraOptions& inputCamera,
                       const AnimationOptions& animation,
                       bool linearZoomInterpolation) {
     CameraOptions camera = inputCamera;
+    const bool globe = state.isGlobeRendering();
 
     double zoom = camera.zoom.value_or(getZoom());
+    if (!camera.zoom && camera.center && globe) {
+        zoom += VerticalPerspectiveProjection::zoomAdjustment(getLatLng().latitude(),
+                                                              state.constrainedCenter(*camera.center).latitude());
+    }
     state.constrainCameraAndZoomToBounds(camera, zoom);
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
@@ -273,12 +311,20 @@ void Transform::flyTo(const CameraOptions& inputCamera,
 
     double w0 = std::max(state.getSize().width - padding.left() - padding.right(),
                          state.getSize().height - padding.top() - padding.bottom());
+    // The globe counts zoom in equator terms and distance along the surface, so the arc is the same at any latitude.
+    const double normalizedStartZoom = globe ? startZoom + VerticalPerspectiveProjection::zoomAdjustment(
+                                                               startLatLng.latitude(), 0)
+                                             : startZoom;
+    const double normalizedZoom = globe ? zoom + VerticalPerspectiveProjection::zoomAdjustment(latLng.latitude(), 0)
+                                        : zoom;
     /// w₁: Final visible span, measured in pixels with respect to the initial
     /// scale.
-    double w1 = w0 / state.zoomScale(zoom - startZoom);
+    double w1 = w0 / state.zoomScale(normalizedZoom - normalizedStartZoom);
     /// Length of the flight path as projected onto the ground plane, measured
     /// in pixels from the world image origin at the initial scale.
-    double u1 = ::hypot((endPoint - startPoint).x, (endPoint - startPoint).y);
+    double u1 = globe ? VerticalPerspectiveProjection::surfaceDistancePixels(
+                            Projection::worldSize(state.getScale()), startLatLng.latitude(), startLatLng, latLng)
+                      : ::hypot((endPoint - startPoint).x, (endPoint - startPoint).y);
 
     /** ρ: The relative amount of zooming that takes place along the flight
         path. A high value maximizes zooming for an exaggerated animation, while
@@ -289,7 +335,24 @@ void Transform::flyTo(const CameraOptions& inputCamera,
         root mean squared average velocity, V<sub>RMS</sub>. A value of 1
         produces a circular motion. */
     double rho = 1.42;
-    if (animation.minZoom || linearZoomInterpolation) {
+    if (globe) {
+        // GL JS: the arc may not dip below the map's or the flight's minimum zoom, and that only ever lowers ρ.
+        const double floorZoom = std::max(animation.minZoom.value_or(state.getMinZoom()), state.getMinZoom());
+        const double normalizedFloorZoom = std::min(
+            {floorZoom + VerticalPerspectiveProjection::zoomAdjustment(latLng.latitude(), 0),
+             normalizedStartZoom,
+             normalizedZoom});
+        const double minZoom = util::clamp(
+            normalizedFloorZoom + VerticalPerspectiveProjection::zoomAdjustment(0, latLng.latitude()),
+            state.getMinZoomAtLatitude(latLng.latitude()),
+            state.getMaxZoom());
+        const double wMax = w0 / state.zoomScale(minZoom +
+                                                 VerticalPerspectiveProjection::zoomAdjustment(latLng.latitude(), 0) -
+                                                 normalizedStartZoom);
+        if (u1 != 0) {
+            rho = std::min(rho, std::sqrt(wMax / u1 * 2));
+        }
+    } else if (animation.minZoom || linearZoomInterpolation) {
         double minZoom = util::min(animation.minZoom.value_or(startZoom), startZoom, zoom);
         minZoom = util::clamp(minZoom, state.getMinZoomAtLatitude(latLng.latitude()), state.getMaxZoom());
         /// w<sub>m</sub>: Maximum visible span, measured in pixels with respect
@@ -353,6 +416,12 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     }
 
     const double startScale = state.getScale();
+    const double deltaLatitude = globe ? VerticalPerspectiveProjection::differenceOfAnglesDegrees(
+                                             startLatLng.latitude(), latLng.latitude())
+                                       : 0.0;
+    const double deltaLongitude = globe ? VerticalPerspectiveProjection::differenceOfAnglesDegrees(
+                                              startLatLng.longitude(), latLng.longitude())
+                                        : 0.0;
     state.setProperties(
         TransformStateProperties().withPanningInProgress(true).withScalingInProgress(true).withRotatingInProgress(
             bearing != startBearing));
@@ -367,19 +436,38 @@ void Transform::flyTo(const CameraOptions& inputCamera,
             double s = k * S;
             double us = k == 1.0 ? 1.0 : u(s);
 
-            // Calculate the current point and zoom level along the flight path.
-            Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
-            double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
-                                                       : startZoom + state.scaleZoom(1 / w(s));
+            if (globe) {
+                LatLng frameLatLng = latLng;
+                double frameZoom = zoom;
+                if (k < 1.0) {
+                    frameLatLng = VerticalPerspectiveProjection::interpolateLatLng(
+                                      startLatLng, deltaLatitude, deltaLongitude, us)
+                                      .wrapped();
+                    const double frameNormalizedZoom = linearZoomInterpolation
+                                                           ? util::interpolate(normalizedStartZoom, normalizedZoom, k)
+                                                           : normalizedStartZoom + state.scaleZoom(1 / w(s));
+                    frameZoom = frameNormalizedZoom +
+                                VerticalPerspectiveProjection::zoomAdjustment(0, frameLatLng.latitude());
+                    if (std::isnan(frameZoom)) {
+                        frameZoom = zoom;
+                    }
+                }
+                state.setLatLngZoom(frameLatLng, frameZoom);
+            } else {
+                // Calculate the current point and zoom level along the flight path.
+                Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
+                double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
+                                                           : startZoom + state.scaleZoom(1 / w(s));
 
-            // Zoom can be NaN if size is empty.
-            if (std::isnan(frameZoom)) {
-                frameZoom = zoom;
+                // Zoom can be NaN if size is empty.
+                if (std::isnan(frameZoom)) {
+                    frameZoom = zoom;
+                }
+
+                // Convert to geographic coordinates and set the new viewpoint.
+                LatLng frameLatLng = Projection::unproject(framePoint, startScale);
+                state.setLatLngZoom(frameLatLng, frameZoom);
             }
-
-            // Convert to geographic coordinates and set the new viewpoint.
-            LatLng frameLatLng = Projection::unproject(framePoint, startScale);
-            state.setLatLngZoom(frameLatLng, frameZoom);
             state.setCenterAltitude(util::interpolate(startCenterAlt, centerAlt, us));
             if (bearing != startBearing) {
                 state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
@@ -620,6 +708,11 @@ void Transform::startTransition(const CameraOptions& camera,
 
     transitionFrameFn = [isAnimated, animation, frame, anchor, anchorLatLng, this](const TimePoint now) {
         float t = isAnimated ? (std::chrono::duration<float>(now - transitionStart) / transitionDuration) : 1.0f;
+        // On the globe the anchor is re-read every frame and the zoom around it is GL JS's blend of the exact
+        // solution and a damped heuristic; the exact solution alone jumps near the horizon.
+        const bool globeZoomAround = anchor && state.isGlobeRendering();
+        const LatLng zoomLocation = globeZoomAround ? state.screenCoordinateToLatLng(*anchor) : anchorLatLng;
+        const double zoomBefore = state.getZoom();
         if (t >= 1.0) {
             frame(1.0);
         } else {
@@ -627,7 +720,14 @@ void Transform::startTransition(const CameraOptions& camera,
             frame(ease.solve(t, 0.001));
         }
 
-        if (anchor) state.moveLatLng(anchorLatLng, *anchor);
+        if (anchor) {
+            if (globeZoomAround && state.getZoom() != zoomBefore) {
+                VerticalPerspectiveProjection::zoomAroundPoint(
+                    state, *anchor, zoomLocation, state.getZoom() - zoomBefore);
+            } else {
+                state.moveLatLng(anchorLatLng, *anchor);
+            }
+        }
 
         // At t = 1.0, a DidChangeAnimated notification should be sent from finish().
         if (t < 1.0) {
