@@ -17,10 +17,10 @@
 
 #import "MLNImageSource.h"
 #import "MLNLight_Private.h"
-#import "MLNSky_Private.h"
 #import "MLNRasterDEMSource.h"
 #import "MLNRasterTileSource.h"
 #import "MLNShapeSource.h"
+#import "MLNSky_Private.h"
 #import "MLNSource.h"
 #import "MLNSource_Private.h"
 #import "MLNTileSource_Private.h"

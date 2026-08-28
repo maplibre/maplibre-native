@@ -66,16 +66,16 @@ mln::style::TransitionOptions makeTransition(jlong duration, jlong delay) {
 
 } // namespace
 
-#define SKY_PROPERTY(Name)                                                                                     \
-    jni::Local<jni::Object<>> Sky::get##Name(jni::JNIEnv& env) {                                               \
-        using namespace mln::android::conversion;                                                              \
-        return std::move(*convert<jni::Local<jni::Object<>>>(env, sky->get##Name()));                          \
-    }                                                                                                          \
-    void Sky::set##Name##Transition(jni::JNIEnv&, jlong duration, jlong delay) {                               \
-        sky->set##Name##Transition(makeTransition(duration, delay));                                           \
-    }                                                                                                          \
-    jni::Local<jni::Object<TransitionOptions>> Sky::get##Name##Transition(jni::JNIEnv& env) {                  \
-        return toJavaTransition(env, sky->get##Name##Transition());                                            \
+#define SKY_PROPERTY(Name)                                                                    \
+    jni::Local<jni::Object<>> Sky::get##Name(jni::JNIEnv& env) {                              \
+        using namespace mln::android::conversion;                                             \
+        return std::move(*convert<jni::Local<jni::Object<>>>(env, sky->get##Name()));         \
+    }                                                                                         \
+    void Sky::set##Name##Transition(jni::JNIEnv&, jlong duration, jlong delay) {              \
+        sky->set##Name##Transition(makeTransition(duration, delay));                          \
+    }                                                                                         \
+    jni::Local<jni::Object<TransitionOptions>> Sky::get##Name##Transition(jni::JNIEnv& env) { \
+        return toJavaTransition(env, sky->get##Name##Transition());                           \
     }
 
 SKY_PROPERTY(AtmosphereBlend)
@@ -92,35 +92,34 @@ void Sky::registerNative(jni::JNIEnv& env) {
     static auto& javaClass = jni::Class<Sky>::Singleton(env);
 
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
-    jni::RegisterNativePeer<Sky>(
-        env,
-        javaClass,
-        "nativePtr",
-        jni::MakePeer<Sky>,
-        "initialize",
-        "finalize",
-        METHOD(&Sky::setProperty, "nativeSetProperty"),
-        METHOD(&Sky::getAtmosphereBlend, "nativeGetAtmosphereBlend"),
-        METHOD(&Sky::getAtmosphereBlendTransition, "nativeGetAtmosphereBlendTransition"),
-        METHOD(&Sky::setAtmosphereBlendTransition, "nativeSetAtmosphereBlendTransition"),
-        METHOD(&Sky::getFogColor, "nativeGetFogColor"),
-        METHOD(&Sky::getFogColorTransition, "nativeGetFogColorTransition"),
-        METHOD(&Sky::setFogColorTransition, "nativeSetFogColorTransition"),
-        METHOD(&Sky::getFogGroundBlend, "nativeGetFogGroundBlend"),
-        METHOD(&Sky::getFogGroundBlendTransition, "nativeGetFogGroundBlendTransition"),
-        METHOD(&Sky::setFogGroundBlendTransition, "nativeSetFogGroundBlendTransition"),
-        METHOD(&Sky::getHorizonColor, "nativeGetHorizonColor"),
-        METHOD(&Sky::getHorizonColorTransition, "nativeGetHorizonColorTransition"),
-        METHOD(&Sky::setHorizonColorTransition, "nativeSetHorizonColorTransition"),
-        METHOD(&Sky::getHorizonFogBlend, "nativeGetHorizonFogBlend"),
-        METHOD(&Sky::getHorizonFogBlendTransition, "nativeGetHorizonFogBlendTransition"),
-        METHOD(&Sky::setHorizonFogBlendTransition, "nativeSetHorizonFogBlendTransition"),
-        METHOD(&Sky::getSkyColor, "nativeGetSkyColor"),
-        METHOD(&Sky::getSkyColorTransition, "nativeGetSkyColorTransition"),
-        METHOD(&Sky::setSkyColorTransition, "nativeSetSkyColorTransition"),
-        METHOD(&Sky::getSkyHorizonBlend, "nativeGetSkyHorizonBlend"),
-        METHOD(&Sky::getSkyHorizonBlendTransition, "nativeGetSkyHorizonBlendTransition"),
-        METHOD(&Sky::setSkyHorizonBlendTransition, "nativeSetSkyHorizonBlendTransition"));
+    jni::RegisterNativePeer<Sky>(env,
+                                 javaClass,
+                                 "nativePtr",
+                                 jni::MakePeer<Sky>,
+                                 "initialize",
+                                 "finalize",
+                                 METHOD(&Sky::setProperty, "nativeSetProperty"),
+                                 METHOD(&Sky::getAtmosphereBlend, "nativeGetAtmosphereBlend"),
+                                 METHOD(&Sky::getAtmosphereBlendTransition, "nativeGetAtmosphereBlendTransition"),
+                                 METHOD(&Sky::setAtmosphereBlendTransition, "nativeSetAtmosphereBlendTransition"),
+                                 METHOD(&Sky::getFogColor, "nativeGetFogColor"),
+                                 METHOD(&Sky::getFogColorTransition, "nativeGetFogColorTransition"),
+                                 METHOD(&Sky::setFogColorTransition, "nativeSetFogColorTransition"),
+                                 METHOD(&Sky::getFogGroundBlend, "nativeGetFogGroundBlend"),
+                                 METHOD(&Sky::getFogGroundBlendTransition, "nativeGetFogGroundBlendTransition"),
+                                 METHOD(&Sky::setFogGroundBlendTransition, "nativeSetFogGroundBlendTransition"),
+                                 METHOD(&Sky::getHorizonColor, "nativeGetHorizonColor"),
+                                 METHOD(&Sky::getHorizonColorTransition, "nativeGetHorizonColorTransition"),
+                                 METHOD(&Sky::setHorizonColorTransition, "nativeSetHorizonColorTransition"),
+                                 METHOD(&Sky::getHorizonFogBlend, "nativeGetHorizonFogBlend"),
+                                 METHOD(&Sky::getHorizonFogBlendTransition, "nativeGetHorizonFogBlendTransition"),
+                                 METHOD(&Sky::setHorizonFogBlendTransition, "nativeSetHorizonFogBlendTransition"),
+                                 METHOD(&Sky::getSkyColor, "nativeGetSkyColor"),
+                                 METHOD(&Sky::getSkyColorTransition, "nativeGetSkyColorTransition"),
+                                 METHOD(&Sky::setSkyColorTransition, "nativeSetSkyColorTransition"),
+                                 METHOD(&Sky::getSkyHorizonBlend, "nativeGetSkyHorizonBlend"),
+                                 METHOD(&Sky::getSkyHorizonBlendTransition, "nativeGetSkyHorizonBlendTransition"),
+                                 METHOD(&Sky::setSkyHorizonBlendTransition, "nativeSetSkyHorizonBlendTransition"));
 }
 
 } // namespace android

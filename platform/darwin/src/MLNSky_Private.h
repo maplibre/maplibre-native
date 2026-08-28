@@ -6,7 +6,7 @@ namespace mln {
 namespace style {
 class Sky;
 }
-} // namespace mln
+}  // namespace mln
 
 @interface MLNSky (Private)
 
