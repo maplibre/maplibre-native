@@ -605,7 +605,9 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto& dynamicVertices = buffer.dynamicAttributeData();
 
 #if MLN_USE_SYMBOL_INSTANCING
-        int vertexOffset = 0;
+        // When instancing, each entry in the attribute vectors describes a whole quad,
+        // so the running offset counts quads rather than individual corner vertices.
+        std::size_t startIndex = 0;
 #endif
 
         for (const auto& symbol : buffer.placedSymbols) {
@@ -614,9 +616,10 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             }
 
 #if MLN_USE_SYMBOL_INSTANCING
-            const auto vertexCount = symbol.glyphOffsets.size();
+            const auto quadCount = symbol.glyphOffsets.size();
+            const auto vertexCount = quadCount * 4;
 #else
-            const auto vertexOffset = symbol.startIndex;
+            const auto startIndex = symbol.startIndex;
             const auto vertexCount = symbol.glyphOffsets.size() * 4;
 #endif
 
@@ -624,7 +627,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             const auto& opacityProperty = isText ? textOpacity : iconOpacity;
             if (!opacityProperty.isConstant()) {
                 const auto& opacityBinder = isText ? textBinders.get<TextOpacity>() : iconBinders.get<IconOpacity>();
-                const auto [vertex] = opacityBinder->getVertexValue(vertexOffset);
+                const auto [vertex] = opacityBinder->getVertexValue(startIndex);
                 if (mln::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
                     continue;
                 }
@@ -632,7 +635,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             const auto& colorProperty = isText ? textColor : iconColor;
             if (!colorProperty.isConstant()) {
                 const auto& colorBinder = isText ? textBinders.get<TextColor>() : iconBinders.get<IconColor>();
-                const auto [vertex] = colorBinder->getVertexValue(vertexOffset);
+                const auto [vertex] = colorBinder->getVertexValue(startIndex);
                 if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
                     continue;
                 }
@@ -642,17 +645,41 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                 using namespace matrix;
                 using namespace vector;
 
-                const auto& staticVertex = staticVertices.at(vertexOffset + i);
-                const auto& dynamicVertex = dynamicVertices.at(vertexOffset + i);
+#if MLN_USE_SYMBOL_INSTANCING
+                // A single instance covers all four corners of the quad, which the shader
+                // selects with the static vertex position, one of (0,0), (1,0), (0,1), (1,1).
+                const auto cornerX = i & 1;
+                const auto cornerY = (i >> 1) & 1;
+
+                // Select the correct instance for this vertex
+                const auto& staticVertex = staticVertices.at(startIndex + i / 4);
+                const auto& dynamicVertex = dynamicVertices.at(startIndex + i / 4);
+
+                // `offset_tltr` holds the top corners, `offset_blbr` the bottom ones.
+                const auto& corners = cornerY ? staticVertex.a3 : staticVertex.a2;
+
+                const vec2 a_pos = {static_cast<double>(staticVertex.a1[0]), static_cast<double>(staticVertex.a1[1])};
+                const vec2 a_offset = {static_cast<double>(corners[2 * cornerX]),
+                                       static_cast<double>(corners[2 * cornerX + 1])};
+                const vec2 a_size = {static_cast<double>(staticVertex.a6[0]), static_cast<double>(staticVertex.a6[1])};
+                // `pixeloffset` holds the top-left and bottom-right offsets, interpolated per corner.
+                const vec2 a_pxoffset = {
+                    staticVertex.a5[0] + static_cast<double>(cornerX) * (staticVertex.a5[2] - staticVertex.a5[0]),
+                    staticVertex.a5[1] + static_cast<double>(cornerY) * (staticVertex.a5[3] - staticVertex.a5[1])};
+                const vec2 a_minFontScale = {staticVertex.a1[2] / 256.0, staticVertex.a1[3] / 256.0};
+#else
+                const auto& staticVertex = staticVertices.at(startIndex + i);
+                const auto& dynamicVertex = dynamicVertices.at(startIndex + i);
 
                 const vec2 a_pos = {static_cast<double>(staticVertex.a1[0]), static_cast<double>(staticVertex.a1[1])};
                 const vec2 a_offset = {static_cast<double>(staticVertex.a1[2]),
                                        static_cast<double>(staticVertex.a1[3])};
                 const vec2 a_size = {static_cast<double>(staticVertex.a2[2]), static_cast<double>(staticVertex.a2[3])};
-                const auto a_size_min = floor(a_size[0] * 0.5);
                 const vec2 a_pxoffset = {static_cast<double>(staticVertex.a3[0]),
                                          static_cast<double>(staticVertex.a3[1])};
                 const vec2 a_minFontScale = {staticVertex.a3[2] / 256.0, staticVertex.a3[3] / 256.0};
+#endif
+                const auto a_size_min = floor(a_size[0] / 2);
                 const vec2 in_projected_pos = {dynamicVertex.a1[0], dynamicVertex.a1[1]};
                 const auto segment_angle = -dynamicVertex.a1[2];
                 const auto& drawableMatrix = isText ? textDrawableMatrix : iconDrawableMatrix;
@@ -703,7 +730,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                 stats.addRenderedFeature(*symbol.featureId, *bound, {tile.getOverscaledTileID()});
             }
 #if MLN_USE_SYMBOL_INSTANCING
-            vertexOffset += vertexCount;
+            startIndex += quadCount;
 #endif
         }
     };
