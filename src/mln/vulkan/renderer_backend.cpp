@@ -26,6 +26,7 @@
 #include <mln/shaders/vulkan/line.hpp>
 #include <mln/shaders/vulkan/location_indicator.hpp>
 #include <mln/shaders/vulkan/raster.hpp>
+#include <mln/shaders/vulkan/sky.hpp>
 #include <mln/shaders/vulkan/symbol.hpp>
 #include <mln/shaders/vulkan/widevector.hpp>
 
@@ -695,6 +696,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::SkyShader,
+                  shaders::BuiltIn::AtmosphereShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
