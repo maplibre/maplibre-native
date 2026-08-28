@@ -1,6 +1,7 @@
 #include <mln/map/vertical_perspective_projection.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/math/angles.hpp>
+#include <mln/math/wrap.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/projection.hpp>
@@ -106,6 +107,18 @@ double distanceOfAnglesRadians(double a, double b) {
     const double twoPi = 2.0 * std::numbers::pi;
     const double d = std::fmod(std::fmod(a - b, twoPi) + twoPi, twoPi);
     return std::min(d, twoPi - d);
+}
+
+// The integral of 1 / cos(x): where the longitude gets to when the globe turns at a steady rate.
+double integrateSecant(double x) {
+    const double half = 0.5 * x;
+    const double sin = std::sin(half);
+    const double cos = std::cos(half);
+    return std::log(sin + cos) - std::log(cos - sin);
+}
+
+int sign(double value) {
+    return (value > 0) - (value < 0);
 }
 
 } // namespace
@@ -324,8 +337,115 @@ std::optional<LatLng> VerticalPerspectiveProjection::centerForLocationAtPoint(co
     return LatLng{std::clamp(util::rad2deg(lat), -90.0, 90.0), util::rad2deg(lng)};
 }
 
+namespace {
+// GL JS vertical_perspective_camera_helper constants.
+constexpr double RAY_SURFACE_DISTANCE_FOR_SLOWING_START = 0.3;
+constexpr double SLOWING_MULTIPLIER = 0.5;
+constexpr double INTERPOLATE_TO_HEURISTIC_START_LNG = 45.0;
+constexpr double INTERPOLATE_TO_HEURISTIC_END_LNG = 85.0;
+constexpr double INTERPOLATE_TO_HEURISTIC_EXPONENT = 0.25;
+constexpr double INTERPOLATE_TO_HEURISTIC_START_HORIZON = 0.95;
+constexpr double INTERPOLATE_TO_HEURISTIC_END_HORIZON = 0.999;
+constexpr double SLOWING_RADIUS_START = 0.9;
+constexpr double SLOWING_RADIUS_STOP = 0.5;
+constexpr double SLOWING_RADIUS_SLOW_FACTOR = 0.25;
+
+double remapSaturate(double value, double oldMin, double oldMax, double newMin, double newMax) {
+    const double t = std::clamp((value - oldMin) / (oldMax - oldMin), 0.0, 1.0);
+    return newMin + (newMax - newMin) * t;
+}
+} // namespace
+
+void VerticalPerspectiveProjection::zoomAroundPoint(TransformState& state,
+                                                    const ScreenCoordinate& anchor,
+                                                    const LatLng& zoomLocation,
+                                                    double zoomDelta) {
+    if (zoomDelta == 0.0) {
+        return;
+    }
+    const LatLng center = state.getLatLng(LatLng::Unwrapped);
+    const double dLngRaw = differenceOfAnglesDegrees(center.longitude(), zoomLocation.longitude());
+    const double dLng = dLngRaw / (std::abs(dLngRaw / 180.0) + 1.0);
+    const double dLat = differenceOfAnglesDegrees(center.latitude(), zoomLocation.latitude());
+
+    // Slow the movement down when the anchor's ray passes far from the planet.
+    const vec3 rayOrigin = state.getGlobeCameraPosition();
+    const vec3 rayDirection = rayDirectionFromPixel(state, anchor, state.getInverseGlobeViewProjectionMatrix());
+    const vec3 closestPoint = add(rayOrigin, scaled(rayDirection, -dot(rayOrigin, rayDirection)));
+    const double rayDistanceFromGlobeCenter = length(closestPoint);
+    const double distanceFactor = std::exp(
+        -std::max(rayDistanceFromGlobeCenter - 1.0 - RAY_SURFACE_DISTANCE_FOR_SLOWING_START, 0.0) * SLOWING_MULTIPLIER);
+    const double interpolationFactorHorizon = remapSaturate(rayDistanceFromGlobeCenter,
+                                                            INTERPOLATE_TO_HEURISTIC_START_HORIZON,
+                                                            INTERPOLATE_TO_HEURISTIC_END_HORIZON,
+                                                            0.0,
+                                                            1.0);
+
+    // And when the globe is small on the viewport, where that is a stand-in for the anchor being near the horizon.
+    const Size size = state.getSize();
+    const double radius = globeRadiusPixels(Projection::worldSize(state.getScale()), center.latitude()) /
+                          std::min(size.width, size.height);
+    const double radiusFactor = remapSaturate(
+        radius, SLOWING_RADIUS_START, SLOWING_RADIUS_STOP, 1.0, SLOWING_RADIUS_SLOW_FACTOR);
+    const double slowingFactor = std::min(distanceFactor, 1.0 + (radiusFactor - 1.0) * interpolationFactorHorizon);
+
+    const double factor = (1.0 - std::pow(2.0, -zoomDelta)) * slowingFactor;
+    const LatLng heuristicCenter{std::clamp(center.latitude() + dLat * factor, -util::LATITUDE_MAX, util::LATITUDE_MAX),
+                                 center.longitude() + dLng * factor};
+
+    const LatLng exactCenter = centerForLocationAtPoint(state, zoomLocation, anchor).value_or(center);
+
+    const double interpolationFactorLongitude = remapSaturate(
+        std::abs(dLngRaw), INTERPOLATE_TO_HEURISTIC_START_LNG, INTERPOLATE_TO_HEURISTIC_END_LNG, 0.0, 1.0);
+    const double heuristicFactor = std::pow(std::max(interpolationFactorLongitude, interpolationFactorHorizon),
+                                            INTERPOLATE_TO_HEURISTIC_EXPONENT);
+    const LatLng target{
+        exactCenter.latitude() +
+            differenceOfAnglesDegrees(exactCenter.latitude(), heuristicCenter.latitude()) * heuristicFactor,
+        exactCenter.longitude() +
+            differenceOfAnglesDegrees(exactCenter.longitude(), heuristicCenter.longitude()) * heuristicFactor};
+    const LatLng constrained = state.constrainedCenter(target);
+    state.setLatLngZoom(constrained, state.getZoom() + zoomAdjustment(center.latitude(), constrained.latitude()));
+}
+
 double VerticalPerspectiveProjection::zoomAdjustment(double fromLatitude, double toLatitude) {
     return std::log2(std::cos(util::deg2rad(toLatitude)) / std::cos(util::deg2rad(fromLatitude)));
+}
+
+double VerticalPerspectiveProjection::differenceOfAnglesDegrees(double from, double to) {
+    const double a = util::wrap(from, 0.0, 360.0);
+    const double b = util::wrap(to, 0.0, 360.0);
+    const double direct = b - a;
+    const double around = b > a ? direct - 360.0 : direct + 360.0;
+    return std::abs(direct) < std::abs(around) ? direct : around;
+}
+
+double VerticalPerspectiveProjection::surfaceDistancePixels(double worldSize,
+                                                            double centerLatitude,
+                                                            const LatLng& a,
+                                                            const LatLng& b) {
+    const double radians = std::acos(std::clamp(dot(surfaceVector(a), surfaceVector(b)), -1.0, 1.0));
+    return radians * globeRadiusPixels(worldSize, centerLatitude);
+}
+
+LatLng VerticalPerspectiveProjection::interpolateLatLng(const LatLng& start,
+                                                        double deltaLatitude,
+                                                        double deltaLongitude,
+                                                        double t) {
+    const double latitude = start.latitude() + deltaLatitude * t;
+    if (std::abs(deltaLatitude) <= 1.0) {
+        return {latitude, start.longitude() + deltaLongitude * t};
+    }
+    const double endLatitude = start.latitude() + deltaLatitude;
+    const bool onDifferentHemispheres = sign(endLatitude) != sign(start.latitude());
+    const double sampleStart = util::deg2rad(onDifferentHemispheres ? -std::abs(start.latitude())
+                                                                    : std::abs(start.latitude()));
+    const double sampleEnd = util::deg2rad(std::abs(endLatitude));
+    const double valueStart = integrateSecant(sampleStart);
+    const double valueEnd = integrateSecant(sampleEnd);
+    const double valueT = integrateSecant(sampleStart + t * (sampleEnd - sampleStart));
+    const double longitudeT = (valueT - valueStart) / (valueEnd - valueStart);
+    return {latitude, start.longitude() + deltaLongitude * longitudeT};
 }
 
 ProjectionData VerticalPerspectiveProjection::getProjectionData(const TransformState& state,
