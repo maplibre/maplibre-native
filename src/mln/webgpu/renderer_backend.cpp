@@ -26,6 +26,7 @@
 #include <mln/shaders/webgpu/line.hpp>
 #include <mln/shaders/webgpu/location_indicator.hpp>
 #include <mln/shaders/webgpu/raster.hpp>
+#include <mln/shaders/webgpu/sky.hpp>
 #include <mln/shaders/webgpu/symbol.hpp>
 #include <mln/shaders/webgpu/widevector.hpp>
 
@@ -94,6 +95,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
     // As WebGPU shader headers are created, they will automatically be picked up
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::SkyShader,
+                  shaders::BuiltIn::AtmosphereShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
