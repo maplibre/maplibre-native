@@ -183,13 +183,11 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-icu>
             $<TARGET_FILE:mlt-cpp>
             ${STATIC_LIBS}
-        # armerge localizes non-kept symbols, including libc++ RTTI emitted for
-        # standard exceptions. On macOS, localized RTTI can prevent exceptions
-        # from being caught downstream, so restore global symbol visibility.
+        # In Mach-O/Itanium ABI names, ZTI/ZTS/ZTV identify typeinfo,
+        # type names, and vtables, while St denotes std::.
+        # Keep them global so C++ exception matching works in downstream code.
         COMMAND ${LLVM_OBJCOPY} --wildcard
-            --globalize-symbol=__ZTISt*
-            --globalize-symbol=__ZTSSt*
-            --globalize-symbol=__ZTVSt*
+            "--globalize-symbol=__ZT[ISV]St*"
             libmbgl-core-amalgam.a
     )
 
