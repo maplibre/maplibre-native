@@ -161,7 +161,7 @@ if(MLN_CREATE_AMALGAMATION)
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND armerge --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
