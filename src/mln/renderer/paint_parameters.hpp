@@ -90,7 +90,7 @@ public:
     gfx::ShaderRegistry& shaders;
 
     gfx::DepthMode depthModeForSublayer(uint8_t n, gfx::DepthMaskType) const;
-    gfx::DepthMode depthModeFor3D() const;
+    gfx::DepthMode depthModeFor3D(gfx::DepthMaskType = gfx::DepthMaskType::ReadWrite) const;
     gfx::ColorMode colorModeForRenderPass() const;
 
     mat4 matrixForTile(const UnwrappedTileID&, bool aligned = false) const;

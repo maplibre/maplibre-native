@@ -149,6 +149,16 @@ enum {
     symbolLayerUBOCount
 };
 
+enum {
+    idSkyPropsUBO = getEnumValue(drawableReservedUBOCount, layerUBOStartId),
+    skyLayerUBOCount
+};
+
+enum {
+    idAtmospherePropsUBO = getEnumValue(drawableReservedUBOCount, layerUBOStartId),
+    atmosphereLayerUBOCount
+};
+
 // drawable SSBOs
 
 static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(backgroundLayerUBOCount),
@@ -160,7 +170,9 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(hillshadeLayerUBOCount),
                                                           static_cast<uint32_t>(lineLayerUBOCount),
                                                           static_cast<uint32_t>(rasterLayerUBOCount),
-                                                          static_cast<uint32_t>(symbolLayerUBOCount)});
+                                                          static_cast<uint32_t>(symbolLayerUBOCount),
+                                                          static_cast<uint32_t>(skyLayerUBOCount),
+                                                          static_cast<uint32_t>(atmosphereLayerUBOCount)});
 
 enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
@@ -288,6 +300,8 @@ static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>
                                                            static_cast<uint32_t>(locationIndicatorUBOCount),
                                                            static_cast<uint32_t>(rasterUBOCount),
                                                            static_cast<uint32_t>(symbolUBOCount),
+                                                           static_cast<uint32_t>(skyLayerUBOCount),
+                                                           static_cast<uint32_t>(atmosphereLayerUBOCount),
                                                            static_cast<uint32_t>(wideVectorUBOCount)});
 
 static constexpr uint32_t maxSSBOCountPerLayer = layerUBOStartId - layerSSBOStartId;
@@ -400,6 +414,16 @@ static constexpr uint32_t maxTextureCountPerShader = std::max({static_cast<uint3
 enum {
     idBackgroundPosVertexAttribute,
     backgroundVertexAttributeCount
+};
+
+enum {
+    idSkyPosVertexAttribute,
+    skyVertexAttributeCount
+};
+
+enum {
+    idAtmospherePosVertexAttribute,
+    atmosphereVertexAttributeCount
 };
 
 enum {
@@ -603,6 +627,8 @@ static constexpr uint32_t maxAttributeCountPerShader = std::max({
     static_cast<uint32_t>(lineVertexAttributeCount),
     static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
+    static_cast<uint32_t>(skyVertexAttributeCount),
+    static_cast<uint32_t>(atmosphereVertexAttributeCount),
     static_cast<uint32_t>(symbolAttributeCount),
     static_cast<uint32_t>(wideVectorAttributeCount),
     static_cast<uint32_t>(wideVectorInstanceAttributeCount),

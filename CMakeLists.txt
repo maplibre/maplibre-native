@@ -282,6 +282,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/renderer_state.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/program_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/shaders/sky_ubo.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/shader_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/storage/database_file_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/storage/file_source_manager.hpp
@@ -631,6 +632,10 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_light.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_light.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_sky.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_sky.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/sky_pass.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/sky_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_orchestrator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_orchestrator.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_pass.hpp

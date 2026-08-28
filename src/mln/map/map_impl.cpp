@@ -129,6 +129,7 @@ void Map::Impl::onUpdate() {
         .spriteLoaded = style->impl->areSpritesLoaded(),
         .transitionOptions = style->impl->getTransitionOptions(),
         .light = style->impl->getLight()->impl,
+        .sky = style->impl->getSky() ? std::optional{style->impl->getSky()->impl} : std::nullopt,
         .images = style->impl->getImageImpls(),
         .sources = style->impl->getSourceImpls(),
         .layers = style->impl->getLayerImpls(),

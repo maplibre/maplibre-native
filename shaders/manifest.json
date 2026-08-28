@@ -26,6 +26,20 @@
         "uses_ubos": true
     },
     {
+        "name": "SkyShader",
+        "header": "sky",
+        "glsl_vert": "sky.vertex.glsl",
+        "glsl_frag": "sky.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "AtmosphereShader",
+        "header": "atmosphere",
+        "glsl_vert": "atmosphere.vertex.glsl",
+        "glsl_frag": "atmosphere.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "CircleShader",
         "header": "circle",
         "glsl_vert": "circle.vertex.glsl",

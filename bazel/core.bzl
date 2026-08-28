@@ -81,6 +81,7 @@ MLN_GENERATED_SHADER_SOURCE = [
 ]
 
 MLN_GENERATED_OPENGL_SHADER_HEADERS = [
+    "include/mln/shaders/gl/atmosphere.hpp",
     "include/mln/shaders/gl/background.hpp",
     "include/mln/shaders/gl/background_pattern.hpp",
     "include/mln/shaders/gl/circle.hpp",
@@ -112,6 +113,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mln/shaders/gl/location_indicator.hpp",
     "include/mln/shaders/gl/location_indicator_textured.hpp",
     "include/mln/shaders/gl/raster.hpp",
+    "include/mln/shaders/gl/sky.hpp",
     "include/mln/shaders/gl/symbol_icon.hpp",
     "include/mln/shaders/gl/symbol_sdf.hpp",
     "include/mln/shaders/gl/symbol_text_and_icon.hpp",
@@ -280,6 +282,10 @@ MLN_CORE_SOURCE = [
     "src/mln/renderer/render_layer.hpp",
     "src/mln/renderer/render_light.cpp",
     "src/mln/renderer/render_light.hpp",
+    "src/mln/renderer/render_sky.cpp",
+    "src/mln/renderer/render_sky.hpp",
+    "src/mln/renderer/sky_pass.cpp",
+    "src/mln/renderer/sky_pass.hpp",
     "src/mln/renderer/render_orchestrator.cpp",
     "src/mln/renderer/render_orchestrator.hpp",
     "src/mln/renderer/render_pass.hpp",
@@ -1061,6 +1067,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mln/shaders/raster_layer_ubo.hpp",
     "include/mln/shaders/shader_defines.hpp",
     "include/mln/shaders/shader_program_base.hpp",
+    "include/mln/shaders/sky_ubo.hpp",
     "include/mln/shaders/symbol_layer_ubo.hpp",
     "include/mln/shaders/widevector_ubo.hpp",
     "include/mln/util/suppress_copies.hpp",

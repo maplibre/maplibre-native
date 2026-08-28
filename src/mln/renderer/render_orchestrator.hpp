@@ -1,11 +1,13 @@
 #pragma once
 
 #include <mln/renderer/globe_depth_pass.hpp>
+#include <mln/renderer/sky_pass.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/render_source_observer.hpp>
 #include <mln/renderer/render_light.hpp>
+#include <mln/renderer/render_sky.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/layer.hpp>
@@ -110,6 +112,8 @@ public:
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
 
     LayerGroupBase* getGlobeDepthLayerGroup() const { return globeDepthPass.getLayerGroup(); }
+    LayerGroupBase* getSkyLayerGroup() const { return skyPass.getSkyLayerGroup(); }
+    LayerGroupBase* getAtmosphereLayerGroup() const { return skyPass.getAtmosphereLayerGroup(); }
 
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroups(Func f) {
@@ -221,6 +225,7 @@ private:
     std::unordered_map<std::string, std::unique_ptr<RenderSource>> renderSources;
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
+    std::optional<RenderSky> renderSky;
 
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;
@@ -250,6 +255,7 @@ private:
     std::vector<RenderTargetPtr> renderTargets;
     RenderItem::DebugLayerGroupMap debugLayerGroups;
     GlobeDepthPass globeDepthPass;
+    SkyPass skyPass;
 };
 
 } // namespace mln
