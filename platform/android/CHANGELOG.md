@@ -4,6 +4,7 @@
 
 ### ✨ Features and improvements
 
+- Add runtime `Sky` style API support, including zoom expressions, transitions, and removal.
 - feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#TBD](https://github.com/maplibre/maplibre-native/pull/TBD)).
 
 ## 13.6.0

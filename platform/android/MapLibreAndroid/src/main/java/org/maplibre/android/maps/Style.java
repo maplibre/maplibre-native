@@ -17,6 +17,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.sky.Sky;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.util.DefaultStyle;
@@ -696,6 +697,39 @@ public class Style {
   public Light getLight() {
     validateState("getLight");
     return nativeMap.getLight();
+  }
+
+  //
+  // Sky
+  //
+
+  /**
+   * Gets a snapshot of the style's sky configuration.
+   *
+   * <p>After changing the returned object, call {@link #setSky(Sky)} to apply
+   * the new snapshot.</p>
+   *
+   * @return the sky configuration, or {@code null} when the style has no sky
+   */
+  @Nullable
+  public Sky getSky() {
+    validateState("getSky");
+    return nativeMap.getSky();
+  }
+
+  /**
+   * Replaces the style's sky configuration. Passing {@code null} removes it.
+   *
+   * @param sky the new sky snapshot, or {@code null} to remove the sky
+   */
+  public void setSky(@Nullable Sky sky) {
+    validateState("setSky");
+    nativeMap.setSky(sky);
+  }
+
+  /** Removes the sky configuration from the style. */
+  public void removeSky() {
+    setSky(null);
   }
 
   //

@@ -1,0 +1,198 @@
+<%
+  const properties = locals.properties;
+-%>
+// This file is generated. Edit scripts/generate-style-code.mjs, then run `make style-code`.
+
+package org.maplibre.android.style.sky;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
+
+import org.maplibre.android.LibraryLoader;
+import org.maplibre.android.style.expressions.Expression;
+import org.maplibre.android.style.layers.PropertyValue;
+import org.maplibre.android.style.layers.TransitionOptions;
+import org.maplibre.android.utils.ColorUtils;
+import org.maplibre.android.utils.ThreadUtils;
+
+/**
+ * The map's sky configuration.
+ *
+ * <p>A {@code Sky} is a snapshot. After changing one of its properties, call
+ * {@link org.maplibre.android.maps.Style#setSky(Sky)} to apply it to the style.</p>
+ *
+ * @see <a href="https://maplibre.org/maplibre-style-spec/sky/">The online documentation</a>
+ */
+@UiThread
+public class Sky {
+
+  private static final String TAG = "Mbgl-Sky";
+
+  static {
+    LibraryLoader.load();
+  }
+
+  @Keep
+  private long nativePtr;
+
+  /**
+   * Creates a sky configuration with no explicitly set properties.
+   * Unspecified properties resolve to their style specification defaults when applied.
+   */
+  public Sky() {
+    checkThread();
+    initialize();
+  }
+
+  /**
+   * Creates a sky configuration backed by a native snapshot.
+   *
+   * @param nativePtr pointer used by core
+   */
+  @Keep
+  Sky(long nativePtr) {
+    checkThread();
+    this.nativePtr = nativePtr;
+  }
+
+<% for (const property of properties) { -%>
+<% if (property.type === 'color') { -%>
+  /**
+   * Sets <%- property.name %>. <%- property.doc %>
+   *
+   * @param value an Android color integer
+   */
+  public void set<%- camelize(property.name) %>(@ColorInt int value) {
+    set<%- camelize(property.name) %>(ColorUtils.colorToRgbaString(value));
+  }
+
+  /**
+   * Sets <%- property.name %>. <%- property.doc %>
+   *
+   * @param value a CSS color string
+   */
+  public void set<%- camelize(property.name) %>(@NonNull String value) {
+    setProperty("<%- property.name %>", value);
+  }
+
+  /**
+   * Sets <%- property.name %> from a zoom expression. <%- property.doc %>
+   *
+   * @param expression a zoom expression that evaluates to a color
+   */
+  public void set<%- camelize(property.name) %>(@NonNull Expression expression) {
+    setProperty("<%- property.name %>", expression);
+  }
+
+  /**
+   * Gets <%- property.name %>.
+   *
+   * @return a property value containing a CSS color string or expression
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<String> get<%- camelize(property.name) %>() {
+    checkThread();
+    return (PropertyValue<String>) new PropertyValue("<%- property.name %>", nativeGet<%- camelize(property.name) %>());
+  }
+
+  /**
+   * Gets <%- property.name %> as an Android color integer.
+   *
+   * @return the Android color integer
+   * @throws IllegalStateException if the property is an expression or undefined
+   */
+  @ColorInt
+  public int get<%- camelize(property.name) %>AsInt() {
+    PropertyValue<String> property = get<%- camelize(property.name) %>();
+    if (!property.isValue()) {
+      throw new IllegalStateException("<%- property.name %> is not a constant value");
+    }
+    return ColorUtils.rgbaToColor(property.getValue());
+  }
+
+<% } else { -%>
+  /**
+   * Sets <%- property.name %>. <%- property.doc %>
+   *
+   * @param value a value between 0 and 1
+   */
+  public void set<%- camelize(property.name) %>(float value) {
+    setProperty("<%- property.name %>", value);
+  }
+
+  /**
+   * Sets <%- property.name %> from a zoom expression. <%- property.doc %>
+   *
+   * @param expression a zoom expression that evaluates to a number
+   */
+  public void set<%- camelize(property.name) %>(@NonNull Expression expression) {
+    setProperty("<%- property.name %>", expression);
+  }
+
+  /**
+   * Gets <%- property.name %>.
+   *
+   * @return a property value containing a float or expression
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> get<%- camelize(property.name) %>() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("<%- property.name %>", nativeGet<%- camelize(property.name) %>());
+  }
+
+<% } -%>
+<% if (property.transition) { -%>
+  /** Gets the transition options for <%- property.name %>. */
+  @NonNull
+  public TransitionOptions get<%- camelize(property.name) %>Transition() {
+    checkThread();
+    return nativeGet<%- camelize(property.name) %>Transition();
+  }
+
+  /** Sets the transition options for <%- property.name %>. */
+  public void set<%- camelize(property.name) %>Transition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSet<%- camelize(property.name) %>Transition(options.getDuration(), options.getDelay());
+  }
+
+<% } -%>
+<% } -%>
+  private void setProperty(@NonNull String name, @NonNull Object value) {
+    checkThread();
+    nativeSetProperty(name, value instanceof Expression ? ((Expression) value).toArray() : value);
+  }
+
+  private void checkThread() {
+    ThreadUtils.checkThread(TAG);
+  }
+
+  @Keep
+  private native void initialize();
+
+  @Keep
+  private native void nativeSetProperty(String name, Object value);
+
+<% for (const property of properties) { -%>
+  @Nullable
+  @Keep
+  private native Object nativeGet<%- camelize(property.name) %>();
+
+<% if (property.transition) { -%>
+  @NonNull
+  @Keep
+  private native TransitionOptions nativeGet<%- camelize(property.name) %>Transition();
+
+  @Keep
+  private native void nativeSet<%- camelize(property.name) %>Transition(long duration, long delay);
+
+<% } -%>
+<% } -%>
+  @Override
+  @Keep
+  protected native void finalize() throws Throwable;
+}
