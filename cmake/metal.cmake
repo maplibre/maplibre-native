@@ -49,6 +49,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/sky.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/shader_group.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/shader_program.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/symbol.hpp
@@ -93,6 +94,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/sky.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/symbol.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/widevector.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/style/layers/mtl/custom_layer_render_parameters.cpp
