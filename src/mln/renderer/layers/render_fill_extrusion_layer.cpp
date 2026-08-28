@@ -178,9 +178,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     if (!staticDataIndices) {
         staticDataIndices = std::make_shared<TriangleIndexVector>(RenderStaticData::fillExtrusionTriangleIndices());
     }
-    if (!staticDataSegments) {
-        staticDataSegments = std::make_shared<SegmentVector>(RenderStaticData::fillExtrusionSegments());
-    }
 
     const auto& instancedShaderGroup = hasPattern ? fillExtrusionPatternInstancedGroup : fillExtrusionInstancedGroup;
     if (!instancedShaderGroup) {
@@ -472,7 +469,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 return;
             }
             instancedBuilder.setSegments(
-                gfx::Triangles(), staticDataIndices, staticDataSegments->data(), staticDataSegments->size());
+                gfx::Triangles(), staticDataIndices, bucket.instanceSegments.data(), bucket.instanceSegments.size());
 
             instancedBuilder.flush(context);
 
