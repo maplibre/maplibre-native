@@ -32,13 +32,13 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 filegroup(
     name = "plugin_api_public_header",
-    srcs = ["include/mbgl/plugin/plugin_api.h"],
+    srcs = ["include/mln/plugin/plugin_api.h"],
     visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "plugin-api",
-    hdrs = ["include/mbgl/plugin/plugin_api.h"],
+    hdrs = ["include/mln/plugin/plugin_api.h"],
     includes = ["include"],
     visibility = ["//visibility:public"],
 )

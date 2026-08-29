@@ -19,12 +19,12 @@ fun obtainTestBuildType(): String {
 android {
     ndkVersion = Versions.ndkVersion
 
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "org.maplibre.android.testapp"
         minSdk = 23
-        targetSdk = 33
+        targetSdk = 35
         versionCode = 14
         testInstrumentationRunner = "org.maplibre.android.InstrumentationRunner"
         multiDexEnabled = true
@@ -115,6 +115,15 @@ android {
                 }
             }
         }
+        create("multiBackend") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_ANDROID_MULTI_BACKEND=ON")
+                    targets("maplibre-opengl", "maplibre-vulkan")
+                }
+            }
+        }
     }
 
     buildFeatures {
@@ -145,6 +154,8 @@ dependencies {
     }
 
     implementation(libs.maplibreJavaTurf)
+
+    implementation(libs.sentryAndroid)
 
     implementation(libs.supportRecyclerView)
     implementation(libs.supportPrint)

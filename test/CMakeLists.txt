@@ -25,12 +25,12 @@ add_library(
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_parser.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/fixture_log_observer.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/getrss.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/sqlite3_test_fs.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/stub_file_source.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/test.cpp
-    ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/util.cpp
+    ${PROJECT_SOURCE_DIR}/test/src/mln/test/fixture_log_observer.cpp
+    ${PROJECT_SOURCE_DIR}/test/src/mln/test/getrss.cpp
+    ${PROJECT_SOURCE_DIR}/test/src/mln/test/sqlite3_test_fs.cpp
+    ${PROJECT_SOURCE_DIR}/test/src/mln/test/stub_file_source.cpp
+    ${PROJECT_SOURCE_DIR}/test/src/mln/test/test.cpp
+    ${PROJECT_SOURCE_DIR}/test/src/mln/test/util.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/asset_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/database_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/headers.test.cpp
@@ -58,6 +58,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/expression.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/util.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/expression/utf8_op_helpers.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/filter.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/properties.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/property_expression.test.cpp
@@ -130,7 +131,7 @@ if(NOT (MLN_WITH_QT AND CMAKE_SYSTEM_NAME STREQUAL Darwin))
     target_sources(
         mbgl-test
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp ${PROJECT_SOURCE_DIR}/test/map/map_snapshotter.test.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/map/map_snapshotter.cpp ${PROJECT_SOURCE_DIR}/test/map/map_snapshotter.test.cpp
     )
 endif()
 
@@ -171,16 +172,16 @@ else()
     set(MLN_TEST_HAS_TEST_SERVER 1)
     target_sources(
         mbgl-test
-        PRIVATE ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
+        PRIVATE ${PROJECT_SOURCE_DIR}/test/src/mln/test/http_server.cpp
     )
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
+        ${PROJECT_SOURCE_DIR}/test/src/mln/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
         $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-shadow>
     )
     set_source_files_properties(
-        ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
+        ${PROJECT_SOURCE_DIR}/test/src/mln/test/http_server.cpp
         PROPERTIES
         COMPILE_OPTIONS
         $<$<STREQUAL:${CMAKE_SYSTEM_NAME},iOS>:-Wno-shorten-64-to-32>

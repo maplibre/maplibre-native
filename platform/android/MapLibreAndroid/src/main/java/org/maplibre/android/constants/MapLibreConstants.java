@@ -169,7 +169,7 @@ public class MapLibreConstants {
   public static final double MINIMUM_DIRECTION = 0;
 
   /**
-   * The current default vertical field of view (matches mbgl::util::DEFAULT_FOV)
+   * The current default vertical field of view (matches mln::util::DEFAULT_FOV)
    */
   public static final double DEFAULT_FOV = 36.86989764584402;
 

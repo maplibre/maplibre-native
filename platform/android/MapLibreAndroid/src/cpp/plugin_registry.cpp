@@ -1,11 +1,11 @@
 #include "plugin_registry.hpp"
 
-#include <mbgl/plugin/plugin_api.h>
-#include <mbgl/plugin/plugin_registry.hpp>
+#include <mln/plugin/plugin_api.h>
+#include <mln/plugin/plugin_registry.hpp>
 
 #include <cstdint>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::jboolean PluginRegistry::isRegistered(jni::JNIEnv& env,
@@ -44,4 +44,4 @@ void PluginRegistry::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

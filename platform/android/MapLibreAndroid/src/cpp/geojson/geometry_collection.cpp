@@ -1,7 +1,7 @@
 #include "geometry_collection.hpp"
 #include "../java/util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
@@ -47,4 +47,4 @@ void GeometryCollection::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

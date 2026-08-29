@@ -23,6 +23,7 @@ dependencies {
     implementation(libs.okhttp3)
     implementation(libs.timber)
     implementation(libs.interpolator)
+    implementation(libs.kotlinxCoroutinesCore)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito)
@@ -109,17 +110,37 @@ android {
                 }
             }
         }
+        create("multiBackend") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments("-DMLN_ANDROID_MULTI_BACKEND=ON")
+                    targets("maplibre-opengl", "maplibre-vulkan")
+                }
+            }
+        }
     }
 
     sourceSets {
         getByName("opengl") {
-            java.srcDirs("src/opengl/java/")
+            java.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
+        }
+        getByName("vulkan") {
+            java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
         }
         listOf("webgpuDawn", "webgpuWgpu").forEach {
             getByName(it) {
-                java.srcDirs("src/vulkan/java")
+                java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
                 manifest.srcFile("src/vulkan/AndroidManifest.xml")
             }
+        }
+        getByName("multiBackend") {
+            java.srcDirs(
+                "src/multiBackend/java/",
+                "src/sharedRenderer/opengl/java/",
+                "src/sharedRenderer/vulkan/java/"
+            )
+            manifest.srcFile("src/multiBackend/AndroidManifest.xml")
         }
     }
 
@@ -184,7 +205,7 @@ android {
     prefab {
         create("maplibre") {
             headers = "../prefab-headers"
-            libraryName = "libmaplibre"
+            headerOnly = true
         }
     }
 
@@ -204,12 +225,12 @@ fun getGitRevision(shortRev: Boolean = true): String {
 val syncPrefabHeaders by tasks.registering(Sync::class) {
     val nativeRoot = rootProject.rootDir.resolve("../..")
     from(nativeRoot.resolve("include")) {
-        include("mbgl/style/layers/custom_layer_host.hpp")
-        include("mbgl/style/layers/custom_layer_init_parameters.hpp")
-        include("mbgl/style/layers/custom_layer_render_parameters.hpp")
-        include("mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp")
-        include("mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp")
-        include("mbgl/plugin/plugin_api.h")
+        include("mln/style/layers/custom_layer_host.hpp")
+        include("mln/style/layers/custom_layer_init_parameters.hpp")
+        include("mln/style/layers/custom_layer_render_parameters.hpp")
+        include("mln/style/layers/vulkan/custom_layer_init_parameters.hpp")
+        include("mln/style/layers/vulkan/custom_layer_render_parameters.hpp")
+        include("mln/plugin/plugin_api.h")
     }
     into(project.rootDir.resolve("prefab-headers"))
 }
@@ -221,14 +242,22 @@ tasks.configureEach {
     }
 }
 
+// AGP 9.1.1 still adds the native build output to the AAR even when the Prefab module is
+// declared header-only. Keep the header-only metadata and omit that redundant unstripped copy.
+tasks.withType<org.gradle.api.tasks.bundling.Zip>().configureEach {
+    if (name.startsWith("bundle") && name.endsWith("Aar")) {
+        // The Prefab artifact is added under a `prefab/` destination by a nested copy spec,
+        // so its paths are still relative to the Prefab root when exclusions are evaluated.
+        exclude("modules/maplibre/libs/**")
+    }
+}
+
 configurations {
     getByName("implementation") {
         exclude(group = "commons-logging", module = "commons-logging")
         exclude(group = "commons-collections", module = "commons-collections")
     }
 }
-
-// apply<DownloadVulkanValidationPlugin>()
 
 // intentionally disabled
 // apply(plugin = "maplibre.jacoco-report")

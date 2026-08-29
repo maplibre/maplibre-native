@@ -7,8 +7,8 @@
  MapLibre Native C++ headers. Backend objects passed through callbacks are
  borrowed for the duration of that callback.
  */
-#if __has_include(<mbgl/plugin/plugin_api.h>)
-#include <mbgl/plugin/plugin_api.h>
+#if __has_include(<mln/plugin/plugin_api.h>)
+#include <mln/plugin/plugin_api.h>
 #else
 #include "plugin_api.h"
 #endif

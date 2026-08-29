@@ -16,7 +16,7 @@
 
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 LayerManagerDarwin::LayerManagerDarwin() {
 #if defined(MBGL_LAYER_FILL_DISABLE_RUNTIME)
@@ -117,7 +117,7 @@ void LayerManagerDarwin::registerCoreFactory(LayerFactory* factory) {
   }
 }
 
-LayerPeerFactory* LayerManagerDarwin::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
+LayerPeerFactory* LayerManagerDarwin::getPeerFactory(const mln::style::LayerTypeInfo* typeInfo) {
   for (const auto& factory : peerFactories) {
     if (layerTypeInfoEquals(factory->getCoreLayerFactory()->getTypeInfo(), typeInfo)) {
       return factory.get();
@@ -131,7 +131,7 @@ LayerFactory* LayerManagerDarwin::getFactory(const std::string& type) noexcept {
   return (search != typeToFactory.end()) ? search->second : nullptr;
 }
 
-LayerFactory* LayerManagerDarwin::getFactory(const mbgl::style::LayerTypeInfo* info) noexcept {
+LayerFactory* LayerManagerDarwin::getFactory(const mln::style::LayerTypeInfo* info) noexcept {
   if (LayerPeerFactory* peerFactory = getPeerFactory(info)) {
     return peerFactory->getCoreLayerFactory();
   }
@@ -162,4 +162,4 @@ const bool LayerManager::annotationsEnabled = false;
 const bool LayerManager::annotationsEnabled = true;
 #endif
 
-}  // namespace mbgl
+}  // namespace mln

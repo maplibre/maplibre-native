@@ -1,0 +1,14 @@
+{
+  "expression": ["join", ["literal", ["", "latitude", "", "", "longitude", ""]], ","],
+  "inputs": [[{}, {}]],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": true,
+      "isZoomConstant": true,
+      "type": "string"
+    },
+    "outputs": [",latitude,,,longitude,"],
+    "serialized": ",latitude,,,longitude,"
+  }
+}

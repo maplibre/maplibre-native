@@ -61,7 +61,7 @@
 #include "text/local_glyph_rasterizer_jni.hpp"
 #include "tile/tile_operation.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void RegisterNativeHTTPRequest(JNIEnv&);
@@ -178,4 +178,4 @@ void registerNatives(JavaVM* vm) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

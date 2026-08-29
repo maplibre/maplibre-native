@@ -1,9 +1,9 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/algorithm/update_tile_masks.hpp>
+#include <mln/test/util.hpp>
+#include <mln/algorithm/update_tile_masks.hpp>
 
 #include <algorithm>
 
-using namespace mbgl;
+using namespace mln;
 
 namespace {
 

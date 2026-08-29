@@ -1,28 +1,28 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/fake_file_source.hpp>
-#include <mbgl/tile/vector_mvt_tile.hpp>
-#include <mbgl/tile/vector_mvt_tile_data.hpp>
-#include <mbgl/tile/tile_loader_impl.hpp>
-#include <mbgl/storage/resource_options.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/fake_file_source.hpp>
+#include <mln/tile/vector_mvt_tile.hpp>
+#include <mln/tile/vector_mvt_tile_data.hpp>
+#include <mln/tile/tile_loader_impl.hpp>
+#include <mln/storage/resource_options.hpp>
 
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
-#include <mbgl/renderer/query.hpp>
-#include <mbgl/geometry/feature_index.hpp>
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/test/vector_tile_test.hpp>
-#include <mbgl/text/glyph_manager.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/renderer/query.hpp>
+#include <mln/geometry/feature_index.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/test/vector_tile_test.hpp>
+#include <mln/text/glyph_manager.hpp>
 
 #include <memory>
-#include "mbgl/tile/vector_mlt_tile_data.hpp"
+#include "mln/tile/vector_mlt_tile_data.hpp"
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(VectorTile, setError) {
     VectorTileTest test;
@@ -69,7 +69,7 @@ TEST(VectorTileData, ParseResults) {
     ASSERT_THROW(layer->getFeature(17154u), std::out_of_range);
 
     std::unique_ptr<GeometryTileFeature> feature = layer->getFeature(0u);
-    ASSERT_EQ(feature->getType(), mbgl::FeatureType::LineString);
+    ASSERT_EQ(feature->getType(), mln::FeatureType::LineString);
     ASSERT_TRUE(feature->getID().is<uint64_t>());
     ASSERT_EQ(feature->getID().get<uint64_t>(), 1u);
 
@@ -115,7 +115,7 @@ TEST(VectorTileData, MLTParseResults) {
         ASSERT_EQ(layer->featureCount(), 17154u);
 
         std::unique_ptr<GeometryTileFeature> feature = layer->getFeature(0u);
-        ASSERT_EQ(feature->getType(), mbgl::FeatureType::LineString);
+        ASSERT_EQ(feature->getType(), mln::FeatureType::LineString);
         ASSERT_TRUE(feature->getID().is<uint64_t>());
         ASSERT_EQ(feature->getID().get<uint64_t>(), 1u);
 

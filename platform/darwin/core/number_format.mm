@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-#include <mbgl/i18n/number_format.hpp>
+#include <mln/i18n/number_format.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 std::string formatNumber(double number, const std::string& localeId, const std::string& currency,
@@ -27,4 +27,4 @@ std::string formatNumber(double number, const std::string& localeId, const std::
 }
 
 }  // namespace platform
-}  // namespace mbgl
+}  // namespace mln

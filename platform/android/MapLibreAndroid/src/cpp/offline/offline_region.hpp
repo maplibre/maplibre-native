@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/storage/offline.hpp>
+#include <mln/storage/offline.hpp>
 #include <jni/jni.hpp>
 
 #include "../file_source.hpp"
 
 #include <memory>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class OfflineRegion {
@@ -31,7 +31,7 @@ public:
 
         static void onStatus(jni::JNIEnv&,
                              const jni::Object<OfflineRegionStatusCallback>&,
-                             std::optional<mbgl::OfflineRegionStatus>);
+                             std::optional<mln::OfflineRegionStatus>);
     };
 
     class OfflineRegionDeleteCallback {
@@ -69,7 +69,7 @@ public:
 
         static void onUpdate(jni::JNIEnv&,
                              const jni::Object<OfflineRegionUpdateMetadataCallback>&,
-                             std::optional<mbgl::OfflineRegionMetadata>);
+                             std::optional<mln::OfflineRegionMetadata>);
     };
 
     static constexpr auto Name() { return "org/maplibre/android/offline/OfflineRegion"; };
@@ -92,20 +92,18 @@ public:
                                      const jni::Array<jni::jbyte>&,
                                      const jni::Object<OfflineRegionUpdateMetadataCallback>&);
 
-    static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&,
-                                                      const jni::Object<FileSource>&,
-                                                      mbgl::OfflineRegion);
+    static jni::Local<jni::Object<OfflineRegion>> New(jni::JNIEnv&, const jni::Object<FileSource>&, mln::OfflineRegion);
 
-    static jni::Local<jni::Array<jni::jbyte>> metadata(jni::JNIEnv&, mbgl::OfflineRegionMetadata);
+    static jni::Local<jni::Array<jni::jbyte>> metadata(jni::JNIEnv&, mln::OfflineRegionMetadata);
 
-    static mbgl::OfflineRegionMetadata metadata(jni::JNIEnv&, const jni::Array<jni::jbyte>&);
+    static mln::OfflineRegionMetadata metadata(jni::JNIEnv&, const jni::Array<jni::jbyte>&);
 
     static void registerNative(jni::JNIEnv&);
 
 private:
-    std::unique_ptr<mbgl::OfflineRegion> region;
-    std::shared_ptr<mbgl::DatabaseFileSource> fileSource;
+    std::unique_ptr<mln::OfflineRegion> region;
+    std::shared_ptr<mln::DatabaseFileSource> fileSource;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

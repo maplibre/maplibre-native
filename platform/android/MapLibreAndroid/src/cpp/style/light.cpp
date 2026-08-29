@@ -1,20 +1,20 @@
-#include <mbgl/map/map.hpp>
+#include <mln/map/map.hpp>
 #include "light.hpp"
 #include "conversion/transition_options.hpp"
 #include "conversion/position.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-Light::Light(mbgl::Map& coreMap, mbgl::style::Light& coreLight)
+Light::Light(mln::Map& coreMap, mln::style::Light& coreLight)
     : light(coreLight),
       map(&coreMap) {}
 
-static Light* initializeLightPeer(mbgl::Map& map, mbgl::style::Light& coreLight) {
+static Light* initializeLightPeer(mln::Map& map, mln::style::Light& coreLight) {
     return new Light(map, coreLight);
 }
 
-jni::Local<jni::Object<Light>> Light::createJavaLightPeer(jni::JNIEnv& env, Map& map, mbgl::style::Light& coreLight) {
+jni::Local<jni::Object<Light>> Light::createJavaLightPeer(jni::JNIEnv& env, Map& map, mln::style::Light& coreLight) {
     std::unique_ptr<Light> peerLight = std::unique_ptr<Light>(initializeLightPeer(map, coreLight));
     auto result = peerLight->createJavaPeer(env);
     peerLight.release();
@@ -46,27 +46,27 @@ jni::Local<jni::String> Light::getAnchor(jni::JNIEnv& env) {
 }
 
 void Light::setPosition(jni::JNIEnv& env, const jni::Object<Position>& jposition) {
-    using namespace mbgl::android::conversion;
-    auto position = *convert<mbgl::style::Position>(env, jposition);
+    using namespace mln::android::conversion;
+    auto position = *convert<mln::style::Position>(env, jposition);
     light.setPosition(position);
 }
 
 jni::Local<jni::Object<Position>> Light::getPosition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    mbgl::style::Position position = light.getPosition().asConstant();
+    using namespace mln::android::conversion;
+    mln::style::Position position = light.getPosition().asConstant();
     return std::move(*convert<jni::Local<jni::Object<Position>>>(env, position));
 }
 
 jni::Local<jni::Object<TransitionOptions>> Light::getPositionTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = light.getPositionTransition();
+    using namespace mln::android::conversion;
+    mln::style::TransitionOptions options = light.getPositionTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void Light::setPositionTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     light.setPositionTransition(options);
 }
 
@@ -83,15 +83,15 @@ jni::Local<jni::String> Light::getColor(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> Light::getColorTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = light.getColorTransition();
+    using namespace mln::android::conversion;
+    mln::style::TransitionOptions options = light.getColorTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void Light::setColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     light.setColorTransition(options);
 }
 
@@ -104,15 +104,15 @@ jni::jfloat Light::getIntensity(jni::JNIEnv&) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> Light::getIntensityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
-    mbgl::style::TransitionOptions options = light.getIntensityTransition();
+    using namespace mln::android::conversion;
+    mln::style::TransitionOptions options = light.getIntensityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
 void Light::setIntensityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     light.setIntensityTransition(options);
 }
 
@@ -142,4 +142,4 @@ void Light::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

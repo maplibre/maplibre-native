@@ -3,7 +3,7 @@
 #include "expression_test_parser.hpp"
 #include "test_runner_common.hpp"
 
-#include <mbgl/util/io.hpp>
+#include <mln/util/io.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
@@ -105,7 +105,7 @@ TestRunOutput runExpressionTest(TestData& data, const std::string& rootPath, con
         std::vector<Value> outputs;
         if (!data.inputs.empty()) {
             for (const auto& input : data.inputs) {
-                mbgl::style::expression::EvaluationResult evaluationResult;
+                mln::style::expression::EvaluationResult evaluationResult;
                 if (input.canonical) {
                     evaluationResult = expression->evaluate(
                         input.zoom, input.feature, input.heatmapDensity, input.availableImages, *input.canonical);

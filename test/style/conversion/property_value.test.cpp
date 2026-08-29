@@ -1,12 +1,12 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/util/rapidjson.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/util/rapidjson.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(StyleConversion, PropertyValue) {
     // PropertyValue<T> accepts a constant expression:

@@ -51,7 +51,7 @@ dependencies {
 val syncPluginApiHeaders by tasks.registering(Sync::class) {
     val nativeRoot = rootProject.rootDir.resolve("../..")
     from(nativeRoot.resolve("include")) {
-        include("mbgl/plugin/plugin_api.h")
+        include("mln/plugin/plugin_api.h")
     }
     into(project.rootDir.resolve("prefab-plugin-api-headers"))
 }

@@ -1430,6 +1430,13 @@ final class NativeMapView implements NativeMap {
     }
   }
 
+  @Keep
+  private void onSymbolError(String message) {
+    if (stateCallback != null) {
+      stateCallback.onSymbolError(message);
+    }
+  }
+
   //
   // JNI methods
   //
@@ -1938,5 +1945,7 @@ final class NativeMapView implements NativeMap {
     void onSpriteRequested(String id, String url);
 
     void onRenderError();
+
+    void onSymbolError(String message);
   }
 }

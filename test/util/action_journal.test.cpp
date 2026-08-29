@@ -1,26 +1,26 @@
-#include <mbgl/util/action_journal.hpp>
-#include <mbgl/util/action_journal_impl.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/chrono.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/gfx/headless_frontend.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/map/map_impl.hpp>
+#include <mln/util/action_journal.hpp>
+#include <mln/util/action_journal_impl.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/rapidjson.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/style/style.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/gfx/headless_frontend.hpp>
+#include <mln/gfx/shader_registry.hpp>
+#include <mln/map/map_impl.hpp>
 
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/stub_map_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_map_observer.hpp>
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock-more-matchers.h>
 
 #include <regex>
 
-using namespace mbgl;
-using namespace mbgl::util;
+using namespace mln;
+using namespace mln::util;
 using namespace ::testing;
 
 class ActionJournalTest {
@@ -144,7 +144,7 @@ namespace {
 
 template <typename EventMethod, typename... Args>
 void validateEventList(ActionJournalTest& test,
-                       std::vector<std::pair<const char*, std::function<void(const mbgl::JSValue&)>>>&& generatedEvents,
+                       std::vector<std::pair<const char*, std::function<void(const mln::JSValue&)>>>&& generatedEvents,
                        EventMethod&& eventGenerator,
                        Args&&... args) {
     test.map->getActionJournal()->clearLog();
@@ -156,7 +156,7 @@ void validateEventList(ActionJournalTest& test,
 
     auto logIt = log.begin();
     for (const auto& generatedEvent : generatedEvents) {
-        mbgl::JSDocument document;
+        mln::JSDocument document;
         document.Parse<rapidjson::kParseDefaultFlags>(*logIt++);
 
         EXPECT_FALSE(document.HasParseError());
@@ -200,7 +200,7 @@ void validateEventList(ActionJournalTest& test,
 template <typename EventMethod, typename... Args>
 void validateEvent(ActionJournalTest& test,
                    const char* generatedEvent,
-                   std::function<void(const mbgl::JSValue&)>&& checkOutput,
+                   std::function<void(const mln::JSValue&)>&& checkOutput,
                    EventMethod&& eventGenerator,
                    Args&&... args) {
     validateEventList(test, {{generatedEvent, checkOutput}}, eventGenerator, std::forward<Args>(args)...);
@@ -227,7 +227,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onCameraWillChange",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             EXPECT_TRUE(json.HasMember("cameraMode"));
             EXPECT_TRUE(json["cameraMode"].IsInt());
             EXPECT_EQ(json["cameraMode"].GetInt(), static_cast<int>(MapObserver::CameraChangeMode::Immediate));
@@ -238,7 +238,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onCameraDidChange",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             EXPECT_TRUE(json.HasMember("cameraMode"));
             EXPECT_TRUE(json["cameraMode"].IsInt());
             EXPECT_EQ(json["cameraMode"].GetInt(), static_cast<int>(MapObserver::CameraChangeMode::Immediate));
@@ -252,7 +252,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onSourceChanged",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             EXPECT_TRUE(json.HasMember("type"));
             EXPECT_TRUE(json["type"].IsString());
             EXPECT_EQ(Enum<style::SourceType>::toEnum(json["type"].GetString()), style::SourceType::GeoJSON);
@@ -269,7 +269,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onDidFailLoadingMap",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             EXPECT_TRUE(json.HasMember("error"));
             EXPECT_TRUE(json["error"].IsString());
             EXPECT_STREQ(json["error"].GetString(), testExceptionMessage);
@@ -281,7 +281,7 @@ TEST(ActionJournal, ValidateEvents) {
         &style::Observer::onStyleError,
         testException);
 
-    const auto checkSprite = [&](const mbgl::JSValue& json) {
+    const auto checkSprite = [&](const mln::JSValue& json) {
         EXPECT_TRUE(json.HasMember("id"));
         EXPECT_TRUE(json["id"].IsString());
         EXPECT_EQ(json["id"].GetString(), testSprite.id);
@@ -296,7 +296,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onSpriteError",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             checkSprite(json);
 
             EXPECT_TRUE(json.HasMember("error"));
@@ -317,7 +317,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onStyleImageMissing",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             EXPECT_TRUE(json.HasMember("id"));
             EXPECT_TRUE(json["id"].IsString());
             EXPECT_STREQ(json["id"].GetString(), "image");
@@ -326,7 +326,7 @@ TEST(ActionJournal, ValidateEvents) {
         "image",
         []() {});
 
-    const auto checkShader = [&](const mbgl::JSValue& json) {
+    const auto checkShader = [&](const mln::JSValue& json) {
         EXPECT_TRUE(json.HasMember("shader"));
         EXPECT_TRUE(json["shader"].IsString());
         EXPECT_EQ(Enum<shaders::BuiltIn>::toEnum(json["shader"].GetString()), shaders::BuiltIn::None);
@@ -355,7 +355,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onShaderCompileFailed",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             checkShader(json);
 
             EXPECT_TRUE(json.HasMember("defines"));
@@ -367,7 +367,7 @@ TEST(ActionJournal, ValidateEvents) {
         gfx::Backend::Type::OpenGL,
         "defines");
 
-    const auto checkGlyphs = [&](const mbgl::JSValue& json) {
+    const auto checkGlyphs = [&](const mln::JSValue& json) {
         EXPECT_TRUE(json.HasMember("fonts"));
         EXPECT_TRUE(json["fonts"].IsArray());
         EXPECT_EQ(json["fonts"].GetArray().Size(), testFontStack.size());
@@ -395,7 +395,7 @@ TEST(ActionJournal, ValidateEvents) {
     validateEvent(
         test,
         "onGlyphsError",
-        [&](const mbgl::JSValue& json) {
+        [&](const mln::JSValue& json) {
             checkGlyphs(json);
 
             EXPECT_TRUE(json.HasMember("error"));
@@ -474,13 +474,13 @@ TEST(ActionJournal, RenderingStats) {
                                               [](const auto& a, const auto& b) { return a + b.renderingTime; }) /
                               testStats.size();
 
-    const auto validateDouble = [](const mbgl::JSValue& json, const auto name, const double value) {
+    const auto validateDouble = [](const mln::JSValue& json, const auto name, const double value) {
         EXPECT_TRUE(json.HasMember(name));
         EXPECT_TRUE(json[name].IsDouble());
         EXPECT_DOUBLE_EQ(json[name].GetDouble(), value);
     };
 
-    const auto validateStats = [&](const mbgl::JSValue& json) {
+    const auto validateStats = [&](const mln::JSValue& json) {
         ;
         validateDouble(json, "encodingMin", encodingMin->encodingTime);
         validateDouble(json, "encodingMax", encodingMax->encodingTime);

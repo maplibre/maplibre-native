@@ -2,8 +2,8 @@
 
 #include <filesystem>
 
-namespace mbgl {
+namespace mln {
 
 namespace filesystem = std::filesystem;
 
-} // namespace mbgl
+} // namespace mln

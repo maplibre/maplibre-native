@@ -1,7 +1,7 @@
 #include "custom_geometry_source.hpp"
 #include "attach_env.hpp"
 
-#include <mbgl/renderer/query.hpp>
+#include <mln/renderer/query.hpp>
 
 // Java -> C++ conversion
 #include "../android_conversion.hpp"
@@ -11,11 +11,11 @@
 #include "../../conversion/conversion.hpp"
 #include "../../conversion/collection.hpp"
 #include "../../geojson/feature.hpp"
-#include <mbgl/style/conversion/custom_geometry_source_options.hpp>
+#include <mln/style/conversion/custom_geometry_source_options.hpp>
 
 #include <string>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 // This conversion is expected not to fail because it's used only in contexts
@@ -26,7 +26,7 @@ static style::CustomGeometrySource::Options convertCustomGeometrySourceOptions(j
                                                                                const jni::Object<>& options,
                                                                                style::TileFunction fetchFn,
                                                                                style::TileFunction cancelFn) {
-    using namespace mbgl::style::conversion;
+    using namespace mln::style::conversion;
     if (!options) {
         return style::CustomGeometrySource::Options();
     }
@@ -43,7 +43,7 @@ static style::CustomGeometrySource::Options convertCustomGeometrySourceOptions(j
 
 CustomGeometrySource::CustomGeometrySource(jni::JNIEnv& env, const jni::String& sourceId, const jni::Object<>& options)
     : Source(env,
-             std::make_unique<mbgl::style::CustomGeometrySource>(
+             std::make_unique<mln::style::CustomGeometrySource>(
                  jni::Make<std::string>(env, sourceId),
                  convertCustomGeometrySourceOptions(
                      env,
@@ -52,7 +52,7 @@ CustomGeometrySource::CustomGeometrySource(jni::JNIEnv& env, const jni::String& 
                      std::bind(&CustomGeometrySource::cancelTile, this, std::placeholders::_1)))) {}
 
 CustomGeometrySource::CustomGeometrySource(jni::JNIEnv& env,
-                                           mbgl::style::Source& coreSource,
+                                           mln::style::Source& coreSource,
                                            AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
 
@@ -60,7 +60,7 @@ CustomGeometrySource::~CustomGeometrySource() {
     releaseThreads();
 }
 
-void CustomGeometrySource::fetchTile(const mbgl::CanonicalTileID& tileID) {
+void CustomGeometrySource::fetchTile(const mln::CanonicalTileID& tileID) {
     android::UniqueEnv _env = android::AttachEnv();
 
     static auto& javaClass = jni::Class<CustomGeometrySource>::Singleton(*_env);
@@ -78,7 +78,7 @@ void CustomGeometrySource::fetchTile(const mbgl::CanonicalTileID& tileID) {
     peer.Call(*_env, fetchTile, (int)tileID.z, (int)tileID.x, (int)tileID.y);
 };
 
-void CustomGeometrySource::cancelTile(const mbgl::CanonicalTileID& tileID) {
+void CustomGeometrySource::cancelTile(const mln::CanonicalTileID& tileID) {
     android::UniqueEnv _env = android::AttachEnv();
 
     static auto& javaClass = jni::Class<CustomGeometrySource>::Singleton(*_env);
@@ -136,33 +136,33 @@ bool CustomGeometrySource::isCancelled(jni::jint z, jni::jint x, jni::jint y) {
 
 void CustomGeometrySource::setTileData(
     jni::JNIEnv& env, jni::jint z, jni::jint x, jni::jint y, const jni::Object<geojson::FeatureCollection>& jFeatures) {
-    using namespace mbgl::android::geojson;
+    using namespace mln::android::geojson;
 
     // Convert the jni object
     auto geometry = geojson::FeatureCollection::convert(env, jFeatures);
 
     // Update the core source if not cancelled
     if (!isCancelled(z, x, y)) {
-        source.as<mbgl::style::CustomGeometrySource>()->CustomGeometrySource::setTileData(CanonicalTileID(z, x, y),
-                                                                                          GeoJSON(geometry));
+        source.as<mln::style::CustomGeometrySource>()->CustomGeometrySource::setTileData(CanonicalTileID(z, x, y),
+                                                                                         GeoJSON(geometry));
     }
 }
 
 void CustomGeometrySource::invalidateTile(jni::JNIEnv&, jni::jint z, jni::jint x, jni::jint y) {
-    source.as<mbgl::style::CustomGeometrySource>()->CustomGeometrySource::invalidateTile(CanonicalTileID(z, x, y));
+    source.as<mln::style::CustomGeometrySource>()->CustomGeometrySource::invalidateTile(CanonicalTileID(z, x, y));
 }
 
 void CustomGeometrySource::invalidateBounds(jni::JNIEnv& env, const jni::Object<LatLngBounds>& jBounds) {
     auto bounds = LatLngBounds::getLatLngBounds(env, jBounds);
-    source.as<mbgl::style::CustomGeometrySource>()->CustomGeometrySource::invalidateRegion(bounds);
+    source.as<mln::style::CustomGeometrySource>()->CustomGeometrySource::invalidateRegion(bounds);
 }
 
 jni::Local<jni::Array<jni::Object<geojson::Feature>>> CustomGeometrySource::querySourceFeatures(
     jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
-    using namespace mbgl::android::conversion;
-    using namespace mbgl::android::geojson;
+    using namespace mln::android::conversion;
+    using namespace mln::android::geojson;
 
-    std::vector<mbgl::Feature> features;
+    std::vector<mln::Feature> features;
     if (rendererFrontend) {
         features = rendererFrontend->querySourceFeatures(source.getID(), {{}, toFilter(env, jfilter)});
     }
@@ -177,13 +177,13 @@ jni::Local<jni::Object<Source>> CustomGeometrySource::createJavaPeer(jni::JNIEnv
 
 void CustomGeometrySource::addToMap(JNIEnv& env,
                                     const jni::Object<Source>& obj,
-                                    mbgl::Map& map,
+                                    mln::Map& map,
                                     AndroidRendererFrontend& frontend) {
     Source::addToMap(env, obj, map, frontend);
     startThreads();
 }
 
-bool CustomGeometrySource::removeFromMap(JNIEnv& env, const jni::Object<Source>& source, mbgl::Map& map) {
+bool CustomGeometrySource::removeFromMap(JNIEnv& env, const jni::Object<Source>& source, mln::Map& map) {
     bool successfullyRemoved = Source::removeFromMap(env, source, map);
     if (successfullyRemoved) {
         releaseThreads();
@@ -212,4 +212,4 @@ void CustomGeometrySource::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

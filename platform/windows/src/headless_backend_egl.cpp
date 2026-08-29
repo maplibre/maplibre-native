@@ -1,7 +1,7 @@
-#include <mbgl/gl/headless_backend.hpp>
+#include <mln/gl/headless_backend.hpp>
 
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/logging.hpp>
 
 #include <EGL/egl.h>
 
@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace mbgl {
+namespace mln {
 namespace gl {
 
 // This class provides a singleton that contains information about the
@@ -37,7 +37,7 @@ public:
         if (!eglBindAPI(EGL_OPENGL_ES_API)) {
             std::ostringstream logMsg;
             logMsg << "eglBindAPI(EGL_OPENGL_ES_API) returned error " << eglGetError();
-            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
+            mln::Log::Error(mln::Event::OpenGL, logMsg.str());
             throw std::runtime_error("eglBindAPI() failed");
         }
 
@@ -78,7 +78,7 @@ public:
             std::ostringstream logMsg;
             logMsg << "eglCreateContext() returned error 0x" << std::setw(4) << std::setfill('0') << std::hex
                    << eglGetError();
-            mbgl::Log::Error(mbgl::Event::OpenGL, logMsg.str());
+            mln::Log::Error(mln::Event::OpenGL, logMsg.str());
             throw std::runtime_error("Error creating the EGL context object.\n");
         }
 
@@ -132,4 +132,4 @@ void HeadlessBackend::createImpl() {
 }
 
 } // namespace gl
-} // namespace mbgl
+} // namespace mln

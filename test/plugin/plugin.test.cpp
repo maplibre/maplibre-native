@@ -1,23 +1,23 @@
 #include <gtest/gtest.h>
 
-#include <mbgl/plugin/plugin_api.h>
-#include <mbgl/plugin/plugin_registry.hpp>
-#include <mbgl/layermanager/layer_manager.hpp>
-#include <mbgl/renderer/render_layer.hpp>
-#include <mbgl/style/conversion_impl.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
-#include <mbgl/style/style_impl.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/stub_layer_observer.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/plugin/plugin_api.h>
+#include <mln/plugin/plugin_registry.hpp>
+#include <mln/layermanager/layer_manager.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/conversion_impl.hpp>
+#include <mln/style/layers/fill_extrusion_layer.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
+#include <mln/style/style_impl.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_layer_observer.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <algorithm>
 #include <array>
 #include <string>
 
-using namespace mbgl;
-using namespace mbgl::style;
+using namespace mln;
+using namespace mln::style;
 
 namespace {
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/map/change.hpp>
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/storage/network_status.hpp>
+#include <mln/map/change.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/tile/tile_operation.hpp>
+#include <mln/storage/network_status.hpp>
 
 #include "annotation/marker.hpp"
 #include "annotation/polygon.hpp"
@@ -34,7 +34,7 @@
 #include <EGL/egl.h>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AndroidRendererFrontend;
@@ -56,7 +56,7 @@ public:
 
     virtual ~NativeMapView();
 
-    // mbgl::RendererBackend (mbgl::MapObserver) //
+    // mln::RendererBackend (mln::MapObserver) //
     void onCameraWillChange(MapObserver::CameraChangeMode) override;
     void onCameraIsChanging() override;
     void onCameraDidChange(MapObserver::CameraChangeMode) override;
@@ -69,7 +69,7 @@ public:
     void onDidFinishRenderingMap(MapObserver::RenderMode) override;
     void onDidBecomeIdle() override;
     void onDidFinishLoadingStyle() override;
-    void onSourceChanged(mbgl::style::Source&) override;
+    void onSourceChanged(mln::style::Source&) override;
     void onStyleImageMissing(const std::string&) override;
     bool onCanRemoveUnusedStyleImage(const std::string&) override;
 
@@ -85,7 +85,7 @@ public:
 
     void setStyleJson(jni::JNIEnv&, const jni::String&);
 
-    void setLatLngBounds(jni::JNIEnv&, const jni::Object<mbgl::android::LatLngBounds>&);
+    void setLatLngBounds(jni::JNIEnv&, const jni::Object<mln::android::LatLngBounds>&);
 
     void cancelTransitions(jni::JNIEnv&);
 
@@ -125,7 +125,7 @@ public:
     void setLatLng(jni::JNIEnv&, jni::jdouble, jni::jdouble, const jni::Array<jni::jdouble>&, jni::jlong);
 
     jni::Local<jni::Object<CameraPosition>> getCameraForLatLngBounds(jni::JNIEnv&,
-                                                                     const jni::Object<mbgl::android::LatLngBounds>&,
+                                                                     const jni::Object<mln::android::LatLngBounds>&,
                                                                      double top,
                                                                      double left,
                                                                      double bottom,
@@ -302,7 +302,7 @@ public:
 
     void addImage(JNIEnv&, const jni::String&, const jni::Object<Bitmap>& bitmap, jni::jfloat, jni::jboolean);
 
-    void addImages(JNIEnv&, const jni::Array<jni::Object<mbgl::android::Image>>&);
+    void addImages(JNIEnv&, const jni::Array<jni::Object<mln::android::Image>>&);
 
     void removeImage(JNIEnv&, const jni::String&);
 
@@ -336,7 +336,7 @@ public:
 
     jni::jdouble getTileLodZoomShift(JNIEnv&);
 
-    mbgl::Map& getMap();
+    mln::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
 
@@ -346,26 +346,28 @@ public:
     void setFrustumOffset(JNIEnv&, const jni::Object<RectF>&);
 
     // Shader compilation
-    void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
-    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
-    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
-    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onRegisterShaders(mln::gfx::ShaderRegistry&) override;
+    void onPreCompileShader(mln::shaders::BuiltIn, mln::gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(mln::shaders::BuiltIn, mln::gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(mln::shaders::BuiltIn, mln::gfx::Backend::Type, const std::string&) override;
 
     // Glyph requests
-    void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
-    void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
-    void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+    void onGlyphsLoaded(const mln::FontStack&, const mln::GlyphRange&) override;
+    void onGlyphsError(const mln::FontStack&, const mln::GlyphRange&, std::exception_ptr) override;
+    void onGlyphsRequested(const mln::FontStack&, const mln::GlyphRange&) override;
 
     // Tile requests
-    void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&, const std::string&) override;
+    void onTileAction(mln::TileOperation, const mln::OverscaledTileID&, const std::string&) override;
 
     // Sprite requests
-    void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
-    void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
-    void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
+    void onSpriteLoaded(const std::optional<mln::style::Sprite>&) override;
+    void onSpriteError(const std::optional<mln::style::Sprite>&, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<mln::style::Sprite>&) override;
 
     // Renderer
     void onRenderError(std::exception_ptr) override;
+
+    void onSymbolError(const std::string&) override;
 
 private:
     std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
@@ -388,8 +390,8 @@ private:
     static constexpr auto annotationRequestTimeout = std::chrono::milliseconds(200);
 
     // Ensure these are initialised last
-    std::unique_ptr<mbgl::Map> map;
+    std::unique_ptr<mln::Map> map;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

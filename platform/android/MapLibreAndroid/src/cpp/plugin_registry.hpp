@@ -2,7 +2,7 @@
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class PluginRegistry {
@@ -17,4 +17,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln
