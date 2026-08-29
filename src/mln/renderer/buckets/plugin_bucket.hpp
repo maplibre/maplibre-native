@@ -13,7 +13,9 @@ namespace mln {
 class PluginVertexVector final : public gfx::VertexVectorBase {
 public:
     PluginVertexVector(std::vector<uint8_t> data_, std::size_t count_, std::size_t stride_)
-        : data(std::move(data_)), count(count_), stride(stride_) {}
+        : data(std::move(data_)),
+          count(count_),
+          stride(stride_) {}
 
     const void* getRawData() const override { return data.data(); }
     std::size_t getRawSize() const override { return stride; }

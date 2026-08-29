@@ -117,11 +117,7 @@ struct LayerTypeDescriptor {
                         {},
                         cString("testVertex"),
                         cString("testFragment")};
-        shaderAttribute = {sizeof(shaderAttribute),
-                           0,
-                           0,
-                           cString("a_position"),
-                           MLN_PLUGIN_VERTEX_FLOAT_X2};
+        shaderAttribute = {sizeof(shaderAttribute), 0, 0, cString("a_position"), MLN_PLUGIN_VERTEX_FLOAT_X2};
         shader = {sizeof(shader), cString("test"), &shaderSource, 1, &shaderAttribute, 1};
         layerType.struct_size = sizeof(layerType);
         layerType.layer_type = cString("test-plugin-layer");
@@ -236,8 +232,8 @@ TEST(PluginRegistry, RegistersSourceBoundLayerTypeAndScopedProperties) {
     JSDocument input;
     input.Parse(R"JSON({"source":"points"})JSON");
     const JSValue* inputValue = &input;
-    auto layer =
-        LayerManager::get()->createLayer("test-plugin-layer", "model", conversion::Convertible(inputValue), error);
+    auto layer = LayerManager::get()->createLayer(
+        "test-plugin-layer", "model", conversion::Convertible(inputValue), error);
     ASSERT_TRUE(layer) << error.message;
     EXPECT_STREQ("test-plugin-layer", layer->getTypeInfo()->type);
     EXPECT_EQ("points", layer->getSourceID());

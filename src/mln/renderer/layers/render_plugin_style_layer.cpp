@@ -172,11 +172,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 if (stream == bucket.vertexStreams.end()) continue;
                 const auto type = attributeType(binding.type);
                 if (const auto& attr = attributes->set(binding.attributeID)) {
-                    attr->setSharedRawData(stream->second,
-                                           binding.byteOffset,
-                                           0,
-                                           stream->second->getRawSize(),
-                                           type);
+                    attr->setSharedRawData(stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
                 }
                 vertexCount = std::max(vertexCount, stream->second->getRawCount());
                 if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
@@ -187,9 +183,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
             builder->setEnableDepth(definition.depthMode != MLN_PLUGIN_DEPTH_DISABLED);
-            builder->setDepthType(definition.depthMode == MLN_PLUGIN_DEPTH_READ_WRITE
-                                      ? gfx::DepthMaskType::ReadWrite
-                                      : gfx::DepthMaskType::ReadOnly);
+            builder->setDepthType(definition.depthMode == MLN_PLUGIN_DEPTH_READ_WRITE ? gfx::DepthMaskType::ReadWrite
+                                                                                      : gfx::DepthMaskType::ReadOnly);
             builder->setIs3D(registration.requires3D);
             builder->setColorMode(colorMode(definition.blendMode));
             builder->setCullFaceMode(definition.enableCullFace ? gfx::CullFaceMode::backCCW()
@@ -260,9 +255,8 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
         const auto propertyIt = impl.pluginProperties.find(definition.name);
-        const auto value = propertyIt == impl.pluginProperties.end()
-                               ? style::defaultPluginPropertyValue(definition)
-                               : propertyIt->second;
+        const auto value = propertyIt == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                     : propertyIt->second;
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};
@@ -273,7 +267,8 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     pluginFeature.evaluated_properties = properties.data();
     pluginFeature.evaluated_property_count = properties.size();
     return registration.queryFeature(
-               &pluginFeature, query.data(), query.size(), pixelsToTileUnits, properties.data(), properties.size()) != 0;
+               &pluginFeature, query.data(), query.size(), pixelsToTileUnits, properties.data(), properties.size()) !=
+           0;
 }
 
 } // namespace mln

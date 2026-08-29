@@ -64,11 +64,10 @@ const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backen
 class PluginShaderGroup final : public gfx::ShaderGroup {
 public:
     PluginShaderGroup(ShaderDefinition definition_, ProgramParameters parameters_)
-        : definition(std::move(definition_)), parameters(std::move(parameters_)) {}
+        : definition(std::move(definition_)),
+          parameters(std::move(parameters_)) {}
 
-    gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
-                                     const StringIDSetsPair&,
-                                     std::string_view) override {
+    gfx::ShaderPtr getOrCreateShader(gfx::Context& context, const StringIDSetsPair&, std::string_view) override {
         const auto name = shaderGroupName(definition.pluginID, definition.id);
         if (auto existing = getShader(name)) return existing;
 
@@ -80,7 +79,8 @@ public:
         attributes.reserve(definition.attributes.size());
         for (const auto& attr : definition.attributes) attributes.emplace_back(attr.name, attr.id);
         const std::vector<shaders::UniformBlockInfo> uniformBlocks = {
-            {"PluginDrawableUBO", shaders::idDrawableReservedVertexOnlyUBO}};
+            { "PluginDrawableUBO",
+              shaders::idDrawableReservedVertexOnlyUBO }};
         shader = gl::ShaderProgramGL::create(static_cast<gl::Context&>(context),
                                              parameters.withProgramType(shaders::BuiltIn::None),
                                              definition.attributes.front().name,
@@ -92,12 +92,8 @@ public:
 #elif MLN_RENDER_BACKEND_VULKAN
         const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_VULKAN);
         if (!source) return {};
-        auto created = static_cast<vulkan::Context&>(context).createProgram(shaders::BuiltIn::None,
-                                                                            name,
-                                                                            source->vertex,
-                                                                            source->fragment,
-                                                                            parameters,
-                                                                            {});
+        auto created = static_cast<vulkan::Context&>(context).createProgram(
+            shaders::BuiltIn::None, name, source->vertex, source->fragment, parameters, {});
         if (!created) return {};
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
@@ -117,10 +113,8 @@ public:
         if (!created) return {};
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
-            typed->initVertexAttribute({attr.location,
-                                        attributeType(attr.type),
-                                        shaders::drawableReservedUBOCount + attr.location,
-                                        attr.id});
+            typed->initVertexAttribute(
+                {attr.location, attributeType(attr.type), shaders::drawableReservedUBOCount + attr.location, attr.id});
         }
         shader = std::move(typed);
 #else

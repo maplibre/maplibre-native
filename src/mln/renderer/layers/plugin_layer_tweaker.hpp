@@ -7,7 +7,8 @@ namespace mln {
 class PluginLayerTweaker final : public LayerTweaker {
 public:
     PluginLayerTweaker(std::string id, Immutable<style::LayerProperties> properties, bool requires3D_)
-        : LayerTweaker(std::move(id), std::move(properties)), requires3D(requires3D_) {}
+        : LayerTweaker(std::move(id), std::move(properties)),
+          requires3D(requires3D_) {}
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 

@@ -48,9 +48,7 @@ expression::Dependency PluginStyleLayer::Impl::getDependencies() const noexcept 
     return result;
 }
 
-PluginStyleLayer::PluginStyleLayer(const std::string& id,
-                                   const std::string& source,
-                                   plugin::LayerType registration)
+PluginStyleLayer::PluginStyleLayer(const std::string& id, const std::string& source, plugin::LayerType registration)
     : Layer(makeMutable<Impl>(id, source, std::move(registration))) {}
 
 PluginStyleLayer::PluginStyleLayer(Immutable<Impl> impl_)

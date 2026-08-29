@@ -73,7 +73,6 @@ struct LayerType {
     mln_plugin_finish_layout_fn finishLayout = nullptr;
     mln_plugin_destroy_layout_fn destroyLayout = nullptr;
     mln_plugin_query_feature_fn queryFeature = nullptr;
-
 };
 
 class PluginRegistry final {

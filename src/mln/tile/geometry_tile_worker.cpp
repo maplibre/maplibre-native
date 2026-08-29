@@ -458,12 +458,11 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{
-            .tileID = id,
-            .mode = mode,
-            .pixelRatio = pixelRatio,
-            .layerType = leaderImpl.getTypeInfo(),
-            .fileSource = fileSource};
+        BucketParameters parameters{.tileID = id,
+                                    .mode = mode,
+                                    .pixelRatio = pixelRatio,
+                                    .layerType = leaderImpl.getTypeInfo(),
+                                    .fileSource = fileSource};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {

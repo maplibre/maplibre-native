@@ -424,8 +424,7 @@ typedef struct mln_plugin_bucket_v1 {
 
 typedef mln_plugin_status (*mln_plugin_create_layout_fn)(const mln_plugin_layout_context_v1* context,
                                                          void** layout_instance);
-typedef mln_plugin_status (*mln_plugin_layout_feature_fn)(void* layout_instance,
-                                                          const mln_plugin_feature_v1* feature);
+typedef mln_plugin_status (*mln_plugin_layout_feature_fn)(void* layout_instance, const mln_plugin_feature_v1* feature);
 typedef mln_plugin_status (*mln_plugin_finish_layout_fn)(void* layout_instance, mln_plugin_bucket_v1* bucket);
 typedef void (*mln_plugin_destroy_layout_fn)(void* layout_instance);
 
@@ -434,11 +433,11 @@ typedef void (*mln_plugin_destroy_layout_fn)(void* layout_instance);
  * coordinates; pixels_to_tile_units converts the bucket query radius.
  */
 typedef uint8_t (*mln_plugin_query_feature_fn)(const mln_plugin_feature_v1* feature,
-                                              const mln_plugin_tile_point_v1* query_geometry,
-                                              size_t query_geometry_count,
-                                              double pixels_to_tile_units,
-                                              const mln_plugin_property_value_v1* properties,
-                                              size_t property_count);
+                                               const mln_plugin_tile_point_v1* query_geometry,
+                                               size_t query_geometry_count,
+                                               double pixels_to_tile_units,
+                                               const mln_plugin_property_value_v1* properties,
+                                               size_t property_count);
 
 typedef mln_plugin_status (*mln_plugin_create_instance_fn)(const mln_plugin_host_api_v1* host,
                                                            mln_plugin_string layer_id,

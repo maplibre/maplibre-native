@@ -50,8 +50,7 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
         const auto& rhs = properties[i];
         if (lhs.targetLayerType != rhs.targetLayerType || lhs.name != rhs.name || lhs.type != rhs.type ||
             lhs.scope != rhs.scope || lhs.defaultValue != rhs.defaultValue ||
-            lhs.supportsExpressions != rhs.supportsExpressions ||
-            lhs.supportsTransitions != rhs.supportsTransitions) {
+            lhs.supportsExpressions != rhs.supportsExpressions || lhs.supportsTransitions != rhs.supportsTransitions) {
             return false;
         }
     }
@@ -70,10 +69,10 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
         const auto& rhs = layerTypes[i];
         if (lhs.type != rhs.type || lhs.backendMask != rhs.backendMask || lhs.renderStage != rhs.renderStage ||
             lhs.requires3D != rhs.requires3D || lhs.sourceKind != rhs.sourceKind ||
-            lhs.geometryTypeMask != rhs.geometryTypeMask ||
-            lhs.createLayout != rhs.createLayout || lhs.layoutFeature != rhs.layoutFeature ||
-            lhs.finishLayout != rhs.finishLayout || lhs.destroyLayout != rhs.destroyLayout ||
-            lhs.queryFeature != rhs.queryFeature || lhs.shaders.size() != rhs.shaders.size()) {
+            lhs.geometryTypeMask != rhs.geometryTypeMask || lhs.createLayout != rhs.createLayout ||
+            lhs.layoutFeature != rhs.layoutFeature || lhs.finishLayout != rhs.finishLayout ||
+            lhs.destroyLayout != rhs.destroyLayout || lhs.queryFeature != rhs.queryFeature ||
+            lhs.shaders.size() != rhs.shaders.size()) {
             return false;
         }
         for (size_t shaderIndex = 0; shaderIndex < lhs.shaders.size(); ++shaderIndex) {
@@ -142,9 +141,8 @@ bool appendShaders(const std::string& pluginID,
         uint32_t sourceBackends = 0;
         for (size_t sourceIndex = 0; sourceIndex < input.source_count; ++sourceIndex) {
             const auto& source = input.sources[sourceIndex];
-            if (source.struct_size < sizeof(mln_plugin_shader_source_v1) ||
-                !validBackendMask(source.backend) || (source.backend & (source.backend - 1u)) != 0 ||
-                !validString(source.vertex_source) ||
+            if (source.struct_size < sizeof(mln_plugin_shader_source_v1) || !validBackendMask(source.backend) ||
+                (source.backend & (source.backend - 1u)) != 0 || !validString(source.vertex_source) ||
                 (source.backend != MLN_PLUGIN_BACKEND_METAL && !validString(source.fragment_source)) ||
                 (source.backend == MLN_PLUGIN_BACKEND_METAL &&
                  (!validString(source.vertex_entry_point) || !validString(source.fragment_entry_point))) ||
@@ -154,10 +152,10 @@ bool appendShaders(const std::string& pluginID,
             }
             sourceBackends |= source.backend;
             shader.sources.push_back(ShaderSource{source.backend,
-                                                   copyString(source.vertex_source),
-                                                   copyString(source.fragment_source),
-                                                   copyString(source.vertex_entry_point),
-                                                   copyString(source.fragment_entry_point)});
+                                                  copyString(source.vertex_source),
+                                                  copyString(source.fragment_source),
+                                                  copyString(source.vertex_entry_point),
+                                                  copyString(source.fragment_entry_point)});
         }
         if ((sourceBackends & backendMask) != backendMask) {
             error = "plugin shader does not provide every declared backend";
@@ -230,11 +228,10 @@ bool appendProperties(const std::string& pluginID,
             property.scope,
             std::move(defaultValue),
             property.struct_size >= offsetof(mln_plugin_property_descriptor_v1, supports_transitions)
-                    ? property.supports_expressions != 0
-                    : false,
-            property.struct_size >= sizeof(mln_plugin_property_descriptor_v1)
-                    ? property.supports_transitions != 0
-                    : false});
+                ? property.supports_expressions != 0
+                : false,
+            property.struct_size >= sizeof(mln_plugin_property_descriptor_v1) ? property.supports_transitions != 0
+                                                                              : false});
     }
     return true;
 }

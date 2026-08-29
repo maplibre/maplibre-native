@@ -17,7 +17,7 @@ namespace style {
 namespace conversion {
 class Convertible;
 struct Error;
-}
+} // namespace conversion
 
 class PluginPropertyValue {
 public:

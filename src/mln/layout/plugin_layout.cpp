@@ -203,9 +203,8 @@ void PluginLayout::createBucket(const ImagePositions&,
         const auto it = leader.pluginProperties.find(definition.name);
         const auto styleProperty = it == leader.pluginProperties.end() ? style::StyleProperty{}
                                                                        : it->second.toStyleProperty();
-        const auto& value = styleProperty.getKind() == style::StyleProperty::Kind::Constant
-                                ? styleProperty.getValue()
-                                : definition.defaultValue;
+        const auto& value = styleProperty.getKind() == style::StyleProperty::Kind::Constant ? styleProperty.getValue()
+                                                                                            : definition.defaultValue;
         property.explicitly_set = it != leader.pluginProperties.end();
         switch (definition.type) {
             case MLN_PLUGIN_VALUE_BOOLEAN:
@@ -256,7 +255,9 @@ void PluginLayout::createBucket(const ImagePositions&,
         Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed to create a layout instance");
         return;
     }
-    const auto destroyLayout = [&] { registration.destroyLayout(layoutInstance); };
+    const auto destroyLayout = [&] {
+        registration.destroyLayout(layoutInstance);
+    };
 
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         auto feature = sourceLayer->getFeature(i);
@@ -293,8 +294,7 @@ void PluginLayout::createBucket(const ImagePositions&,
             mln_plugin_property_value_v1 evaluated{};
             evaluated.struct_size = sizeof(evaluated);
             evaluated.name = borrowed(definition.name);
-            evaluated.value = value.evaluate(
-                zoom, *feature, emptyState, definition, evaluatedStrings[propertyIndex]);
+            evaluated.value = value.evaluate(zoom, *feature, emptyState, definition, evaluatedStrings[propertyIndex]);
             evaluated.explicitly_set = propertyIt != leader.pluginProperties.end();
             evaluatedProperties.push_back(evaluated);
         }
@@ -362,9 +362,9 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!valid) break;
         drawable.key = input.drawable_key;
         drawable.shaderID.assign(input.shader_id.data, input.shader_id.size);
-        const auto shaderIt = std::find_if(registration.shaders.begin(), registration.shaders.end(), [&](const auto& shader) {
-            return shader.id == drawable.shaderID;
-        });
+        const auto shaderIt = std::find_if(registration.shaders.begin(),
+                                           registration.shaders.end(),
+                                           [&](const auto& shader) { return shader.id == drawable.shaderID; });
         valid = shaderIt != registration.shaders.end() && input.attribute_count == shaderIt->attributes.size();
         if (!valid) break;
         drawable.drawMode = input.draw_mode;
@@ -378,9 +378,10 @@ void PluginLayout::createBucket(const ImagePositions&,
         for (size_t bindingIndex = 0; valid && bindingIndex < input.attribute_count; ++bindingIndex) {
             const auto& binding = input.attributes[bindingIndex];
             const auto streamIt = bucket->vertexStreams.find(binding.stream_id);
-            const auto attributeIt = std::find_if(shaderIt->attributes.begin(), shaderIt->attributes.end(), [&](const auto& attribute) {
-                return attribute.id == binding.attribute_id;
-            });
+            const auto attributeIt = std::find_if(
+                shaderIt->attributes.begin(), shaderIt->attributes.end(), [&](const auto& attribute) {
+                    return attribute.id == binding.attribute_id;
+                });
             const auto size = attributeSize(binding.type);
             valid = binding.struct_size >= sizeof(binding) && streamIt != bucket->vertexStreams.end() &&
                     attributeIt != shaderIt->attributes.end() && attributeIt->type == binding.type && size > 0 &&
@@ -397,10 +398,11 @@ void PluginLayout::createBucket(const ImagePositions&,
         for (size_t segmentIndex = 0; valid && segmentIndex < input.segment_count; ++segmentIndex) {
             const auto& segment = input.segments[segmentIndex];
             valid = segment.struct_size >= sizeof(segment) &&
-                    validRange(segment.index_offset, segment.index_length, output.index_count) &&
-                    drawableVertexCount && validRange(segment.vertex_offset, segment.vertex_length, *drawableVertexCount);
+                    validRange(segment.index_offset, segment.index_length, output.index_count) && drawableVertexCount &&
+                    validRange(segment.vertex_offset, segment.vertex_length, *drawableVertexCount);
             if (valid) {
-                for (size_t index = segment.index_offset; index < segment.index_offset + segment.index_length; ++index) {
+                for (size_t index = segment.index_offset; index < segment.index_offset + segment.index_length;
+                     ++index) {
                     if (output.indices[index] >= segment.vertex_length) {
                         valid = false;
                         break;

@@ -32,13 +32,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) return;
         const auto tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = getTileMatrix(tileID,
-                                          parameters,
-                                          {{0.0f, 0.0f}},
-                                          style::TranslateAnchorType::Viewport,
-                                          requires3D,
-                                          false,
-                                          drawable);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, {{0.0f, 0.0f}}, style::TranslateAnchorType::Viewport, requires3D, false, drawable);
         const PluginDrawableUBO ubo{util::cast<float>(matrix), parameters.pixelsToGLUnits, {0.0f, 0.0f}};
 #if MLN_UBO_CONSOLIDATION
         drawableUBOs[index] = ubo;
