@@ -70,9 +70,9 @@ mln_plugin_buffer_binding_v1 pluginBinding(const gfx::AttributeBindingArray& bin
     const auto& binding = bindings[location];
     if (!binding || !binding->vertexBufferResource) return result;
     const auto& resource = static_cast<const VertexBufferResource&>(*binding->vertexBufferResource).get();
-    const auto& metalBuffer = resource.getMetalBuffer();
+    const auto* metalBuffer = resource.materializeMetalBuffer();
     if (!metalBuffer) return result;
-    result.buffer = reinterpret_cast<uint64_t>(metalBuffer.get());
+    result.buffer = reinterpret_cast<uint64_t>(metalBuffer);
     result.offset = binding->attribute.offset + static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
     result.stride = binding->vertexStride;
     result.type = pluginAttributeType(binding->attribute.dataType);
