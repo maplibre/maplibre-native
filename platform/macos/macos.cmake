@@ -155,7 +155,7 @@ find_program(
 )
 
 if(MLN_CREATE_AMALGAMATION)
-    if ("${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    if(NOT ARMERGE)
         message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
     endif()
     if ("${LLVM_OBJCOPY}" STREQUAL "LLVM_OBJCOPY-NOTFOUND")
@@ -174,7 +174,7 @@ if(MLN_CREATE_AMALGAMATION)
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND ${ARMERGE} --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
