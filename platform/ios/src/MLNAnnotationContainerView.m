@@ -19,13 +19,6 @@
     return self;
 }
 
-+ (instancetype)annotationContainerViewWithAnnotationContainerView:(nonnull MLNAnnotationContainerView *)annotationContainerView
-{
-    MLNAnnotationContainerView *newAnnotationContainerView = [[MLNAnnotationContainerView alloc] initWithFrame:annotationContainerView.frame];
-    [newAnnotationContainerView addSubviews:annotationContainerView.subviews];
-    return newAnnotationContainerView;
-}
-
 - (void)addSubviews:(NSArray<MLNAnnotationView *> *)subviews
 {
     for (MLNAnnotationView *view in subviews)
