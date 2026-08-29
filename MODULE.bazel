@@ -70,7 +70,7 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 
 http_archive(
     name = "glfw",
-    build_file = "@//vendor:glfw.BUILD",
+    build_file = "//vendor:glfw.BUILD",
     integrity = "sha256-tewASycS/Qjohh3CcUKPBId1IAot9xnM9XUUO6dJo+k=",
     strip_prefix = "glfw-3.4",
     urls = ["https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"],

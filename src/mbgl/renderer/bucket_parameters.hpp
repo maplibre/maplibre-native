@@ -3,6 +3,8 @@
 #include <mbgl/map/mode.hpp>
 #include <mbgl/tile/tile_id.hpp>
 
+#include <memory>
+
 namespace mbgl {
 namespace style {
 struct LayerTypeInfo;
@@ -14,6 +16,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
+    std::shared_ptr<class FileSource> fileSource;
 };
 
 } // namespace mbgl

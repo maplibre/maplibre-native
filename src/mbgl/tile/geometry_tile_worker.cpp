@@ -39,7 +39,8 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
-                                       std::shared_ptr<FontFaces> fontFaces_)
+                                       std::shared_ptr<FontFaces> fontFaces_,
+                                       std::shared_ptr<FileSource> fileSource_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
       scheduler(scheduler_),
@@ -50,7 +51,8 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
       pixelRatio(pixelRatio_),
       showCollisionBoxes(showCollisionBoxes_),
       dynamicTextureAtlas(dynamicTextureAtlas_),
-      fontFaces(fontFaces_) {}
+      fontFaces(fontFaces_),
+      fileSource(std::move(fileSource_)) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
@@ -445,7 +447,11 @@ void GeometryTileWorker::parse() {
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
         BucketParameters parameters{
-            .tileID = id, .mode = mode, .pixelRatio = pixelRatio, .layerType = leaderImpl.getTypeInfo()};
+            .tileID = id,
+            .mode = mode,
+            .pixelRatio = pixelRatio,
+            .layerType = leaderImpl.getTypeInfo(),
+            .fileSource = fileSource};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {

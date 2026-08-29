@@ -33,7 +33,10 @@ cc_library(
     ] + select({
         "@platforms//os:ios": ["//platform:ios-sdk"],
         "@platforms//os:linux": ["//platform/linux:impl"],
-        "@platforms//os:macos": ["//platform/default:mbgl-default"],
+        "@platforms//os:macos": [
+            "//platform/darwin:darwin-objcpp",
+            "//platform/default:mbgl-default",
+        ],
         "//conditions:default": [],
     }),
 )

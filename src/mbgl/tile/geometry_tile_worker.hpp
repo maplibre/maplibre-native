@@ -22,6 +22,7 @@ namespace mbgl {
 class GeometryTile;
 class GeometryTileData;
 class Layout;
+class FileSource;
 
 namespace style {
 class Layer;
@@ -44,7 +45,8 @@ public:
                        float pixelRatio,
                        bool showCollisionBoxes_,
                        gfx::DynamicTextureAtlasPtr,
-                       std::shared_ptr<FontFaces> fontFaces);
+                       std::shared_ptr<FontFaces> fontFaces,
+                       std::shared_ptr<FileSource> fileSource);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -123,6 +125,7 @@ private:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     std::shared_ptr<FontFaces> fontFaces;
+    std::shared_ptr<FileSource> fileSource;
 };
 
 } // namespace mbgl

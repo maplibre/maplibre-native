@@ -65,11 +65,6 @@ struct LayerType {
     uint32_t backendMask = 0;
     mln_plugin_render_stage renderStage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
     bool requires3D = false;
-    mln_plugin_create_instance_fn createInstance = nullptr;
-    mln_plugin_destroy_instance_fn destroyInstance = nullptr;
-    mln_plugin_prepare_frame_fn prepareFrame = nullptr;
-    mln_plugin_render_before_layer_fn renderLayer = nullptr;
-    mln_plugin_context_lost_fn contextLost = nullptr;
     mln_plugin_source_kind sourceKind = MLN_PLUGIN_SOURCE_NONE;
     uint32_t geometryTypeMask = 0;
     std::vector<ShaderDefinition> shaders;
@@ -79,7 +74,6 @@ struct LayerType {
     mln_plugin_destroy_layout_fn destroyLayout = nullptr;
     mln_plugin_query_feature_fn queryFeature = nullptr;
 
-    bool usesHostDrawables() const noexcept { return createLayout != nullptr; }
 };
 
 class PluginRegistry final {

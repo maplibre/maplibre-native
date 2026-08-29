@@ -36,6 +36,23 @@ mln_plugin_status callback(void*, const mln_plugin_frame_context_v1*) {
 
 void destroyInstance(void*) {}
 
+mln_plugin_status createLayout(const mln_plugin_layout_context_v1*, void** instance) {
+    static int layout;
+    *instance = &layout;
+    return MLN_PLUGIN_STATUS_OK;
+}
+
+mln_plugin_status layoutFeature(void*, const mln_plugin_feature_v1*) {
+    return MLN_PLUGIN_STATUS_OK;
+}
+
+mln_plugin_status finishLayout(void*, mln_plugin_bucket_v1* bucket) {
+    bucket->query_radius = 0.0f;
+    return MLN_PLUGIN_STATUS_OK;
+}
+
+void destroyLayout(void*) {}
+
 struct Descriptor {
     explicit Descriptor(const char* id_, const char* propertyName_)
         : propertyName(propertyName_),
@@ -93,17 +110,19 @@ struct LayerTypeDescriptor {
                     defaultURI,
                     0,
                     0};
-        defaultPosition.struct_size = sizeof(defaultPosition);
-        defaultPosition.type = MLN_PLUGIN_VALUE_FLOAT2;
-        defaultPosition.data.float2_value = {0.0f, 0.0f};
-        positionProperty = {sizeof(positionProperty),
-                            cString("test-model-position"),
-                            MLN_PLUGIN_VALUE_FLOAT2,
-                            MLN_PLUGIN_PROPERTY_LAYOUT,
-                            defaultPosition,
-                            0,
-                            0};
-        properties = {property, positionProperty};
+        properties = {property};
+        shaderSource = {sizeof(shaderSource),
+                        MLN_PLUGIN_BACKEND_METAL,
+                        cString("shader source"),
+                        {},
+                        cString("testVertex"),
+                        cString("testFragment")};
+        shaderAttribute = {sizeof(shaderAttribute),
+                           0,
+                           0,
+                           cString("a_position"),
+                           MLN_PLUGIN_VERTEX_FLOAT_X2};
+        shader = {sizeof(shader), cString("test"), &shaderSource, 1, &shaderAttribute, 1};
         layerType.struct_size = sizeof(layerType);
         layerType.layer_type = cString("test-plugin-layer");
         layerType.backend_mask = MLN_PLUGIN_BACKEND_METAL;
@@ -111,10 +130,14 @@ struct LayerTypeDescriptor {
         layerType.requires_3d = 1;
         layerType.properties = properties.data();
         layerType.property_count = properties.size();
-        layerType.create_instance = createInstance;
-        layerType.destroy_instance = destroyInstance;
-        layerType.prepare_frame = callback;
-        layerType.render_layer = callback;
+        layerType.source_kind = MLN_PLUGIN_SOURCE_GEOMETRY;
+        layerType.geometry_type_mask = MLN_PLUGIN_GEOMETRY_POINT;
+        layerType.shaders = &shader;
+        layerType.shader_count = 1;
+        layerType.create_layout = createLayout;
+        layerType.layout_feature = layoutFeature;
+        layerType.finish_layout = finishLayout;
+        layerType.destroy_layout = destroyLayout;
         descriptor = {sizeof(descriptor),
                       MLN_PLUGIN_ABI_VERSION_1,
                       cString("org.maplibre.test.layer-type"),
@@ -128,10 +151,11 @@ struct LayerTypeDescriptor {
     }
 
     mln_plugin_value defaultURI{};
-    mln_plugin_value defaultPosition{};
     mln_plugin_property_descriptor_v1 property{};
-    mln_plugin_property_descriptor_v1 positionProperty{};
-    std::array<mln_plugin_property_descriptor_v1, 2> properties{};
+    std::array<mln_plugin_property_descriptor_v1, 1> properties{};
+    mln_plugin_shader_source_v1 shaderSource{};
+    mln_plugin_shader_attribute_v1 shaderAttribute{};
+    mln_plugin_shader_descriptor_v1 shader{};
     mln_plugin_layer_type_v1 layerType{};
     mln_plugin_descriptor_v1 descriptor{};
 };
@@ -194,21 +218,29 @@ TEST(PluginRegistry, OrdersExtensionsByPriorityThenID) {
     EXPECT_LT(earlierIt, laterIt);
 }
 
-TEST(PluginRegistry, RegistersSourceLessLayerTypeAndScopedProperties) {
+TEST(PluginRegistry, RegistersSourceBoundLayerTypeAndScopedProperties) {
     LayerTypeDescriptor custom;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&custom.descriptor, nullptr, 0));
     const auto registration = plugin::PluginRegistry::get().findLayerType("test-plugin-layer");
     ASSERT_TRUE(registration);
     EXPECT_TRUE(registration->requires3D);
 
-    JSDocument empty;
-    empty.Parse("{}");
-    const JSValue* emptyValue = &empty;
+    JSDocument missingSource;
+    missingSource.Parse("{}");
+    const JSValue* missingSourceValue = &missingSource;
     conversion::Error error;
-    auto layer = LayerManager::get()->createLayer(
-        "test-plugin-layer", "model", conversion::Convertible(emptyValue), error);
+    EXPECT_FALSE(LayerManager::get()->createLayer(
+        "test-plugin-layer", "missing-source", conversion::Convertible(missingSourceValue), error));
+    EXPECT_NE(std::string::npos, error.message.find("requires a source"));
+
+    JSDocument input;
+    input.Parse(R"JSON({"source":"points"})JSON");
+    const JSValue* inputValue = &input;
+    auto layer =
+        LayerManager::get()->createLayer("test-plugin-layer", "model", conversion::Convertible(inputValue), error);
     ASSERT_TRUE(layer) << error.message;
     EXPECT_STREQ("test-plugin-layer", layer->getTypeInfo()->type);
+    EXPECT_EQ("points", layer->getSourceID());
     auto renderLayer = LayerManager::get()->createRenderLayer(layer->baseImpl);
     ASSERT_TRUE(renderLayer);
     EXPECT_TRUE(renderLayer->needsRendering());
@@ -220,30 +252,23 @@ TEST(PluginRegistry, RegistersSourceLessLayerTypeAndScopedProperties) {
     EXPECT_EQ("https://example.test/model.glb",
               *serialized.getObject()->at("layout").getObject()->at("test-model-uri").getString());
 
-    JSDocument position;
-    position.Parse("[2.2945, 48.8584]");
-    const JSValue* positionValue = &position;
-    EXPECT_FALSE(layer->setProperty(
-        "test-model-position", conversion::Convertible(positionValue), Layer::PropertyScope::Layout));
-    const auto serializedPosition = layer->serialize();
-    const auto* positionArray =
-        serializedPosition.getObject()->at("layout").getObject()->at("test-model-position").getArray();
-    ASSERT_NE(nullptr, positionArray);
-    ASSERT_EQ(2u, positionArray->size());
-    EXPECT_NEAR(2.2945, *positionArray->at(0).getDouble(), 1e-6);
-
     util::RunLoop loop;
     auto fileSource = std::make_shared<StubFileSource>();
     Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
     style.loadJSON(R"JSON({
       "version": 8,
-      "sources": {},
+      "sources": {
+        "points": {
+          "type": "geojson",
+          "data": {"type":"FeatureCollection","features":[]}
+        }
+      },
       "layers": [{
         "id": "model-from-json",
         "type": "test-plugin-layer",
+        "source": "points",
         "layout": {
-          "test-model-uri": "https://example.test/from-style.glb",
-          "test-model-position": [2.2945, 48.8584]
+          "test-model-uri": "https://example.test/from-style.glb"
         }
       }]
     })JSON");

@@ -26,6 +26,7 @@ public:
 private:
     const OverscaledTileID tileID;
     const float zoom;
+    std::shared_ptr<FileSource> fileSource;
     std::vector<Immutable<style::LayerProperties>> layers;
     std::unique_ptr<GeometryTileLayer> sourceLayer;
     plugin::LayerType registration;

@@ -27,7 +27,6 @@
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/string.hpp>
-#include <mbgl/util/logging.hpp>
 
 #include <algorithm>
 

@@ -117,7 +117,10 @@ public:
         if (!created) return {};
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
-            typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.location, attr.id});
+            typed->initVertexAttribute({attr.location,
+                                        attributeType(attr.type),
+                                        shaders::drawableReservedUBOCount + attr.location,
+                                        attr.id});
         }
         shader = std::move(typed);
 #else

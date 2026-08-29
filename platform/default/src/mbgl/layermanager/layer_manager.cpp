@@ -111,7 +111,6 @@ LayerFactory* LayerManagerDefault::getFactory(const mbgl::style::LayerTypeInfo* 
             return factory.get();
         }
     }
-    assert(false);
     return nullptr;
 }
 

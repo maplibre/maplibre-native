@@ -363,6 +363,8 @@ typedef struct mln_plugin_layout_context_v1 {
     /* Serialized style values. Expressions are deliberately not evaluated here. */
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
+    /* Resource requests use MapLibre's configured file source and cache. */
+    const mln_plugin_host_api_v1* host;
 } mln_plugin_layout_context_v1;
 
 /* Bytes are copied by the host before finish_layout returns. */
@@ -467,10 +469,9 @@ typedef struct mln_plugin_layer_extension_v1 {
  * ordering, visibility, queries and zoom ranges. The plugin supplies immutable
  * metadata and CPU layout callbacks only.
  *
- * The legacy direct-render callbacks remain at the front of this unpublished
- * v1 struct while in-tree plugins are migrated. New custom layers must use the
- * source/layout/drawable fields below; the host rejects descriptors that mix
- * the two execution models.
+ * Custom layers are source-bound and cannot issue backend commands directly.
+ * Existing-layer extensions use mln_plugin_layer_extension_v1 when they need
+ * access to a target layer's short-lived render packets.
  */
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
@@ -480,11 +481,6 @@ typedef struct mln_plugin_layer_type_v1 {
     uint8_t requires_3d;
     const mln_plugin_property_descriptor_v1* properties;
     size_t property_count;
-    mln_plugin_create_instance_fn create_instance;
-    mln_plugin_destroy_instance_fn destroy_instance;
-    mln_plugin_prepare_frame_fn prepare_frame;
-    mln_plugin_render_before_layer_fn render_layer;
-    mln_plugin_context_lost_fn context_lost;
     mln_plugin_source_kind source_kind;
     uint32_t geometry_type_mask;
     const mln_plugin_shader_descriptor_v1* shaders;

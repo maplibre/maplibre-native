@@ -3,11 +3,14 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/renderer/buckets/plugin_bucket.hpp>
 #include <mbgl/renderer/render_layer.hpp>
+#include <mbgl/storage/file_source.hpp>
+#include <mbgl/storage/resource.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/style/layers/plugin_style_layer.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/rapidjson.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -15,6 +18,7 @@
 #include <cstring>
 #include <limits>
 #include <set>
+#include <thread>
 
 namespace mbgl {
 namespace {
@@ -81,6 +85,88 @@ bool validBlendMode(mln_plugin_blend_mode mode) {
     return mode >= MLN_PLUGIN_BLEND_REPLACE && mode <= MLN_PLUGIN_BLEND_MULTIPLY;
 }
 
+class LayoutResourceHost {
+public:
+    explicit LayoutResourceHost(std::shared_ptr<FileSource> fileSource_)
+        : fileSource(std::move(fileSource_)) {
+        api.struct_size = sizeof(api);
+        api.abi_version = MLN_PLUGIN_ABI_VERSION_1;
+        api.log = log;
+        api.context = this;
+        api.request_resource = requestResource;
+        api.cancel_resource_request = cancelResourceRequest;
+        api.request_repaint = requestRepaint;
+    }
+
+    const mln_plugin_host_api_v1* getAPI() const noexcept { return &api; }
+
+private:
+    static void log(int32_t severity, mln_plugin_string message) {
+        const std::string text = message.data ? std::string(message.data, message.size) : std::string{};
+        if (severity >= 3) {
+            Log::Error(Event::Style, text);
+        } else if (severity == 2) {
+            Log::Warning(Event::Style, text);
+        } else {
+            Log::Info(Event::Style, text);
+        }
+    }
+
+    static mln_plugin_status requestResource(void* context,
+                                             mln_plugin_string url,
+                                             mln_plugin_resource_callback_fn callback,
+                                             void* callbackContext,
+                                             uint64_t* requestID) {
+        auto* self = static_cast<LayoutResourceHost*>(context);
+        if (!self || !self->fileSource || !url.data || !url.size || !callback || !requestID) {
+            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+        const auto id = self->nextRequestID++;
+        *requestID = id;
+        const std::string resourceURL(url.data, url.size);
+        Response response;
+        bool receivedResponse = false;
+        auto fileSource = self->fileSource;
+        // FileSource delivers onto the scheduler that starts a request. Layout
+        // callbacks already run on a tile worker, so waiting for a request
+        // started there would deadlock that scheduler. Give the resource its
+        // own short-lived run loop and return its result on the layout thread.
+        std::thread loader([&] {
+            util::RunLoop runLoop;
+            auto request = fileSource->request(Resource(Resource::Kind::Unknown, resourceURL), [&](Response result) {
+                response = std::move(result);
+                receivedResponse = true;
+                runLoop.stop();
+            });
+            if (!request) return;
+            runLoop.run();
+        });
+        loader.join();
+        if (!receivedResponse) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+
+        std::string error;
+        if (response.error) error = response.error->message;
+        mln_plugin_resource_response_v1 result{};
+        result.struct_size = sizeof(result);
+        result.request_id = id;
+        if (response.data) {
+            result.data = reinterpret_cast<const uint8_t*>(response.data->data());
+            result.data_size = response.data->size();
+        }
+        result.error_message = {error.data(), error.size()};
+        callback(callbackContext, &result);
+        return MLN_PLUGIN_STATUS_OK;
+    }
+
+    static void cancelResourceRequest(void*, uint64_t) {}
+
+    static void requestRepaint(void*) {}
+
+    mln_plugin_host_api_v1 api{};
+    std::shared_ptr<FileSource> fileSource;
+    uint64_t nextRequestID = 1;
+};
+
 } // namespace
 
 PluginLayout::PluginLayout(const BucketParameters& parameters,
@@ -89,6 +175,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            plugin::LayerType registration_)
     : tileID(parameters.tileID),
       zoom(parameters.tileID.overscaledZ),
+      fileSource(parameters.fileSource),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {}
@@ -102,12 +189,12 @@ void PluginLayout::createBucket(const ImagePositions&,
     if (!sourceLayer || layers.empty()) return;
 
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
-    std::vector<mln_plugin_property_value_v1> properties;
-    properties.reserve(plugin::PluginRegistry::get().propertiesForLayer(registration.type).size());
-    // Constant snapshots are retained for old plugins. Expression snapshots
-    // are supplied by the typed property storage added in the evaluation path.
     const auto propertyDefinitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
-    for (const auto& definition : propertyDefinitions) {
+    std::vector<mln_plugin_property_value_v1> properties;
+    std::vector<std::string> propertyStrings(propertyDefinitions.size());
+    properties.reserve(propertyDefinitions.size());
+    for (size_t propertyIndex = 0; propertyIndex < propertyDefinitions.size(); ++propertyIndex) {
+        const auto& definition = propertyDefinitions[propertyIndex];
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = borrowed(definition.name);
@@ -142,13 +229,15 @@ void PluginLayout::createBucket(const ImagePositions&,
             }
             case MLN_PLUGIN_VALUE_STRING: {
                 const auto* string = value.getString();
-                property.value.data.string_value = string ? borrowed(*string) : mln_plugin_string{};
+                if (string) propertyStrings[propertyIndex] = *string;
+                property.value.data.string_value = borrowed(propertyStrings[propertyIndex]);
                 break;
             }
         }
         properties.push_back(property);
     }
 
+    LayoutResourceHost resourceHost(fileSource);
     mln_plugin_layout_context_v1 context{};
     context.struct_size = sizeof(context);
     context.zoom = zoom;
@@ -160,6 +249,7 @@ void PluginLayout::createBucket(const ImagePositions&,
     context.source_layer_id = borrowed(leader.sourceLayer);
     context.properties = properties.data();
     context.property_count = properties.size();
+    context.host = resourceHost.getAPI();
 
     void* layoutInstance = nullptr;
     if (registration.createLayout(&context, &layoutInstance) != MLN_PLUGIN_STATUS_OK || !layoutInstance) {

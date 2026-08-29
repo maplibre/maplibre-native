@@ -114,15 +114,6 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
-    if (!registration.usesHostDrawables()) {
-        if (!layerGroup) {
-            if (auto group = context.createLayerGroup(layerIndex, 0, getID())) {
-                setLayerGroup(std::move(group), changes);
-            }
-        }
-        return;
-    }
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -135,8 +126,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    tileLayerGroup->setStencilTiles(renderTiles);
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties);
+        layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration.requires3D);
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
@@ -197,6 +189,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             builder->setDepthType(definition.depthMode == MLN_PLUGIN_DEPTH_READ_WRITE
                                       ? gfx::DepthMaskType::ReadWrite
                                       : gfx::DepthMaskType::ReadOnly);
+            builder->setIs3D(registration.requires3D);
             builder->setColorMode(colorMode(definition.blendMode));
             builder->setCullFaceMode(definition.enableCullFace ? gfx::CullFaceMode::backCCW()
                                                                : gfx::CullFaceMode::disabled());

@@ -196,18 +196,6 @@ PluginLayerHost::PluginLayerHost(std::string layerID_, std::string layerType_, I
     for (auto& extension : PluginRegistry::get().extensionsForLayer(layerType)) {
         instances.push_back(std::make_unique<Instance>(std::move(extension)));
     }
-    if (const auto registeredType = PluginRegistry::get().findLayerType(layerType)) {
-        instances.push_back(std::make_unique<Instance>(LayerExtension{registeredType->pluginID,
-                                                                      registeredType->pluginVersion,
-                                                                      registeredType->type,
-                                                                      0,
-                                                                      registeredType->backendMask,
-                                                                      registeredType->createInstance,
-                                                                      registeredType->destroyInstance,
-                                                                      registeredType->prepareFrame,
-                                                                      registeredType->renderLayer,
-                                                                      registeredType->contextLost}));
-    }
 }
 
 PluginLayerHost::~PluginLayerHost() {

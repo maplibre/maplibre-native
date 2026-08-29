@@ -69,10 +69,8 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
         const auto& lhs = existing.layerTypes[i];
         const auto& rhs = layerTypes[i];
         if (lhs.type != rhs.type || lhs.backendMask != rhs.backendMask || lhs.renderStage != rhs.renderStage ||
-            lhs.requires3D != rhs.requires3D || lhs.createInstance != rhs.createInstance ||
-            lhs.destroyInstance != rhs.destroyInstance || lhs.prepareFrame != rhs.prepareFrame ||
-            lhs.renderLayer != rhs.renderLayer || lhs.contextLost != rhs.contextLost ||
-            lhs.sourceKind != rhs.sourceKind || lhs.geometryTypeMask != rhs.geometryTypeMask ||
+            lhs.requires3D != rhs.requires3D || lhs.sourceKind != rhs.sourceKind ||
+            lhs.geometryTypeMask != rhs.geometryTypeMask ||
             lhs.createLayout != rhs.createLayout || lhs.layoutFeature != rhs.layoutFeature ||
             lhs.finishLayout != rhs.finishLayout || lhs.destroyLayout != rhs.destroyLayout ||
             lhs.queryFeature != rhs.queryFeature || lhs.shaders.size() != rhs.shaders.size()) {
@@ -317,17 +315,9 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
     std::set<std::string> layerTypeKeys;
     for (size_t i = 0; i < descriptor.layer_type_count; ++i) {
         const auto& layerType = descriptor.layer_types[i];
-        constexpr auto legacyLayerTypeSize = offsetof(mln_plugin_layer_type_v1, source_kind);
-        const bool hasHostDrawableFields = layerType.struct_size >= sizeof(mln_plugin_layer_type_v1);
-        const bool usesHostDrawables =
-            hasHostDrawableFields &&
-            (layerType.create_layout || layerType.layout_feature || layerType.finish_layout ||
-             layerType.destroy_layout || layerType.shader_count || layerType.shaders);
-        const bool usesLegacyRenderer = layerType.create_instance || layerType.destroy_instance ||
-                                        layerType.prepare_frame || layerType.render_layer || layerType.context_lost;
         const uint32_t validGeometryMask = MLN_PLUGIN_GEOMETRY_POINT | MLN_PLUGIN_GEOMETRY_LINESTRING |
                                            MLN_PLUGIN_GEOMETRY_POLYGON;
-        if (layerType.struct_size < legacyLayerTypeSize || !validString(layerType.layer_type) ||
+        if (layerType.struct_size < sizeof(mln_plugin_layer_type_v1) || !validString(layerType.layer_type) ||
             !validBackendMask(layerType.backend_mask) ||
             (layerType.render_stage != MLN_PLUGIN_RENDER_STAGE_PASS_3D &&
              layerType.render_stage != MLN_PLUGIN_RENDER_STAGE_OPAQUE &&
@@ -335,22 +325,10 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             error = "plugin layer type is malformed or has no supported backend";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
-        if (usesHostDrawables == usesLegacyRenderer) {
-            error = usesHostDrawables ? "plugin layer cannot mix host drawables with direct rendering"
-                                      : "plugin layer has no rendering implementation";
-            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
-        }
-        if (usesHostDrawables &&
-            (layerType.source_kind != MLN_PLUGIN_SOURCE_GEOMETRY || !layerType.create_layout ||
-             !layerType.layout_feature || !layerType.finish_layout || !layerType.destroy_layout ||
-             layerType.geometry_type_mask == 0 || (layerType.geometry_type_mask & ~validGeometryMask) != 0)) {
-            error = "host-drawable layer requires a geometry source and complete layout callbacks";
-            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
-        }
-        if (usesLegacyRenderer &&
-            (!layerType.create_instance || !layerType.destroy_instance || !layerType.render_layer ||
-             (hasHostDrawableFields && layerType.source_kind != MLN_PLUGIN_SOURCE_NONE))) {
-            error = "legacy direct-render layer must be source-less and provide complete callbacks";
+        if (layerType.source_kind != MLN_PLUGIN_SOURCE_GEOMETRY || !layerType.create_layout ||
+            !layerType.layout_feature || !layerType.finish_layout || !layerType.destroy_layout ||
+            layerType.geometry_type_mask == 0 || (layerType.geometry_type_mask & ~validGeometryMask) != 0) {
+            error = "plugin layer requires a geometry source and complete layout callbacks";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
         const auto type = copyString(layerType.layer_type);
@@ -365,26 +343,19 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         copiedLayerType.backendMask = layerType.backend_mask;
         copiedLayerType.renderStage = layerType.render_stage;
         copiedLayerType.requires3D = layerType.requires_3d != 0;
-        copiedLayerType.createInstance = layerType.create_instance;
-        copiedLayerType.destroyInstance = layerType.destroy_instance;
-        copiedLayerType.prepareFrame = layerType.prepare_frame;
-        copiedLayerType.renderLayer = layerType.render_layer;
-        copiedLayerType.contextLost = layerType.context_lost;
-        if (hasHostDrawableFields) {
-            copiedLayerType.sourceKind = layerType.source_kind;
-            copiedLayerType.geometryTypeMask = layerType.geometry_type_mask;
-            copiedLayerType.createLayout = layerType.create_layout;
-            copiedLayerType.layoutFeature = layerType.layout_feature;
-            copiedLayerType.finishLayout = layerType.finish_layout;
-            copiedLayerType.destroyLayout = layerType.destroy_layout;
-            copiedLayerType.queryFeature = layerType.query_feature;
-        }
-        if (usesHostDrawables && !appendShaders(pluginID,
-                                                layerType.shaders,
-                                                layerType.shader_count,
-                                                layerType.backend_mask,
-                                                copiedLayerType.shaders,
-                                                error)) {
+        copiedLayerType.sourceKind = layerType.source_kind;
+        copiedLayerType.geometryTypeMask = layerType.geometry_type_mask;
+        copiedLayerType.createLayout = layerType.create_layout;
+        copiedLayerType.layoutFeature = layerType.layout_feature;
+        copiedLayerType.finishLayout = layerType.finish_layout;
+        copiedLayerType.destroyLayout = layerType.destroy_layout;
+        copiedLayerType.queryFeature = layerType.query_feature;
+        if (!appendShaders(pluginID,
+                           layerType.shaders,
+                           layerType.shader_count,
+                           layerType.backend_mask,
+                           copiedLayerType.shaders,
+                           error)) {
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
         newLayerTypes.push_back(std::move(copiedLayerType));

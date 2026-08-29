@@ -36,7 +36,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                           parameters,
                                           {{0.0f, 0.0f}},
                                           style::TranslateAnchorType::Viewport,
-                                          false,
+                                          requires3D,
                                           false,
                                           drawable);
         const PluginDrawableUBO ubo{util::cast<float>(matrix), parameters.pixelsToGLUnits, {0.0f, 0.0f}};
