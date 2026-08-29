@@ -61,24 +61,32 @@ public:
 
     void bind() override {
         assert(context.getBackend().getCommandQueue());
-        commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
-        colorTexture->create();
-
-        renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
-        if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
-            colorTarget->setTexture(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
+        // Upload, plugin prepare, and render passes belong to one frame and
+        // must be encoded into the same command buffer. In particular, plugin
+        // prepare callbacks may produce textures consumed by the main pass.
+        // swap() commits the frame and resets both objects for the next one.
+        if (!commandBuffer) {
+            commandBuffer = NS::RetainPtr(context.getBackend().getCommandQueue()->commandBuffer());
         }
+        if (!renderPassDescriptor) {
+            colorTexture->create();
 
-        if (depthTexture) {
-            depthTexture->create();
-            if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
-                depthTarget->setTexture(static_cast<Texture2D*>(depthTexture.get())->getMetalTexture());
+            renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::alloc()->init());
+            if (auto* colorTarget = renderPassDescriptor->colorAttachments()->object(0)) {
+                colorTarget->setTexture(static_cast<Texture2D*>(colorTexture.get())->getMetalTexture());
             }
-        }
-        if (stencilTexture) {
-            stencilTexture->create();
-            if (auto* stencilTarget = renderPassDescriptor->stencilAttachment()) {
-                stencilTarget->setTexture(static_cast<Texture2D*>(stencilTexture.get())->getMetalTexture());
+
+            if (depthTexture) {
+                depthTexture->create();
+                if (auto* depthTarget = renderPassDescriptor->depthAttachment()) {
+                    depthTarget->setTexture(static_cast<Texture2D*>(depthTexture.get())->getMetalTexture());
+                }
+            }
+            if (stencilTexture) {
+                stencilTexture->create();
+                if (auto* stencilTarget = renderPassDescriptor->stencilAttachment()) {
+                    stencilTarget->setTexture(static_cast<Texture2D*>(stencilTexture.get())->getMetalTexture());
+                }
             }
         }
     }

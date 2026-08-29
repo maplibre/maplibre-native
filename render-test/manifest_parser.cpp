@@ -86,10 +86,10 @@ std::vector<mbgl::filesystem::path> getTestExpectations(const mbgl::filesystem::
 }
 
 mbgl::filesystem::path getValidPath(const std::string& manifestPath, const std::string& path) {
-    const static mbgl::filesystem::path BasePath{manifestPath};
+    const mbgl::filesystem::path basePath{manifestPath};
     mbgl::filesystem::path result{path};
     if (result.is_relative()) {
-        result = BasePath / result;
+        result = basePath / result;
     }
     if (mbgl::filesystem::exists(result)) {
         return result.lexically_normal();
