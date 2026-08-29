@@ -11,6 +11,72 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
   return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude;
 }
 
+static BOOL MLNIsGeoJSONGeometryType(NSString *type) {
+  return [type isEqualToString:@"Point"] || [type isEqualToString:@"MultiPoint"] ||
+         [type isEqualToString:@"LineString"] || [type isEqualToString:@"MultiLineString"] ||
+         [type isEqualToString:@"Polygon"] || [type isEqualToString:@"MultiPolygon"];
+}
+
+static id MLNGeoJSONObjectByReplacingEmptyCoordinates(id object, BOOL *changed) {
+  if ([object isKindOfClass:[NSArray class]]) {
+    NSArray *array = object;
+    NSMutableArray *updatedArray = nil;
+    for (NSUInteger index = 0; index < array.count; index++) {
+      id updatedObject = MLNGeoJSONObjectByReplacingEmptyCoordinates(array[index], changed);
+      if (updatedObject != array[index]) {
+        if (!updatedArray) {
+          updatedArray = [array mutableCopy];
+        }
+        updatedArray[index] = updatedObject;
+      }
+    }
+    return updatedArray ?: object;
+  }
+
+  if (![object isKindOfClass:[NSDictionary class]]) {
+    return object;
+  }
+
+  NSDictionary *dictionary = object;
+  NSString *type = dictionary[@"type"];
+  if (![type isKindOfClass:[NSString class]]) {
+    return object;
+  }
+  id coordinates = dictionary[@"coordinates"];
+  if (MLNIsGeoJSONGeometryType(type) && [coordinates isKindOfClass:[NSArray class]] &&
+      [coordinates count] == 0) {
+    *changed = YES;
+    return [NSNull null];
+  }
+
+  NSString *childKey = nil;
+  if ([type isEqualToString:@"Feature"]) {
+    childKey = @"geometry";
+  } else if ([type isEqualToString:@"FeatureCollection"]) {
+    childKey = @"features";
+  } else if ([type isEqualToString:@"GeometryCollection"]) {
+    childKey = @"geometries";
+  }
+
+  if (!childKey) {
+    return object;
+  }
+
+  id child = dictionary[childKey];
+  if (!child) {
+    return object;
+  }
+
+  id updatedChild = MLNGeoJSONObjectByReplacingEmptyCoordinates(child, changed);
+  if (updatedChild == child) {
+    return object;
+  }
+
+  NSMutableDictionary *updatedDictionary = [dictionary mutableCopy];
+  updatedDictionary[childKey] = updatedChild;
+  return updatedDictionary;
+}
+
 @implementation MLNShape
 
 + (nullable MLNShape *)shapeWithData:(NSData *)data
@@ -28,11 +94,32 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
     const auto geojson = mapbox::geojson::parse(string.UTF8String);
     return MLNShapeFromGeoJSON(geojson);
   } catch (std::runtime_error &err) {
+    NSString *failureReason = @(err.what());
+    NSData *utf8Data = [string dataUsingEncoding:NSUTF8StringEncoding];
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:utf8Data options:0 error:nil];
+    BOOL changed = NO;
+    id updatedJSONObject = MLNGeoJSONObjectByReplacingEmptyCoordinates(jsonObject, &changed);
+    if (changed) {
+      if ([updatedJSONObject isKindOfClass:[NSNull class]]) {
+        updatedJSONObject = @{@"type" : @"GeometryCollection", @"geometries" : @[]};
+      }
+      NSData *updatedData = [NSJSONSerialization dataWithJSONObject:updatedJSONObject
+                                                            options:NSJSONWritingFragmentsAllowed
+                                                              error:nil];
+      NSString *updatedString = [[NSString alloc] initWithData:updatedData
+                                                      encoding:NSUTF8StringEncoding];
+      try {
+        const auto geojson = mapbox::geojson::parse(updatedString.UTF8String);
+        return MLNShapeFromGeoJSON(geojson);
+      } catch (std::runtime_error &updatedError) {
+        failureReason = @(updatedError.what());
+      }
+    }
     if (outError) {
       *outError = [NSError errorWithDomain:MLNErrorDomain
                                       code:MLNErrorCodeUnknown
                                   userInfo:@{
-                                    NSLocalizedFailureReasonErrorKey : @(err.what()),
+                                    NSLocalizedFailureReasonErrorKey : failureReason,
                                   }];
     }
     return nil;

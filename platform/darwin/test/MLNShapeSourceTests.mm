@@ -91,6 +91,52 @@
   XCTAssertTrue([collection.shapes.firstObject isMemberOfClass:[MLNPolylineFeature class]]);
 }
 
+- (void)testMLNShapeSourceWithEmptyGeometries {
+  NSString *geoJSON = @"{\"type\":\"FeatureCollection\",\"features\":["
+                       "{\"type\":\"Feature\",\"properties\":{},\"geometry\":null},"
+                       "{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\","
+                       "\"coordinates\":[]}},"
+                       "{\"type\":\"Feature\",\"properties\":{\"name\":\"Café\"},"
+                       "\"geometry\":{\"type\":\"Point\","
+                       "\"coordinates\":[0,0]}}]}";
+  NSData *data = [geoJSON dataUsingEncoding:NSISOLatin1StringEncoding];
+  NSError *error = nil;
+  MLNShapeCollectionFeature *collection =
+      (MLNShapeCollectionFeature *)[MLNShape shapeWithData:data
+                                                  encoding:NSISOLatin1StringEncoding
+                                                     error:&error];
+
+  XCTAssertNil(error);
+  XCTAssertEqual(collection.shapes.count, 3UL);
+  XCTAssertTrue([collection.shapes[0] isKindOfClass:[MLNEmptyFeature class]]);
+  XCTAssertTrue([collection.shapes[1] isKindOfClass:[MLNEmptyFeature class]]);
+  XCTAssertTrue([collection.shapes[2] isKindOfClass:[MLNPointFeature class]]);
+  XCTAssertEqualObjects([collection.shapes[2] attributeForKey:@"name"], @"Café");
+
+  MLNShapeSource *source;
+  XCTAssertNoThrow(source = [[MLNShapeSource alloc] initWithIdentifier:@"source-id"
+                                                                 shape:collection
+                                                               options:nil]);
+  XCTAssertNotNil(source.shape);
+}
+
+- (void)testMLNShapeSourceWithEmptyTopLevelGeometry {
+  NSData *data =
+      [@"{\"type\":\"Point\",\"coordinates\":[]}" dataUsingEncoding:NSUTF8StringEncoding];
+  NSError *error = nil;
+  MLNShape *shape = [MLNShape shapeWithData:data encoding:NSUTF8StringEncoding error:&error];
+
+  XCTAssertNil(error);
+  XCTAssertTrue([shape isKindOfClass:[MLNShapeCollection class]]);
+  XCTAssertEqual(((MLNShapeCollection *)shape).shapes.count, 0UL);
+
+  MLNShapeSource *source;
+  XCTAssertNoThrow(source = [[MLNShapeSource alloc] initWithIdentifier:@"source-id"
+                                                                 shape:shape
+                                                               options:nil]);
+  XCTAssertNotNil(source.shape);
+}
+
 - (void)testMLNShapeSourceWithSingleGeometry {
   NSData *data =
       [@"{\"type\": \"Point\", \"coordinates\": [0, 0]}" dataUsingEncoding:NSUTF8StringEncoding];
