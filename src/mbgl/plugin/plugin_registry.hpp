@@ -19,6 +19,30 @@ struct PropertyDefinition {
     mln_plugin_value_type type = MLN_PLUGIN_VALUE_BOOLEAN;
     mln_plugin_property_scope scope = MLN_PLUGIN_PROPERTY_PAINT;
     Value defaultValue;
+    bool supportsExpressions = false;
+    bool supportsTransitions = false;
+};
+
+struct ShaderAttribute {
+    uint32_t id = 0;
+    uint32_t location = 0;
+    std::string name;
+    mln_plugin_vertex_attribute_type type = MLN_PLUGIN_VERTEX_FLOAT;
+};
+
+struct ShaderSource {
+    mln_plugin_backend backend = MLN_PLUGIN_BACKEND_OPENGL;
+    std::string vertex;
+    std::string fragment;
+    std::string vertexEntryPoint;
+    std::string fragmentEntryPoint;
+};
+
+struct ShaderDefinition {
+    std::string pluginID;
+    std::string id;
+    std::vector<ShaderSource> sources;
+    std::vector<ShaderAttribute> attributes;
 };
 
 struct LayerExtension {
@@ -46,6 +70,16 @@ struct LayerType {
     mln_plugin_prepare_frame_fn prepareFrame = nullptr;
     mln_plugin_render_before_layer_fn renderLayer = nullptr;
     mln_plugin_context_lost_fn contextLost = nullptr;
+    mln_plugin_source_kind sourceKind = MLN_PLUGIN_SOURCE_NONE;
+    uint32_t geometryTypeMask = 0;
+    std::vector<ShaderDefinition> shaders;
+    mln_plugin_create_layout_fn createLayout = nullptr;
+    mln_plugin_layout_feature_fn layoutFeature = nullptr;
+    mln_plugin_finish_layout_fn finishLayout = nullptr;
+    mln_plugin_destroy_layout_fn destroyLayout = nullptr;
+    mln_plugin_query_feature_fn queryFeature = nullptr;
+
+    bool usesHostDrawables() const noexcept { return createLayout != nullptr; }
 };
 
 class PluginRegistry final {
@@ -57,6 +91,7 @@ public:
     std::vector<PropertyDefinition> propertiesForLayer(const std::string& layerType) const;
     std::vector<LayerExtension> extensionsForLayer(const std::string& layerType) const;
     std::optional<LayerType> findLayerType(const std::string& layerType) const;
+    std::vector<LayerType> allLayerTypes() const;
     bool isRegistered(const std::string& pluginID) const;
     std::vector<std::string> pluginIDs() const;
 

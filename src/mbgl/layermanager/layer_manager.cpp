@@ -1,6 +1,7 @@
 #include <mbgl/layermanager/layer_manager.hpp>
 
 #include <mbgl/layout/layout.hpp>
+#include <mbgl/layout/plugin_layout.hpp>
 #include <mbgl/layermanager/layer_factory.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>
@@ -29,7 +30,17 @@ std::unique_ptr<style::Layer> LayerManager::createLayer(const std::string& type,
         return layer;
     } else {
         if (auto registration = plugin::PluginRegistry::get().findLayerType(type)) {
-            return std::make_unique<style::PluginStyleLayer>(id, std::move(*registration));
+            std::string source;
+            if (registration->sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY) {
+                const auto sourceValue = objectMember(value, "source");
+                const auto sourceID = sourceValue ? toString(*sourceValue) : std::nullopt;
+                if (!sourceID || sourceID->empty()) {
+                    error.message = "Plugin layer '" + id + "' of type '" + type + "' requires a source";
+                    return nullptr;
+                }
+                source = *sourceID;
+            }
+            return std::make_unique<style::PluginStyleLayer>(id, source, std::move(*registration));
         }
         error.message = "Null factory for type: " + type;
     }
@@ -52,6 +63,11 @@ std::unique_ptr<Layout> LayerManager::createLayout(const LayoutParameters& param
     assert(!layers.empty());
     assert(parameters.bucketParameters.layerType->layout == style::LayerTypeInfo::Layout::Required);
     LayerFactory* factory = getFactory(parameters.bucketParameters.layerType);
+    if (!factory && layers.front()->baseImpl->isPluginStyleLayer()) {
+        const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
+        return std::make_unique<PluginLayout>(
+            parameters.bucketParameters, layers, std::move(tileLayer), impl.registration);
+    }
     assert(factory);
     return factory->createLayout(parameters, std::move(tileLayer), layers);
 }

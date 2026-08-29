@@ -1,0 +1,157 @@
+#include <mbgl/plugin/plugin_shader.hpp>
+
+#include <mbgl/gfx/backend.hpp>
+#include <mbgl/gfx/gfx_types.hpp>
+#include <mbgl/gfx/shader_group.hpp>
+#include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/plugin/plugin_registry.hpp>
+#include <mbgl/shaders/program_parameters.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/util/logging.hpp>
+
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mbgl/gl/context.hpp>
+#include <mbgl/shaders/gl/shader_info.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#elif MLN_RENDER_BACKEND_VULKAN
+#include <mbgl/vulkan/context.hpp>
+#include <mbgl/shaders/vulkan/shader_program.hpp>
+#elif MLN_RENDER_BACKEND_METAL
+#include <mbgl/mtl/context.hpp>
+#include <mbgl/shaders/mtl/common.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
+#endif
+
+#include <stdexcept>
+
+namespace mbgl {
+namespace plugin {
+namespace {
+
+#if MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_METAL
+gfx::AttributeDataType attributeType(mln_plugin_vertex_attribute_type type) {
+    switch (type) {
+        case MLN_PLUGIN_VERTEX_INT16:
+            return gfx::AttributeDataType::Short;
+        case MLN_PLUGIN_VERTEX_INT16_X2:
+            return gfx::AttributeDataType::Short2;
+        case MLN_PLUGIN_VERTEX_UINT16:
+            return gfx::AttributeDataType::UShort;
+        case MLN_PLUGIN_VERTEX_UINT16_X2:
+            return gfx::AttributeDataType::UShort2;
+        case MLN_PLUGIN_VERTEX_FLOAT:
+            return gfx::AttributeDataType::Float;
+        case MLN_PLUGIN_VERTEX_FLOAT_X2:
+            return gfx::AttributeDataType::Float2;
+        case MLN_PLUGIN_VERTEX_FLOAT_X3:
+            return gfx::AttributeDataType::Float3;
+        case MLN_PLUGIN_VERTEX_FLOAT_X4:
+            return gfx::AttributeDataType::Float4;
+        case MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED:
+            return gfx::AttributeDataType::UByte4;
+    }
+    return gfx::AttributeDataType::Invalid;
+}
+#endif
+
+const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backend backend) {
+    for (const auto& source : shader.sources) {
+        if (source.backend == backend) return &source;
+    }
+    return nullptr;
+}
+
+class PluginShaderGroup final : public gfx::ShaderGroup {
+public:
+    PluginShaderGroup(ShaderDefinition definition_, ProgramParameters parameters_)
+        : definition(std::move(definition_)), parameters(std::move(parameters_)) {}
+
+    gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
+                                     const StringIDSetsPair&,
+                                     std::string_view) override {
+        const auto name = shaderGroupName(definition.pluginID, definition.id);
+        if (auto existing = getShader(name)) return existing;
+
+        gfx::ShaderPtr shader;
+#if MLN_RENDER_BACKEND_OPENGL
+        const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_OPENGL);
+        if (!source) return {};
+        std::vector<shaders::AttributeInfo> attributes;
+        attributes.reserve(definition.attributes.size());
+        for (const auto& attr : definition.attributes) attributes.emplace_back(attr.name, attr.id);
+        const std::vector<shaders::UniformBlockInfo> uniformBlocks = {
+            {"PluginDrawableUBO", shaders::idDrawableReservedVertexOnlyUBO}};
+        shader = gl::ShaderProgramGL::create(static_cast<gl::Context&>(context),
+                                             parameters.withProgramType(shaders::BuiltIn::None),
+                                             definition.attributes.front().name,
+                                             uniformBlocks,
+                                             {},
+                                             attributes,
+                                             source->vertex,
+                                             source->fragment);
+#elif MLN_RENDER_BACKEND_VULKAN
+        const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_VULKAN);
+        if (!source) return {};
+        auto created = static_cast<vulkan::Context&>(context).createProgram(shaders::BuiltIn::None,
+                                                                            name,
+                                                                            source->vertex,
+                                                                            source->fragment,
+                                                                            parameters,
+                                                                            {});
+        if (!created) return {};
+        auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
+        for (const auto& attr : definition.attributes) {
+            typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
+        }
+        shader = std::move(typed);
+#elif MLN_RENDER_BACKEND_METAL
+        const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_METAL);
+        if (!source) return {};
+        auto created = static_cast<mtl::Context&>(context).createProgram(shaders::BuiltIn::None,
+                                                                         name,
+                                                                         std::string(shaders::prelude) + source->vertex,
+                                                                         source->vertexEntryPoint,
+                                                                         source->fragmentEntryPoint,
+                                                                         parameters,
+                                                                         {});
+        if (!created) return {};
+        auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
+        for (const auto& attr : definition.attributes) {
+            typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.location, attr.id});
+        }
+        shader = std::move(typed);
+#else
+        (void)context;
+#endif
+        if (!shader) return {};
+        if (!registerShader(gfx::ShaderPtr(shader), name)) {
+            return getShader(name);
+        }
+        return shader;
+    }
+
+private:
+    ShaderDefinition definition;
+    ProgramParameters parameters;
+};
+
+} // namespace
+
+std::string shaderGroupName(const std::string& pluginID, const std::string& shaderID) {
+    return "plugin/" + pluginID + "/" + shaderID;
+}
+
+void registerPluginShaderGroups(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
+    for (const auto& layerType : PluginRegistry::get().allLayerTypes()) {
+        for (const auto& shader : layerType.shaders) {
+            const auto name = shaderGroupName(shader.pluginID, shader.id);
+            if (registry.isShaderGroup(name)) continue;
+            if (!registry.registerShaderGroup(std::make_shared<PluginShaderGroup>(shader, parameters), name)) {
+                throw std::runtime_error("Failed to register plugin shader group '" + name + "'");
+            }
+        }
+    }
+}
+
+} // namespace plugin
+} // namespace mbgl

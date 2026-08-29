@@ -45,6 +45,24 @@ typedef enum mln_plugin_property_scope {
     MLN_PLUGIN_PROPERTY_LAYOUT = 2
 } mln_plugin_property_scope;
 
+/*
+ * Custom layer source contract. Geometry sources cover GeoJSON and vector
+ * tile sources. The remaining values are reserved so adding raster and DEM
+ * adapters does not change the shape of the layer descriptor.
+ */
+typedef enum mln_plugin_source_kind {
+    MLN_PLUGIN_SOURCE_NONE = 0,
+    MLN_PLUGIN_SOURCE_GEOMETRY = 1,
+    MLN_PLUGIN_SOURCE_RASTER = 2,
+    MLN_PLUGIN_SOURCE_RASTER_DEM = 3
+} mln_plugin_source_kind;
+
+typedef enum mln_plugin_geometry_type {
+    MLN_PLUGIN_GEOMETRY_POINT = 1u << 0u,
+    MLN_PLUGIN_GEOMETRY_LINESTRING = 1u << 1u,
+    MLN_PLUGIN_GEOMETRY_POLYGON = 1u << 2u
+} mln_plugin_geometry_type;
+
 typedef struct mln_plugin_string {
     const char* data;
     size_t size;
@@ -82,6 +100,10 @@ typedef struct mln_plugin_property_descriptor_v1 {
     mln_plugin_value_type type;
     mln_plugin_property_scope scope;
     mln_plugin_value default_value;
+    /* Expressions are parsed and evaluated by the host. */
+    uint8_t supports_expressions;
+    /* Paint properties may opt into the normal MapLibre transition system. */
+    uint8_t supports_transitions;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -241,6 +263,181 @@ typedef struct mln_plugin_host_api_v1 {
     void (*request_repaint)(void* context);
 } mln_plugin_host_api_v1;
 
+/* ------------------------------------------------------------------------- */
+/* Source layout and host-owned drawable API                                 */
+/* ------------------------------------------------------------------------- */
+
+typedef enum mln_plugin_vertex_attribute_type {
+    MLN_PLUGIN_VERTEX_INT16 = 1,
+    MLN_PLUGIN_VERTEX_INT16_X2 = 2,
+    MLN_PLUGIN_VERTEX_UINT16 = 3,
+    MLN_PLUGIN_VERTEX_UINT16_X2 = 4,
+    MLN_PLUGIN_VERTEX_FLOAT = 5,
+    MLN_PLUGIN_VERTEX_FLOAT_X2 = 6,
+    MLN_PLUGIN_VERTEX_FLOAT_X3 = 7,
+    MLN_PLUGIN_VERTEX_FLOAT_X4 = 8,
+    MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED = 9
+} mln_plugin_vertex_attribute_type;
+
+typedef enum mln_plugin_draw_mode {
+    MLN_PLUGIN_DRAW_MODE_TRIANGLES = 1,
+    MLN_PLUGIN_DRAW_MODE_LINES = 2,
+    MLN_PLUGIN_DRAW_MODE_POINTS = 3
+} mln_plugin_draw_mode;
+
+typedef enum mln_plugin_depth_mode {
+    MLN_PLUGIN_DEPTH_DISABLED = 0,
+    MLN_PLUGIN_DEPTH_READ_ONLY = 1,
+    MLN_PLUGIN_DEPTH_READ_WRITE = 2
+} mln_plugin_depth_mode;
+
+typedef enum mln_plugin_blend_mode {
+    MLN_PLUGIN_BLEND_REPLACE = 0,
+    MLN_PLUGIN_BLEND_ALPHA = 1,
+    MLN_PLUGIN_BLEND_PREMULTIPLIED_ALPHA = 2,
+    MLN_PLUGIN_BLEND_MULTIPLY = 3
+} mln_plugin_blend_mode;
+
+/* Stable IDs are local to one registered plugin layer type. */
+typedef struct mln_plugin_shader_attribute_v1 {
+    uint32_t struct_size;
+    uint32_t attribute_id;
+    uint32_t location;
+    mln_plugin_string name;
+    mln_plugin_vertex_attribute_type type;
+} mln_plugin_shader_attribute_v1;
+
+typedef struct mln_plugin_shader_source_v1 {
+    uint32_t struct_size;
+    mln_plugin_backend backend;
+    /* GLSL vertex source for OpenGL/Vulkan; complete MSL source for Metal. */
+    mln_plugin_string vertex_source;
+    /* GLSL fragment source. Empty for Metal, where vertex_source is complete. */
+    mln_plugin_string fragment_source;
+    /* Metal entry points. Empty for OpenGL/Vulkan. */
+    mln_plugin_string vertex_entry_point;
+    mln_plugin_string fragment_entry_point;
+} mln_plugin_shader_source_v1;
+
+typedef struct mln_plugin_shader_descriptor_v1 {
+    uint32_t struct_size;
+    mln_plugin_string shader_id;
+    const mln_plugin_shader_source_v1* sources;
+    size_t source_count;
+    const mln_plugin_shader_attribute_v1* attributes;
+    size_t attribute_count;
+} mln_plugin_shader_descriptor_v1;
+
+/* A geometry is represented as paths into a flat tile-coordinate point list. */
+typedef struct mln_plugin_tile_point_v1 {
+    int16_t x;
+    int16_t y;
+} mln_plugin_tile_point_v1;
+
+typedef struct mln_plugin_feature_v1 {
+    uint32_t struct_size;
+    mln_plugin_geometry_type geometry_type;
+    uint64_t feature_index;
+    mln_plugin_string feature_id;
+    const mln_plugin_tile_point_v1* points;
+    size_t point_count;
+    /* path_offsets has path_count + 1 entries and ends at point_count. */
+    const uint32_t* path_offsets;
+    size_t path_count;
+    /* UTF-8 JSON object. Borrowed and valid only during layout_feature. */
+    mln_plugin_string properties_json;
+    /* Host-evaluated plugin properties for this feature and tile zoom. */
+    const mln_plugin_property_value_v1* evaluated_properties;
+    size_t evaluated_property_count;
+} mln_plugin_feature_v1;
+
+typedef struct mln_plugin_layout_context_v1 {
+    uint32_t struct_size;
+    float zoom;
+    int32_t canonical_z;
+    int32_t canonical_x;
+    int32_t canonical_y;
+    uint32_t extent;
+    mln_plugin_string layer_id;
+    mln_plugin_string source_layer_id;
+    /* Serialized style values. Expressions are deliberately not evaluated here. */
+    const mln_plugin_property_value_v1* properties;
+    size_t property_count;
+} mln_plugin_layout_context_v1;
+
+/* Bytes are copied by the host before finish_layout returns. */
+typedef struct mln_plugin_vertex_stream_v1 {
+    uint32_t struct_size;
+    uint32_t stream_id;
+    const uint8_t* data;
+    size_t data_size;
+    uint32_t vertex_count;
+    uint32_t stride;
+} mln_plugin_vertex_stream_v1;
+
+typedef struct mln_plugin_attribute_binding_v1 {
+    uint32_t struct_size;
+    uint32_t attribute_id;
+    uint32_t stream_id;
+    uint32_t byte_offset;
+    mln_plugin_vertex_attribute_type type;
+} mln_plugin_attribute_binding_v1;
+
+typedef struct mln_plugin_segment_v1 {
+    uint32_t struct_size;
+    uint32_t vertex_offset;
+    uint32_t index_offset;
+    uint32_t vertex_length;
+    uint32_t index_length;
+    uint64_t feature_index;
+} mln_plugin_segment_v1;
+
+typedef struct mln_plugin_drawable_descriptor_v1 {
+    uint32_t struct_size;
+    uint64_t drawable_key;
+    mln_plugin_string shader_id;
+    mln_plugin_draw_mode draw_mode;
+    mln_plugin_render_stage render_stage;
+    mln_plugin_depth_mode depth_mode;
+    mln_plugin_blend_mode blend_mode;
+    uint8_t enable_stencil;
+    uint8_t enable_cull_face;
+    const mln_plugin_attribute_binding_v1* attributes;
+    size_t attribute_count;
+    const mln_plugin_segment_v1* segments;
+    size_t segment_count;
+} mln_plugin_drawable_descriptor_v1;
+
+typedef struct mln_plugin_bucket_v1 {
+    uint32_t struct_size;
+    const mln_plugin_vertex_stream_v1* vertex_streams;
+    size_t vertex_stream_count;
+    const uint16_t* indices;
+    size_t index_count;
+    const mln_plugin_drawable_descriptor_v1* drawables;
+    size_t drawable_count;
+    /* Maximum screen-pixel distance used by precise rendered-feature query. */
+    float query_radius;
+} mln_plugin_bucket_v1;
+
+typedef mln_plugin_status (*mln_plugin_create_layout_fn)(const mln_plugin_layout_context_v1* context,
+                                                         void** layout_instance);
+typedef mln_plugin_status (*mln_plugin_layout_feature_fn)(void* layout_instance,
+                                                          const mln_plugin_feature_v1* feature);
+typedef mln_plugin_status (*mln_plugin_finish_layout_fn)(void* layout_instance, mln_plugin_bucket_v1* bucket);
+typedef void (*mln_plugin_destroy_layout_fn)(void* layout_instance);
+
+/*
+ * Optional exact hit test. query_x/query_y and feature geometry are in tile
+ * coordinates; pixels_to_tile_units converts the bucket query radius.
+ */
+typedef uint8_t (*mln_plugin_query_feature_fn)(const mln_plugin_feature_v1* feature,
+                                              const mln_plugin_tile_point_v1* query_geometry,
+                                              size_t query_geometry_count,
+                                              double pixels_to_tile_units,
+                                              const mln_plugin_property_value_v1* properties,
+                                              size_t property_count);
+
 typedef mln_plugin_status (*mln_plugin_create_instance_fn)(const mln_plugin_host_api_v1* host,
                                                            mln_plugin_string layer_id,
                                                            void** instance);
@@ -265,9 +462,15 @@ typedef struct mln_plugin_layer_extension_v1 {
 } mln_plugin_layer_extension_v1;
 
 /*
- * A source-less style layer type implemented entirely by a plugin. The host
- * owns style parsing, property storage, ordering, visibility and zoom ranges;
- * the plugin owns its renderer and GPU resources.
+ * A custom style layer type. The host owns parsing, source/tile scheduling,
+ * expression evaluation, bucket lifetime, shaders, GPU resources, drawables,
+ * ordering, visibility, queries and zoom ranges. The plugin supplies immutable
+ * metadata and CPU layout callbacks only.
+ *
+ * The legacy direct-render callbacks remain at the front of this unpublished
+ * v1 struct while in-tree plugins are migrated. New custom layers must use the
+ * source/layout/drawable fields below; the host rejects descriptors that mix
+ * the two execution models.
  */
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
@@ -282,6 +485,15 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_prepare_frame_fn prepare_frame;
     mln_plugin_render_before_layer_fn render_layer;
     mln_plugin_context_lost_fn context_lost;
+    mln_plugin_source_kind source_kind;
+    uint32_t geometry_type_mask;
+    const mln_plugin_shader_descriptor_v1* shaders;
+    size_t shader_count;
+    mln_plugin_create_layout_fn create_layout;
+    mln_plugin_layout_feature_fn layout_feature;
+    mln_plugin_finish_layout_fn finish_layout;
+    mln_plugin_destroy_layout_fn destroy_layout;
+    mln_plugin_query_feature_fn query_feature;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

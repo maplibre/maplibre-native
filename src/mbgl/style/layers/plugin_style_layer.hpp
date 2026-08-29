@@ -11,7 +11,7 @@ namespace style {
 
 class PluginStyleLayer final : public Layer {
 public:
-    PluginStyleLayer(const std::string& id, plugin::LayerType);
+    PluginStyleLayer(const std::string& id, const std::string& source, plugin::LayerType);
     ~PluginStyleLayer() final;
 
     class Impl;
@@ -29,12 +29,13 @@ private:
 
 class PluginStyleLayer::Impl final : public Layer::Impl {
 public:
-    Impl(const std::string& id, plugin::LayerType);
+    Impl(const std::string& id, const std::string& source, plugin::LayerType);
     Impl(const Impl&) = default;
 
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
     const LayerTypeInfo* getTypeInfo() const noexcept override;
+    expression::Dependency getDependencies() const noexcept override;
     bool isPluginStyleLayer() const noexcept override { return true; }
 
     struct TypeInfoHolder;
@@ -45,9 +46,25 @@ public:
 class PluginStyleLayerProperties final : public LayerProperties {
 public:
     explicit PluginStyleLayerProperties(Immutable<PluginStyleLayer::Impl> impl)
-        : LayerProperties(std::move(impl)) {}
+        : LayerProperties(std::move(impl)) {
+        const auto& registration = static_cast<const PluginStyleLayer::Impl&>(*baseImpl).registration;
+        switch (registration.renderStage) {
+            case MLN_PLUGIN_RENDER_STAGE_PASS_3D:
+                renderPasses = 1u << 2u;
+                break;
+            case MLN_PLUGIN_RENDER_STAGE_OPAQUE:
+                renderPasses = 1u << 0u;
+                break;
+            case MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT:
+                renderPasses = 1u << 1u;
+                break;
+            default:
+                renderPasses = 0;
+                break;
+        }
+    }
 
-    expression::Dependency getDependencies() const noexcept override { return expression::Dependency::None; }
+    expression::Dependency getDependencies() const noexcept override { return baseImpl->getDependencies(); }
 };
 
 } // namespace style

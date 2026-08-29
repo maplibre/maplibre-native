@@ -151,7 +151,10 @@ Value Layer::serialize() const {
         const auto section = definition->scope == MLN_PLUGIN_PROPERTY_PAINT ? "paint" : "layout";
         auto& object = result[section];
         if (!object.getObject()) object = mapbox::base::ValueObject{};
-        object.getObject()->insert_or_assign(name, value);
+        const auto property = value.toStyleProperty();
+        if (property.getKind() != StyleProperty::Kind::Undefined) {
+            object.getObject()->insert_or_assign(name, property.getValue());
+        }
     }
 
     return result;
@@ -160,10 +163,10 @@ Value Layer::serialize() const {
 StyleProperty Layer::getPluginProperty(const std::string& name) const {
     const auto value = baseImpl->pluginProperties.find(name);
     if (value != baseImpl->pluginProperties.end()) {
-        return {value->second, StyleProperty::Kind::Constant};
+        return value->second.toStyleProperty();
     }
     const auto definition = plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name);
-    return definition ? StyleProperty{definition->defaultValue, StyleProperty::Kind::Constant} : StyleProperty{};
+    return definition ? defaultPluginPropertyValue(*definition).toStyleProperty() : StyleProperty{};
 }
 
 bool Layer::getPluginBoolean(const std::string& name, bool defaultValue) const {
@@ -276,41 +279,12 @@ std::optional<conversion::Error> Layer::setPluginProperty(const std::string& nam
         return std::nullopt;
     }
 
-    std::optional<Value> converted;
-    switch (definition->type) {
-        case MLN_PLUGIN_VALUE_BOOLEAN:
-            if (const auto typed = toBool(value)) converted = Value{*typed};
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT:
-            if (const auto typed = toDouble(value)) converted = Value{*typed};
-            break;
-        case MLN_PLUGIN_VALUE_STRING:
-            if (const auto typed = toString(value)) converted = Value{*typed};
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT2:
-        case MLN_PLUGIN_VALUE_COLOR: {
-            const std::size_t expectedSize = definition->type == MLN_PLUGIN_VALUE_FLOAT2 ? 2 : 4;
-            if (!isArray(value) || arrayLength(value) != expectedSize) break;
-            mapbox::base::ValueArray items;
-            items.reserve(expectedSize);
-            for (std::size_t i = 0; i < expectedSize; ++i) {
-                const auto item = toDouble(arrayMember(value, i));
-                if (!item) {
-                    items.clear();
-                    break;
-                }
-                items.emplace_back(*item);
-            }
-            if (items.size() == expectedSize) converted = Value{std::move(items)};
-            break;
-        }
-    }
-    if (!converted || !plugin::PluginRegistry::valueMatches(definition->type, *converted)) {
-        return Error{"plugin property '" + name + "' has the wrong constant type"};
-    }
+    Error conversionError;
+    auto converted = convertPluginPropertyValue(*definition, value, conversionError);
+    if (!converted) return conversionError;
     const auto existing = impl_->pluginProperties.find(name);
     if (existing != impl_->pluginProperties.end() && existing->second == *converted) return std::nullopt;
-    impl_->pluginProperties.insert_or_assign(name, *converted);
+    impl_->pluginProperties.insert_or_assign(name, std::move(*converted));
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
     return std::nullopt;

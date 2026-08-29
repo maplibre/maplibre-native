@@ -3,6 +3,7 @@
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/extension.hpp>
+#include <mbgl/plugin/plugin_shader.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
@@ -152,6 +153,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
     // Initialize legacy shader programs
     Programs programs(programParameters);
     programs.registerWith(shaders);
+    plugin::registerPluginShaderGroups(shaders, programParameters);
 }
 
 } // namespace gl

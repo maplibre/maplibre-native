@@ -43,8 +43,13 @@ struct Descriptor {
         defaultValue.struct_size = sizeof(defaultValue);
         defaultValue.type = MLN_PLUGIN_VALUE_BOOLEAN;
         defaultValue.data.boolean_value = 0;
-        property = {
-            sizeof(property), cString(propertyName), MLN_PLUGIN_VALUE_BOOLEAN, MLN_PLUGIN_PROPERTY_PAINT, defaultValue};
+        property = {sizeof(property),
+                    cString(propertyName),
+                    MLN_PLUGIN_VALUE_BOOLEAN,
+                    MLN_PLUGIN_PROPERTY_PAINT,
+                    defaultValue,
+                    0,
+                    0};
         extension = {sizeof(extension),
                      cString("fill-extrusion"),
                      10,
@@ -85,7 +90,9 @@ struct LayerTypeDescriptor {
                     cString("test-model-uri"),
                     MLN_PLUGIN_VALUE_STRING,
                     MLN_PLUGIN_PROPERTY_LAYOUT,
-                    defaultURI};
+                    defaultURI,
+                    0,
+                    0};
         defaultPosition.struct_size = sizeof(defaultPosition);
         defaultPosition.type = MLN_PLUGIN_VALUE_FLOAT2;
         defaultPosition.data.float2_value = {0.0f, 0.0f};
@@ -93,20 +100,21 @@ struct LayerTypeDescriptor {
                             cString("test-model-position"),
                             MLN_PLUGIN_VALUE_FLOAT2,
                             MLN_PLUGIN_PROPERTY_LAYOUT,
-                            defaultPosition};
+                            defaultPosition,
+                            0,
+                            0};
         properties = {property, positionProperty};
-        layerType = {sizeof(layerType),
-                     cString("test-plugin-layer"),
-                     MLN_PLUGIN_BACKEND_METAL,
-                     MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT,
-                     1,
-                     properties.data(),
-                     properties.size(),
-                     createInstance,
-                     destroyInstance,
-                     callback,
-                     callback,
-                     nullptr};
+        layerType.struct_size = sizeof(layerType);
+        layerType.layer_type = cString("test-plugin-layer");
+        layerType.backend_mask = MLN_PLUGIN_BACKEND_METAL;
+        layerType.render_stage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
+        layerType.requires_3d = 1;
+        layerType.properties = properties.data();
+        layerType.property_count = properties.size();
+        layerType.create_instance = createInstance;
+        layerType.destroy_instance = destroyInstance;
+        layerType.prepare_frame = callback;
+        layerType.render_layer = callback;
         descriptor = {sizeof(descriptor),
                       MLN_PLUGIN_ABI_VERSION_1,
                       cString("org.maplibre.test.layer-type"),
@@ -222,7 +230,7 @@ TEST(PluginRegistry, RegistersSourceLessLayerTypeAndScopedProperties) {
         serializedPosition.getObject()->at("layout").getObject()->at("test-model-position").getArray();
     ASSERT_NE(nullptr, positionArray);
     ASSERT_EQ(2u, positionArray->size());
-    EXPECT_DOUBLE_EQ(2.2945, *positionArray->at(0).getDouble());
+    EXPECT_NEAR(2.2945, *positionArray->at(0).getDouble(), 1e-6);
 
     util::RunLoop loop;
     auto fileSource = std::make_shared<StubFileSource>();
@@ -283,7 +291,7 @@ TEST(PluginStyleProperty, DefaultSetCloneAndSerialize) {
     EXPECT_TRUE(layer.setProperty("test-plugin-boolean", conversion::Convertible(&wrongType)));
 
     JSDocument expression;
-    expression.Parse(R"(["literal", true])");
+    expression.Parse(R"(["get", "enabled"])");
     const JSValue* expressionValue = &expression;
     EXPECT_TRUE(layer.setProperty("test-plugin-boolean", conversion::Convertible(expressionValue)));
 

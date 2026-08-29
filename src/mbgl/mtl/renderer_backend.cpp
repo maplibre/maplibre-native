@@ -3,6 +3,7 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/context.hpp>
+#include <mbgl/plugin/plugin_shader.hpp>
 #include <mbgl/shaders/background_layer_ubo.hpp>
 
 #include <mbgl/shaders/mtl/shader_group.hpp>
@@ -136,6 +137,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+    plugin::registerPluginShaderGroups(shaders, programParameters);
 }
 
 } // namespace mtl

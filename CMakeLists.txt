@@ -989,10 +989,19 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layer_host.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_registry.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_registry.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_shader.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_shader.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layout/plugin_layout.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layout/plugin_layout.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/buckets/plugin_bucket.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/plugin_style_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/plugin_style_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/plugin_property.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/plugin_property.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_plugin_style_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_plugin_style_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/plugin_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/plugin_layer_tweaker.cpp
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)

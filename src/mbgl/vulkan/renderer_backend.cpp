@@ -4,6 +4,7 @@
 
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/plugin/plugin_shader.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/logging.hpp>
 
@@ -725,6 +726,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+    plugin::registerPluginShaderGroups(shaders, programParameters);
 }
 
 } // namespace vulkan

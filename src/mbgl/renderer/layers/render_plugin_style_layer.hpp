@@ -19,13 +19,20 @@ public:
 
     bool is3D() const override;
 
+    bool queryIntersectsFeature(const GeometryCoordinates&,
+                                const GeometryTileFeature&,
+                                float,
+                                const TransformState&,
+                                float,
+                                const mat4&,
+                                const FeatureState&) const override;
+
 private:
     void transition(const TransitionParameters&) override {}
     void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override { return false; }
     bool hasCrossfade() const override { return false; }
     void markContextDestroyed() override { RenderLayer::markContextDestroyed(); }
-    void prepare(const LayerPrepareParameters&) override {}
 };
 
 } // namespace mbgl

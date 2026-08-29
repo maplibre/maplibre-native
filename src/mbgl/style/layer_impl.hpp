@@ -3,6 +3,7 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/style/filter.hpp>
+#include <mbgl/style/plugin_property.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -62,9 +63,9 @@ public:
     float maxZoom = std::numeric_limits<float>::infinity();
     VisibilityType visibility = VisibilityType::Visible;
 
-    // Constant properties supplied by runtime plugins. The property schema is
-    // process-wide; values belong to the immutable layer implementation.
-    std::map<std::string, Value> pluginProperties;
+    // Typed constant/expression values supplied by runtime plugins. The
+    // property schema is process-wide; values belong to immutable layer state.
+    std::map<std::string, PluginPropertyValue> pluginProperties;
 
 protected:
     Impl(const Impl&) = default;

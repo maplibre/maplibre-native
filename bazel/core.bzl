@@ -3,15 +3,24 @@ MLN_LAYER_PLUGIN_HEADERS = [
     "src/mbgl/plugin/plugin_drawable_data.hpp",
     "src/mbgl/plugin/plugin_layer_host.hpp",
     "src/mbgl/plugin/plugin_registry.hpp",
+    "src/mbgl/plugin/plugin_shader.hpp",
+    "src/mbgl/layout/plugin_layout.hpp",
+    "src/mbgl/renderer/buckets/plugin_bucket.hpp",
     "src/mbgl/style/layers/plugin_style_layer.hpp",
+    "src/mbgl/style/plugin_property.hpp",
     "src/mbgl/renderer/layers/render_plugin_style_layer.hpp",
+    "src/mbgl/renderer/layers/plugin_layer_tweaker.hpp",
 ]
 
 MLN_LAYER_PLUGIN_SOURCE = [
     "src/mbgl/plugin/plugin_layer_host.cpp",
     "src/mbgl/plugin/plugin_registry.cpp",
+    "src/mbgl/plugin/plugin_shader.cpp",
+    "src/mbgl/layout/plugin_layout.cpp",
     "src/mbgl/style/layers/plugin_style_layer.cpp",
+    "src/mbgl/style/plugin_property.cpp",
     "src/mbgl/renderer/layers/render_plugin_style_layer.cpp",
+    "src/mbgl/renderer/layers/plugin_layer_tweaker.cpp",
 ]
 
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [

@@ -247,7 +247,10 @@ PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const In
         if (definition.pluginID != instance.extension.pluginID) continue;
         const auto explicitValue = layerImpl->pluginProperties.find(definition.name);
         const bool explicitlySet = explicitValue != layerImpl->pluginProperties.end();
-        const auto& value = explicitlySet ? explicitValue->second : definition.defaultValue;
+        const auto styleValue = explicitlySet ? explicitValue->second.toStyleProperty() : style::StyleProperty{};
+        const auto& value = explicitlySet && styleValue.getKind() == style::StyleProperty::Kind::Constant
+                                ? styleValue.getValue()
+                                : definition.defaultValue;
         snapshot.names.push_back(definition.name);
         snapshot.values.push_back(
             mln_plugin_property_value_v1{sizeof(mln_plugin_property_value_v1),

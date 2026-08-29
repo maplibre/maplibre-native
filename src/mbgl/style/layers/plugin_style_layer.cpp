@@ -7,19 +7,22 @@ struct PluginStyleLayer::Impl::TypeInfoHolder {
     explicit TypeInfoHolder(const plugin::LayerType& registration)
         : name(registration.type),
           info{name.c_str(),
-               LayerTypeInfo::Source::NotRequired,
+               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? LayerTypeInfo::Source::Required
+                                                                     : LayerTypeInfo::Source::NotRequired,
                registration.requires3D ? LayerTypeInfo::Pass3D::Required : LayerTypeInfo::Pass3D::NotRequired,
-               LayerTypeInfo::Layout::NotRequired,
+               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? LayerTypeInfo::Layout::Required
+                                                                     : LayerTypeInfo::Layout::NotRequired,
                LayerTypeInfo::FadingTiles::NotRequired,
                LayerTypeInfo::CrossTileIndex::NotRequired,
-               LayerTypeInfo::TileKind::NotRequired} {}
+               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? LayerTypeInfo::TileKind::Geometry
+                                                                     : LayerTypeInfo::TileKind::NotRequired} {}
 
     std::string name;
     LayerTypeInfo info;
 };
 
-PluginStyleLayer::Impl::Impl(const std::string& id, plugin::LayerType registration_)
-    : Layer::Impl(id, ""),
+PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, plugin::LayerType registration_)
+    : Layer::Impl(id, source),
       registration(std::move(registration_)),
       typeInfo(std::make_shared<TypeInfoHolder>(registration)) {}
 
@@ -36,8 +39,19 @@ const LayerTypeInfo* PluginStyleLayer::Impl::getTypeInfo() const noexcept {
     return &typeInfo->info;
 }
 
-PluginStyleLayer::PluginStyleLayer(const std::string& id, plugin::LayerType registration)
-    : Layer(makeMutable<Impl>(id, std::move(registration))) {}
+expression::Dependency PluginStyleLayer::Impl::getDependencies() const noexcept {
+    expression::Dependency result = expression::Dependency::None;
+    for (const auto& [name, value] : pluginProperties) {
+        (void)name;
+        result |= value.getDependencies();
+    }
+    return result;
+}
+
+PluginStyleLayer::PluginStyleLayer(const std::string& id,
+                                   const std::string& source,
+                                   plugin::LayerType registration)
+    : Layer(makeMutable<Impl>(id, source, std::move(registration))) {}
 
 PluginStyleLayer::PluginStyleLayer(Immutable<Impl> impl_)
     : Layer(std::move(impl_)) {}
