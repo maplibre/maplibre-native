@@ -67,7 +67,15 @@ const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backen
 std::string resourcePrelude(const ShaderDefinition& shader) {
     std::ostringstream output;
     for (const auto& uniform : shader.uniformBlocks) {
-        output << "#define MLN_PLUGIN_UNIFORM_" << uniform.id << "_BINDING " << uniform.bindingID << '\n';
+        auto bindingID = uniform.bindingID;
+#if MLN_RENDER_BACKEND_VULKAN
+        // Uniform arrays use MapLibre's global IDs, while Vulkan descriptor
+        // bindings are local to their descriptor set. Built-in shaders perform
+        // this same mapping through their backend-specific prelude constants.
+        bindingID -= uniform.scope == MLN_PLUGIN_UNIFORM_SCOPE_LAYER ? shaders::layerSSBOStartId
+                                                                     : shaders::drawableSSBOStartId;
+#endif
+        output << "#define MLN_PLUGIN_UNIFORM_" << uniform.id << "_BINDING " << bindingID << '\n';
     }
     for (const auto& texture : shader.textures) {
         output << "#define MLN_PLUGIN_TEXTURE_" << texture.id << "_BINDING " << texture.location << '\n';
