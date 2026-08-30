@@ -241,5 +241,4 @@ class iosapp_UITests: XCTestCase {
             }
         }
     }
-
 }

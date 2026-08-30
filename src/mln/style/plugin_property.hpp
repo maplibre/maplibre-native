@@ -50,9 +50,7 @@ public:
                               const FeatureState&,
                               const plugin::PropertyDefinition&,
                               EvaluationStorage&) const;
-    mln_plugin_value evaluate(float zoom,
-                              const plugin::PropertyDefinition&,
-                              EvaluationStorage&) const;
+    mln_plugin_value evaluate(float zoom, const plugin::PropertyDefinition&, EvaluationStorage&) const;
 
     friend bool operator==(const PluginPropertyValue& lhs, const PluginPropertyValue& rhs) {
         return lhs.value == rhs.value;

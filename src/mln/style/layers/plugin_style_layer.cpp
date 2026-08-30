@@ -14,12 +14,10 @@ struct PluginStyleLayer::Impl::TypeInfoHolder {
                                                                      : LayerTypeInfo::Layout::NotRequired,
                LayerTypeInfo::FadingTiles::NotRequired,
                LayerTypeInfo::CrossTileIndex::NotRequired,
-               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY
-                   ? LayerTypeInfo::TileKind::Geometry
-                   : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM
-                         ? LayerTypeInfo::TileKind::RasterDEM
-                         : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER ? LayerTypeInfo::TileKind::Raster
-                                                                              : LayerTypeInfo::TileKind::NotRequired} {}
+               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY     ? LayerTypeInfo::TileKind::Geometry
+               : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM ? LayerTypeInfo::TileKind::RasterDEM
+               : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER     ? LayerTypeInfo::TileKind::Raster
+                                                                         : LayerTypeInfo::TileKind::NotRequired} {}
 
     std::string name;
     LayerTypeInfo info;

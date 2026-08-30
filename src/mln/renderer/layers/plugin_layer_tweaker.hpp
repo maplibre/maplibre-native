@@ -9,9 +9,7 @@ namespace mln {
 
 class PluginLayerTweaker final : public LayerTweaker {
 public:
-    PluginLayerTweaker(std::string id,
-                       Immutable<style::LayerProperties> properties,
-                       plugin::LayerType registration_)
+    PluginLayerTweaker(std::string id, Immutable<style::LayerProperties> properties, plugin::LayerType registration_)
         : LayerTweaker(std::move(id), std::move(properties)),
           requires3D(registration_.requires3D),
           registration(std::move(registration_)) {}

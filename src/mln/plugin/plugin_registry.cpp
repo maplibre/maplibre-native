@@ -97,12 +97,11 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
         const auto& rhs = layerTypes[i];
         if (lhs.type != rhs.type || lhs.backendMask != rhs.backendMask || lhs.renderStage != rhs.renderStage ||
             lhs.requires3D != rhs.requires3D || lhs.participatesIn3DPass != rhs.participatesIn3DPass ||
-            lhs.sourceKind != rhs.sourceKind ||
-            lhs.geometryTypeMask != rhs.geometryTypeMask || lhs.createLayout != rhs.createLayout ||
-            lhs.layoutFeature != rhs.layoutFeature || lhs.finishLayout != rhs.finishLayout ||
-            lhs.destroyLayout != rhs.destroyLayout || lhs.queryFeature != rhs.queryFeature ||
-            lhs.shaders.size() != rhs.shaders.size() || lhs.renderGraph != rhs.renderGraph ||
-            lhs.updateUniformBlock != rhs.updateUniformBlock) {
+            lhs.sourceKind != rhs.sourceKind || lhs.geometryTypeMask != rhs.geometryTypeMask ||
+            lhs.createLayout != rhs.createLayout || lhs.layoutFeature != rhs.layoutFeature ||
+            lhs.finishLayout != rhs.finishLayout || lhs.destroyLayout != rhs.destroyLayout ||
+            lhs.queryFeature != rhs.queryFeature || lhs.shaders.size() != rhs.shaders.size() ||
+            lhs.renderGraph != rhs.renderGraph || lhs.updateUniformBlock != rhs.updateUniformBlock) {
             return false;
         }
         for (size_t shaderIndex = 0; shaderIndex < lhs.shaders.size(); ++shaderIndex) {
@@ -258,9 +257,9 @@ bool appendShaders(const std::string& pluginID,
         for (size_t uniformIndex = 0; uniformIndex < input.uniform_block_count; ++uniformIndex) {
             const auto& uniform = input.uniform_blocks[uniformIndex];
             const auto validStages = MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT;
-            if (uniform.struct_size < sizeof(mln_plugin_uniform_block_descriptor_v1) ||
-                !validString(uniform.name) || uniform.byte_size == 0 || uniform.byte_size % 16 != 0 ||
-                uniform.stage_mask == 0 || (uniform.stage_mask & ~validStages) != 0 ||
+            if (uniform.struct_size < sizeof(mln_plugin_uniform_block_descriptor_v1) || !validString(uniform.name) ||
+                uniform.byte_size == 0 || uniform.byte_size % 16 != 0 || uniform.stage_mask == 0 ||
+                (uniform.stage_mask & ~validStages) != 0 ||
                 (uniform.scope != MLN_PLUGIN_UNIFORM_SCOPE_LAYER &&
                  uniform.scope != MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE) ||
                 !uniformIDs.emplace(uniform.uniform_id).second ||
@@ -320,8 +319,7 @@ bool appendShaders(const std::string& pluginID,
             const auto& texture = input.textures[textureIndex];
             if (texture.struct_size < sizeof(mln_plugin_shader_texture_v1) || !validString(texture.name) ||
                 texture.location >= shaders::maxTextureCountPerShader ||
-                !textureIDs.emplace(texture.texture_id).second ||
-                !textureLocations.emplace(texture.location).second) {
+                !textureIDs.emplace(texture.texture_id).second || !textureLocations.emplace(texture.location).second) {
                 error = "plugin shader texture is malformed or duplicated";
                 return false;
             }
@@ -420,20 +418,20 @@ bool appendProperties(const std::string& pluginID,
                 }
             }
         }
-        output.push_back(PropertyDefinition{
-            pluginID,
-            targetLayerType,
-            propertyName,
-            property.type,
-            property.scope,
-            std::move(defaultValue),
-            property.supports_expressions != 0,
-            property.supports_transitions != 0,
-            property.accepts_scalar != 0,
-            property.has_minimum ? std::optional<float>{property.minimum} : std::nullopt,
-            property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
-            property.maximum_array_length,
-            std::move(enumValues)});
+        output.push_back(
+            PropertyDefinition{pluginID,
+                               targetLayerType,
+                               propertyName,
+                               property.type,
+                               property.scope,
+                               std::move(defaultValue),
+                               property.supports_expressions != 0,
+                               property.supports_transitions != 0,
+                               property.accepts_scalar != 0,
+                               property.has_minimum ? std::optional<float>{property.minimum} : std::nullopt,
+                               property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
+                               property.maximum_array_length,
+                               std::move(enumValues)});
     }
     return true;
 }
@@ -474,9 +472,8 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
             return false;
         }
         const auto shaderID = copyString(pass.shader_id);
-        const auto shaderIt = std::find_if(shaders.begin(), shaders.end(), [&](const auto& shader) {
-            return shader.id == shaderID;
-        });
+        const auto shaderIt = std::find_if(
+            shaders.begin(), shaders.end(), [&](const auto& shader) { return shader.id == shaderID; });
         if (shaderIt == shaders.end()) {
             error = "plugin render pass references an unknown shader";
             return false;
@@ -507,9 +504,9 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
         std::set<uint32_t> boundTextures;
         for (size_t bindingIndex = 0; bindingIndex < pass.texture_count; ++bindingIndex) {
             const auto& binding = pass.textures[bindingIndex];
-            const auto textureIt = std::find_if(shaderIt->textures.begin(), shaderIt->textures.end(), [&](const auto& texture) {
-                return texture.id == binding.texture_id;
-            });
+            const auto textureIt = std::find_if(shaderIt->textures.begin(),
+                                                shaderIt->textures.end(),
+                                                [&](const auto& texture) { return texture.id == binding.texture_id; });
             const bool validSource = binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM ||
                                      binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET;
             if (binding.struct_size < sizeof(mln_plugin_texture_binding_v1) || textureIt == shaderIt->textures.end() ||
@@ -637,9 +634,9 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             (geometryLayer && (!layerType.create_layout || !layerType.layout_feature || !layerType.finish_layout ||
                                !layerType.destroy_layout || layerType.geometry_type_mask == 0 ||
                                (layerType.geometry_type_mask & ~validGeometryMask) != 0 || layerType.render_graph)) ||
-            (rasterDEMLayer && (layerType.create_layout || layerType.layout_feature || layerType.finish_layout ||
-                               layerType.destroy_layout || layerType.geometry_type_mask != 0 ||
-                               !layerType.render_graph))) {
+            (rasterDEMLayer &&
+             (layerType.create_layout || layerType.layout_feature || layerType.finish_layout ||
+              layerType.destroy_layout || layerType.geometry_type_mask != 0 || !layerType.render_graph))) {
             error = geometryLayer ? "geometry plugin layer has an invalid layout or render graph contract"
                                   : "RasterDEM plugin layer requires a render graph and no geometry callbacks";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
@@ -677,20 +674,15 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         }
         const bool needsUniformCallback = std::any_of(copiedLayerType.shaders.begin(),
                                                       copiedLayerType.shaders.end(),
-                                                      [](const auto& shader) {
-                                                          return !shader.uniformBlocks.empty();
-                                                      });
+                                                      [](const auto& shader) { return !shader.uniformBlocks.empty(); });
         if (needsUniformCallback && !layerType.update_uniform_block) {
             error = "plugin layer declares uniforms without an update callback";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
         if (rasterDEMLayer) {
             RenderGraphDefinition graph;
-            if (!appendRenderGraph(*layerType.render_graph,
-                                   copiedLayerType.shaders,
-                                   layerType.render_stage,
-                                   graph,
-                                   error)) {
+            if (!appendRenderGraph(
+                    *layerType.render_graph, copiedLayerType.shaders, layerType.render_stage, graph, error)) {
                 return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
             }
             copiedLayerType.renderGraph = std::move(graph);

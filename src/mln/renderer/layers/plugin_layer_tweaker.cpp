@@ -54,9 +54,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         for (size_t i = 0; i < propertyDefinitions.size(); ++i) {
             const auto& definition = propertyDefinitions[i];
             const auto propertyIt = impl.pluginProperties.find(definition.name);
-            const auto value = propertyIt == impl.pluginProperties.end()
-                                   ? style::defaultPluginPropertyValue(definition)
-                                   : propertyIt->second;
+            const auto value = propertyIt == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                         : propertyIt->second;
             mln_plugin_property_value_v1 property{};
             property.struct_size = sizeof(property);
             property.name = {definition.name.data(), definition.name.size()};
@@ -70,16 +69,12 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) return;
             const auto& data = static_cast<const gfx::PluginRenderGraphDrawableData&>(*drawable.getData());
             const auto* pass = registration.renderGraph ? findPass(registration, data.passID) : nullptr;
-            const auto* shader = pass
-                                     ? findShader(registration, *pass)
-                                     : [&]() -> const plugin::ShaderDefinition* {
-                                           const auto it = std::find_if(registration.shaders.begin(),
-                                                                        registration.shaders.end(),
-                                                                        [&](const auto& candidate) {
-                                                                            return candidate.id == data.shaderID;
-                                                                        });
-                                           return it == registration.shaders.end() ? nullptr : &*it;
-                                       }();
+            const auto* shader = pass ? findShader(registration, *pass) : [&]() -> const plugin::ShaderDefinition* {
+                const auto it = std::find_if(registration.shaders.begin(),
+                                             registration.shaders.end(),
+                                             [&](const auto& candidate) { return candidate.id == data.shaderID; });
+                return it == registration.shaders.end() ? nullptr : &*it;
+            }();
             if (!shader) return;
 
             const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();

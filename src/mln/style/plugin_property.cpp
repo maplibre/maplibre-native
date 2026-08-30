@@ -90,9 +90,7 @@ T evaluateTyped(const PropertyValue<T>& value,
 }
 
 template <class T>
-T evaluateCameraTyped(const PropertyValue<T>& value,
-                      float zoom,
-                      const plugin::PropertyDefinition& definition) {
+T evaluateCameraTyped(const PropertyValue<T>& value, float zoom, const plugin::PropertyDefinition& definition) {
     const auto fallback = defaultValue<T>(definition);
     return value.match([&](const Undefined&) { return fallback; },
                        [&](const T& constant) { return constant; },
@@ -149,8 +147,8 @@ bool validateConstant(const plugin::PropertyDefinition& definition,
             for (const auto& item : *array) {
                 const auto number = numericValue<double>(item);
                 if (!number || !inRange(*number)) {
-                    error.message =
-                        "array entry is outside the allowed range for plugin property '" + definition.name + "'";
+                    error.message = "array entry is outside the allowed range for plugin property '" + definition.name +
+                                    "'";
                     return false;
                 }
             }
@@ -258,8 +256,7 @@ mln_plugin_value PluginPropertyValue::evaluate(float zoom,
             result.data.string_value = {storage.string.data(), storage.string.size()};
             break;
         case MLN_PLUGIN_VALUE_FLOAT_ARRAY:
-            storage.floats = evaluateCameraTyped(
-                std::get<PropertyValue<std::vector<float>>>(value), zoom, definition);
+            storage.floats = evaluateCameraTyped(std::get<PropertyValue<std::vector<float>>>(value), zoom, definition);
             result.data.float_array_value = {storage.floats.data(), storage.floats.size()};
             break;
         case MLN_PLUGIN_VALUE_COLOR_ARRAY: {

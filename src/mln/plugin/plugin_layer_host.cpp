@@ -275,15 +275,12 @@ PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const In
                                 ? styleValue.getValue()
                                 : definition.defaultValue;
         snapshot.names.push_back(definition.name);
-        snapshot.values.push_back(
-            mln_plugin_property_value_v1{sizeof(mln_plugin_property_value_v1),
-                                         {snapshot.names.back().data(), snapshot.names.back().size()},
-                                         makeCValue(value,
-                                                    definition.type,
-                                                    snapshot.stringValues,
-                                                    snapshot.floatArrayValues,
-                                                    snapshot.colorArrayValues),
-                                         static_cast<uint8_t>(explicitlySet ? 1 : 0)});
+        snapshot.values.push_back(mln_plugin_property_value_v1{
+            sizeof(mln_plugin_property_value_v1),
+            {snapshot.names.back().data(), snapshot.names.back().size()},
+            makeCValue(
+                value, definition.type, snapshot.stringValues, snapshot.floatArrayValues, snapshot.colorArrayValues),
+            static_cast<uint8_t>(explicitlySet ? 1 : 0)});
     }
     return snapshot;
 }

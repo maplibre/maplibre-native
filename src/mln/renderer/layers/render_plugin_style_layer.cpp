@@ -107,22 +107,20 @@ gfx::TextureWrapType textureWrap(mln_plugin_texture_wrap wrap) {
 }
 
 const plugin::ShaderDefinition* findShader(const plugin::LayerType& registration, const std::string& id) {
-    const auto it = std::find_if(registration.shaders.begin(), registration.shaders.end(), [&](const auto& shader) {
-        return shader.id == id;
-    });
+    const auto it = std::find_if(
+        registration.shaders.begin(), registration.shaders.end(), [&](const auto& shader) { return shader.id == id; });
     return it == registration.shaders.end() ? nullptr : &*it;
 }
 
 const plugin::ShaderTextureDefinition* findTexture(const plugin::ShaderDefinition& shader, uint32_t id) {
-    const auto it = std::find_if(shader.textures.begin(), shader.textures.end(), [&](const auto& texture) {
-        return texture.id == id;
-    });
+    const auto it = std::find_if(
+        shader.textures.begin(), shader.textures.end(), [&](const auto& texture) { return texture.id == id; });
     return it == shader.textures.end() ? nullptr : &*it;
 }
 
 mln_plugin_raster_dem_encoding demEncoding(Tileset::RasterEncoding encoding) {
     return encoding == Tileset::RasterEncoding::Terrarium ? MLN_PLUGIN_RASTER_DEM_TERRARIUM
-                                                           : MLN_PLUGIN_RASTER_DEM_MAPBOX;
+                                                          : MLN_PLUGIN_RASTER_DEM_MAPBOX;
 }
 
 void activateRenderTarget(const RenderTargetPtr& renderTarget, bool activate, UniqueChangeRequestVec& changes) {
@@ -338,9 +336,8 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
 
     const auto deactivate = [&](const RenderTargetPtr& target) {
         activateRenderTarget(target, false, changes);
-        activatedRenderTargets.erase(
-            std::remove(activatedRenderTargets.begin(), activatedRenderTargets.end(), target),
-            activatedRenderTargets.end());
+        activatedRenderTargets.erase(std::remove(activatedRenderTargets.begin(), activatedRenderTargets.end(), target),
+                                     activatedRenderTargets.end());
     };
     const auto discardTileState = [&](const OverscaledTileID& tileID, RasterGraphTileState& tileState) {
         removeTile(mainRenderPass, tileID);
@@ -385,8 +382,8 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     if (!rasterSharedVertices) {
-        rasterSharedVertices =
-            std::make_shared<gfx::VertexVector<HillshadeLayoutVertex>>(RenderStaticData::rasterVertices());
+        rasterSharedVertices = std::make_shared<gfx::VertexVector<HillshadeLayoutVertex>>(
+            RenderStaticData::rasterVertices());
     }
     const auto staticIndices = RenderStaticData::quadTriangleIndices();
     const auto staticSegments = RenderStaticData::rasterSegments();
@@ -404,8 +401,7 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
         auto& bucket = static_cast<HillshadeBucket&>(*rawBucket);
         auto existing = rasterGraphTiles.find(tileID);
         if (existing != rasterGraphTiles.end() &&
-            (existing->second.bucketID != bucket.getID() ||
-             existing->second.demRevision != bucket.getDEMRevision() ||
+            (existing->second.bucketID != bucket.getID() || existing->second.demRevision != bucket.getDEMRevision() ||
              existing->second.maskRevision != bucket.getMaskRevision())) {
             discardTileState(tileID, existing->second);
             rasterGraphTiles.erase(existing);
@@ -443,7 +439,8 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
         bool complete = true;
         for (const auto& pass : graph.passes) {
             const auto* shaderDefinition = findShader(registration, pass.shaderID);
-            const auto shaderGroup = shaders.getShaderGroup(plugin::shaderGroupName(registration.pluginID, pass.shaderID));
+            const auto shaderGroup = shaders.getShaderGroup(
+                plugin::shaderGroupName(registration.pluginID, pass.shaderID));
             const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, {}) : gfx::ShaderPtr{};
             if (!shaderDefinition || !shader) {
                 complete = false;
@@ -454,8 +451,7 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
                                 !bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty();
             const auto vertices = masked ? bucket.sharedVertices : rasterSharedVertices;
             std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices =
-                masked ? bucket.sharedIndices
-                       : std::make_shared<gfx::IndexVector<gfx::Triangles>>(staticIndices);
+                masked ? bucket.sharedIndices : std::make_shared<gfx::IndexVector<gfx::Triangles>>(staticIndices);
             const auto* segments = masked ? &bucket.segments : &staticSegments;
 
             auto attributes = context.createVertexAttributeArray();
@@ -529,13 +525,13 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
                 drawable->setLayerTweaker(layerTweaker);
-                drawable->setData(std::make_unique<gfx::PluginRenderGraphDrawableData>(
-                    pass.shaderID,
-                    pass.id,
-                    dimension,
-                    stride,
-                    demEncoding(bucket.getDEMData().encoding),
-                    sourceMaxZoom));
+                drawable->setData(
+                    std::make_unique<gfx::PluginRenderGraphDrawableData>(pass.shaderID,
+                                                                         pass.id,
+                                                                         dimension,
+                                                                         stride,
+                                                                         demEncoding(bucket.getDEMData().encoding),
+                                                                         sourceMaxZoom));
                 if (pass.renderTargetID) {
                     auto targetGroup = std::static_pointer_cast<TileLayerGroup>(
                         tileState.renderTargets.at(pass.renderTargetID)->getLayerGroup(0));

@@ -45,10 +45,7 @@ private:
     bool hasCrossfade() const override { return false; }
     void markContextDestroyed() override;
 
-    void updateRasterDEMGraph(gfx::ShaderRegistry&,
-                              gfx::Context&,
-                              const PaintParameters&,
-                              UniqueChangeRequestVec&);
+    void updateRasterDEMGraph(gfx::ShaderRegistry&, gfx::Context&, const PaintParameters&, UniqueChangeRequestVec&);
     void addRenderTarget(const RenderTargetPtr&, UniqueChangeRequestVec&);
     void removeRenderTargets(UniqueChangeRequestVec&);
 

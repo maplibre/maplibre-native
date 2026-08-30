@@ -114,13 +114,12 @@ public:
 #elif MLN_RENDER_BACKEND_VULKAN
         const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_VULKAN);
         if (!source) return {};
-        auto created = static_cast<vulkan::Context&>(context).createProgram(
-            shaders::BuiltIn::None,
-            name,
-            pluginPrelude + source->vertex,
-            pluginPrelude + source->fragment,
-            parameters,
-            {});
+        auto created = static_cast<vulkan::Context&>(context).createProgram(shaders::BuiltIn::None,
+                                                                            name,
+                                                                            pluginPrelude + source->vertex,
+                                                                            pluginPrelude + source->fragment,
+                                                                            parameters,
+                                                                            {});
         if (!created) return {};
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
@@ -133,13 +132,14 @@ public:
 #elif MLN_RENDER_BACKEND_METAL
         const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_METAL);
         if (!source) return {};
-        auto created = static_cast<mtl::Context&>(context).createProgram(shaders::BuiltIn::None,
-                                                                         name,
-                                                                         std::string(shaders::prelude) + pluginPrelude + source->vertex,
-                                                                         source->vertexEntryPoint,
-                                                                         source->fragmentEntryPoint,
-                                                                         parameters,
-                                                                         {});
+        auto created = static_cast<mtl::Context&>(context).createProgram(
+            shaders::BuiltIn::None,
+            name,
+            std::string(shaders::prelude) + pluginPrelude + source->vertex,
+            source->vertexEntryPoint,
+            source->fragmentEntryPoint,
+            parameters,
+            {});
         if (!created) return {};
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {

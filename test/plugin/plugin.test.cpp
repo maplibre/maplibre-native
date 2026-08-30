@@ -186,8 +186,7 @@ TEST(PluginRegistry, RejectsAbiMismatchAndConflictingProperty) {
 TEST(PluginRegistry, RejectsMalformedDuplicateAndNonPaintDescriptors) {
     Descriptor truncatedProperty("org.maplibre.test.truncated-property", "test-truncated-property");
     truncatedProperty.property.struct_size = sizeof(truncatedProperty.property) - 1;
-    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
-              mln_plugin_register_v1(&truncatedProperty.descriptor, nullptr, 0));
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&truncatedProperty.descriptor, nullptr, 0));
 
     Descriptor missingDestroy("org.maplibre.test.missing-destroy", "test-missing-destroy");
     missingDestroy.extension.destroy_instance = nullptr;
@@ -205,13 +204,12 @@ TEST(PluginRegistry, RejectsMalformedDuplicateAndNonPaintDescriptors) {
 }
 
 TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies) {
-    const mln_plugin_shader_source_v1 source{
-        sizeof(mln_plugin_shader_source_v1),
-        MLN_PLUGIN_BACKEND_METAL,
-        cString("shader source"),
-        {},
-        cString("testVertex"),
-        cString("testFragment")};
+    const mln_plugin_shader_source_v1 source{sizeof(mln_plugin_shader_source_v1),
+                                             MLN_PLUGIN_BACKEND_METAL,
+                                             cString("shader source"),
+                                             {},
+                                             cString("testVertex"),
+                                             cString("testFragment")};
     const mln_plugin_shader_attribute_v1 attribute{
         sizeof(mln_plugin_shader_attribute_v1), 0, 0, cString("a_position"), MLN_PLUGIN_VERTEX_INT16_X2};
     const mln_plugin_uniform_block_descriptor_v1 uniform{sizeof(mln_plugin_uniform_block_descriptor_v1),
@@ -220,8 +218,7 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
                                                          16,
                                                          MLN_PLUGIN_SHADER_STAGE_VERTEX,
                                                          MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE};
-    const mln_plugin_shader_texture_v1 texture{
-        sizeof(mln_plugin_shader_texture_v1), 0, 0, cString("u_image")};
+    const mln_plugin_shader_texture_v1 texture{sizeof(mln_plugin_shader_texture_v1), 0, 0, cString("u_image")};
     const mln_plugin_shader_descriptor_v1 shader{sizeof(mln_plugin_shader_descriptor_v1),
                                                  cString("dem-shader"),
                                                  &source,
@@ -233,9 +230,9 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
                                                  &texture,
                                                  1};
     const mln_plugin_render_target_descriptor_v1 target{sizeof(mln_plugin_render_target_descriptor_v1),
-                                                         1,
-                                                         MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE,
-                                                         MLN_PLUGIN_RENDER_TARGET_RGBA8};
+                                                        1,
+                                                        MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE,
+                                                        MLN_PLUGIN_RENDER_TARGET_RGBA8};
     const mln_plugin_texture_binding_v1 prepareTexture{sizeof(mln_plugin_texture_binding_v1),
                                                        0,
                                                        MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM,
