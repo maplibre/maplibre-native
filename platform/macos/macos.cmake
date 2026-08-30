@@ -149,9 +149,7 @@ find_program(
     NAMES llvm-objcopy
     HINTS
         /opt/homebrew/opt/llvm/bin
-        /opt/homebrew/opt/llvm@18/bin
         /usr/local/opt/llvm/bin
-        /usr/local/opt/llvm@18/bin
 )
 
 if(MLN_CREATE_AMALGAMATION)
