@@ -66,7 +66,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         }
 
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-            if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) return;
+            if (!drawable.getData() || !checkTweakDrawable(drawable)) return;
             const auto& data = static_cast<const gfx::PluginRenderGraphDrawableData&>(*drawable.getData());
             const auto* pass = registration.renderGraph ? findPass(registration, data.passID) : nullptr;
             const auto* shader = pass ? findShader(registration, *pass) : [&]() -> const plugin::ShaderDefinition* {
@@ -77,28 +77,38 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             }();
             if (!shader) return;
 
-            const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            const auto tileMatrix = getTileMatrix(tileID,
-                                                  parameters,
-                                                  {0.0f, 0.0f},
-                                                  style::TranslateAnchorType::Viewport,
-                                                  requires3D,
-                                                  false,
-                                                  drawable,
-                                                  true);
+            const bool hasTile = drawable.getTileID().has_value();
+            const std::optional<UnwrappedTileID> tileID =
+                hasTile ? std::optional<UnwrappedTileID>{drawable.getTileID()->toUnwrapped()} : std::nullopt;
+            mat4 tileMatrix = matrix::identity4();
+            if (hasTile) {
+                const bool nearClipped = pass ? pass->tileProjection == MLN_PLUGIN_TILE_PROJECTION_NEAR_CLIPPED
+                                              : requires3D;
+                const bool aligned = pass ? pass->tileProjection == MLN_PLUGIN_TILE_PROJECTION_ALIGNED : true;
+                tileMatrix = getTileMatrix(*tileID,
+                                           parameters,
+                                           {0.0f, 0.0f},
+                                           style::TranslateAnchorType::Viewport,
+                                           nearClipped,
+                                           false,
+                                           drawable,
+                                           aligned);
+            }
             mat4 targetMatrix;
             matrix::ortho(targetMatrix, 0, util::EXTENT, -util::EXTENT, 0, -1, 1);
             matrix::translate(targetMatrix, targetMatrix, 0, -util::EXTENT, 0);
-            const auto latitudeRange = getLatRange(tileID);
+            const auto latitudeRange = hasTile ? getLatRange(*tileID) : std::array<float, 2>{0.0f, 0.0f};
+            mat4 viewportMatrix;
+            matrix::ortho(viewportMatrix, 0, 1, 1, 0, -1, 1);
 
             mln_plugin_uniform_context_v1 callbackContext{};
             callbackContext.struct_size = sizeof(callbackContext);
             callbackContext.pass_id = pass ? pass->id : 0;
-            callbackContext.canonical_z = tileID.canonical.z;
-            callbackContext.canonical_x = tileID.canonical.x;
-            callbackContext.canonical_y = tileID.canonical.y;
-            callbackContext.wrap = tileID.wrap;
-            callbackContext.overscaled_z = drawable.getTileID()->overscaledZ;
+            callbackContext.canonical_z = hasTile ? tileID->canonical.z : 0;
+            callbackContext.canonical_x = hasTile ? tileID->canonical.x : 0;
+            callbackContext.canonical_y = hasTile ? tileID->canonical.y : 0;
+            callbackContext.wrap = hasTile ? tileID->wrap : 0;
+            callbackContext.overscaled_z = hasTile ? drawable.getTileID()->overscaledZ : 0;
             callbackContext.source_max_zoom = data.sourceMaxZoom;
             callbackContext.dem_dimension = data.dimension;
             callbackContext.dem_stride = data.stride;
@@ -112,6 +122,16 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             std::copy(tileMatrixFloats.begin(), tileMatrixFloats.end(), callbackContext.tile_matrix);
             std::copy(targetMatrixFloats.begin(), targetMatrixFloats.end(), callbackContext.render_target_matrix);
             std::copy(latitudeRange.begin(), latitudeRange.end(), callbackContext.latitude_range);
+            const auto viewportSize = parameters.state.getSize();
+            callbackContext.viewport_width = viewportSize.width;
+            callbackContext.viewport_height = viewportSize.height;
+            callbackContext.render_target_width = data.renderTargetWidth;
+            callbackContext.render_target_height = data.renderTargetHeight;
+            callbackContext.pixels_to_tile_units = hasTile ? tileID->pixelsToTileUnits(
+                                                                 1.0f, static_cast<float>(parameters.state.getZoom()))
+                                                           : 0.0f;
+            const auto viewportMatrixFloats = util::cast<float>(viewportMatrix);
+            std::copy(viewportMatrixFloats.begin(), viewportMatrixFloats.end(), callbackContext.viewport_matrix);
             callbackContext.properties = propertyValues.data();
             callbackContext.property_count = propertyValues.size();
 

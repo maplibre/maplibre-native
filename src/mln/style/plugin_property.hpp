@@ -2,6 +2,7 @@
 
 #include <mln/plugin/plugin_api.h>
 #include <mln/style/property_value.hpp>
+#include <mln/style/color_ramp_property_value.hpp>
 #include <mln/style/style_property.hpp>
 #include <mln/util/color.hpp>
 
@@ -28,7 +29,8 @@ public:
                                     PropertyValue<Color>,
                                     PropertyValue<std::string>,
                                     PropertyValue<std::vector<float>>,
-                                    PropertyValue<std::vector<Color>>>;
+                                    PropertyValue<std::vector<Color>>,
+                                    ColorRampPropertyValue>;
 
     struct EvaluationStorage {
         std::string string;
@@ -44,6 +46,7 @@ public:
     expression::Dependency getDependencies() const noexcept;
     bool isDataDriven() const noexcept;
     bool isZoomConstant() const noexcept;
+    const ColorRampPropertyValue* colorRamp() const noexcept;
 
     mln_plugin_value evaluate(float zoom,
                               const GeometryTileFeature&,

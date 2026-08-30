@@ -34,6 +34,13 @@ std::string featurePropertiesJSON(const GeometryTileFeature& feature) {
     return {buffer.GetString(), buffer.GetSize()};
 }
 
+std::string valueJSON(const Value& value) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    style::conversion::stringify(writer, value);
+    return {buffer.GetString(), buffer.GetSize()};
+}
+
 mln_plugin_geometry_type geometryType(FeatureType type) {
     switch (type) {
         case FeatureType::Point:
@@ -82,7 +89,7 @@ bool validDepthMode(mln_plugin_depth_mode mode) {
 }
 
 bool validBlendMode(mln_plugin_blend_mode mode) {
-    return mode >= MLN_PLUGIN_BLEND_REPLACE && mode <= MLN_PLUGIN_BLEND_MULTIPLY;
+    return mode >= MLN_PLUGIN_BLEND_REPLACE && mode <= MLN_PLUGIN_BLEND_ADDITIVE;
 }
 
 class LayoutResourceHost {
@@ -267,6 +274,10 @@ void PluginLayout::createBucket(const ImagePositions&,
                 property.value.data.color_array_value = {output.data(), output.size()};
                 break;
             }
+            case MLN_PLUGIN_VALUE_COLOR_RAMP:
+                propertyStrings[propertyIndex] = valueJSON(value);
+                property.value.data.color_ramp_json = borrowed(propertyStrings[propertyIndex]);
+                break;
         }
         properties.push_back(property);
     }

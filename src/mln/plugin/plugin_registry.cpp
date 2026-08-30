@@ -1,8 +1,10 @@
 #include <mln/plugin/plugin_registry.hpp>
 
 #include <mln/shaders/shader_defines.hpp>
+#include <mln/style/plugin_property.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <set>
 
@@ -54,6 +56,8 @@ Value copyValue(const mln_plugin_value& value) {
             }
             return Value{std::move(values)};
         }
+        case MLN_PLUGIN_VALUE_COLOR_RAMP:
+            return Value{copyString(value.data.color_ramp_json)};
     }
     return {};
 }
@@ -162,7 +166,7 @@ bool validDepthMode(mln_plugin_depth_mode mode) {
 }
 
 bool validBlendMode(mln_plugin_blend_mode mode) {
-    return mode >= MLN_PLUGIN_BLEND_REPLACE && mode <= MLN_PLUGIN_BLEND_MULTIPLY;
+    return mode >= MLN_PLUGIN_BLEND_REPLACE && mode <= MLN_PLUGIN_BLEND_ADDITIVE;
 }
 
 bool validVertexType(mln_plugin_vertex_attribute_type type) {
@@ -432,6 +436,12 @@ bool appendProperties(const std::string& pluginID,
                                property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
                                property.maximum_array_length,
                                std::move(enumValues)});
+        if (property.type == MLN_PLUGIN_VALUE_COLOR_RAMP &&
+            !style::defaultPluginPropertyValue(output.back()).colorRamp()) {
+            output.pop_back();
+            error = "plugin color-ramp property default is not a valid color-ramp expression";
+            return false;
+        }
     }
     return true;
 }
@@ -449,13 +459,31 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
     std::set<uint32_t> targetIDs;
     for (size_t targetIndex = 0; targetIndex < input.render_target_count; ++targetIndex) {
         const auto& target = input.render_targets[targetIndex];
+        const bool sourceTile = target.size == MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE;
+        const bool viewport = target.size == MLN_PLUGIN_RENDER_TARGET_VIEWPORT;
+        const bool validFormat = target.format == MLN_PLUGIN_RENDER_TARGET_RGBA8 ||
+                                 target.format == MLN_PLUGIN_RENDER_TARGET_RGBA16F;
+        const bool validScope = target.scope == MLN_PLUGIN_RENDER_TARGET_PER_TILE ||
+                                target.scope == MLN_PLUGIN_RENDER_TARGET_PER_LAYER;
+        const bool validScale = sourceTile || (std::isfinite(target.width_scale) && target.width_scale > 0.0f &&
+                                               std::isfinite(target.height_scale) && target.height_scale > 0.0f);
+        const bool validClearColor = std::isfinite(target.clear_color.r) && std::isfinite(target.clear_color.g) &&
+                                     std::isfinite(target.clear_color.b) && std::isfinite(target.clear_color.a);
         if (target.struct_size < sizeof(mln_plugin_render_target_descriptor_v1) || target.target_id == 0 ||
-            target.size != MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE || target.format != MLN_PLUGIN_RENDER_TARGET_RGBA8 ||
+            (!sourceTile && !viewport) || !validFormat || !validScope || !validScale || !validClearColor ||
+            (sourceTile && target.scope != MLN_PLUGIN_RENDER_TARGET_PER_TILE) ||
             !targetIDs.emplace(target.target_id).second) {
             error = "plugin render target is malformed or duplicated";
             return false;
         }
-        output.renderTargets.push_back({target.target_id, target.size, target.format});
+        output.renderTargets.push_back(
+            {target.target_id,
+             target.size,
+             target.format,
+             target.scope,
+             sourceTile ? 1.0f : target.width_scale,
+             sourceTile ? 1.0f : target.height_scale,
+             {target.clear_color.r, target.clear_color.g, target.clear_color.b, target.clear_color.a}});
     }
 
     std::set<uint32_t> passIDs;
@@ -464,9 +492,14 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
         const auto& pass = input.passes[passIndex];
         if (pass.struct_size < sizeof(mln_plugin_render_pass_descriptor_v1) || pass.pass_id == 0 ||
             !validString(pass.shader_id) || !passIDs.emplace(pass.pass_id).second ||
-            (pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_FULL_TILE &&
-             pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE) ||
+            (pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_PLUGIN_BUCKET &&
+             pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_FULL_TILE &&
+             pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE &&
+             pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_VIEWPORT_QUAD) ||
             !validDrawMode(pass.draw_mode) || !validDepthMode(pass.depth_mode) || !validBlendMode(pass.blend_mode) ||
+            (pass.tile_projection != MLN_PLUGIN_TILE_PROJECTION_MAP &&
+             pass.tile_projection != MLN_PLUGIN_TILE_PROJECTION_ALIGNED &&
+             pass.tile_projection != MLN_PLUGIN_TILE_PROJECTION_NEAR_CLIPPED) ||
             (pass.texture_count && !pass.textures)) {
             error = "plugin render pass is malformed or duplicated";
             return false;
@@ -501,6 +534,7 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
         copied.blendMode = pass.blend_mode;
         copied.enableStencil = pass.enable_stencil != 0;
         copied.enableCullFace = pass.enable_cull_face != 0;
+        copied.tileProjection = pass.tile_projection;
         std::set<uint32_t> boundTextures;
         for (size_t bindingIndex = 0; bindingIndex < pass.texture_count; ++bindingIndex) {
             const auto& binding = pass.textures[bindingIndex];
@@ -508,13 +542,16 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
                                                 shaderIt->textures.end(),
                                                 [&](const auto& texture) { return texture.id == binding.texture_id; });
             const bool validSource = binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM ||
-                                     binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET;
+                                     binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET ||
+                                     binding.source == MLN_PLUGIN_TEXTURE_SOURCE_COLOR_RAMP_PROPERTY;
             if (binding.struct_size < sizeof(mln_plugin_texture_binding_v1) || textureIt == shaderIt->textures.end() ||
                 !boundTextures.emplace(binding.texture_id).second || !validSource ||
                 (binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET &&
                  (targetIDs.find(binding.render_target_id) == targetIDs.end() ||
                   writtenTargets.find(binding.render_target_id) == writtenTargets.end())) ||
                 (binding.source == MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM && binding.render_target_id != 0) ||
+                (binding.source == MLN_PLUGIN_TEXTURE_SOURCE_COLOR_RAMP_PROPERTY &&
+                 (!validString(binding.property_name) || binding.render_target_id != 0)) ||
                 (binding.filter != MLN_PLUGIN_TEXTURE_FILTER_NEAREST &&
                  binding.filter != MLN_PLUGIN_TEXTURE_FILTER_LINEAR) ||
                 (binding.wrap_u != MLN_PLUGIN_TEXTURE_WRAP_CLAMP && binding.wrap_u != MLN_PLUGIN_TEXTURE_WRAP_REPEAT) ||
@@ -525,6 +562,7 @@ bool appendRenderGraph(const mln_plugin_render_graph_v1& input,
             copied.textures.push_back({binding.texture_id,
                                        binding.source,
                                        binding.render_target_id,
+                                       copyString(binding.property_name),
                                        binding.filter,
                                        binding.wrap_u,
                                        binding.wrap_v});
@@ -633,7 +671,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         if ((!geometryLayer && !rasterDEMLayer) ||
             (geometryLayer && (!layerType.create_layout || !layerType.layout_feature || !layerType.finish_layout ||
                                !layerType.destroy_layout || layerType.geometry_type_mask == 0 ||
-                               (layerType.geometry_type_mask & ~validGeometryMask) != 0 || layerType.render_graph)) ||
+                               (layerType.geometry_type_mask & ~validGeometryMask) != 0)) ||
             (rasterDEMLayer &&
              (layerType.create_layout || layerType.layout_feature || layerType.finish_layout ||
               layerType.destroy_layout || layerType.geometry_type_mask != 0 || !layerType.render_graph))) {
@@ -679,20 +717,83 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             error = "plugin layer declares uniforms without an update callback";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
-        if (rasterDEMLayer) {
-            RenderGraphDefinition graph;
-            if (!appendRenderGraph(
-                    *layerType.render_graph, copiedLayerType.shaders, layerType.render_stage, graph, error)) {
-                return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
-            }
-            copiedLayerType.renderGraph = std::move(graph);
-        }
-        newLayerTypes.push_back(std::move(copiedLayerType));
         if (!appendProperties(
                 pluginID, type, layerType.properties, layerType.property_count, propertyKeys, newProperties, error)) {
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
+        if (layerType.render_graph) {
+            RenderGraphDefinition graph;
+            if (!appendRenderGraph(
+                    *layerType.render_graph, copiedLayerType.shaders, layerType.render_stage, graph, error)) {
+                return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+            }
+            for (const auto& pass : graph.passes) {
+                for (const auto& texture : pass.textures) {
+                    if (texture.source != MLN_PLUGIN_TEXTURE_SOURCE_COLOR_RAMP_PROPERTY) continue;
+                    const auto property = std::find_if(
+                        newProperties.begin(), newProperties.end(), [&](const auto& item) {
+                            return item.targetLayerType == type && item.name == texture.propertyName &&
+                                   item.type == MLN_PLUGIN_VALUE_COLOR_RAMP;
+                        });
+                    if (property == newProperties.end()) {
+                        error = "plugin color-ramp texture references a missing or non-ramp property";
+                        return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+                    }
+                }
+            }
+            const bool graphMatchesSource = [&] {
+                const bool hasMainPass = std::any_of(graph.passes.begin(), graph.passes.end(), [](const auto& pass) {
+                    return pass.renderTargetID == 0;
+                });
+                if (!hasMainPass) return false;
+                if (geometryLayer) {
+                    const bool validTargets = std::all_of(
+                        graph.renderTargets.begin(), graph.renderTargets.end(), [](const auto& target) {
+                            return target.size == MLN_PLUGIN_RENDER_TARGET_VIEWPORT &&
+                                   target.scope == MLN_PLUGIN_RENDER_TARGET_PER_LAYER;
+                        });
+                    const bool validPasses = std::all_of(
+                        graph.passes.begin(), graph.passes.end(), [](const auto& pass) {
+                            if (pass.geometry == MLN_PLUGIN_GRAPH_GEOMETRY_PLUGIN_BUCKET) {
+                                return pass.renderTargetID != 0 && pass.drawMode == MLN_PLUGIN_DRAW_MODE_TRIANGLES &&
+                                       pass.textures.empty();
+                            }
+                            if (pass.geometry == MLN_PLUGIN_GRAPH_GEOMETRY_VIEWPORT_QUAD) {
+                                return pass.renderTargetID == 0 && pass.drawMode == MLN_PLUGIN_DRAW_MODE_TRIANGLES &&
+                                       std::none_of(
+                                           pass.textures.begin(), pass.textures.end(), [](const auto& texture) {
+                                               return texture.source == MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM;
+                                           });
+                            }
+                            return false;
+                        });
+                    return validTargets && validPasses;
+                }
+
+                const bool validTargets = std::all_of(
+                    graph.renderTargets.begin(), graph.renderTargets.end(), [](const auto& target) {
+                        return target.size == MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE &&
+                               target.scope == MLN_PLUGIN_RENDER_TARGET_PER_TILE;
+                    });
+                const bool validPasses = std::all_of(graph.passes.begin(), graph.passes.end(), [](const auto& pass) {
+                    const bool validGeometry = pass.geometry == MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_FULL_TILE ||
+                                               pass.geometry == MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE;
+                    const bool validTextures = std::none_of(
+                        pass.textures.begin(), pass.textures.end(), [](const auto& texture) {
+                            return texture.source == MLN_PLUGIN_TEXTURE_SOURCE_COLOR_RAMP_PROPERTY;
+                        });
+                    return validGeometry && pass.drawMode == MLN_PLUGIN_DRAW_MODE_TRIANGLES && validTextures;
+                });
+                return validTargets && validPasses;
+            }();
+            if (!graphMatchesSource) {
+                error = "plugin render graph target scope or geometry is incompatible with its source kind";
+                return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+            }
+            copiedLayerType.renderGraph = std::move(graph);
+        }
+        newLayerTypes.push_back(std::move(copiedLayerType));
     }
 
     std::lock_guard<std::mutex> lock(mutex);
@@ -807,6 +908,7 @@ bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value
         case MLN_PLUGIN_VALUE_FLOAT:
             return numeric();
         case MLN_PLUGIN_VALUE_STRING:
+        case MLN_PLUGIN_VALUE_COLOR_RAMP:
             return value.getString() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT2:
         case MLN_PLUGIN_VALUE_COLOR: {

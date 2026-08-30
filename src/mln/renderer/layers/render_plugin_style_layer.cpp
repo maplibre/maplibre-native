@@ -10,6 +10,7 @@
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gfx/vertex_attribute.hpp>
+#include <mln/map/transform_state.hpp>
 #include <mln/plugin/plugin_shader.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
@@ -20,6 +21,7 @@
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/shaders/shader_program_base.hpp>
+#include <mln/style/plugin_property.hpp>
 
 #include <set>
 
@@ -76,6 +78,8 @@ gfx::ColorMode colorMode(mln_plugin_blend_mode mode) {
                                                          gfx::ColorBlendFactorType::Zero},
                     .blendColor = {},
                     .mask = {.r = true, .g = true, .b = true, .a = true}};
+        case MLN_PLUGIN_BLEND_ADDITIVE:
+            return gfx::ColorMode::additive();
         case MLN_PLUGIN_BLEND_ALPHA:
         case MLN_PLUGIN_BLEND_PREMULTIPLIED_ALPHA:
             return gfx::ColorMode::alphaBlended();
@@ -182,6 +186,8 @@ void RenderPluginStyleLayer::markLayerRenderable(bool willRender, UniqueChangeRe
     RenderLayer::markLayerRenderable(willRender, changes);
     if (!willRender) {
         removeRenderTargets(changes);
+        geometryGraph.renderTargets.clear();
+        geometryGraph.propertyTextures.clear();
         if (pluginImpl(baseImpl).registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM) {
             removeAllDrawables();
             rasterGraphTiles.clear();
@@ -193,6 +199,8 @@ void RenderPluginStyleLayer::layerRemoved(UniqueChangeRequestVec& changes) {
     RenderLayer::layerRemoved(changes);
     removeRenderTargets(changes);
     rasterGraphTiles.clear();
+    geometryGraph.renderTargets.clear();
+    geometryGraph.propertyTextures.clear();
 }
 
 void RenderPluginStyleLayer::markContextDestroyed() {
@@ -200,6 +208,11 @@ void RenderPluginStyleLayer::markContextDestroyed() {
     activatedRenderTargets.clear();
     rasterGraphTiles.clear();
     rasterSharedVertices.reset();
+    geometryGraph.renderTargets.clear();
+    geometryGraph.propertyTextures.clear();
+    viewportVertices.reset();
+    viewportIndices.reset();
+    viewportSegments.clear();
 }
 
 void RenderPluginStyleLayer::addRenderTarget(const RenderTargetPtr& target, UniqueChangeRequestVec& changes) {
@@ -214,7 +227,7 @@ void RenderPluginStyleLayer::removeRenderTargets(UniqueChangeRequestVec& changes
 
 void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     gfx::Context& context,
-                                    const TransformState&,
+                                    const TransformState& state,
                                     const std::shared_ptr<UpdateParameters>&,
                                     const PaintParameters& paintParameters,
                                     const RenderTree&,
@@ -222,6 +235,10 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
     const auto& registration = pluginImpl(baseImpl).registration;
     if (registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM && registration.renderGraph) {
         updateRasterDEMGraph(shaders, context, paintParameters, changes);
+        return;
+    }
+    if (registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY && registration.renderGraph) {
+        updateGeometryGraph(shaders, context, state, paintParameters, changes);
         return;
     }
     if (!renderTiles || renderTiles->empty()) {
@@ -421,8 +438,15 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
         const auto dimension = static_cast<uint32_t>(bucket.getDEMData().dim);
         const auto stride = static_cast<uint32_t>(bucket.getDEMData().stride);
         for (const auto& targetDefinition : graph.renderTargets) {
-            auto target = context.createRenderTarget({dimension, dimension}, gfx::TextureChannelDataType::UnsignedByte);
+            const auto channelType = targetDefinition.format == MLN_PLUGIN_RENDER_TARGET_RGBA16F
+                                         ? gfx::TextureChannelDataType::HalfFloat
+                                         : gfx::TextureChannelDataType::UnsignedByte;
+            auto target = context.createRenderTarget({dimension, dimension}, channelType);
             if (!target) continue;
+            target->setClearColor(Color{targetDefinition.clearColor[0],
+                                        targetDefinition.clearColor[1],
+                                        targetDefinition.clearColor[2],
+                                        targetDefinition.clearColor[3]});
             auto targetGroup = context.createTileLayerGroup(0, 1, getID());
             if (!targetGroup) continue;
             targetGroup->addLayerTweaker(layerTweaker);
@@ -556,6 +580,245 @@ void RenderPluginStyleLayer::updateRasterDEMGraph(gfx::ShaderRegistry& shaders,
         }
         setRenderTileBucketID(tileID, bucket.getID());
         rasterGraphTiles.emplace(tileID, std::move(tileState));
+    }
+}
+
+void RenderPluginStyleLayer::updateGeometryGraph(gfx::ShaderRegistry& shaders,
+                                                 gfx::Context& context,
+                                                 const TransformState& state,
+                                                 const PaintParameters&,
+                                                 UniqueChangeRequestVec& changes) {
+    const auto& registration = pluginImpl(baseImpl).registration;
+    const auto& graph = *registration.renderGraph;
+    const auto mainRenderPass = renderPassFor(registration.renderStage);
+
+    if (!renderTiles || renderTiles->empty()) {
+        removeAllDrawables();
+        for (auto& [targetID, target] : geometryGraph.renderTargets) {
+            (void)targetID;
+            if (auto group = target->getLayerGroup(0)) group->clearDrawables();
+        }
+        return;
+    }
+
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
+    }
+
+    const auto viewport = state.getSize();
+    for (const auto& targetDefinition : graph.renderTargets) {
+        if (targetDefinition.scope != MLN_PLUGIN_RENDER_TARGET_PER_LAYER ||
+            targetDefinition.size != MLN_PLUGIN_RENDER_TARGET_VIEWPORT) {
+            continue;
+        }
+        const Size targetSize{
+            std::max<uint32_t>(1, static_cast<uint32_t>(viewport.width * targetDefinition.widthScale)),
+            std::max<uint32_t>(1, static_cast<uint32_t>(viewport.height * targetDefinition.heightScale))};
+        auto targetIt = geometryGraph.renderTargets.find(targetDefinition.id);
+        if (targetIt == geometryGraph.renderTargets.end()) {
+            const auto channelType = targetDefinition.format == MLN_PLUGIN_RENDER_TARGET_RGBA16F
+                                         ? gfx::TextureChannelDataType::HalfFloat
+                                         : gfx::TextureChannelDataType::UnsignedByte;
+            auto target = context.createRenderTarget(targetSize, channelType);
+            if (!target) continue;
+            target->setClearColor(Color{targetDefinition.clearColor[0],
+                                        targetDefinition.clearColor[1],
+                                        targetDefinition.clearColor[2],
+                                        targetDefinition.clearColor[3]});
+            auto targetGroup = context.createTileLayerGroup(0, 64, getID());
+            if (!targetGroup) continue;
+            targetGroup->addLayerTweaker(layerTweaker);
+            target->addLayerGroup(targetGroup, true);
+            addRenderTarget(target, changes);
+            targetIt = geometryGraph.renderTargets.emplace(targetDefinition.id, std::move(target)).first;
+        }
+        if (targetIt->second->getTexture()->getSize() != targetSize) {
+            targetIt->second->getTexture()->setSize(targetSize);
+        }
+        if (auto group = targetIt->second->getLayerGroup(0)) group->clearDrawables();
+    }
+
+    if (!layerGroup) {
+        if (auto group = context.createLayerGroup(layerIndex, 1, getID())) {
+            group->addLayerTweaker(layerTweaker);
+            setLayerGroup(std::move(group), changes);
+        } else {
+            return;
+        }
+    }
+    auto* mainGroup = static_cast<LayerGroup*>(layerGroup.get());
+    mainGroup->clearDrawables();
+
+    const auto buildBucketDrawable = [&](const plugin::RenderPassDefinition& pass,
+                                         const RenderTile& tile,
+                                         PluginBucket& bucket,
+                                         TileLayerGroup& outputGroup,
+                                         const Size targetSize) {
+        const auto definitionIt = std::find_if(bucket.drawables.begin(), bucket.drawables.end(), [&](const auto& item) {
+            return item.shaderID == pass.shaderID;
+        });
+        if (definitionIt == bucket.drawables.end() || definitionIt->segments.empty()) return;
+        const auto shaderGroup = shaders.getShaderGroup(plugin::shaderGroupName(registration.pluginID, pass.shaderID));
+        const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, {}) : gfx::ShaderPtr{};
+        if (!shader) return;
+
+        auto attributes = context.createVertexAttributeArray();
+        std::size_t vertexCount = 0;
+        gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
+        for (const auto& binding : definitionIt->attributes) {
+            const auto stream = bucket.vertexStreams.find(binding.streamID);
+            if (stream == bucket.vertexStreams.end()) continue;
+            const auto type = attributeType(binding.type);
+            if (const auto& attr = attributes->set(binding.attributeID)) {
+                attr->setSharedRawData(stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
+            }
+            vertexCount = std::max(vertexCount, stream->second->getRawCount());
+            if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
+        }
+        if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) return;
+
+        auto builder = context.createDrawableBuilder("plugin/" + registration.type + "/" + pass.shaderID);
+        builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+        builder->setRenderPass(RenderPass::Translucent);
+        builder->setEnableDepth(pass.depthMode != MLN_PLUGIN_DEPTH_DISABLED);
+        builder->setDepthType(pass.depthMode == MLN_PLUGIN_DEPTH_READ_WRITE ? gfx::DepthMaskType::ReadWrite
+                                                                            : gfx::DepthMaskType::ReadOnly);
+        builder->setColorMode(colorMode(pass.blendMode));
+        builder->setCullFaceMode(pass.enableCullFace ? gfx::CullFaceMode::backCCW() : gfx::CullFaceMode::disabled());
+        builder->setEnableStencil(pass.enableStencil);
+        builder->setVertexAttributes(std::move(attributes));
+        builder->setRawVertices({}, vertexCount, firstType);
+        builder->setSegments(
+            gfx::Triangles(), bucket.indices, definitionIt->segments.data(), definitionIt->segments.size());
+        builder->flush(context);
+        const auto& tileID = tile.getOverscaledTileID();
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setTileID(tileID);
+            drawable->setLayerTweaker(layerTweaker);
+            drawable->setRenderTile(renderTilesOwner, &tile);
+            drawable->setData(std::make_unique<gfx::PluginRenderGraphDrawableData>(
+                pass.shaderID, pass.id, 0, 0, MLN_PLUGIN_RASTER_DEM_MAPBOX, 0, targetSize.width, targetSize.height));
+            outputGroup.addDrawable(RenderPass::Translucent, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        }
+    };
+
+    for (const auto& pass : graph.passes) {
+        if (pass.geometry == MLN_PLUGIN_GRAPH_GEOMETRY_PLUGIN_BUCKET && pass.renderTargetID) {
+            const auto targetIt = geometryGraph.renderTargets.find(pass.renderTargetID);
+            if (targetIt == geometryGraph.renderTargets.end()) continue;
+            auto* outputGroup = static_cast<TileLayerGroup*>(targetIt->second->getLayerGroup(0).get());
+            const auto targetSize = targetIt->second->getTexture()->getSize();
+            for (const RenderTile& tile : *renderTiles) {
+                const auto* renderData = getRenderDataForPass(tile, mainRenderPass);
+                if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) continue;
+                buildBucketDrawable(
+                    pass, tile, static_cast<PluginBucket&>(*renderData->bucket), *outputGroup, targetSize);
+            }
+            continue;
+        }
+
+        if (pass.geometry != MLN_PLUGIN_GRAPH_GEOMETRY_VIEWPORT_QUAD || pass.renderTargetID) continue;
+        const auto* shaderDefinition = findShader(registration, pass.shaderID);
+        const auto shaderGroup = shaders.getShaderGroup(plugin::shaderGroupName(registration.pluginID, pass.shaderID));
+        const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, {}) : gfx::ShaderPtr{};
+        if (!shaderDefinition || !shader) continue;
+
+        if (!viewportVertices) {
+            viewportVertices = std::make_shared<gfx::VertexVector<PluginViewportLayoutVertex>>();
+            viewportVertices->emplace_back(PluginViewportLayoutVertex{{{0, 0}}});
+            viewportVertices->emplace_back(PluginViewportLayoutVertex{{{1, 0}}});
+            viewportVertices->emplace_back(PluginViewportLayoutVertex{{{0, 1}}});
+            viewportVertices->emplace_back(PluginViewportLayoutVertex{{{1, 1}}});
+            viewportIndices = std::make_shared<gfx::IndexVector<gfx::Triangles>>(
+                RenderStaticData::quadTriangleIndices());
+            viewportSegments.emplace_back(0, 0, 4, 6);
+        }
+        auto attributes = context.createVertexAttributeArray();
+        for (const auto& attribute : shaderDefinition->attributes) {
+            if (attribute.location != 0) continue;
+            if (const auto& binding = attributes->set(attribute.id)) {
+                binding->setSharedRawData(viewportVertices,
+                                          offsetof(PluginViewportLayoutVertex, a1),
+                                          0,
+                                          sizeof(PluginViewportLayoutVertex),
+                                          gfx::AttributeDataType::Short2);
+            }
+        }
+
+        auto builder = context.createDrawableBuilder("plugin/" + registration.type + "/" + pass.shaderID);
+        builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+        builder->setRenderPass(mainRenderPass);
+        builder->setEnableDepth(pass.depthMode != MLN_PLUGIN_DEPTH_DISABLED);
+        builder->setDepthType(pass.depthMode == MLN_PLUGIN_DEPTH_READ_WRITE ? gfx::DepthMaskType::ReadWrite
+                                                                            : gfx::DepthMaskType::ReadOnly);
+        builder->setColorMode(colorMode(pass.blendMode));
+        builder->setCullFaceMode(pass.enableCullFace ? gfx::CullFaceMode::backCCW() : gfx::CullFaceMode::disabled());
+        builder->setEnableStencil(pass.enableStencil);
+        builder->setVertexAttributes(std::move(attributes));
+        builder->setRawVertices({}, viewportVertices->elements(), gfx::AttributeDataType::Short2);
+        builder->setSegments(gfx::Triangles(), viewportIndices, viewportSegments.data(), viewportSegments.size());
+
+        bool texturesComplete = true;
+        Size sampledTargetSize{};
+        for (const auto& textureBinding : pass.textures) {
+            const auto* textureDefinition = findTexture(*shaderDefinition, textureBinding.textureID);
+            if (!textureDefinition) {
+                texturesComplete = false;
+                break;
+            }
+            gfx::Texture2DPtr texture;
+            if (textureBinding.source == MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET) {
+                const auto targetIt = geometryGraph.renderTargets.find(textureBinding.renderTargetID);
+                if (targetIt != geometryGraph.renderTargets.end()) {
+                    texture = targetIt->second->getTexture();
+                    sampledTargetSize = texture->getSize();
+                }
+            } else if (textureBinding.source == MLN_PLUGIN_TEXTURE_SOURCE_COLOR_RAMP_PROPERTY) {
+                const auto propertyDefinition = plugin::PluginRegistry::get().findProperty(registration.type,
+                                                                                           textureBinding.propertyName);
+                if (propertyDefinition && propertyDefinition->type == MLN_PLUGIN_VALUE_COLOR_RAMP) {
+                    const auto& impl = pluginImpl(baseImpl);
+                    const auto propertyIt = impl.pluginProperties.find(textureBinding.propertyName);
+                    const auto value = propertyIt == impl.pluginProperties.end()
+                                           ? style::defaultPluginPropertyValue(*propertyDefinition)
+                                           : propertyIt->second;
+                    if (const auto* ramp = value.colorRamp()) {
+                        auto image = std::make_shared<PremultipliedImage>(Size{256, 1});
+                        if (applyColorRamp(*ramp, *image)) {
+                            auto& stored = geometryGraph.propertyTextures[textureBinding.propertyName];
+                            if (!stored) stored = context.createTexture2D();
+                            stored->setImage(std::move(image));
+                            texture = stored;
+                        }
+                    }
+                }
+            }
+            if (!texture) {
+                texturesComplete = false;
+                break;
+            }
+            texture->setSamplerConfiguration({.filter = textureFilter(textureBinding.filter),
+                                              .wrapU = textureWrap(textureBinding.wrapU),
+                                              .wrapV = textureWrap(textureBinding.wrapV)});
+            builder->setTexture(texture, textureDefinition->id);
+        }
+        if (!texturesComplete) continue;
+
+        builder->flush(context);
+        for (auto& drawable : builder->clearDrawables()) {
+            drawable->setLayerTweaker(layerTweaker);
+            drawable->setData(std::make_unique<gfx::PluginRenderGraphDrawableData>(pass.shaderID,
+                                                                                   pass.id,
+                                                                                   0,
+                                                                                   0,
+                                                                                   MLN_PLUGIN_RASTER_DEM_MAPBOX,
+                                                                                   0,
+                                                                                   sampledTargetSize.width,
+                                                                                   sampledTargetSize.height));
+            mainGroup->addDrawable(std::move(drawable));
+            ++stats.drawablesAdded;
+        }
     }
 }
 

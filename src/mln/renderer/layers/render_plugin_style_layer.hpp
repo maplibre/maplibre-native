@@ -1,12 +1,18 @@
 #pragma once
 
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/vertex_vector.hpp>
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
+#include <mln/shaders/attributes.hpp>
+#include <mln/shaders/segment.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
 
 #include <map>
 
 namespace mln {
+
+using PluginViewportLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 
 class RenderPluginStyleLayer final : public RenderLayer {
 public:
@@ -46,6 +52,8 @@ private:
     void markContextDestroyed() override;
 
     void updateRasterDEMGraph(gfx::ShaderRegistry&, gfx::Context&, const PaintParameters&, UniqueChangeRequestVec&);
+    void updateGeometryGraph(
+        gfx::ShaderRegistry&, gfx::Context&, const TransformState&, const PaintParameters&, UniqueChangeRequestVec&);
     void addRenderTarget(const RenderTargetPtr&, UniqueChangeRequestVec&);
     void removeRenderTargets(UniqueChangeRequestVec&);
 
@@ -61,6 +69,14 @@ private:
     std::map<OverscaledTileID, RasterGraphTileState> rasterGraphTiles;
     std::vector<RenderTargetPtr> activatedRenderTargets;
     std::shared_ptr<gfx::VertexVector<HillshadeLayoutVertex>> rasterSharedVertices;
+
+    struct GeometryGraphState {
+        std::map<uint32_t, RenderTargetPtr> renderTargets;
+        std::map<std::string, gfx::Texture2DPtr> propertyTextures;
+    } geometryGraph;
+    std::shared_ptr<gfx::VertexVector<PluginViewportLayoutVertex>> viewportVertices;
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> viewportIndices;
+    SegmentVector viewportSegments;
 };
 
 } // namespace mln

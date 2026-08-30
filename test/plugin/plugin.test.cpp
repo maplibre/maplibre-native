@@ -232,11 +232,16 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
     const mln_plugin_render_target_descriptor_v1 target{sizeof(mln_plugin_render_target_descriptor_v1),
                                                         1,
                                                         MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE,
-                                                        MLN_PLUGIN_RENDER_TARGET_RGBA8};
+                                                        MLN_PLUGIN_RENDER_TARGET_RGBA8,
+                                                        MLN_PLUGIN_RENDER_TARGET_PER_TILE,
+                                                        1.0f,
+                                                        1.0f,
+                                                        {0.0f, 0.0f, 0.0f, 1.0f}};
     const mln_plugin_texture_binding_v1 prepareTexture{sizeof(mln_plugin_texture_binding_v1),
                                                        0,
                                                        MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM,
                                                        0,
+                                                       {},
                                                        MLN_PLUGIN_TEXTURE_FILTER_NEAREST,
                                                        MLN_PLUGIN_TEXTURE_WRAP_CLAMP,
                                                        MLN_PLUGIN_TEXTURE_WRAP_CLAMP};
@@ -244,6 +249,7 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
                                                0,
                                                MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET,
                                                1,
+                                               {},
                                                MLN_PLUGIN_TEXTURE_FILTER_LINEAR,
                                                MLN_PLUGIN_TEXTURE_WRAP_CLAMP,
                                                MLN_PLUGIN_TEXTURE_WRAP_CLAMP};
@@ -259,6 +265,7 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
          MLN_PLUGIN_BLEND_REPLACE,
          0,
          0,
+         MLN_PLUGIN_TILE_PROJECTION_ALIGNED,
          &prepareTexture,
          1},
         {sizeof(mln_plugin_render_pass_descriptor_v1),
@@ -272,6 +279,7 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
          MLN_PLUGIN_BLEND_PREMULTIPLIED_ALPHA,
          0,
          0,
+         MLN_PLUGIN_TILE_PROJECTION_ALIGNED,
          &finalTexture,
          1},
     }};
@@ -305,12 +313,19 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
     EXPECT_NE(std::string::npos, std::string(errorBuffer).find("uniforms without an update callback"));
 
     layerType.update_uniform_block = updateUniform;
+    passes[0].tile_projection = static_cast<mln_plugin_tile_projection>(0);
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, nullptr, 0));
+    passes[0].tile_projection = MLN_PLUGIN_TILE_PROJECTION_ALIGNED;
+    passes[0].draw_mode = MLN_PLUGIN_DRAW_MODE_LINES;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, nullptr, 0));
+    passes[0].draw_mode = MLN_PLUGIN_DRAW_MODE_TRIANGLES;
     EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, nullptr, 0));
     const auto registration = plugin::PluginRegistry::get().findLayerType("org.maplibre.test.raster-dem-graph");
     ASSERT_TRUE(registration);
     ASSERT_TRUE(registration->renderGraph);
     EXPECT_TRUE(registration->participatesIn3DPass);
     EXPECT_EQ(2u, registration->renderGraph->passes.size());
+    EXPECT_EQ(MLN_PLUGIN_TILE_PROJECTION_ALIGNED, registration->renderGraph->passes.front().tileProjection);
 
     finalTexture.render_target_id = 9;
     layerType.layer_type = cString("org.maplibre.test.raster-dem-forward-reference");
@@ -488,4 +503,35 @@ TEST(PluginStyleProperty, EnforcesArrayNumericAndEnumConstraints) {
     EXPECT_FALSE(layer.setProperty("test-constrained-enum", conversion::Convertible(&allowedValue)));
     const JSValue rejectedValue("third");
     EXPECT_TRUE(layer.setProperty("test-constrained-enum", conversion::Convertible(&rejectedValue)));
+}
+
+TEST(PluginStyleProperty, ParsesSerializesAndValidatesColorRamps) {
+    constexpr char defaultRamp[] =
+        R"JSON(["interpolate",["linear"],["heatmap-density"],0,"rgba(0, 0, 255, 0)",1,"red"])JSON";
+    Descriptor ramp("org.maplibre.test.color-ramp", "test-color-ramp");
+    ramp.defaultValue.type = MLN_PLUGIN_VALUE_COLOR_RAMP;
+    ramp.defaultValue.data.color_ramp_json = {defaultRamp, sizeof(defaultRamp) - 1};
+    ramp.property.type = MLN_PLUGIN_VALUE_COLOR_RAMP;
+    ramp.property.default_value = ramp.defaultValue;
+    ramp.property.supports_expressions = 1;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&ramp.descriptor, nullptr, 0));
+
+    FillExtrusionLayer layer("color-ramp", "source");
+    JSDocument expression;
+    expression.Parse(R"JSON(["interpolate",["linear"],["heatmap-density"],0,"rgba(0, 255, 0, 0)",1,"yellow"])JSON");
+    const JSValue* expressionValue = &expression;
+    EXPECT_FALSE(layer.setProperty("test-color-ramp", conversion::Convertible(expressionValue)));
+    const auto serialized = static_cast<const Layer&>(layer).serialize();
+    const auto* paint = serialized.getObject()->at("paint").getObject();
+    ASSERT_NE(nullptr, paint);
+    EXPECT_NE(nullptr, paint->at("test-color-ramp").getArray());
+
+    constexpr char invalidRamp[] = R"JSON(["not-a-color-ramp"])JSON";
+    Descriptor invalid("org.maplibre.test.invalid-color-ramp", "test-invalid-color-ramp");
+    invalid.defaultValue.type = MLN_PLUGIN_VALUE_COLOR_RAMP;
+    invalid.defaultValue.data.color_ramp_json = {invalidRamp, sizeof(invalidRamp) - 1};
+    invalid.property.type = MLN_PLUGIN_VALUE_COLOR_RAMP;
+    invalid.property.default_value = invalid.defaultValue;
+    invalid.property.supports_expressions = 1;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&invalid.descriptor, nullptr, 0));
 }

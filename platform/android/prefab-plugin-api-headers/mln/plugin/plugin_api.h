@@ -39,7 +39,9 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_COLOR = 4,
     MLN_PLUGIN_VALUE_STRING = 5,
     MLN_PLUGIN_VALUE_FLOAT_ARRAY = 6,
-    MLN_PLUGIN_VALUE_COLOR_ARRAY = 7
+    MLN_PLUGIN_VALUE_COLOR_ARRAY = 7,
+    /* UTF-8 JSON expression evaluated by the host into a 256 x 1 texture. */
+    MLN_PLUGIN_VALUE_COLOR_RAMP = 8
 } mln_plugin_value_type;
 
 typedef enum mln_plugin_property_scope {
@@ -100,6 +102,7 @@ typedef union mln_plugin_value_data {
     mln_plugin_string string_value;
     mln_plugin_float_array float_array_value;
     mln_plugin_color_array color_array_value;
+    mln_plugin_string color_ramp_json;
 } mln_plugin_value_data;
 
 typedef struct mln_plugin_value {
@@ -320,7 +323,8 @@ typedef enum mln_plugin_blend_mode {
     MLN_PLUGIN_BLEND_REPLACE = 0,
     MLN_PLUGIN_BLEND_ALPHA = 1,
     MLN_PLUGIN_BLEND_PREMULTIPLIED_ALPHA = 2,
-    MLN_PLUGIN_BLEND_MULTIPLY = 3
+    MLN_PLUGIN_BLEND_MULTIPLY = 3,
+    MLN_PLUGIN_BLEND_ADDITIVE = 4
 } mln_plugin_blend_mode;
 
 /* Stable IDs are local to one registered plugin layer type. */
@@ -394,12 +398,16 @@ typedef struct mln_plugin_shader_descriptor_v1 {
 typedef enum mln_plugin_graph_geometry {
     MLN_PLUGIN_GRAPH_GEOMETRY_PLUGIN_BUCKET = 1,
     MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_FULL_TILE = 2,
-    MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE = 3
+    MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE = 3,
+    /* One host-owned normalized [0, 1] viewport quad per layer. */
+    MLN_PLUGIN_GRAPH_GEOMETRY_VIEWPORT_QUAD = 4
 } mln_plugin_graph_geometry;
 
 typedef enum mln_plugin_texture_source {
     MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM = 1,
-    MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET = 2
+    MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET = 2,
+    /* A 256 x 1 premultiplied texture generated from a color-ramp property. */
+    MLN_PLUGIN_TEXTURE_SOURCE_COLOR_RAMP_PROPERTY = 3
 } mln_plugin_texture_source;
 
 typedef enum mln_plugin_texture_filter {
@@ -413,18 +421,40 @@ typedef enum mln_plugin_texture_wrap {
 } mln_plugin_texture_wrap;
 
 typedef enum mln_plugin_render_target_size {
-    MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE = 1
+    MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE = 1,
+    MLN_PLUGIN_RENDER_TARGET_VIEWPORT = 2
 } mln_plugin_render_target_size;
 
 typedef enum mln_plugin_render_target_format {
-    MLN_PLUGIN_RENDER_TARGET_RGBA8 = 1
+    MLN_PLUGIN_RENDER_TARGET_RGBA8 = 1,
+    MLN_PLUGIN_RENDER_TARGET_RGBA16F = 2
 } mln_plugin_render_target_format;
+
+typedef enum mln_plugin_render_target_scope {
+    MLN_PLUGIN_RENDER_TARGET_PER_TILE = 1,
+    MLN_PLUGIN_RENDER_TARGET_PER_LAYER = 2
+} mln_plugin_render_target_scope;
+
+/* Projection matrix used for tile-bound geometry in a render-graph pass. */
+typedef enum mln_plugin_tile_projection {
+    /* The camera projection used by ordinary 2D geometry such as heatmaps. */
+    MLN_PLUGIN_TILE_PROJECTION_MAP = 1,
+    /* Pixel-aligned camera projection used by raster-like tile geometry. */
+    MLN_PLUGIN_TILE_PROJECTION_ALIGNED = 2,
+    /* Map projection with a farther near plane for 3D depth precision. */
+    MLN_PLUGIN_TILE_PROJECTION_NEAR_CLIPPED = 3
+} mln_plugin_tile_projection;
 
 typedef struct mln_plugin_render_target_descriptor_v1 {
     uint32_t struct_size;
     uint32_t target_id;
     mln_plugin_render_target_size size;
     mln_plugin_render_target_format format;
+    mln_plugin_render_target_scope scope;
+    /* Used for VIEWPORT targets. Zero is invalid; 0.5 creates a half-size target. */
+    float width_scale;
+    float height_scale;
+    mln_plugin_color clear_color;
 } mln_plugin_render_target_descriptor_v1;
 
 typedef struct mln_plugin_texture_binding_v1 {
@@ -433,6 +463,8 @@ typedef struct mln_plugin_texture_binding_v1 {
     mln_plugin_texture_source source;
     /* Required only for MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET. */
     uint32_t render_target_id;
+    /* Required only for COLOR_RAMP_PROPERTY. */
+    mln_plugin_string property_name;
     mln_plugin_texture_filter filter;
     mln_plugin_texture_wrap wrap_u;
     mln_plugin_texture_wrap wrap_v;
@@ -451,6 +483,7 @@ typedef struct mln_plugin_render_pass_descriptor_v1 {
     mln_plugin_blend_mode blend_mode;
     uint8_t enable_stencil;
     uint8_t enable_cull_face;
+    mln_plugin_tile_projection tile_projection;
     const mln_plugin_texture_binding_v1* textures;
     size_t texture_count;
 } mln_plugin_render_pass_descriptor_v1;
@@ -487,6 +520,13 @@ typedef struct mln_plugin_uniform_context_v1 {
     float tile_matrix[16];
     float render_target_matrix[16];
     float latitude_range[2];
+    uint32_t viewport_width;
+    uint32_t viewport_height;
+    uint32_t render_target_width;
+    uint32_t render_target_height;
+    float pixels_to_tile_units;
+    /* Column-major matrix mapping normalized viewport coordinates. */
+    float viewport_matrix[16];
     const mln_plugin_property_value_v1* properties;
     size_t property_count;
 } mln_plugin_uniform_context_v1;
@@ -657,7 +697,7 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_finish_layout_fn finish_layout;
     mln_plugin_destroy_layout_fn destroy_layout;
     mln_plugin_query_feature_fn query_feature;
-    /* Required for RasterDEM graph layers; absent for geometry-only layers. */
+    /* Required for RasterDEM layers; optional for multi-pass geometry layers. */
     const mln_plugin_render_graph_v1* render_graph;
     mln_plugin_update_uniform_block_fn update_uniform_block;
     /* Matches LayerTypeInfo::Pass3D without making the drawables depth-writing 3D geometry. */

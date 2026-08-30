@@ -101,6 +101,10 @@ mln_plugin_value makeCValue(const Value& value,
             stringStorage.push_back(*value.getString());
             result.data.string_value = {stringStorage.back().data(), stringStorage.back().size()};
             break;
+        case MLN_PLUGIN_VALUE_COLOR_RAMP:
+            stringStorage.push_back(value.getString() ? *value.getString() : std::string{});
+            result.data.color_ramp_json = {stringStorage.back().data(), stringStorage.back().size()};
+            break;
         case MLN_PLUGIN_VALUE_FLOAT_ARRAY: {
             floatArrayStorage.emplace_back();
             auto& output = floatArrayStorage.back();

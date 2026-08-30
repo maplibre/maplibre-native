@@ -2,15 +2,29 @@
 
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/style/conversion/property_value.hpp>
+#include <mln/style/conversion/color_ramp_property_value.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/stringify.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/style/expression/expression.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 
 #include <algorithm>
 
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 namespace mln {
 namespace style {
 namespace {
+
+std::string serializeRamp(const ColorRampPropertyValue& ramp) {
+    if (ramp.isUndefined()) return {};
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    conversion::stringify(writer, ramp.getExpression().serialize());
+    return {buffer.GetString(), buffer.GetSize()};
+}
 
 template <class T>
 T defaultValue(const plugin::PropertyDefinition& definition);
@@ -172,7 +186,19 @@ bool PluginPropertyValue::isDataDriven() const noexcept {
 }
 
 bool PluginPropertyValue::isZoomConstant() const noexcept {
-    return std::visit([](const auto& typed) { return typed.isZoomConstant(); }, value);
+    return std::visit(
+        [](const auto& typed) {
+            if constexpr (std::is_same_v<std::decay_t<decltype(typed)>, ColorRampPropertyValue>) {
+                return true;
+            } else {
+                return typed.isZoomConstant();
+            }
+        },
+        value);
+}
+
+const ColorRampPropertyValue* PluginPropertyValue::colorRamp() const noexcept {
+    return std::get_if<ColorRampPropertyValue>(&value);
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
@@ -223,6 +249,14 @@ mln_plugin_value PluginPropertyValue::evaluate(float zoom,
             result.data.color_array_value = {storage.colors.data(), storage.colors.size()};
             break;
         }
+        case MLN_PLUGIN_VALUE_COLOR_RAMP: {
+            const auto* ramp = std::get_if<ColorRampPropertyValue>(&value);
+            if (ramp && !ramp->isUndefined()) {
+                storage.string = serializeRamp(*ramp);
+            }
+            result.data.color_ramp_json = {storage.string.data(), storage.string.size()};
+            break;
+        }
     }
     return result;
 }
@@ -268,6 +302,14 @@ mln_plugin_value PluginPropertyValue::evaluate(float zoom,
             result.data.color_array_value = {storage.colors.data(), storage.colors.size()};
             break;
         }
+        case MLN_PLUGIN_VALUE_COLOR_RAMP: {
+            const auto* ramp = std::get_if<ColorRampPropertyValue>(&value);
+            if (ramp && !ramp->isUndefined()) {
+                storage.string = serializeRamp(*ramp);
+            }
+            result.data.color_ramp_json = {storage.string.data(), storage.string.size()};
+            break;
+        }
     }
     return result;
 }
@@ -295,6 +337,13 @@ PluginPropertyValue defaultPluginPropertyValue(const plugin::PropertyDefinition&
         case MLN_PLUGIN_VALUE_COLOR_ARRAY:
             return PluginPropertyValue{PluginPropertyValue::TypedValue{
                 PropertyValue<std::vector<Color>>{defaultValue<std::vector<Color>>(definition)}}};
+        case MLN_PLUGIN_VALUE_COLOR_RAMP: {
+            conversion::Error error;
+            const auto* json = definition.defaultValue.getString();
+            auto converted = json ? conversion::convertJSON<ColorRampPropertyValue>(*json, error) : std::nullopt;
+            return converted ? PluginPropertyValue{PluginPropertyValue::TypedValue{std::move(*converted)}}
+                             : PluginPropertyValue{};
+        }
     }
     return {};
 }
@@ -332,6 +381,11 @@ std::optional<PluginPropertyValue> convertPluginPropertyValue(const plugin::Prop
         case MLN_PLUGIN_VALUE_COLOR_ARRAY:
             converted = convertTyped<std::vector<Color>>(definition, value, error);
             break;
+        case MLN_PLUGIN_VALUE_COLOR_RAMP: {
+            auto ramp = conversion::convert<ColorRampPropertyValue>(value, error, false, false);
+            if (ramp) converted = PluginPropertyValue{PluginPropertyValue::TypedValue{std::move(*ramp)}};
+            break;
+        }
     }
     if (converted && !validateConstant(definition, *converted, error)) return std::nullopt;
     return converted;

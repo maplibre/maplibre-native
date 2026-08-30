@@ -3,6 +3,7 @@
 #include <mln/plugin/plugin_api.h>
 #include <mln/style/style_property.hpp>
 
+#include <array>
 #include <map>
 #include <mutex>
 #include <optional>
@@ -71,6 +72,7 @@ struct TextureBindingDefinition {
     uint32_t textureID = 0;
     mln_plugin_texture_source source = MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM;
     uint32_t renderTargetID = 0;
+    std::string propertyName;
     mln_plugin_texture_filter filter = MLN_PLUGIN_TEXTURE_FILTER_LINEAR;
     mln_plugin_texture_wrap wrapU = MLN_PLUGIN_TEXTURE_WRAP_CLAMP;
     mln_plugin_texture_wrap wrapV = MLN_PLUGIN_TEXTURE_WRAP_CLAMP;
@@ -81,6 +83,10 @@ struct RenderTargetDefinition {
     uint32_t id = 0;
     mln_plugin_render_target_size size = MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE;
     mln_plugin_render_target_format format = MLN_PLUGIN_RENDER_TARGET_RGBA8;
+    mln_plugin_render_target_scope scope = MLN_PLUGIN_RENDER_TARGET_PER_TILE;
+    float widthScale = 1.0f;
+    float heightScale = 1.0f;
+    std::array<float, 4> clearColor{0.0f, 0.0f, 0.0f, 1.0f};
     bool operator==(const RenderTargetDefinition&) const = default;
 };
 
@@ -95,6 +101,7 @@ struct RenderPassDefinition {
     mln_plugin_blend_mode blendMode = MLN_PLUGIN_BLEND_ALPHA;
     bool enableStencil = false;
     bool enableCullFace = false;
+    mln_plugin_tile_projection tileProjection = MLN_PLUGIN_TILE_PROJECTION_MAP;
     std::vector<TextureBindingDefinition> textures;
     bool operator==(const RenderPassDefinition&) const = default;
 };
