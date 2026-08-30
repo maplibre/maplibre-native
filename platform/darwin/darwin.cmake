@@ -188,11 +188,10 @@ function(mbgl_add_darwin_style_code_target)
     )
 endfunction()
 
-# Custom layer examples use OpenGL ES / Metal APIs directly and are not
+# The custom layer example uses OpenGL ES / Metal APIs directly and is not
 # available for WebGPU builds.
 if(NOT MLN_WITH_WEBGPU)
     set(_custom_layer_sources
-        "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
         "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
     )
 

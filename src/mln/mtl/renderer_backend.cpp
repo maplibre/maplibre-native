@@ -17,8 +17,6 @@
 #include <mln/shaders/mtl/clipping_mask.hpp>
 #include <mln/shaders/mtl/collision.hpp>
 #include <mln/shaders/mtl/color_relief.hpp>
-#include <mln/shaders/mtl/custom_geometry.hpp>
-#include <mln/shaders/mtl/custom_symbol_icon.hpp>
 #include <mln/shaders/mtl/debug.hpp>
 #include <mln/shaders/mtl/fill.hpp>
 #include <mln/shaders/mtl/fill_extrusion.hpp>
@@ -93,8 +91,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
-                  shaders::BuiltIn::CustomGeometryShader,
-                  shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,

@@ -55,12 +55,14 @@ gfx::AttributeDataType attributeType(mln_plugin_vertex_attribute_type type) {
 }
 #endif
 
+#if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_METAL
 const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backend backend) {
     for (const auto& source : shader.sources) {
         if (source.backend == backend) return &source;
     }
     return nullptr;
 }
+#endif
 
 std::string resourcePrelude(const ShaderDefinition& shader) {
     std::ostringstream output;

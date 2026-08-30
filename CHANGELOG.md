@@ -2,6 +2,10 @@
 
 ## main
 
+### ⚠️ Breaking changes
+
+- [core][iOS] Remove the C++ `CustomDrawableLayer` API and Objective-C `MLNCustomDrawableStyleLayer` wrapper. Source-bound C plugin layers are the preferred host-owned drawable extension; backend-direct `CustomLayer` and `CustomGeometrySource` remain available.
+
 ### ✨ New features
 
 - *...Add new stuff here...*

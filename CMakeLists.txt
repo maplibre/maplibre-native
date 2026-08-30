@@ -1024,16 +1024,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/metal.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/vulkan.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/webgpu.cmake)
 
-list(APPEND
-    SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mln/layermanager/custom_drawable_layer_factory.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_custom_drawable_layer.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_custom_drawable_layer.hpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer_impl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer_impl.hpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer.cpp
-)
-
 # Harfbuzz text shaping
 set(SHAPE_TARGETS, "")
 list(APPEND
