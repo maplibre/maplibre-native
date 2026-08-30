@@ -132,7 +132,11 @@ private:
         // started there would deadlock that scheduler. Give the resource its
         // own short-lived run loop and return its result on the layout thread.
         std::thread loader([&] {
-            util::RunLoop runLoop;
+            // A layout request runs on its own worker thread. On libuv
+            // platforms the default RunLoop is process-global and may already
+            // be active on the renderer thread, so this bridge needs an
+            // independent loop to receive the FileSource callback.
+            util::RunLoop runLoop(util::RunLoop::Type::New);
             auto request = fileSource->request(Resource(Resource::Kind::Unknown, resourceURL), [&](Response result) {
                 response = std::move(result);
                 receivedResponse = true;
