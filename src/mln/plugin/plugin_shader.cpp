@@ -23,6 +23,7 @@
 #endif
 
 #include <stdexcept>
+#include <sstream>
 
 namespace mln {
 namespace plugin {
@@ -61,6 +62,17 @@ const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backen
     return nullptr;
 }
 
+std::string resourcePrelude(const ShaderDefinition& shader) {
+    std::ostringstream output;
+    for (const auto& uniform : shader.uniformBlocks) {
+        output << "#define MLN_PLUGIN_UNIFORM_" << uniform.id << "_BINDING " << uniform.bindingID << '\n';
+    }
+    for (const auto& texture : shader.textures) {
+        output << "#define MLN_PLUGIN_TEXTURE_" << texture.id << "_BINDING " << texture.location << '\n';
+    }
+    return output.str();
+}
+
 class PluginShaderGroup final : public gfx::ShaderGroup {
 public:
     PluginShaderGroup(ShaderDefinition definition_, ProgramParameters parameters_)
@@ -70,6 +82,7 @@ public:
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context, const StringIDSetsPair&, std::string_view) override {
         const auto name = shaderGroupName(definition.pluginID, definition.id);
         if (auto existing = getShader(name)) return existing;
+        const auto pluginPrelude = resourcePrelude(definition);
 
         gfx::ShaderPtr shader;
 #if MLN_RENDER_BACKEND_OPENGL
@@ -78,26 +91,41 @@ public:
         std::vector<shaders::AttributeInfo> attributes;
         attributes.reserve(definition.attributes.size());
         for (const auto& attr : definition.attributes) attributes.emplace_back(attr.name, attr.id);
-        const std::vector<shaders::UniformBlockInfo> uniformBlocks = {
-            { "PluginDrawableUBO",
-              shaders::idDrawableReservedVertexOnlyUBO }};
+        std::vector<shaders::UniformBlockInfo> uniformBlocks;
+        uniformBlocks.reserve(definition.uniformBlocks.size());
+        for (const auto& uniform : definition.uniformBlocks) {
+            uniformBlocks.emplace_back(uniform.name, uniform.bindingID);
+        }
+        std::vector<shaders::TextureInfo> textures;
+        textures.reserve(definition.textures.size());
+        for (const auto& texture : definition.textures) {
+            textures.emplace_back(texture.name, texture.id);
+        }
         shader = gl::ShaderProgramGL::create(static_cast<gl::Context&>(context),
                                              parameters.withProgramType(shaders::BuiltIn::None),
                                              definition.attributes.front().name,
                                              uniformBlocks,
-                                             {},
+                                             textures,
                                              attributes,
-                                             source->vertex,
-                                             source->fragment);
+                                             pluginPrelude + source->vertex,
+                                             pluginPrelude + source->fragment);
 #elif MLN_RENDER_BACKEND_VULKAN
         const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_VULKAN);
         if (!source) return {};
         auto created = static_cast<vulkan::Context&>(context).createProgram(
-            shaders::BuiltIn::None, name, source->vertex, source->fragment, parameters, {});
+            shaders::BuiltIn::None,
+            name,
+            pluginPrelude + source->vertex,
+            pluginPrelude + source->fragment,
+            parameters,
+            {});
         if (!created) return {};
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
             typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
+        }
+        for (const auto& texture : definition.textures) {
+            typed->initTexture({texture.location, texture.id});
         }
         shader = std::move(typed);
 #elif MLN_RENDER_BACKEND_METAL
@@ -105,7 +133,7 @@ public:
         if (!source) return {};
         auto created = static_cast<mtl::Context&>(context).createProgram(shaders::BuiltIn::None,
                                                                          name,
-                                                                         std::string(shaders::prelude) + source->vertex,
+                                                                         std::string(shaders::prelude) + pluginPrelude + source->vertex,
                                                                          source->vertexEntryPoint,
                                                                          source->fragmentEntryPoint,
                                                                          parameters,
@@ -114,7 +142,10 @@ public:
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
             typed->initVertexAttribute(
-                {attr.location, attributeType(attr.type), shaders::drawableReservedUBOCount + attr.location, attr.id});
+                {attr.location, attributeType(attr.type), shaders::maxUBOCountPerShader + attr.location, attr.id});
+        }
+        for (const auto& texture : definition.textures) {
+            typed->initTexture({texture.location, texture.id});
         }
         shader = std::move(typed);
 #else

@@ -7,15 +7,19 @@ struct PluginStyleLayer::Impl::TypeInfoHolder {
     explicit TypeInfoHolder(const plugin::LayerType& registration)
         : name(registration.type),
           info{name.c_str(),
-               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? LayerTypeInfo::Source::Required
-                                                                     : LayerTypeInfo::Source::NotRequired,
-               registration.requires3D ? LayerTypeInfo::Pass3D::Required : LayerTypeInfo::Pass3D::NotRequired,
+               registration.sourceKind == MLN_PLUGIN_SOURCE_NONE ? LayerTypeInfo::Source::NotRequired
+                                                                 : LayerTypeInfo::Source::Required,
+               registration.participatesIn3DPass ? LayerTypeInfo::Pass3D::Required : LayerTypeInfo::Pass3D::NotRequired,
                registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? LayerTypeInfo::Layout::Required
                                                                      : LayerTypeInfo::Layout::NotRequired,
                LayerTypeInfo::FadingTiles::NotRequired,
                LayerTypeInfo::CrossTileIndex::NotRequired,
-               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? LayerTypeInfo::TileKind::Geometry
-                                                                     : LayerTypeInfo::TileKind::NotRequired} {}
+               registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY
+                   ? LayerTypeInfo::TileKind::Geometry
+                   : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM
+                         ? LayerTypeInfo::TileKind::RasterDEM
+                         : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER ? LayerTypeInfo::TileKind::Raster
+                                                                              : LayerTypeInfo::TileKind::NotRequired} {}
 
     std::string name;
     LayerTypeInfo info;

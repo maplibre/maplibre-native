@@ -6,6 +6,7 @@
 #include <mln/util/color.hpp>
 
 #include <array>
+#include <vector>
 #include <variant>
 
 namespace mln {
@@ -25,7 +26,15 @@ public:
                                     PropertyValue<float>,
                                     PropertyValue<std::array<float, 2>>,
                                     PropertyValue<Color>,
-                                    PropertyValue<std::string>>;
+                                    PropertyValue<std::string>,
+                                    PropertyValue<std::vector<float>>,
+                                    PropertyValue<std::vector<Color>>>;
+
+    struct EvaluationStorage {
+        std::string string;
+        std::vector<float> floats;
+        std::vector<mln_plugin_color> colors;
+    };
 
     PluginPropertyValue() = default;
     explicit PluginPropertyValue(TypedValue value_)
@@ -40,7 +49,10 @@ public:
                               const GeometryTileFeature&,
                               const FeatureState&,
                               const plugin::PropertyDefinition&,
-                              std::string& stringStorage) const;
+                              EvaluationStorage&) const;
+    mln_plugin_value evaluate(float zoom,
+                              const plugin::PropertyDefinition&,
+                              EvaluationStorage&) const;
 
     friend bool operator==(const PluginPropertyValue& lhs, const PluginPropertyValue& rhs) {
         return lhs.value == rhs.value;

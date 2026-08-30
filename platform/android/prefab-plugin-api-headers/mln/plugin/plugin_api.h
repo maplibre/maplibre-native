@@ -37,7 +37,9 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_FLOAT = 2,
     MLN_PLUGIN_VALUE_FLOAT2 = 3,
     MLN_PLUGIN_VALUE_COLOR = 4,
-    MLN_PLUGIN_VALUE_STRING = 5
+    MLN_PLUGIN_VALUE_STRING = 5,
+    MLN_PLUGIN_VALUE_FLOAT_ARRAY = 6,
+    MLN_PLUGIN_VALUE_COLOR_ARRAY = 7
 } mln_plugin_value_type;
 
 typedef enum mln_plugin_property_scope {
@@ -80,12 +82,24 @@ typedef struct mln_plugin_color {
     float a;
 } mln_plugin_color;
 
+typedef struct mln_plugin_float_array {
+    const float* data;
+    size_t count;
+} mln_plugin_float_array;
+
+typedef struct mln_plugin_color_array {
+    const mln_plugin_color* data;
+    size_t count;
+} mln_plugin_color_array;
+
 typedef union mln_plugin_value_data {
     uint8_t boolean_value;
     float float_value;
     mln_plugin_float2 float2_value;
     mln_plugin_color color_value;
     mln_plugin_string string_value;
+    mln_plugin_float_array float_array_value;
+    mln_plugin_color_array color_array_value;
 } mln_plugin_value_data;
 
 typedef struct mln_plugin_value {
@@ -104,6 +118,17 @@ typedef struct mln_plugin_property_descriptor_v1 {
     uint8_t supports_expressions;
     /* Paint properties may opt into the normal MapLibre transition system. */
     uint8_t supports_transitions;
+    /* Array values may also be authored as a scalar/single color. */
+    uint8_t accepts_scalar;
+    uint8_t has_minimum;
+    uint8_t has_maximum;
+    float minimum;
+    float maximum;
+    /* Zero means no descriptor-specific limit. */
+    uint32_t maximum_array_length;
+    /* Optional allowed string values. */
+    const mln_plugin_string* enum_values;
+    size_t enum_value_count;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -307,10 +332,44 @@ typedef struct mln_plugin_shader_attribute_v1 {
     mln_plugin_vertex_attribute_type type;
 } mln_plugin_shader_attribute_v1;
 
+typedef enum mln_plugin_shader_stage {
+    MLN_PLUGIN_SHADER_STAGE_VERTEX = 1u << 0u,
+    MLN_PLUGIN_SHADER_STAGE_FRAGMENT = 1u << 1u
+} mln_plugin_shader_stage;
+
+typedef enum mln_plugin_uniform_scope {
+    MLN_PLUGIN_UNIFORM_SCOPE_LAYER = 1,
+    MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE = 2
+} mln_plugin_uniform_scope;
+
+typedef struct mln_plugin_uniform_block_descriptor_v1 {
+    uint32_t struct_size;
+    uint32_t uniform_id;
+    mln_plugin_string name;
+    uint32_t byte_size;
+    uint32_t stage_mask;
+    mln_plugin_uniform_scope scope;
+} mln_plugin_uniform_block_descriptor_v1;
+
+typedef struct mln_plugin_shader_texture_v1 {
+    uint32_t struct_size;
+    uint32_t texture_id;
+    uint32_t location;
+    mln_plugin_string name;
+} mln_plugin_shader_texture_v1;
+
 typedef struct mln_plugin_shader_source_v1 {
     uint32_t struct_size;
     mln_plugin_backend backend;
-    /* GLSL vertex source for OpenGL/Vulkan; complete MSL source for Metal. */
+    /*
+     * GLSL vertex source for OpenGL/Vulkan; complete MSL source for Metal.
+     * The host prepends one numeric binding macro for every declared resource:
+     *   MLN_PLUGIN_UNIFORM_<uniform_id>_BINDING
+     *   MLN_PLUGIN_TEXTURE_<texture_id>_BINDING
+     * This keeps backend binding allocation owned by the host. A shader should
+     * use those macros in Vulkan set/binding declarations and Metal buffer,
+     * texture, and sampler attributes. OpenGL resolves uniforms by name.
+     */
     mln_plugin_string vertex_source;
     /* GLSL fragment source. Empty for Metal, where vertex_source is complete. */
     mln_plugin_string fragment_source;
@@ -326,7 +385,116 @@ typedef struct mln_plugin_shader_descriptor_v1 {
     size_t source_count;
     const mln_plugin_shader_attribute_v1* attributes;
     size_t attribute_count;
+    const mln_plugin_uniform_block_descriptor_v1* uniform_blocks;
+    size_t uniform_block_count;
+    const mln_plugin_shader_texture_v1* textures;
+    size_t texture_count;
 } mln_plugin_shader_descriptor_v1;
+
+typedef enum mln_plugin_graph_geometry {
+    MLN_PLUGIN_GRAPH_GEOMETRY_PLUGIN_BUCKET = 1,
+    MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_FULL_TILE = 2,
+    MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE = 3
+} mln_plugin_graph_geometry;
+
+typedef enum mln_plugin_texture_source {
+    MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM = 1,
+    MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET = 2
+} mln_plugin_texture_source;
+
+typedef enum mln_plugin_texture_filter {
+    MLN_PLUGIN_TEXTURE_FILTER_NEAREST = 1,
+    MLN_PLUGIN_TEXTURE_FILTER_LINEAR = 2
+} mln_plugin_texture_filter;
+
+typedef enum mln_plugin_texture_wrap {
+    MLN_PLUGIN_TEXTURE_WRAP_CLAMP = 1,
+    MLN_PLUGIN_TEXTURE_WRAP_REPEAT = 2
+} mln_plugin_texture_wrap;
+
+typedef enum mln_plugin_render_target_size {
+    MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE = 1
+} mln_plugin_render_target_size;
+
+typedef enum mln_plugin_render_target_format {
+    MLN_PLUGIN_RENDER_TARGET_RGBA8 = 1
+} mln_plugin_render_target_format;
+
+typedef struct mln_plugin_render_target_descriptor_v1 {
+    uint32_t struct_size;
+    uint32_t target_id;
+    mln_plugin_render_target_size size;
+    mln_plugin_render_target_format format;
+} mln_plugin_render_target_descriptor_v1;
+
+typedef struct mln_plugin_texture_binding_v1 {
+    uint32_t struct_size;
+    uint32_t texture_id;
+    mln_plugin_texture_source source;
+    /* Required only for MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET. */
+    uint32_t render_target_id;
+    mln_plugin_texture_filter filter;
+    mln_plugin_texture_wrap wrap_u;
+    mln_plugin_texture_wrap wrap_v;
+} mln_plugin_texture_binding_v1;
+
+typedef struct mln_plugin_render_pass_descriptor_v1 {
+    uint32_t struct_size;
+    uint32_t pass_id;
+    mln_plugin_string shader_id;
+    mln_plugin_graph_geometry geometry;
+    /* Zero renders into the map; non-zero names a graph render target. */
+    uint32_t render_target_id;
+    mln_plugin_render_stage render_stage;
+    mln_plugin_draw_mode draw_mode;
+    mln_plugin_depth_mode depth_mode;
+    mln_plugin_blend_mode blend_mode;
+    uint8_t enable_stencil;
+    uint8_t enable_cull_face;
+    const mln_plugin_texture_binding_v1* textures;
+    size_t texture_count;
+} mln_plugin_render_pass_descriptor_v1;
+
+typedef struct mln_plugin_render_graph_v1 {
+    uint32_t struct_size;
+    const mln_plugin_render_target_descriptor_v1* render_targets;
+    size_t render_target_count;
+    const mln_plugin_render_pass_descriptor_v1* passes;
+    size_t pass_count;
+} mln_plugin_render_graph_v1;
+
+typedef enum mln_plugin_raster_dem_encoding {
+    MLN_PLUGIN_RASTER_DEM_MAPBOX = 1,
+    MLN_PLUGIN_RASTER_DEM_TERRARIUM = 2
+} mln_plugin_raster_dem_encoding;
+
+/* Borrowed render-thread inputs for a host-owned plugin uniform block. */
+typedef struct mln_plugin_uniform_context_v1 {
+    uint32_t struct_size;
+    uint32_t pass_id;
+    int32_t canonical_z;
+    int32_t canonical_x;
+    int32_t canonical_y;
+    int32_t wrap;
+    int32_t overscaled_z;
+    uint32_t source_max_zoom;
+    uint32_t dem_dimension;
+    uint32_t dem_stride;
+    mln_plugin_raster_dem_encoding dem_encoding;
+    double zoom;
+    double bearing;
+    float pixels_to_gl_units[2];
+    float tile_matrix[16];
+    float render_target_matrix[16];
+    float latitude_range[2];
+    const mln_plugin_property_value_v1* properties;
+    size_t property_count;
+} mln_plugin_uniform_context_v1;
+
+typedef mln_plugin_status (*mln_plugin_update_uniform_block_fn)(const mln_plugin_uniform_context_v1* context,
+                                                                uint32_t uniform_id,
+                                                                uint8_t* output,
+                                                                size_t output_size);
 
 /* A geometry is represented as paths into a flat tile-coordinate point list. */
 typedef struct mln_plugin_tile_point_v1 {
@@ -489,6 +657,11 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_finish_layout_fn finish_layout;
     mln_plugin_destroy_layout_fn destroy_layout;
     mln_plugin_query_feature_fn query_feature;
+    /* Required for RasterDEM graph layers; absent for geometry-only layers. */
+    const mln_plugin_render_graph_v1* render_graph;
+    mln_plugin_update_uniform_block_fn update_uniform_block;
+    /* Matches LayerTypeInfo::Pass3D without making the drawables depth-writing 3D geometry. */
+    uint8_t participates_in_3d_pass;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

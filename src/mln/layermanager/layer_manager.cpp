@@ -31,7 +31,7 @@ std::unique_ptr<style::Layer> LayerManager::createLayer(const std::string& type,
     } else {
         if (auto registration = plugin::PluginRegistry::get().findLayerType(type)) {
             std::string source;
-            if (registration->sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY) {
+            if (registration->sourceKind != MLN_PLUGIN_SOURCE_NONE) {
                 const auto sourceValue = objectMember(value, "source");
                 const auto sourceID = sourceValue ? toString(*sourceValue) : std::nullopt;
                 if (!sourceID || sourceID->empty()) {

@@ -192,6 +192,8 @@ void PluginLayout::createBucket(const ImagePositions&,
     const auto propertyDefinitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
     std::vector<mln_plugin_property_value_v1> properties;
     std::vector<std::string> propertyStrings(propertyDefinitions.size());
+    std::vector<std::vector<float>> propertyFloatArrays(propertyDefinitions.size());
+    std::vector<std::vector<mln_plugin_color>> propertyColorArrays(propertyDefinitions.size());
     properties.reserve(propertyDefinitions.size());
     for (size_t propertyIndex = 0; propertyIndex < propertyDefinitions.size(); ++propertyIndex) {
         const auto& definition = propertyDefinitions[propertyIndex];
@@ -230,6 +232,35 @@ void PluginLayout::createBucket(const ImagePositions&,
                 const auto* string = value.getString();
                 if (string) propertyStrings[propertyIndex] = *string;
                 property.value.data.string_value = borrowed(propertyStrings[propertyIndex]);
+                break;
+            }
+            case MLN_PLUGIN_VALUE_FLOAT_ARRAY: {
+                const auto* array = value.getArray();
+                auto& output = propertyFloatArrays[propertyIndex];
+                if (array) {
+                    output.reserve(array->size());
+                    for (const auto& item : *array) {
+                        output.push_back(numericValue<float>(item).value_or(0.0f));
+                    }
+                }
+                property.value.data.float_array_value = {output.data(), output.size()};
+                break;
+            }
+            case MLN_PLUGIN_VALUE_COLOR_ARRAY: {
+                const auto* array = value.getArray();
+                auto& output = propertyColorArrays[propertyIndex];
+                if (array) {
+                    output.reserve(array->size());
+                    for (const auto& item : *array) {
+                        const auto* components = item.getArray();
+                        if (!components || components->size() != 4) continue;
+                        output.push_back({numericValue<float>((*components)[0]).value_or(0.0f),
+                                          numericValue<float>((*components)[1]).value_or(0.0f),
+                                          numericValue<float>((*components)[2]).value_or(0.0f),
+                                          numericValue<float>((*components)[3]).value_or(0.0f)});
+                    }
+                }
+                property.value.data.color_array_value = {output.data(), output.size()};
                 break;
             }
         }
@@ -282,7 +313,7 @@ void PluginLayout::createBucket(const ImagePositions&,
         const auto id = featureIDtoString(feature->getID()).value_or(std::string{});
         const auto propertiesJSON = featurePropertiesJSON(*feature);
         std::vector<mln_plugin_property_value_v1> evaluatedProperties;
-        std::vector<std::string> evaluatedStrings(propertyDefinitions.size());
+        std::vector<style::PluginPropertyValue::EvaluationStorage> evaluatedStorage(propertyDefinitions.size());
         evaluatedProperties.reserve(propertyDefinitions.size());
         const FeatureState emptyState;
         for (size_t propertyIndex = 0; propertyIndex < propertyDefinitions.size(); ++propertyIndex) {
@@ -294,7 +325,7 @@ void PluginLayout::createBucket(const ImagePositions&,
             mln_plugin_property_value_v1 evaluated{};
             evaluated.struct_size = sizeof(evaluated);
             evaluated.name = borrowed(definition.name);
-            evaluated.value = value.evaluate(zoom, *feature, emptyState, definition, evaluatedStrings[propertyIndex]);
+            evaluated.value = value.evaluate(zoom, *feature, emptyState, definition, evaluatedStorage[propertyIndex]);
             evaluated.explicitly_set = propertyIt != leader.pluginProperties.end();
             evaluatedProperties.push_back(evaluated);
         }

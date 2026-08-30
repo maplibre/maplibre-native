@@ -1005,6 +1005,7 @@ MLN_DRAWABLES_SOURCE = [
 MLN_DRAWABLES_HEADERS = [
     "include/mln/gfx/drawable.hpp",
     "include/mln/gfx/drawable_data.hpp",
+    "include/mln/gfx/plugin_render_graph_drawable_data.hpp",
     "include/mln/gfx/drawable_impl.hpp",
     "include/mln/gfx/drawable_builder.hpp",
     "include/mln/gfx/drawable_tweaker.hpp",

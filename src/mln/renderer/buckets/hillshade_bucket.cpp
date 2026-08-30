@@ -48,6 +48,7 @@ void HillshadeBucket::setMask(TileMask&& mask_) {
     }
 
     mask = std::move(mask_);
+    ++maskRevision;
     clear();
 
     if (mask == TileMask{{0, 0, 0}}) {

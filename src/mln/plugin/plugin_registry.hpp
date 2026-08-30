@@ -21,6 +21,11 @@ struct PropertyDefinition {
     Value defaultValue;
     bool supportsExpressions = false;
     bool supportsTransitions = false;
+    bool acceptsScalar = false;
+    std::optional<float> minimum;
+    std::optional<float> maximum;
+    uint32_t maximumArrayLength = 0;
+    std::vector<std::string> enumValues;
 };
 
 struct ShaderAttribute {
@@ -38,11 +43,66 @@ struct ShaderSource {
     std::string fragmentEntryPoint;
 };
 
+struct UniformBlockDefinition {
+    uint32_t id = 0;
+    std::string name;
+    uint32_t byteSize = 0;
+    uint32_t stageMask = 0;
+    mln_plugin_uniform_scope scope = MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE;
+    uint32_t bindingID = 0;
+};
+
+struct ShaderTextureDefinition {
+    uint32_t id = 0;
+    uint32_t location = 0;
+    std::string name;
+};
+
 struct ShaderDefinition {
     std::string pluginID;
     std::string id;
     std::vector<ShaderSource> sources;
     std::vector<ShaderAttribute> attributes;
+    std::vector<UniformBlockDefinition> uniformBlocks;
+    std::vector<ShaderTextureDefinition> textures;
+};
+
+struct TextureBindingDefinition {
+    uint32_t textureID = 0;
+    mln_plugin_texture_source source = MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM;
+    uint32_t renderTargetID = 0;
+    mln_plugin_texture_filter filter = MLN_PLUGIN_TEXTURE_FILTER_LINEAR;
+    mln_plugin_texture_wrap wrapU = MLN_PLUGIN_TEXTURE_WRAP_CLAMP;
+    mln_plugin_texture_wrap wrapV = MLN_PLUGIN_TEXTURE_WRAP_CLAMP;
+    bool operator==(const TextureBindingDefinition&) const = default;
+};
+
+struct RenderTargetDefinition {
+    uint32_t id = 0;
+    mln_plugin_render_target_size size = MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE;
+    mln_plugin_render_target_format format = MLN_PLUGIN_RENDER_TARGET_RGBA8;
+    bool operator==(const RenderTargetDefinition&) const = default;
+};
+
+struct RenderPassDefinition {
+    uint32_t id = 0;
+    std::string shaderID;
+    mln_plugin_graph_geometry geometry = MLN_PLUGIN_GRAPH_GEOMETRY_PLUGIN_BUCKET;
+    uint32_t renderTargetID = 0;
+    mln_plugin_render_stage renderStage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
+    mln_plugin_draw_mode drawMode = MLN_PLUGIN_DRAW_MODE_TRIANGLES;
+    mln_plugin_depth_mode depthMode = MLN_PLUGIN_DEPTH_DISABLED;
+    mln_plugin_blend_mode blendMode = MLN_PLUGIN_BLEND_ALPHA;
+    bool enableStencil = false;
+    bool enableCullFace = false;
+    std::vector<TextureBindingDefinition> textures;
+    bool operator==(const RenderPassDefinition&) const = default;
+};
+
+struct RenderGraphDefinition {
+    std::vector<RenderTargetDefinition> renderTargets;
+    std::vector<RenderPassDefinition> passes;
+    bool operator==(const RenderGraphDefinition&) const = default;
 };
 
 struct LayerExtension {
@@ -65,6 +125,7 @@ struct LayerType {
     uint32_t backendMask = 0;
     mln_plugin_render_stage renderStage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
     bool requires3D = false;
+    bool participatesIn3DPass = false;
     mln_plugin_source_kind sourceKind = MLN_PLUGIN_SOURCE_NONE;
     uint32_t geometryTypeMask = 0;
     std::vector<ShaderDefinition> shaders;
@@ -73,6 +134,8 @@ struct LayerType {
     mln_plugin_finish_layout_fn finishLayout = nullptr;
     mln_plugin_destroy_layout_fn destroyLayout = nullptr;
     mln_plugin_query_feature_fn queryFeature = nullptr;
+    std::optional<RenderGraphDefinition> renderGraph;
+    mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
 };
 
 class PluginRegistry final {

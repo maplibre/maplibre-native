@@ -68,7 +68,11 @@ double numericValue(const Value& value) {
     return 0.0;
 }
 
-mln_plugin_value makeCValue(const Value& value, mln_plugin_value_type type, std::vector<std::string>& stringStorage) {
+mln_plugin_value makeCValue(const Value& value,
+                            mln_plugin_value_type type,
+                            std::vector<std::string>& stringStorage,
+                            std::vector<std::vector<float>>& floatArrayStorage,
+                            std::vector<std::vector<mln_plugin_color>>& colorArrayStorage) {
     mln_plugin_value result{};
     result.struct_size = sizeof(result);
     result.type = type;
@@ -97,6 +101,33 @@ mln_plugin_value makeCValue(const Value& value, mln_plugin_value_type type, std:
             stringStorage.push_back(*value.getString());
             result.data.string_value = {stringStorage.back().data(), stringStorage.back().size()};
             break;
+        case MLN_PLUGIN_VALUE_FLOAT_ARRAY: {
+            floatArrayStorage.emplace_back();
+            auto& output = floatArrayStorage.back();
+            if (const auto* array = value.getArray()) {
+                output.reserve(array->size());
+                for (const auto& item : *array) output.push_back(static_cast<float>(numericValue(item)));
+            }
+            result.data.float_array_value = {output.data(), output.size()};
+            break;
+        }
+        case MLN_PLUGIN_VALUE_COLOR_ARRAY: {
+            colorArrayStorage.emplace_back();
+            auto& output = colorArrayStorage.back();
+            if (const auto* array = value.getArray()) {
+                output.reserve(array->size());
+                for (const auto& item : *array) {
+                    const auto* components = item.getArray();
+                    if (!components || components->size() != 4) continue;
+                    output.push_back({static_cast<float>(numericValue((*components)[0])),
+                                      static_cast<float>(numericValue((*components)[1])),
+                                      static_cast<float>(numericValue((*components)[2])),
+                                      static_cast<float>(numericValue((*components)[3]))});
+                }
+            }
+            result.data.color_array_value = {output.data(), output.size()};
+            break;
+        }
     }
     return result;
 }
@@ -186,6 +217,8 @@ struct PluginLayerHost::Instance {
 struct PluginLayerHost::PropertySnapshot {
     std::vector<std::string> names;
     std::vector<std::string> stringValues;
+    std::vector<std::vector<float>> floatArrayValues;
+    std::vector<std::vector<mln_plugin_color>> colorArrayValues;
     std::vector<mln_plugin_property_value_v1> values;
 };
 
@@ -229,6 +262,8 @@ PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const In
     });
     snapshot.names.reserve(count);
     snapshot.stringValues.reserve(count);
+    snapshot.floatArrayValues.reserve(count);
+    snapshot.colorArrayValues.reserve(count);
     snapshot.values.reserve(count);
 
     for (const auto& definition : definitions) {
@@ -243,7 +278,11 @@ PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const In
         snapshot.values.push_back(
             mln_plugin_property_value_v1{sizeof(mln_plugin_property_value_v1),
                                          {snapshot.names.back().data(), snapshot.names.back().size()},
-                                         makeCValue(value, definition.type, snapshot.stringValues),
+                                         makeCValue(value,
+                                                    definition.type,
+                                                    snapshot.stringValues,
+                                                    snapshot.floatArrayValues,
+                                                    snapshot.colorArrayValues),
                                          static_cast<uint8_t>(explicitlySet ? 1 : 0)});
     }
     return snapshot;

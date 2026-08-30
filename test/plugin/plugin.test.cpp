@@ -53,6 +53,10 @@ mln_plugin_status finishLayout(void*, mln_plugin_bucket_v1* bucket) {
 
 void destroyLayout(void*) {}
 
+mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
+    return MLN_PLUGIN_STATUS_OK;
+}
+
 struct Descriptor {
     explicit Descriptor(const char* id_, const char* propertyName_)
         : propertyName(propertyName_),
@@ -60,13 +64,11 @@ struct Descriptor {
         defaultValue.struct_size = sizeof(defaultValue);
         defaultValue.type = MLN_PLUGIN_VALUE_BOOLEAN;
         defaultValue.data.boolean_value = 0;
-        property = {sizeof(property),
-                    cString(propertyName),
-                    MLN_PLUGIN_VALUE_BOOLEAN,
-                    MLN_PLUGIN_PROPERTY_PAINT,
-                    defaultValue,
-                    0,
-                    0};
+        property.struct_size = sizeof(property);
+        property.name = cString(propertyName);
+        property.type = MLN_PLUGIN_VALUE_BOOLEAN;
+        property.scope = MLN_PLUGIN_PROPERTY_PAINT;
+        property.default_value = defaultValue;
         extension = {sizeof(extension),
                      cString("fill-extrusion"),
                      10,
@@ -103,13 +105,11 @@ struct LayerTypeDescriptor {
         defaultURI.struct_size = sizeof(defaultURI);
         defaultURI.type = MLN_PLUGIN_VALUE_STRING;
         defaultURI.data.string_value = {"", 0};
-        property = {sizeof(property),
-                    cString("test-model-uri"),
-                    MLN_PLUGIN_VALUE_STRING,
-                    MLN_PLUGIN_PROPERTY_LAYOUT,
-                    defaultURI,
-                    0,
-                    0};
+        property.struct_size = sizeof(property);
+        property.name = cString("test-model-uri");
+        property.type = MLN_PLUGIN_VALUE_STRING;
+        property.scope = MLN_PLUGIN_PROPERTY_LAYOUT;
+        property.default_value = defaultURI;
         properties = {property};
         shaderSource = {sizeof(shaderSource),
                         MLN_PLUGIN_BACKEND_METAL,
@@ -118,7 +118,12 @@ struct LayerTypeDescriptor {
                         cString("testVertex"),
                         cString("testFragment")};
         shaderAttribute = {sizeof(shaderAttribute), 0, 0, cString("a_position"), MLN_PLUGIN_VERTEX_FLOAT_X2};
-        shader = {sizeof(shader), cString("test"), &shaderSource, 1, &shaderAttribute, 1};
+        shader.struct_size = sizeof(shader);
+        shader.shader_id = cString("test");
+        shader.sources = &shaderSource;
+        shader.source_count = 1;
+        shader.attributes = &shaderAttribute;
+        shader.attribute_count = 1;
         layerType.struct_size = sizeof(layerType);
         layerType.layer_type = cString("test-plugin-layer");
         layerType.backend_mask = MLN_PLUGIN_BACKEND_METAL;
@@ -179,6 +184,11 @@ TEST(PluginRegistry, RejectsAbiMismatchAndConflictingProperty) {
 }
 
 TEST(PluginRegistry, RejectsMalformedDuplicateAndNonPaintDescriptors) {
+    Descriptor truncatedProperty("org.maplibre.test.truncated-property", "test-truncated-property");
+    truncatedProperty.property.struct_size = sizeof(truncatedProperty.property) - 1;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
+              mln_plugin_register_v1(&truncatedProperty.descriptor, nullptr, 0));
+
     Descriptor missingDestroy("org.maplibre.test.missing-destroy", "test-missing-destroy");
     missingDestroy.extension.destroy_instance = nullptr;
     EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&missingDestroy.descriptor, nullptr, 0));
@@ -192,6 +202,123 @@ TEST(PluginRegistry, RejectsMalformedDuplicateAndNonPaintDescriptors) {
     duplicate.extension.properties = properties.data();
     duplicate.extension.property_count = properties.size();
     EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&duplicate.descriptor, nullptr, 0));
+}
+
+TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies) {
+    const mln_plugin_shader_source_v1 source{
+        sizeof(mln_plugin_shader_source_v1),
+        MLN_PLUGIN_BACKEND_METAL,
+        cString("shader source"),
+        {},
+        cString("testVertex"),
+        cString("testFragment")};
+    const mln_plugin_shader_attribute_v1 attribute{
+        sizeof(mln_plugin_shader_attribute_v1), 0, 0, cString("a_position"), MLN_PLUGIN_VERTEX_INT16_X2};
+    const mln_plugin_uniform_block_descriptor_v1 uniform{sizeof(mln_plugin_uniform_block_descriptor_v1),
+                                                         0,
+                                                         cString("TestDrawableUBO"),
+                                                         16,
+                                                         MLN_PLUGIN_SHADER_STAGE_VERTEX,
+                                                         MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE};
+    const mln_plugin_shader_texture_v1 texture{
+        sizeof(mln_plugin_shader_texture_v1), 0, 0, cString("u_image")};
+    const mln_plugin_shader_descriptor_v1 shader{sizeof(mln_plugin_shader_descriptor_v1),
+                                                 cString("dem-shader"),
+                                                 &source,
+                                                 1,
+                                                 &attribute,
+                                                 1,
+                                                 &uniform,
+                                                 1,
+                                                 &texture,
+                                                 1};
+    const mln_plugin_render_target_descriptor_v1 target{sizeof(mln_plugin_render_target_descriptor_v1),
+                                                         1,
+                                                         MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE,
+                                                         MLN_PLUGIN_RENDER_TARGET_RGBA8};
+    const mln_plugin_texture_binding_v1 prepareTexture{sizeof(mln_plugin_texture_binding_v1),
+                                                       0,
+                                                       MLN_PLUGIN_TEXTURE_SOURCE_RASTER_DEM,
+                                                       0,
+                                                       MLN_PLUGIN_TEXTURE_FILTER_NEAREST,
+                                                       MLN_PLUGIN_TEXTURE_WRAP_CLAMP,
+                                                       MLN_PLUGIN_TEXTURE_WRAP_CLAMP};
+    mln_plugin_texture_binding_v1 finalTexture{sizeof(mln_plugin_texture_binding_v1),
+                                               0,
+                                               MLN_PLUGIN_TEXTURE_SOURCE_RENDER_TARGET,
+                                               1,
+                                               MLN_PLUGIN_TEXTURE_FILTER_LINEAR,
+                                               MLN_PLUGIN_TEXTURE_WRAP_CLAMP,
+                                               MLN_PLUGIN_TEXTURE_WRAP_CLAMP};
+    std::array<mln_plugin_render_pass_descriptor_v1, 2> passes{{
+        {sizeof(mln_plugin_render_pass_descriptor_v1),
+         1,
+         cString("dem-shader"),
+         MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_FULL_TILE,
+         1,
+         MLN_PLUGIN_RENDER_STAGE_PREPARE,
+         MLN_PLUGIN_DRAW_MODE_TRIANGLES,
+         MLN_PLUGIN_DEPTH_DISABLED,
+         MLN_PLUGIN_BLEND_REPLACE,
+         0,
+         0,
+         &prepareTexture,
+         1},
+        {sizeof(mln_plugin_render_pass_descriptor_v1),
+         2,
+         cString("dem-shader"),
+         MLN_PLUGIN_GRAPH_GEOMETRY_RASTER_DEM_MASKED_TILE,
+         0,
+         MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT,
+         MLN_PLUGIN_DRAW_MODE_TRIANGLES,
+         MLN_PLUGIN_DEPTH_DISABLED,
+         MLN_PLUGIN_BLEND_PREMULTIPLIED_ALPHA,
+         0,
+         0,
+         &finalTexture,
+         1},
+    }};
+    const mln_plugin_render_graph_v1 graph{
+        sizeof(mln_plugin_render_graph_v1), &target, 1, passes.data(), passes.size()};
+    mln_plugin_layer_type_v1 layerType{};
+    layerType.struct_size = sizeof(layerType);
+    layerType.layer_type = cString("org.maplibre.test.raster-dem-graph");
+    layerType.backend_mask = MLN_PLUGIN_BACKEND_METAL;
+    layerType.render_stage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
+    layerType.source_kind = MLN_PLUGIN_SOURCE_RASTER_DEM;
+    layerType.shaders = &shader;
+    layerType.shader_count = 1;
+    layerType.render_graph = &graph;
+    layerType.update_uniform_block = updateUniform;
+    layerType.participates_in_3d_pass = 1;
+    mln_plugin_descriptor_v1 descriptor{sizeof(mln_plugin_descriptor_v1),
+                                        MLN_PLUGIN_ABI_VERSION_1,
+                                        cString("org.maplibre.test.raster-dem-graph-plugin"),
+                                        cString("1.0.0"),
+                                        MLN_PLUGIN_ABI_VERSION_1,
+                                        MLN_PLUGIN_ABI_VERSION_1,
+                                        nullptr,
+                                        0,
+                                        &layerType,
+                                        1};
+    char errorBuffer[256]{};
+    layerType.update_uniform_block = nullptr;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
+              mln_plugin_register_v1(&descriptor, errorBuffer, sizeof(errorBuffer)));
+    EXPECT_NE(std::string::npos, std::string(errorBuffer).find("uniforms without an update callback"));
+
+    layerType.update_uniform_block = updateUniform;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, nullptr, 0));
+    const auto registration = plugin::PluginRegistry::get().findLayerType("org.maplibre.test.raster-dem-graph");
+    ASSERT_TRUE(registration);
+    ASSERT_TRUE(registration->renderGraph);
+    EXPECT_TRUE(registration->participatesIn3DPass);
+    EXPECT_EQ(2u, registration->renderGraph->passes.size());
+
+    finalTexture.render_target_id = 9;
+    layerType.layer_type = cString("org.maplibre.test.raster-dem-forward-reference");
+    descriptor.plugin_id = cString("org.maplibre.test.raster-dem-forward-reference-plugin");
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, nullptr, 0));
 }
 
 TEST(PluginRegistry, OrdersExtensionsByPriorityThenID) {
@@ -220,6 +347,7 @@ TEST(PluginRegistry, RegistersSourceBoundLayerTypeAndScopedProperties) {
     const auto registration = plugin::PluginRegistry::get().findLayerType("test-plugin-layer");
     ASSERT_TRUE(registration);
     EXPECT_TRUE(registration->requires3D);
+    EXPECT_TRUE(registration->participatesIn3DPass);
 
     JSDocument missingSource;
     missingSource.Parse("{}");
@@ -318,4 +446,49 @@ TEST(PluginStyleProperty, DefaultSetCloneAndSerialize) {
 
     const JSValue unknown(true);
     EXPECT_TRUE(layer.setProperty("test-unregistered-property", conversion::Convertible(&unknown)));
+}
+
+TEST(PluginStyleProperty, EnforcesArrayNumericAndEnumConstraints) {
+    Descriptor numeric("org.maplibre.test.constrained-array", "test-constrained-array");
+    const std::array<float, 1> defaultArray{45.0f};
+    numeric.defaultValue.type = MLN_PLUGIN_VALUE_FLOAT_ARRAY;
+    numeric.defaultValue.data.float_array_value = {defaultArray.data(), defaultArray.size()};
+    numeric.property.type = MLN_PLUGIN_VALUE_FLOAT_ARRAY;
+    numeric.property.default_value = numeric.defaultValue;
+    numeric.property.accepts_scalar = 1;
+    numeric.property.has_minimum = 1;
+    numeric.property.minimum = 0.0f;
+    numeric.property.has_maximum = 1;
+    numeric.property.maximum = 90.0f;
+    numeric.property.maximum_array_length = 4;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&numeric.descriptor, nullptr, 0));
+
+    FillExtrusionLayer layer("constrained", "source");
+    const JSValue scalar(30);
+    EXPECT_FALSE(layer.setProperty("test-constrained-array", conversion::Convertible(&scalar)));
+
+    JSDocument tooLong;
+    tooLong.Parse("[0, 1, 2, 3, 4]");
+    const JSValue* tooLongValue = &tooLong;
+    EXPECT_TRUE(layer.setProperty("test-constrained-array", conversion::Convertible(tooLongValue)));
+
+    JSDocument outOfRange;
+    outOfRange.Parse("[91]");
+    const JSValue* outOfRangeValue = &outOfRange;
+    EXPECT_TRUE(layer.setProperty("test-constrained-array", conversion::Convertible(outOfRangeValue)));
+
+    Descriptor enumeration("org.maplibre.test.constrained-enum", "test-constrained-enum");
+    enumeration.defaultValue.type = MLN_PLUGIN_VALUE_STRING;
+    enumeration.defaultValue.data.string_value = cString("first");
+    enumeration.property.type = MLN_PLUGIN_VALUE_STRING;
+    enumeration.property.default_value = enumeration.defaultValue;
+    const std::array<mln_plugin_string, 2> allowed{cString("first"), cString("second")};
+    enumeration.property.enum_values = allowed.data();
+    enumeration.property.enum_value_count = allowed.size();
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&enumeration.descriptor, nullptr, 0));
+
+    const JSValue allowedValue("second");
+    EXPECT_FALSE(layer.setProperty("test-constrained-enum", conversion::Convertible(&allowedValue)));
+    const JSValue rejectedValue("third");
+    EXPECT_TRUE(layer.setProperty("test-constrained-enum", conversion::Convertible(&rejectedValue)));
 }

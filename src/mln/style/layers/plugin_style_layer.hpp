@@ -62,6 +62,7 @@ public:
                 renderPasses = 0;
                 break;
         }
+        if (registration.participatesIn3DPass) renderPasses |= 1u << 2u;
     }
 
     expression::Dependency getDependencies() const noexcept override { return baseImpl->getDependencies(); }
