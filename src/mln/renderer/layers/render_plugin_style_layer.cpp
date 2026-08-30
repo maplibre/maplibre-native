@@ -172,7 +172,9 @@ bool RenderPluginStyleLayer::is3D() const {
 
 void RenderPluginStyleLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTiles();
-    sourceMaxZoom = params.source->getMaxZoom();
+    if (pluginImpl(baseImpl).registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM) {
+        sourceMaxZoom = params.source->getMaxZoom();
+    }
     updateRenderTileIDs();
 }
 
