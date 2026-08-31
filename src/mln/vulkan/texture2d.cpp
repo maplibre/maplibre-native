@@ -551,7 +551,7 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
 }
 
 void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer) {
-    assert(imageLayout != vk::ImageLayout::eTransferDstOptimal);
+    assert(imageLayout == vk::ImageLayout::eTransferDstOptimal);
 
     const auto barrier = vk::ImageMemoryBarrier()
                              .setImage(imageAllocation->image)
