@@ -484,6 +484,9 @@ void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& b
     } else if (imageLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
         barrier.setSrcAccessMask(vk::AccessFlagBits::eShaderRead);
         srcMask = vk::PipelineStageFlagBits::eFragmentShader;
+    } else if (imageLayout == vk::ImageLayout::eGeneral) {
+        barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
+        srcMask = vk::PipelineStageFlagBits::eTransfer;
     } else {
         assert(false);
     }
