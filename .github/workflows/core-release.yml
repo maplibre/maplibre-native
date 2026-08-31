@@ -50,7 +50,7 @@ jobs:
         with:
           submodules: recursive
 
-      - run: brew install webp libuv
+      - run: brew install webp libuv llvm
 
       - uses: taiki-e/install-action@ba47c86ac325773530516bb756137ac718732518 # v2.86.5
         with:
