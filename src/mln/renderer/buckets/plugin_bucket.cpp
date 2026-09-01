@@ -18,7 +18,9 @@ namespace {
 class PluginFeatureSnapshot final : public GeometryTileFeature {
 public:
     PluginFeatureSnapshot(FeatureType type_, FeatureIdentifier id_, PropertyMap properties_)
-        : type(type_), id(std::move(id_)), properties(std::move(properties_)) {}
+        : type(type_),
+          id(std::move(id_)),
+          properties(std::move(properties_)) {}
 
     FeatureType getType() const override { return type; }
     std::optional<Value> getValue(const std::string& key) const override {
@@ -77,8 +79,7 @@ void encodedValue(const mln_plugin_value& value,
     }
 }
 
-mln_plugin_value decodedValue(const std::array<float, 4>& input,
-                              mln_plugin_value_type type) {
+mln_plugin_value decodedValue(const std::array<float, 4>& input, mln_plugin_value_type type) {
     mln_plugin_value value{};
     value.struct_size = sizeof(value);
     value.type = type;
@@ -103,10 +104,7 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input,
 
 } // namespace
 
-void PluginPaintVertexVector::set(std::size_t first,
-                                  std::size_t length,
-                                  const float* minimum,
-                                  const float* maximum) {
+void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const float* minimum, const float* maximum) {
     if (first > count || length > count - first) return;
     for (std::size_t vertex = first; vertex < first + length; ++vertex) {
         auto* destination = data.data() + vertex * components * 2;
@@ -116,8 +114,7 @@ void PluginPaintVertexVector::set(std::size_t first,
     updateModified(true);
 }
 
-void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum,
-                                     std::array<float, 4>& maximum) const {
+void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum, std::array<float, 4>& maximum) const {
     minimum.fill(std::numeric_limits<float>::infinity());
     maximum.fill(-std::numeric_limits<float>::infinity());
     for (std::size_t vertex = 0; vertex < count; ++vertex) {
@@ -201,8 +198,7 @@ void PluginPaintPropertyBinder::writeUniform(float zoom,
             std::memcpy(output + binding.uniformByteOffset, encoded.data(), size);
         }
     }
-    if (uniformID == binding.interpolationUniformID &&
-        binding.interpolationUniformByteOffset <= outputSize &&
+    if (uniformID == binding.interpolationUniformID && binding.interpolationUniformByteOffset <= outputSize &&
         sizeof(float) <= outputSize - binding.interpolationUniformByteOffset) {
         const auto factor = interpolationFactor(zoom);
         std::memcpy(output + binding.interpolationUniformByteOffset, &factor, sizeof(factor));
@@ -238,9 +234,7 @@ bool PluginPaintPropertyBinder::update(const FeatureStates& states, const Geomet
     return changed;
 }
 
-void PluginPaintPropertyBinder::statistics(float zoom,
-                                           mln_plugin_value& minimum,
-                                           mln_plugin_value& maximum) const {
+void PluginPaintPropertyBinder::statistics(float zoom, mln_plugin_value& minimum, mln_plugin_value& maximum) const {
     if (!dataDriven || !vertexVector) {
         style::PluginPropertyValue::EvaluationStorage storage;
         minimum = value.evaluate(zoom, definition, storage);
@@ -257,7 +251,8 @@ void PluginPaintPropertyBinder::refill(const GeometryTileLayer* layer) {
         std::unique_ptr<GeometryTileFeature> feature;
         if (layer) feature = layer->getFeature(range.featureIndex);
         PluginFeatureSnapshot snapshot(range.featureType, range.featureIdentifier, range.properties);
-        const GeometryTileFeature& sourceFeature = feature ? *feature : static_cast<const GeometryTileFeature&>(snapshot);
+        const GeometryTileFeature& sourceFeature = feature ? *feature
+                                                           : static_cast<const GeometryTileFeature&>(snapshot);
         const auto state = featureStates.find(range.featureID);
         const FeatureState empty;
         fillRange(range, sourceFeature, state == featureStates.end() ? empty : state->second);
@@ -284,15 +279,14 @@ void PluginPaintPropertyBinder::updateStatistics() {
     if (vertexVector) vertexVector->bounds(minimumValues, maximumValues);
 }
 
-PluginPaintPropertyBinders::PluginPaintPropertyBinders(
-    const plugin::LayerType& registration,
-    const plugin::ShaderDefinition& shader,
-    uint64_t drawableKey,
-    std::size_t vertexCount,
-    float bucketZoom,
-    const style::PluginPropertyMap& properties,
-    const std::vector<PluginFeatureVertexRange>& ranges,
-    const GeometryTileLayer& layer) {
+PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& registration,
+                                                       const plugin::ShaderDefinition& shader,
+                                                       uint64_t drawableKey,
+                                                       std::size_t vertexCount,
+                                                       float bucketZoom,
+                                                       const style::PluginPropertyMap& properties,
+                                                       const std::vector<PluginFeatureVertexRange>& ranges,
+                                                       const GeometryTileLayer& layer) {
     const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
     for (const auto& binding : shader.propertyBindings) {
         const auto definition = std::find_if(definitions.begin(), definitions.end(), [&](const auto& candidate) {
@@ -323,11 +317,7 @@ void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeAr
         const auto& vector = binder.getVertexVector();
         const auto components = binder.componentCount();
         if (const auto& minimum = attributes.set(binding.minimumAttributeID)) {
-            minimum->setSharedRawData(vector,
-                                      0,
-                                      0,
-                                      vector->getRawSize(),
-                                      binder.attributeType());
+            minimum->setSharedRawData(vector, 0, 0, vector->getRawSize(), binder.attributeType());
         }
         if (const auto& maximum = attributes.set(binding.maximumAttributeID)) {
             maximum->setSharedRawData(vector,
@@ -362,8 +352,7 @@ bool PluginPaintPropertyBinders::update(const FeatureStates& states, const Geome
 }
 
 void PluginPaintPropertyBinders::appendStatistics(
-    float zoom,
-    std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>>& output) const {
+    float zoom, std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>>& output) const {
     for (const auto& binder : binders) {
         if (output.find(binder.getDefinition().name) != output.end()) continue;
         mln_plugin_value minimum{};
@@ -440,10 +429,8 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     std::vector<mln_plugin_property_statistics_v1> statistics;
     statistics.reserve(values.size());
     for (const auto& [name, bounds] : values) {
-        statistics.push_back({sizeof(mln_plugin_property_statistics_v1),
-                              {name.data(), name.size()},
-                              bounds.first,
-                              bounds.second});
+        statistics.push_back(
+            {sizeof(mln_plugin_property_statistics_v1), {name.data(), name.size()}, bounds.first, bounds.second});
     }
 
     const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
@@ -458,18 +445,15 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
                                     current.evaluate(zoom, definition, storage[i]),
                                     properties.find(definition.name) != properties.end()});
     }
-    const auto radius = registration.queryRadius(statistics.data(),
-                                                 statistics.size(),
-                                                 cameraProperties.data(),
-                                                 cameraProperties.size());
+    const auto radius = registration.queryRadius(
+        statistics.data(), statistics.size(), cameraProperties.data(), cameraProperties.size());
     if (std::isfinite(radius) && radius >= 0.0f) {
         queryRadii.insert_or_assign(layerID, radius);
         queryRadiusErrorsLogged.erase(layerID);
     } else {
         queryRadii.insert_or_assign(layerID, 0.0f);
         if (queryRadiusErrorsLogged.emplace(layerID).second) {
-            Log::Warning(Event::Style,
-                         "Plugin layer '" + registration.type + "' returned an invalid query radius");
+            Log::Warning(Event::Style, "Plugin layer '" + registration.type + "' returned an invalid query radius");
         }
     }
 }

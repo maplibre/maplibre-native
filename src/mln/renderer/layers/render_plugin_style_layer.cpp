@@ -150,11 +150,9 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     for (const auto& definition : definitions) {
         if (definition.scope != MLN_PLUGIN_PROPERTY_PAINT) continue;
         const auto property = layerImpl.pluginProperties.find(definition.name);
-        auto value = property == layerImpl.pluginProperties.end()
-                         ? style::defaultPluginPropertyValue(definition)
-                         : property->second;
-        transitioningPaintProperties.emplace(
-            definition.name, style::PluginTransitioningPropertyValue{value});
+        auto value = property == layerImpl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                  : property->second;
+        transitioningPaintProperties.emplace(definition.name, style::PluginTransitioningPropertyValue{value});
         evaluatedPluginProperties.emplace(definition.name, std::move(value));
     }
     passes = renderPassFor(registration.renderStage);
@@ -167,13 +165,11 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
     for (const auto& definition : definitions) {
         if (definition.scope != MLN_PLUGIN_PROPERTY_PAINT) continue;
         const auto property = impl.pluginProperties.find(definition.name);
-        auto value = property == impl.pluginProperties.end()
-                         ? style::defaultPluginPropertyValue(definition)
-                         : property->second;
+        auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                             : property->second;
         auto prior = transitioningPaintProperties.find(definition.name);
         auto priorValue = prior == transitioningPaintProperties.end()
-                              ? style::PluginTransitioningPropertyValue{
-                                    style::defaultPluginPropertyValue(definition)}
+                              ? style::PluginTransitioningPropertyValue{style::defaultPluginPropertyValue(definition)}
                               : std::move(prior->second);
         const auto options = impl.pluginPropertyTransitions.find(definition.name);
         const auto transition = options == impl.pluginPropertyTransitions.end()
@@ -198,16 +194,14 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
         if (definition.scope != MLN_PLUGIN_PROPERTY_PAINT) continue;
         const auto transition = transitioningPaintProperties.find(definition.name);
         if (transition != transitioningPaintProperties.end()) {
-            evaluatedPluginProperties.emplace(
-                definition.name,
-                transition->second.evaluate(parameters.z, definition, parameters.now));
+            evaluatedPluginProperties.emplace(definition.name,
+                                              transition->second.evaluate(parameters.z, definition, parameters.now));
         } else {
             const auto property = impl.pluginProperties.find(definition.name);
-            evaluatedPluginProperties.emplace(
-                definition.name,
-                property == impl.pluginProperties.end()
-                    ? style::defaultPluginPropertyValue(definition)
-                    : property->second);
+            evaluatedPluginProperties.emplace(definition.name,
+                                              property == impl.pluginProperties.end()
+                                                  ? style::defaultPluginPropertyValue(definition)
+                                                  : property->second);
         }
     }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
@@ -333,8 +327,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         auto& bucket = static_cast<PluginBucket&>(*renderData->bucket);
-        if (bucket.synchronizePaint(
-                getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()))) {
+        if (bucket.synchronizePaint(getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()))) {
             removeTile(renderPass, tileID);
         }
         const auto previousBucket = getRenderTileBucketID(tileID);
@@ -730,8 +723,7 @@ void RenderPluginStyleLayer::updateGeometryGraph(gfx::ShaderRegistry& shaders,
             return item.shaderID == pass.shaderID;
         });
         if (definitionIt == bucket.drawables.end() || definitionIt->segments.empty()) return;
-        bucket.synchronizePaint(
-            getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()));
+        bucket.synchronizePaint(getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()));
         StringIDSetsPair propertiesAsUniforms;
         auto* paintBinders = bucket.paintBinders(getID(), definitionIt->key);
         auto attributes = context.createVertexAttributeArray();
@@ -942,9 +934,8 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
         const auto propertyIt = evaluatedPluginProperties.find(definition.name);
-        const auto value = propertyIt == evaluatedPluginProperties.end()
-                               ? style::defaultPluginPropertyValue(definition)
-                               : propertyIt->second;
+        const auto value = propertyIt == evaluatedPluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                                         : propertyIt->second;
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};

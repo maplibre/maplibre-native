@@ -81,8 +81,8 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
         if (lhs.targetLayerType != rhs.targetLayerType || lhs.name != rhs.name || lhs.type != rhs.type ||
             lhs.scope != rhs.scope || lhs.defaultValue != rhs.defaultValue ||
             lhs.expressionCapabilities != rhs.expressionCapabilities ||
-            lhs.supportsTransitions != rhs.supportsTransitions ||
-            lhs.acceptsScalar != rhs.acceptsScalar || lhs.minimum != rhs.minimum || lhs.maximum != rhs.maximum ||
+            lhs.supportsTransitions != rhs.supportsTransitions || lhs.acceptsScalar != rhs.acceptsScalar ||
+            lhs.minimum != rhs.minimum || lhs.maximum != rhs.maximum ||
             lhs.maximumArrayLength != rhs.maximumArrayLength || lhs.enumValues != rhs.enumValues) {
             return false;
         }
@@ -106,8 +106,8 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
             lhs.createLayout != rhs.createLayout || lhs.layoutFeature != rhs.layoutFeature ||
             lhs.finishLayout != rhs.finishLayout || lhs.destroyLayout != rhs.destroyLayout ||
             lhs.queryFeature != rhs.queryFeature || lhs.queryRadius != rhs.queryRadius ||
-            lhs.shaders.size() != rhs.shaders.size() ||
-            lhs.renderGraph != rhs.renderGraph || lhs.updateUniformBlock != rhs.updateUniformBlock) {
+            lhs.shaders.size() != rhs.shaders.size() || lhs.renderGraph != rhs.renderGraph ||
+            lhs.updateUniformBlock != rhs.updateUniformBlock) {
             return false;
         }
         for (size_t shaderIndex = 0; shaderIndex < lhs.shaders.size(); ++shaderIndex) {
@@ -385,9 +385,10 @@ bool appendShaders(const std::string& pluginID,
             const auto encodingSize = propertyEncodingSize(binding.encoding);
             const auto encodingAlignment = propertyEncodingAlignment(binding.encoding);
             const auto attributeType = propertyAttributeType(binding.encoding);
-            const auto uniform = std::find_if(shader.uniformBlocks.begin(), shader.uniformBlocks.end(), [&](const auto& candidate) {
-                return candidate.id == binding.uniform_id;
-            });
+            const auto uniform = std::find_if(
+                shader.uniformBlocks.begin(), shader.uniformBlocks.end(), [&](const auto& candidate) {
+                    return candidate.id == binding.uniform_id;
+                });
             const auto interpolationUniform = std::find_if(
                 shader.uniformBlocks.begin(), shader.uniformBlocks.end(), [&](const auto& candidate) {
                     return candidate.id == binding.interpolation_uniform_id;
@@ -431,9 +432,8 @@ bool appendShaders(const std::string& pluginID,
                 return true;
             };
             if (!addUniformRange(binding.uniform_id, binding.uniform_byte_offset, encodingSize) ||
-                !addUniformRange(binding.interpolation_uniform_id,
-                                 binding.interpolation_uniform_byte_offset,
-                                 sizeof(float))) {
+                !addUniformRange(
+                    binding.interpolation_uniform_id, binding.interpolation_uniform_byte_offset, sizeof(float))) {
                 error = "plugin shader property bindings contain overlapping uniform ranges";
                 return false;
             }
@@ -464,8 +464,7 @@ bool appendProperties(const std::string& pluginID,
     }
     for (size_t p = 0; p < propertyCount; ++p) {
         const auto& property = properties[p];
-        constexpr uint32_t validExpressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA |
-                                                         MLN_PLUGIN_EXPRESSION_FEATURE |
+        constexpr uint32_t validExpressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
                                                          MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                                          MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
         if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
@@ -479,8 +478,7 @@ bool appendProperties(const std::string& pluginID,
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
                                         property.type == MLN_PLUGIN_VALUE_FLOAT2 ||
                                         property.type == MLN_PLUGIN_VALUE_COLOR;
-        if (property.supports_transitions &&
-            (property.scope != MLN_PLUGIN_PROPERTY_PAINT || !transitionableType)) {
+        if (property.supports_transitions && (property.scope != MLN_PLUGIN_PROPERTY_PAINT || !transitionableType)) {
             error = "plugin transitions require an interpolatable paint property";
             return false;
         }
@@ -769,8 +767,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                 error = "existing-layer extension properties must be paint properties";
                 return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
             }
-            constexpr uint32_t featureCapabilities = MLN_PLUGIN_EXPRESSION_FEATURE |
-                                                     MLN_PLUGIN_EXPRESSION_COMPOSITE |
+            constexpr uint32_t featureCapabilities = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                                      MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
             if ((extension.properties[p].expression_capabilities & featureCapabilities) != 0) {
                 error = "existing-layer extension properties cannot declare feature expression dependencies";
@@ -866,11 +863,14 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                     return item.targetLayerType == type && item.name == binding.propertyName;
                 });
                 const bool encodingMatches = property != newProperties.end() &&
-                    ((property->type == MLN_PLUGIN_VALUE_FLOAT && binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT) ||
-                     (property->type == MLN_PLUGIN_VALUE_FLOAT2 && binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2) ||
-                     (property->type == MLN_PLUGIN_VALUE_COLOR && binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR) ||
-                     (property->type == MLN_PLUGIN_VALUE_BOOLEAN &&
-                      binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT));
+                                             ((property->type == MLN_PLUGIN_VALUE_FLOAT &&
+                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT) ||
+                                              (property->type == MLN_PLUGIN_VALUE_FLOAT2 &&
+                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2) ||
+                                              (property->type == MLN_PLUGIN_VALUE_COLOR &&
+                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR) ||
+                                              (property->type == MLN_PLUGIN_VALUE_BOOLEAN &&
+                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT));
                 if (property == newProperties.end() || property->scope != MLN_PLUGIN_PROPERTY_PAINT ||
                     !encodingMatches) {
                     error = "plugin shader property binding references an incompatible paint property";
@@ -880,20 +880,15 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         }
         for (const auto& property : newProperties) {
             if (property.targetLayerType != type) continue;
-            const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE |
-                                          MLN_PLUGIN_EXPRESSION_COMPOSITE |
+            const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                           MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
             if ((property.expressionCapabilities & dataDependencies) == 0) continue;
-            const bool bound = std::any_of(copiedLayerType.shaders.begin(),
-                                           copiedLayerType.shaders.end(),
-                                           [&](const auto& shader) {
-                                               return std::any_of(
-                                                   shader.propertyBindings.begin(),
-                                                   shader.propertyBindings.end(),
-                                                   [&](const auto& binding) {
-                                                       return binding.propertyName == property.name;
-                                                   });
-                                           });
+            const bool bound = std::any_of(
+                copiedLayerType.shaders.begin(), copiedLayerType.shaders.end(), [&](const auto& shader) {
+                    return std::any_of(shader.propertyBindings.begin(),
+                                       shader.propertyBindings.end(),
+                                       [&](const auto& binding) { return binding.propertyName == property.name; });
+                });
             if (property.scope != MLN_PLUGIN_PROPERTY_PAINT || !bound) {
                 error = "data-driven plugin properties require a shader property binding";
                 return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;

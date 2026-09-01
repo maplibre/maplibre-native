@@ -44,7 +44,7 @@ std::optional<std::string> pluginTransitionPropertyName(const char* layerType, c
     return definition && definition->supportsTransitions ? std::optional<std::string>{std::move(propertyName)}
                                                          : std::nullopt;
 }
-}
+} // namespace
 
 Layer::Layer(Immutable<Impl> impl)
     : baseImpl(std::move(impl)),
@@ -344,8 +344,7 @@ std::optional<conversion::Error> Layer::setPluginTransition(const std::string& n
     auto transition = convert<TransitionOptions>(value, error);
     if (!transition) return error;
     const auto existing = impl_->pluginPropertyTransitions.find(*propertyName);
-    if (existing != impl_->pluginPropertyTransitions.end() &&
-        existing->second.serialize() == transition->serialize()) {
+    if (existing != impl_->pluginPropertyTransitions.end() && existing->second.serialize() == transition->serialize()) {
         return std::nullopt;
     }
     impl_->pluginPropertyTransitions.insert_or_assign(*propertyName, std::move(*transition));

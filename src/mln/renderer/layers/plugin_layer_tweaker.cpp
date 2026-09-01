@@ -152,10 +152,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 }
                 if (const auto* baseBinders = drawable.getBinders()) {
                     const auto* binders = static_cast<const PluginPaintPropertyBinders*>(baseBinders);
-                    binders->writeUniforms(static_cast<float>(parameters.state.getZoom()),
-                                           uniform.id,
-                                           bytes.data(),
-                                           bytes.size());
+                    binders->writeUniforms(
+                        static_cast<float>(parameters.state.getZoom()), uniform.id, bytes.data(), bytes.size());
                 }
                 if (uniform.scope == MLN_PLUGIN_UNIFORM_SCOPE_LAYER) {
                     auto& buffer = layerUniformBuffers[{callbackContext.pass_id, uniform.id}];

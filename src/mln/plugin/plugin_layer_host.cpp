@@ -198,11 +198,11 @@ PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const In
         const auto property = explicitlySet ? explicitValue->second : style::defaultPluginPropertyValue(definition);
         snapshot.evaluationStorage.emplace_back();
         snapshot.names.push_back(definition.name);
-        snapshot.values.push_back(mln_plugin_property_value_v1{
-            sizeof(mln_plugin_property_value_v1),
-            {snapshot.names.back().data(), snapshot.names.back().size()},
-            property.evaluate(zoom, definition, snapshot.evaluationStorage.back()),
-            static_cast<uint8_t>(explicitlySet ? 1 : 0)});
+        snapshot.values.push_back(
+            mln_plugin_property_value_v1{sizeof(mln_plugin_property_value_v1),
+                                         {snapshot.names.back().data(), snapshot.names.back().size()},
+                                         property.evaluate(zoom, definition, snapshot.evaluationStorage.back()),
+                                         static_cast<uint8_t>(explicitlySet ? 1 : 0)});
     }
     return snapshot;
 }

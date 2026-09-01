@@ -164,11 +164,11 @@ struct LayerTypeDescriptor {
 struct DynamicLayerTypeDescriptor {
     DynamicLayerTypeDescriptor(const char* pluginID_,
                                const char* layerType_,
-                               uint32_t capabilities = MLN_PLUGIN_EXPRESSION_CAMERA |
-                                                       MLN_PLUGIN_EXPRESSION_FEATURE |
+                               uint32_t capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
                                                        MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                                        MLN_PLUGIN_EXPRESSION_FEATURE_STATE)
-        : pluginID(pluginID_), layerTypeName(layerType_) {
+        : pluginID(pluginID_),
+          layerTypeName(layerType_) {
         defaultValue.struct_size = sizeof(defaultValue);
         defaultValue.type = MLN_PLUGIN_VALUE_FLOAT;
         defaultValue.data.float_value = 4.0f;
@@ -196,15 +196,7 @@ struct DynamicLayerTypeDescriptor {
                    16,
                    MLN_PLUGIN_SHADER_STAGE_VERTEX,
                    MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE};
-        binding = {sizeof(binding),
-                   cString("test-size"),
-                   MLN_PLUGIN_PROPERTY_ENCODING_FLOAT,
-                   0,
-                   0,
-                   1,
-                   2,
-                   0,
-                   4};
+        binding = {sizeof(binding), cString("test-size"), MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 2, 0, 4};
         shader.struct_size = sizeof(shader);
         shader.shader_id = cString("test-dynamic");
         shader.sources = &shaderSource;
@@ -530,24 +522,20 @@ TEST(PluginRegistry, ValidatesDynamicShaderPropertyBindings) {
     DynamicLayerTypeDescriptor missingBinding("org.maplibre.test.dynamic-unbound", "test-dynamic-unbound");
     missingBinding.shader.property_bindings = nullptr;
     missingBinding.shader.property_binding_count = 0;
-    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
-              mln_plugin_register_v1(&missingBinding.descriptor, nullptr, 0));
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&missingBinding.descriptor, nullptr, 0));
 
-    DynamicLayerTypeDescriptor wrongProperty("org.maplibre.test.dynamic-wrong-property",
-                                             "test-dynamic-wrong-property");
+    DynamicLayerTypeDescriptor wrongProperty("org.maplibre.test.dynamic-wrong-property", "test-dynamic-wrong-property");
     wrongProperty.binding.property_name = cString("not-a-property");
-    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
-              mln_plugin_register_v1(&wrongProperty.descriptor, nullptr, 0));
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&wrongProperty.descriptor, nullptr, 0));
 
     Descriptor booleanTransition("org.maplibre.test.boolean-transition", "test-boolean-transition");
     booleanTransition.property.supports_transitions = 1;
-    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
-              mln_plugin_register_v1(&booleanTransition.descriptor, nullptr, 0));
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&booleanTransition.descriptor, nullptr, 0));
 }
 
 TEST(PluginStyleProperty, EnforcesExpressionDependencyCapabilities) {
-    DynamicLayerTypeDescriptor cameraOnly("org.maplibre.test.dynamic-camera", "test-dynamic-camera",
-                                          MLN_PLUGIN_EXPRESSION_CAMERA);
+    DynamicLayerTypeDescriptor cameraOnly(
+        "org.maplibre.test.dynamic-camera", "test-dynamic-camera", MLN_PLUGIN_EXPRESSION_CAMERA);
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&cameraOnly.descriptor, nullptr, 0));
     JSDocument layerJSON;
     layerJSON.Parse(R"JSON({"source":"points"})JSON");
@@ -592,12 +580,10 @@ TEST(PluginStyleProperty, StoresSerializesAndInterpolatesTransitions) {
     JSDocument transitionJSON;
     transitionJSON.Parse(R"JSON({"duration":100,"delay":20})JSON");
     const JSValue* transitionValue = &transitionJSON;
-    EXPECT_FALSE(layer->setProperty("test-size-transition",
-                                    conversion::Convertible(transitionValue),
-                                    Layer::PropertyScope::Paint));
-    EXPECT_TRUE(layer->setProperty("test-size-transition",
-                                   conversion::Convertible(transitionValue),
-                                   Layer::PropertyScope::Layout));
+    EXPECT_FALSE(layer->setProperty(
+        "test-size-transition", conversion::Convertible(transitionValue), Layer::PropertyScope::Paint));
+    EXPECT_TRUE(layer->setProperty(
+        "test-size-transition", conversion::Convertible(transitionValue), Layer::PropertyScope::Layout));
     const auto serialized = layer->serialize();
     const auto* paint = serialized.getObject()->at("paint").getObject();
     ASSERT_NE(nullptr, paint);
@@ -606,13 +592,21 @@ TEST(PluginStyleProperty, StoresSerializesAndInterpolatesTransitions) {
     EXPECT_EQ(100, *transition->at("duration").getInt());
     EXPECT_EQ(20, *transition->at("delay").getInt());
 
-    plugin::PropertyDefinition definition{"test", "test-dynamic-transition", "test-size",
-                                          MLN_PLUGIN_VALUE_FLOAT, MLN_PLUGIN_PROPERTY_PAINT, Value{4.0},
-                                          MLN_PLUGIN_EXPRESSION_CAMERA, true, false, {}, {}, 0, {}};
-    style::PluginPropertyValue from{
-        style::PluginPropertyValue::TypedValue{PropertyValue<float>{0.0f}}};
-    style::PluginPropertyValue to{
-        style::PluginPropertyValue::TypedValue{PropertyValue<float>{10.0f}}};
+    plugin::PropertyDefinition definition{"test",
+                                          "test-dynamic-transition",
+                                          "test-size",
+                                          MLN_PLUGIN_VALUE_FLOAT,
+                                          MLN_PLUGIN_PROPERTY_PAINT,
+                                          Value{4.0},
+                                          MLN_PLUGIN_EXPRESSION_CAMERA,
+                                          true,
+                                          false,
+                                          {},
+                                          {},
+                                          0,
+                                          {}};
+    style::PluginPropertyValue from{style::PluginPropertyValue::TypedValue{PropertyValue<float>{0.0f}}};
+    style::PluginPropertyValue to{style::PluginPropertyValue::TypedValue{PropertyValue<float>{10.0f}}};
     const auto start = Clock::now();
     style::PluginTransitioningPropertyValue transitioning{
         std::move(to),

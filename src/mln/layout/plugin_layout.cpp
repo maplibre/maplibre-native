@@ -470,14 +470,16 @@ void PluginLayout::createBucket(const ImagePositions&,
                 range.feature_index < sourceLayer->featureCount() && drawable != drawableVertexCounts.end() &&
                 range.vertex_count > 0 && validRange(range.first_vertex, range.vertex_count, drawable->second);
         if (valid) {
-            bucket->featureVertexRanges.push_back(
-                {static_cast<std::size_t>(range.feature_index), range.drawable_key, range.first_vertex, range.vertex_count});
+            bucket->featureVertexRanges.push_back({static_cast<std::size_t>(range.feature_index),
+                                                   range.drawable_key,
+                                                   range.first_vertex,
+                                                   range.vertex_count});
         }
     }
     for (const auto& drawable : bucket->drawables) {
-        const auto shader = std::find_if(registration.shaders.begin(), registration.shaders.end(), [&](const auto& candidate) {
-            return candidate.id == drawable.shaderID;
-        });
+        const auto shader = std::find_if(registration.shaders.begin(),
+                                         registration.shaders.end(),
+                                         [&](const auto& candidate) { return candidate.id == drawable.shaderID; });
         if (!valid || shader == registration.shaders.end() || shader->propertyBindings.empty()) continue;
         std::vector<uint8_t> coverage(drawable.vertexCount);
         for (const auto& range : bucket->featureVertexRanges) {
@@ -504,9 +506,9 @@ void PluginLayout::createBucket(const ImagePositions&,
         const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
         auto& layerBinders = bucket->paintPropertyBinders[impl.id];
         for (const auto& drawable : bucket->drawables) {
-            const auto shader = std::find_if(registration.shaders.begin(), registration.shaders.end(), [&](const auto& candidate) {
-                return candidate.id == drawable.shaderID;
-            });
+            const auto shader = std::find_if(registration.shaders.begin(),
+                                             registration.shaders.end(),
+                                             [&](const auto& candidate) { return candidate.id == drawable.shaderID; });
             if (shader == registration.shaders.end() || shader->propertyBindings.empty()) continue;
             layerBinders.emplace(std::piecewise_construct,
                                  std::forward_as_tuple(drawable.key),
