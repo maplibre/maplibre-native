@@ -61,81 +61,6 @@ mln_plugin_render_stage stageFor(RenderPass pass) {
     }
 }
 
-double numericValue(const Value& value) {
-    if (const auto* number = value.getDouble()) return *number;
-    if (const auto* number = value.getInt()) return static_cast<double>(*number);
-    if (const auto* number = value.getUint()) return static_cast<double>(*number);
-    return 0.0;
-}
-
-mln_plugin_value makeCValue(const Value& value,
-                            mln_plugin_value_type type,
-                            std::vector<std::string>& stringStorage,
-                            std::vector<std::vector<float>>& floatArrayStorage,
-                            std::vector<std::vector<mln_plugin_color>>& colorArrayStorage) {
-    mln_plugin_value result{};
-    result.struct_size = sizeof(result);
-    result.type = type;
-    switch (type) {
-        case MLN_PLUGIN_VALUE_BOOLEAN:
-            result.data.boolean_value = value.getBool() && *value.getBool() ? 1 : 0;
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT:
-            result.data.float_value = static_cast<float>(numericValue(value));
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT2: {
-            const auto& array = *value.getArray();
-            result.data.float2_value = {static_cast<float>(numericValue(array[0])),
-                                        static_cast<float>(numericValue(array[1]))};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_COLOR: {
-            const auto& array = *value.getArray();
-            result.data.color_value = {static_cast<float>(numericValue(array[0])),
-                                       static_cast<float>(numericValue(array[1])),
-                                       static_cast<float>(numericValue(array[2])),
-                                       static_cast<float>(numericValue(array[3]))};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_STRING:
-            stringStorage.push_back(*value.getString());
-            result.data.string_value = {stringStorage.back().data(), stringStorage.back().size()};
-            break;
-        case MLN_PLUGIN_VALUE_COLOR_RAMP:
-            stringStorage.push_back(value.getString() ? *value.getString() : std::string{});
-            result.data.color_ramp_json = {stringStorage.back().data(), stringStorage.back().size()};
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT_ARRAY: {
-            floatArrayStorage.emplace_back();
-            auto& output = floatArrayStorage.back();
-            if (const auto* array = value.getArray()) {
-                output.reserve(array->size());
-                for (const auto& item : *array) output.push_back(static_cast<float>(numericValue(item)));
-            }
-            result.data.float_array_value = {output.data(), output.size()};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_COLOR_ARRAY: {
-            colorArrayStorage.emplace_back();
-            auto& output = colorArrayStorage.back();
-            if (const auto* array = value.getArray()) {
-                output.reserve(array->size());
-                for (const auto& item : *array) {
-                    const auto* components = item.getArray();
-                    if (!components || components->size() != 4) continue;
-                    output.push_back({static_cast<float>(numericValue((*components)[0])),
-                                      static_cast<float>(numericValue((*components)[1])),
-                                      static_cast<float>(numericValue((*components)[2])),
-                                      static_cast<float>(numericValue((*components)[3]))});
-                }
-            }
-            result.data.color_array_value = {output.data(), output.size()};
-            break;
-        }
-    }
-    return result;
-}
-
 #if MLN_RENDER_BACKEND_VULKAN
 mln_plugin_proc resolveVulkanProc(void* context, const char* name) {
     if (!context || !name) return nullptr;
@@ -220,10 +145,8 @@ struct PluginLayerHost::Instance {
 
 struct PluginLayerHost::PropertySnapshot {
     std::vector<std::string> names;
-    std::vector<std::string> stringValues;
-    std::vector<std::vector<float>> floatArrayValues;
-    std::vector<std::vector<mln_plugin_color>> colorArrayValues;
     std::vector<mln_plugin_property_value_v1> values;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> evaluationStorage;
 };
 
 PluginLayerHost::PluginLayerHost(std::string layerID_, std::string layerType_, Immutable<style::Layer::Impl> layerImpl_)
@@ -258,32 +181,27 @@ void PluginLayerHost::updateEnvironment(std::shared_ptr<FileSource> fileSource, 
     }
 }
 
-PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const Instance& instance) const {
+PluginLayerHost::PropertySnapshot PluginLayerHost::makePropertySnapshot(const Instance& instance, float zoom) const {
     PropertySnapshot snapshot;
     const auto definitions = PluginRegistry::get().propertiesForLayer(layerType);
     const auto count = std::count_if(definitions.begin(), definitions.end(), [&](const auto& definition) {
         return definition.pluginID == instance.extension.pluginID;
     });
     snapshot.names.reserve(count);
-    snapshot.stringValues.reserve(count);
-    snapshot.floatArrayValues.reserve(count);
-    snapshot.colorArrayValues.reserve(count);
     snapshot.values.reserve(count);
+    snapshot.evaluationStorage.reserve(count);
 
     for (const auto& definition : definitions) {
         if (definition.pluginID != instance.extension.pluginID) continue;
         const auto explicitValue = layerImpl->pluginProperties.find(definition.name);
         const bool explicitlySet = explicitValue != layerImpl->pluginProperties.end();
-        const auto styleValue = explicitlySet ? explicitValue->second.toStyleProperty() : style::StyleProperty{};
-        const auto& value = explicitlySet && styleValue.getKind() == style::StyleProperty::Kind::Constant
-                                ? styleValue.getValue()
-                                : definition.defaultValue;
+        const auto property = explicitlySet ? explicitValue->second : style::defaultPluginPropertyValue(definition);
+        snapshot.evaluationStorage.emplace_back();
         snapshot.names.push_back(definition.name);
         snapshot.values.push_back(mln_plugin_property_value_v1{
             sizeof(mln_plugin_property_value_v1),
             {snapshot.names.back().data(), snapshot.names.back().size()},
-            makeCValue(
-                value, definition.type, snapshot.stringValues, snapshot.floatArrayValues, snapshot.colorArrayValues),
+            property.evaluate(zoom, definition, snapshot.evaluationStorage.back()),
             static_cast<uint8_t>(explicitlySet ? 1 : 0)});
     }
     return snapshot;
@@ -347,7 +265,7 @@ void PluginLayerHost::invoke(Instance& instance,
     }
 
     const auto size = parameters.backend.getDefaultRenderable().getSize();
-    auto properties = makePropertySnapshot(instance);
+    auto properties = makePropertySnapshot(instance, static_cast<float>(parameters.state.getZoom()));
     mln_plugin_backend_context_v1 backend{};
     backend.struct_size = sizeof(backend);
     backend.backend = static_cast<mln_plugin_backend>(activeBackend);

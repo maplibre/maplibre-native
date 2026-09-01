@@ -45,8 +45,10 @@ public:
 
 class PluginStyleLayerProperties final : public LayerProperties {
 public:
-    explicit PluginStyleLayerProperties(Immutable<PluginStyleLayer::Impl> impl)
-        : LayerProperties(std::move(impl)) {
+    explicit PluginStyleLayerProperties(Immutable<PluginStyleLayer::Impl> impl,
+                                        PluginPropertyMap evaluatedPaintProperties_ = {})
+        : LayerProperties(std::move(impl)),
+          evaluatedPaintProperties(std::move(evaluatedPaintProperties_)) {
         const auto& registration = static_cast<const PluginStyleLayer::Impl&>(*baseImpl).registration;
         switch (registration.renderStage) {
             case MLN_PLUGIN_RENDER_STAGE_PASS_3D:
@@ -66,6 +68,8 @@ public:
     }
 
     expression::Dependency getDependencies() const noexcept override { return baseImpl->getDependencies(); }
+
+    PluginPropertyMap evaluatedPaintProperties;
 };
 
 } // namespace style

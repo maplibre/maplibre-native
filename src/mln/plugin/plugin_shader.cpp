@@ -24,6 +24,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <cctype>
 
 namespace mln {
 namespace plugin {
@@ -83,16 +84,38 @@ std::string resourcePrelude(const ShaderDefinition& shader) {
     return output.str();
 }
 
+std::string propertyMacro(const std::string& propertyName) {
+    std::string result = "MLN_PLUGIN_PROPERTY_";
+    result.reserve(result.size() + propertyName.size() + 11);
+    for (const unsigned char character : propertyName) {
+        result.push_back(std::isalnum(character) ? static_cast<char>(std::toupper(character)) : '_');
+    }
+    result += "_IS_UNIFORM";
+    return result;
+}
+
+std::string propertyPrelude(const ShaderDefinition& shader, const StringIDSetsPair& propertiesAsUniforms) {
+    std::ostringstream output;
+    for (const auto& binding : shader.propertyBindings) {
+        output << "#define " << propertyMacro(binding.propertyName) << ' '
+               << (propertiesAsUniforms.first.contains(binding.propertyName) ? 1 : 0) << '\n';
+    }
+    return output.str();
+}
+
 class PluginShaderGroup final : public gfx::ShaderGroup {
 public:
     PluginShaderGroup(ShaderDefinition definition_, ProgramParameters parameters_)
         : definition(std::move(definition_)),
           parameters(std::move(parameters_)) {}
 
-    gfx::ShaderPtr getOrCreateShader(gfx::Context& context, const StringIDSetsPair&, std::string_view) override {
-        const auto name = shaderGroupName(definition.pluginID, definition.id);
+    gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
+                                     const StringIDSetsPair& propertiesAsUniforms,
+                                     std::string_view) override {
+        const auto groupName = shaderGroupName(definition.pluginID, definition.id);
+        const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;
-        const auto pluginPrelude = resourcePrelude(definition);
+        const auto pluginPrelude = resourcePrelude(definition) + propertyPrelude(definition, propertiesAsUniforms);
 
         gfx::ShaderPtr shader;
 #if MLN_RENDER_BACKEND_OPENGL
@@ -100,7 +123,9 @@ public:
         if (!source) return {};
         std::vector<shaders::AttributeInfo> attributes;
         attributes.reserve(definition.attributes.size());
-        for (const auto& attr : definition.attributes) attributes.emplace_back(attr.name, attr.id);
+        for (const auto& attr : definition.attributes) {
+            if (!propertiesAsUniforms.second.contains(attr.id)) attributes.emplace_back(attr.name, attr.id);
+        }
         std::vector<shaders::UniformBlockInfo> uniformBlocks;
         uniformBlocks.reserve(definition.uniformBlocks.size());
         for (const auto& uniform : definition.uniformBlocks) {
@@ -131,7 +156,9 @@ public:
         if (!created) return {};
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
-            typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
+            if (!propertiesAsUniforms.second.contains(attr.id)) {
+                typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
+            }
         }
         for (const auto& texture : definition.textures) {
             typed->initTexture({texture.location, texture.id});
@@ -151,8 +178,10 @@ public:
         if (!created) return {};
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
         for (const auto& attr : definition.attributes) {
-            typed->initVertexAttribute(
-                {attr.location, attributeType(attr.type), shaders::maxUBOCountPerShader + attr.location, attr.id});
+            if (!propertiesAsUniforms.second.contains(attr.id)) {
+                typed->initVertexAttribute(
+                    {attr.location, attributeType(attr.type), shaders::maxUBOCountPerShader + attr.location, attr.id});
+            }
         }
         for (const auto& texture : definition.textures) {
             typed->initTexture({texture.location, texture.id});

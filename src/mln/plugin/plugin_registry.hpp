@@ -20,7 +20,7 @@ struct PropertyDefinition {
     mln_plugin_value_type type = MLN_PLUGIN_VALUE_BOOLEAN;
     mln_plugin_property_scope scope = MLN_PLUGIN_PROPERTY_PAINT;
     Value defaultValue;
-    bool supportsExpressions = false;
+    uint32_t expressionCapabilities = MLN_PLUGIN_EXPRESSION_NONE;
     bool supportsTransitions = false;
     bool acceptsScalar = false;
     std::optional<float> minimum;
@@ -59,6 +59,18 @@ struct ShaderTextureDefinition {
     std::string name;
 };
 
+struct ShaderPropertyBindingDefinition {
+    std::string propertyName;
+    mln_plugin_property_encoding_v1 encoding = MLN_PLUGIN_PROPERTY_ENCODING_FLOAT;
+    uint32_t uniformID = 0;
+    uint32_t uniformByteOffset = 0;
+    uint32_t minimumAttributeID = 0;
+    uint32_t maximumAttributeID = 0;
+    uint32_t interpolationUniformID = 0;
+    uint32_t interpolationUniformByteOffset = 0;
+    bool operator==(const ShaderPropertyBindingDefinition&) const = default;
+};
+
 struct ShaderDefinition {
     std::string pluginID;
     std::string id;
@@ -66,6 +78,7 @@ struct ShaderDefinition {
     std::vector<ShaderAttribute> attributes;
     std::vector<UniformBlockDefinition> uniformBlocks;
     std::vector<ShaderTextureDefinition> textures;
+    std::vector<ShaderPropertyBindingDefinition> propertyBindings;
 };
 
 struct TextureBindingDefinition {
@@ -141,6 +154,7 @@ struct LayerType {
     mln_plugin_finish_layout_fn finishLayout = nullptr;
     mln_plugin_destroy_layout_fn destroyLayout = nullptr;
     mln_plugin_query_feature_fn queryFeature = nullptr;
+    mln_plugin_query_radius_fn queryRadius = nullptr;
     std::optional<RenderGraphDefinition> renderGraph;
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
 };

@@ -1,6 +1,7 @@
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/style/conversion/constant.hpp>
 #include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/transition_options.hpp>
 #include <mln/style/conversion_impl.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/layer_impl.hpp>
@@ -30,6 +31,19 @@ static_assert(mln::underlying_type(Tile::Kind::RasterDEM) == mln::underlying_typ
 
 namespace {
 LayerObserver nullObserver;
+
+constexpr const char* transitionSuffix = "-transition";
+
+std::optional<std::string> pluginTransitionPropertyName(const char* layerType, const std::string& name) {
+    constexpr std::size_t suffixLength = 11;
+    if (name.size() <= suffixLength || name.compare(name.size() - suffixLength, suffixLength, transitionSuffix) != 0) {
+        return std::nullopt;
+    }
+    auto propertyName = name.substr(0, name.size() - suffixLength);
+    const auto definition = plugin::PluginRegistry::get().findProperty(layerType, propertyName);
+    return definition && definition->supportsTransitions ? std::optional<std::string>{std::move(propertyName)}
+                                                         : std::nullopt;
+}
 }
 
 Layer::Layer(Immutable<Impl> impl)
@@ -156,11 +170,22 @@ Value Layer::serialize() const {
             object.getObject()->insert_or_assign(name, property.getValue());
         }
     }
+    for (const auto& [name, transition] : baseImpl->pluginPropertyTransitions) {
+        auto& paint = result["paint"];
+        if (!paint.getObject()) paint = mapbox::base::ValueObject{};
+        paint.getObject()->insert_or_assign(name + transitionSuffix, transition.serialize());
+    }
 
     return result;
 }
 
 StyleProperty Layer::getPluginProperty(const std::string& name) const {
+    if (const auto propertyName = pluginTransitionPropertyName(getTypeInfo()->type, name)) {
+        const auto transition = baseImpl->pluginPropertyTransitions.find(*propertyName);
+        return transition == baseImpl->pluginPropertyTransitions.end()
+                   ? StyleProperty{TransitionOptions{}.serialize(), StyleProperty::Kind::Transition}
+                   : StyleProperty{transition->second.serialize(), StyleProperty::Kind::Transition};
+    }
     const auto value = baseImpl->pluginProperties.find(name);
     if (value != baseImpl->pluginProperties.end()) {
         return value->second.toStyleProperty();
@@ -199,6 +224,9 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     if (!error) return error; // Successfully set by the derived class implementation.
     if (plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name)) {
         return setPluginProperty(name, value);
+    }
+    if (pluginTransitionPropertyName(getTypeInfo()->type, name)) {
+        return setPluginTransition(name, value);
     }
     if (name == "visibility") return setVisibility(value);
     if (name == "minzoom") {
@@ -253,6 +281,9 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name,
     if (plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name)) {
         return setPluginProperty(name, value, scope);
     }
+    if (pluginTransitionPropertyName(getTypeInfo()->type, name)) {
+        return setPluginTransition(name, value, scope);
+    }
     return setProperty(name, value);
 }
 
@@ -285,6 +316,39 @@ std::optional<conversion::Error> Layer::setPluginProperty(const std::string& nam
     const auto existing = impl_->pluginProperties.find(name);
     if (existing != impl_->pluginProperties.end() && existing->second == *converted) return std::nullopt;
     impl_->pluginProperties.insert_or_assign(name, std::move(*converted));
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+    return std::nullopt;
+}
+
+std::optional<conversion::Error> Layer::setPluginTransition(const std::string& name,
+                                                            const conversion::Convertible& value,
+                                                            std::optional<PropertyScope> scope) {
+    using namespace conversion;
+    const auto propertyName = pluginTransitionPropertyName(getTypeInfo()->type, name);
+    if (!propertyName) return Error{"layer doesn't support this transition"};
+    if (scope && *scope != PropertyScope::Paint) {
+        return Error{"plugin transition '" + name + "' is in the wrong style section"};
+    }
+
+    auto impl_ = mutableBaseImpl();
+    if (isUndefined(value)) {
+        if (impl_->pluginPropertyTransitions.erase(*propertyName) != 0) {
+            baseImpl = std::move(impl_);
+            observer->onLayerChanged(*this);
+        }
+        return std::nullopt;
+    }
+
+    Error error;
+    auto transition = convert<TransitionOptions>(value, error);
+    if (!transition) return error;
+    const auto existing = impl_->pluginPropertyTransitions.find(*propertyName);
+    if (existing != impl_->pluginPropertyTransitions.end() &&
+        existing->second.serialize() == transition->serialize()) {
+        return std::nullopt;
+    }
+    impl_->pluginPropertyTransitions.insert_or_assign(*propertyName, std::move(*transition));
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
     return std::nullopt;

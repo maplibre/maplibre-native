@@ -42,12 +42,12 @@ public:
                                 const FeatureState&) const override;
 
 private:
-    void transition(const TransitionParameters&) override {}
+    void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
     void layerChanged(const TransitionParameters&,
                       const Immutable<style::Layer::Impl>&,
                       UniqueChangeRequestVec&) override;
-    bool hasTransition() const override { return false; }
+    bool hasTransition() const override;
     bool hasCrossfade() const override { return false; }
     void markContextDestroyed() override;
 
@@ -77,6 +77,8 @@ private:
     std::shared_ptr<gfx::VertexVector<PluginViewportLayoutVertex>> viewportVertices;
     std::shared_ptr<gfx::IndexVector<gfx::Triangles>> viewportIndices;
     SegmentVector viewportSegments;
+    std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
+    style::PluginPropertyMap evaluatedPluginProperties;
 };
 
 } // namespace mln

@@ -161,6 +161,100 @@ struct LayerTypeDescriptor {
     mln_plugin_descriptor_v1 descriptor{};
 };
 
+struct DynamicLayerTypeDescriptor {
+    DynamicLayerTypeDescriptor(const char* pluginID_,
+                               const char* layerType_,
+                               uint32_t capabilities = MLN_PLUGIN_EXPRESSION_CAMERA |
+                                                       MLN_PLUGIN_EXPRESSION_FEATURE |
+                                                       MLN_PLUGIN_EXPRESSION_COMPOSITE |
+                                                       MLN_PLUGIN_EXPRESSION_FEATURE_STATE)
+        : pluginID(pluginID_), layerTypeName(layerType_) {
+        defaultValue.struct_size = sizeof(defaultValue);
+        defaultValue.type = MLN_PLUGIN_VALUE_FLOAT;
+        defaultValue.data.float_value = 4.0f;
+        property.struct_size = sizeof(property);
+        property.name = cString("test-size");
+        property.type = MLN_PLUGIN_VALUE_FLOAT;
+        property.scope = MLN_PLUGIN_PROPERTY_PAINT;
+        property.default_value = defaultValue;
+        property.expression_capabilities = capabilities;
+        property.supports_transitions = 1;
+        shaderSource = {sizeof(shaderSource),
+                        MLN_PLUGIN_BACKEND_METAL,
+                        cString("shader source"),
+                        {},
+                        cString("testVertex"),
+                        cString("testFragment")};
+        shaderAttributes = {{
+            {sizeof(mln_plugin_shader_attribute_v1), 0, 0, cString("a_position"), MLN_PLUGIN_VERTEX_FLOAT_X2},
+            {sizeof(mln_plugin_shader_attribute_v1), 1, 1, cString("a_size_min"), MLN_PLUGIN_VERTEX_FLOAT},
+            {sizeof(mln_plugin_shader_attribute_v1), 2, 2, cString("a_size_max"), MLN_PLUGIN_VERTEX_FLOAT},
+        }};
+        uniform = {sizeof(uniform),
+                   0,
+                   cString("TestDrawableUBO"),
+                   16,
+                   MLN_PLUGIN_SHADER_STAGE_VERTEX,
+                   MLN_PLUGIN_UNIFORM_SCOPE_DRAWABLE};
+        binding = {sizeof(binding),
+                   cString("test-size"),
+                   MLN_PLUGIN_PROPERTY_ENCODING_FLOAT,
+                   0,
+                   0,
+                   1,
+                   2,
+                   0,
+                   4};
+        shader.struct_size = sizeof(shader);
+        shader.shader_id = cString("test-dynamic");
+        shader.sources = &shaderSource;
+        shader.source_count = 1;
+        shader.attributes = shaderAttributes.data();
+        shader.attribute_count = shaderAttributes.size();
+        shader.uniform_blocks = &uniform;
+        shader.uniform_block_count = 1;
+        shader.property_bindings = &binding;
+        shader.property_binding_count = 1;
+        layerType.struct_size = sizeof(layerType);
+        layerType.layer_type = cString(layerTypeName);
+        layerType.backend_mask = MLN_PLUGIN_BACKEND_METAL;
+        layerType.render_stage = MLN_PLUGIN_RENDER_STAGE_TRANSLUCENT;
+        layerType.properties = &property;
+        layerType.property_count = 1;
+        layerType.source_kind = MLN_PLUGIN_SOURCE_GEOMETRY;
+        layerType.geometry_type_mask = MLN_PLUGIN_GEOMETRY_POINT;
+        layerType.shaders = &shader;
+        layerType.shader_count = 1;
+        layerType.create_layout = createLayout;
+        layerType.layout_feature = layoutFeature;
+        layerType.finish_layout = finishLayout;
+        layerType.destroy_layout = destroyLayout;
+        layerType.update_uniform_block = updateUniform;
+        descriptor = {sizeof(descriptor),
+                      MLN_PLUGIN_ABI_VERSION_1,
+                      cString(pluginID),
+                      cString("1.0.0"),
+                      MLN_PLUGIN_ABI_VERSION_1,
+                      MLN_PLUGIN_ABI_VERSION_1,
+                      nullptr,
+                      0,
+                      &layerType,
+                      1};
+    }
+
+    const char* pluginID;
+    const char* layerTypeName;
+    mln_plugin_value defaultValue{};
+    mln_plugin_property_descriptor_v1 property{};
+    mln_plugin_shader_source_v1 shaderSource{};
+    std::array<mln_plugin_shader_attribute_v1, 3> shaderAttributes{};
+    mln_plugin_uniform_block_descriptor_v1 uniform{};
+    mln_plugin_shader_property_binding_v1 binding{};
+    mln_plugin_shader_descriptor_v1 shader{};
+    mln_plugin_layer_type_v1 layerType{};
+    mln_plugin_descriptor_v1 descriptor{};
+};
+
 } // namespace
 
 TEST(PluginRegistry, RegistersAndAcceptsIdenticalRepeat) {
@@ -228,7 +322,9 @@ TEST(PluginRegistry, RegistersRasterDEMRenderGraphAndRejectsForwardDependencies)
                                                  &uniform,
                                                  1,
                                                  &texture,
-                                                 1};
+                                                 1,
+                                                 nullptr,
+                                                 0};
     const mln_plugin_render_target_descriptor_v1 target{sizeof(mln_plugin_render_target_descriptor_v1),
                                                         1,
                                                         MLN_PLUGIN_RENDER_TARGET_SOURCE_TILE,
@@ -414,6 +510,127 @@ TEST(PluginRegistry, RegistersSourceBoundLayerTypeAndScopedProperties) {
               *parsedLayer->serialize().getObject()->at("layout").getObject()->at("test-model-uri").getString());
 }
 
+TEST(PluginRegistry, ValidatesDynamicShaderPropertyBindings) {
+    DynamicLayerTypeDescriptor valid("org.maplibre.test.dynamic-valid", "test-dynamic-valid");
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&valid.descriptor, nullptr, 0));
+    const auto registration = plugin::PluginRegistry::get().findLayerType("test-dynamic-valid");
+    ASSERT_TRUE(registration);
+    ASSERT_EQ(1u, registration->shaders.size());
+    ASSERT_EQ(1u, registration->shaders.front().propertyBindings.size());
+    EXPECT_EQ("test-size", registration->shaders.front().propertyBindings.front().propertyName);
+
+    DynamicLayerTypeDescriptor overlap("org.maplibre.test.dynamic-overlap", "test-dynamic-overlap");
+    overlap.binding.interpolation_uniform_byte_offset = 0;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&overlap.descriptor, nullptr, 0));
+
+    DynamicLayerTypeDescriptor unaligned("org.maplibre.test.dynamic-unaligned", "test-dynamic-unaligned");
+    unaligned.binding.uniform_byte_offset = 2;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&unaligned.descriptor, nullptr, 0));
+
+    DynamicLayerTypeDescriptor missingBinding("org.maplibre.test.dynamic-unbound", "test-dynamic-unbound");
+    missingBinding.shader.property_bindings = nullptr;
+    missingBinding.shader.property_binding_count = 0;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
+              mln_plugin_register_v1(&missingBinding.descriptor, nullptr, 0));
+
+    DynamicLayerTypeDescriptor wrongProperty("org.maplibre.test.dynamic-wrong-property",
+                                             "test-dynamic-wrong-property");
+    wrongProperty.binding.property_name = cString("not-a-property");
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
+              mln_plugin_register_v1(&wrongProperty.descriptor, nullptr, 0));
+
+    Descriptor booleanTransition("org.maplibre.test.boolean-transition", "test-boolean-transition");
+    booleanTransition.property.supports_transitions = 1;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT,
+              mln_plugin_register_v1(&booleanTransition.descriptor, nullptr, 0));
+}
+
+TEST(PluginStyleProperty, EnforcesExpressionDependencyCapabilities) {
+    DynamicLayerTypeDescriptor cameraOnly("org.maplibre.test.dynamic-camera", "test-dynamic-camera",
+                                          MLN_PLUGIN_EXPRESSION_CAMERA);
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&cameraOnly.descriptor, nullptr, 0));
+    JSDocument layerJSON;
+    layerJSON.Parse(R"JSON({"source":"points"})JSON");
+    const JSValue* layerValue = &layerJSON;
+    conversion::Error createError;
+    auto layer = LayerManager::get()->createLayer(
+        "test-dynamic-camera", "dynamic", conversion::Convertible(layerValue), createError);
+    ASSERT_TRUE(layer) << createError.message;
+
+    JSDocument camera;
+    camera.Parse(R"JSON(["interpolate",["linear"],["zoom"],0,2,20,20])JSON");
+    const JSValue* cameraValue = &camera;
+    EXPECT_FALSE(layer->setProperty("test-size", conversion::Convertible(cameraValue)));
+
+    JSDocument feature;
+    feature.Parse(R"JSON(["get","size"])JSON");
+    const JSValue* featureValue = &feature;
+    EXPECT_TRUE(layer->setProperty("test-size", conversion::Convertible(featureValue)));
+
+    JSDocument composite;
+    composite.Parse(R"JSON(["interpolate",["linear"],["zoom"],0,["get","small"],20,["get","large"]])JSON");
+    const JSValue* compositeValue = &composite;
+    EXPECT_TRUE(layer->setProperty("test-size", conversion::Convertible(compositeValue)));
+
+    JSDocument featureState;
+    featureState.Parse(R"JSON(["coalesce",["feature-state","size"],4])JSON");
+    const JSValue* featureStateValue = &featureState;
+    EXPECT_TRUE(layer->setProperty("test-size", conversion::Convertible(featureStateValue)));
+}
+
+TEST(PluginStyleProperty, StoresSerializesAndInterpolatesTransitions) {
+    DynamicLayerTypeDescriptor dynamic("org.maplibre.test.dynamic-transition", "test-dynamic-transition");
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&dynamic.descriptor, nullptr, 0));
+    JSDocument layerJSON;
+    layerJSON.Parse(R"JSON({"source":"points"})JSON");
+    const JSValue* layerValue = &layerJSON;
+    conversion::Error createError;
+    auto layer = LayerManager::get()->createLayer(
+        "test-dynamic-transition", "dynamic-transition", conversion::Convertible(layerValue), createError);
+    ASSERT_TRUE(layer) << createError.message;
+
+    JSDocument transitionJSON;
+    transitionJSON.Parse(R"JSON({"duration":100,"delay":20})JSON");
+    const JSValue* transitionValue = &transitionJSON;
+    EXPECT_FALSE(layer->setProperty("test-size-transition",
+                                    conversion::Convertible(transitionValue),
+                                    Layer::PropertyScope::Paint));
+    EXPECT_TRUE(layer->setProperty("test-size-transition",
+                                   conversion::Convertible(transitionValue),
+                                   Layer::PropertyScope::Layout));
+    const auto serialized = layer->serialize();
+    const auto* paint = serialized.getObject()->at("paint").getObject();
+    ASSERT_NE(nullptr, paint);
+    const auto* transition = paint->at("test-size-transition").getObject();
+    ASSERT_NE(nullptr, transition);
+    EXPECT_EQ(100, *transition->at("duration").getInt());
+    EXPECT_EQ(20, *transition->at("delay").getInt());
+
+    plugin::PropertyDefinition definition{"test", "test-dynamic-transition", "test-size",
+                                          MLN_PLUGIN_VALUE_FLOAT, MLN_PLUGIN_PROPERTY_PAINT, Value{4.0},
+                                          MLN_PLUGIN_EXPRESSION_CAMERA, true, false, {}, {}, 0, {}};
+    style::PluginPropertyValue from{
+        style::PluginPropertyValue::TypedValue{PropertyValue<float>{0.0f}}};
+    style::PluginPropertyValue to{
+        style::PluginPropertyValue::TypedValue{PropertyValue<float>{10.0f}}};
+    const auto start = Clock::now();
+    style::PluginTransitioningPropertyValue transitioning{
+        std::move(to),
+        style::PluginTransitioningPropertyValue{std::move(from)},
+        TransitionOptions{std::chrono::milliseconds(100), Duration::zero()},
+        start};
+    const auto midpoint = transitioning.evaluate(0.0f, definition, start + std::chrono::milliseconds(50));
+    const auto midpointStyle = midpoint.toStyleProperty();
+    const auto value = numericValue<double>(midpointStyle.getValue());
+    ASSERT_TRUE(value);
+    EXPECT_GT(*value, 0.0);
+    EXPECT_LT(*value, 10.0);
+    EXPECT_TRUE(transitioning.hasTransition());
+    const auto completed = transitioning.evaluate(0.0f, definition, start + std::chrono::milliseconds(100));
+    EXPECT_DOUBLE_EQ(10.0, *numericValue<double>(completed.toStyleProperty().getValue()));
+    EXPECT_FALSE(transitioning.hasTransition());
+}
+
 TEST(PluginStyleProperty, DefaultSetCloneAndSerialize) {
     Descriptor plugin("org.maplibre.test.style-property", "test-plugin-boolean");
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&plugin.descriptor, nullptr, 0));
@@ -513,7 +730,7 @@ TEST(PluginStyleProperty, ParsesSerializesAndValidatesColorRamps) {
     ramp.defaultValue.data.color_ramp_json = {defaultRamp, sizeof(defaultRamp) - 1};
     ramp.property.type = MLN_PLUGIN_VALUE_COLOR_RAMP;
     ramp.property.default_value = ramp.defaultValue;
-    ramp.property.supports_expressions = 1;
+    ramp.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&ramp.descriptor, nullptr, 0));
 
     FillExtrusionLayer layer("color-ramp", "source");
@@ -532,6 +749,6 @@ TEST(PluginStyleProperty, ParsesSerializesAndValidatesColorRamps) {
     invalid.defaultValue.data.color_ramp_json = {invalidRamp, sizeof(invalidRamp) - 1};
     invalid.property.type = MLN_PLUGIN_VALUE_COLOR_RAMP;
     invalid.property.default_value = invalid.defaultValue;
-    invalid.property.supports_expressions = 1;
+    invalid.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
     EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&invalid.descriptor, nullptr, 0));
 }

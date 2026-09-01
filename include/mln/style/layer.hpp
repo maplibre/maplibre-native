@@ -184,6 +184,9 @@ private:
     std::optional<conversion::Error> setPluginProperty(const std::string& name,
                                                        const conversion::Convertible& value,
                                                        std::optional<PropertyScope> scope = std::nullopt);
+    std::optional<conversion::Error> setPluginTransition(const std::string& name,
+                                                         const conversion::Convertible& value,
+                                                         std::optional<PropertyScope> scope = std::nullopt);
     std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);
     std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
     std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);

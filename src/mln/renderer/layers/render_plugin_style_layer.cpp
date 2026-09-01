@@ -145,20 +145,82 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     // its first frame, including styles installed before the initial zoom
     // evaluation.
     const auto& registration = pluginImpl(baseImpl).registration;
+    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& layerImpl = pluginImpl(baseImpl);
+    for (const auto& definition : definitions) {
+        if (definition.scope != MLN_PLUGIN_PROPERTY_PAINT) continue;
+        const auto property = layerImpl.pluginProperties.find(definition.name);
+        auto value = property == layerImpl.pluginProperties.end()
+                         ? style::defaultPluginPropertyValue(definition)
+                         : property->second;
+        transitioningPaintProperties.emplace(
+            definition.name, style::PluginTransitioningPropertyValue{value});
+        evaluatedPluginProperties.emplace(definition.name, std::move(value));
+    }
     passes = renderPassFor(registration.renderStage);
     if (registration.participatesIn3DPass) passes |= RenderPass::Pass3D;
 }
 
-void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters&) {
+void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) {
+    const auto& impl = pluginImpl(baseImpl);
+    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(impl.registration.type);
+    for (const auto& definition : definitions) {
+        if (definition.scope != MLN_PLUGIN_PROPERTY_PAINT) continue;
+        const auto property = impl.pluginProperties.find(definition.name);
+        auto value = property == impl.pluginProperties.end()
+                         ? style::defaultPluginPropertyValue(definition)
+                         : property->second;
+        auto prior = transitioningPaintProperties.find(definition.name);
+        auto priorValue = prior == transitioningPaintProperties.end()
+                              ? style::PluginTransitioningPropertyValue{
+                                    style::defaultPluginPropertyValue(definition)}
+                              : std::move(prior->second);
+        const auto options = impl.pluginPropertyTransitions.find(definition.name);
+        const auto transition = options == impl.pluginPropertyTransitions.end()
+                                    ? parameters.transition
+                                    : options->second.reverseMerge(parameters.transition);
+        transitioningPaintProperties.insert_or_assign(
+            definition.name,
+            style::PluginTransitioningPropertyValue{
+                std::move(value), std::move(priorValue), transition, parameters.now});
+    }
+}
+
+void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     const auto& registration = pluginImpl(baseImpl).registration;
     passes = renderPassFor(registration.renderStage);
     if (registration.participatesIn3DPass) passes |= RenderPass::Pass3D;
 
+    evaluatedPluginProperties.clear();
+    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& impl = pluginImpl(baseImpl);
+    for (const auto& definition : definitions) {
+        if (definition.scope != MLN_PLUGIN_PROPERTY_PAINT) continue;
+        const auto transition = transitioningPaintProperties.find(definition.name);
+        if (transition != transitioningPaintProperties.end()) {
+            evaluatedPluginProperties.emplace(
+                definition.name,
+                transition->second.evaluate(parameters.z, definition, parameters.now));
+        } else {
+            const auto property = impl.pluginProperties.find(definition.name);
+            evaluatedPluginProperties.emplace(
+                definition.name,
+                property == impl.pluginProperties.end()
+                    ? style::defaultPluginPropertyValue(definition)
+                    : property->second);
+        }
+    }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
-        staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl));
+        staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
     properties->renderPasses = underlying_type(passes);
     evaluatedProperties = std::move(properties);
     if (layerTweaker) layerTweaker->updateProperties(evaluatedProperties);
+}
+
+bool RenderPluginStyleLayer::hasTransition() const {
+    return std::any_of(transitioningPaintProperties.begin(),
+                       transitioningPaintProperties.end(),
+                       [](const auto& property) { return property.second.hasTransition(); });
 }
 
 void RenderPluginStyleLayer::layerChanged(const TransitionParameters&,
@@ -271,6 +333,10 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         auto& bucket = static_cast<PluginBucket&>(*renderData->bucket);
+        if (bucket.synchronizePaint(
+                getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()))) {
+            removeTile(renderPass, tileID);
+        }
         const auto previousBucket = getRenderTileBucketID(tileID);
         if (previousBucket != util::SimpleIdentity::Empty && previousBucket != bucket.getID()) {
             removeTile(renderPass, tileID);
@@ -285,12 +351,16 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         for (const auto& definition : bucket.drawables) {
             const auto groupName = plugin::shaderGroupName(registration.pluginID, definition.shaderID);
             const auto shaderGroup = shaders.getShaderGroup(groupName);
-            const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, {}) : gfx::ShaderPtr{};
+            StringIDSetsPair propertiesAsUniforms;
+            auto* paintBinders = bucket.paintBinders(getID(), definition.key);
+            auto attributes = context.createVertexAttributeArray();
+            if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
+            const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
+                                            : gfx::ShaderPtr{};
             if (!shader || definition.segments.empty()) {
                 continue;
             }
 
-            auto attributes = context.createVertexAttributeArray();
             std::size_t vertexCount = 0;
             gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
             for (const auto& binding : definition.attributes) {
@@ -336,6 +406,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setTileID(tileID);
                 drawable->setLayerTweaker(layerTweaker);
+                if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
                 drawable->setData(std::make_unique<gfx::PluginRenderGraphDrawableData>(definition.shaderID));
                 drawable->setRenderTile(renderTilesOwner, &tile);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
@@ -651,6 +722,7 @@ void RenderPluginStyleLayer::updateGeometryGraph(gfx::ShaderRegistry& shaders,
 
     const auto buildBucketDrawable = [&](const plugin::RenderPassDefinition& pass,
                                          const RenderTile& tile,
+                                         const std::shared_ptr<Bucket>& bucketOwner,
                                          PluginBucket& bucket,
                                          TileLayerGroup& outputGroup,
                                          const Size targetSize) {
@@ -658,11 +730,17 @@ void RenderPluginStyleLayer::updateGeometryGraph(gfx::ShaderRegistry& shaders,
             return item.shaderID == pass.shaderID;
         });
         if (definitionIt == bucket.drawables.end() || definitionIt->segments.empty()) return;
+        bucket.synchronizePaint(
+            getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()));
+        StringIDSetsPair propertiesAsUniforms;
+        auto* paintBinders = bucket.paintBinders(getID(), definitionIt->key);
+        auto attributes = context.createVertexAttributeArray();
+        if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
         const auto shaderGroup = shaders.getShaderGroup(plugin::shaderGroupName(registration.pluginID, pass.shaderID));
-        const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, {}) : gfx::ShaderPtr{};
+        const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
+                                        : gfx::ShaderPtr{};
         if (!shader) return;
 
-        auto attributes = context.createVertexAttributeArray();
         std::size_t vertexCount = 0;
         gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
         for (const auto& binding : definitionIt->attributes) {
@@ -695,6 +773,7 @@ void RenderPluginStyleLayer::updateGeometryGraph(gfx::ShaderRegistry& shaders,
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
+            if (paintBinders) drawable->setBinders(bucketOwner, paintBinders);
             drawable->setRenderTile(renderTilesOwner, &tile);
             drawable->setData(std::make_unique<gfx::PluginRenderGraphDrawableData>(
                 pass.shaderID, pass.id, 0, 0, MLN_PLUGIN_RASTER_DEM_MAPBOX, 0, targetSize.width, targetSize.height));
@@ -712,8 +791,12 @@ void RenderPluginStyleLayer::updateGeometryGraph(gfx::ShaderRegistry& shaders,
             for (const RenderTile& tile : *renderTiles) {
                 const auto* renderData = getRenderDataForPass(tile, mainRenderPass);
                 if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) continue;
-                buildBucketDrawable(
-                    pass, tile, static_cast<PluginBucket&>(*renderData->bucket), *outputGroup, targetSize);
+                buildBucketDrawable(pass,
+                                    tile,
+                                    renderData->bucket,
+                                    static_cast<PluginBucket&>(*renderData->bucket),
+                                    *outputGroup,
+                                    targetSize);
             }
             continue;
         }
@@ -858,14 +941,15 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     properties.reserve(definitions.size());
     for (size_t i = 0; i < definitions.size(); ++i) {
         const auto& definition = definitions[i];
-        const auto propertyIt = impl.pluginProperties.find(definition.name);
-        const auto value = propertyIt == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                     : propertyIt->second;
+        const auto propertyIt = evaluatedPluginProperties.find(definition.name);
+        const auto value = propertyIt == evaluatedPluginProperties.end()
+                               ? style::defaultPluginPropertyValue(definition)
+                               : propertyIt->second;
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};
         property.value = value.evaluate(zoom, feature, featureState, definition, storage[i]);
-        property.explicitly_set = propertyIt != impl.pluginProperties.end();
+        property.explicitly_set = impl.pluginProperties.find(definition.name) != impl.pluginProperties.end();
         properties.push_back(property);
     }
     pluginFeature.evaluated_properties = properties.data();

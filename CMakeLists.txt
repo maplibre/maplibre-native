@@ -1009,6 +1009,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/layout/plugin_layout.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/layout/plugin_layout.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/buckets/plugin_bucket.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/buckets/plugin_bucket.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/layers/plugin_style_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/layers/plugin_style_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/plugin_property.hpp

@@ -327,23 +327,6 @@ void PluginLayout::createBucket(const ImagePositions&,
 
         const auto id = featureIDtoString(feature->getID()).value_or(std::string{});
         const auto propertiesJSON = featurePropertiesJSON(*feature);
-        std::vector<mln_plugin_property_value_v1> evaluatedProperties;
-        std::vector<style::PluginPropertyValue::EvaluationStorage> evaluatedStorage(propertyDefinitions.size());
-        evaluatedProperties.reserve(propertyDefinitions.size());
-        const FeatureState emptyState;
-        for (size_t propertyIndex = 0; propertyIndex < propertyDefinitions.size(); ++propertyIndex) {
-            const auto& definition = propertyDefinitions[propertyIndex];
-            const auto propertyIt = leader.pluginProperties.find(definition.name);
-            const auto value = propertyIt == leader.pluginProperties.end()
-                                   ? style::defaultPluginPropertyValue(definition)
-                                   : propertyIt->second;
-            mln_plugin_property_value_v1 evaluated{};
-            evaluated.struct_size = sizeof(evaluated);
-            evaluated.name = borrowed(definition.name);
-            evaluated.value = value.evaluate(zoom, *feature, emptyState, definition, evaluatedStorage[propertyIndex]);
-            evaluated.explicitly_set = propertyIt != leader.pluginProperties.end();
-            evaluatedProperties.push_back(evaluated);
-        }
         mln_plugin_feature_v1 pluginFeature{};
         pluginFeature.struct_size = sizeof(pluginFeature);
         pluginFeature.geometry_type = type;
@@ -354,8 +337,12 @@ void PluginLayout::createBucket(const ImagePositions&,
         pluginFeature.path_offsets = offsets.data();
         pluginFeature.path_count = geometry.size();
         pluginFeature.properties_json = borrowed(propertiesJSON);
-        pluginFeature.evaluated_properties = evaluatedProperties.data();
-        pluginFeature.evaluated_property_count = evaluatedProperties.size();
+        // Paint expressions are evaluated by the host-owned binders after the
+        // plugin has described its geometry. The evaluated property channel is
+        // reserved for query callbacks, where values are specific to the
+        // queried feature and current feature state.
+        pluginFeature.evaluated_properties = nullptr;
+        pluginFeature.evaluated_property_count = 0;
         if (registration.layoutFeature(layoutInstance, &pluginFeature) != MLN_PLUGIN_STATUS_OK) {
             Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed while laying out a feature");
             destroyLayout();
@@ -411,7 +398,15 @@ void PluginLayout::createBucket(const ImagePositions&,
         const auto shaderIt = std::find_if(registration.shaders.begin(),
                                            registration.shaders.end(),
                                            [&](const auto& shader) { return shader.id == drawable.shaderID; });
-        valid = shaderIt != registration.shaders.end() && input.attribute_count == shaderIt->attributes.size();
+        std::set<uint32_t> hostAttributeIDs;
+        if (shaderIt != registration.shaders.end()) {
+            for (const auto& binding : shaderIt->propertyBindings) {
+                hostAttributeIDs.emplace(binding.minimumAttributeID);
+                hostAttributeIDs.emplace(binding.maximumAttributeID);
+            }
+        }
+        valid = shaderIt != registration.shaders.end() &&
+                input.attribute_count + hostAttributeIDs.size() == shaderIt->attributes.size();
         if (!valid) break;
         drawable.drawMode = input.draw_mode;
         drawable.renderStage = input.render_stage;
@@ -431,6 +426,7 @@ void PluginLayout::createBucket(const ImagePositions&,
             const auto size = attributeSize(binding.type);
             valid = binding.struct_size >= sizeof(binding) && streamIt != bucket->vertexStreams.end() &&
                     attributeIt != shaderIt->attributes.end() && attributeIt->type == binding.type && size > 0 &&
+                    hostAttributeIDs.find(binding.attribute_id) == hostAttributeIDs.end() &&
                     binding.byte_offset <= streamIt->second->getRawSize() &&
                     size <= streamIt->second->getRawSize() - binding.byte_offset &&
                     boundAttributeIDs.emplace(binding.attribute_id).second &&
@@ -441,6 +437,7 @@ void PluginLayout::createBucket(const ImagePositions&,
                     {binding.attribute_id, binding.stream_id, binding.byte_offset, binding.type});
             }
         }
+        if (drawableVertexCount) drawable.vertexCount = *drawableVertexCount;
         for (size_t segmentIndex = 0; valid && segmentIndex < input.segment_count; ++segmentIndex) {
             const auto& segment = input.segments[segmentIndex];
             valid = segment.struct_size >= sizeof(segment) &&
@@ -462,13 +459,69 @@ void PluginLayout::createBucket(const ImagePositions&,
         }
         if (valid) bucket->drawables.push_back(std::move(drawable));
     }
+
+    if (valid && output.feature_vertex_range_count && !output.feature_vertex_ranges) valid = false;
+    std::map<uint64_t, std::size_t> drawableVertexCounts;
+    for (const auto& drawable : bucket->drawables) drawableVertexCounts.emplace(drawable.key, drawable.vertexCount);
+    for (size_t rangeIndex = 0; valid && rangeIndex < output.feature_vertex_range_count; ++rangeIndex) {
+        const auto& range = output.feature_vertex_ranges[rangeIndex];
+        const auto drawable = drawableVertexCounts.find(range.drawable_key);
+        valid = range.struct_size >= sizeof(mln_plugin_feature_vertex_range_v1) &&
+                range.feature_index < sourceLayer->featureCount() && drawable != drawableVertexCounts.end() &&
+                range.vertex_count > 0 && validRange(range.first_vertex, range.vertex_count, drawable->second);
+        if (valid) {
+            bucket->featureVertexRanges.push_back(
+                {static_cast<std::size_t>(range.feature_index), range.drawable_key, range.first_vertex, range.vertex_count});
+        }
+    }
+    for (const auto& drawable : bucket->drawables) {
+        const auto shader = std::find_if(registration.shaders.begin(), registration.shaders.end(), [&](const auto& candidate) {
+            return candidate.id == drawable.shaderID;
+        });
+        if (!valid || shader == registration.shaders.end() || shader->propertyBindings.empty()) continue;
+        std::vector<uint8_t> coverage(drawable.vertexCount);
+        for (const auto& range : bucket->featureVertexRanges) {
+            if (range.drawableKey != drawable.key) continue;
+            for (std::size_t vertex = range.firstVertex; vertex < range.firstVertex + range.vertexCount; ++vertex) {
+                if (coverage[vertex] != 0) {
+                    valid = false;
+                    break;
+                }
+                coverage[vertex] = 1;
+            }
+            if (!valid) break;
+        }
+        if (valid && std::find(coverage.begin(), coverage.end(), 0) != coverage.end()) valid = false;
+    }
     bucket->queryRadius = output.query_radius;
-    destroyLayout();
 
     if (!valid) {
+        destroyLayout();
         Log::Error(Event::Style, "Plugin layer '" + leader.id + "' returned a malformed bucket");
         return;
     }
+    for (const auto& layer : layers) {
+        const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
+        auto& layerBinders = bucket->paintPropertyBinders[impl.id];
+        for (const auto& drawable : bucket->drawables) {
+            const auto shader = std::find_if(registration.shaders.begin(), registration.shaders.end(), [&](const auto& candidate) {
+                return candidate.id == drawable.shaderID;
+            });
+            if (shader == registration.shaders.end() || shader->propertyBindings.empty()) continue;
+            layerBinders.emplace(std::piecewise_construct,
+                                 std::forward_as_tuple(drawable.key),
+                                 std::forward_as_tuple(registration,
+                                                       *shader,
+                                                       drawable.key,
+                                                       drawable.vertexCount,
+                                                       zoom,
+                                                       impl.pluginProperties,
+                                                       bucket->featureVertexRanges,
+                                                       *sourceLayer));
+        }
+        bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
+    }
+    destroyLayout();
     if (!bucket->hasData()) return;
 
     for (const auto& layer : layers) {

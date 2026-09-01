@@ -41,7 +41,7 @@ private:
     struct Instance;
     struct PropertySnapshot;
 
-    PropertySnapshot makePropertySnapshot(const Instance&) const;
+    PropertySnapshot makePropertySnapshot(const Instance&, float zoom) const;
     void invoke(Instance&, PaintParameters&, bool prepare, const std::vector<mln_plugin_draw_packet_v1>&);
     void disable(Instance&, const char* callbackName, mln_plugin_status);
 

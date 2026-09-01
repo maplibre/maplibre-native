@@ -17,6 +17,7 @@ MLN_LAYER_PLUGIN_SOURCE = [
     "src/mln/plugin/plugin_registry.cpp",
     "src/mln/plugin/plugin_shader.cpp",
     "src/mln/layout/plugin_layout.cpp",
+    "src/mln/renderer/buckets/plugin_bucket.cpp",
     "src/mln/style/layers/plugin_style_layer.cpp",
     "src/mln/style/plugin_property.cpp",
     "src/mln/renderer/layers/render_plugin_style_layer.cpp",

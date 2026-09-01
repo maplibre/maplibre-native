@@ -66,6 +66,7 @@ public:
     // Typed constant/expression values supplied by runtime plugins. The
     // property schema is process-wide; values belong to immutable layer state.
     std::map<std::string, PluginPropertyValue> pluginProperties;
+    std::map<std::string, TransitionOptions> pluginPropertyTransitions;
 
 protected:
     Impl(const Impl&) = default;

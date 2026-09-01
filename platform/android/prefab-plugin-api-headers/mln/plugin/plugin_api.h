@@ -49,6 +49,15 @@ typedef enum mln_plugin_property_scope {
     MLN_PLUGIN_PROPERTY_LAYOUT = 2
 } mln_plugin_property_scope;
 
+/* Expression dependencies accepted by a plugin property. */
+typedef enum mln_plugin_expression_capability {
+    MLN_PLUGIN_EXPRESSION_NONE = 0,
+    MLN_PLUGIN_EXPRESSION_CAMERA = 1u << 0u,
+    MLN_PLUGIN_EXPRESSION_FEATURE = 1u << 1u,
+    MLN_PLUGIN_EXPRESSION_COMPOSITE = 1u << 2u,
+    MLN_PLUGIN_EXPRESSION_FEATURE_STATE = 1u << 3u
+} mln_plugin_expression_capability;
+
 /*
  * Custom layer source contract. Geometry sources cover GeoJSON and vector
  * tile sources. The remaining values are reserved so adding raster and DEM
@@ -117,8 +126,8 @@ typedef struct mln_plugin_property_descriptor_v1 {
     mln_plugin_value_type type;
     mln_plugin_property_scope scope;
     mln_plugin_value default_value;
-    /* Expressions are parsed and evaluated by the host. */
-    uint8_t supports_expressions;
+    /* Bitmask of mln_plugin_expression_capability values. */
+    uint32_t expression_capabilities;
     /* Paint properties may opt into the normal MapLibre transition system. */
     uint8_t supports_transitions;
     /* Array values may also be authored as a scalar/single color. */
@@ -382,6 +391,31 @@ typedef struct mln_plugin_shader_source_v1 {
     mln_plugin_string fragment_entry_point;
 } mln_plugin_shader_source_v1;
 
+typedef enum mln_plugin_property_encoding_v1 {
+    MLN_PLUGIN_PROPERTY_ENCODING_FLOAT = 1,
+    MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2 = 2,
+    MLN_PLUGIN_PROPERTY_ENCODING_COLOR = 3,
+    MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT = 4
+} mln_plugin_property_encoding_v1;
+
+/*
+ * Declares a host-owned dynamic paint binding. The named property is supplied
+ * either through the uniform block range or through the minimum/maximum vertex
+ * attributes. Composite expressions use both attributes plus the interpolation
+ * factor. Source-only expressions write equal minimum and maximum values.
+ */
+typedef struct mln_plugin_shader_property_binding_v1 {
+    uint32_t struct_size;
+    mln_plugin_string property_name;
+    mln_plugin_property_encoding_v1 encoding;
+    uint32_t uniform_id;
+    uint32_t uniform_byte_offset;
+    uint32_t minimum_attribute_id;
+    uint32_t maximum_attribute_id;
+    uint32_t interpolation_uniform_id;
+    uint32_t interpolation_uniform_byte_offset;
+} mln_plugin_shader_property_binding_v1;
+
 typedef struct mln_plugin_shader_descriptor_v1 {
     uint32_t struct_size;
     mln_plugin_string shader_id;
@@ -393,6 +427,8 @@ typedef struct mln_plugin_shader_descriptor_v1 {
     size_t uniform_block_count;
     const mln_plugin_shader_texture_v1* textures;
     size_t texture_count;
+    const mln_plugin_shader_property_binding_v1* property_bindings;
+    size_t property_binding_count;
 } mln_plugin_shader_descriptor_v1;
 
 typedef enum mln_plugin_graph_geometry {
@@ -554,7 +590,8 @@ typedef struct mln_plugin_feature_v1 {
     size_t path_count;
     /* UTF-8 JSON object. Borrowed and valid only during layout_feature. */
     mln_plugin_string properties_json;
-    /* Host-evaluated plugin properties for this feature and tile zoom. */
+    /* Populated for query_feature with the current zoom and feature state;
+     * null during layout_feature because host binders own paint evaluation. */
     const mln_plugin_property_value_v1* evaluated_properties;
     size_t evaluated_property_count;
 } mln_plugin_feature_v1;
@@ -618,6 +655,14 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     size_t segment_count;
 } mln_plugin_drawable_descriptor_v1;
 
+typedef struct mln_plugin_feature_vertex_range_v1 {
+    uint32_t struct_size;
+    uint64_t feature_index;
+    uint64_t drawable_key;
+    uint32_t first_vertex;
+    uint32_t vertex_count;
+} mln_plugin_feature_vertex_range_v1;
+
 typedef struct mln_plugin_bucket_v1 {
     uint32_t struct_size;
     const mln_plugin_vertex_stream_v1* vertex_streams;
@@ -628,6 +673,8 @@ typedef struct mln_plugin_bucket_v1 {
     size_t drawable_count;
     /* Maximum screen-pixel distance used by precise rendered-feature query. */
     float query_radius;
+    const mln_plugin_feature_vertex_range_v1* feature_vertex_ranges;
+    size_t feature_vertex_range_count;
 } mln_plugin_bucket_v1;
 
 typedef mln_plugin_status (*mln_plugin_create_layout_fn)(const mln_plugin_layout_context_v1* context,
@@ -646,6 +693,19 @@ typedef uint8_t (*mln_plugin_query_feature_fn)(const mln_plugin_feature_v1* feat
                                                double pixels_to_tile_units,
                                                const mln_plugin_property_value_v1* properties,
                                                size_t property_count);
+
+typedef struct mln_plugin_property_statistics_v1 {
+    uint32_t struct_size;
+    mln_plugin_string property_name;
+    mln_plugin_value minimum;
+    mln_plugin_value maximum;
+} mln_plugin_property_statistics_v1;
+
+/* Optional conservative screen-pixel radius for broad-phase feature queries. */
+typedef float (*mln_plugin_query_radius_fn)(const mln_plugin_property_statistics_v1* statistics,
+                                            size_t statistics_count,
+                                            const mln_plugin_property_value_v1* camera_properties,
+                                            size_t camera_property_count);
 
 typedef mln_plugin_status (*mln_plugin_create_instance_fn)(const mln_plugin_host_api_v1* host,
                                                            mln_plugin_string layer_id,
@@ -702,6 +762,7 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_update_uniform_block_fn update_uniform_block;
     /* Matches LayerTypeInfo::Pass3D without making the drawables depth-writing 3D geometry. */
     uint8_t participates_in_3d_pass;
+    mln_plugin_query_radius_fn get_query_radius;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

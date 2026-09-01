@@ -29,7 +29,19 @@ PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, p
       typeInfo(std::make_shared<TypeInfoHolder>(registration)) {}
 
 bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
-    return pluginProperties != other.pluginProperties || visibility != other.visibility;
+    const auto& pluginOther = static_cast<const PluginStyleLayer::Impl&>(other);
+    if (visibility != pluginOther.visibility) return true;
+    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    for (const auto& definition : definitions) {
+        if (definition.scope != MLN_PLUGIN_PROPERTY_LAYOUT) continue;
+        const auto lhs = pluginProperties.find(definition.name);
+        const auto rhs = pluginOther.pluginProperties.find(definition.name);
+        if (lhs == pluginProperties.end() && rhs == pluginOther.pluginProperties.end()) continue;
+        if (lhs == pluginProperties.end() || rhs == pluginOther.pluginProperties.end() || lhs->second != rhs->second) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {

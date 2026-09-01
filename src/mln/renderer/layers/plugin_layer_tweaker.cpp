@@ -5,6 +5,7 @@
 #include <mln/gfx/plugin_render_graph_drawable_data.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/plugin_property.hpp>
@@ -46,22 +47,24 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     if (layerGroup.empty()) return;
 
     {
-        const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*evaluatedProperties->baseImpl);
+        const auto& properties = static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties);
+        const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*properties.baseImpl);
         const auto propertyDefinitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
         std::vector<style::PluginPropertyValue::EvaluationStorage> propertyStorage(propertyDefinitions.size());
         std::vector<mln_plugin_property_value_v1> propertyValues;
         propertyValues.reserve(propertyDefinitions.size());
         for (size_t i = 0; i < propertyDefinitions.size(); ++i) {
             const auto& definition = propertyDefinitions[i];
-            const auto propertyIt = impl.pluginProperties.find(definition.name);
-            const auto value = propertyIt == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
-                                                                         : propertyIt->second;
+            const auto propertyIt = properties.evaluatedPaintProperties.find(definition.name);
+            const auto value = propertyIt == properties.evaluatedPaintProperties.end()
+                                   ? style::defaultPluginPropertyValue(definition)
+                                   : propertyIt->second;
             mln_plugin_property_value_v1 property{};
             property.struct_size = sizeof(property);
             property.name = {definition.name.data(), definition.name.size()};
             property.value = value.evaluate(
                 static_cast<float>(parameters.state.getZoom()), definition, propertyStorage[i]);
-            property.explicitly_set = propertyIt != impl.pluginProperties.end();
+            property.explicitly_set = impl.pluginProperties.find(definition.name) != impl.pluginProperties.end();
             propertyValues.push_back(property);
         }
 
@@ -146,6 +149,13 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    std::to_string(uniform.id) + " for pass " + std::to_string(callbackContext.pass_id) +
                                    " (status " + std::to_string(static_cast<int>(status)) + ")");
                     continue;
+                }
+                if (const auto* baseBinders = drawable.getBinders()) {
+                    const auto* binders = static_cast<const PluginPaintPropertyBinders*>(baseBinders);
+                    binders->writeUniforms(static_cast<float>(parameters.state.getZoom()),
+                                           uniform.id,
+                                           bytes.data(),
+                                           bytes.size());
                 }
                 if (uniform.scope == MLN_PLUGIN_UNIFORM_SCOPE_LAYER) {
                     auto& buffer = layerUniformBuffers[{callbackContext.pass_id, uniform.id}];
