@@ -194,8 +194,10 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
     imageAtlas.iconPositions.reserve(icons.size());
     for (auto& [texHandle, icon] : iconsToUpload) {
         const auto& rect = texHandle.getRectangle();
+        const auto it = versionMap.find(icon->id);
+        const auto version = it != versionMap.end() ? it->second : 0;
 
-        if (texHandle.isUploadNeeded()) {
+        if (texHandle.isUploadNeeded() || static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
             PremultipliedImage paddedImage(Size{rect.w, rect.h});
             paddedImage.fill(0);
             PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
@@ -203,16 +205,16 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
-        const auto it = versionMap.find(icon->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon, version});
+        imageAtlas.iconPositions.emplace(icon->id, ImagePosition{rectWithoutExtraPadding(rect), *icon});
     }
 
     imageAtlas.patternPositions.reserve(patterns.size());
     for (auto& [texHandle, pattern] : patternsToUpload) {
         const auto& rect = texHandle.getRectangle();
+        const auto it = versionMap.find(pattern->id);
+        const auto version = it != versionMap.end() ? it->second : 0;
 
-        if (texHandle.isUploadNeeded()) {
+        if (texHandle.isUploadNeeded() || static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
             PremultipliedImage paddedImage(Size{rect.w, rect.h});
             paddedImage.fill(0);
             PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);
@@ -231,10 +233,7 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
             imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
         }
         imageAtlas.textureHandles.emplace_back(texHandle);
-        const auto it = versionMap.find(pattern->id);
-        const auto version = it != versionMap.end() ? it->second : 0;
-        imageAtlas.patternPositions.emplace(pattern->id,
-                                            ImagePosition{rectWithoutExtraPadding(rect), *pattern, version});
+        imageAtlas.patternPositions.emplace(pattern->id, ImagePosition{rectWithoutExtraPadding(rect), *pattern});
     }
 
     return imageAtlas;

@@ -43,34 +43,28 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
     return &result;
 }
 
-class ImagePatch {
-public:
-    ImagePatch(Immutable<style::Image::Impl> image_, const Rect<uint16_t>& paddedRect_)
-        : image(std::move(image_)),
-          paddedRect(paddedRect_) {}
-    Immutable<style::Image::Impl> image;
-    Rect<uint16_t> paddedRect;
-};
-
-void populateImagePatches(ImagePositions& imagePositions,
-                          const ImageManager& imageManager,
-                          std::vector<ImagePatch>& /*out*/ patches) {
-    if (imagePositions.empty()) {
-        imagePositions.reserve(imageManager.updatedImageVersions.size());
-    }
+void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager) {
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
         const std::string& name = updatedImageVersion.first;
         const uint32_t version = updatedImageVersion.second;
-        const auto it = imagePositions.find(updatedImageVersion.first);
-        if (it != imagePositions.end()) {
-            auto& position = it->second;
-            if (position.version == version) continue;
+        auto nameId = sqrt(util::hash(name)) / 2;
+        for (auto& texHandle : imageAtlas.textureHandles) {
+            int32_t uniqueId = static_cast<int32_t>(nameId + (texHandle.getRectangle().w - 4) * (texHandle.getRectangle().h - 4));
+            if (texHandle.getId() == uniqueId) {
+                if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
+                    continue;
+                }
 
-            const auto updatedImage = imageManager.getSharedImage(name);
-            if (updatedImage == nullptr) continue;
+                const auto updatedImage = imageManager.getSharedImage(name);
+                if (updatedImage == nullptr) continue;
 
-            patches.emplace_back(*updatedImage, position.paddedRect);
-            position.version = version;
+                PremultipliedImage paddedImage(Size{texHandle.getRectangle().w, texHandle.getRectangle().h});
+                paddedImage.fill(0);
+                PremultipliedImage::copy(updatedImage->get()->image, paddedImage, {0, 0}, {2, 2}, updatedImage->get()->image.size);
+
+                imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
+                break;
+            }
         }
     }
 }
@@ -91,7 +85,6 @@ private:
     void prepare(const SourcePrepareParameters&) override;
 
     std::shared_ptr<GeometryTile::LayoutResult> layoutResult;
-    std::vector<ImagePatch> imagePatches;
 };
 
 using namespace style;
@@ -134,24 +127,13 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
         imageDynamicTexture->uploadDeferredImages(uploadPass);
         atlasTextures->icon = imageDynamicTexture->getTexture();
     }
-
-    if (!imagePatches.empty()) {
-        for (const auto& imagePatch : imagePatches) { // patch updated images.
-            atlasTextures->icon->uploadSubRegion(imagePatch.image->image,
-                                                 imagePatch.paddedRect.x + ImagePosition::padding,
-                                                 imagePatch.paddedRect.y + ImagePosition::padding);
-        }
-        imagePatches.clear();
-    }
 }
 
 void GeometryTileRenderData::prepare(const SourcePrepareParameters& parameters) {
     MLN_TRACE_FUNC();
 
     if (!layoutResult) return;
-    imagePatches.clear();
-    populateImagePatches(layoutResult->imageAtlas.iconPositions, parameters.imageManager, imagePatches);
-    populateImagePatches(layoutResult->imageAtlas.patternPositions, parameters.imageManager, imagePatches);
+    updateImages(layoutResult->imageAtlas, parameters.imageManager);
 }
 
 Bucket* GeometryTileRenderData::getBucket(const Layer::Impl& layer) const {

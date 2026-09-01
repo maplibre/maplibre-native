@@ -35,6 +35,13 @@ bool DynamicTexture::isEmpty() const {
     return (numTextures == 0);
 }
 
+int32_t DynamicTexture::getVersion(int32_t uniqueId) const {
+    if (versionMap.contains(uniqueId)) {
+        return versionMap.at(uniqueId);
+    }
+    return -1;
+}
+
 std::optional<TextureHandle> DynamicTexture::reserveSize(const Size& size, int32_t uniqueId) {
     std::scoped_lock lock(mutex);
     mapbox::Bin* bin = shelfPack.packOne(uniqueId, size.width, size.height);
@@ -59,6 +66,11 @@ std::optional<TextureHandle> DynamicTexture::addImage(const uint8_t* pixelData,
 
 void DynamicTexture::uploadImage(const uint8_t* /*pixelData*/, gfx::TextureHandle& texHandle) {
     texHandle.needsUpload = false;
+    int32_t version = 0;
+    if (versionMap.contains(texHandle.getId())) {
+        version = versionMap[texHandle.getId()] + 1;
+    }
+    versionMap[texHandle.getId()] = version;
 }
 
 bool DynamicTexture::removeTexture(const TextureHandle& texHandle) {
@@ -70,6 +82,7 @@ bool DynamicTexture::removeTexture(const TextureHandle& texHandle) {
     auto refcount = shelfPack.unref(*bin);
     if (refcount == 0) {
         numTextures--;
+        versionMap.erase(texHandle.getId());
         return true;
     }
     return false;
