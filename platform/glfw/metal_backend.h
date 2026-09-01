@@ -15,5 +15,4 @@ public:
     void activate() override;
     void deactivate() override;
     void setSize(mln::Size size_);
-    mln::Size getSize() const;
 };
