@@ -197,7 +197,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         const auto it = versionMap.find(icon->id);
         const auto version = it != versionMap.end() ? it->second : 0;
 
-        if (texHandle.isUploadNeeded() || static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
+        if (texHandle.isUploadNeeded() ||
+            static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
             PremultipliedImage paddedImage(Size{rect.w, rect.h});
             paddedImage.fill(0);
             PremultipliedImage::copy(icon->image, paddedImage, {0, 0}, {padding, padding}, icon->image.size);
@@ -214,7 +215,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         const auto it = versionMap.find(pattern->id);
         const auto version = it != versionMap.end() ? it->second : 0;
 
-        if (texHandle.isUploadNeeded() || static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
+        if (texHandle.isUploadNeeded() ||
+            static_cast<int32_t>(version) > imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
             PremultipliedImage paddedImage(Size{rect.w, rect.h});
             paddedImage.fill(0);
             PremultipliedImage::copy(pattern->image, paddedImage, {0, 0}, {padding, padding}, pattern->image.size);

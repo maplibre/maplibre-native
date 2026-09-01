@@ -49,7 +49,8 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
         const uint32_t version = updatedImageVersion.second;
         auto nameId = sqrt(util::hash(name)) / 2;
         for (auto& texHandle : imageAtlas.textureHandles) {
-            int32_t uniqueId = static_cast<int32_t>(nameId + (texHandle.getRectangle().w - 4) * (texHandle.getRectangle().h - 4));
+            int32_t uniqueId = static_cast<int32_t>(nameId + (texHandle.getRectangle().w - 4) *
+                                                                 (texHandle.getRectangle().h - 4));
             if (texHandle.getId() == uniqueId) {
                 if (static_cast<int32_t>(version) <= imageAtlas.dynamicTexture->getVersion(texHandle.getId())) {
                     continue;
@@ -60,7 +61,8 @@ void updateImages(gfx::ImageAtlas& imageAtlas, const ImageManager& imageManager)
 
                 PremultipliedImage paddedImage(Size{texHandle.getRectangle().w, texHandle.getRectangle().h});
                 paddedImage.fill(0);
-                PremultipliedImage::copy(updatedImage->get()->image, paddedImage, {0, 0}, {2, 2}, updatedImage->get()->image.size);
+                PremultipliedImage::copy(
+                    updatedImage->get()->image, paddedImage, {0, 0}, {2, 2}, updatedImage->get()->image.size);
 
                 imageAtlas.dynamicTexture->uploadImage(paddedImage.data.get(), texHandle);
                 break;
