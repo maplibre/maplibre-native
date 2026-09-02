@@ -62,16 +62,16 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
 {
   "version": 8,
   "sources": {
-    "maplibre": {
+    "osm": {
       "type": "raster",
-      "tiles": ["https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.png"],
-      "tileSize": 256
+      "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      "tileSize": 256,
+      "maxzoom": 19,
+      "attribution": "&copy; OpenStreetMap Contributors"
     },
     "terrainSource": {
       "type": "raster-dem",
-      "tiles": ["https://demotiles.maplibre.org/terrain-tiles/{z}/{x}/{y}.png"],
-      "tileSize": 256,
-      "encoding": "terrarium"
+      "url": "https://tiles.mapterhorn.com/tilejson.json"
     }
   },
   "terrain": {
@@ -82,11 +82,37 @@ Terrain rendering enables draping the map over 3D elevation data from Digital El
     {
       "id": "background",
       "type": "raster",
-      "source": "maplibre"
+      "source": "osm"
     }
   ]
 }
 ```
+
+**Give the raster-dem source a `url`, not an inline `tiles` array.** The TileJSON
+carries `encoding`, `tileSize` and `bounds`, and the source picks all three up; hand-
+rolling them instead is the easiest way to get a blank map with no error in the log.
+`tileSize` is the sharp edge - declaring 256 for a source that serves 512px tiles
+meshes the cover at a shallower zoom than the DEM is loaded at, so mesh and DEM never
+line up. This is the pattern the
+[demo terrain tiles](https://github.com/maplibre/demotiles/tree/gh-pages/terrain-tiles#how-to-use-the-demo-terrain-tiles)
+and every terrain test activity use.
+
+Two DEM sources are used across this work:
+
+| | coverage | encoding | tile size |
+|---|---|---|---|
+| [Mapterhorn](https://mapterhorn.com/data-access/) `tiles.mapterhorn.com/tilejson.json` | worldwide | terrarium | 512 |
+| demotiles `demotiles.maplibre.org/terrain-tiles/tiles.json` | N047E011 only, to z12 | Terrain-RGB | 512 |
+
+The Android test activities all use Mapterhorn, for planet-wide coverage to test
+against. The demotiles DEM is the narrower option: it is fine around Innsbruck
+(11.404, 47.265) and 404s everywhere else, even though its `tiles.json` advertises
+worldwide `bounds`.
+
+For the basemap, note that `demotiles.maplibre.org/tiles/{z}/{x}/{y}.png` does not
+exist - that demotiles set is vector-only. Use OSM raster (above), or the full-planet
+OpenFreeMap Liberty vector basemap (`TestStyles.OPENFREEMAP_LIBERTY`) that
+`TerrainVectorMapActivity` drapes.
 
 ### Terrain Properties
 
@@ -280,14 +306,16 @@ Implemented:
 Terrain work has been developed and tested almost entirely on **OpenGL**. A first
 audit against the other backends found the following. Only GL and Vulkan are
 buildable/testable in this environment (Metal needs macOS; WebGPU builds via the
-`webgpuDawn`/`webgpuWgpu` flavours but has not been run).
+`webgpuDawn`/`webgpuWgpu` flavours but has not been run). The **Metal** column was
+filled in by @daviani on an iPhone 16 Pro Max / iOS 26.6, built for device with
+`--//:renderer=metal` ([#4190 review](https://github.com/maplibre/maplibre-native/pull/4190#issuecomment-5491176380)).
 
 | | OpenGL | Vulkan | Metal | WebGPU |
 |---|---|---|---|---|
-| builds | yes | yes | not here | yes (Dawn) |
-| terrain renders | yes | **yes, verified on device** | untested | untested |
-| terrain off->on (all 3 load modes) | yes | **yes, verified** | untested | untested |
-| symbol occlusion | yes | looks correct on device | untested | untested |
+| builds | yes | yes | **yes** (bazel, for device) | yes (Dawn) |
+| terrain renders | yes | **yes, verified on device** | **yes, verified on device** | untested |
+| terrain off->on (all 3 load modes) | yes | **yes, verified** | **yes** (via style JSON; load modes not separated) | untested |
+| symbol occlusion | yes | looks correct on device | untested (code path is complete; see below) | untested |
 | **fill-extrusion elevation** | yes | **yes** (2026-08-01, render test pixel-matches the GL baseline) | **yes** (2026-08-02, shaders sample the DEM; CI confirmation pending) | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
@@ -439,6 +467,60 @@ ahead of GL: quality 115.2 fps / 2.66 jank-per-s vs GL's 105.0 / 5.38, performan
 **Open: one intermittent Vulkan crash.** A `SIGSEGV` in the render thread during a
 Balanced-mode benchmark run (0 samples captured). Not reproduced in four
 subsequent launches, so it is rare; no backtrace captured yet.
+
+**Symbol occlusion on Metal: code-complete, still unverified on screen.** An audit
+by @daviani alongside the device run above found the Metal path whole -
+`src/mln/shaders/mtl/terrain_depth.cpp` is the same shape as the Vulkan and WebGPU
+ones, all three symbol shaders bind `idSymbolDepthTexture` (slots 2/2/3 against
+Vulkan's 3/3/3, which is Metal numbering without the gap Vulkan leaves for the icon
+texture), and nothing in `render_terrain.cpp` branches away from Metal. What is
+missing is a test that can *see* an occluded marker: markers placed along a line are
+raised onto the surface and so are never behind it, and packing them across a ridge
+puts them in a narrow band near the horizon at high pitch where out-of-frame and
+occluded look alike. The Android answer is `TerrainFlightActivity`'s baked,
+elevation-planned path (probes placed by querying terrain elevation rather than by
+guessing coordinates); an iOS equivalent would fill this row.
+
+**Metal performance** (iPhone 16 Pro Max, iOS 26.6, z12 Innsbruck, camera rotating
+at 24 deg/s, 8 s per pass after a 2 s warm-up, `MLNRenderingStats`; two runs).
+The cost scales with pitch, and it is not all extra tiles:
+
+| pitch | fps, terrain | fps, no terrain | delta | encode CPU | draw calls |
+|---|---|---|---|---|---|
+| 25 deg | 54.8 / 58.8 | 61.2 / 58.9 | -11% / -0% | x1.39 / x1.50 | 6 vs 6 |
+| 45 deg | 40.9 / 42.1 | 60.5 / 59.6 | -32% / -29% | x1.73 / x1.82 | 8 vs 8 |
+| 65 deg | 21.5 / 22.0 | 53.8 / 56.2 | -60% / -61% | x2.35 / x2.30 | 28 vs 19 |
+
+At 25 and 45 degrees the draw call count is *identical* with and without terrain,
+yet encode time is still x1.4-1.8 - so that share of the cost is per-drawable work
+(drape targets, tweakers, UBO churn), not tile count. Only at 65 degrees does the
+cover itself grow, +47%, as the horizon pushes out. Caveats from the reporter: the
+no-terrain passes sit on the 60 Hz vsync ceiling, so the deltas are a **lower
+bound**; the style keeps a `hillshade` layer in both arms, so this is terrain *on
+top of* hillshade rather than against a bare map; and memory counters were left out
+as process-wide gauges that could not be attributed to a pass.
+
+**FIXED - replacing terrain at runtime orphaned the old mesh.** Reported from the
+same session: raising `exaggeration` behaved, lowering it blanked the map, and
+neither turning terrain off nor any gesture brought it back - only restarting the
+app did. That is not the Phase 4 camera-anchoring item it resembles.
+`RenderOrchestrator::createRenderTree` dropped and rebuilt `RenderTerrain` whenever
+the terrain impl changed, but called `deactivate()` only on the *removal* path. The
+mesh layer group is a `shared_ptr` the orchestrator holds in
+`layerGroupsByLayerIndex`, a **multimap**, so each replacement stacked a new group
+beside the old one instead of evicting it, and every orphan kept drawing with its
+own stale exaggeration and a drape texture the new terrain's pool had already
+recycled. Every symptom follows: the orphans accumulate one per slider step; turning
+terrain off removes only the current group and leaves the pile; per-frame cost grows
+until the iOS main-thread render loop stalls and takes the gestures with it. So does
+the direction asymmetry - raising exaggeration hides the shorter stale surfaces
+behind the new one, while lowering it leaves them towering over and occluding the
+real terrain. No Android test activity changes exaggeration at runtime (all five use
+a fixed value and toggle only on/off, which took the working path), which is why
+device testing never hit it. `TerrainTestOptions` now carries exaggeration controls
+and an `exag_sweep_*` ramp so all five activities exercise the replacement path.
+The orphaning itself is settled from the code and the fix is in; the symptom chain
+above is inference from it and still wants a re-run on Metal to confirm.
 
 ## Remaining Work for Production
 
@@ -788,7 +870,9 @@ This known issue is closed.
 
 At high pitch over tall terrain the near (bottom) part of the view goes black:
 the camera sits at or below the terrain surface, so the near rays hit nothing
-and clear to the background. This is a camera-model problem, not a tile/drape
+and clear to the background. (A blank map that *also* kills gestures and survives
+turning terrain off is a different bug - the orphaned-mesh one fixed under Backend
+parity above, not this.) This is a camera-model problem, not a tile/drape
 one — confirmed on device with a clean tile diagnostic (all tiles covered, mesh
 == drawables) while the bottom of the frame was black below a terrain silhouette.
 
