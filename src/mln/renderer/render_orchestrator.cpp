@@ -224,19 +224,27 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // Update terrain. The per-frame drawable/DEM update happens later in
     // updateRenderTree once the render sources have been updated; here we only
     // (re)create or drop the RenderTerrain to match the style.
-    if (updateParameters->terrain) {
-        if (!renderTerrain || renderTerrain->getImpl() != *updateParameters->terrain) {
-            renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
-        }
-    } else if (renderTerrain) {
-        // Unregister the terrain mesh layer group from the orchestrator before
-        // dropping RenderTerrain, or the orchestrator keeps its own reference and
-        // draws the orphaned mesh - a second, floating terrain surface after the
-        // user toggles 3D terrain off and back on.
+    //
+    // Unregister the mesh layer group before dropping a RenderTerrain, on replacement as
+    // well as on removal: the orchestrator holds its own reference and keeps drawing an
+    // orphaned mesh otherwise, and the layer index is a multimap key, so a replacement
+    // stacks up beside the old one rather than evicting it.
+    const auto dropRenderTerrain = [&] {
         UniqueChangeRequestVec terrainChanges;
         renderTerrain->deactivate(terrainChanges);
         addChanges(terrainChanges);
         renderTerrain.reset();
+    };
+
+    if (updateParameters->terrain) {
+        if (renderTerrain && renderTerrain->getImpl() != *updateParameters->terrain) {
+            dropRenderTerrain();
+        }
+        if (!renderTerrain) {
+            renderTerrain = std::make_unique<RenderTerrain>(*updateParameters->terrain);
+        }
+    } else if (renderTerrain) {
+        dropRenderTerrain();
     }
 
     // Let every source's tile cover account for the height of the terrain, so that the
