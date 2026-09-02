@@ -7,8 +7,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import java.text.DecimalFormat
@@ -59,12 +59,13 @@ class PressForMarkerActivity : AppCompatActivity() {
         val title = (
             LAT_LON_FORMATTER.format(point.latitude) + ", " +
                 LAT_LON_FORMATTER.format(point.longitude)
-            )
+        )
         val snippet = "X = " + pixel.x.toInt() + ", Y = " + pixel.y.toInt()
-        val marker = MarkerOptions()
-            .position(point)
-            .title(title)
-            .snippet(snippet)
+        val marker =
+            MarkerOptions()
+                .position(point)
+                .title(title)
+                .snippet(snippet)
         markerList!!.add(marker)
         maplibreMap.addMarker(marker)
     }
@@ -117,15 +118,17 @@ class PressForMarkerActivity : AppCompatActivity() {
         mapView.onLowMemory()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.menuItemReset -> {
                 resetMap()
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
-    }
 
     companion object {
         private val LAT_LON_FORMATTER = DecimalFormat("#.#####")

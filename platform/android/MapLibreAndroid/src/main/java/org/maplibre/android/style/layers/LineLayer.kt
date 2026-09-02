@@ -1,692 +1,588 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * A stroked line.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-line">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-line)
  */
 @UiThread
-public class LineLayer extends Layer {
+class LineLayer : Layer {
 
-  /**
-   * Creates a LineLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  LineLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a LineLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a LineLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public LineLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
-
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
-
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public LineLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public LineLayer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
+    /**
+     * Creates a LineLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
     }
-  }
 
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public LineLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  // Property getters
+    /**
+     * The source layer.
+     */
+    var sourceLayer: String?
+        get() {
+            checkThread()
+            return nativeGetSourceLayer()
+        }
+        set(sourceLayer) {
+            checkThread()
+            nativeSetSourceLayer(sourceLayer)
+        }
 
-  /**
-   * Get the LineCap property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getLineCap() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("line-cap", nativeGetLineCap());
-  }
-
-  /**
-   * Get the LineJoin property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getLineJoin() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("line-join", nativeGetLineJoin());
-  }
-
-  /**
-   * Get the LineMiterLimit property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineMiterLimit() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-miter-limit", nativeGetLineMiterLimit());
-  }
-
-  /**
-   * Get the LineRoundLimit property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineRoundLimit() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-round-limit", nativeGetLineRoundLimit());
-  }
-
-  /**
-   * Get the LineSortKey property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineSortKey() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-sort-key", nativeGetLineSortKey());
-  }
-
-  /**
-   * Get the LineOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-opacity", nativeGetLineOpacity());
-  }
-
-  /**
-   * Get the LineOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getLineOpacityTransition() {
-    checkThread();
-    return nativeGetLineOpacityTransition();
-  }
-
-  /**
-   * Set the LineOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setLineOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineOpacityTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getLineColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("line-color", nativeGetLineColor());
-  }
-
-  /**
-   * The color with which the line will be drawn.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getLineColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getLineColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("line-color was set as a Function");
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): LineLayer {
+        this.sourceLayer = sourceLayer
+        return this
     }
-  }
 
-  /**
-   * Get the LineColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getLineColorTransition() {
-    checkThread();
-    return nativeGetLineColorTransition();
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  /**
-   * Set the LineColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setLineColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineTranslate property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getLineTranslate() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("line-translate", nativeGetLineTranslate());
-  }
-
-  /**
-   * Get the LineTranslate property transition options
-   *
-   * @return transition options for Float[]
-   */
-  @NonNull
-  public TransitionOptions getLineTranslateTransition() {
-    checkThread();
-    return nativeGetLineTranslateTransition();
-  }
-
-  /**
-   * Set the LineTranslate property transition options
-   *
-   * @param options transition options for Float[]
-   */
-  public void setLineTranslateTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineTranslateTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineTranslateAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getLineTranslateAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("line-translate-anchor", nativeGetLineTranslateAnchor());
-  }
-
-  /**
-   * Get the LineWidth property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineWidth() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-width", nativeGetLineWidth());
-  }
-
-  /**
-   * Get the LineWidth property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getLineWidthTransition() {
-    checkThread();
-    return nativeGetLineWidthTransition();
-  }
-
-  /**
-   * Set the LineWidth property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setLineWidthTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineWidthTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineGapWidth property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineGapWidth() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-gap-width", nativeGetLineGapWidth());
-  }
-
-  /**
-   * Get the LineGapWidth property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getLineGapWidthTransition() {
-    checkThread();
-    return nativeGetLineGapWidthTransition();
-  }
-
-  /**
-   * Set the LineGapWidth property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setLineGapWidthTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineGapWidthTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineOffset property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineOffset() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-offset", nativeGetLineOffset());
-  }
-
-  /**
-   * Get the LineOffset property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getLineOffsetTransition() {
-    checkThread();
-    return nativeGetLineOffsetTransition();
-  }
-
-  /**
-   * Set the LineOffset property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setLineOffsetTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineOffsetTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineBlur property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getLineBlur() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("line-blur", nativeGetLineBlur());
-  }
-
-  /**
-   * Get the LineBlur property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getLineBlurTransition() {
-    checkThread();
-    return nativeGetLineBlurTransition();
-  }
-
-  /**
-   * Set the LineBlur property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setLineBlurTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineBlurTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineDasharray property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getLineDasharray() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("line-dasharray", nativeGetLineDasharray());
-  }
-
-  /**
-   * Get the LineDasharray property transition options
-   *
-   * @return transition options for Float[]
-   */
-  @NonNull
-  public TransitionOptions getLineDasharrayTransition() {
-    checkThread();
-    return nativeGetLineDasharrayTransition();
-  }
-
-  /**
-   * Set the LineDasharray property transition options
-   *
-   * @param options transition options for Float[]
-   */
-  public void setLineDasharrayTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLineDasharrayTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LinePattern property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getLinePattern() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("line-pattern", nativeGetLinePattern());
-  }
-
-  /**
-   * Get the LinePattern property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getLinePatternTransition() {
-    checkThread();
-    return nativeGetLinePatternTransition();
-  }
-
-  /**
-   * Set the LinePattern property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setLinePatternTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLinePatternTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the LineGradient property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getLineGradient() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("line-gradient", nativeGetLineGradient());
-  }
-
-  /**
-   * Defines a gradient with which to color a line feature. Can only be used with GeoJSON sources that specify `"lineMetrics": true`.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getLineGradientAsInt() {
-    checkThread();
-    PropertyValue<String> value = getLineGradient();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("line-gradient was set as a Function");
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     */
+    fun setFilter(filter: Expression) {
+        checkThread()
+        nativeSetFilter(filter.toArray())
     }
-  }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineCap();
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     * @return This
+     */
+    fun withFilter(filter: Expression): LineLayer {
+        setFilter(filter)
+        return this
+    }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineJoin();
+    /**
+     * A single expression filter.
+     *
+     * Use [setFilter] to set the filter.
+     */
+    val filter: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetFilter()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineMiterLimit();
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): LineLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineRoundLimit();
+    // Property getters
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineSortKey();
+    /**
+     * Get the LineCap property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineCap: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-cap", nativeGetLineCap())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineOpacity();
+    /**
+     * Get the LineJoin property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineJoin: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-join", nativeGetLineJoin())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineOpacityTransition();
+    /**
+     * Get the LineMiterLimit property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineMiterLimit: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-miter-limit", nativeGetLineMiterLimit())
+            return value as PropertyValue<Float>
+        }
 
-  @Keep
-  private native void nativeSetLineOpacityTransition(long duration, long delay);
+    /**
+     * Get the LineRoundLimit property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineRoundLimit: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-round-limit", nativeGetLineRoundLimit())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineColor();
+    /**
+     * Get the LineSortKey property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineSortKey: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-sort-key", nativeGetLineSortKey())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineColorTransition();
+    /**
+     * Get the LineOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-opacity", nativeGetLineOpacity())
+            return value as PropertyValue<Float>
+        }
 
-  @Keep
-  private native void nativeSetLineColorTransition(long duration, long delay);
+    /**
+     * The LineOpacity property transition options
+     */
+    var lineOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineOpacityTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineTranslate();
+    /**
+     * Get the LineColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-color", nativeGetLineColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineTranslateTransition();
+    /**
+     * The color with which the line will be drawn.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getLineColorAsInt(): Int {
+        checkThread()
+        val value = lineColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("line-color was set as a Function")
+        }
+    }
 
-  @Keep
-  private native void nativeSetLineTranslateTransition(long duration, long delay);
+    /**
+     * The LineColor property transition options
+     */
+    var lineColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineColorTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineTranslateAnchor();
+    /**
+     * Get the LineTranslate property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineTranslate: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-translate", nativeGetLineTranslate())
+            return value as PropertyValue<Array<Float>>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineWidth();
+    /**
+     * The LineTranslate property transition options
+     */
+    var lineTranslateTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineTranslateTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineTranslateTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineWidthTransition();
+    /**
+     * Get the LineTranslateAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineTranslateAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-translate-anchor", nativeGetLineTranslateAnchor())
+            return value as PropertyValue<String>
+        }
 
-  @Keep
-  private native void nativeSetLineWidthTransition(long duration, long delay);
+    /**
+     * Get the LineWidth property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineWidth: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-width", nativeGetLineWidth())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineGapWidth();
+    /**
+     * The LineWidth property transition options
+     */
+    var lineWidthTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineWidthTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineWidthTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineGapWidthTransition();
+    /**
+     * Get the LineGapWidth property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineGapWidth: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-gap-width", nativeGetLineGapWidth())
+            return value as PropertyValue<Float>
+        }
 
-  @Keep
-  private native void nativeSetLineGapWidthTransition(long duration, long delay);
+    /**
+     * The LineGapWidth property transition options
+     */
+    var lineGapWidthTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineGapWidthTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineGapWidthTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineOffset();
+    /**
+     * Get the LineOffset property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineOffset: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-offset", nativeGetLineOffset())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineOffsetTransition();
+    /**
+     * The LineOffset property transition options
+     */
+    var lineOffsetTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineOffsetTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineOffsetTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetLineOffsetTransition(long duration, long delay);
+    /**
+     * Get the LineBlur property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineBlur: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-blur", nativeGetLineBlur())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineBlur();
+    /**
+     * The LineBlur property transition options
+     */
+    var lineBlurTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineBlurTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineBlurTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineBlurTransition();
+    /**
+     * Get the LineDasharray property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineDasharray: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-dasharray", nativeGetLineDasharray())
+            return value as PropertyValue<Array<Float>>
+        }
 
-  @Keep
-  private native void nativeSetLineBlurTransition(long duration, long delay);
+    /**
+     * The LineDasharray property transition options
+     */
+    var lineDasharrayTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLineDasharrayTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLineDasharrayTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineDasharray();
+    /**
+     * Get the LinePattern property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val linePattern: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-pattern", nativeGetLinePattern())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLineDasharrayTransition();
+    /**
+     * The LinePattern property transition options
+     */
+    var linePatternTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLinePatternTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLinePatternTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetLineDasharrayTransition(long duration, long delay);
+    /**
+     * Get the LineGradient property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val lineGradient: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("line-gradient", nativeGetLineGradient())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLinePattern();
+    /**
+     * Defines a gradient with which to color a line feature. Can only be used with GeoJSON sources that specify `"lineMetrics": true`.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getLineGradientAsInt(): Int {
+        checkThread()
+        val value = lineGradient
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("line-gradient was set as a Function")
+        }
+    }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLinePatternTransition();
+    @Keep
+    private external fun nativeGetLineCap(): Any
 
-  @Keep
-  private native void nativeSetLinePatternTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetLineJoin(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLineGradient();
+    @Keep
+    private external fun nativeGetLineMiterLimit(): Any
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    @Keep
+    private external fun nativeGetLineRoundLimit(): Any
 
+    @Keep
+    private external fun nativeGetLineSortKey(): Any
+
+    @Keep
+    private external fun nativeGetLineOpacity(): Any
+
+    @Keep
+    private external fun nativeGetLineOpacityTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineOpacityTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineColor(): Any
+
+    @Keep
+    private external fun nativeGetLineColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineTranslate(): Any
+
+    @Keep
+    private external fun nativeGetLineTranslateTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineTranslateTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineTranslateAnchor(): Any
+
+    @Keep
+    private external fun nativeGetLineWidth(): Any
+
+    @Keep
+    private external fun nativeGetLineWidthTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineWidthTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineGapWidth(): Any
+
+    @Keep
+    private external fun nativeGetLineGapWidthTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineGapWidthTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineOffset(): Any
+
+    @Keep
+    private external fun nativeGetLineOffsetTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineOffsetTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineBlur(): Any
+
+    @Keep
+    private external fun nativeGetLineBlurTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineBlurTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineDasharray(): Any
+
+    @Keep
+    private external fun nativeGetLineDasharrayTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLineDasharrayTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLinePattern(): Any
+
+    @Keep
+    private external fun nativeGetLinePatternTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLinePatternTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetLineGradient(): Any
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

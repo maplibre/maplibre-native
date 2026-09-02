@@ -1,29 +1,33 @@
-package org.maplibre.android.location.engine;
+package org.maplibre.android.location.engine
 
-import android.app.PendingIntent;
-import android.os.Looper;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.app.PendingIntent
+import android.os.Looper
 
 /**
  * Internal location engine implementation interface.
  *
- * @param <T> location listener object type
+ * @param T location listener object type
  */
-public interface LocationEngineImpl<T> {
-  @NonNull
-  T createListener(LocationEngineCallback<LocationEngineResult> callback);
+interface LocationEngineImpl<T> {
+    fun createListener(callback: LocationEngineCallback<LocationEngineResult>): T
 
-  void getLastLocation(@NonNull LocationEngineCallback<LocationEngineResult> callback) throws SecurityException;
+    @Throws(SecurityException::class)
+    fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>)
 
-  void requestLocationUpdates(@NonNull LocationEngineRequest request,
-                              @NonNull T listener, @Nullable Looper looper) throws SecurityException;
+    @Throws(SecurityException::class)
+    fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        listener: T,
+        looper: Looper?,
+    )
 
-  void requestLocationUpdates(@NonNull LocationEngineRequest request,
-                              @NonNull PendingIntent pendingIntent) throws SecurityException;
+    @Throws(SecurityException::class)
+    fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        pendingIntent: PendingIntent?,
+    )
 
-  void removeLocationUpdates(T listener);
+    fun removeLocationUpdates(listener: T)
 
-  void removeLocationUpdates(PendingIntent pendingIntent);
+    fun removeLocationUpdates(pendingIntent: PendingIntent?)
 }

@@ -1,174 +1,172 @@
-package org.maplibre.android.maps.renderer.surfaceview;
+package org.maplibre.android.maps.renderer.surfaceview
 
-import android.content.Context;
-import android.util.AttributeSet;
-import android.util.Log;
+import android.content.Context
+import android.util.AttributeSet
+import android.util.Log
+import java.lang.ref.WeakReference
 
-import java.lang.ref.WeakReference;
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+private fun Any.monitorNotifyAll() = (this as java.lang.Object).notifyAll()
 
-public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+private fun Any.monitorWait() = (this as java.lang.Object).wait()
 
-  protected final WeakReference<MapLibreVulkanSurfaceView> viewWeakReference = new WeakReference<>(this);
+class MapLibreVulkanSurfaceView : MapLibreSurfaceView {
+    private val viewWeakReference = WeakReference(this)
 
-  public MapLibreVulkanSurfaceView(Context context) {
-    super(context);
-  }
+    constructor(context: Context) : super(context)
 
-  public MapLibreVulkanSurfaceView(Context context, AttributeSet attrs) {
-    super(context, attrs);
-  }
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-  @Override
-  protected void createRenderThread() {
-    renderThread = new VulkanThread(viewWeakReference);
-  }
-
-  static class VulkanThread extends MapLibreSurfaceView.RenderThread {
-    VulkanThread(WeakReference<MapLibreVulkanSurfaceView> surfaceViewWeakRef) {
-      super(surfaceViewWeakRef.get().renderThreadManager);
-      mSurfaceViewWeakRef = surfaceViewWeakRef;
+    override fun createRenderThread() {
+        renderThread = VulkanThread(viewWeakReference)
     }
 
-    @Override
-    protected void guardedRun() throws InterruptedException {
-      wantRenderNotification = false;
+    internal class VulkanThread(
+        private val surfaceViewWeakRef: WeakReference<MapLibreVulkanSurfaceView>,
+    ) : MapLibreSurfaceView.RenderThread(surfaceViewWeakRef.get()!!.renderThreadManager) {
+        private var graphicsSurfaceCreated = false
 
-      boolean sizeChanged = false;
-      boolean initSurface = false;
-      boolean wantRenderNotification = false;
-      boolean doRenderNotification = false;
-      int w = 0;
-      int h = 0;
-      Runnable event = null;
-      Runnable finishDrawingRunnable = null;
+        @Suppress(
+            "CyclomaticComplexMethod",
+            "ComplexMethod",
+            "LongMethod",
+            "NestedBlockDepth",
+            "NAME_SHADOWING",
+        )
+        @Throws(InterruptedException::class)
+        override fun guardedRun() {
+            wantRenderNotification = false
 
-      while (true) {
-        synchronized (renderThreadManager) {
-          while (true) {
-            if (shouldExit) {
-              return;
+            var sizeChanged = false
+            var initSurface = false
+            var wantRenderNotification = false
+            var doRenderNotification = false
+            var w = 0
+            var h = 0
+            var event: Runnable? = null
+            var finishDrawingRunnable: Runnable? = null
+
+            while (true) {
+                synchronized(renderThreadManager) {
+                    while (true) {
+                        if (shouldExit) {
+                            return
+                        }
+
+                        if (eventQueue.isNotEmpty()) {
+                            event = eventQueue.removeAt(0)
+                            break
+                        }
+
+                        // Update the pause state.
+                        if (paused != requestPaused) {
+                            paused = requestPaused
+                            renderThreadManager.monitorNotifyAll()
+                        }
+
+                        // lost surface
+                        if (!hasSurface && !waitingForSurface) {
+                            val view = surfaceViewWeakRef.get()
+                            if (view != null && graphicsSurfaceCreated) {
+                                view.renderer?.onSurfaceDestroyed()
+                            }
+                            graphicsSurfaceCreated = false
+                            waitingForSurface = true
+                            renderThreadManager.monitorNotifyAll()
+                        }
+
+                        // acquired surface
+                        if (hasSurface && waitingForSurface) {
+                            if (surfaceViewWeakRef.get() != null) {
+                                initSurface = true
+                                graphicsSurfaceCreated = true
+                            }
+                            waitingForSurface = false
+                            renderThreadManager.monitorNotifyAll()
+                        }
+
+                        if (doRenderNotification) {
+                            this.wantRenderNotification = false
+                            doRenderNotification = false
+                            renderComplete = true
+                            renderThreadManager.monitorNotifyAll()
+                        }
+
+                        if (this.finishDrawingRunnable != null) {
+                            finishDrawingRunnable = this.finishDrawingRunnable
+                            this.finishDrawingRunnable = null
+                        }
+
+                        // Ready to draw?
+                        if (readyToDraw() && graphicsSurfaceCreated) {
+                            if (this.sizeChanged) {
+                                sizeChanged = true
+                                w = width
+                                h = height
+                                this.wantRenderNotification = true
+                                this.sizeChanged = false
+                            }
+                            requestRender = false
+                            renderThreadManager.monitorNotifyAll()
+                            if (this.wantRenderNotification) {
+                                wantRenderNotification = true
+                            }
+                            break
+                        } else {
+                            val pendingDraw = finishDrawingRunnable
+                            if (pendingDraw != null) {
+                                Log.w(
+                                    MapLibreSurfaceView.TAG,
+                                    "Warning, !readyToDraw() but waiting for draw finished! " +
+                                        "Early reporting draw finished.",
+                                )
+                                pendingDraw.run()
+                                finishDrawingRunnable = null
+                            }
+                        }
+                        // By design, this is the only place in a RenderThread thread where we wait().
+                        renderThreadManager.monitorWait()
+                    }
+                } // end of synchronized(renderThreadManager)
+
+                val pendingEvent = event
+                if (pendingEvent != null) {
+                    pendingEvent.run()
+                    event = null
+                    continue
+                }
+
+                if (initSurface) {
+                    surfaceViewWeakRef.get()?.let { view ->
+                        view.renderer?.onSurfaceCreated(view.holder.surface)
+                        initSurface = false
+                    }
+                }
+
+                if (sizeChanged) {
+                    surfaceViewWeakRef.get()?.let { view ->
+                        view.renderer?.onSurfaceChanged(w, h)
+                        sizeChanged = false
+                    }
+                }
+
+                surfaceViewWeakRef.get()?.let { view ->
+                    view.renderer?.onDrawFrame()
+                    val pendingDraw = finishDrawingRunnable
+                    if (pendingDraw != null) {
+                        pendingDraw.run()
+                        finishDrawingRunnable = null
+                    }
+                }
+
+                if (wantRenderNotification) {
+                    doRenderNotification = true
+                    wantRenderNotification = false
+                }
             }
-
-            if (!eventQueue.isEmpty()) {
-              event = eventQueue.remove(0);
-              break;
-            }
-
-            // Update the pause state.
-            if (paused != requestPaused) {
-              paused = requestPaused;
-              renderThreadManager.notifyAll();
-            }
-
-            // lost surface
-            if (!hasSurface && !waitingForSurface) {
-              MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-              if (view != null && graphicsSurfaceCreated) {
-                view.renderer.onSurfaceDestroyed();
-              }
-              graphicsSurfaceCreated = false;
-              waitingForSurface = true;
-              renderThreadManager.notifyAll();
-            }
-
-            // acquired surface
-            if (hasSurface && waitingForSurface) {
-              MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-              if (view != null) {
-                initSurface = true;
-                graphicsSurfaceCreated = true;
-              }
-              waitingForSurface = false;
-              renderThreadManager.notifyAll();
-            }
-
-            if (doRenderNotification) {
-              this.wantRenderNotification = false;
-              doRenderNotification = false;
-              renderComplete = true;
-              renderThreadManager.notifyAll();
-            }
-
-            if (this.finishDrawingRunnable != null) {
-              finishDrawingRunnable = this.finishDrawingRunnable;
-              this.finishDrawingRunnable = null;
-            }
-
-            // Ready to draw?
-            if (readyToDraw() && graphicsSurfaceCreated) {
-              if (this.sizeChanged) {
-                sizeChanged = true;
-                w = width;
-                h = height;
-                this.wantRenderNotification = true;
-                this.sizeChanged = false;
-              }
-              requestRender = false;
-              renderThreadManager.notifyAll();
-              if (this.wantRenderNotification) {
-                wantRenderNotification = true;
-              }
-              break;
-            } else {
-              if (finishDrawingRunnable != null) {
-                Log.w(TAG, "Warning, !readyToDraw() but waiting for "
-                  + "draw finished! Early reporting draw finished.");
-                finishDrawingRunnable.run();
-                finishDrawingRunnable = null;
-              }
-            }
-            // By design, this is the only place in a RenderThread thread where we wait().
-            renderThreadManager.wait();
-          }
-        } // end of synchronized(sRenderThreadManager)
-
-        if (event != null) {
-          event.run();
-          event = null;
-          continue;
         }
 
-        if (initSurface) {
-          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onSurfaceCreated(view.getHolder().getSurface());
-            initSurface = false;
-          }
-        }
-
-        if (sizeChanged) {
-          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onSurfaceChanged(w, h);
-            sizeChanged = false;
-          }
-        }
-
-        {
-          MapLibreVulkanSurfaceView view = mSurfaceViewWeakRef.get();
-          if (view != null) {
-            view.renderer.onDrawFrame();
-            if (finishDrawingRunnable != null) {
-              finishDrawingRunnable.run();
-              finishDrawingRunnable = null;
-            }
-          }
-        }
-
-        if (wantRenderNotification) {
-          doRenderNotification = true;
-          wantRenderNotification = false;
-        }
-      }
+        override fun ableToDraw(): Boolean = graphicsSurfaceCreated && readyToDraw()
     }
-
-    @Override
-    public boolean ableToDraw() {
-      return graphicsSurfaceCreated && readyToDraw();
-    }
-
-    private boolean graphicsSurfaceCreated;
-
-    private final WeakReference<MapLibreVulkanSurfaceView> mSurfaceViewWeakRef;
-  }
 }

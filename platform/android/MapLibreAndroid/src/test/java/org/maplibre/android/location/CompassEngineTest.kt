@@ -33,7 +33,8 @@ class CompassEngineTest : BaseTest() {
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        Mockito.`when`(sensorManager!!.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR))
+        Mockito
+            .`when`(sensorManager!!.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR))
             .thenReturn(compassSensor)
         compassEngine = LocationComponentCompassEngine(windowManager!!, sensorManager)
     }
@@ -43,20 +44,21 @@ class CompassEngineTest : BaseTest() {
         Assert.assertEquals(
             "Last accuracy should match",
             compassEngine!!.lastAccuracySensorStatus,
-            0
+            0,
         )
     }
 
     @Test
     fun lastKnownCompassAccuracyStatusValue() {
-        val sensor = Mockito.mock(
-            Sensor::class.java
-        )
+        val sensor =
+            Mockito.mock(
+                Sensor::class.java,
+            )
         compassEngine!!.onAccuracyChanged(sensor, 2)
         Assert.assertEquals(
             "Last accuracy should match",
             compassEngine!!.lastAccuracySensorStatus,
-            2
+            2,
         )
     }
 
@@ -77,11 +79,12 @@ class CompassEngineTest : BaseTest() {
     @Test
     fun listener_registerOnAdd() {
         compassEngine!!.addCompassListener(compassListener!!)
-        Mockito.verify(sensorManager)
+        Mockito
+            .verify(sensorManager)
             ?.registerListener(
                 ArgumentMatchers.any(SensorEventListener::class.java),
                 ArgumentMatchers.eq(compassSensor),
-                ArgumentMatchers.eq(LocationComponentCompassEngine.SENSOR_DELAY_MICROS)
+                ArgumentMatchers.eq(LocationComponentCompassEngine.SENSOR_DELAY_MICROS),
             )
     }
 
@@ -91,9 +94,9 @@ class CompassEngineTest : BaseTest() {
         compassEngine!!.removeCompassListener(compassListener)
         Mockito.verify(sensorManager)?.unregisterListener(
             ArgumentMatchers.any(
-                SensorEventListener::class.java
+                SensorEventListener::class.java,
             ),
-            ArgumentMatchers.eq(compassSensor)
+            ArgumentMatchers.eq(compassSensor),
         )
     }
 }

@@ -1,33 +1,26 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.view.animation.Interpolator;
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.view.animation.Interpolator
 
-import androidx.annotation.NonNull;
-
-import java.util.List;
-
-class MapLibreAnimatorSetProvider {
-  private static MapLibreAnimatorSetProvider instance;
-
-  private MapLibreAnimatorSetProvider() {
-    // private constructor
-  }
-
-  static MapLibreAnimatorSetProvider getInstance() {
-    if (instance == null) {
-      instance = new MapLibreAnimatorSetProvider();
+internal class MapLibreAnimatorSetProvider private constructor() {
+    fun startAnimation(
+        animators: List<Animator>,
+        interpolator: Interpolator,
+        duration: Long,
+    ) {
+        val locationAnimatorSet = AnimatorSet()
+        locationAnimatorSet.playTogether(animators)
+        locationAnimatorSet.interpolator = interpolator
+        locationAnimatorSet.duration = duration
+        locationAnimatorSet.start()
     }
-    return instance;
-  }
 
-  void startAnimation(@NonNull List<Animator> animators, @NonNull Interpolator interpolator,
-                      long duration) {
-    AnimatorSet locationAnimatorSet = new AnimatorSet();
-    locationAnimatorSet.playTogether(animators);
-    locationAnimatorSet.setInterpolator(interpolator);
-    locationAnimatorSet.setDuration(duration);
-    locationAnimatorSet.start();
-  }
+    companion object {
+        private var instance: MapLibreAnimatorSetProvider? = null
+
+        @JvmStatic
+        fun getInstance(): MapLibreAnimatorSetProvider = instance ?: MapLibreAnimatorSetProvider().also { instance = it }
+    }
 }

@@ -19,6 +19,7 @@ import java.io.IOException
 class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private val maplibreMap: MapLibreMap? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_textureview_transparent)
@@ -37,10 +38,11 @@ class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
         maplibreMapOptions.translucentTextureSurface(true)
         maplibreMapOptions.textureMode(true)
         maplibreMapOptions.camera(
-            CameraPosition.Builder()
+            CameraPosition
+                .Builder()
                 .zoom(2.0)
                 .target(LatLng(48.507879, 8.363795))
-                .build()
+                .build(),
         )
         mapView = MapView(this, maplibreMapOptions)
         mapView.onCreate(savedInstanceState)
@@ -51,7 +53,7 @@ class TextureViewTransparentBackgroundActivity : AppCompatActivity() {
     private fun initMap(maplibreMap: MapLibreMap) {
         try {
             maplibreMap.setStyle(
-                Style.Builder().fromJson(ResourceUtils.readRawResource(this, R.raw.no_bg_style))
+                Style.Builder().fromJson(ResourceUtils.readRawResource(this, R.raw.no_bg_style)),
             )
         } catch (exception: IOException) {
             Timber.e(exception)

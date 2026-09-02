@@ -1,368 +1,376 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import static org.maplibre.android.location.LocationComponentConstants.ACCURACY_LAYER;
-import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_LAYER;
-import static org.maplibre.android.location.LocationComponentConstants.BACKGROUND_STALE_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.BEARING_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.BEARING_LAYER;
-import static org.maplibre.android.location.LocationComponentConstants.FOREGROUND_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.FOREGROUND_LAYER;
-import static org.maplibre.android.location.LocationComponentConstants.FOREGROUND_STALE_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.LOCATION_SOURCE;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_ACCURACY_ALPHA;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_ACCURACY_COLOR;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_ACCURACY_RADIUS;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_BACKGROUND_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_BACKGROUND_STALE_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_BEARING_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_COMPASS_BEARING;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_FOREGROUND_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_FOREGROUND_ICON_OFFSET;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_FOREGROUND_STALE_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_GPS_BEARING;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_LOCATION_STALE;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_PULSING_OPACITY;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_PULSING_RADIUS;
-import static org.maplibre.android.location.LocationComponentConstants.PROPERTY_SHADOW_ICON_OFFSET;
-import static org.maplibre.android.location.LocationComponentConstants.PULSING_CIRCLE_LAYER;
-import static org.maplibre.android.location.LocationComponentConstants.SHADOW_ICON;
-import static org.maplibre.android.location.LocationComponentConstants.SHADOW_LAYER;
-import static org.maplibre.android.style.expressions.Expression.get;
-import static org.maplibre.android.style.layers.Property.NONE;
-import static org.maplibre.android.style.layers.Property.VISIBLE;
-import static org.maplibre.android.style.layers.PropertyFactory.circleColor;
-import static org.maplibre.android.style.layers.PropertyFactory.circleOpacity;
-import static org.maplibre.android.style.layers.PropertyFactory.circleRadius;
-import static org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor;
-import static org.maplibre.android.style.layers.PropertyFactory.iconSize;
-import static org.maplibre.android.style.layers.PropertyFactory.visibility;
-import static org.maplibre.android.utils.ColorUtils.colorToRgbaString;
+import android.graphics.Bitmap
+import com.google.gson.JsonArray
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.LocationComponentConstants.ACCURACY_LAYER
+import org.maplibre.android.location.LocationComponentConstants.BACKGROUND_ICON
+import org.maplibre.android.location.LocationComponentConstants.BACKGROUND_LAYER
+import org.maplibre.android.location.LocationComponentConstants.BACKGROUND_STALE_ICON
+import org.maplibre.android.location.LocationComponentConstants.BEARING_ICON
+import org.maplibre.android.location.LocationComponentConstants.BEARING_LAYER
+import org.maplibre.android.location.LocationComponentConstants.FOREGROUND_ICON
+import org.maplibre.android.location.LocationComponentConstants.FOREGROUND_LAYER
+import org.maplibre.android.location.LocationComponentConstants.FOREGROUND_STALE_ICON
+import org.maplibre.android.location.LocationComponentConstants.LOCATION_SOURCE
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_ACCURACY_ALPHA
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_ACCURACY_COLOR
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_ACCURACY_RADIUS
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_BACKGROUND_ICON
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_BACKGROUND_STALE_ICON
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_BEARING_ICON
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_COMPASS_BEARING
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_FOREGROUND_ICON
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_FOREGROUND_ICON_OFFSET
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_FOREGROUND_STALE_ICON
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_GPS_BEARING
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_LOCATION_STALE
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_PULSING_OPACITY
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_PULSING_RADIUS
+import org.maplibre.android.location.LocationComponentConstants.PROPERTY_SHADOW_ICON_OFFSET
+import org.maplibre.android.location.LocationComponentConstants.PULSING_CIRCLE_LAYER
+import org.maplibre.android.location.LocationComponentConstants.SHADOW_ICON
+import org.maplibre.android.location.LocationComponentConstants.SHADOW_LAYER
+import org.maplibre.android.location.modes.RenderMode
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.expressions.Expression.Companion.get
+import org.maplibre.android.style.layers.Layer
+import org.maplibre.android.style.layers.Property.NONE
+import org.maplibre.android.style.layers.Property.VISIBLE
+import org.maplibre.android.style.layers.PropertyFactory.circleColor
+import org.maplibre.android.style.layers.PropertyFactory.circleOpacity
+import org.maplibre.android.style.layers.PropertyFactory.circleRadius
+import org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor
+import org.maplibre.android.style.layers.PropertyFactory.iconSize
+import org.maplibre.android.style.layers.PropertyFactory.visibility
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.android.utils.ColorUtils.colorToRgbaString
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.Point
 
-import android.graphics.Bitmap;
+internal class SymbolLocationLayerRenderer(
+    private val layerSourceProvider: LayerSourceProvider,
+    featureProvider: LayerFeatureProvider,
+    isStale: Boolean,
+) : LocationLayerRenderer {
+    private lateinit var style: Style
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+    private val layerSet: MutableSet<String> = layerSourceProvider.emptyLayerSet
+    private var locationFeature: Feature = featureProvider.generateLocationFeature(null, isStale)
+    private lateinit var locationSource: GeoJsonSource
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import org.maplibre.geojson.Feature;
-import org.maplibre.geojson.Point;
-
-import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.maps.Style;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.layers.SymbolLayer;
-import org.maplibre.android.style.sources.GeoJsonSource;
-
-import java.util.Set;
-
-final class SymbolLocationLayerRenderer implements LocationLayerRenderer {
-  private Style style;
-  private final LayerSourceProvider layerSourceProvider;
-
-  private final Set<String> layerSet;
-  private Feature locationFeature;
-  private GeoJsonSource locationSource;
-
-  SymbolLocationLayerRenderer(LayerSourceProvider layerSourceProvider,
-                              LayerFeatureProvider featureProvider,
-                              boolean isStale) {
-    this.layerSourceProvider = layerSourceProvider;
-    this.layerSet = layerSourceProvider.getEmptyLayerSet();
-    this.locationFeature = featureProvider.generateLocationFeature(locationFeature, isStale);
-  }
-
-  @Override
-  public void initializeComponents(Style style) {
-    this.style = style;
-    addLocationSource();
-  }
-
-  @Override
-  public void addLayers(LocationComponentPositionManager positionManager) {
-
-    if (positionManager.bearingOnTop) {
-      // positions the top-most reference layer
-      Layer layer = layerSourceProvider.generateLayer(BEARING_LAYER);
-      positionManager.addLayerToMap(layer);
-      layerSet.add(layer.getId());
-
-      // adds remaining layers while keeping the order
-      addSymbolLayer(FOREGROUND_LAYER, BEARING_LAYER);
-      addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER);
-      addSymbolLayer(SHADOW_LAYER, BACKGROUND_LAYER);
-    } else {
-      // positions the top-most reference layer
-      Layer layer = layerSourceProvider.generateLayer(FOREGROUND_LAYER);
-      positionManager.addLayerToMap(layer);
-      layerSet.add(layer.getId());
-
-      // adds remaining layers while keeping the order
-      addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER);
-      addSymbolLayer(BEARING_LAYER, BACKGROUND_LAYER);
-      addSymbolLayer(SHADOW_LAYER, BEARING_LAYER);
+    override fun initializeComponents(style: Style) {
+        this.style = style
+        addLocationSource()
     }
 
-    addAccuracyLayer();
-    addPulsingCircleLayerToMap();
-  }
+    override fun addLayers(positionManager: LocationComponentPositionManager) {
+        if (positionManager.bearingOnTop) {
+            // positions the top-most reference layer
+            val layer = layerSourceProvider.generateLayer(BEARING_LAYER)
+            positionManager.addLayerToMap(layer)
+            layerSet.add(layer.id)
 
-  @Override
-  public void removeLayers() {
-    for (String layerId : layerSet) {
-      style.removeLayer(layerId);
-    }
-    layerSet.clear();
-  }
+            // adds remaining layers while keeping the order
+            addSymbolLayer(FOREGROUND_LAYER, BEARING_LAYER)
+            addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER)
+            addSymbolLayer(SHADOW_LAYER, BACKGROUND_LAYER)
+        } else {
+            // positions the top-most reference layer
+            val layer = layerSourceProvider.generateLayer(FOREGROUND_LAYER)
+            positionManager.addLayerToMap(layer)
+            layerSet.add(layer.id)
 
-  @Override
-  public void hide() {
-    for (String layerId : layerSet) {
-      setLayerVisibility(layerId, false);
-    }
-  }
+            // adds remaining layers while keeping the order
+            addSymbolLayer(BACKGROUND_LAYER, FOREGROUND_LAYER)
+            addSymbolLayer(BEARING_LAYER, BACKGROUND_LAYER)
+            addSymbolLayer(SHADOW_LAYER, BEARING_LAYER)
+        }
 
-  @Override
-  public void cameraTiltUpdated(double tilt) {
-    updateForegroundOffset(tilt);
-  }
-
-  @Override
-  public void cameraBearingUpdated(double bearing) {
-    updateForegroundBearing((float) bearing);
-  }
-
-  @Override
-  public void show(@RenderMode.Mode int renderMode, boolean isStale) {
-    switch (renderMode) {
-      case RenderMode.NORMAL:
-        setLayerVisibility(SHADOW_LAYER, true);
-        setLayerVisibility(FOREGROUND_LAYER, true);
-        setLayerVisibility(BACKGROUND_LAYER, true);
-        setLayerVisibility(ACCURACY_LAYER, !isStale);
-        setLayerVisibility(BEARING_LAYER, false);
-        break;
-      case RenderMode.COMPASS:
-        setLayerVisibility(SHADOW_LAYER, true);
-        setLayerVisibility(FOREGROUND_LAYER, true);
-        setLayerVisibility(BACKGROUND_LAYER, true);
-        setLayerVisibility(ACCURACY_LAYER, !isStale);
-        setLayerVisibility(BEARING_LAYER, true);
-        break;
-      case RenderMode.GPS:
-        setLayerVisibility(SHADOW_LAYER, false);
-        setLayerVisibility(FOREGROUND_LAYER, true);
-        setLayerVisibility(BACKGROUND_LAYER, true);
-        setLayerVisibility(ACCURACY_LAYER, false);
-        setLayerVisibility(BEARING_LAYER, false);
-        break;
-      default:
-        break;
-    }
-  }
-
-  @Override
-  public void styleAccuracy(float accuracyAlpha, int accuracyColor) {
-    locationFeature.addNumberProperty(PROPERTY_ACCURACY_ALPHA, accuracyAlpha);
-    locationFeature.addStringProperty(PROPERTY_ACCURACY_COLOR, colorToRgbaString(accuracyColor));
-    refreshSource();
-  }
-
-  @Override
-  public void setLatLng(LatLng latLng) {
-    Point point = Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude());
-    setLocationPoint(point);
-  }
-
-  @Override
-  public void setGpsBearing(Float gpsBearing) {
-    setBearingProperty(PROPERTY_GPS_BEARING, gpsBearing);
-  }
-
-  @Override
-  public void setCompassBearing(Float compassBearing) {
-    setBearingProperty(PROPERTY_COMPASS_BEARING, compassBearing);
-  }
-
-  @Override
-  public void setAccuracyRadius(Float accuracy) {
-    updateAccuracyRadius(accuracy);
-  }
-
-  @Override
-  public void styleScaling(Expression scaleExpression) {
-    for (String layerId : layerSet) {
-      Layer layer = style.getLayer(layerId);
-      if (layer instanceof SymbolLayer) {
-        layer.setProperties(
-          iconSize(scaleExpression)
-        );
-      }
-    }
-  }
-
-  @Override
-  public void setLocationStale(boolean isStale, int renderMode) {
-    locationFeature.addBooleanProperty(PROPERTY_LOCATION_STALE, isStale);
-    refreshSource();
-    if (renderMode != RenderMode.GPS) {
-      setLayerVisibility(ACCURACY_LAYER, !isStale);
-    }
-  }
-
-  @Override
-  public void updateIconIds(String foregroundIconString, String foregroundStaleIconString, String backgroundIconString,
-                            String backgroundStaleIconString, String bearingIconString) {
-    locationFeature.addStringProperty(PROPERTY_FOREGROUND_ICON, foregroundIconString);
-    locationFeature.addStringProperty(PROPERTY_BACKGROUND_ICON, backgroundIconString);
-    locationFeature.addStringProperty(PROPERTY_FOREGROUND_STALE_ICON, foregroundStaleIconString);
-    locationFeature.addStringProperty(PROPERTY_BACKGROUND_STALE_ICON, backgroundStaleIconString);
-    locationFeature.addStringProperty(PROPERTY_BEARING_ICON, bearingIconString);
-    refreshSource();
-  }
-
-  @Override
-  public void addBitmaps(@RenderMode.Mode int renderMode, @Nullable Bitmap shadowBitmap, Bitmap backgroundBitmap,
-                         Bitmap backgroundStaleBitmap, Bitmap bearingBitmap,
-                         Bitmap foregroundBitmap, Bitmap foregroundBitmapStale) {
-    if (shadowBitmap != null) {
-      style.addImage(SHADOW_ICON, shadowBitmap);
-    } else {
-      style.removeImage(SHADOW_ICON);
-    }
-    style.addImage(BACKGROUND_ICON, backgroundBitmap);
-    style.addImage(BACKGROUND_STALE_ICON, backgroundStaleBitmap);
-    style.addImage(BEARING_ICON, bearingBitmap);
-    style.addImage(FOREGROUND_ICON, foregroundBitmap);
-    style.addImage(FOREGROUND_STALE_ICON, foregroundBitmapStale);
-  }
-
-  private void updateForegroundOffset(double tilt) {
-    JsonArray foregroundJsonArray = new JsonArray();
-    foregroundJsonArray.add(0f);
-    foregroundJsonArray.add((float) (-0.05 * tilt));
-    locationFeature.addProperty(PROPERTY_FOREGROUND_ICON_OFFSET, foregroundJsonArray);
-
-    JsonArray backgroundJsonArray = new JsonArray();
-    backgroundJsonArray.add(0f);
-    backgroundJsonArray.add((float) (0.05 * tilt));
-    locationFeature.addProperty(PROPERTY_SHADOW_ICON_OFFSET, backgroundJsonArray);
-
-    refreshSource();
-  }
-
-  private void updateForegroundBearing(float bearing) {
-    setBearingProperty(PROPERTY_GPS_BEARING, bearing);
-  }
-
-  private void setLayerVisibility(@NonNull String layerId, boolean visible) {
-    if (!style.isFullyLoaded()) {
-      return;
+        addAccuracyLayer()
+        addPulsingCircleLayerToMap()
     }
 
-    Layer layer = style.getLayer(layerId);
-    if (layer != null) {
-      String targetVisibility = visible ? VISIBLE : NONE;
-      if (!layer.getVisibility().value.equals(targetVisibility)) {
-        layer.setProperties(visibility(visible ? VISIBLE : NONE));
-      }
+    override fun removeLayers() {
+        for (layerId in layerSet) {
+            style.removeLayer(layerId)
+        }
+        layerSet.clear()
     }
-  }
 
-  /**
-   * Adjust the visibility of the pulsing LocationComponent circle.
-   */
-  @Override
-  public void adjustPulsingCircleLayerVisibility(boolean visible) {
-    setLayerVisibility(PULSING_CIRCLE_LAYER, visible);
-  }
-
-  /**
-   * Adjust the the pulsing LocationComponent circle based on the set options.
-   */
-  @Override
-  public void stylePulsingCircle(LocationComponentOptions options) {
-    if (style.getLayer(PULSING_CIRCLE_LAYER) != null) {
-      setLayerVisibility(PULSING_CIRCLE_LAYER, true);
-      style.getLayer(PULSING_CIRCLE_LAYER).setProperties(
-          circleRadius(get(PROPERTY_PULSING_RADIUS)),
-          circleColor(options.pulseColor()),
-          circleStrokeColor(options.pulseColor()),
-          circleOpacity(get(PROPERTY_PULSING_OPACITY))
-      );
+    override fun hide() {
+        for (layerId in layerSet) {
+            setLayerVisibility(layerId, false)
+        }
     }
-  }
 
-  /**
-   * Adjust the visual appearance of the pulsing LocationComponent circle.
-   */
-  @Override
-  public void updatePulsingUi(float radius, @Nullable Float opacity) {
-    locationFeature.addNumberProperty(PROPERTY_PULSING_RADIUS, radius);
-    if (opacity != null) {
-      locationFeature.addNumberProperty(PROPERTY_PULSING_OPACITY, opacity);
+    override fun cameraTiltUpdated(tilt: Double) {
+        updateForegroundOffset(tilt)
     }
-    refreshSource();
-  }
 
-  private void addSymbolLayer(@NonNull String layerId, @NonNull String beforeLayerId) {
-    Layer layer = layerSourceProvider.generateLayer(layerId);
-    addLayerToMap(layer, beforeLayerId);
-  }
-
-  private void addAccuracyLayer() {
-    Layer accuracyLayer = layerSourceProvider.generateAccuracyLayer();
-    addLayerToMap(accuracyLayer, BACKGROUND_LAYER);
-  }
-
-  /**
-   * Add the pulsing LocationComponent circle to the map for future use, if need be.
-   */
-  private void addPulsingCircleLayerToMap() {
-    Layer pulsingCircleLayer = layerSourceProvider.generatePulsingCircleLayer();
-    addLayerToMap(pulsingCircleLayer, ACCURACY_LAYER);
-  }
-
-  private void addLayerToMap(Layer layer, @NonNull String idBelowLayer) {
-    style.addLayerBelow(layer, idBelowLayer);
-    layerSet.add(layer.getId());
-  }
-
-  private void addLocationSource() {
-    locationSource = layerSourceProvider.generateSource(locationFeature, true);
-    style.addSource(locationSource);
-  }
-
-  private void refreshSource() {
-    // prevents exception when other style has been set with an update in flight
-    // https://github.com/maplibre/maplibre-native/issues/3348
-    if (!style.isFullyLoaded()) {
-      return;
+    override fun cameraBearingUpdated(bearing: Double) {
+        updateForegroundBearing(bearing.toFloat())
     }
-    GeoJsonSource source = style.getSourceAs(LOCATION_SOURCE);
-    if (source != null) {
-      locationSource.setGeoJson(locationFeature);
+
+    override fun show(
+        @RenderMode.Mode renderMode: Int,
+        isStale: Boolean,
+    ) {
+        when (renderMode) {
+            RenderMode.NORMAL -> {
+                setLayerVisibility(SHADOW_LAYER, true)
+                setLayerVisibility(FOREGROUND_LAYER, true)
+                setLayerVisibility(BACKGROUND_LAYER, true)
+                setLayerVisibility(ACCURACY_LAYER, !isStale)
+                setLayerVisibility(BEARING_LAYER, false)
+            }
+
+            RenderMode.COMPASS -> {
+                setLayerVisibility(SHADOW_LAYER, true)
+                setLayerVisibility(FOREGROUND_LAYER, true)
+                setLayerVisibility(BACKGROUND_LAYER, true)
+                setLayerVisibility(ACCURACY_LAYER, !isStale)
+                setLayerVisibility(BEARING_LAYER, true)
+            }
+
+            RenderMode.GPS -> {
+                setLayerVisibility(SHADOW_LAYER, false)
+                setLayerVisibility(FOREGROUND_LAYER, true)
+                setLayerVisibility(BACKGROUND_LAYER, true)
+                setLayerVisibility(ACCURACY_LAYER, false)
+                setLayerVisibility(BEARING_LAYER, false)
+            }
+        }
     }
-  }
 
-  private void setLocationPoint(Point locationPoint) {
-    JsonObject properties = locationFeature.properties();
-    if (properties != null) {
-      locationFeature = Feature.fromGeometry(locationPoint, properties);
-      refreshSource();
+    override fun styleAccuracy(
+        accuracyAlpha: Float,
+        accuracyColor: Int,
+    ) {
+        locationFeature.addNumberProperty(PROPERTY_ACCURACY_ALPHA, accuracyAlpha)
+        locationFeature.addStringProperty(PROPERTY_ACCURACY_COLOR, colorToRgbaString(accuracyColor))
+        refreshSource()
     }
-  }
 
-  private void setBearingProperty(@NonNull String propertyId, float bearing) {
-    locationFeature.addNumberProperty(propertyId, bearing);
-    refreshSource();
-  }
+    override fun setLatLng(latLng: LatLng) {
+        setLocationPoint(Point.fromLngLat(latLng.longitude, latLng.latitude))
+    }
 
-  private void updateAccuracyRadius(float accuracy) {
-    locationFeature.addNumberProperty(PROPERTY_ACCURACY_RADIUS, accuracy);
-    refreshSource();
-  }
+    override fun setGpsBearing(gpsBearing: Float) {
+        setBearingProperty(PROPERTY_GPS_BEARING, gpsBearing)
+    }
+
+    override fun setCompassBearing(compassBearing: Float) {
+        setBearingProperty(PROPERTY_COMPASS_BEARING, compassBearing)
+    }
+
+    override fun setAccuracyRadius(accuracy: Float) {
+        updateAccuracyRadius(accuracy)
+    }
+
+    override fun styleScaling(scaleExpression: Expression) {
+        for (layerId in layerSet) {
+            val layer = style.getLayer(layerId)
+            if (layer is SymbolLayer) {
+                layer.setProperties(
+                    iconSize(scaleExpression),
+                )
+            }
+        }
+    }
+
+    override fun setLocationStale(
+        isStale: Boolean,
+        renderMode: Int,
+    ) {
+        locationFeature.addBooleanProperty(PROPERTY_LOCATION_STALE, isStale)
+        refreshSource()
+        if (renderMode != RenderMode.GPS) {
+            setLayerVisibility(ACCURACY_LAYER, !isStale)
+        }
+    }
+
+    override fun updateIconIds(
+        foregroundIconString: String,
+        foregroundStaleIconString: String,
+        backgroundIconString: String,
+        backgroundStaleIconString: String,
+        bearingIconString: String,
+    ) {
+        locationFeature.addStringProperty(PROPERTY_FOREGROUND_ICON, foregroundIconString)
+        locationFeature.addStringProperty(PROPERTY_BACKGROUND_ICON, backgroundIconString)
+        locationFeature.addStringProperty(PROPERTY_FOREGROUND_STALE_ICON, foregroundStaleIconString)
+        locationFeature.addStringProperty(PROPERTY_BACKGROUND_STALE_ICON, backgroundStaleIconString)
+        locationFeature.addStringProperty(PROPERTY_BEARING_ICON, bearingIconString)
+        refreshSource()
+    }
+
+    override fun addBitmaps(
+        @RenderMode.Mode renderMode: Int,
+        shadowBitmap: Bitmap?,
+        backgroundBitmap: Bitmap?,
+        backgroundStaleBitmap: Bitmap?,
+        bearingBitmap: Bitmap?,
+        foregroundBitmap: Bitmap?,
+        foregroundStaleBitmap: Bitmap?,
+    ) {
+        updateBitmap(SHADOW_ICON, shadowBitmap)
+        updateBitmap(BACKGROUND_ICON, backgroundBitmap)
+        updateBitmap(BACKGROUND_STALE_ICON, backgroundStaleBitmap)
+        updateBitmap(BEARING_ICON, bearingBitmap)
+        updateBitmap(FOREGROUND_ICON, foregroundBitmap)
+        updateBitmap(FOREGROUND_STALE_ICON, foregroundStaleBitmap)
+    }
+
+    private fun updateBitmap(
+        name: String,
+        bitmap: Bitmap?,
+    ) {
+        if (bitmap == null) {
+            style.removeImage(name)
+        } else {
+            style.addImage(name, bitmap)
+        }
+    }
+
+    private fun updateForegroundOffset(tilt: Double) {
+        val foregroundJsonArray = JsonArray()
+        foregroundJsonArray.add(0f)
+        foregroundJsonArray.add((-0.05 * tilt).toFloat())
+        locationFeature.addProperty(PROPERTY_FOREGROUND_ICON_OFFSET, foregroundJsonArray)
+
+        val backgroundJsonArray = JsonArray()
+        backgroundJsonArray.add(0f)
+        backgroundJsonArray.add((0.05 * tilt).toFloat())
+        locationFeature.addProperty(PROPERTY_SHADOW_ICON_OFFSET, backgroundJsonArray)
+
+        refreshSource()
+    }
+
+    private fun updateForegroundBearing(bearing: Float) {
+        setBearingProperty(PROPERTY_GPS_BEARING, bearing)
+    }
+
+    private fun setLayerVisibility(
+        layerId: String,
+        visible: Boolean,
+    ) {
+        if (!style.isFullyLoaded) {
+            return
+        }
+
+        val layer = style.getLayer(layerId)
+        if (layer != null) {
+            val targetVisibility = if (visible) VISIBLE else NONE
+            if (layer.visibility.value != targetVisibility) {
+                layer.setProperties(visibility(targetVisibility))
+            }
+        }
+    }
+
+    /**
+     * Adjust the visibility of the pulsing LocationComponent circle.
+     */
+    override fun adjustPulsingCircleLayerVisibility(visible: Boolean) {
+        setLayerVisibility(PULSING_CIRCLE_LAYER, visible)
+    }
+
+    /**
+     * Adjust the the pulsing LocationComponent circle based on the set options.
+     */
+    override fun stylePulsingCircle(options: LocationComponentOptions) {
+        val pulsingCircleLayer = style.getLayer(PULSING_CIRCLE_LAYER)
+        if (pulsingCircleLayer != null) {
+            setLayerVisibility(PULSING_CIRCLE_LAYER, true)
+            pulsingCircleLayer.setProperties(
+                circleRadius(get(PROPERTY_PULSING_RADIUS)),
+                circleColor(options.pulseColor()!!),
+                circleStrokeColor(options.pulseColor()!!),
+                circleOpacity(get(PROPERTY_PULSING_OPACITY)),
+            )
+        }
+    }
+
+    /**
+     * Adjust the visual appearance of the pulsing LocationComponent circle.
+     */
+    override fun updatePulsingUi(
+        radius: Float,
+        opacity: Float?,
+    ) {
+        locationFeature.addNumberProperty(PROPERTY_PULSING_RADIUS, radius)
+        if (opacity != null) {
+            locationFeature.addNumberProperty(PROPERTY_PULSING_OPACITY, opacity)
+        }
+        refreshSource()
+    }
+
+    private fun addSymbolLayer(
+        layerId: String,
+        beforeLayerId: String,
+    ) {
+        val layer = layerSourceProvider.generateLayer(layerId)
+        addLayerToMap(layer, beforeLayerId)
+    }
+
+    private fun addAccuracyLayer() {
+        val accuracyLayer = layerSourceProvider.generateAccuracyLayer()
+        addLayerToMap(accuracyLayer, BACKGROUND_LAYER)
+    }
+
+    /**
+     * Add the pulsing LocationComponent circle to the map for future use, if need be.
+     */
+    private fun addPulsingCircleLayerToMap() {
+        val pulsingCircleLayer = layerSourceProvider.generatePulsingCircleLayer()
+        addLayerToMap(pulsingCircleLayer, ACCURACY_LAYER)
+    }
+
+    private fun addLayerToMap(
+        layer: Layer,
+        idBelowLayer: String,
+    ) {
+        style.addLayerBelow(layer, idBelowLayer)
+        layerSet.add(layer.id)
+    }
+
+    private fun addLocationSource() {
+        locationSource = layerSourceProvider.generateSource(locationFeature, true)
+        style.addSource(locationSource)
+    }
+
+    private fun refreshSource() {
+        // prevents exception when other style has been set with an update in flight
+        // https://github.com/maplibre/maplibre-native/issues/3348
+        if (!style.isFullyLoaded) {
+            return
+        }
+        val source = style.getSourceAs<GeoJsonSource>(LOCATION_SOURCE)
+        if (source != null) {
+            locationSource.setGeoJson(locationFeature)
+        }
+    }
+
+    private fun setLocationPoint(locationPoint: Point) {
+        val properties = locationFeature.properties()
+        if (properties != null) {
+            locationFeature = Feature.fromGeometry(locationPoint, properties)
+            refreshSource()
+        }
+    }
+
+    private fun setBearingProperty(
+        propertyId: String,
+        bearing: Float,
+    ) {
+        locationFeature.addNumberProperty(propertyId, bearing)
+        refreshSource()
+    }
+
+    private fun updateAccuracyRadius(accuracy: Float) {
+        locationFeature.addNumberProperty(PROPERTY_ACCURACY_RADIUS, accuracy)
+        refreshSource()
+    }
 }

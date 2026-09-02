@@ -1,13 +1,8 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.RectF;
+import android.graphics.RectF
+import org.maplibre.android.annotations.Annotation
 
-import org.maplibre.android.annotations.Annotation;
-
-import java.util.List;
-
-interface ShapeAnnotations {
-
-  List<Annotation> obtainAllIn(RectF rectF);
-
+internal interface ShapeAnnotations {
+    fun obtainAllIn(rectF: RectF): List<Annotation>
 }

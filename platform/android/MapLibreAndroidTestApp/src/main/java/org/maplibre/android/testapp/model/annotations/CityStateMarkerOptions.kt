@@ -9,6 +9,7 @@ import org.maplibre.android.geometry.LatLng
 
 class CityStateMarkerOptions : BaseMarkerOptions<CityStateMarker?, CityStateMarkerOptions?> {
     private var infoWindowBackgroundColor: String? = null
+
     fun infoWindowBackground(color: String?): CityStateMarkerOptions {
         infoWindowBackgroundColor = color
         return getThis()
@@ -26,23 +27,21 @@ class CityStateMarkerOptions : BaseMarkerOptions<CityStateMarker?, CityStateMark
         title(`in`.readString())
     }
 
-    override fun getThis(): CityStateMarkerOptions {
-        return this
-    }
+    override fun getThis(): CityStateMarkerOptions = this
 
-    override fun getMarker(): CityStateMarker? {
-        return infoWindowBackgroundColor?.let { CityStateMarker(this, it) }
-    }
+    override val marker: CityStateMarker?
+        get() = infoWindowBackgroundColor?.let { CityStateMarker(this, it) }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
-    override fun writeToParcel(out: Parcel, flags: Int) {
+    override fun writeToParcel(
+        out: Parcel,
+        flags: Int,
+    ) {
         out.writeParcelable(position, flags)
         out.writeString(snippet)
-        out.writeString(icon.id)
-        out.writeParcelable(icon.bitmap, flags)
+        out.writeString(icon!!.id)
+        out.writeParcelable(icon!!.bitmap, flags)
         out.writeString(title)
     }
 
@@ -50,13 +49,9 @@ class CityStateMarkerOptions : BaseMarkerOptions<CityStateMarker?, CityStateMark
         @JvmField
         val CREATOR: Parcelable.Creator<CityStateMarkerOptions?> =
             object : Parcelable.Creator<CityStateMarkerOptions?> {
-                override fun createFromParcel(`in`: Parcel): CityStateMarkerOptions {
-                    return CityStateMarkerOptions(`in`)
-                }
+                override fun createFromParcel(`in`: Parcel): CityStateMarkerOptions = CityStateMarkerOptions(`in`)
 
-                override fun newArray(size: Int): Array<CityStateMarkerOptions?> {
-                    return arrayOfNulls(size)
-                }
+                override fun newArray(size: Int): Array<CityStateMarkerOptions?> = arrayOfNulls(size)
             }
     }
 }

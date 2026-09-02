@@ -1,535 +1,452 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
-import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.layers.PropertyValue;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.style.layers.Layer
+import org.maplibre.android.style.layers.PropertyValue
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * 
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-location-indicator">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-location-indicator)
  */
 @UiThread
-class LocationIndicatorLayer extends Layer {
+internal class LocationIndicatorLayer : Layer {
 
-  /**
-   * Creates a LocationIndicatorLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  LocationIndicatorLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a LocationIndicatorLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a LocationIndicatorLayer.
-   *
-   * @param layerId the id of the layer
-   */
-  public LocationIndicatorLayer(String layerId) {
-    super();
-    initialize(layerId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId);
-
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public LocationIndicatorLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
-
-  // Property getters
-
-  /**
-   * Get the TopImage property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTopImage() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("top-image", nativeGetTopImage());
-  }
-
-  /**
-   * Get the BearingImage property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getBearingImage() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("bearing-image", nativeGetBearingImage());
-  }
-
-  /**
-   * Get the ShadowImage property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getShadowImage() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("shadow-image", nativeGetShadowImage());
-  }
-
-  /**
-   * Get the PerspectiveCompensation property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getPerspectiveCompensation() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("perspective-compensation", nativeGetPerspectiveCompensation());
-  }
-
-  /**
-   * Get the ImageTiltDisplacement property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getImageTiltDisplacement() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("image-tilt-displacement", nativeGetImageTiltDisplacement());
-  }
-
-  /**
-   * Get the Bearing property
-   *
-   * @return property wrapper value around Double
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Double> getBearing() {
-    checkThread();
-    return (PropertyValue<Double>) new PropertyValue("bearing", nativeGetBearing());
-  }
-
-  /**
-   * Get the Bearing property transition options
-   *
-   * @return transition options for Double
-   */
-  @NonNull
-  public TransitionOptions getBearingTransition() {
-    checkThread();
-    return nativeGetBearingTransition();
-  }
-
-  /**
-   * Set the Bearing property transition options
-   *
-   * @param options transition options for Double
-   */
-  public void setBearingTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetBearingTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the Location property
-   *
-   * @return property wrapper value around Double[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Double[]> getLocation() {
-    checkThread();
-    return (PropertyValue<Double[]>) new PropertyValue("location", nativeGetLocation());
-  }
-
-  /**
-   * Get the Location property transition options
-   *
-   * @return transition options for Double[]
-   */
-  @NonNull
-  public TransitionOptions getLocationTransition() {
-    checkThread();
-    return nativeGetLocationTransition();
-  }
-
-  /**
-   * Set the Location property transition options
-   *
-   * @param options transition options for Double[]
-   */
-  public void setLocationTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetLocationTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the AccuracyRadius property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getAccuracyRadius() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("accuracy-radius", nativeGetAccuracyRadius());
-  }
-
-  /**
-   * Get the AccuracyRadius property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getAccuracyRadiusTransition() {
-    checkThread();
-    return nativeGetAccuracyRadiusTransition();
-  }
-
-  /**
-   * Set the AccuracyRadius property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setAccuracyRadiusTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetAccuracyRadiusTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TopImageSize property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTopImageSize() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("top-image-size", nativeGetTopImageSize());
-  }
-
-  /**
-   * Get the TopImageSize property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getTopImageSizeTransition() {
-    checkThread();
-    return nativeGetTopImageSizeTransition();
-  }
-
-  /**
-   * Set the TopImageSize property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setTopImageSizeTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTopImageSizeTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the BearingImageSize property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getBearingImageSize() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("bearing-image-size", nativeGetBearingImageSize());
-  }
-
-  /**
-   * Get the BearingImageSize property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getBearingImageSizeTransition() {
-    checkThread();
-    return nativeGetBearingImageSizeTransition();
-  }
-
-  /**
-   * Set the BearingImageSize property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setBearingImageSizeTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetBearingImageSizeTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the ShadowImageSize property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getShadowImageSize() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("shadow-image-size", nativeGetShadowImageSize());
-  }
-
-  /**
-   * Get the ShadowImageSize property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getShadowImageSizeTransition() {
-    checkThread();
-    return nativeGetShadowImageSizeTransition();
-  }
-
-  /**
-   * Set the ShadowImageSize property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setShadowImageSizeTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetShadowImageSizeTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the AccuracyRadiusColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getAccuracyRadiusColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("accuracy-radius-color", nativeGetAccuracyRadiusColor());
-  }
-
-  /**
-   * The color for drawing the accuracy radius, as a circle. To adjust transparency, set the alpha component of the color accordingly.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getAccuracyRadiusColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getAccuracyRadiusColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("accuracy-radius-color was set as a Function");
+    /**
+     * Creates a LocationIndicatorLayer.
+     *
+     * @param layerId the id of the layer
+     */
+    constructor(layerId: String?) : super() {
+        initialize(layerId)
     }
-  }
 
-  /**
-   * Get the AccuracyRadiusColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getAccuracyRadiusColorTransition() {
-    checkThread();
-    return nativeGetAccuracyRadiusColorTransition();
-  }
+    @Keep
+    protected external fun initialize(layerId: String?)
 
-  /**
-   * Set the AccuracyRadiusColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setAccuracyRadiusColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetAccuracyRadiusColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the AccuracyRadiusBorderColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getAccuracyRadiusBorderColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("accuracy-radius-border-color", nativeGetAccuracyRadiusBorderColor());
-  }
-
-  /**
-   * The color for drawing the accuracy radius border. To adjust transparency, set the alpha component of the color accordingly.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getAccuracyRadiusBorderColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getAccuracyRadiusBorderColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("accuracy-radius-border-color was set as a Function");
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): LocationIndicatorLayer {
+        setProperties(*properties)
+        return this
     }
-  }
 
-  /**
-   * Get the AccuracyRadiusBorderColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getAccuracyRadiusBorderColorTransition() {
-    checkThread();
-    return nativeGetAccuracyRadiusBorderColorTransition();
-  }
+    // Property getters
 
-  /**
-   * Set the AccuracyRadiusBorderColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setAccuracyRadiusBorderColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetAccuracyRadiusBorderColorTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Get the TopImage property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val topImage: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("top-image", nativeGetTopImage())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetTopImage();
+    /**
+     * Get the BearingImage property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val bearingImage: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("bearing-image", nativeGetBearingImage())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetBearingImage();
+    /**
+     * Get the ShadowImage property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val shadowImage: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("shadow-image", nativeGetShadowImage())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetShadowImage();
+    /**
+     * Get the PerspectiveCompensation property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val perspectiveCompensation: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("perspective-compensation", nativeGetPerspectiveCompensation())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetPerspectiveCompensation();
+    /**
+     * Get the ImageTiltDisplacement property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val imageTiltDisplacement: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("image-tilt-displacement", nativeGetImageTiltDisplacement())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetImageTiltDisplacement();
+    /**
+     * Get the Bearing property
+     *
+     * @return property wrapper value around Double
+     */
+    @Suppress("UNCHECKED_CAST")
+    val bearing: PropertyValue<Double>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("bearing", nativeGetBearing())
+            return value as PropertyValue<Double>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetBearing();
+    /**
+     * The Bearing property transition options
+     */
+    var bearingTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetBearingTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetBearingTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetBearingTransition();
+    /**
+     * Get the Location property
+     *
+     * @return property wrapper value around Array<Double>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val location: PropertyValue<Array<Double>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("location", nativeGetLocation())
+            return value as PropertyValue<Array<Double>>
+        }
 
-  @Keep
-  private native void nativeSetBearingTransition(long duration, long delay);
+    /**
+     * The Location property transition options
+     */
+    var locationTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetLocationTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetLocationTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetLocation();
+    /**
+     * Get the AccuracyRadius property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val accuracyRadius: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("accuracy-radius", nativeGetAccuracyRadius())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetLocationTransition();
+    /**
+     * The AccuracyRadius property transition options
+     */
+    var accuracyRadiusTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetAccuracyRadiusTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetAccuracyRadiusTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetLocationTransition(long duration, long delay);
+    /**
+     * Get the TopImageSize property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val topImageSize: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("top-image-size", nativeGetTopImageSize())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetAccuracyRadius();
+    /**
+     * The TopImageSize property transition options
+     */
+    var topImageSizeTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTopImageSizeTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTopImageSizeTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetAccuracyRadiusTransition();
+    /**
+     * Get the BearingImageSize property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val bearingImageSize: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("bearing-image-size", nativeGetBearingImageSize())
+            return value as PropertyValue<Float>
+        }
 
-  @Keep
-  private native void nativeSetAccuracyRadiusTransition(long duration, long delay);
+    /**
+     * The BearingImageSize property transition options
+     */
+    var bearingImageSizeTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetBearingImageSizeTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetBearingImageSizeTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetTopImageSize();
+    /**
+     * Get the ShadowImageSize property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val shadowImageSize: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("shadow-image-size", nativeGetShadowImageSize())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTopImageSizeTransition();
+    /**
+     * The ShadowImageSize property transition options
+     */
+    var shadowImageSizeTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetShadowImageSizeTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetShadowImageSizeTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetTopImageSizeTransition(long duration, long delay);
+    /**
+     * Get the AccuracyRadiusColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val accuracyRadiusColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("accuracy-radius-color", nativeGetAccuracyRadiusColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetBearingImageSize();
+    /**
+     * The color for drawing the accuracy radius, as a circle. To adjust transparency, set the alpha component of the color accordingly.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getAccuracyRadiusColorAsInt(): Int {
+        checkThread()
+        val value = accuracyRadiusColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("accuracy-radius-color was set as a Function")
+        }
+    }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetBearingImageSizeTransition();
+    /**
+     * The AccuracyRadiusColor property transition options
+     */
+    var accuracyRadiusColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetAccuracyRadiusColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetAccuracyRadiusColorTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetBearingImageSizeTransition(long duration, long delay);
+    /**
+     * Get the AccuracyRadiusBorderColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val accuracyRadiusBorderColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("accuracy-radius-border-color", nativeGetAccuracyRadiusBorderColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetShadowImageSize();
+    /**
+     * The color for drawing the accuracy radius border. To adjust transparency, set the alpha component of the color accordingly.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getAccuracyRadiusBorderColorAsInt(): Int {
+        checkThread()
+        val value = accuracyRadiusBorderColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("accuracy-radius-border-color was set as a Function")
+        }
+    }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetShadowImageSizeTransition();
+    /**
+     * The AccuracyRadiusBorderColor property transition options
+     */
+    var accuracyRadiusBorderColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetAccuracyRadiusBorderColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetAccuracyRadiusBorderColorTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetShadowImageSizeTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetTopImage(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetAccuracyRadiusColor();
+    @Keep
+    private external fun nativeGetBearingImage(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetAccuracyRadiusColorTransition();
+    @Keep
+    private external fun nativeGetShadowImage(): Any
 
-  @Keep
-  private native void nativeSetAccuracyRadiusColorTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetPerspectiveCompensation(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetAccuracyRadiusBorderColor();
+    @Keep
+    private external fun nativeGetImageTiltDisplacement(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetAccuracyRadiusBorderColorTransition();
+    @Keep
+    private external fun nativeGetBearing(): Any
 
-  @Keep
-  private native void nativeSetAccuracyRadiusBorderColorTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetBearingTransition(): TransitionOptions
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    @Keep
+    private external fun nativeSetBearingTransition(duration: Long, delay: Long)
 
+    @Keep
+    private external fun nativeGetLocation(): Any
+
+    @Keep
+    private external fun nativeGetLocationTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetLocationTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetAccuracyRadius(): Any
+
+    @Keep
+    private external fun nativeGetAccuracyRadiusTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetAccuracyRadiusTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTopImageSize(): Any
+
+    @Keep
+    private external fun nativeGetTopImageSizeTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTopImageSizeTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetBearingImageSize(): Any
+
+    @Keep
+    private external fun nativeGetBearingImageSizeTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetBearingImageSizeTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetShadowImageSize(): Any
+
+    @Keep
+    private external fun nativeGetShadowImageSizeTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetShadowImageSizeTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetAccuracyRadiusColor(): Any
+
+    @Keep
+    private external fun nativeGetAccuracyRadiusColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetAccuracyRadiusColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetAccuracyRadiusBorderColor(): Any
+
+    @Keep
+    private external fun nativeGetAccuracyRadiusBorderColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetAccuracyRadiusBorderColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

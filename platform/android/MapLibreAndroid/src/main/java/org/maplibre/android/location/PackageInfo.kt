@@ -1,4 +1,4 @@
 /**
  * Contains the MapLibre Location layer component.
  */
-package org.maplibre.android.location;
+package org.maplibre.android.location

@@ -2,6 +2,10 @@ package org.maplibre.android.testapp.style
 
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.isRoot
+import org.junit.Assert
+import org.junit.Assert.*
+import org.junit.Ignore
+import org.junit.Test
 import org.maplibre.android.style.sources.CustomGeometrySource.Companion.THREAD_POOL_LIMIT
 import org.maplibre.android.style.sources.CustomGeometrySource.Companion.THREAD_PREFIX
 import org.maplibre.android.testapp.action.MapLibreMapAction.invoke
@@ -13,13 +17,8 @@ import org.maplibre.android.testapp.activity.style.GridSourceActivity
 import org.maplibre.android.testapp.activity.style.GridSourceActivity.Companion.ID_GRID_LAYER
 import org.maplibre.android.testapp.activity.style.GridSourceActivity.Companion.ID_GRID_SOURCE
 import org.maplibre.android.testapp.utils.TestingAsyncUtils
-import org.junit.Assert
-import org.junit.Assert.*
-import org.junit.Ignore
-import org.junit.Test
 
 class CustomGeometrySourceTest : BaseTest() {
-
     override fun getActivityClass(): Class<*> = GridSourceActivity::class.java
 
     @Test
@@ -32,9 +31,12 @@ class CustomGeometrySourceTest : BaseTest() {
         WaitAction.invoke(2000)
         Assert.assertFalse(
             "Threads should be shutdown when the source is destroyed.",
-            Thread.getAllStackTraces().keys.filter {
-                it.name.startsWith(THREAD_PREFIX)
-            }.count() > THREAD_POOL_LIMIT
+            Thread
+                .getAllStackTraces()
+                .keys
+                .filter {
+                    it.name.startsWith(THREAD_PREFIX)
+                }.count() > THREAD_POOL_LIMIT,
         )
     }
 
@@ -48,9 +50,12 @@ class CustomGeometrySourceTest : BaseTest() {
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             Assert.assertTrue(
                 "There should be no threads running when the source is removed.",
-                Thread.getAllStackTraces().keys.filter {
-                    it.name.startsWith(THREAD_PREFIX)
-                }.count() == 0
+                Thread
+                    .getAllStackTraces()
+                    .keys
+                    .filter {
+                        it.name.startsWith(THREAD_PREFIX)
+                    }.count() == 0,
             )
         }
     }
@@ -69,9 +74,12 @@ class CustomGeometrySourceTest : BaseTest() {
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             Assert.assertTrue(
                 "Threads should be restarted when the source is re-added to the map.",
-                Thread.getAllStackTraces().keys.filter {
-                    it.name.startsWith(THREAD_PREFIX)
-                }.count() == THREAD_POOL_LIMIT
+                Thread
+                    .getAllStackTraces()
+                    .keys
+                    .filter {
+                        it.name.startsWith(THREAD_PREFIX)
+                    }.count() == THREAD_POOL_LIMIT,
             )
         }
     }
@@ -97,9 +105,9 @@ class CustomGeometrySourceTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { uiController, maplibreMap ->
             maplibreMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
-                assertFalse(it.isVolatile)
+                assertFalse(it.isVolatile!!)
                 it.isVolatile = true
-                assertTrue(it.isVolatile)
+                assertTrue(it.isVolatile!!)
             }
         }
     }
@@ -109,9 +117,9 @@ class CustomGeometrySourceTest : BaseTest() {
         validateTestSetup()
         invoke(maplibreMap) { uiController, maplibreMap ->
             maplibreMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
-                assertEquals(0, it.minimumTileUpdateInterval)
+                assertEquals(0, it.minimumTileUpdateInterval!!)
                 it.minimumTileUpdateInterval = 1000
-                assertEquals(1000, it.minimumTileUpdateInterval)
+                assertEquals(1000, it.minimumTileUpdateInterval!!)
             }
         }
     }

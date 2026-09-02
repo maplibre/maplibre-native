@@ -1,28 +1,31 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.RectF;
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.annotations.BaseMarkerOptions;
-import org.maplibre.android.annotations.Marker;
-
-import java.util.List;
+import android.graphics.RectF
+import org.maplibre.android.annotations.BaseMarkerOptions
+import org.maplibre.android.annotations.Marker
 
 /**
- * Interface that defines convenient methods for working with a {@link Marker}'s collection.
+ * Interface that defines convenient methods for working with a [Marker]'s collection.
  */
-interface Markers {
-  Marker addBy(@NonNull BaseMarkerOptions markerOptions, @NonNull MapLibreMap maplibreMap);
+internal interface Markers {
+    fun addBy(
+        markerOptions: BaseMarkerOptions<*, *>,
+        maplibreMap: MapLibreMap,
+    ): Marker
 
-  List<Marker> addBy(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MapLibreMap maplibreMap);
+    fun addBy(
+        markerOptionsList: List<BaseMarkerOptions<*, *>>,
+        maplibreMap: MapLibreMap,
+    ): List<Marker>
 
-  void update(@NonNull Marker updatedMarker, @NonNull MapLibreMap maplibreMap);
+    fun update(
+        updatedMarker: Marker,
+        maplibreMap: MapLibreMap,
+    )
 
-  List<Marker> obtainAll();
+    fun obtainAll(): List<Marker>
 
-  @NonNull
-  List<Marker> obtainAllIn(@NonNull RectF rectangle);
+    fun obtainAllIn(rectangle: RectF): List<Marker>
 
-  void reload();
+    fun reload()
 }

@@ -1,25 +1,20 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.annotations.Annotation;
-
-import java.util.List;
+import org.maplibre.android.annotations.Annotation
 
 /**
- * Interface that defines convenient methods for working with a {@link Annotation}'s collection.
+ * Interface that defines convenient methods for working with a [Annotation]'s collection.
  */
-interface Annotations {
-  Annotation obtainBy(long id);
+internal interface Annotations {
+    fun obtainBy(id: Long): Annotation?
 
-  List<Annotation> obtainAll();
+    fun obtainAll(): List<Annotation>
 
-  void removeBy(long id);
+    fun removeBy(id: Long)
 
-  void removeBy(@NonNull Annotation annotation);
+    fun removeBy(annotation: Annotation)
 
-  void removeBy(@NonNull List<? extends Annotation> annotationList);
+    fun removeBy(annotationList: List<Annotation>)
 
-  void removeAll();
+    fun removeAll()
 }

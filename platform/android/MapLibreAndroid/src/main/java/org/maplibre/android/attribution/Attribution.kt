@@ -1,68 +1,42 @@
-package org.maplibre.android.attribution;
+package org.maplibre.android.attribution
 
-import androidx.annotation.Nullable;
+class Attribution internal constructor(
+    val title: String,
+    val url: String,
+) {
+    val titleAbbreviated: String
+        get() = if (title == OPENSTREETMAP) OPENSTREETMAP_ABBR else title
 
-import java.util.ArrayList;
-import java.util.List;
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
 
-public class Attribution {
+        other as Attribution
 
-  private static final String OPENSTREETMAP = "OpenStreetMap";
-  private static final String OPENSTREETMAP_ABBR = "OSM";
-  static final String MAPBOX_URL = "https://www.mapbox.com/about/maps/";
-  static final List<String> IMPROVE_MAP_URLS = new ArrayList<>();
-
-  static {
-    // Using a List makes URL backwards compatible
-    IMPROVE_MAP_URLS.add("https://www.mapbox.com/feedback/");
-    IMPROVE_MAP_URLS.add("https://www.mapbox.com/map-feedback/");
-    IMPROVE_MAP_URLS.add("https://apps.mapbox.com/feedback/");
-  }
-
-  private String title;
-  private String url;
-
-  Attribution(String title, String url) {
-    this.title = title;
-    this.url = url;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public String getTitleAbbreviated() {
-    if (title.equals(OPENSTREETMAP)) {
-      return OPENSTREETMAP_ABBR;
-    }
-    return title;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  @Override
-  public boolean equals(@Nullable Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+        return title == other.title && url == other.url
     }
 
-    Attribution that = (Attribution) o;
-
-    if (title != null ? !title.equals(that.title) : that.title != null) {
-      return false;
+    override fun hashCode(): Int {
+        var result = title.hashCode()
+        result = 31 * result + url.hashCode()
+        return result
     }
-    return url != null ? url.equals(that.url) : that.url == null;
-  }
 
-  @Override
-  public int hashCode() {
-    int result = title != null ? title.hashCode() : 0;
-    result = 31 * result + (url != null ? url.hashCode() : 0);
-    return result;
-  }
+    companion object {
+        private const val OPENSTREETMAP = "OpenStreetMap"
+        private const val OPENSTREETMAP_ABBR = "OSM"
+        internal const val MAPBOX_URL = "https://www.mapbox.com/about/maps/"
+
+        // Using a List makes URL backwards compatible
+        internal val IMPROVE_MAP_URLS: List<String> =
+            listOf(
+                "https://www.mapbox.com/feedback/",
+                "https://www.mapbox.com/map-feedback/",
+                "https://apps.mapbox.com/feedback/",
+            )
+    }
 }

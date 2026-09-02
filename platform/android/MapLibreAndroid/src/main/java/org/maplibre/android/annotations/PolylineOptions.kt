@@ -1,251 +1,217 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.maplibre.android.geometry.LatLng;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.os.Parcel
+import android.os.Parcelable
+import org.maplibre.android.geometry.LatLng
 
 /**
- * Builder for composing {@link Polyline} objects.
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/maplibre/maplibre-plugins-android">
- *   MapLibre Annotation Plugin</a> instead
+ * Builder for composing [Polyline] objects.
  */
-@Deprecated
-public final class PolylineOptions implements Parcelable {
+@Deprecated(
+    "As of 7.0.0, use " +
+        "[MapLibre Annotation Plugin](https://github.com/maplibre/maplibre-plugins-android) instead",
+)
+class PolylineOptions : Parcelable {
+    /**
+     * Do not use this property. Used internally by the SDK.
+     */
+    val polyline: Polyline = Polyline()
 
+    /**
+     * Defines options for a polyline.
+     */
+    constructor()
 
-  public static final Parcelable.Creator<PolylineOptions> CREATOR =
-    new Parcelable.Creator<PolylineOptions>() {
-      public PolylineOptions createFromParcel(@NonNull Parcel in) {
-        return new PolylineOptions(in);
-      }
-
-      public PolylineOptions[] newArray(int size) {
-        return new PolylineOptions[size];
-      }
-    };
-
-  private PolylineOptions(Parcel in) {
-    polyline = new Polyline();
-    ArrayList<LatLng> pointsList = new ArrayList<>();
-    in.readList(pointsList, LatLng.class.getClassLoader());
-    addAll(pointsList);
-    alpha(in.readFloat());
-    color(in.readInt());
-    width(in.readFloat());
-  }
-
-  /**
-   * Describe the kinds of special objects contained in this Parcelable's
-   * marshalled representation.
-   *
-   * @return integer 0.
-   */
-  @Override
-  public int describeContents() {
-    return 0;
-  }
-
-  /**
-   * Flatten this object in to a Parcel.
-   *
-   * @param out   The Parcel in which the object should be written.
-   * @param flags Additional flags about how the object should be written. May be 0 or
-   *              {@link #PARCELABLE_WRITE_RETURN_VALUE}.
-   */
-  @Override
-  public void writeToParcel(Parcel out, int flags) {
-    out.writeList(getPoints());
-    out.writeFloat(getAlpha());
-    out.writeInt(getColor());
-    out.writeFloat(getWidth());
-  }
-
-  private Polyline polyline;
-
-  /**
-   * Defines options for a polyline.
-   */
-  public PolylineOptions() {
-    polyline = new Polyline();
-  }
-
-  /**
-   * Adds a vertex to the end of the polyline being built.
-   *
-   * @param point {@link LatLng} point to be added to polyline geometry.
-   * @return This {@link PolylineOptions} object with the given point on the end.
-   */
-  @NonNull
-  public PolylineOptions add(LatLng point) {
-    polyline.addPoint(point);
-    return this;
-  }
-
-  /**
-   * Adds vertices to the end of the polyline being built.
-   *
-   * @param points {@link LatLng} points defining the polyline geometry.
-   * @return This {@link PolylineOptions} object with the given point on the end.
-   */
-  @NonNull
-  public PolylineOptions add(LatLng... points) {
-    for (LatLng point : points) {
-      add(point);
-    }
-    return this;
-  }
-
-  /**
-   * Adds vertices to the end of the polyline being built.
-   *
-   * @param points {@link Iterable} list made up of {@link LatLng} points defining the polyline
-   *               geometry
-   * @return This {@link PolylineOptions} object with the given points on the end.
-   */
-  @NonNull
-  public PolylineOptions addAll(Iterable<LatLng> points) {
-    for (LatLng point : points) {
-      add(point);
-    }
-    return this;
-  }
-
-  /**
-   * Set the alpha value of the polyline.
-   *
-   * @param alpha float value between 0 (not visible) and 1.
-   * @return This {@link PolylineOptions} object with the given polyline alpha value.
-   */
-  @NonNull
-  public PolylineOptions alpha(float alpha) {
-    polyline.setAlpha(alpha);
-    return this;
-  }
-
-  /**
-   * Gets the alpha set for this {@link PolylineOptions} object.
-   *
-   * @return float value between 0 and 1 defining the alpha.
-   */
-  public float getAlpha() {
-    return polyline.getAlpha();
-  }
-
-  /**
-   * Sets the color of the polyline as a 32-bit ARGB color. The default color is black.
-   *
-   * @param color 32-bit ARGB color.
-   * @return This {@link PolylineOptions} object with a new color set.
-   */
-  @NonNull
-  public PolylineOptions color(int color) {
-    polyline.setColor(color);
-    return this;
-  }
-
-  /**
-   * Gets the color set for this {@link PolylineOptions} object.
-   *
-   * @return The color of the polyline in ARGB format.
-   */
-  public int getColor() {
-    return polyline.getColor();
-  }
-
-  /**
-   * Do not use this method. Used internally by the SDK.
-   *
-   * @return PolyLine The polyline build by this class.
-   */
-  public Polyline getPolyline() {
-    return polyline;
-  }
-
-  /**
-   * Gets the width set for this {@link PolylineOptions} object.
-   *
-   * @return The width of the polyline in screen pixels.
-   */
-  public float getWidth() {
-    return polyline.getWidth();
-  }
-
-  /**
-   * Sets the width of the polyline in screen pixels. The default is 10.
-   *
-   * @param width float value defining width of polyline using unit pixels.
-   * @return This {@link PolylineOptions} object with a new width set.
-   */
-  @NonNull
-  public PolylineOptions width(float width) {
-    polyline.setWidth(width);
-    return this;
-  }
-
-  /**
-   * Gets the points set for this {@link PolylineOptions} object.
-   *
-   * @return a {@link List} of {@link LatLng}s specifying the vertices of the polyline.
-   */
-  public List<LatLng> getPoints() {
-    // the getter gives us a copy, which is the safe thing to do...
-    return polyline.getPoints();
-  }
-
-  /**
-   * Compares this {@link PolylineOptions} object with another {@link PolylineOptions} and
-   * determines if their color, alpha, width, and vertices match.
-   *
-   * @param o Another {@link PolylineOptions} to compare with this object.
-   * @return True if color, alpha, width, and vertices match this {@link PolylineOptions} object.
-   * Else, false.
-   */
-  @Override
-  public boolean equals(@Nullable Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    @Suppress("DEPRECATION")
+    private constructor(parcel: Parcel) {
+        val pointsList = ArrayList<Any?>()
+        parcel.readList(pointsList, LatLng::class.java.classLoader)
+        addAll(pointsList.map { it as LatLng })
+        alpha(parcel.readFloat())
+        color(parcel.readInt())
+        width(parcel.readFloat())
     }
 
-    PolylineOptions polyline = (PolylineOptions) o;
+    /**
+     * Describe the kinds of special objects contained in this Parcelable's
+     * marshalled representation.
+     *
+     * @return integer 0.
+     */
+    override fun describeContents(): Int = 0
 
-    if (Float.compare(polyline.getAlpha(), getAlpha()) != 0) {
-      return false;
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * @param out   The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written. May be 0 or
+     *              `PARCELABLE_WRITE_RETURN_VALUE`.
+     */
+    override fun writeToParcel(
+        out: Parcel,
+        flags: Int,
+    ) {
+        out.writeList(getPoints())
+        out.writeFloat(getAlpha())
+        out.writeInt(getColor())
+        out.writeFloat(getWidth())
     }
-    if (getColor() != polyline.getColor()) {
-      return false;
-    }
-    if (Float.compare(polyline.getWidth(), getWidth()) != 0) {
-      return false;
-    }
-    return !(getPoints() != null ? !getPoints().equals(polyline.getPoints()) : polyline.getPoints() != null);
-  }
 
-  /**
-   * Gives an integer which can be used as the bucket number for storing elements of the set/map.
-   * This bucket number is the address of the element inside the set/map. There's no guarantee
-   * that this hash value will be consistent between different Java implementations, or even
-   * between different execution runs of the same program.
-   *
-   * @return integer value you can use for storing element.
-   */
-  @Override
-  public int hashCode() {
-    int result = 1;
-    result = 31 * result + (getAlpha() != +0.0f ? Float.floatToIntBits(getAlpha()) : 0);
-    result = 31 * result + getColor();
-    result = 31 * result + (getWidth() != +0.0f ? Float.floatToIntBits(getWidth()) : 0);
-    result = 31 * result + (getPoints() != null ? getPoints().hashCode() : 0);
-    return result;
-  }
+    /**
+     * Adds a vertex to the end of the polyline being built.
+     *
+     * @param point [LatLng] point to be added to polyline geometry.
+     * @return This [PolylineOptions] object with the given point on the end.
+     */
+    fun add(point: LatLng): PolylineOptions {
+        polyline.addPoint(point)
+        return this
+    }
+
+    /**
+     * Adds vertices to the end of the polyline being built.
+     *
+     * @param points [LatLng] points defining the polyline geometry.
+     * @return This [PolylineOptions] object with the given point on the end.
+     */
+    fun add(vararg points: LatLng): PolylineOptions {
+        for (point in points) {
+            add(point)
+        }
+        return this
+    }
+
+    /**
+     * Adds vertices to the end of the polyline being built.
+     *
+     * @param points [Iterable] list made up of [LatLng] points defining the polyline geometry
+     * @return This [PolylineOptions] object with the given points on the end.
+     */
+    fun addAll(points: Iterable<LatLng>): PolylineOptions {
+        for (point in points) {
+            add(point)
+        }
+        return this
+    }
+
+    /**
+     * Set the alpha value of the polyline.
+     *
+     * @param alpha float value between 0 (not visible) and 1.
+     * @return This [PolylineOptions] object with the given polyline alpha value.
+     */
+    fun alpha(alpha: Float): PolylineOptions {
+        polyline.alpha = alpha
+        return this
+    }
+
+    /**
+     * Gets the alpha set for this [PolylineOptions] object.
+     *
+     * @return float value between 0 and 1 defining the alpha.
+     */
+    fun getAlpha(): Float = polyline.alpha
+
+    /**
+     * Sets the color of the polyline as a 32-bit ARGB color. The default color is black.
+     *
+     * @param color 32-bit ARGB color.
+     * @return This [PolylineOptions] object with a new color set.
+     */
+    fun color(color: Int): PolylineOptions {
+        polyline.color = color
+        return this
+    }
+
+    /**
+     * Gets the color set for this [PolylineOptions] object.
+     *
+     * @return The color of the polyline in ARGB format.
+     */
+    fun getColor(): Int = polyline.color
+
+    /**
+     * Gets the width set for this [PolylineOptions] object.
+     *
+     * @return The width of the polyline in screen pixels.
+     */
+    fun getWidth(): Float = polyline.width
+
+    /**
+     * Sets the width of the polyline in screen pixels. The default is 10.
+     *
+     * @param width float value defining width of polyline using unit pixels.
+     * @return This [PolylineOptions] object with a new width set.
+     */
+    fun width(width: Float): PolylineOptions {
+        polyline.width = width
+        return this
+    }
+
+    /**
+     * Gets the points set for this [PolylineOptions] object.
+     *
+     * @return a [List] of [LatLng]s specifying the vertices of the polyline.
+     */
+    fun getPoints(): List<LatLng> {
+        // the getter gives us a copy, which is the safe thing to do...
+        return polyline.points
+    }
+
+    /**
+     * Compares this [PolylineOptions] object with another [PolylineOptions] and
+     * determines if their color, alpha, width, and vertices match.
+     *
+     * @param other Another [PolylineOptions] to compare with this object.
+     * @return True if color, alpha, width, and vertices match this [PolylineOptions] object.
+     * Else, false.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
+
+        other as PolylineOptions
+
+        if (other.getAlpha().compareTo(getAlpha()) != 0) {
+            return false
+        }
+        if (getColor() != other.getColor()) {
+            return false
+        }
+        if (other.getWidth().compareTo(getWidth()) != 0) {
+            return false
+        }
+        return getPoints() == other.getPoints()
+    }
+
+    /**
+     * Gives an integer which can be used as the bucket number for storing elements of the set/map.
+     * This bucket number is the address of the element inside the set/map. There's no guarantee
+     * that this hash value will be consistent between different Java implementations, or even
+     * between different execution runs of the same program.
+     *
+     * @return integer value you can use for storing element.
+     */
+    override fun hashCode(): Int {
+        var result = 1
+        result = 31 * result + (if (getAlpha() != +0.0f) getAlpha().toBits() else 0)
+        result = 31 * result + getColor()
+        result = 31 * result + (if (getWidth() != +0.0f) getWidth().toBits() else 0)
+        result = 31 * result + getPoints().hashCode()
+        return result
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<PolylineOptions> =
+            object : Parcelable.Creator<PolylineOptions> {
+                override fun createFromParcel(parcel: Parcel): PolylineOptions = PolylineOptions(parcel)
+
+                override fun newArray(size: Int): Array<PolylineOptions?> = arrayOfNulls(size)
+            }
+    }
 }

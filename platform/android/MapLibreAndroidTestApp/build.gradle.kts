@@ -8,13 +8,12 @@ plugins {
     id("maplibre.gradle-lint")
 }
 
-fun obtainTestBuildType(): String {
-    return if (project.hasProperty("testBuildType")) {
+fun obtainTestBuildType(): String =
+    if (project.hasProperty("testBuildType")) {
         project.properties["testBuildType"] as String
     } else {
         "debug"
     }
-}
 
 android {
     ndkVersion = Versions.ndkVersion
@@ -146,6 +145,30 @@ kotlin {
     jvmToolchain(17)
 }
 
+// The instrumentation tests live in this module but inside the SDK's own packages, so they reach for
+// declarations that used to be package-private in Java and are now `internal` in Kotlin. Kotlin scopes
+// `internal` to a module, so register MapLibreAndroid as a friend module of the androidTest compilation to
+// keep the access that Java package-private visibility used to grant, without widening the public API.
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    if (!name.endsWith("AndroidTestKotlin")) {
+        return@configureEach
+    }
+    val sdkBuildDir =
+        project(":MapLibreAndroid")
+            .layout.buildDirectory
+            .get()
+            .asFile.absolutePath
+    compilerOptions.freeCompilerArgs.add(
+        providers.provider {
+            val friendPaths =
+                libraries.files
+                    .filter { it.absolutePath.startsWith(sdkBuildDir) }
+                    .joinToString(",") { it.absolutePath }
+            "-Xfriend-paths=$friendPaths"
+        },
+    )
+}
+
 dependencies {
     implementation(project(":MapLibreAndroid"))
 
@@ -187,4 +210,4 @@ dependencies {
     implementation(libs.androidxTracing)
 }
 
-apply<SentryConditionalPlugin>()
+apply<SentryConfigPlugin>()

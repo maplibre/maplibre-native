@@ -1,7 +1,7 @@
-package org.maplibre.android;
+package org.maplibre.android
 
-public enum WellKnownTileServer {
-  Mapbox,
-  MapTiler,
-  MapLibre;
+enum class WellKnownTileServer {
+    Mapbox,
+    MapTiler,
+    MapLibre,
 }

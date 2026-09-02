@@ -1,87 +1,53 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-
-import androidx.annotation.NonNull;
-import androidx.collection.LongSparseArray;
-
-import org.maplibre.android.annotations.Annotation;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.collection.LongSparseArray
+import org.maplibre.android.annotations.Annotation
 
 /**
- * Encapsulates {@link Annotation}'s functionality..
+ * Encapsulates [Annotation]'s functionality..
  */
-class AnnotationContainer implements Annotations {
+internal class AnnotationContainer(
+    private val nativeMap: NativeMap?,
+    private val annotations: LongSparseArray<Annotation>,
+) : Annotations {
+    override fun obtainBy(id: Long): Annotation? = annotations.get(id)
 
-  private final NativeMap nativeMap;
-  private final LongSparseArray<Annotation> annotations;
-
-  AnnotationContainer(NativeMap nativeMap, LongSparseArray<Annotation> annotations) {
-    this.nativeMap = nativeMap;
-    this.annotations = annotations;
-  }
-
-  @Override
-  public Annotation obtainBy(long id) {
-    return annotations.get(id);
-  }
-
-  @NonNull
-  @Override
-  public List<Annotation> obtainAll() {
-    List<Annotation> annotations = new ArrayList<>();
-    for (int i = 0; i < this.annotations.size(); i++) {
-      annotations.add(this.annotations.get(this.annotations.keyAt(i)));
-    }
-    return annotations;
-  }
-
-  @Override
-  public void removeBy(long id) {
-    if (nativeMap != null) {
-      nativeMap.removeAnnotation(id);
-    }
-    annotations.remove(id);
-  }
-
-  @Override
-  public void removeBy(@NonNull Annotation annotation) {
-    long id = annotation.getId();
-    removeBy(id);
-  }
-
-  @Override
-  public void removeBy(@NonNull List<? extends Annotation> annotationList) {
-    int count = annotationList.size();
-    long[] ids = new long[count];
-    for (int i = 0; i < count; i++) {
-      ids[i] = annotationList.get(i).getId();
+    override fun obtainAll(): List<Annotation> {
+        val result = mutableListOf<Annotation>()
+        for (i in 0 until annotations.size()) {
+            annotations.get(annotations.keyAt(i))?.let { result.add(it) }
+        }
+        return result
     }
 
-    removeNativeAnnotations(ids);
-
-    for (long id : ids) {
-      annotations.remove(id);
-    }
-  }
-
-  @Override
-  public void removeAll() {
-    int count = annotations.size();
-    long[] ids = new long[count];
-    for (int i = 0; i < count; i++) {
-      ids[i] = annotations.keyAt(i);
+    override fun removeBy(id: Long) {
+        nativeMap?.removeAnnotation(id)
+        annotations.remove(id)
     }
 
-    removeNativeAnnotations(ids);
-
-    annotations.clear();
-  }
-
-  private void removeNativeAnnotations(long[] ids) {
-    if (nativeMap != null) {
-      nativeMap.removeAnnotations(ids);
+    override fun removeBy(annotation: Annotation) {
+        removeBy(annotation.id)
     }
-  }
+
+    override fun removeBy(annotationList: List<Annotation>) {
+        val ids = LongArray(annotationList.size) { annotationList[it].id }
+
+        removeNativeAnnotations(ids)
+
+        for (id in ids) {
+            annotations.remove(id)
+        }
+    }
+
+    override fun removeAll() {
+        val ids = LongArray(annotations.size()) { annotations.keyAt(it) }
+
+        removeNativeAnnotations(ids)
+
+        annotations.clear()
+    }
+
+    private fun removeNativeAnnotations(ids: LongArray) {
+        nativeMap?.removeAnnotations(ids)
+    }
 }

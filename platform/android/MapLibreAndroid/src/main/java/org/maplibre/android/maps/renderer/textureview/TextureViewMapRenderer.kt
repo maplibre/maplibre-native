@@ -1,153 +1,103 @@
-package org.maplibre.android.maps.renderer.textureview;
+package org.maplibre.android.maps.renderer.textureview
 
-import android.content.Context;
-import android.view.Surface;
-import android.view.TextureView;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.maps.renderer.MapRenderer;
+import android.content.Context
+import android.view.Surface
+import android.view.TextureView
+import android.view.View
+import org.maplibre.android.maps.renderer.MapRenderer
 
 /**
- * The {@link TextureViewMapRenderer} encapsulates the GL thread and
- * {@link TextureView} specifics to render the map.
+ * The [TextureViewMapRenderer] encapsulates the render thread and
+ * [TextureView] specifics to render the map.
+ *
+ * @param context                  the current Context
+ * @param textureView              the TextureView
+ * @param localIdeographFontFamily the local font family
+ * @param translucentSurface       the translucency flag
  *
  * @see MapRenderer
  */
-public class TextureViewMapRenderer extends MapRenderer {
-  private TextureViewRenderThread renderThread;
-  private boolean translucentSurface;
-  private TextureView textureView;
+open class TextureViewMapRenderer(
+    context: Context,
+    private val textureView: TextureView,
+    localIdeographFontFamily: String?,
+    val isTranslucentSurface: Boolean,
+) : MapRenderer(context, localIdeographFontFamily) {
+    private lateinit var renderThread: TextureViewRenderThread
 
-  /**
-   * Create a {@link MapRenderer} for the given {@link TextureView}
-   *
-   * @param context                  the current Context
-   * @param textureView              the TextureView
-   * @param localIdeographFontFamily the local font family
-   * @param translucentSurface    the translucency flag
-   */
-  public TextureViewMapRenderer(@NonNull Context context,
-                                @NonNull TextureView textureView,
-                                String localIdeographFontFamily,
-                                boolean translucentSurface) {
-    super(context, localIdeographFontFamily);
-    this.textureView = textureView;
-    this.translucentSurface = translucentSurface;
+    fun setRenderThread(thread: TextureViewRenderThread) {
+        renderThread = thread
+        renderThread.name = "TextureViewRenderer"
+        renderThread.start()
+    }
 
-  }
+    override val view: View
+        get() = textureView
 
-  public void setRenderThread(TextureViewRenderThread thread) {
-    renderThread = thread;
-    renderThread.setName("TextureViewRenderer");
-    renderThread.start();
-  }
+    /**
+     * Overridden to widen visibility for the render threads.
+     */
+    public override fun onSurfaceCreated(surface: Surface?) {
+        super.onSurfaceCreated(surface)
+    }
 
-  @Override
-  public View getView() {
-    return this.textureView;
-  }
+    /**
+     * Overridden to widen visibility for the render threads.
+     */
+    public override fun onSurfaceChanged(
+        width: Int,
+        height: Int,
+    ) {
+        super.onSurfaceChanged(width, height)
+    }
 
-  /**
-   * Overridden to provide package access
-   */
-  @Override
-  protected void onSurfaceCreated(Surface surface) {
-    super.onSurfaceCreated(surface);
-  }
+    /**
+     * Overridden to widen visibility for the render threads.
+     */
+    public override fun onSurfaceDestroyed() {
+        super.onSurfaceDestroyed()
+    }
 
-  /**
-   * Overridden to provide package access
-   */
-  @Override
-  protected void onSurfaceChanged(int width, int height) {
-    super.onSurfaceChanged(width, height);
-  }
+    /**
+     * Overridden to widen visibility for the render threads.
+     */
+    public override fun onDrawFrame() {
+        super.onDrawFrame()
+    }
 
-  /**
-   * Overridden to provide package access
-   */
-  @Override
-  protected void onSurfaceDestroyed() {
-    super.onSurfaceDestroyed();
-  }
+    override fun requestRender() {
+        renderThread.requestRender()
+    }
 
-  /**
-   * Overridden to provide package access
-   */
-  @Override
-  protected void onDrawFrame() {
-    super.onDrawFrame();
-  }
+    override fun queueEvent(runnable: Runnable) {
+        renderThread.queueEvent(runnable)
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void requestRender() {
-    renderThread.requestRender();
-  }
+    override fun waitForEmpty() {
+        renderThread.waitForEmpty()
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void queueEvent(Runnable runnable) {
-    renderThread.queueEvent(runnable);
-  }
+    override fun onStop() {
+        renderThread.onPause()
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void waitForEmpty() {
-    renderThread.waitForEmpty();
-  }
+    override fun onStart() {
+        renderThread.onResume()
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void onStop() {
-    renderThread.onPause();
-  }
+    override fun onDestroy() {
+        renderThread.onDestroy()
+    }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void onStart() {
-    renderThread.onResume();
-  }
+    override fun setRenderingRefreshMode(mode: RenderingRefreshMode): Unit =
+        throw RuntimeException(
+            "setRenderingRefreshMode is not supported for TextureViewMapRenderer. " +
+                "Use SurfaceViewMapRenderer to set the rendering refresh mode.",
+        )
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void onDestroy() {
-    renderThread.onDestroy();
-  }
-
-  public boolean isTranslucentSurface() {
-    return translucentSurface;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
-    throw new RuntimeException("setRenderingRefreshMode is not supported for TextureViewMapRenderer. "
-                                + "Use SurfaceViewMapRenderer to set the rendering refresh mode.");
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
-    throw new RuntimeException("getRenderingRefreshMode is not supported for TextureViewMapRenderer. "
-                                + "Use SurfaceViewMapRenderer to set the rendering refresh mode.");
-  }
+    override fun getRenderingRefreshMode(): RenderingRefreshMode =
+        throw RuntimeException(
+            "getRenderingRefreshMode is not supported for TextureViewMapRenderer. " +
+                "Use SurfaceViewMapRenderer to set the rendering refresh mode.",
+        )
 }

@@ -1,9 +1,9 @@
 package org.maplibre.android.geometry
 
-import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.utils.MockParcel
 
 class LatLngSpanTest : BaseTest() {
     @Test
@@ -18,9 +18,9 @@ class LatLngSpanTest : BaseTest() {
         Assert.assertEquals(
             "latLngSpan is not equal to a LatLng",
             latLngSpan.equals(
-                LAT_LNG_NULL_ISLAND
+                LAT_LNG_NULL_ISLAND,
             ),
-            false
+            false,
         )
     }
 

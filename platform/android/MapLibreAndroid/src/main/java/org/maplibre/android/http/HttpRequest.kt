@@ -1,33 +1,40 @@
-package org.maplibre.android.http;
+package org.maplibre.android.http
 
 /**
  * Interface definition for performing http requests.
- * <p>
+ *
  * This allows to provide alternative implementations for the http interaction of this library.
- * </p>
  */
-public interface HttpRequest {
+interface HttpRequest {
+    /**
+     * Executes the request.
+     *
+     * @param httpRequest  callback to be invoked when we receive a response
+     * @param nativePtr    the pointer associated to the request
+     * @param resourceUrl  the resource url to download
+     * @param dataRange    http header, used to indicate the part of a resource that the server should return
+     * @param etag         http header, identifier for a specific version of a resource
+     * @param modified     http header, used to determine if a resource hasn't been modified since
+     * @param offlineUsage flag to indicate a resource will be used for offline, appends offline=true as a query parameter
+     */
+    fun executeRequest(
+        httpRequest: HttpResponder,
+        nativePtr: Long,
+        resourceUrl: String,
+        dataRange: String,
+        etag: String,
+        modified: String,
+        offlineUsage: Boolean,
+    )
 
-  int CONNECTION_ERROR = 0;
-  int TEMPORARY_ERROR = 1;
-  int PERMANENT_ERROR = 2;
+    /**
+     * Cancels the request.
+     */
+    fun cancelRequest()
 
-  /**
-   * Executes the request.
-   *
-   * @param httpRequest  callback to be invoked when we receive a response
-   * @param nativePtr    the pointer associated to the request
-   * @param resourceUrl  the resource url to download
-   * @param dataRange    http header, used to indicate the part of a resource that the server should return
-   * @param etag         http header, identifier for a specific version of a resource
-   * @param modified     http header, used to determine if a resource hasn't been modified since
-   * @param offlineUsage flag to indicate a resource will be used for offline, appends offline=true as a query parameter
-   */
-  void executeRequest(HttpResponder httpRequest, long nativePtr, String resourceUrl,
-                      String dataRange, String etag, String modified, boolean offlineUsage);
-
-  /**
-   * Cancels the request.
-   */
-  void cancelRequest();
+    companion object {
+        const val CONNECTION_ERROR: Int = 0
+        const val TEMPORARY_ERROR: Int = 1
+        const val PERMANENT_ERROR: Int = 2
+    }
 }

@@ -1,131 +1,101 @@
-package org.maplibre.android.maps.renderer.surfaceview;
+package org.maplibre.android.maps.renderer.surfaceview
 
-import android.content.Context;
-import android.view.Surface;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.maps.renderer.MapRenderer;
+import android.content.Context
+import android.view.Surface
+import android.view.View
+import org.maplibre.android.maps.renderer.MapRenderer
 
 /**
- * The {@link SurfaceViewMapRenderer} encapsulates the render thread and
- * {@link MapLibreSurfaceView} specifics to render the map.
+ * The [SurfaceViewMapRenderer] encapsulates the render thread and
+ * [MapLibreSurfaceView] specifics to render the map.
  *
  * @see MapRenderer
  */
-public class SurfaceViewMapRenderer extends MapRenderer {
+open class SurfaceViewMapRenderer(
+    context: Context,
+    @JvmField protected val surfaceView: MapLibreSurfaceView,
+    localIdeographFontFamily: String?,
+) : MapRenderer(context, localIdeographFontFamily) {
+    init {
+        surfaceView.setDetachedListener {
+            // because the render thread is destroyed when the view is detached from window,
+            // we need to ensure releasing the native renderer as well.
+            // This avoids releasing it only when the view is being recreated, which is already
+            // on a new render thread, and leads to JNI crashes like
+            // https://github.com/mapbox/mapbox-gl-native/issues/14618
+            nativeReset()
+        }
+    }
 
-  @NonNull
-  protected final MapLibreSurfaceView surfaceView;
+    override val view: View
+        get() = surfaceView
 
-  public SurfaceViewMapRenderer(Context context,
-                                MapLibreSurfaceView surfaceView,
-                                String localIdeographFontFamily) {
-    super(context, localIdeographFontFamily);
-    this.surfaceView = surfaceView;
+    override fun onStop() {
+        surfaceView.onPause()
+    }
 
-    surfaceView.setDetachedListener(new MapLibreSurfaceView.OnSurfaceViewDetachedListener() {
-      @Override
-      public void onSurfaceViewDetached() {
-        // because the GL thread is destroyed when the view is detached from window,
-        // we need to ensure releasing the native renderer as well.
-        // This avoids releasing it only when the view is being recreated, which is already on a new GL thread,
-        // and leads to JNI crashes like https://github.com/mapbox/mapbox-gl-native/issues/14618
-        nativeReset();
-      }
-    });
-  }
+    override fun onPause() {
+        super.onPause()
+    }
 
-  @Override
-  public View getView() {
-    return this.surfaceView;
-  }
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 
-  @Override
-  public void onStop() {
-    surfaceView.onPause();
-  }
+    override fun onStart() {
+        surfaceView.onResume()
+    }
 
-  @Override
-  public void onPause() {
-    super.onPause();
-  }
+    override fun onResume() {
+        super.onResume()
+    }
 
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
-  }
+    public override fun onSurfaceCreated(surface: Surface?) {
+        super.onSurfaceCreated(surface)
+    }
 
-  @Override
-  public void onStart() {
-    surfaceView.onResume();
-  }
+    public override fun onSurfaceDestroyed() {
+        super.onSurfaceDestroyed()
+    }
 
-  @Override
-  public void onResume() {
-    super.onResume();
-  }
+    public override fun onSurfaceChanged(
+        width: Int,
+        height: Int,
+    ) {
+        super.onSurfaceChanged(width, height)
+    }
 
-  public void onSurfaceCreated(Surface surface) {
-    super.onSurfaceCreated(surface);
-  }
+    public override fun onDrawFrame() {
+        super.onDrawFrame()
+    }
 
-  public void onSurfaceDestroyed() {
-    super.onSurfaceDestroyed();
-  }
+    /**
+     * May be called from any thread.
+     *
+     * Called from the renderer frontend to schedule a render.
+     */
+    override fun requestRender() {
+        surfaceView.requestRender()
+    }
 
-  public void onSurfaceChanged(int width, int height) {
-    super.onSurfaceChanged(width, height);
-  }
+    /**
+     * May be called from any thread.
+     *
+     * Schedules work to be performed on the MapRenderer thread.
+     *
+     * @param runnable the runnable to execute
+     */
+    override fun queueEvent(runnable: Runnable) {
+        surfaceView.queueEvent(runnable)
+    }
 
-  public void onDrawFrame() {
-    super.onDrawFrame();
-  }
+    override fun waitForEmpty() {
+        surfaceView.waitForEmpty()
+    }
 
-  /**
-   * May be called from any thread.
-   * <p>
-   * Called from the renderer frontend to schedule a render.
-   */
-  @Override
-  public void requestRender() {
-    surfaceView.requestRender();
-  }
+    override fun setRenderingRefreshMode(mode: RenderingRefreshMode) {
+        surfaceView.setRenderingRefreshMode(mode)
+    }
 
-  /**
-   * May be called from any thread.
-   * <p>
-   * Schedules work to be performed on the MapRenderer thread.
-   *
-   * @param runnable the runnable to execute
-   */
-  @Override
-  public void queueEvent(Runnable runnable) {
-    surfaceView.queueEvent(runnable);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void waitForEmpty() {
-    surfaceView.waitForEmpty();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
-    surfaceView.setRenderingRefreshMode(mode);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
-    return surfaceView.getRenderingRefreshMode();
-  }
+    override fun getRenderingRefreshMode(): RenderingRefreshMode = surfaceView.getRenderingRefreshMode()
 }

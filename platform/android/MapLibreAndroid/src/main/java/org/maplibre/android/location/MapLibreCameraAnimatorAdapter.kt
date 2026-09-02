@@ -1,17 +1,15 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
+import androidx.annotation.Size
+import org.maplibre.android.location.MapLibreAnimator.AnimationsValueChangeListener
+import org.maplibre.android.maps.MapLibreMap
 
-import org.maplibre.android.maps.MapLibreMap;
-
-class MapLibreCameraAnimatorAdapter extends MapLibreFloatAnimator {
-
-  MapLibreCameraAnimatorAdapter(@NonNull @Size(min = 2) Float[] values,
-                                AnimationsValueChangeListener updateListener,
-                                @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
-    super(values, updateListener, Integer.MAX_VALUE);
-    addListener(new MapLibreAnimatorListener(cancelableCallback));
-  }
+internal class MapLibreCameraAnimatorAdapter(
+    @Size(min = 2) values: Array<Float>,
+    updateListener: AnimationsValueChangeListener<Float>,
+    cancelableCallback: MapLibreMap.CancelableCallback?,
+) : MapLibreFloatAnimator(values, updateListener, Int.MAX_VALUE) {
+    init {
+        addListener(MapLibreAnimatorListener(cancelableCallback))
+    }
 }

@@ -1,46 +1,30 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-class AnimatorListenerHolder {
-  @MapLibreAnimator.Type
-  private final int animatorType;
-  private final MapLibreAnimator.AnimationsValueChangeListener listener;
+import org.maplibre.android.location.MapLibreAnimator.AnimationsValueChangeListener
 
-  AnimatorListenerHolder(@MapLibreAnimator.Type int animatorType,
-                         MapLibreAnimator.AnimationsValueChangeListener listener) {
-    this.animatorType = animatorType;
-    this.listener = listener;
-  }
+internal class AnimatorListenerHolder(
+    @param:MapLibreAnimator.Type @get:MapLibreAnimator.Type val animatorType: Int,
+    val listener: AnimationsValueChangeListener<*>,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
 
-  @MapLibreAnimator.Type
-  public int getAnimatorType() {
-    return animatorType;
-  }
+        other as AnimatorListenerHolder
 
-  public MapLibreAnimator.AnimationsValueChangeListener getListener() {
-    return listener;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+        if (animatorType != other.animatorType) {
+            return false
+        }
+        return listener == other.listener
     }
 
-    AnimatorListenerHolder that = (AnimatorListenerHolder) o;
-
-    if (animatorType != that.animatorType) {
-      return false;
+    override fun hashCode(): Int {
+        var result = animatorType
+        result = 31 * result + listener.hashCode()
+        return result
     }
-    return listener != null ? listener.equals(that.listener) : that.listener == null;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = animatorType;
-    result = 31 * result + (listener != null ? listener.hashCode() : 0);
-    return result;
-  }
 }

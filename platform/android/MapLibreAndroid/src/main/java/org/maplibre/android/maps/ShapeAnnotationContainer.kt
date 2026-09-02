@@ -1,42 +1,24 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.RectF;
+import android.graphics.RectF
+import androidx.collection.LongSparseArray
+import org.maplibre.android.annotations.Annotation
 
-import androidx.annotation.NonNull;
-import androidx.collection.LongSparseArray;
-
-import org.maplibre.android.annotations.Annotation;
-
-import java.util.ArrayList;
-import java.util.List;
-
-class ShapeAnnotationContainer implements ShapeAnnotations {
-
-  private final NativeMap nativeMapView;
-  private final LongSparseArray<Annotation> annotations;
-
-  ShapeAnnotationContainer(NativeMap nativeMapView, LongSparseArray<Annotation> annotations) {
-    this.nativeMapView = nativeMapView;
-    this.annotations = annotations;
-  }
-
-  @NonNull
-  @Override
-  public List<Annotation> obtainAllIn(@NonNull RectF rectangle) {
-    RectF rect = nativeMapView.getDensityDependantRectangle(rectangle);
-    long[] annotationIds = nativeMapView.queryShapeAnnotations(rect);
-    return getAnnotationsFromIds(annotationIds);
-  }
-
-  @NonNull
-  private List<Annotation> getAnnotationsFromIds(long[] annotationIds) {
-    List<Annotation> shapeAnnotations = new ArrayList<>();
-    for (long annotationId : annotationIds) {
-      Annotation annotation = annotations.get(annotationId);
-      if (annotation != null) {
-        shapeAnnotations.add(annotation);
-      }
+internal class ShapeAnnotationContainer(
+    private val nativeMapView: NativeMap,
+    private val annotations: LongSparseArray<Annotation>,
+) : ShapeAnnotations {
+    override fun obtainAllIn(rectF: RectF): List<Annotation> {
+        val rect = nativeMapView.getDensityDependantRectangle(rectF)
+        val annotationIds = nativeMapView.queryShapeAnnotations(rect)
+        return getAnnotationsFromIds(annotationIds)
     }
-    return shapeAnnotations;
-  }
+
+    private fun getAnnotationsFromIds(annotationIds: LongArray): List<Annotation> {
+        val shapeAnnotations = mutableListOf<Annotation>()
+        for (annotationId in annotationIds) {
+            annotations.get(annotationId)?.let { shapeAnnotations.add(it) }
+        }
+        return shapeAnnotations
+    }
 }

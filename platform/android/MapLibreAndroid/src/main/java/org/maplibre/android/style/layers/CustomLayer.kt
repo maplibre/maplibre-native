@@ -1,40 +1,35 @@
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.Keep;
+import androidx.annotation.Keep
 
 /**
  * Custom layer.
- * <p>
+ *
  * Experimental feature. Do not use.
- * </p>
  */
-public class CustomLayer extends Layer {
+class CustomLayer : Layer {
+    constructor(id: String?, host: Long) {
+        initialize(id, host)
+    }
 
-  public CustomLayer(String id,
-                     long host) {
-    initialize(id, host);
-  }
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Triggers map re-paint.
-   *
-   * @deprecated Use {@link MapLibreMap#triggerRepaint()} instead.
-   */
-  @Deprecated
-  @Keep
-  public void update() {
-  }
+    /**
+     * Triggers map re-paint.
+     */
+    @Deprecated("Use MapLibreMap.triggerRepaint() instead.")
+    @Keep
+    fun update() {
+    }
 
-  @Keep
-  CustomLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    @Keep
+    protected external fun initialize(
+        id: String?,
+        host: Long,
+    )
 
-  @Keep
-  protected native void initialize(String id, long host);
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
-
+    @Keep
+    @Throws(Throwable::class)
+    protected external override fun finalize()
 }

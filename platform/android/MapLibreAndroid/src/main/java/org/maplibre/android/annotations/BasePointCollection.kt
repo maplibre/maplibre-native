@@ -1,82 +1,48 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.geometry.LatLng;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.annotation.Keep
+import org.maplibre.android.geometry.LatLng
 
 /**
  * Multipoint is an abstract annotation for combining geographical locations.
- *
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/maplibre/maplibre-plugins-android">
- *   MapLibre Annotation Plugin</a> instead
  */
-@Deprecated
-public abstract class BasePointCollection extends Annotation {
+@Deprecated(
+    "As of 7.0.0, use " +
+        "[MapLibre Annotation Plugin](https://github.com/maplibre/maplibre-plugins-android) instead",
+)
+abstract class BasePointCollection protected constructor() : Annotation() {
+    /**
+     * The points making up this point collection.
+     *
+     * Reading returns a copy of the points. Writing takes a copy of the points, so further
+     * mutations to the provided list will have no effect on this annotation.
+     */
+    @field:Keep
+    var points: List<LatLng> = ArrayList()
+        get() = ArrayList(field)
+        set(value) {
+            field = ArrayList(value)
+            update()
+        }
 
-  @Keep
-  private List<LatLng> points;
-  @Keep
-  private float alpha = 1.0f;
+    /**
+     * Value between 0 and 1 defining the polyline alpha.
+     */
+    @field:Keep
+    var alpha: Float = 1.0f
+        set(value) {
+            field = value
+            update()
+        }
 
-  protected BasePointCollection() {
-    super();
-    points = new ArrayList<>();
-  }
+    /**
+     * Add a point to the polyline.
+     *
+     * @param point A [LatLng] point to be added.
+     */
+    fun addPoint(point: LatLng) {
+        points = points + point
+    }
 
-  /**
-   * Returns a copy of the points.
-   *
-   * @return A {@link List} of points.
-   */
-  @NonNull
-  public List<LatLng> getPoints() {
-    return new ArrayList<>(points);
-  }
-
-  /**
-   * Sets the points of this polyline. This method will take a copy of the points, so further
-   * mutations to points will have no effect on this polyline.
-   *
-   * @param points A {@link List} of {@link LatLng} points making up the polyline.
-   */
-  public void setPoints(@NonNull List<LatLng> points) {
-    this.points = new ArrayList<>(points);
-    update();
-  }
-
-  /**
-   * Add a point to the polyline.
-   *
-   * @param point A {@link LatLng} point to be added.
-   */
-  public void addPoint(LatLng point) {
-    points.add(point);
-    update();
-  }
-
-  /**
-   * Value between 0 and 1 defining the polyline alpha.
-   *
-   * @return float value between 0 and 1.
-   */
-  public float getAlpha() {
-    return alpha;
-  }
-
-  /**
-   * Set this {@link BasePointCollection}s alpha.
-   *
-   * @param alpha float value between 0 and 1.
-   */
-  public void setAlpha(float alpha) {
-    this.alpha = alpha;
-    update();
-  }
-
-  abstract void update();
+    protected abstract fun update()
 }

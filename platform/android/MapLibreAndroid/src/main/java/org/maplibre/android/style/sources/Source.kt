@@ -1,220 +1,176 @@
-package org.maplibre.android.style.sources;
+package org.maplibre.android.style.sources
 
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.gson.JsonObject;
-import org.maplibre.android.LibraryLoader;
-import org.maplibre.android.utils.ThreadUtils;
+import androidx.annotation.Keep
+import com.google.gson.JsonObject
+import org.maplibre.android.LibraryLoader
+import org.maplibre.android.utils.ThreadUtils
 
 /**
  * Base Peer class for sources. see source.hpp for the other half of the peer.
  */
-public abstract class Source {
+abstract class Source {
+    /**
+     * Internal use
+     *
+     * @return the native peer pointer
+     */
+    @Keep
+    var nativePtr: Long = 0
+        private set
 
-  private static final String TAG = "Mbgl-Source";
+    protected var detached = false
 
-  @Keep
-  private long nativePtr;
+    /**
+     * Internal use
+     *
+     * @param nativePtr - pointer to native peer
+     */
+    @Keep
+    protected constructor(nativePtr: Long) {
+        checkThread()
+        this.nativePtr = nativePtr
+    }
 
-  protected boolean detached;
+    constructor() {
+        checkThread()
+    }
 
-  static {
-    LibraryLoader.load();
-  }
+    /**
+     * Validates if source interaction is happening on the UI thread
+     */
+    protected open fun checkThread() {
+        ThreadUtils.checkThread(TAG)
+    }
 
-  /**
-   * Internal use
-   *
-   * @param nativePtr - pointer to native peer
-   */
-  @Keep
-  protected Source(long nativePtr) {
-    checkThread();
-    this.nativePtr = nativePtr;
-  }
+    /**
+     * Retrieve the source id
+     *
+     * @return the source id
+     */
+    val id: String
+        get() {
+            checkThread()
+            return nativeGetId()
+        }
 
-  public Source() {
-    checkThread();
-  }
+    /**
+     * Retrieve the source attribution.
+     *
+     * Will return an empty String if no attribution is available.
+     *
+     * @return the string representation of the attribution in html format
+     */
+    val attribution: String
+        get() {
+            checkThread()
+            return nativeGetAttribution()
+        }
 
-  /**
-   * Validates if source interaction is happening on the UI thread
-   */
-  protected void checkThread() {
-    ThreadUtils.checkThread(TAG);
-  }
+    /**
+     * The tile pre-fetching zoom delta for current source. Pre-fetching makes sure that a low-resolution
+     * tile at the (current_zoom_level - delta) is rendered as soon as possible at the
+     * expense of a little bandwidth.
+     * If delta has not been set or set to null, it will use the value in MapLibreMap instance.
+     */
+    var prefetchZoomDelta: Int?
+        get() = nativeGetPrefetchZoomDelta()
+        set(delta) {
+            nativeSetPrefetchZoomDelta(delta)
+        }
 
-  /**
-   * Retrieve the source id
-   *
-   * @return the source id
-   */
-  @NonNull
-  public String getId() {
-    checkThread();
-    return nativeGetId();
-  }
+    /**
+     * When a set of tiles for a current zoom level is being rendered and some of the
+     * ideal tiles that cover the screen are not yet loaded, parent tile could be
+     * used instead. This might introduce unwanted rendering side-effects, especially
+     * for raster tiles that are overscaled multiple times. This is the maximum
+     * limit for how much a parent tile can be overscaled.
+     */
+    var maxOverscaleFactorForParentTiles: Int?
+        get() = nativeGetMaxOverscaleFactorForParentTiles()
+        set(maxOverscaleFactor) {
+            nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor)
+        }
 
-  /**
-   * Retrieve the source attribution.
-   * <p>
-   * Will return an empty String if no attribution is available.
-   * </p>
-   *
-   * @return the string representation of the attribution in html format
-   */
-  @NonNull
-  public String getAttribution() {
-    checkThread();
-    return nativeGetAttribution();
-  }
+    /**
+     * Whether or not the fetched tiles for the given source should be stored in the local cache.
+     *
+     * True if tiles are volatile, false if they will be stored in local cache. Default value is false.
+     */
+    var isVolatile: Boolean?
+        get() = nativeIsVolatile()
+        set(value) {
+            nativeSetVolatile(value)
+        }
 
-  /**
-   * Retrieve current pre-fetching zoom delta.
-   *
-   * @return current zoom delta or null if not set.
-   */
-  @Nullable
-  public Integer getPrefetchZoomDelta() {
-    return nativeGetPrefetchZoomDelta();
-  }
+    /**
+     * The minimum tile update interval in milliseconds, which is used to throttle the tile update
+     * network requests. The default value is 0.
+     */
+    var minimumTileUpdateInterval: Long?
+        get() = nativeGetMinimumTileUpdateInterval()
+        set(interval) {
+            nativeSetMinimumTileUpdateInterval(interval)
+        }
 
-  /**
-   * Set the tile pre-fetching zoom delta for current source. Pre-fetching makes sure that a low-resolution
-   * tile at the (current_zoom_level - delta) is rendered as soon as possible at the
-   * expense of a little bandwidth.
-   * If delta has not been set or set to null, it will use the value in MapLibreMap instance.
-   *
-   * @param delta zoom delta
-   */
-  public void setPrefetchZoomDelta(@Nullable Integer delta) {
-    nativeSetPrefetchZoomDelta(delta);
-  }
+    @Keep
+    protected external fun nativeGetId(): String
 
-  /**
-   * When a set of tiles for a current zoom level is being rendered and some of the
-   * ideal tiles that cover the screen are not yet loaded, parent tile could be
-   * used instead. This might introduce unwanted rendering side-effects, especially
-   * for raster tiles that are overscaled multiple times. This method sets the maximum
-   * limit for how much a parent tile can be overscaled.
-   *
-   * @param maxOverscaleFactor maximum overscale factor
-   */
-  public void setMaxOverscaleFactorForParentTiles(@Nullable Integer maxOverscaleFactor) {
-    nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor);
-  }
+    @Keep
+    protected external fun nativeGetAttribution(): String
 
-  /**
-   * Retrieve current maximum overscale factor for parent tiles.
-   *
-   * @return current maximum overscale factor or null if not set.
-   */
-  @Nullable
-  public Integer getMaxOverscaleFactorForParentTiles() {
-    return nativeGetMaxOverscaleFactorForParentTiles();
-  }
+    @Keep
+    protected external fun nativeGetPrefetchZoomDelta(): Int?
 
-  /**
-   * Retrieve whether or not the fetched tiles for the given source should be stored in the local cache
-   *
-   @return true if tiles are volatile, false if they will be stored in local cache. Default value is false.
-   */
-  @NonNull
-  public Boolean isVolatile() {
-    return nativeIsVolatile();
-  }
+    @Keep
+    protected external fun nativeSetPrefetchZoomDelta(delta: Int?)
 
-  /**
-   * Set a flag defining whether or not the fetched tiles for the given source should be stored in the local cache
-   *
-   * @param value current setting for volatile.
-   */
-  public void setVolatile(Boolean value) {
-    nativeSetVolatile(value);
-  }
+    @Keep
+    protected external fun nativeSetMaxOverscaleFactorForParentTiles(maxOverscaleFactor: Int?)
 
-  /**
-   * Sets the minimum tile update interval, which is used to throttle the tile update network requests.
-   *
-   * @param interval the update interval in milliseconds.
-   */
-  public void setMinimumTileUpdateInterval(Long interval) {
-    nativeSetMinimumTileUpdateInterval(interval);
-  }
+    @Keep
+    protected external fun nativeGetMaxOverscaleFactorForParentTiles(): Int?
 
-  /**
-   * Retrieve the minimum tile update interval, which is used to throttle the tile update network requests.
-   *
-   * @return the update interval in milliseconds, default valuse is 0.
-   */
-  @NonNull
-  public Long getMinimumTileUpdateInterval() {
-    return nativeGetMinimumTileUpdateInterval();
-  }
+    @Keep
+    protected external fun nativeIsVolatile(): Boolean?
 
-  /**
-   * Internal use
-   *
-   * @return the native peer pointer
-   */
-  public long getNativePtr() {
-    return nativePtr;
-  }
+    @Keep
+    protected external fun nativeSetVolatile(value: Boolean?)
 
-  @NonNull
-  @Keep
-  protected native String nativeGetId();
+    @Keep
+    protected external fun nativeSetMinimumTileUpdateInterval(interval: Long?)
 
-  @NonNull
-  @Keep
-  protected native String nativeGetAttribution();
+    @Keep
+    protected external fun nativeGetMinimumTileUpdateInterval(): Long?
 
-  @NonNull
-  @Keep
-  protected native Integer nativeGetPrefetchZoomDelta();
+    @Keep
+    protected external fun nativeSetFeatureState(
+        sourceLayerId: String?,
+        featureId: String,
+        state: JsonObject,
+    ): Boolean
 
-  @Keep
-  protected native void nativeSetPrefetchZoomDelta(@Nullable  Integer delta);
+    @Keep
+    protected external fun nativeGetFeatureState(
+        sourceLayerId: String?,
+        featureId: String,
+    ): JsonObject?
 
-  @Keep
-  protected native void nativeSetMaxOverscaleFactorForParentTiles(@Nullable Integer maxOverscaleFactor);
+    @Keep
+    protected external fun nativeRemoveFeatureState(
+        sourceLayerId: String?,
+        featureId: String?,
+        stateKey: String?,
+    ): Boolean
 
-  @NonNull
-  @Keep
-  protected native Integer nativeGetMaxOverscaleFactorForParentTiles();
+    fun setDetached() {
+        detached = true
+    }
 
-  @NonNull
-  @Keep
-  protected native Boolean nativeIsVolatile();
+    private companion object {
+        const val TAG = "Mbgl-Source"
 
-  @Keep
-  protected native void nativeSetVolatile(@NonNull Boolean value);
-
-  @Keep
-  protected native void nativeSetMinimumTileUpdateInterval(@NonNull Long interval);
-
-  @NonNull
-  @Keep
-  protected native Long nativeGetMinimumTileUpdateInterval();
-
-  @Keep
-  protected native boolean nativeSetFeatureState(@Nullable String sourceLayerId,
-                                                 @NonNull String featureId,
-                                                 @NonNull JsonObject state);
-
-  @Nullable
-  @Keep
-  protected native JsonObject nativeGetFeatureState(@Nullable String sourceLayerId,
-                                                    @NonNull String featureId);
-
-  @Keep
-  protected native boolean nativeRemoveFeatureState(@Nullable String sourceLayerId,
-                                                    @Nullable String featureId,
-                                                    @Nullable String stateKey);
-
-  public void setDetached() {
-    detached = true;
-  }
+        init {
+            LibraryLoader.load()
+        }
+    }
 }

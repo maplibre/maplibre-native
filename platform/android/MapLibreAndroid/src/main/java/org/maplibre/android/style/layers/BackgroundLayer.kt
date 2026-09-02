@@ -1,216 +1,178 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * The background color or pattern of the map.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-background">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-background)
  */
 @UiThread
-public class BackgroundLayer extends Layer {
+class BackgroundLayer : Layer {
 
-  /**
-   * Creates a BackgroundLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  BackgroundLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a BackgroundLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a BackgroundLayer.
-   *
-   * @param layerId the id of the layer
-   */
-  public BackgroundLayer(String layerId) {
-    super();
-    initialize(layerId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId);
-
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public BackgroundLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
-
-  // Property getters
-
-  /**
-   * Get the BackgroundColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getBackgroundColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("background-color", nativeGetBackgroundColor());
-  }
-
-  /**
-   * The color with which the background will be drawn.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getBackgroundColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getBackgroundColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("background-color was set as a Function");
+    /**
+     * Creates a BackgroundLayer.
+     *
+     * @param layerId the id of the layer
+     */
+    constructor(layerId: String?) : super() {
+        initialize(layerId)
     }
-  }
 
-  /**
-   * Get the BackgroundColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getBackgroundColorTransition() {
-    checkThread();
-    return nativeGetBackgroundColorTransition();
-  }
+    @Keep
+    protected external fun initialize(layerId: String?)
 
-  /**
-   * Set the BackgroundColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setBackgroundColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetBackgroundColorTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): BackgroundLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  /**
-   * Get the BackgroundPattern property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getBackgroundPattern() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("background-pattern", nativeGetBackgroundPattern());
-  }
+    // Property getters
 
-  /**
-   * Get the BackgroundPattern property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getBackgroundPatternTransition() {
-    checkThread();
-    return nativeGetBackgroundPatternTransition();
-  }
+    /**
+     * Get the BackgroundColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val backgroundColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("background-color", nativeGetBackgroundColor())
+            return value as PropertyValue<String>
+        }
 
-  /**
-   * Set the BackgroundPattern property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setBackgroundPatternTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetBackgroundPatternTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The color with which the background will be drawn.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getBackgroundColorAsInt(): Int {
+        checkThread()
+        val value = backgroundColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("background-color was set as a Function")
+        }
+    }
 
-  /**
-   * Get the BackgroundOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getBackgroundOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("background-opacity", nativeGetBackgroundOpacity());
-  }
+    /**
+     * The BackgroundColor property transition options
+     */
+    var backgroundColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetBackgroundColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetBackgroundColorTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the BackgroundOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getBackgroundOpacityTransition() {
-    checkThread();
-    return nativeGetBackgroundOpacityTransition();
-  }
+    /**
+     * Get the BackgroundPattern property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val backgroundPattern: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("background-pattern", nativeGetBackgroundPattern())
+            return value as PropertyValue<String>
+        }
 
-  /**
-   * Set the BackgroundOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setBackgroundOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetBackgroundOpacityTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The BackgroundPattern property transition options
+     */
+    var backgroundPatternTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetBackgroundPatternTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetBackgroundPatternTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetBackgroundColor();
+    /**
+     * Get the BackgroundOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val backgroundOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("background-opacity", nativeGetBackgroundOpacity())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetBackgroundColorTransition();
+    /**
+     * The BackgroundOpacity property transition options
+     */
+    var backgroundOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetBackgroundOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetBackgroundOpacityTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetBackgroundColorTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetBackgroundColor(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetBackgroundPattern();
+    @Keep
+    private external fun nativeGetBackgroundColorTransition(): TransitionOptions
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetBackgroundPatternTransition();
+    @Keep
+    private external fun nativeSetBackgroundColorTransition(duration: Long, delay: Long)
 
-  @Keep
-  private native void nativeSetBackgroundPatternTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetBackgroundPattern(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetBackgroundOpacity();
+    @Keep
+    private external fun nativeGetBackgroundPatternTransition(): TransitionOptions
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetBackgroundOpacityTransition();
+    @Keep
+    private external fun nativeSetBackgroundPatternTransition(duration: Long, delay: Long)
 
-  @Keep
-  private native void nativeSetBackgroundOpacityTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetBackgroundOpacity(): Any
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    @Keep
+    private external fun nativeGetBackgroundOpacityTransition(): TransitionOptions
 
+    @Keep
+    private external fun nativeSetBackgroundOpacityTransition(duration: Long, delay: Long)
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

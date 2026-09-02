@@ -1,4 +1,4 @@
 /**
  * Contains the MapLibre Maps Android Log API classes.
  */
-package org.maplibre.android.log;
+package org.maplibre.android.log

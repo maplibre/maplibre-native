@@ -1,6 +1,6 @@
-package org.maplibre.android.tile;
+package org.maplibre.android.tile
 
-public enum TileOperation {
+enum class TileOperation {
     RequestedFromCache,
     RequestedFromNetwork,
     LoadFromNetwork,

@@ -5,12 +5,9 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.JsonObject
-import org.maplibre.geojson.Feature
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.Point
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property
@@ -19,6 +16,9 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Point
 import timber.log.Timber
 
 /**
@@ -32,19 +32,20 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     private var isInitialPosition = true
     private var isSelected = false
     private var isShowingSymbolLayer = true
-    private val mapClickListener = OnMapClickListener { point ->
-        val screenPoint = maplibreMap.projection.toScreenLocation(point)
-        val featureList = maplibreMap.queryRenderedFeatures(screenPoint, LAYER_ID)
-        if (!featureList.isEmpty()) {
-            val feature = featureList[0]
-            val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED)
-            isSelected = !selectedNow
-            updateSource(maplibreMap.style)
-        } else {
-            Timber.e("No features found")
+    private val mapClickListener =
+        OnMapClickListener { point ->
+            val screenPoint = maplibreMap.projection.toScreenLocation(point)
+            val featureList = maplibreMap.queryRenderedFeatures(screenPoint, LAYER_ID)
+            if (!featureList.isEmpty()) {
+                val feature = featureList[0]
+                val selectedNow = feature.getBooleanProperty(KEY_PROPERTY_SELECTED)
+                isSelected = !selectedNow
+                updateSource(maplibreMap.style)
+            } else {
+                Timber.e("No features found")
+            }
+            true
         }
-        true
-    }
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,18 +76,19 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
 
     private fun toggleSymbolLayerVisibility() {
         layer!!.setProperties(
-            PropertyFactory.visibility(if (isShowingSymbolLayer) Property.NONE else Property.VISIBLE)
+            PropertyFactory.visibility(if (isShowingSymbolLayer) Property.NONE else Property.VISIBLE),
         )
         isShowingSymbolLayer = !isShowingSymbolLayer
     }
 
     // # --8<-- [start:createFeatureCollection]
     private fun createFeatureCollection(): FeatureCollection {
-        val point = if (isInitialPosition) {
-            Point.fromLngLat(-74.01618140, 40.701745)
-        } else {
-            Point.fromLngLat(-73.988097, 40.749864)
-        }
+        val point =
+            if (isInitialPosition) {
+                Point.fromLngLat(-74.01618140, 40.701745)
+            } else {
+                Point.fromLngLat(-73.988097, 40.749864)
+            }
         val properties = JsonObject()
         properties.addProperty(KEY_PROPERTY_SELECTED, isSelected)
         val feature = Feature.fromGeometry(point, properties)
@@ -101,17 +103,17 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
                 Expression.step(
                     Expression.zoom(),
                     Expression.literal(BUS_MAKI_ICON_ID),
-                    Expression.stop(ZOOM_STOP_MAX_VALUE, CAFE_MAKI_ICON_ID)
-                )
+                    Expression.stop(ZOOM_STOP_MAX_VALUE, CAFE_MAKI_ICON_ID),
+                ),
             ),
             PropertyFactory.iconSize(
                 Expression.switchCase(
                     Expression.get(KEY_PROPERTY_SELECTED),
                     Expression.literal(3.0f),
-                    Expression.literal(1.0f)
-                )
+                    Expression.literal(1.0f),
+                ),
             ),
-            PropertyFactory.iconAllowOverlap(true)
+            PropertyFactory.iconAllowOverlap(true),
         )
         style.addLayer(layer!!)
     }

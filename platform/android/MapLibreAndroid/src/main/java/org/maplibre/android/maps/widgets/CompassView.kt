@@ -1,181 +1,169 @@
-package org.maplibre.android.maps.widgets;
+package org.maplibre.android.maps.widgets
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.ViewPropertyAnimatorCompat;
-import androidx.core.view.ViewPropertyAnimatorListenerAdapter;
-
-import org.maplibre.android.maps.MapLibreMap;
-import org.maplibre.android.maps.MapLibreMapOptions;
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.core.view.ViewCompat
+import androidx.core.view.ViewPropertyAnimatorCompat
+import androidx.core.view.ViewPropertyAnimatorListenerAdapter
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapLibreMapOptions
+import kotlin.math.abs
 
 /**
  * UI element overlaid on a map to show the map's bearing when it isn't true north (0.0). Tapping
  * the compass resets the bearing to true north and hides the compass.
- * <p>
+ *
  * You can change the behaviour of this View during initialisation with
- * {@link MapLibreMapOptions}, and xml attributes. While running you can
- * use {@link org.maplibre.android.maps.UiSettings}.
- * </p>
+ * [MapLibreMapOptions], and xml attributes. While running you can
+ * use [org.maplibre.android.maps.UiSettings].
  */
-public final class CompassView extends ImageView implements Runnable {
+class CompassView :
+    ImageView,
+    Runnable {
+    private var compassRotation = 0.0f
+    private var fadeCompassViewFacingNorth = true
+    private var fadeAnimator: ViewPropertyAnimatorCompat? = null
+    private lateinit var compassAnimationListener: MapLibreMap.OnCompassAnimationListener
+    private var animating = false
 
-  public static final long TIME_WAIT_IDLE = 500;
-  public static final long TIME_MAP_NORTH_ANIMATION = 150;
-  private static final long TIME_FADE_ANIMATION = TIME_WAIT_IDLE;
-
-  private float rotation = 0.0f;
-  private boolean fadeCompassViewFacingNorth = true;
-  @Nullable
-  private ViewPropertyAnimatorCompat fadeAnimator;
-  private MapLibreMap.OnCompassAnimationListener compassAnimationListener;
-  private boolean isAnimating = false;
-
-  public CompassView(@NonNull Context context) {
-    super(context);
-    initialize(context);
-  }
-
-  public CompassView(@NonNull Context context, AttributeSet attrs) {
-    super(context, attrs);
-    initialize(context);
-  }
-
-  public CompassView(@NonNull Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-    initialize(context);
-  }
-
-  private void initialize(Context context) {
-    setEnabled(false);
-
-    // Layout params
-    float screenDensity = context.getResources().getDisplayMetrics().density;
-    ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams((int) (48 * screenDensity), (int) (48 * screenDensity));
-    setLayoutParams(lp);
-  }
-
-  public void injectCompassAnimationListener(@NonNull MapLibreMap.OnCompassAnimationListener compassAnimationListener) {
-    this.compassAnimationListener = compassAnimationListener;
-  }
-
-  public void isAnimating(boolean isAnimating) {
-    this.isAnimating = isAnimating;
-  }
-
-  public void resetAnimation() {
-    if (fadeAnimator != null) {
-      fadeAnimator.cancel();
-    }
-    fadeAnimator = null;
-  }
-
-  public boolean isHidden() {
-    return fadeCompassViewFacingNorth && isFacingNorth();
-  }
-
-  public boolean isFacingNorth() {
-    // increase range of facing north to more than only 0.0
-    return Math.abs(rotation) >= 359.0 || Math.abs(rotation) <= 1.0;
-  }
-
-  @Override
-  public void setEnabled(boolean enabled) {
-    super.setEnabled(enabled);
-    if (enabled && !isHidden()) {
-      resetAnimation();
-      setAlpha(1.0f);
-      setVisibility(View.VISIBLE);
-      update(rotation);
-    } else {
-      resetAnimation();
-      setAlpha(0.0f);
-      setVisibility(View.INVISIBLE);
-    }
-  }
-
-  /**
-   * Updates the direction of the compass.
-   *
-   * @param bearing the direction value of the map
-   */
-  public void update(final double bearing) {
-    rotation = (float) bearing;
-
-    if (!isEnabled()) {
-      return;
+    constructor(context: Context) : super(context) {
+        initialize(context)
     }
 
-    if (isHidden()) {
-      if (getVisibility() == View.INVISIBLE || fadeAnimator != null) {
-        return;
-      }
-      postDelayed(this, TIME_WAIT_IDLE);
-      return;
-    } else {
-      resetAnimation();
-      setAlpha(1.0f);
-      setVisibility(View.VISIBLE);
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        initialize(context)
     }
 
-    notifyCompassAnimationListenerWhenAnimating();
-    setRotation(rotation);
-  }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        initialize(context)
+    }
 
-  public void fadeCompassViewFacingNorth(boolean compassFadeFacingNorth) {
-    fadeCompassViewFacingNorth = compassFadeFacingNorth;
-  }
+    private fun initialize(context: Context) {
+        isEnabled = false
 
-  public boolean isFadeCompassViewFacingNorth() {
-    return fadeCompassViewFacingNorth;
-  }
+        // Layout params
+        val screenDensity = context.resources.displayMetrics.density
+        layoutParams = ViewGroup.LayoutParams((48 * screenDensity).toInt(), (48 * screenDensity).toInt())
+    }
 
-  /**
-   * Set the CompassView image.
-   *
-   * @param compass the drawable to use as compass image
-   */
-  public void setCompassImage(Drawable compass) {
-    setImageDrawable(compass);
-  }
+    fun injectCompassAnimationListener(compassAnimationListener: MapLibreMap.OnCompassAnimationListener) {
+        this.compassAnimationListener = compassAnimationListener
+    }
 
-  /**
-   * Get the current configured CompassView image.
-   *
-   * @return the drawable used as compass image
-   */
-  public Drawable getCompassImage() {
-    return getDrawable();
-  }
+    fun isAnimating(isAnimating: Boolean) {
+        this.animating = isAnimating
+    }
 
-  @Override
-  public void run() {
-    if (isHidden()) {
-      compassAnimationListener.onCompassAnimationFinished();
-      resetAnimation();
-      setLayerType(View.LAYER_TYPE_HARDWARE, null);
-      fadeAnimator = ViewCompat.animate(CompassView.this).alpha(0.0f).setDuration(TIME_FADE_ANIMATION);
-      fadeAnimator.setListener(new ViewPropertyAnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(View view) {
-          setLayerType(LAYER_TYPE_NONE, null);
-          setVisibility(View.INVISIBLE);
-          resetAnimation();
+    fun resetAnimation() {
+        fadeAnimator?.cancel()
+        fadeAnimator = null
+    }
+
+    val isHidden: Boolean
+        get() = fadeCompassViewFacingNorth && isFacingNorth()
+
+    fun isFacingNorth(): Boolean =
+        // increase range of facing north to more than only 0.0
+        abs(compassRotation) >= 359.0 || abs(compassRotation) <= 1.0
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        if (enabled && !isHidden) {
+            resetAnimation()
+            alpha = 1.0f
+            visibility = View.VISIBLE
+            update(compassRotation.toDouble())
+        } else {
+            resetAnimation()
+            alpha = 0.0f
+            visibility = View.INVISIBLE
         }
-      });
     }
-  }
 
-  private void notifyCompassAnimationListenerWhenAnimating() {
-    if (isAnimating) {
-      compassAnimationListener.onCompassAnimation();
+    /**
+     * Updates the direction of the compass.
+     *
+     * @param bearing the direction value of the map
+     */
+    fun update(bearing: Double) {
+        compassRotation = bearing.toFloat()
+
+        if (!isEnabled) {
+            return
+        }
+
+        if (isHidden) {
+            if (visibility == View.INVISIBLE || fadeAnimator != null) {
+                return
+            }
+            postDelayed(this, TIME_WAIT_IDLE)
+            return
+        } else {
+            resetAnimation()
+            alpha = 1.0f
+            visibility = View.VISIBLE
+        }
+
+        notifyCompassAnimationListenerWhenAnimating()
+        rotation = compassRotation
     }
-  }
+
+    fun fadeCompassViewFacingNorth(compassFadeFacingNorth: Boolean) {
+        fadeCompassViewFacingNorth = compassFadeFacingNorth
+    }
+
+    val isFadeCompassViewFacingNorth: Boolean
+        get() = fadeCompassViewFacingNorth
+
+    /**
+     * Set the CompassView image.
+     *
+     * @param compass the drawable to use as compass image
+     */
+    fun setCompassImage(compass: Drawable?) {
+        setImageDrawable(compass)
+    }
+
+    /**
+     * Get the current configured CompassView image.
+     *
+     * @return the drawable used as compass image
+     */
+    fun getCompassImage(): Drawable? = drawable
+
+    override fun run() {
+        if (isHidden) {
+            compassAnimationListener.onCompassAnimationFinished()
+            resetAnimation()
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
+            fadeAnimator =
+                ViewCompat.animate(this).alpha(0.0f).setDuration(TIME_FADE_ANIMATION).apply {
+                    setListener(
+                        object : ViewPropertyAnimatorListenerAdapter() {
+                            override fun onAnimationEnd(view: View) {
+                                setLayerType(LAYER_TYPE_NONE, null)
+                                visibility = View.INVISIBLE
+                                resetAnimation()
+                            }
+                        },
+                    )
+                }
+        }
+    }
+
+    private fun notifyCompassAnimationListenerWhenAnimating() {
+        if (animating) {
+            compassAnimationListener.onCompassAnimation()
+        }
+    }
+
+    companion object {
+        const val TIME_WAIT_IDLE = 500L
+        const val TIME_MAP_NORTH_ANIMATION = 150L
+        private const val TIME_FADE_ANIMATION = TIME_WAIT_IDLE
+    }
 }

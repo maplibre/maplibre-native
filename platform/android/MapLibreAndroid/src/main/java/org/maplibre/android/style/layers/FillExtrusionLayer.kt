@@ -1,479 +1,402 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * An extruded (3D) polygon.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-fill-extrusion">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-fill-extrusion)
  */
 @UiThread
-public class FillExtrusionLayer extends Layer {
+class FillExtrusionLayer : Layer {
 
-  /**
-   * Creates a FillExtrusionLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  FillExtrusionLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a FillExtrusionLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a FillExtrusionLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public FillExtrusionLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
-
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
-
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public FillExtrusionLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public FillExtrusionLayer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
+    /**
+     * Creates a FillExtrusionLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
     }
-  }
 
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public FillExtrusionLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  // Property getters
+    /**
+     * The source layer.
+     */
+    var sourceLayer: String?
+        get() {
+            checkThread()
+            return nativeGetSourceLayer()
+        }
+        set(sourceLayer) {
+            checkThread()
+            nativeSetSourceLayer(sourceLayer)
+        }
 
-  /**
-   * Get the FillExtrusionRoundedCornerDistance property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillExtrusionRoundedCornerDistance() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-rounded-corner-distance", nativeGetFillExtrusionRoundedCornerDistance());
-  }
-
-  /**
-   * Get the FillExtrusionOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillExtrusionOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-opacity", nativeGetFillExtrusionOpacity());
-  }
-
-  /**
-   * Get the FillExtrusionOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionOpacityTransition() {
-    checkThread();
-    return nativeGetFillExtrusionOpacityTransition();
-  }
-
-  /**
-   * Set the FillExtrusionOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setFillExtrusionOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionOpacityTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the FillExtrusionColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillExtrusionColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-extrusion-color", nativeGetFillExtrusionColor());
-  }
-
-  /**
-   * The base color of the extruded fill. The extrusion's surfaces will be shaded differently based on this color in combination with the root `light` settings. If this color is specified as `rgba` with an alpha component, the alpha component will be ignored; use `fill-extrusion-opacity` to set layer opacity.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getFillExtrusionColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getFillExtrusionColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("fill-extrusion-color was set as a Function");
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): FillExtrusionLayer {
+        this.sourceLayer = sourceLayer
+        return this
     }
-  }
 
-  /**
-   * Get the FillExtrusionColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionColorTransition() {
-    checkThread();
-    return nativeGetFillExtrusionColorTransition();
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  /**
-   * Set the FillExtrusionColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setFillExtrusionColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionColorTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     */
+    fun setFilter(filter: Expression) {
+        checkThread()
+        nativeSetFilter(filter.toArray())
+    }
 
-  /**
-   * Get the FillExtrusionTranslate property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getFillExtrusionTranslate() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("fill-extrusion-translate", nativeGetFillExtrusionTranslate());
-  }
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     * @return This
+     */
+    fun withFilter(filter: Expression): FillExtrusionLayer {
+        setFilter(filter)
+        return this
+    }
 
-  /**
-   * Get the FillExtrusionTranslate property transition options
-   *
-   * @return transition options for Float[]
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionTranslateTransition() {
-    checkThread();
-    return nativeGetFillExtrusionTranslateTransition();
-  }
+    /**
+     * A single expression filter.
+     *
+     * Use [setFilter] to set the filter.
+     */
+    val filter: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetFilter()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
+        }
 
-  /**
-   * Set the FillExtrusionTranslate property transition options
-   *
-   * @param options transition options for Float[]
-   */
-  public void setFillExtrusionTranslateTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionTranslateTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): FillExtrusionLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  /**
-   * Get the FillExtrusionTranslateAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillExtrusionTranslateAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-extrusion-translate-anchor", nativeGetFillExtrusionTranslateAnchor());
-  }
+    // Property getters
 
-  /**
-   * Get the FillExtrusionPattern property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillExtrusionPattern() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-extrusion-pattern", nativeGetFillExtrusionPattern());
-  }
+    /**
+     * Get the FillExtrusionRoundedCornerDistance property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionRoundedCornerDistance: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-rounded-corner-distance", nativeGetFillExtrusionRoundedCornerDistance())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the FillExtrusionPattern property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionPatternTransition() {
-    checkThread();
-    return nativeGetFillExtrusionPatternTransition();
-  }
+    /**
+     * Get the FillExtrusionOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-opacity", nativeGetFillExtrusionOpacity())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Set the FillExtrusionPattern property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setFillExtrusionPatternTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionPatternTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The FillExtrusionOpacity property transition options
+     */
+    var fillExtrusionOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillExtrusionOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillExtrusionOpacityTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the FillExtrusionHeight property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillExtrusionHeight() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-height", nativeGetFillExtrusionHeight());
-  }
+    /**
+     * Get the FillExtrusionColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-color", nativeGetFillExtrusionColor())
+            return value as PropertyValue<String>
+        }
 
-  /**
-   * Get the FillExtrusionHeight property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionHeightTransition() {
-    checkThread();
-    return nativeGetFillExtrusionHeightTransition();
-  }
+    /**
+     * The base color of the extruded fill. The extrusion's surfaces will be shaded differently based on this color in combination with the root `light` settings. If this color is specified as `rgba` with an alpha component, the alpha component will be ignored; use `fill-extrusion-opacity` to set layer opacity.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getFillExtrusionColorAsInt(): Int {
+        checkThread()
+        val value = fillExtrusionColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("fill-extrusion-color was set as a Function")
+        }
+    }
 
-  /**
-   * Set the FillExtrusionHeight property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setFillExtrusionHeightTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionHeightTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The FillExtrusionColor property transition options
+     */
+    var fillExtrusionColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillExtrusionColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillExtrusionColorTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the FillExtrusionBase property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillExtrusionBase() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-base", nativeGetFillExtrusionBase());
-  }
+    /**
+     * Get the FillExtrusionTranslate property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionTranslate: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-translate", nativeGetFillExtrusionTranslate())
+            return value as PropertyValue<Array<Float>>
+        }
 
-  /**
-   * Get the FillExtrusionBase property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionBaseTransition() {
-    checkThread();
-    return nativeGetFillExtrusionBaseTransition();
-  }
+    /**
+     * The FillExtrusionTranslate property transition options
+     */
+    var fillExtrusionTranslateTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillExtrusionTranslateTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillExtrusionTranslateTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the FillExtrusionBase property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setFillExtrusionBaseTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionBaseTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Get the FillExtrusionTranslateAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionTranslateAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-translate-anchor", nativeGetFillExtrusionTranslateAnchor())
+            return value as PropertyValue<String>
+        }
 
-  /**
-   * Get the FillExtrusionVerticalGradient property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getFillExtrusionVerticalGradient() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
-  }
+    /**
+     * Get the FillExtrusionPattern property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionPattern: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-pattern", nativeGetFillExtrusionPattern())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionRoundedCornerDistance();
+    /**
+     * The FillExtrusionPattern property transition options
+     */
+    var fillExtrusionPatternTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillExtrusionPatternTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillExtrusionPatternTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionOpacity();
+    /**
+     * Get the FillExtrusionHeight property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionHeight: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-height", nativeGetFillExtrusionHeight())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionOpacityTransition();
+    /**
+     * The FillExtrusionHeight property transition options
+     */
+    var fillExtrusionHeightTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillExtrusionHeightTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillExtrusionHeightTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetFillExtrusionOpacityTransition(long duration, long delay);
+    /**
+     * Get the FillExtrusionBase property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionBase: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-base", nativeGetFillExtrusionBase())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionColor();
+    /**
+     * The FillExtrusionBase property transition options
+     */
+    var fillExtrusionBaseTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillExtrusionBaseTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillExtrusionBaseTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionColorTransition();
+    /**
+     * Get the FillExtrusionVerticalGradient property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillExtrusionVerticalGradient: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient())
+            return value as PropertyValue<Boolean>
+        }
 
-  @Keep
-  private native void nativeSetFillExtrusionColorTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetFillExtrusionRoundedCornerDistance(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionTranslate();
+    @Keep
+    private external fun nativeGetFillExtrusionOpacity(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionTranslateTransition();
+    @Keep
+    private external fun nativeGetFillExtrusionOpacityTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetFillExtrusionTranslateTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetFillExtrusionOpacityTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionTranslateAnchor();
+    @Keep
+    private external fun nativeGetFillExtrusionColor(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionPattern();
+    @Keep
+    private external fun nativeGetFillExtrusionColorTransition(): TransitionOptions
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionPatternTransition();
+    @Keep
+    private external fun nativeSetFillExtrusionColorTransition(duration: Long, delay: Long)
 
-  @Keep
-  private native void nativeSetFillExtrusionPatternTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetFillExtrusionTranslate(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionHeight();
+    @Keep
+    private external fun nativeGetFillExtrusionTranslateTransition(): TransitionOptions
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionHeightTransition();
+    @Keep
+    private external fun nativeSetFillExtrusionTranslateTransition(duration: Long, delay: Long)
 
-  @Keep
-  private native void nativeSetFillExtrusionHeightTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetFillExtrusionTranslateAnchor(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionBase();
+    @Keep
+    private external fun nativeGetFillExtrusionPattern(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionBaseTransition();
+    @Keep
+    private external fun nativeGetFillExtrusionPatternTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetFillExtrusionBaseTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetFillExtrusionPatternTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionVerticalGradient();
+    @Keep
+    private external fun nativeGetFillExtrusionHeight(): Any
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    @Keep
+    private external fun nativeGetFillExtrusionHeightTransition(): TransitionOptions
 
+    @Keep
+    private external fun nativeSetFillExtrusionHeightTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetFillExtrusionBase(): Any
+
+    @Keep
+    private external fun nativeGetFillExtrusionBaseTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetFillExtrusionBaseTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetFillExtrusionVerticalGradient(): Any
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

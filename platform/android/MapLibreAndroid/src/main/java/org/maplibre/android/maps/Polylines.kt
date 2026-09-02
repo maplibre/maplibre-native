@@ -1,22 +1,23 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.annotations.Polyline;
-import org.maplibre.android.annotations.PolylineOptions;
-
-import java.util.List;
+import org.maplibre.android.annotations.Polyline
+import org.maplibre.android.annotations.PolylineOptions
 
 /**
- * Interface that defines convenient methods for working with a {@link Polyline}'s collection.
+ * Interface that defines convenient methods for working with a [Polyline]'s collection.
  */
-interface Polylines {
-  Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap);
+internal interface Polylines {
+    fun addBy(
+        polylineOptions: PolylineOptions,
+        maplibreMap: MapLibreMap,
+    ): Polyline
 
-  List<Polyline> addBy(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapLibreMap maplibreMap);
+    fun addBy(
+        polylineOptionsList: List<PolylineOptions>,
+        maplibreMap: MapLibreMap,
+    ): List<Polyline>
 
-  void update(Polyline polyline);
+    fun update(polyline: Polyline)
 
-  List<Polyline> obtainAll();
+    fun obtainAll(): List<Polyline>
 }

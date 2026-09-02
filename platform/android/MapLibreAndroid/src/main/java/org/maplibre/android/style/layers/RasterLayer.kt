@@ -1,397 +1,329 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * Raster map textures such as satellite imagery.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-raster">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-raster)
  */
 @UiThread
-public class RasterLayer extends Layer {
+class RasterLayer : Layer {
 
-  /**
-   * Creates a RasterLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  RasterLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a RasterLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a RasterLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public RasterLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
+    /**
+     * Creates a RasterLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
+    }
 
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
+    /**
+     * Set the source layer.
+     *
+     * @param sourceLayer the source layer to set
+     */
+    fun setSourceLayer(sourceLayer: String?) {
+        checkThread()
+        nativeSetSourceLayer(sourceLayer)
+    }
 
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public RasterLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): RasterLayer {
+        setSourceLayer(sourceLayer)
+        return this
+    }
 
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public RasterLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): RasterLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  // Property getters
+    // Property getters
 
-  /**
-   * Get the RasterOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-opacity", nativeGetRasterOpacity());
-  }
+    /**
+     * Get the RasterOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-opacity", nativeGetRasterOpacity())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the RasterOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getRasterOpacityTransition() {
-    checkThread();
-    return nativeGetRasterOpacityTransition();
-  }
+    /**
+     * The RasterOpacity property transition options
+     */
+    var rasterOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetRasterOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetRasterOpacityTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the RasterOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setRasterOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetRasterOpacityTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Get the RasterHueRotate property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterHueRotate: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-hue-rotate", nativeGetRasterHueRotate())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the RasterHueRotate property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterHueRotate() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-hue-rotate", nativeGetRasterHueRotate());
-  }
+    /**
+     * The RasterHueRotate property transition options
+     */
+    var rasterHueRotateTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetRasterHueRotateTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetRasterHueRotateTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the RasterHueRotate property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getRasterHueRotateTransition() {
-    checkThread();
-    return nativeGetRasterHueRotateTransition();
-  }
+    /**
+     * Get the RasterBrightnessMin property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterBrightnessMin: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-brightness-min", nativeGetRasterBrightnessMin())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Set the RasterHueRotate property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setRasterHueRotateTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetRasterHueRotateTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The RasterBrightnessMin property transition options
+     */
+    var rasterBrightnessMinTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetRasterBrightnessMinTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetRasterBrightnessMinTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the RasterBrightnessMin property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterBrightnessMin() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-brightness-min", nativeGetRasterBrightnessMin());
-  }
+    /**
+     * Get the RasterBrightnessMax property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterBrightnessMax: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-brightness-max", nativeGetRasterBrightnessMax())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the RasterBrightnessMin property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getRasterBrightnessMinTransition() {
-    checkThread();
-    return nativeGetRasterBrightnessMinTransition();
-  }
+    /**
+     * The RasterBrightnessMax property transition options
+     */
+    var rasterBrightnessMaxTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetRasterBrightnessMaxTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetRasterBrightnessMaxTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the RasterBrightnessMin property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setRasterBrightnessMinTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetRasterBrightnessMinTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Get the RasterSaturation property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterSaturation: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-saturation", nativeGetRasterSaturation())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the RasterBrightnessMax property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterBrightnessMax() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-brightness-max", nativeGetRasterBrightnessMax());
-  }
+    /**
+     * The RasterSaturation property transition options
+     */
+    var rasterSaturationTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetRasterSaturationTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetRasterSaturationTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the RasterBrightnessMax property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getRasterBrightnessMaxTransition() {
-    checkThread();
-    return nativeGetRasterBrightnessMaxTransition();
-  }
+    /**
+     * Get the RasterContrast property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterContrast: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-contrast", nativeGetRasterContrast())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Set the RasterBrightnessMax property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setRasterBrightnessMaxTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetRasterBrightnessMaxTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The RasterContrast property transition options
+     */
+    var rasterContrastTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetRasterContrastTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetRasterContrastTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Get the RasterSaturation property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterSaturation() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-saturation", nativeGetRasterSaturation());
-  }
+    /**
+     * Get the RasterResampling property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterResampling: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-resampling", nativeGetRasterResampling())
+            return value as PropertyValue<String>
+        }
 
-  /**
-   * Get the RasterSaturation property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getRasterSaturationTransition() {
-    checkThread();
-    return nativeGetRasterSaturationTransition();
-  }
+    /**
+     * Get the RasterFadeDuration property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val rasterFadeDuration: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("raster-fade-duration", nativeGetRasterFadeDuration())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Set the RasterSaturation property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setRasterSaturationTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetRasterSaturationTransition(options.getDuration(), options.getDelay());
-  }
+    @Keep
+    private external fun nativeGetRasterOpacity(): Any
 
-  /**
-   * Get the RasterContrast property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterContrast() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-contrast", nativeGetRasterContrast());
-  }
+    @Keep
+    private external fun nativeGetRasterOpacityTransition(): TransitionOptions
 
-  /**
-   * Get the RasterContrast property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getRasterContrastTransition() {
-    checkThread();
-    return nativeGetRasterContrastTransition();
-  }
+    @Keep
+    private external fun nativeSetRasterOpacityTransition(duration: Long, delay: Long)
 
-  /**
-   * Set the RasterContrast property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setRasterContrastTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetRasterContrastTransition(options.getDuration(), options.getDelay());
-  }
+    @Keep
+    private external fun nativeGetRasterHueRotate(): Any
 
-  /**
-   * Get the RasterResampling property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getRasterResampling() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("raster-resampling", nativeGetRasterResampling());
-  }
+    @Keep
+    private external fun nativeGetRasterHueRotateTransition(): TransitionOptions
 
-  /**
-   * Get the RasterFadeDuration property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getRasterFadeDuration() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("raster-fade-duration", nativeGetRasterFadeDuration());
-  }
+    @Keep
+    private external fun nativeSetRasterHueRotateTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterOpacity();
+    @Keep
+    private external fun nativeGetRasterBrightnessMin(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetRasterOpacityTransition();
+    @Keep
+    private external fun nativeGetRasterBrightnessMinTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetRasterOpacityTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetRasterBrightnessMinTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterHueRotate();
+    @Keep
+    private external fun nativeGetRasterBrightnessMax(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetRasterHueRotateTransition();
+    @Keep
+    private external fun nativeGetRasterBrightnessMaxTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetRasterHueRotateTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetRasterBrightnessMaxTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterBrightnessMin();
+    @Keep
+    private external fun nativeGetRasterSaturation(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetRasterBrightnessMinTransition();
+    @Keep
+    private external fun nativeGetRasterSaturationTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetRasterBrightnessMinTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetRasterSaturationTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterBrightnessMax();
+    @Keep
+    private external fun nativeGetRasterContrast(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetRasterBrightnessMaxTransition();
+    @Keep
+    private external fun nativeGetRasterContrastTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetRasterBrightnessMaxTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetRasterContrastTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterSaturation();
+    @Keep
+    private external fun nativeGetRasterResampling(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetRasterSaturationTransition();
+    @Keep
+    private external fun nativeGetRasterFadeDuration(): Any
 
-  @Keep
-  private native void nativeSetRasterSaturationTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterContrast();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetRasterContrastTransition();
-
-  @Keep
-  private native void nativeSetRasterContrastTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterResampling();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetRasterFadeDuration();
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
-
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

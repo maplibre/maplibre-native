@@ -1,14 +1,10 @@
-package org.maplibre.android.location.permissions;
-
-import java.util.List;
+package org.maplibre.android.location.permissions
 
 /**
  * Callback used in PermissionsManager
  */
+interface PermissionsListener {
+    fun onExplanationNeeded(permissionsToExplain: List<String>)
 
-public interface PermissionsListener {
-
-  void onExplanationNeeded(List<String> permissionsToExplain);
-
-  void onPermissionResult(boolean granted);
+    fun onPermissionResult(granted: Boolean)
 }

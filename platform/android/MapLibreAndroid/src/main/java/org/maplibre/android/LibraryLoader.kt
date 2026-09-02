@@ -1,67 +1,73 @@
-package org.maplibre.android;
+package org.maplibre.android
 
-import org.maplibre.android.log.Logger;
-import org.maplibre.android.utils.PlatformUtils;
+import org.maplibre.android.log.Logger
+import org.maplibre.android.utils.PlatformUtils
 
 /**
  * Loads the mapbox-gl shared library
- * <p>
+ *
  * By default uses System.loadLibrary
- * use {@link #setLibraryLoader(LibraryLoader)} to provide an alternative library loading hook.
- * </p>
+ * use [setLibraryLoader] to provide an alternative library loading hook.
  */
-public abstract class LibraryLoader {
+abstract class LibraryLoader {
+    abstract fun load(name: String)
 
-  private static final String TAG = "Mbgl-LibraryLoader";
+    companion object {
+        private const val TAG = "Mbgl-LibraryLoader"
 
-  private static final LibraryLoader DEFAULT = MapLibre.getModuleProvider()
-    .createLibraryLoaderProvider()
-    .getDefaultLibraryLoader();
+        private val DEFAULT: LibraryLoader =
+            MapLibre
+                .getModuleProvider()
+                .createLibraryLoaderProvider()
+                .getDefaultLibraryLoader()
 
-  private static volatile LibraryLoader loader = DEFAULT;
+        @Volatile
+        private var loader: LibraryLoader = DEFAULT
 
-  private static boolean loaded;
-  private static boolean handleLoadError = false;
+        private var loaded = false
+        private var handleLoadError = false
 
-  /**
-   * Set the library loader that loads the shared library.
-   *
-   * @param libraryLoader the library loader
-   */
-  public static void setLibraryLoader(LibraryLoader libraryLoader) {
-    loader = libraryLoader;
-  }
+        /**
+         * Set the library loader that loads the shared library.
+         *
+         * @param libraryLoader the library loader
+         */
+        @JvmStatic
+        fun setLibraryLoader(libraryLoader: LibraryLoader) {
+            loader = libraryLoader
+        }
 
-  /**
-   * Catch UnsatisfiedLinkErrors on load
-   */
-  public static void enableErrorHandling(boolean value) {
-    handleLoadError = value;
-  }
+        /**
+         * Catch UnsatisfiedLinkErrors on load
+         */
+        @JvmStatic
+        fun enableErrorHandling(value: Boolean) {
+            handleLoadError = value
+        }
 
-  /**
-   * Loads "libmaplibre.so" native shared library.
-   * <p>
-   * Catches UnsatisfiedLinkErrors (if enabled) and prints a warning to logcat.
-   * </p>
-   */
-  public static synchronized void load() {
-    try {
-      if (!loaded) {
-        loaded = true;
-        loader.load("maplibre");
-      }
-    } catch (UnsatisfiedLinkError error) {
-      loaded = false;
-      String message = "Failed to load native shared library.";
-      Logger.e(TAG, message, error);
-      MapStrictMode.strictModeViolation(message, error);
+        /**
+         * Loads "libmaplibre.so" native shared library.
+         *
+         * Catches UnsatisfiedLinkErrors (if enabled) and prints a warning to logcat.
+         */
+        @JvmStatic
+        @Synchronized
+        fun load() {
+            try {
+                if (!loaded) {
+                    loaded = true
+                    loader.load("maplibre")
+                }
+            } catch (error: UnsatisfiedLinkError) {
+                loaded = false
+                val message = "Failed to load native shared library."
+                Logger.e(TAG, message, error)
+                MapStrictMode.strictModeViolation(message, error)
 
-      if (!handleLoadError && !PlatformUtils.isTest()) {
-        throw error;
-      }
+                if (!handleLoadError && !PlatformUtils.isTest()) {
+                    throw error
+                }
+            }
+        }
     }
-  }
-
-  public abstract void load(String name);
 }

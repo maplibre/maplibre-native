@@ -1,72 +1,37 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import android.graphics.Color;
-
-import androidx.annotation.Keep;
-
-import org.maplibre.android.maps.MapLibreMap;
+import android.graphics.Color
+import androidx.annotation.Keep
 
 /**
  * Polyline is a geometry feature with an unclosed list of coordinates drawn as a line
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/maplibre/maplibre-plugins-android">
- *   MapLibre Annotation Plugin</a> instead
  */
-@Deprecated
-public final class Polyline extends BasePointCollection {
+@Deprecated(
+    "As of 7.0.0, use " +
+        "[MapLibre Annotation Plugin](https://github.com/maplibre/maplibre-plugins-android) instead",
+)
+class Polyline internal constructor() : BasePointCollection() {
+    /**
+     * The color of this polyline, in ARGB format.
+     */
+    @field:Keep
+    var color: Int = Color.BLACK // default color is black
+        set(value) {
+            field = value
+            update()
+        }
 
-  @Keep
-  private int color = Color.BLACK; // default color is black
-  @Keep
-  private float width = 10; // As specified by Google API Docs (in pixels)
+    /**
+     * The width of this polyline, in screen pixels.
+     */
+    @field:Keep
+    var width: Float = 10f // As specified by Google API Docs (in pixels)
+        set(value) {
+            field = value
+            update()
+        }
 
-  Polyline() {
-    super();
-  }
-
-  /**
-   * Gets the color of this polyline.
-   *
-   * @return The color in ARGB format.
-   */
-  public int getColor() {
-    return color;
-  }
-
-  /**
-   * Gets the width of this polyline.
-   *
-   * @return The width in screen pixels.
-   */
-  public float getWidth() {
-    return width;
-  }
-
-  /**
-   * Sets the color of the polyline.
-   *
-   * @param color - the color in ARGB format
-   */
-  public void setColor(int color) {
-    this.color = color;
-    update();
-  }
-
-  /**
-   * Sets the width of the polyline.
-   *
-   * @param width in pixels
-   */
-  public void setWidth(float width) {
-    this.width = width;
-    update();
-  }
-
-  @Override
-  void update() {
-    MapLibreMap maplibreMap = getMapLibreMap();
-    if (maplibreMap != null) {
-      maplibreMap.updatePolyline(this);
+    override fun update() {
+        getMapLibreMap()?.updatePolyline(this)
     }
-  }
 }

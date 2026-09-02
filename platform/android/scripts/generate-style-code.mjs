@@ -160,6 +160,54 @@ global.propertyJavaType = function propertyType(property) {
    }
  }
 
+global.propertyKotlinType = function propertyKotlinType(property) {
+   switch (property.type) {
+       case 'boolean':
+         return 'Boolean';
+       case 'number':
+         return 'Float';
+       case 'formatted':
+         return 'Formatted';
+       case 'string':
+       case 'resolvedImage':
+         return 'String';
+       case 'enum':
+         return 'String';
+       case 'color':
+         return 'String';
+       case 'numberArray':
+         return 'FloatArray';
+       case 'colorArray':
+         return 'Array<String>';
+       case 'array':
+         return `Array<${propertyKotlinType({type:property.value})}>`;
+       default:
+         throw new Error(`unknown type for ${property.name}`);
+   }
+ }
+
+// The Kotlin counterpart of `propertyType`, i.e. the boxed type used as a `PropertyValue` type argument.
+global.propertyKotlinBoxedType = function propertyKotlinBoxedType(property) {
+   let type = propertyType(property);
+   let arrayDepth = 0;
+   while (type.endsWith('[]')) {
+     type = type.slice(0, -2);
+     arrayDepth++;
+   }
+   if (type === 'Object') {
+     type = 'Any';
+   }
+   while (arrayDepth-- > 0) {
+     type = `Array<${type}>`;
+   }
+   return type;
+ }
+
+// Rewrites the Javadoc links produced for the Java templates as KDoc links.
+global.kotlinDoc = function kotlinDoc(doc) {
+   return doc.replace(/\{@link ([^}]+)\}/g, (match, reference) => `[${reference.replace('#', '.')}]`);
+ }
+
 global.propertyJNIType = function propertyJNIType(property) {
   switch (property.type) {
       case 'boolean':
@@ -457,14 +505,14 @@ global.supportsPropertyFunction = function (property) {
 
 // Template processing //
 
-// Java + JNI Light (Peer model)
-const lightJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/light/light.java.ejs'), 'utf8'), {strict: true});
+// Kotlin + JNI Light (Peer model)
+const lightKotlin = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/light/light.kt.ejs'), 'utf8'), {strict: true});
 const lightJavaUnitTests = ejs.compile(fs.readFileSync(absPath('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/light.junit.ejs'), 'utf8'), {strict: true});
-writeIfModified(absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/light/Light.java`), lightJava({properties: lightProperties}));
+writeIfModified(absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/light/Light.kt`), lightKotlin({properties: lightProperties}));
 writeIfModified(absPath(`MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/LightTest.java`), lightJavaUnitTests({properties: lightProperties}));
 
-// Java
-const layerJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/layer.java.ejs'), 'utf8'), {strict: true});
+// Kotlin
+const layerKotlin = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/layer.kt.ejs'), 'utf8'), {strict: true});
 const layerJavaUnitTests = ejs.compile(fs.readFileSync(absPath('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/layer.junit.ejs'), 'utf8'), {strict: true});
 
 for (const layer of layers) {
@@ -475,7 +523,7 @@ for (const layer of layers) {
     testDir = 'MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/location/'
   }
 
-  writeIfModified(absPath(srcDir + `${camelize(layer.type)}Layer.java`), layerJava(layer));
+  writeIfModified(absPath(srcDir + `${camelize(layer.type)}Layer.kt`), layerKotlin(layer));
   writeIfModified(absPath(testDir + `${camelize(layer.type)}LayerTest.java`), layerJavaUnitTests(layer));
 }
 
@@ -490,24 +538,24 @@ for (const layer of layers) {
   writeIfModified(absPath(`MapLibreAndroid/src/cpp/style/layers/${layerFileName}_layer.cpp`), layerCpp(layer));
 }
 
-// Java PropertyFactory
-const propertyFactoryTemplate = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property_factory.java.ejs'), 'utf8'), {strict: true});
+// Kotlin PropertyFactory
+const propertyFactoryTemplate = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property_factory.kt.ejs'), 'utf8'), {strict: true});
 
-const propertyFactorySrcDir = absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/PropertyFactory.java')
+const propertyFactorySrcDir = absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/PropertyFactory.kt')
 writeIfModified(
     propertyFactorySrcDir,
     propertyFactoryTemplate({layoutProperties: layoutProperties, paintProperties: paintProperties, locationIndicator: false})
 );
 
-const locationPropertyFactorySrcDir = absPath('MapLibreAndroid/src/main/java/org/maplibre/android/location/LocationPropertyFactory.java')
+const locationPropertyFactorySrcDir = absPath('MapLibreAndroid/src/main/java/org/maplibre/android/location/LocationPropertyFactory.kt')
 writeIfModified(
     locationPropertyFactorySrcDir,
     propertyFactoryTemplate({layoutProperties: locationLayoutProperties, paintProperties: locationPaintProperties, locationIndicator: true})
 );
 
-// Java Property
-const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property.java.ejs'), 'utf8'), {strict: true});
+// Kotlin Property
+const enumPropertyKotlinTemplate = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property.kt.ejs'), 'utf8'), {strict: true});
 writeIfModified(
-    absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/Property.java`),
-    enumPropertyJavaTemplate({properties: enumProperties})
+    absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/Property.kt`),
+    enumPropertyKotlinTemplate({properties: enumProperties})
 );

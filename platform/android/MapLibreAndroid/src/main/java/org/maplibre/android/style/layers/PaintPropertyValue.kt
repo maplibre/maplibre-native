@@ -1,11 +1,6 @@
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.NonNull;
-
-public class PaintPropertyValue<T> extends PropertyValue<T> {
-
-  public PaintPropertyValue(@NonNull String name, T value) {
-    super(name, value);
-  }
-
-}
+class PaintPropertyValue<T>(
+    name: String,
+    value: T?,
+) : PropertyValue<T>(name, value)

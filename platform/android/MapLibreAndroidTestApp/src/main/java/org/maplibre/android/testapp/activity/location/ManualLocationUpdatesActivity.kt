@@ -15,18 +15,21 @@ import org.maplibre.android.location.engine.LocationEngineRequest
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
-class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
+class ManualLocationUpdatesActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private var locationComponent: LocationComponent? = null
     private var locationEngine: LocationEngine? = null
     private var permissionsManager: PermissionsManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_manual_update)
@@ -36,7 +39,7 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
         fabManualUpdate.setOnClickListener { v: View? ->
             if (locationComponent != null && locationComponent!!.locationEngine == null) {
                 locationComponent!!.forceLocationUpdate(
-                    Utils.getRandomLocation(LatLngBounds.from(60.0, 25.0, 40.0, -5.0))
+                    Utils.getRandomLocation(LatLngBounds.from(60.0, 25.0, 40.0, -5.0)),
                 )
             }
         }
@@ -50,20 +53,22 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
                     fabToggle.setImageResource(R.drawable.ic_layers_clear)
                     fabManualUpdate.isEnabled = true
                     fabManualUpdate.alpha = 1f
-                    Toast.makeText(
-                        this@ManualLocationUpdatesActivity.applicationContext,
-                        "LocationEngine disabled, use manual updates",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            this@ManualLocationUpdatesActivity.applicationContext,
+                            "LocationEngine disabled, use manual updates",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 } else {
                     fabToggle.setImageResource(R.drawable.ic_layers)
                     fabManualUpdate.isEnabled = false
                     fabManualUpdate.alpha = 0.5f
-                    Toast.makeText(
-                        this@ManualLocationUpdatesActivity.applicationContext,
-                        "LocationEngine enabled",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            this@ManualLocationUpdatesActivity.applicationContext,
+                            "LocationEngine enabled",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
             }
         }
@@ -71,23 +76,27 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
         } else {
-            permissionsManager = PermissionsManager(object : PermissionsListener {
-                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-                    Toast.makeText(
-                        this@ManualLocationUpdatesActivity.applicationContext,
-                        "You need to accept location permissions.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            permissionsManager =
+                PermissionsManager(
+                    object : PermissionsListener {
+                        override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                            Toast
+                                .makeText(
+                                    this@ManualLocationUpdatesActivity.applicationContext,
+                                    "You need to accept location permissions.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                override fun onPermissionResult(granted: Boolean) {
-                    if (granted) {
-                        mapView.getMapAsync(this@ManualLocationUpdatesActivity)
-                    } else {
-                        finish()
-                    }
-                }
-            })
+                        override fun onPermissionResult(granted: Boolean) {
+                            if (granted) {
+                                mapView.getMapAsync(this@ManualLocationUpdatesActivity)
+                            } else {
+                                finish()
+                            }
+                        }
+                    },
+                )
             permissionsManager!!.requestLocationPermissions(this)
         }
     }
@@ -95,7 +104,7 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -104,7 +113,7 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         maplibreMap.setStyle(
-            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
+            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets")),
         ) { style: Style? ->
             locationComponent = maplibreMap.locationComponent
             locationComponent!!.activateLocationComponent(
@@ -112,11 +121,12 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
                     .builder(this, style!!)
                     .locationEngine(locationEngine)
                     .locationEngineRequest(
-                        LocationEngineRequest.Builder(500)
+                        LocationEngineRequest
+                            .Builder(500)
                             .setFastestInterval(500)
-                            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
-                    )
-                    .build()
+                            .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                            .build(),
+                    ).build(),
             )
             locationComponent!!.isLocationComponentEnabled = true
             locationComponent!!.renderMode = RenderMode.COMPASS

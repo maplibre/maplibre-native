@@ -1,31 +1,19 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import androidx.annotation.IntDef;
+import androidx.annotation.IntDef
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+@Deprecated("As of 7.0.0")
+internal class ArrowDirection(
+    @param:Value @get:Value val value: Int,
+) {
+    @IntDef(LEFT, RIGHT, TOP, BOTTOM)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class Value
 
-@Deprecated
-class ArrowDirection {
-  @IntDef( {LEFT, RIGHT, TOP, BOTTOM})
-  @Retention(RetentionPolicy.SOURCE)
-  @interface Value {
-  }
-
-  static final int LEFT = 0;
-  static final int RIGHT = 1;
-  static final int TOP = 2;
-  static final int BOTTOM = 3;
-
-  @Value
-  private final int value;
-
-  ArrowDirection(@Value int value) {
-    this.value = value;
-  }
-
-  @Value
-  public int getValue() {
-    return value;
-  }
+    companion object {
+        const val LEFT = 0
+        const val RIGHT = 1
+        const val TOP = 2
+        const val BOTTOM = 3
+    }
 }

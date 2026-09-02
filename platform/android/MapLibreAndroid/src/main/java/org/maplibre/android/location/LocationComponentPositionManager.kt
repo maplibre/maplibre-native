@@ -1,54 +1,42 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.Layer
 
-import org.maplibre.android.maps.Style;
-import org.maplibre.android.style.layers.Layer;
+internal class LocationComponentPositionManager(
+    private val style: Style,
+    private var layerAbove: String?,
+    private var layerBelow: String?,
+    var bearingOnTop: Boolean,
+) {
+    /**
+     * Returns true whenever layer above/below configuration has changed and requires re-layout.
+     */
+    fun update(
+        layerAbove: String?,
+        layerBelow: String?,
+        bearingOnTop: Boolean,
+    ): Boolean {
+        val requiresUpdate =
+            this.layerAbove != layerAbove ||
+                this.layerBelow != layerBelow ||
+                this.bearingOnTop != bearingOnTop
 
-class LocationComponentPositionManager {
-
-  @NonNull
-  private final Style style;
-
-  @Nullable
-  private String layerAbove;
-
-  @Nullable
-  private String layerBelow;
-
-  public boolean bearingOnTop;
-
-  LocationComponentPositionManager(@NonNull Style style, @Nullable String layerAbove,
-                                   @Nullable String layerBelow, Boolean bearingOnTop) {
-    this.style = style;
-    this.layerAbove = layerAbove;
-    this.layerBelow = layerBelow;
-    this.bearingOnTop = bearingOnTop;
-  }
-
-  /**
-   * Returns true whenever layer above/below configuration has changed and requires re-layout.
-   */
-  boolean update(@Nullable String layerAbove, @Nullable String layerBelow, boolean bearingOnTop) {
-    boolean requiresUpdate =
-      !(this.layerAbove == layerAbove || (this.layerAbove != null && this.layerAbove.equals(layerAbove)))
-        || !(this.layerBelow == layerBelow || (this.layerBelow != null && this.layerBelow.equals(layerBelow)))
-        || (this.bearingOnTop != bearingOnTop);
-
-    this.layerAbove = layerAbove;
-    this.layerBelow = layerBelow;
-    this.bearingOnTop = bearingOnTop;
-    return requiresUpdate;
-  }
-
-  void addLayerToMap(@NonNull Layer layer) {
-    if (layerAbove != null) {
-      style.addLayerAbove(layer, layerAbove);
-    } else if (layerBelow != null) {
-      style.addLayerBelow(layer, layerBelow);
-    } else {
-      style.addLayer(layer);
+        this.layerAbove = layerAbove
+        this.layerBelow = layerBelow
+        this.bearingOnTop = bearingOnTop
+        return requiresUpdate
     }
-  }
+
+    fun addLayerToMap(layer: Layer) {
+        val layerAbove = this.layerAbove
+        val layerBelow = this.layerBelow
+        if (layerAbove != null) {
+            style.addLayerAbove(layer, layerAbove)
+        } else if (layerBelow != null) {
+            style.addLayerBelow(layer, layerBelow)
+        } else {
+            style.addLayer(layer)
+        }
+    }
 }

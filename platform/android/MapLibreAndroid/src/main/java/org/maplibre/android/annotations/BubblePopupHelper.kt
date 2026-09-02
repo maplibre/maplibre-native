@@ -1,36 +1,27 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.view.ViewGroup;
-import android.widget.PopupWindow;
+import android.content.Context
+import android.view.ViewGroup
+import android.widget.PopupWindow
+import org.maplibre.android.R
 
-import androidx.annotation.NonNull;
+@Deprecated("As of 7.0.0")
+internal object BubblePopupHelper {
+    @JvmStatic
+    fun create(
+        context: Context,
+        bubbleLayout: BubbleLayout,
+    ): PopupWindow {
+        val popupWindow = PopupWindow(context)
 
-import org.maplibre.android.R;
+        popupWindow.contentView = bubbleLayout
+        popupWindow.isOutsideTouchable = true
+        popupWindow.width = ViewGroup.LayoutParams.WRAP_CONTENT
+        popupWindow.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        popupWindow.animationStyle = android.R.style.Animation_Dialog
+        // change background color to transparent
+        popupWindow.setBackgroundDrawable(context.getDrawable(R.drawable.maplibre_popup_window_transparent))
 
-@Deprecated
-class BubblePopupHelper {
-
-  @NonNull
-  static PopupWindow create(@NonNull Context context, @NonNull BubbleLayout bubbleLayout) {
-    PopupWindow popupWindow = new PopupWindow(context);
-
-    popupWindow.setContentView(bubbleLayout);
-    popupWindow.setOutsideTouchable(true);
-    popupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-    popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-    popupWindow.setAnimationStyle(android.R.style.Animation_Dialog);
-    // change background color to transparent
-    Drawable drawable;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      drawable = context.getDrawable(R.drawable.maplibre_popup_window_transparent);
-    } else {
-      drawable = context.getResources().getDrawable(R.drawable.maplibre_popup_window_transparent);
+        return popupWindow
     }
-    popupWindow.setBackgroundDrawable(drawable);
-
-    return popupWindow;
-  }
 }

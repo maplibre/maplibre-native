@@ -1,40 +1,31 @@
-package org.maplibre.android.http;
+package org.maplibre.android.http
 
-import android.content.Context;
-import android.content.pm.PackageInfo;
+import android.content.Context
+import org.maplibre.android.MapLibre
+import org.maplibre.android.MapStrictMode
 
-import androidx.annotation.NonNull;
+object HttpIdentifier {
+    /**
+     * Returns the application identifier, consisting out the package name, version name and version code.
+     *
+     * @return the application identifier
+     */
+    @JvmStatic
+    fun getIdentifier(): String = getIdentifier(MapLibre.getApplicationContext())
 
-import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.MapLibre;
-
-public class HttpIdentifier {
-
-  private HttpIdentifier() {
-  }
-
-  /**
-   * Returns the application identifier, consisting out the package name, version name and version code.
-   *
-   * @return the application identifier
-   */
-  public static String getIdentifier() {
-    return getIdentifier(MapLibre.getApplicationContext());
-  }
-
-  /**
-   * Returns the application identifier, consisting out the package name, version name and version code.
-   *
-   * @param context the context used to retrieve the package manager from
-   * @return the application identifier
-   */
-  private static String getIdentifier(@NonNull Context context) {
-    try {
-      PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-      return String.format("%s/%s (%s)", context.getPackageName(), packageInfo.versionName, packageInfo.versionCode);
-    } catch (Exception exception) {
-      MapStrictMode.strictModeViolation(exception);
-      return "";
-    }
-  }
+    /**
+     * Returns the application identifier, consisting out the package name, version name and version code.
+     *
+     * @param context the context used to retrieve the package manager from
+     * @return the application identifier
+     */
+    @Suppress("DEPRECATION")
+    private fun getIdentifier(context: Context): String =
+        try {
+            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            String.format("%s/%s (%s)", context.packageName, packageInfo.versionName, packageInfo.versionCode)
+        } catch (exception: Exception) {
+            MapStrictMode.strictModeViolation(exception)
+            ""
+        }
 }

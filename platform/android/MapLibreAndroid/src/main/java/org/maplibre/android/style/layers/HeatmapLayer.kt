@@ -1,331 +1,281 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * A heatmap.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-heatmap">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-heatmap)
  */
 @UiThread
-public class HeatmapLayer extends Layer {
+class HeatmapLayer : Layer {
 
-  /**
-   * Creates a HeatmapLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  HeatmapLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a HeatmapLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a HeatmapLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public HeatmapLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
-
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
-
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public HeatmapLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public HeatmapLayer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
+    /**
+     * Creates a HeatmapLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
     }
-  }
 
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public HeatmapLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  // Property getters
+    /**
+     * The source layer.
+     */
+    var sourceLayer: String?
+        get() {
+            checkThread()
+            return nativeGetSourceLayer()
+        }
+        set(sourceLayer) {
+            checkThread()
+            nativeSetSourceLayer(sourceLayer)
+        }
 
-  /**
-   * Get the HeatmapRadius property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getHeatmapRadius() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("heatmap-radius", nativeGetHeatmapRadius());
-  }
-
-  /**
-   * Get the HeatmapRadius property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getHeatmapRadiusTransition() {
-    checkThread();
-    return nativeGetHeatmapRadiusTransition();
-  }
-
-  /**
-   * Set the HeatmapRadius property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setHeatmapRadiusTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHeatmapRadiusTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the HeatmapWeight property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getHeatmapWeight() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("heatmap-weight", nativeGetHeatmapWeight());
-  }
-
-  /**
-   * Get the HeatmapIntensity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getHeatmapIntensity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("heatmap-intensity", nativeGetHeatmapIntensity());
-  }
-
-  /**
-   * Get the HeatmapIntensity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getHeatmapIntensityTransition() {
-    checkThread();
-    return nativeGetHeatmapIntensityTransition();
-  }
-
-  /**
-   * Set the HeatmapIntensity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setHeatmapIntensityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHeatmapIntensityTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the HeatmapColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getHeatmapColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("heatmap-color", nativeGetHeatmapColor());
-  }
-
-  /**
-   * Defines the color of each pixel based on its density value in a heatmap.  Should be an expression that uses `["heatmap-density"]` as input.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getHeatmapColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getHeatmapColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("heatmap-color was set as a Function");
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): HeatmapLayer {
+        this.sourceLayer = sourceLayer
+        return this
     }
-  }
 
-  /**
-   * Get the HeatmapOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getHeatmapOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("heatmap-opacity", nativeGetHeatmapOpacity());
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  /**
-   * Get the HeatmapOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getHeatmapOpacityTransition() {
-    checkThread();
-    return nativeGetHeatmapOpacityTransition();
-  }
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     */
+    fun setFilter(filter: Expression) {
+        checkThread()
+        nativeSetFilter(filter.toArray())
+    }
 
-  /**
-   * Set the HeatmapOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setHeatmapOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHeatmapOpacityTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     * @return This
+     */
+    fun withFilter(filter: Expression): HeatmapLayer {
+        setFilter(filter)
+        return this
+    }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHeatmapRadius();
+    /**
+     * A single expression filter.
+     *
+     * Use [setFilter] to set the filter.
+     */
+    val filter: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetFilter()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHeatmapRadiusTransition();
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): HeatmapLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  @Keep
-  private native void nativeSetHeatmapRadiusTransition(long duration, long delay);
+    // Property getters
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHeatmapWeight();
+    /**
+     * Get the HeatmapRadius property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val heatmapRadius: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("heatmap-radius", nativeGetHeatmapRadius())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHeatmapIntensity();
+    /**
+     * The HeatmapRadius property transition options
+     */
+    var heatmapRadiusTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHeatmapRadiusTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHeatmapRadiusTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHeatmapIntensityTransition();
+    /**
+     * Get the HeatmapWeight property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val heatmapWeight: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("heatmap-weight", nativeGetHeatmapWeight())
+            return value as PropertyValue<Float>
+        }
 
-  @Keep
-  private native void nativeSetHeatmapIntensityTransition(long duration, long delay);
+    /**
+     * Get the HeatmapIntensity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val heatmapIntensity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("heatmap-intensity", nativeGetHeatmapIntensity())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHeatmapColor();
+    /**
+     * The HeatmapIntensity property transition options
+     */
+    var heatmapIntensityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHeatmapIntensityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHeatmapIntensityTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHeatmapOpacity();
+    /**
+     * Get the HeatmapColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val heatmapColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("heatmap-color", nativeGetHeatmapColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHeatmapOpacityTransition();
+    /**
+     * Defines the color of each pixel based on its density value in a heatmap.  Should be an expression that uses `["heatmap-density"]` as input.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getHeatmapColorAsInt(): Int {
+        checkThread()
+        val value = heatmapColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("heatmap-color was set as a Function")
+        }
+    }
 
-  @Keep
-  private native void nativeSetHeatmapOpacityTransition(long duration, long delay);
+    /**
+     * Get the HeatmapOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val heatmapOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("heatmap-opacity", nativeGetHeatmapOpacity())
+            return value as PropertyValue<Float>
+        }
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    /**
+     * The HeatmapOpacity property transition options
+     */
+    var heatmapOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHeatmapOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHeatmapOpacityTransition(options.duration, options.delay)
+        }
 
+    @Keep
+    private external fun nativeGetHeatmapRadius(): Any
+
+    @Keep
+    private external fun nativeGetHeatmapRadiusTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHeatmapRadiusTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetHeatmapWeight(): Any
+
+    @Keep
+    private external fun nativeGetHeatmapIntensity(): Any
+
+    @Keep
+    private external fun nativeGetHeatmapIntensityTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHeatmapIntensityTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetHeatmapColor(): Any
+
+    @Keep
+    private external fun nativeGetHeatmapOpacity(): Any
+
+    @Keep
+    private external fun nativeGetHeatmapOpacityTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHeatmapOpacityTransition(duration: Long, delay: Long)
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

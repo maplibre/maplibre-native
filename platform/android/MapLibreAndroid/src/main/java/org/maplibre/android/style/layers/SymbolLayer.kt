@@ -1,1468 +1,1336 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
-import org.maplibre.android.style.types.Formatted;
-import org.maplibre.android.style.types.FormattedSection;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.style.types.Formatted
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * An icon or a text label.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-symbol">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-symbol)
  */
 @UiThread
-public class SymbolLayer extends Layer {
+class SymbolLayer : Layer {
 
-  /**
-   * Creates a SymbolLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  SymbolLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a SymbolLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a SymbolLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public SymbolLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
-
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
-
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public SymbolLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public SymbolLayer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
+    /**
+     * Creates a SymbolLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
     }
-  }
 
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public SymbolLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  // Property getters
+    /**
+     * The source layer.
+     */
+    var sourceLayer: String?
+        get() {
+            checkThread()
+            return nativeGetSourceLayer()
+        }
+        set(sourceLayer) {
+            checkThread()
+            nativeSetSourceLayer(sourceLayer)
+        }
 
-  /**
-   * Get the SymbolPlacement property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getSymbolPlacement() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("symbol-placement", nativeGetSymbolPlacement());
-  }
-
-  /**
-   * Get the SymbolSpacing property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getSymbolSpacing() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("symbol-spacing", nativeGetSymbolSpacing());
-  }
-
-  /**
-   * Get the SymbolAvoidEdges property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getSymbolAvoidEdges() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("symbol-avoid-edges", nativeGetSymbolAvoidEdges());
-  }
-
-  /**
-   * Get the SymbolSortKey property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getSymbolSortKey() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("symbol-sort-key", nativeGetSymbolSortKey());
-  }
-
-  /**
-   * Get the SymbolZOrder property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getSymbolZOrder() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("symbol-z-order", nativeGetSymbolZOrder());
-  }
-
-  /**
-   * Get the IconAllowOverlap property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getIconAllowOverlap() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("icon-allow-overlap", nativeGetIconAllowOverlap());
-  }
-
-  /**
-   * Get the IconIgnorePlacement property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getIconIgnorePlacement() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("icon-ignore-placement", nativeGetIconIgnorePlacement());
-  }
-
-  /**
-   * Get the IconOptional property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getIconOptional() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("icon-optional", nativeGetIconOptional());
-  }
-
-  /**
-   * Get the IconRotationAlignment property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconRotationAlignment() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-rotation-alignment", nativeGetIconRotationAlignment());
-  }
-
-  /**
-   * Get the IconSize property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconSize() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-size", nativeGetIconSize());
-  }
-
-  /**
-   * Get the IconTextFit property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconTextFit() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-text-fit", nativeGetIconTextFit());
-  }
-
-  /**
-   * Get the IconTextFitPadding property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getIconTextFitPadding() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("icon-text-fit-padding", nativeGetIconTextFitPadding());
-  }
-
-  /**
-   * Get the IconImage property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconImage() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-image", nativeGetIconImage());
-  }
-
-  /**
-   * Get the IconRotate property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconRotate() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-rotate", nativeGetIconRotate());
-  }
-
-  /**
-   * Get the IconPadding property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getIconPadding() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("icon-padding", nativeGetIconPadding());
-  }
-
-  /**
-   * Get the IconKeepUpright property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getIconKeepUpright() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("icon-keep-upright", nativeGetIconKeepUpright());
-  }
-
-  /**
-   * Get the IconOffset property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getIconOffset() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("icon-offset", nativeGetIconOffset());
-  }
-
-  /**
-   * Get the IconAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-anchor", nativeGetIconAnchor());
-  }
-
-  /**
-   * Get the IconPitchAlignment property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconPitchAlignment() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-pitch-alignment", nativeGetIconPitchAlignment());
-  }
-
-  /**
-   * Get the TextPitchAlignment property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextPitchAlignment() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-pitch-alignment", nativeGetTextPitchAlignment());
-  }
-
-  /**
-   * Get the TextRotationAlignment property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextRotationAlignment() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-rotation-alignment", nativeGetTextRotationAlignment());
-  }
-
-  /**
-   * Get the TextField property
-   *
-   * @return property wrapper value around Formatted
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Formatted> getTextField() {
-    checkThread();
-    return (PropertyValue<Formatted>) new PropertyValue("text-field", nativeGetTextField());
-  }
-
-  /**
-   * Get the TextFont property
-   *
-   * @return property wrapper value around String[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String[]> getTextFont() {
-    checkThread();
-    return (PropertyValue<String[]>) new PropertyValue("text-font", nativeGetTextFont());
-  }
-
-  /**
-   * Get the TextSize property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextSize() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-size", nativeGetTextSize());
-  }
-
-  /**
-   * Get the TextMaxWidth property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextMaxWidth() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-max-width", nativeGetTextMaxWidth());
-  }
-
-  /**
-   * Get the TextLineHeight property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextLineHeight() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-line-height", nativeGetTextLineHeight());
-  }
-
-  /**
-   * Get the TextLetterSpacing property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextLetterSpacing() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-letter-spacing", nativeGetTextLetterSpacing());
-  }
-
-  /**
-   * Get the TextJustify property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextJustify() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-justify", nativeGetTextJustify());
-  }
-
-  /**
-   * Get the TextRadialOffset property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextRadialOffset() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-radial-offset", nativeGetTextRadialOffset());
-  }
-
-  /**
-   * Get the TextVariableAnchor property
-   *
-   * @return property wrapper value around String[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String[]> getTextVariableAnchor() {
-    checkThread();
-    return (PropertyValue<String[]>) new PropertyValue("text-variable-anchor", nativeGetTextVariableAnchor());
-  }
-
-  /**
-   * Get the TextVariableAnchorOffset property
-   *
-   * @return property wrapper value around Object[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Object[]> getTextVariableAnchorOffset() {
-    checkThread();
-    return (PropertyValue<Object[]>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
-  }
-
-  /**
-   * Get the TextAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-anchor", nativeGetTextAnchor());
-  }
-
-  /**
-   * Get the TextMaxAngle property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextMaxAngle() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-max-angle", nativeGetTextMaxAngle());
-  }
-
-  /**
-   * Get the TextWritingMode property
-   *
-   * @return property wrapper value around String[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String[]> getTextWritingMode() {
-    checkThread();
-    return (PropertyValue<String[]>) new PropertyValue("text-writing-mode", nativeGetTextWritingMode());
-  }
-
-  /**
-   * Get the TextRotate property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextRotate() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-rotate", nativeGetTextRotate());
-  }
-
-  /**
-   * Get the TextPadding property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextPadding() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-padding", nativeGetTextPadding());
-  }
-
-  /**
-   * Get the TextKeepUpright property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getTextKeepUpright() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("text-keep-upright", nativeGetTextKeepUpright());
-  }
-
-  /**
-   * Get the TextTransform property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextTransform() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-transform", nativeGetTextTransform());
-  }
-
-  /**
-   * Get the TextOffset property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getTextOffset() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("text-offset", nativeGetTextOffset());
-  }
-
-  /**
-   * Get the TextAllowOverlap property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getTextAllowOverlap() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("text-allow-overlap", nativeGetTextAllowOverlap());
-  }
-
-  /**
-   * Get the TextIgnorePlacement property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getTextIgnorePlacement() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("text-ignore-placement", nativeGetTextIgnorePlacement());
-  }
-
-  /**
-   * Get the TextOptional property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getTextOptional() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("text-optional", nativeGetTextOptional());
-  }
-
-  /**
-   * Get the SymbolScreenSpace property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getSymbolScreenSpace() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("symbol-screen-space", nativeGetSymbolScreenSpace());
-  }
-
-  /**
-   * Get the IconOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-opacity", nativeGetIconOpacity());
-  }
-
-  /**
-   * Get the IconOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getIconOpacityTransition() {
-    checkThread();
-    return nativeGetIconOpacityTransition();
-  }
-
-  /**
-   * Set the IconOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setIconOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIconOpacityTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the IconColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-color", nativeGetIconColor());
-  }
-
-  /**
-   * The color of the icon. This can only be used with SDF icons.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getIconColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getIconColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("icon-color was set as a Function");
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): SymbolLayer {
+        this.sourceLayer = sourceLayer
+        return this
     }
-  }
 
-  /**
-   * Get the IconColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getIconColorTransition() {
-    checkThread();
-    return nativeGetIconColorTransition();
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  /**
-   * Set the IconColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setIconColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIconColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the IconHaloColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconHaloColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-halo-color", nativeGetIconHaloColor());
-  }
-
-  /**
-   * The color of the icon's halo. Icon halos can only be used with SDF icons.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getIconHaloColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getIconHaloColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("icon-halo-color was set as a Function");
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     */
+    fun setFilter(filter: Expression) {
+        checkThread()
+        nativeSetFilter(filter.toArray())
     }
-  }
 
-  /**
-   * Get the IconHaloColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getIconHaloColorTransition() {
-    checkThread();
-    return nativeGetIconHaloColorTransition();
-  }
-
-  /**
-   * Set the IconHaloColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setIconHaloColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIconHaloColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the IconHaloWidth property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconHaloWidth() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-halo-width", nativeGetIconHaloWidth());
-  }
-
-  /**
-   * Get the IconHaloWidth property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getIconHaloWidthTransition() {
-    checkThread();
-    return nativeGetIconHaloWidthTransition();
-  }
-
-  /**
-   * Set the IconHaloWidth property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setIconHaloWidthTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIconHaloWidthTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the IconHaloBlur property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getIconHaloBlur() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("icon-halo-blur", nativeGetIconHaloBlur());
-  }
-
-  /**
-   * Get the IconHaloBlur property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getIconHaloBlurTransition() {
-    checkThread();
-    return nativeGetIconHaloBlurTransition();
-  }
-
-  /**
-   * Set the IconHaloBlur property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setIconHaloBlurTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIconHaloBlurTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the IconTranslate property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getIconTranslate() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("icon-translate", nativeGetIconTranslate());
-  }
-
-  /**
-   * Get the IconTranslate property transition options
-   *
-   * @return transition options for Float[]
-   */
-  @NonNull
-  public TransitionOptions getIconTranslateTransition() {
-    checkThread();
-    return nativeGetIconTranslateTransition();
-  }
-
-  /**
-   * Set the IconTranslate property transition options
-   *
-   * @param options transition options for Float[]
-   */
-  public void setIconTranslateTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIconTranslateTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the IconTranslateAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getIconTranslateAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("icon-translate-anchor", nativeGetIconTranslateAnchor());
-  }
-
-  /**
-   * Get the TextOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-opacity", nativeGetTextOpacity());
-  }
-
-  /**
-   * Get the TextOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getTextOpacityTransition() {
-    checkThread();
-    return nativeGetTextOpacityTransition();
-  }
-
-  /**
-   * Set the TextOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setTextOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTextOpacityTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TextColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-color", nativeGetTextColor());
-  }
-
-  /**
-   * The color with which the text will be drawn.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getTextColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getTextColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("text-color was set as a Function");
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     * @return This
+     */
+    fun withFilter(filter: Expression): SymbolLayer {
+        setFilter(filter)
+        return this
     }
-  }
 
-  /**
-   * Get the TextColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getTextColorTransition() {
-    checkThread();
-    return nativeGetTextColorTransition();
-  }
+    /**
+     * A single expression filter.
+     *
+     * Use [setFilter] to set the filter.
+     */
+    val filter: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetFilter()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
+        }
 
-  /**
-   * Set the TextColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setTextColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTextColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TextHaloColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextHaloColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-halo-color", nativeGetTextHaloColor());
-  }
-
-  /**
-   * The color of the text's halo, which helps it stand out from backgrounds.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getTextHaloColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getTextHaloColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("text-halo-color was set as a Function");
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): SymbolLayer {
+        setProperties(*properties)
+        return this
     }
-  }
-
-  /**
-   * Get the TextHaloColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getTextHaloColorTransition() {
-    checkThread();
-    return nativeGetTextHaloColorTransition();
-  }
-
-  /**
-   * Set the TextHaloColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setTextHaloColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTextHaloColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TextHaloWidth property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextHaloWidth() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-halo-width", nativeGetTextHaloWidth());
-  }
-
-  /**
-   * Get the TextHaloWidth property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getTextHaloWidthTransition() {
-    checkThread();
-    return nativeGetTextHaloWidthTransition();
-  }
-
-  /**
-   * Set the TextHaloWidth property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setTextHaloWidthTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTextHaloWidthTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TextHaloBlur property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getTextHaloBlur() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("text-halo-blur", nativeGetTextHaloBlur());
-  }
-
-  /**
-   * Get the TextHaloBlur property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getTextHaloBlurTransition() {
-    checkThread();
-    return nativeGetTextHaloBlurTransition();
-  }
-
-  /**
-   * Set the TextHaloBlur property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setTextHaloBlurTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTextHaloBlurTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TextTranslate property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getTextTranslate() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("text-translate", nativeGetTextTranslate());
-  }
-
-  /**
-   * Get the TextTranslate property transition options
-   *
-   * @return transition options for Float[]
-   */
-  @NonNull
-  public TransitionOptions getTextTranslateTransition() {
-    checkThread();
-    return nativeGetTextTranslateTransition();
-  }
-
-  /**
-   * Set the TextTranslate property transition options
-   *
-   * @param options transition options for Float[]
-   */
-  public void setTextTranslateTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetTextTranslateTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the TextTranslateAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getTextTranslateAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("text-translate-anchor", nativeGetTextTranslateAnchor());
-  }
-
-  @NonNull
-  @Keep
-  private native Object nativeGetSymbolPlacement();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetSymbolSpacing();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetSymbolAvoidEdges();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetSymbolSortKey();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetSymbolZOrder();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconAllowOverlap();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconIgnorePlacement();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconOptional();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconRotationAlignment();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconSize();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconTextFit();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconTextFitPadding();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconImage();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconRotate();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconPadding();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconKeepUpright();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconOffset();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconAnchor();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconPitchAlignment();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextPitchAlignment();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextRotationAlignment();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextField();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextFont();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextSize();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextMaxWidth();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextLineHeight();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextLetterSpacing();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextJustify();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextRadialOffset();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextVariableAnchor();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextVariableAnchorOffset();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextAnchor();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextMaxAngle();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextWritingMode();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextRotate();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextPadding();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextKeepUpright();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextTransform();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextOffset();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextAllowOverlap();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextIgnorePlacement();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextOptional();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetSymbolScreenSpace();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconOpacity();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIconOpacityTransition();
-
-  @Keep
-  private native void nativeSetIconOpacityTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconColor();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIconColorTransition();
-
-  @Keep
-  private native void nativeSetIconColorTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconHaloColor();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIconHaloColorTransition();
-
-  @Keep
-  private native void nativeSetIconHaloColorTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconHaloWidth();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIconHaloWidthTransition();
-
-  @Keep
-  private native void nativeSetIconHaloWidthTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconHaloBlur();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIconHaloBlurTransition();
-
-  @Keep
-  private native void nativeSetIconHaloBlurTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconTranslate();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIconTranslateTransition();
-
-  @Keep
-  private native void nativeSetIconTranslateTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetIconTranslateAnchor();
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextOpacity();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTextOpacityTransition();
-
-  @Keep
-  private native void nativeSetTextOpacityTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextColor();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTextColorTransition();
-
-  @Keep
-  private native void nativeSetTextColorTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextHaloColor();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTextHaloColorTransition();
-
-  @Keep
-  private native void nativeSetTextHaloColorTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextHaloWidth();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTextHaloWidthTransition();
-
-  @Keep
-  private native void nativeSetTextHaloWidthTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextHaloBlur();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTextHaloBlurTransition();
-
-  @Keep
-  private native void nativeSetTextHaloBlurTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextTranslate();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetTextTranslateTransition();
-
-  @Keep
-  private native void nativeSetTextTranslateTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetTextTranslateAnchor();
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
 
+    // Property getters
+
+    /**
+     * Get the SymbolPlacement property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val symbolPlacement: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("symbol-placement", nativeGetSymbolPlacement())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the SymbolSpacing property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val symbolSpacing: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("symbol-spacing", nativeGetSymbolSpacing())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the SymbolAvoidEdges property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val symbolAvoidEdges: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("symbol-avoid-edges", nativeGetSymbolAvoidEdges())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the SymbolSortKey property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val symbolSortKey: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("symbol-sort-key", nativeGetSymbolSortKey())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the SymbolZOrder property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val symbolZOrder: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("symbol-z-order", nativeGetSymbolZOrder())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the IconAllowOverlap property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconAllowOverlap: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-allow-overlap", nativeGetIconAllowOverlap())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the IconIgnorePlacement property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconIgnorePlacement: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-ignore-placement", nativeGetIconIgnorePlacement())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the IconOptional property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconOptional: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-optional", nativeGetIconOptional())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the IconRotationAlignment property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconRotationAlignment: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-rotation-alignment", nativeGetIconRotationAlignment())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the IconSize property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconSize: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-size", nativeGetIconSize())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the IconTextFit property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconTextFit: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-text-fit", nativeGetIconTextFit())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the IconTextFitPadding property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconTextFitPadding: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-text-fit-padding", nativeGetIconTextFitPadding())
+            return value as PropertyValue<Array<Float>>
+        }
+
+    /**
+     * Get the IconImage property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconImage: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-image", nativeGetIconImage())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the IconRotate property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconRotate: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-rotate", nativeGetIconRotate())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the IconPadding property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconPadding: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-padding", nativeGetIconPadding())
+            return value as PropertyValue<Array<Float>>
+        }
+
+    /**
+     * Get the IconKeepUpright property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconKeepUpright: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-keep-upright", nativeGetIconKeepUpright())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the IconOffset property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconOffset: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-offset", nativeGetIconOffset())
+            return value as PropertyValue<Array<Float>>
+        }
+
+    /**
+     * Get the IconAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-anchor", nativeGetIconAnchor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the IconPitchAlignment property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconPitchAlignment: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-pitch-alignment", nativeGetIconPitchAlignment())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextPitchAlignment property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textPitchAlignment: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-pitch-alignment", nativeGetTextPitchAlignment())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextRotationAlignment property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textRotationAlignment: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-rotation-alignment", nativeGetTextRotationAlignment())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextField property
+     *
+     * @return property wrapper value around Formatted
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textField: PropertyValue<Formatted>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-field", nativeGetTextField())
+            return value as PropertyValue<Formatted>
+        }
+
+    /**
+     * Get the TextFont property
+     *
+     * @return property wrapper value around Array<String>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textFont: PropertyValue<Array<String>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-font", nativeGetTextFont())
+            return value as PropertyValue<Array<String>>
+        }
+
+    /**
+     * Get the TextSize property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textSize: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-size", nativeGetTextSize())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextMaxWidth property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textMaxWidth: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-max-width", nativeGetTextMaxWidth())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextLineHeight property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textLineHeight: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-line-height", nativeGetTextLineHeight())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextLetterSpacing property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textLetterSpacing: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-letter-spacing", nativeGetTextLetterSpacing())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextJustify property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textJustify: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-justify", nativeGetTextJustify())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextRadialOffset property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textRadialOffset: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-radial-offset", nativeGetTextRadialOffset())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextVariableAnchor property
+     *
+     * @return property wrapper value around Array<String>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textVariableAnchor: PropertyValue<Array<String>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-variable-anchor", nativeGetTextVariableAnchor())
+            return value as PropertyValue<Array<String>>
+        }
+
+    /**
+     * Get the TextVariableAnchorOffset property
+     *
+     * @return property wrapper value around Array<Any>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textVariableAnchorOffset: PropertyValue<Array<Any>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset())
+            return value as PropertyValue<Array<Any>>
+        }
+
+    /**
+     * Get the TextAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-anchor", nativeGetTextAnchor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextMaxAngle property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textMaxAngle: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-max-angle", nativeGetTextMaxAngle())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextWritingMode property
+     *
+     * @return property wrapper value around Array<String>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textWritingMode: PropertyValue<Array<String>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-writing-mode", nativeGetTextWritingMode())
+            return value as PropertyValue<Array<String>>
+        }
+
+    /**
+     * Get the TextRotate property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textRotate: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-rotate", nativeGetTextRotate())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextPadding property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textPadding: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-padding", nativeGetTextPadding())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * Get the TextKeepUpright property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textKeepUpright: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-keep-upright", nativeGetTextKeepUpright())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the TextTransform property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textTransform: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-transform", nativeGetTextTransform())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextOffset property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textOffset: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-offset", nativeGetTextOffset())
+            return value as PropertyValue<Array<Float>>
+        }
+
+    /**
+     * Get the TextAllowOverlap property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textAllowOverlap: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-allow-overlap", nativeGetTextAllowOverlap())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the TextIgnorePlacement property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textIgnorePlacement: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-ignore-placement", nativeGetTextIgnorePlacement())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the TextOptional property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textOptional: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-optional", nativeGetTextOptional())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the SymbolScreenSpace property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val symbolScreenSpace: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("symbol-screen-space", nativeGetSymbolScreenSpace())
+            return value as PropertyValue<Boolean>
+        }
+
+    /**
+     * Get the IconOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-opacity", nativeGetIconOpacity())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * The IconOpacity property transition options
+     */
+    var iconOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIconOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIconOpacityTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the IconColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-color", nativeGetIconColor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * The color of the icon. This can only be used with SDF icons.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getIconColorAsInt(): Int {
+        checkThread()
+        val value = iconColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("icon-color was set as a Function")
+        }
+    }
+
+    /**
+     * The IconColor property transition options
+     */
+    var iconColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIconColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIconColorTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the IconHaloColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconHaloColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-halo-color", nativeGetIconHaloColor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * The color of the icon's halo. Icon halos can only be used with SDF icons.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getIconHaloColorAsInt(): Int {
+        checkThread()
+        val value = iconHaloColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("icon-halo-color was set as a Function")
+        }
+    }
+
+    /**
+     * The IconHaloColor property transition options
+     */
+    var iconHaloColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIconHaloColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIconHaloColorTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the IconHaloWidth property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconHaloWidth: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-halo-width", nativeGetIconHaloWidth())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * The IconHaloWidth property transition options
+     */
+    var iconHaloWidthTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIconHaloWidthTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIconHaloWidthTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the IconHaloBlur property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconHaloBlur: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-halo-blur", nativeGetIconHaloBlur())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * The IconHaloBlur property transition options
+     */
+    var iconHaloBlurTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIconHaloBlurTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIconHaloBlurTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the IconTranslate property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconTranslate: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-translate", nativeGetIconTranslate())
+            return value as PropertyValue<Array<Float>>
+        }
+
+    /**
+     * The IconTranslate property transition options
+     */
+    var iconTranslateTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIconTranslateTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIconTranslateTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the IconTranslateAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val iconTranslateAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("icon-translate-anchor", nativeGetIconTranslateAnchor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * Get the TextOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-opacity", nativeGetTextOpacity())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * The TextOpacity property transition options
+     */
+    var textOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTextOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTextOpacityTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the TextColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-color", nativeGetTextColor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * The color with which the text will be drawn.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getTextColorAsInt(): Int {
+        checkThread()
+        val value = textColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("text-color was set as a Function")
+        }
+    }
+
+    /**
+     * The TextColor property transition options
+     */
+    var textColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTextColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTextColorTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the TextHaloColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textHaloColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-halo-color", nativeGetTextHaloColor())
+            return value as PropertyValue<String>
+        }
+
+    /**
+     * The color of the text's halo, which helps it stand out from backgrounds.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getTextHaloColorAsInt(): Int {
+        checkThread()
+        val value = textHaloColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("text-halo-color was set as a Function")
+        }
+    }
+
+    /**
+     * The TextHaloColor property transition options
+     */
+    var textHaloColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTextHaloColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTextHaloColorTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the TextHaloWidth property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textHaloWidth: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-halo-width", nativeGetTextHaloWidth())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * The TextHaloWidth property transition options
+     */
+    var textHaloWidthTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTextHaloWidthTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTextHaloWidthTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the TextHaloBlur property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textHaloBlur: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-halo-blur", nativeGetTextHaloBlur())
+            return value as PropertyValue<Float>
+        }
+
+    /**
+     * The TextHaloBlur property transition options
+     */
+    var textHaloBlurTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTextHaloBlurTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTextHaloBlurTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the TextTranslate property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textTranslate: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-translate", nativeGetTextTranslate())
+            return value as PropertyValue<Array<Float>>
+        }
+
+    /**
+     * The TextTranslate property transition options
+     */
+    var textTranslateTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetTextTranslateTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetTextTranslateTransition(options.duration, options.delay)
+        }
+
+    /**
+     * Get the TextTranslateAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val textTranslateAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("text-translate-anchor", nativeGetTextTranslateAnchor())
+            return value as PropertyValue<String>
+        }
+
+    @Keep
+    private external fun nativeGetSymbolPlacement(): Any
+
+    @Keep
+    private external fun nativeGetSymbolSpacing(): Any
+
+    @Keep
+    private external fun nativeGetSymbolAvoidEdges(): Any
+
+    @Keep
+    private external fun nativeGetSymbolSortKey(): Any
+
+    @Keep
+    private external fun nativeGetSymbolZOrder(): Any
+
+    @Keep
+    private external fun nativeGetIconAllowOverlap(): Any
+
+    @Keep
+    private external fun nativeGetIconIgnorePlacement(): Any
+
+    @Keep
+    private external fun nativeGetIconOptional(): Any
+
+    @Keep
+    private external fun nativeGetIconRotationAlignment(): Any
+
+    @Keep
+    private external fun nativeGetIconSize(): Any
+
+    @Keep
+    private external fun nativeGetIconTextFit(): Any
+
+    @Keep
+    private external fun nativeGetIconTextFitPadding(): Any
+
+    @Keep
+    private external fun nativeGetIconImage(): Any
+
+    @Keep
+    private external fun nativeGetIconRotate(): Any
+
+    @Keep
+    private external fun nativeGetIconPadding(): Any
+
+    @Keep
+    private external fun nativeGetIconKeepUpright(): Any
+
+    @Keep
+    private external fun nativeGetIconOffset(): Any
+
+    @Keep
+    private external fun nativeGetIconAnchor(): Any
+
+    @Keep
+    private external fun nativeGetIconPitchAlignment(): Any
+
+    @Keep
+    private external fun nativeGetTextPitchAlignment(): Any
+
+    @Keep
+    private external fun nativeGetTextRotationAlignment(): Any
+
+    @Keep
+    private external fun nativeGetTextField(): Any
+
+    @Keep
+    private external fun nativeGetTextFont(): Any
+
+    @Keep
+    private external fun nativeGetTextSize(): Any
+
+    @Keep
+    private external fun nativeGetTextMaxWidth(): Any
+
+    @Keep
+    private external fun nativeGetTextLineHeight(): Any
+
+    @Keep
+    private external fun nativeGetTextLetterSpacing(): Any
+
+    @Keep
+    private external fun nativeGetTextJustify(): Any
+
+    @Keep
+    private external fun nativeGetTextRadialOffset(): Any
+
+    @Keep
+    private external fun nativeGetTextVariableAnchor(): Any
+
+    @Keep
+    private external fun nativeGetTextVariableAnchorOffset(): Any
+
+    @Keep
+    private external fun nativeGetTextAnchor(): Any
+
+    @Keep
+    private external fun nativeGetTextMaxAngle(): Any
+
+    @Keep
+    private external fun nativeGetTextWritingMode(): Any
+
+    @Keep
+    private external fun nativeGetTextRotate(): Any
+
+    @Keep
+    private external fun nativeGetTextPadding(): Any
+
+    @Keep
+    private external fun nativeGetTextKeepUpright(): Any
+
+    @Keep
+    private external fun nativeGetTextTransform(): Any
+
+    @Keep
+    private external fun nativeGetTextOffset(): Any
+
+    @Keep
+    private external fun nativeGetTextAllowOverlap(): Any
+
+    @Keep
+    private external fun nativeGetTextIgnorePlacement(): Any
+
+    @Keep
+    private external fun nativeGetTextOptional(): Any
+
+    @Keep
+    private external fun nativeGetSymbolScreenSpace(): Any
+
+    @Keep
+    private external fun nativeGetIconOpacity(): Any
+
+    @Keep
+    private external fun nativeGetIconOpacityTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetIconOpacityTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetIconColor(): Any
+
+    @Keep
+    private external fun nativeGetIconColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetIconColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetIconHaloColor(): Any
+
+    @Keep
+    private external fun nativeGetIconHaloColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetIconHaloColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetIconHaloWidth(): Any
+
+    @Keep
+    private external fun nativeGetIconHaloWidthTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetIconHaloWidthTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetIconHaloBlur(): Any
+
+    @Keep
+    private external fun nativeGetIconHaloBlurTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetIconHaloBlurTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetIconTranslate(): Any
+
+    @Keep
+    private external fun nativeGetIconTranslateTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetIconTranslateTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetIconTranslateAnchor(): Any
+
+    @Keep
+    private external fun nativeGetTextOpacity(): Any
+
+    @Keep
+    private external fun nativeGetTextOpacityTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTextOpacityTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTextColor(): Any
+
+    @Keep
+    private external fun nativeGetTextColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTextColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTextHaloColor(): Any
+
+    @Keep
+    private external fun nativeGetTextHaloColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTextHaloColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTextHaloWidth(): Any
+
+    @Keep
+    private external fun nativeGetTextHaloWidthTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTextHaloWidthTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTextHaloBlur(): Any
+
+    @Keep
+    private external fun nativeGetTextHaloBlurTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTextHaloBlurTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTextTranslate(): Any
+
+    @Keep
+    private external fun nativeGetTextTranslateTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetTextTranslateTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetTextTranslateAnchor(): Any
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

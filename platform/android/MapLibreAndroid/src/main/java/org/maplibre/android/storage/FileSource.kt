@@ -1,399 +1,433 @@
-package org.maplibre.android.storage;
+package org.maplibre.android.storage
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
-import android.os.Environment;
-
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.MapLibre;
-import org.maplibre.android.constants.MapLibreConstants;
-import org.maplibre.android.log.Logger;
-import org.maplibre.android.util.TileServerOptions;
-import org.maplibre.android.utils.FileUtils;
-import org.maplibre.android.utils.ThreadUtils;
-
-import java.io.File;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.AsyncTask
+import android.os.Environment
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.MapLibre
+import org.maplibre.android.MapStrictMode
+import org.maplibre.android.constants.MapLibreConstants
+import org.maplibre.android.log.Logger
+import org.maplibre.android.util.TileServerOptions
+import org.maplibre.android.utils.FileUtils
+import org.maplibre.android.utils.ThreadUtils
+import java.io.File
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Holds a central reference to the core's DefaultFileSource for as long as
  * there are active mapviews / offline managers
  */
-public class FileSource {
+class FileSource private constructor(
+    cachePath: String,
+) {
+    @Keep
+    private val nativePtr: Long = 0
 
-  private static final String TAG = "Mbgl-FileSource";
-  private static final String MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH = "fileSourceResourcesCachePath";
-  private static final Lock resourcesCachePathLoaderLock = new ReentrantLock();
-  private static final Lock internalCachePathLoaderLock = new ReentrantLock();
-  @Nullable
-  private static String resourcesCachePath;
-  private static String internalCachePath;
-
-  /**
-   * This callback allows implementors to transform URLs before they are requested
-   * from the internet. This can be used add or remove custom parameters, or reroute
-   * certain requests to other servers or endpoints.
-   */
-  @Keep
-  public interface ResourceTransformCallback {
+    init {
+        val options = MapLibre.getTileServerOptions()
+        initialize(MapLibre.getApiKey(), cachePath, options)
+    }
 
     /**
-     * Called whenever a URL needs to be transformed.
-     *
-     * @param kind the kind of URL to be transformed.
-     * @param url  the  URL to be transformed
-     * @return a URL that will now be downloaded.
+     * This callback allows implementors to transform URLs before they are requested
+     * from the internet. This can be used add or remove custom parameters, or reroute
+     * certain requests to other servers or endpoints.
      */
-    String onURL(@Resource.Kind int kind, String url);
-
-  }
-
-  /**
-   * This callback receives an asynchronous response containing the new path of the
-   * resources cache database.
-   */
-  @Keep
-  public interface ResourcesCachePathChangeCallback {
+    @Keep
+    interface ResourceTransformCallback {
+        /**
+         * Called whenever a URL needs to be transformed.
+         *
+         * @param kind the kind of URL to be transformed.
+         * @param url  the  URL to be transformed
+         * @return a URL that will now be downloaded.
+         */
+        fun onURL(
+            @Resource.Kind kind: Int,
+            url: String,
+        ): String
+    }
 
     /**
-     * Receives the new database path
-     *
-     * @param path the path of the current resources cache database
+     * This callback receives an asynchronous response containing the new path of the
+     * resources cache database.
      */
-    void onSuccess(@NonNull String path);
+    @Keep
+    interface ResourcesCachePathChangeCallback {
+        /**
+         * Receives the new database path
+         *
+         * @param path the path of the current resources cache database
+         */
+        fun onSuccess(path: String)
+
+        /**
+         * Receives an error message if setting the path was not successful
+         *
+         * @param message the error message
+         */
+        fun onError(message: String)
+    }
+
+    @Keep
+    external fun setTileServerOptions(tileServerOptions: TileServerOptions?)
+
+    @Keep
+    external fun isActivated(): Boolean
+
+    @Keep
+    external fun activate()
+
+    @Keep
+    external fun deactivate()
+
+    @Keep
+    external fun setApiKey(apiKey: String?)
+
+    @Keep
+    external fun getApiKey(): String
+
+    @Keep
+    external fun setApiBaseUrl(baseUrl: String?)
+
+    @Keep
+    external fun getApiBaseUrl(): String
 
     /**
-     * Receives an error message if setting the path was not successful
+     * Sets a callback for transforming URLs requested from the internet
      *
-     * @param message the error message
+     * The callback will be executed on the main thread once for every requested URL.
+     *
+     * @param callback the callback to be invoked or null to reset
      */
-    void onError(@NonNull String message);
+    @Keep
+    external fun setResourceTransform(callback: ResourceTransformCallback?)
 
-  }
+    @Keep
+    private external fun setResourceCachePath(
+        path: String,
+        callback: ResourcesCachePathChangeCallback,
+    )
 
-  // File source instance is kept alive after initialization
-  private static FileSource INSTANCE;
+    @Keep
+    private external fun initialize(
+        apiKey: String?,
+        cachePath: String,
+        options: TileServerOptions?,
+    )
 
-  /**
-   * Get the single instance of FileSource.
-   *
-   * @param context the context to derive the cache path from
-   * @return the single instance of FileSource
-   */
-  @UiThread
-  public static synchronized FileSource getInstance(@NonNull Context context) {
-    if (INSTANCE == null) {
-      INSTANCE = new FileSource(getResourcesCachePath(context));
-    }
+    @Keep
+    @Throws(Throwable::class)
+    protected external fun finalize()
 
-    return INSTANCE;
-  }
+    companion object {
+        private const val TAG = "Mbgl-FileSource"
+        private const val MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH = "fileSourceResourcesCachePath"
+        private val resourcesCachePathLoaderLock: Lock = ReentrantLock()
+        private val internalCachePathLoaderLock: Lock = ReentrantLock()
+        private var resourcesCachePath: String? = null
+        private var internalCachePath: String? = null
 
-  /**
-   * Get files directory path for a context.
-   *
-   * @param context the context to derive the files directory path from
-   * @return the files directory path
-   */
-  @NonNull
-  private static String getCachePath(@NonNull Context context) {
-    SharedPreferences preferences = context.getSharedPreferences(
-      MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-    String cachePath = preferences.getString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, null);
+        // File source instance is kept alive after initialization
+        @Suppress("ktlint:standard:property-naming")
+        private var INSTANCE: FileSource? = null
 
-    if (!isPathWritable(cachePath)) {
-      // Use default path
-      cachePath = getDefaultCachePath(context);
+        /**
+         * Get the single instance of FileSource.
+         *
+         * @param context the context to derive the cache path from
+         * @return the single instance of FileSource
+         */
+        @JvmStatic
+        @UiThread
+        @Synchronized
+        fun getInstance(context: Context): FileSource {
+            var instance = INSTANCE
+            if (instance == null) {
+                instance = FileSource(getResourcesCachePath(context))
+                INSTANCE = instance
+            }
 
-      // Reset stored cache path
-      SharedPreferences.Editor editor =
-        context.getSharedPreferences(MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
-      editor.remove(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH).apply();
-    }
-
-    return cachePath;
-  }
-
-  /**
-   * Get the default resources cache path depending on the external storage configuration
-   *
-   * @param context the context to derive the files directory path from
-   * @return the default directory path
-   */
-  @NonNull
-  private static String getDefaultCachePath(@NonNull Context context) {
-    if (isExternalStorageConfiguration(context) && isExternalStorageReadable()) {
-      File externalFilesDir = context.getExternalFilesDir(null);
-      if (externalFilesDir != null) {
-        return externalFilesDir.getAbsolutePath();
-      }
-    }
-    return context.getFilesDir().getAbsolutePath();
-  }
-
-  private static boolean isExternalStorageConfiguration(@NonNull Context context) {
-    // Default value
-    boolean isExternalStorageConfiguration = MapLibreConstants.DEFAULT_SET_STORAGE_EXTERNAL;
-
-    try {
-      // Try getting a custom value from the app Manifest
-      ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(),
-        PackageManager.GET_META_DATA);
-      if (appInfo.metaData != null) {
-        isExternalStorageConfiguration = appInfo.metaData.getBoolean(
-          MapLibreConstants.KEY_META_DATA_SET_STORAGE_EXTERNAL,
-          MapLibreConstants.DEFAULT_SET_STORAGE_EXTERNAL
-        );
-      }
-    } catch (PackageManager.NameNotFoundException exception) {
-      Logger.e(TAG, "Failed to read the package metadata: ", exception);
-      MapStrictMode.strictModeViolation(exception);
-    } catch (Exception exception) {
-      Logger.e(TAG, "Failed to read the storage key: ", exception);
-      MapStrictMode.strictModeViolation(exception);
-    }
-    return isExternalStorageConfiguration;
-  }
-
-  /**
-   * Checks if external storage is available to at least read. In order for this to work, make
-   * sure you include &lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /&gt;
-   * (or WRITE_EXTERNAL_STORAGE) for API level &lt; 18 in your app Manifest.
-   * <p>
-   * Code from https://developer.android.com/guide/topics/data/data-storage.html#filesExternal
-   * </p>
-   *
-   * @return true if external storage is readable
-   */
-  public static boolean isExternalStorageReadable() {
-    String state = Environment.getExternalStorageState();
-    if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-      return true;
-    }
-
-    Logger.w(TAG, "External storage was requested but it isn't readable. For API level < 18"
-      + " make sure you've requested READ_EXTERNAL_STORAGE or WRITE_EXTERNAL_STORAGE"
-      + " permissions in your app Manifest (defaulting to internal storage).");
-
-    return false;
-  }
-
-  /**
-   * Initializes file directories paths.
-   *
-   * @param context the context to derive paths from
-   */
-  @UiThread
-  public static void initializeFileDirsPaths(Context context) {
-    ThreadUtils.checkThread(TAG);
-    new FileDirsPathsTask().execute(context);
-  }
-
-  private static class FileDirsPathsTask extends AsyncTask<Context, Void, Void> {
-
-    @Override
-    protected Void doInBackground(Context... contexts) {
-      getResourcesCachePath(contexts[0]);
-      getInternalCachePath(contexts[0]);
-      return null;
-    }
-  }
-
-  /**
-   * Get files directory path for a context.
-   *
-   * @param context the context to derive the files directory path from
-   * @return the files directory path
-   */
-  @NonNull
-  public static String getResourcesCachePath(@NonNull Context context) {
-    resourcesCachePathLoaderLock.lock();
-    try {
-      if (resourcesCachePath == null) {
-        resourcesCachePath = getCachePath(context);
-      }
-      return resourcesCachePath;
-    } finally {
-      resourcesCachePathLoaderLock.unlock();
-    }
-  }
-
-  /**
-   * Get internal cache path for a context.
-   *
-   * @param context the context to derive the internal cache path from
-   * @return the internal cache path
-   */
-  public static String getInternalCachePath(@NonNull Context context) {
-    internalCachePathLoaderLock.lock();
-    try {
-      if (internalCachePath == null) {
-        internalCachePath = context.getCacheDir().getAbsolutePath();
-      }
-      return internalCachePath;
-    } finally {
-      internalCachePathLoaderLock.unlock();
-    }
-  }
-
-  /**
-   * Changes the path of the resources cache database.
-   * <p>
-   * The callback reference is <b>strongly kept</b> throughout the process,
-   * so it needs to be wrapped in a weak reference or released on the client side if necessary.
-   * </p>
-   *
-   * @param context  the context of the path
-   * @param path     the new database path
-   * @param callback the callback to obtain the result
-   * @deprecated Use {@link #setResourcesCachePath(String, ResourcesCachePathChangeCallback)}
-   */
-  @Deprecated
-  public static void setResourcesCachePath(@NonNull final Context context,
-                                           @NonNull final String path,
-                                           @NonNull final ResourcesCachePathChangeCallback callback) {
-    setResourcesCachePath(path, callback);
-  }
-
-  /**
-   * Changes the path of the resources cache database.
-   * <p>
-   * The callback reference is <b>strongly kept</b> throughout the process,
-   * so it needs to be wrapped in a weak reference or released on the client side if necessary.
-   * </p>
-   *
-   * @param path     the new database path
-   * @param callback the callback to obtain the result
-   */
-  public static void setResourcesCachePath(@NonNull final String path,
-                                           @NonNull final ResourcesCachePathChangeCallback callback) {
-    final Context applicationContext = MapLibre.getApplicationContext();
-    final FileSource fileSource = FileSource.getInstance(applicationContext);
-
-    if (path.equals(getResourcesCachePath(applicationContext))) {
-      // no need to change the path
-      callback.onSuccess(path);
-    } else {
-      new FileUtils.CheckFileWritePermissionTask(new FileUtils.OnCheckFileWritePermissionListener() {
-        @Override
-        public void onWritePermissionGranted() {
-          final SharedPreferences.Editor editor =
-            applicationContext.getSharedPreferences(MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES,
-              Context.MODE_PRIVATE).edit();
-          editor.putString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, path);
-          editor.apply();
-          internalSetResourcesCachePath(applicationContext, path, callback);
+            return instance
         }
 
-        @Override
-        public void onError() {
-          String message = "Path is not writable: " + path;
-          Logger.e(TAG, message);
-          callback.onError(message);
+        /**
+         * Get files directory path for a context.
+         *
+         * @param context the context to derive the files directory path from
+         * @return the files directory path
+         */
+        private fun getCachePath(context: Context): String {
+            val preferences =
+                context.getSharedPreferences(
+                    MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES,
+                    Context.MODE_PRIVATE,
+                )
+            var cachePath = preferences.getString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, null)
+
+            if (!isPathWritable(cachePath)) {
+                // Use default path
+                cachePath = getDefaultCachePath(context)
+
+                // Reset stored cache path
+                val editor =
+                    context
+                        .getSharedPreferences(
+                            MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES,
+                            Context.MODE_PRIVATE,
+                        ).edit()
+                editor.remove(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH).apply()
+            }
+
+            return cachePath!!
         }
-      }).execute(new File(path));
-    }
-  }
 
-  private static void internalSetResourcesCachePath(@NonNull Context context, @NonNull String path,
-                                                    @NonNull final ResourcesCachePathChangeCallback callback) {
-    final FileSource fileSource = getInstance(context);
-    final boolean active = fileSource.isActivated();
-    if (!active) {
-      fileSource.activate();
-    }
-
-    fileSource.setResourceCachePath(path, new ResourcesCachePathChangeCallback() {
-      @Override
-      public void onSuccess(@NonNull String path) {
-        if (!active) {
-          fileSource.deactivate();
+        /**
+         * Get the default resources cache path depending on the external storage configuration
+         *
+         * @param context the context to derive the files directory path from
+         * @return the default directory path
+         */
+        private fun getDefaultCachePath(context: Context): String {
+            if (isExternalStorageConfiguration(context) && isExternalStorageReadable()) {
+                val externalFilesDir = context.getExternalFilesDir(null)
+                if (externalFilesDir != null) {
+                    return externalFilesDir.absolutePath
+                }
+            }
+            return context.filesDir.absolutePath
         }
-        resourcesCachePathLoaderLock.lock();
-        resourcesCachePath = path;
-        resourcesCachePathLoaderLock.unlock();
-        callback.onSuccess(path);
-      }
 
-      @Override
-      public void onError(@NonNull String message) {
-        if (!active) {
-          fileSource.deactivate();
+        private fun isExternalStorageConfiguration(context: Context): Boolean {
+            // Default value
+            var isExternalStorageConfiguration = MapLibreConstants.DEFAULT_SET_STORAGE_EXTERNAL
+
+            try {
+                // Try getting a custom value from the app Manifest
+                val appInfo =
+                    context.packageManager.getApplicationInfo(
+                        context.packageName,
+                        PackageManager.GET_META_DATA,
+                    )
+                if (appInfo.metaData != null) {
+                    isExternalStorageConfiguration =
+                        appInfo.metaData.getBoolean(
+                            MapLibreConstants.KEY_META_DATA_SET_STORAGE_EXTERNAL,
+                            MapLibreConstants.DEFAULT_SET_STORAGE_EXTERNAL,
+                        )
+                }
+            } catch (exception: PackageManager.NameNotFoundException) {
+                Logger.e(TAG, "Failed to read the package metadata: ", exception)
+                MapStrictMode.strictModeViolation(exception)
+            } catch (exception: Exception) {
+                Logger.e(TAG, "Failed to read the storage key: ", exception)
+                MapStrictMode.strictModeViolation(exception)
+            }
+            return isExternalStorageConfiguration
         }
-        callback.onError(message);
-      }
-    });
-  }
 
-  private static boolean isPathWritable(String path) {
-    if (path == null || path.isEmpty()) {
-      return false;
+        /**
+         * Checks if external storage is available to at least read. In order for this to work, make
+         * sure you include &lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /&gt;
+         * (or WRITE_EXTERNAL_STORAGE) for API level &lt; 18 in your app Manifest.
+         *
+         * Code from https://developer.android.com/guide/topics/data/data-storage.html#filesExternal
+         *
+         * @return true if external storage is readable
+         */
+        @JvmStatic
+        fun isExternalStorageReadable(): Boolean {
+            val state = Environment.getExternalStorageState()
+            if (Environment.MEDIA_MOUNTED == state || Environment.MEDIA_MOUNTED_READ_ONLY == state) {
+                return true
+            }
+
+            Logger.w(
+                TAG,
+                "External storage was requested but it isn't readable. For API level < 18" +
+                    " make sure you've requested READ_EXTERNAL_STORAGE or WRITE_EXTERNAL_STORAGE" +
+                    " permissions in your app Manifest (defaulting to internal storage).",
+            )
+
+            return false
+        }
+
+        /**
+         * Initializes file directories paths.
+         *
+         * @param context the context to derive paths from
+         */
+        @JvmStatic
+        @UiThread
+        fun initializeFileDirsPaths(context: Context) {
+            ThreadUtils.checkThread(TAG)
+            FileDirsPathsTask().execute(context)
+        }
+
+        @Suppress("DEPRECATION")
+        private class FileDirsPathsTask : AsyncTask<Context, Void, Void?>() {
+            override fun doInBackground(vararg contexts: Context): Void? {
+                getResourcesCachePath(contexts[0])
+                getInternalCachePath(contexts[0])
+                return null
+            }
+        }
+
+        /**
+         * Get files directory path for a context.
+         *
+         * @param context the context to derive the files directory path from
+         * @return the files directory path
+         */
+        @JvmStatic
+        fun getResourcesCachePath(context: Context): String {
+            resourcesCachePathLoaderLock.lock()
+            try {
+                var path = resourcesCachePath
+                if (path == null) {
+                    path = getCachePath(context)
+                    resourcesCachePath = path
+                }
+                return path
+            } finally {
+                resourcesCachePathLoaderLock.unlock()
+            }
+        }
+
+        /**
+         * Get internal cache path for a context.
+         *
+         * @param context the context to derive the internal cache path from
+         * @return the internal cache path
+         */
+        @JvmStatic
+        fun getInternalCachePath(context: Context): String {
+            internalCachePathLoaderLock.lock()
+            try {
+                var path = internalCachePath
+                if (path == null) {
+                    path = context.cacheDir.absolutePath
+                    internalCachePath = path
+                }
+                return path
+            } finally {
+                internalCachePathLoaderLock.unlock()
+            }
+        }
+
+        /**
+         * Changes the path of the resources cache database.
+         *
+         * The callback reference is **strongly kept** throughout the process,
+         * so it needs to be wrapped in a weak reference or released on the client side if necessary.
+         *
+         * @param context  the context of the path
+         * @param path     the new database path
+         * @param callback the callback to obtain the result
+         */
+        @Deprecated(
+            "Use setResourcesCachePath(String, ResourcesCachePathChangeCallback) instead",
+            ReplaceWith("setResourcesCachePath(path, callback)"),
+        )
+        @JvmStatic
+        fun setResourcesCachePath(
+            context: Context,
+            path: String,
+            callback: ResourcesCachePathChangeCallback,
+        ) {
+            setResourcesCachePath(path, callback)
+        }
+
+        /**
+         * Changes the path of the resources cache database.
+         *
+         * The callback reference is **strongly kept** throughout the process,
+         * so it needs to be wrapped in a weak reference or released on the client side if necessary.
+         *
+         * @param path     the new database path
+         * @param callback the callback to obtain the result
+         */
+        @JvmStatic
+        fun setResourcesCachePath(
+            path: String,
+            callback: ResourcesCachePathChangeCallback,
+        ) {
+            val applicationContext = MapLibre.getApplicationContext()
+            // make sure the file source is initialized before the path is changed
+            getInstance(applicationContext)
+
+            if (path == getResourcesCachePath(applicationContext)) {
+                // no need to change the path
+                callback.onSuccess(path)
+            } else {
+                FileUtils
+                    .CheckFileWritePermissionTask(
+                        object : FileUtils.OnCheckFileWritePermissionListener {
+                            override fun onWritePermissionGranted() {
+                                val editor =
+                                    applicationContext
+                                        .getSharedPreferences(
+                                            MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES,
+                                            Context.MODE_PRIVATE,
+                                        ).edit()
+                                editor.putString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, path)
+                                editor.apply()
+                                internalSetResourcesCachePath(applicationContext, path, callback)
+                            }
+
+                            override fun onError() {
+                                val message = "Path is not writable: $path"
+                                Logger.e(TAG, message)
+                                callback.onError(message)
+                            }
+                        },
+                    ).execute(File(path))
+            }
+        }
+
+        private fun internalSetResourcesCachePath(
+            context: Context,
+            path: String,
+            callback: ResourcesCachePathChangeCallback,
+        ) {
+            val fileSource = getInstance(context)
+            val active = fileSource.isActivated()
+            if (!active) {
+                fileSource.activate()
+            }
+
+            fileSource.setResourceCachePath(
+                path,
+                object : ResourcesCachePathChangeCallback {
+                    override fun onSuccess(path: String) {
+                        if (!active) {
+                            fileSource.deactivate()
+                        }
+                        resourcesCachePathLoaderLock.lock()
+                        resourcesCachePath = path
+                        resourcesCachePathLoaderLock.unlock()
+                        callback.onSuccess(path)
+                    }
+
+                    override fun onError(message: String) {
+                        if (!active) {
+                            fileSource.deactivate()
+                        }
+                        callback.onError(message)
+                    }
+                },
+            )
+        }
+
+        private fun isPathWritable(path: String?): Boolean {
+            if (path.isNullOrEmpty()) {
+                return false
+            }
+            return File(path).canWrite()
+        }
     }
-    return new File(path).canWrite();
-  }
-
-  @Keep
-  private long nativePtr;
-
-  private FileSource(String cachePath) {
-    TileServerOptions options = MapLibre.getTileServerOptions();
-    initialize(MapLibre.getApiKey(), cachePath, options);
-  }
-
-  @Keep
-  public native void setTileServerOptions(TileServerOptions tileServerOptions);
-
-  @Keep
-  public native boolean isActivated();
-
-  @Keep
-  public native void activate();
-
-  @Keep
-  public native void deactivate();
-
-  @Keep
-  public native void setApiKey(String apiKey);
-
-  @NonNull
-  @Keep
-  public native String getApiKey();
-
-  @Keep
-  public native void setApiBaseUrl(String baseUrl);
-
-  @NonNull
-  @Keep
-  public native String getApiBaseUrl();
-
-  /**
-   * Sets a callback for transforming URLs requested from the internet
-   * <p>
-   * The callback will be executed on the main thread once for every requested URL.
-   * </p>
-   *
-   * @param callback the callback to be invoked or null to reset
-   */
-  @Keep
-  public native void setResourceTransform(final ResourceTransformCallback callback);
-
-  @Keep
-  private native void setResourceCachePath(String path, ResourcesCachePathChangeCallback callback);
-
-  @Keep
-  private native void initialize(String apiKey, String cachePath, TileServerOptions options);
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
-
 }

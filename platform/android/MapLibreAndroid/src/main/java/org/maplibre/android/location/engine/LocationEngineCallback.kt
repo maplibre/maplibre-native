@@ -1,25 +1,23 @@
-package org.maplibre.android.location.engine;
-
-import androidx.annotation.NonNull;
+package org.maplibre.android.location.engine
 
 /**
  * Invoked for asynchronous notifications when new data
  * from engine becomes available.
  *
- * @param <T> Successful updated data type
+ * @param T Successful updated data type
  */
-public interface LocationEngineCallback<T> {
-  /**
-   * Invoked when new data available.
-   *
-   * @param result updated data.
-   */
-  void onSuccess(T result);
+interface LocationEngineCallback<T> {
+    /**
+     * Invoked when new data available.
+     *
+     * @param result updated data.
+     */
+    fun onSuccess(result: T)
 
-  /**
-   * Invoked when engine exception occurs.
-   *
-   * @param exception {@link Exception}
-   */
-  void onFailure(@NonNull Exception exception);
+    /**
+     * Invoked when engine exception occurs.
+     *
+     * @param exception [Exception]
+     */
+    fun onFailure(exception: Exception)
 }

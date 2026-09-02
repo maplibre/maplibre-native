@@ -1,709 +1,648 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import org.maplibre.android.log.Logger;
-import org.maplibre.android.tile.TileOperation;
+import org.maplibre.android.log.Logger
+import org.maplibre.android.tile.TileOperation
+import java.util.concurrent.CopyOnWriteArrayList
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+@Suppress("TooManyFunctions", "LargeClass")
+internal class MapChangeReceiver : NativeMapView.StateCallback {
+    private val onCameraWillChangeListenerList = CopyOnWriteArrayList<MapView.OnCameraWillChangeListener>()
+    private val onCameraIsChangingListenerList = CopyOnWriteArrayList<MapView.OnCameraIsChangingListener>()
+    private val onCameraDidChangeListenerList = CopyOnWriteArrayList<MapView.OnCameraDidChangeListener>()
+    private val onWillStartLoadingMapListenerList = CopyOnWriteArrayList<MapView.OnWillStartLoadingMapListener>()
+    private val onDidFinishLoadingMapListenerList = CopyOnWriteArrayList<MapView.OnDidFinishLoadingMapListener>()
+    private val onDidFailLoadingMapListenerList = CopyOnWriteArrayList<MapView.OnDidFailLoadingMapListener>()
+    private val onWillStartRenderingFrameList = CopyOnWriteArrayList<MapView.OnWillStartRenderingFrameListener>()
+    private val onDidFinishRenderingFrameList = CopyOnWriteArrayList<MapView.OnDidFinishRenderingFrameListener>()
+    private val onDidFinishRenderingFrameWithStatsList =
+        CopyOnWriteArrayList<MapView.OnDidFinishRenderingFrameWithStatsListener>()
+    private val onWillStartRenderingMapListenerList = CopyOnWriteArrayList<MapView.OnWillStartRenderingMapListener>()
+    private val onDidFinishRenderingMapListenerList = CopyOnWriteArrayList<MapView.OnDidFinishRenderingMapListener>()
+    private val onDidBecomeIdleListenerList = CopyOnWriteArrayList<MapView.OnDidBecomeIdleListener>()
+    private val onDidFinishLoadingStyleListenerList = CopyOnWriteArrayList<MapView.OnDidFinishLoadingStyleListener>()
+    private val onSourceChangedListenerList = CopyOnWriteArrayList<MapView.OnSourceChangedListener>()
+    private val onStyleImageMissingListenerList = CopyOnWriteArrayList<MapView.OnStyleImageMissingListener>()
+    private val onCanRemoveUnusedStyleImageListenerList =
+        CopyOnWriteArrayList<MapView.OnCanRemoveUnusedStyleImageListener>()
+    private val onPreCompileShaderList = CopyOnWriteArrayList<MapView.OnPreCompileShaderListener>()
+    private val onPostCompileShaderList = CopyOnWriteArrayList<MapView.OnPostCompileShaderListener>()
+    private val onShaderCompileFailedList = CopyOnWriteArrayList<MapView.OnShaderCompileFailedListener>()
+    private val onGlyphsLoadedList = CopyOnWriteArrayList<MapView.OnGlyphsLoadedListener>()
+    private val onGlyphsErrorList = CopyOnWriteArrayList<MapView.OnGlyphsErrorListener>()
+    private val onGlyphsRequestedList = CopyOnWriteArrayList<MapView.OnGlyphsRequestedListener>()
+    private val onTileActionList = CopyOnWriteArrayList<MapView.OnTileActionListener>()
+    private val onSpriteLoadedList = CopyOnWriteArrayList<MapView.OnSpriteLoadedListener>()
+    private val onSpriteErrorList = CopyOnWriteArrayList<MapView.OnSpriteErrorListener>()
+    private val onSpriteRequestedList = CopyOnWriteArrayList<MapView.OnSpriteRequestedListener>()
+    private val onRenderErrorList = CopyOnWriteArrayList<MapView.OnRenderErrorListener>()
+    private val onSymbolErrorList = CopyOnWriteArrayList<MapView.OnSymbolErrorListener>()
 
-class MapChangeReceiver implements NativeMapView.StateCallback {
-
-  private static final String TAG = "Mbgl-MapChangeReceiver";
-
-  private final List<MapView.OnCameraWillChangeListener> onCameraWillChangeListenerList = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnCameraIsChangingListener> onCameraIsChangingListenerList = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnCameraDidChangeListener> onCameraDidChangeListenerList = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnWillStartLoadingMapListener> onWillStartLoadingMapListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidFinishLoadingMapListener> onDidFinishLoadingMapListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidFailLoadingMapListener> onDidFailLoadingMapListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnWillStartRenderingFrameListener> onWillStartRenderingFrameList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidFinishRenderingFrameListener> onDidFinishRenderingFrameList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidFinishRenderingFrameWithStatsListener> onDidFinishRenderingFrameWithStatsList
-          = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnWillStartRenderingMapListener> onWillStartRenderingMapListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidFinishRenderingMapListener> onDidFinishRenderingMapListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidBecomeIdleListener> onDidBecomeIdleListenerList
-      = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnDidFinishLoadingStyleListener> onDidFinishLoadingStyleListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnSourceChangedListener> onSourceChangedListenerList = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnStyleImageMissingListener> onStyleImageMissingListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnCanRemoveUnusedStyleImageListener> onCanRemoveUnusedStyleImageListenerList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnPreCompileShaderListener> onPreCompileShaderList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnPostCompileShaderListener> onPostCompileShaderList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnShaderCompileFailedListener> onShaderCompileFailedList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnGlyphsLoadedListener> onGlyphsLoadedList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnGlyphsErrorListener> onGlyphsErrorList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnGlyphsRequestedListener> onGlyphsRequestedList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileActionListener> onTileActionList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnSpriteLoadedListener> onSpriteLoadedList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnSpriteErrorListener> onSpriteErrorList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnSpriteRequestedListener> onSpriteRequestedList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnRenderErrorListener> onRenderErrorList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnSymbolErrorListener> onSymbolErrorList
-          = new CopyOnWriteArrayList<>();
-
-  @Override
-  public void onCameraWillChange(boolean animated) {
-    try {
-      if (!onCameraWillChangeListenerList.isEmpty()) {
-        for (MapView.OnCameraWillChangeListener onCameraWillChangeListener : onCameraWillChangeListenerList) {
-          onCameraWillChangeListener.onCameraWillChange(animated);
+    override fun onCameraWillChange(animated: Boolean) {
+        try {
+            for (listener in onCameraWillChangeListenerList) {
+                listener.onCameraWillChange(animated)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onCameraWillChange", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onCameraWillChange", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onCameraIsChanging() {
-    try {
-      if (!onCameraIsChangingListenerList.isEmpty()) {
-        for (MapView.OnCameraIsChangingListener onCameraIsChangingListener : onCameraIsChangingListenerList) {
-          onCameraIsChangingListener.onCameraIsChanging();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onCameraIsChanging", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onCameraDidChange(boolean animated) {
-    try {
-      if (!onCameraDidChangeListenerList.isEmpty()) {
-        for (MapView.OnCameraDidChangeListener onCameraDidChangeListener : onCameraDidChangeListenerList) {
-          onCameraDidChangeListener.onCameraDidChange(animated);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onCameraDidChange", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onWillStartLoadingMap() {
-    try {
-      if (!onWillStartLoadingMapListenerList.isEmpty()) {
-        for (MapView.OnWillStartLoadingMapListener onWillStartLoadingMapListener : onWillStartLoadingMapListenerList) {
-          onWillStartLoadingMapListener.onWillStartLoadingMap();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onWillStartLoadingMap", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onDidFinishLoadingMap() {
-    try {
-      if (!onDidFinishLoadingMapListenerList.isEmpty()) {
-        for (MapView.OnDidFinishLoadingMapListener onDidFinishLoadingMapListener : onDidFinishLoadingMapListenerList) {
-          onDidFinishLoadingMapListener.onDidFinishLoadingMap();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onDidFinishLoadingMap", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onDidFailLoadingMap(String error) {
-    try {
-      if (!onDidFailLoadingMapListenerList.isEmpty()) {
-        for (MapView.OnDidFailLoadingMapListener onDidFailLoadingMapListener : onDidFailLoadingMapListenerList) {
-          onDidFailLoadingMapListener.onDidFailLoadingMap(error);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onDidFailLoadingMap", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onWillStartRenderingFrame() {
-    try {
-      if (!onWillStartRenderingFrameList.isEmpty()) {
-        for (MapView.OnWillStartRenderingFrameListener listener : onWillStartRenderingFrameList) {
-          listener.onWillStartRenderingFrame();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onWillStartRenderingFrame", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onDidFinishRenderingFrame(boolean fully, RenderingStats stats) {
-    try {
-      if (!onDidFinishRenderingFrameList.isEmpty()) {
-        for (MapView.OnDidFinishRenderingFrameListener listener : onDidFinishRenderingFrameList) {
-          listener.onDidFinishRenderingFrame(fully, stats.encodingTime, stats.renderingTime);
-        }
-      }
-
-      if (!onDidFinishRenderingFrameWithStatsList.isEmpty()) {
-        for (MapView.OnDidFinishRenderingFrameWithStatsListener listener : onDidFinishRenderingFrameWithStatsList) {
-          listener.onDidFinishRenderingFrame(fully, stats);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onDidFinishRenderingFrame", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onWillStartRenderingMap() {
-    try {
-      if (!onWillStartRenderingMapListenerList.isEmpty()) {
-        for (MapView.OnWillStartRenderingMapListener listener : onWillStartRenderingMapListenerList) {
-          listener.onWillStartRenderingMap();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onWillStartRenderingMap", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onDidFinishRenderingMap(boolean fully) {
-    try {
-      if (!onDidFinishRenderingMapListenerList.isEmpty()) {
-        for (MapView.OnDidFinishRenderingMapListener listener : onDidFinishRenderingMapListenerList) {
-          listener.onDidFinishRenderingMap(fully);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onDidFinishRenderingMap", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onDidBecomeIdle() {
-    try {
-      if (!onDidBecomeIdleListenerList.isEmpty()) {
-        for (MapView.OnDidBecomeIdleListener listener : onDidBecomeIdleListenerList) {
-          listener.onDidBecomeIdle();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onDidBecomeIdle", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onDidFinishLoadingStyle() {
-    try {
-      if (!onDidFinishLoadingStyleListenerList.isEmpty()) {
-        for (MapView.OnDidFinishLoadingStyleListener listener : onDidFinishLoadingStyleListenerList) {
-          listener.onDidFinishLoadingStyle();
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onDidFinishLoadingStyle", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onSourceChanged(String sourceId) {
-    try {
-      if (!onSourceChangedListenerList.isEmpty()) {
-        for (MapView.OnSourceChangedListener onSourceChangedListener : onSourceChangedListenerList) {
-          onSourceChangedListener.onSourceChangedListener(sourceId);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onSourceChanged", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onStyleImageMissing(String imageId) {
-    try {
-      if (!onStyleImageMissingListenerList.isEmpty()) {
-        for (MapView.OnStyleImageMissingListener listener : onStyleImageMissingListenerList) {
-          listener.onStyleImageMissing(imageId);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onStyleImageMissing", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public boolean onCanRemoveUnusedStyleImage(String imageId) {
-    if (onCanRemoveUnusedStyleImageListenerList.isEmpty()) {
-      return true;
     }
 
-    try {
-      if (!onCanRemoveUnusedStyleImageListenerList.isEmpty()) {
-        boolean canRemove = true;
-        for (MapView.OnCanRemoveUnusedStyleImageListener listener : onCanRemoveUnusedStyleImageListenerList) {
-          canRemove &= listener.onCanRemoveUnusedStyleImage(imageId);
+    override fun onCameraIsChanging() {
+        try {
+            for (listener in onCameraIsChangingListenerList) {
+                listener.onCameraIsChanging()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onCameraIsChanging", err)
+            throw err
+        }
+    }
+
+    override fun onCameraDidChange(animated: Boolean) {
+        try {
+            for (listener in onCameraDidChangeListenerList) {
+                listener.onCameraDidChange(animated)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onCameraDidChange", err)
+            throw err
+        }
+    }
+
+    override fun onWillStartLoadingMap() {
+        try {
+            for (listener in onWillStartLoadingMapListenerList) {
+                listener.onWillStartLoadingMap()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onWillStartLoadingMap", err)
+            throw err
+        }
+    }
+
+    override fun onDidFinishLoadingMap() {
+        try {
+            for (listener in onDidFinishLoadingMapListenerList) {
+                listener.onDidFinishLoadingMap()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onDidFinishLoadingMap", err)
+            throw err
+        }
+    }
+
+    override fun onDidFailLoadingMap(error: String) {
+        try {
+            for (listener in onDidFailLoadingMapListenerList) {
+                listener.onDidFailLoadingMap(error)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onDidFailLoadingMap", err)
+            throw err
+        }
+    }
+
+    override fun onWillStartRenderingFrame() {
+        try {
+            for (listener in onWillStartRenderingFrameList) {
+                listener.onWillStartRenderingFrame()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onWillStartRenderingFrame", err)
+            throw err
+        }
+    }
+
+    override fun onDidFinishRenderingFrame(
+        fully: Boolean,
+        stats: RenderingStats,
+    ) {
+        try {
+            for (listener in onDidFinishRenderingFrameList) {
+                listener.onDidFinishRenderingFrame(fully, stats.encodingTime, stats.renderingTime)
+            }
+
+            for (listener in onDidFinishRenderingFrameWithStatsList) {
+                listener.onDidFinishRenderingFrame(fully, stats)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onDidFinishRenderingFrame", err)
+            throw err
+        }
+    }
+
+    override fun onWillStartRenderingMap() {
+        try {
+            for (listener in onWillStartRenderingMapListenerList) {
+                listener.onWillStartRenderingMap()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onWillStartRenderingMap", err)
+            throw err
+        }
+    }
+
+    override fun onDidFinishRenderingMap(fully: Boolean) {
+        try {
+            for (listener in onDidFinishRenderingMapListenerList) {
+                listener.onDidFinishRenderingMap(fully)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onDidFinishRenderingMap", err)
+            throw err
+        }
+    }
+
+    override fun onDidBecomeIdle() {
+        try {
+            for (listener in onDidBecomeIdleListenerList) {
+                listener.onDidBecomeIdle()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onDidBecomeIdle", err)
+            throw err
+        }
+    }
+
+    override fun onDidFinishLoadingStyle() {
+        try {
+            for (listener in onDidFinishLoadingStyleListenerList) {
+                listener.onDidFinishLoadingStyle()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onDidFinishLoadingStyle", err)
+            throw err
+        }
+    }
+
+    override fun onSourceChanged(sourceId: String) {
+        try {
+            for (listener in onSourceChangedListenerList) {
+                listener.onSourceChangedListener(sourceId)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onSourceChanged", err)
+            throw err
+        }
+    }
+
+    override fun onStyleImageMissing(imageId: String) {
+        try {
+            for (listener in onStyleImageMissingListenerList) {
+                listener.onStyleImageMissing(imageId)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onStyleImageMissing", err)
+            throw err
+        }
+    }
+
+    override fun onCanRemoveUnusedStyleImage(imageId: String): Boolean {
+        if (onCanRemoveUnusedStyleImageListenerList.isEmpty()) {
+            return true
         }
 
-        return canRemove;
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onCanRemoveUnusedStyleImage", err);
-      throw err;
-    }
-
-    return true;
-  }
-
-  @Override
-  public void onPreCompileShader(int id, int type, String additionalDefines) {
-    try {
-      if (!onPreCompileShaderList.isEmpty()) {
-        for (MapView.OnPreCompileShaderListener listener : onPreCompileShaderList) {
-          listener.onPreCompileShader(id, type, additionalDefines);
+        try {
+            var canRemove = true
+            for (listener in onCanRemoveUnusedStyleImageListenerList) {
+                canRemove = canRemove and listener.onCanRemoveUnusedStyleImage(imageId)
+            }
+            return canRemove
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onCanRemoveUnusedStyleImage", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onPreCompileShader", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onPostCompileShader(int id, int type, String additionalDefines) {
-    try {
-      if (!onPostCompileShaderList.isEmpty()) {
-        for (MapView.OnPostCompileShaderListener listener : onPostCompileShaderList) {
-          listener.onPostCompileShader(id, type, additionalDefines);
+    override fun onPreCompileShader(
+        id: Int,
+        type: Int,
+        additionalDefines: String,
+    ) {
+        try {
+            for (listener in onPreCompileShaderList) {
+                listener.onPreCompileShader(id, type, additionalDefines)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onPreCompileShader", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onPostCompileShader", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onShaderCompileFailed(int id, int type, String additionalDefines) {
-    try {
-      if (!onShaderCompileFailedList.isEmpty()) {
-        for (MapView.OnShaderCompileFailedListener listener : onShaderCompileFailedList) {
-          listener.onShaderCompileFailed(id, type, additionalDefines);
+    override fun onPostCompileShader(
+        id: Int,
+        type: Int,
+        additionalDefines: String,
+    ) {
+        try {
+            for (listener in onPostCompileShaderList) {
+                listener.onPostCompileShader(id, type, additionalDefines)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onPostCompileShader", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onShaderCompileFailed", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd) {
-    try {
-      if (!onGlyphsLoadedList.isEmpty()) {
-        for (MapView.OnGlyphsLoadedListener listener : onGlyphsLoadedList) {
-          listener.onGlyphsLoaded(stack, rangeStart, rangeEnd);
+    override fun onShaderCompileFailed(
+        id: Int,
+        type: Int,
+        additionalDefines: String,
+    ) {
+        try {
+            for (listener in onShaderCompileFailedList) {
+                listener.onShaderCompileFailed(id, type, additionalDefines)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onShaderCompileFailed", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onGlyphsLoaded", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onGlyphsError(String[] stack, int rangeStart, int rangeEnd) {
-    try {
-      if (!onGlyphsErrorList.isEmpty()) {
-        for (MapView.OnGlyphsErrorListener listener : onGlyphsErrorList) {
-          listener.onGlyphsError(stack, rangeStart, rangeEnd);
+    override fun onGlyphsLoaded(
+        stack: Array<String>,
+        rangeStart: Int,
+        rangeEnd: Int,
+    ) {
+        try {
+            for (listener in onGlyphsLoadedList) {
+                listener.onGlyphsLoaded(stack, rangeStart, rangeEnd)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onGlyphsLoaded", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onGlyphsError", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd) {
-    try {
-      if (!onGlyphsRequestedList.isEmpty()) {
-        for (MapView.OnGlyphsRequestedListener listener : onGlyphsRequestedList) {
-          listener.onGlyphsRequested(stack, rangeStart, rangeEnd);
+    override fun onGlyphsError(
+        stack: Array<String>,
+        rangeStart: Int,
+        rangeEnd: Int,
+    ) {
+        try {
+            for (listener in onGlyphsErrorList) {
+                listener.onGlyphsError(stack, rangeStart, rangeEnd)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onGlyphsError", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onGlyphsRequested", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID) {
-    try {
-      if (!onTileActionList.isEmpty()) {
-        for (MapView.OnTileActionListener listener : onTileActionList) {
-          listener.onTileAction(op, x, y, z, wrap, overscaledZ, sourceID);
+    override fun onGlyphsRequested(
+        stack: Array<String>,
+        rangeStart: Int,
+        rangeEnd: Int,
+    ) {
+        try {
+            for (listener in onGlyphsRequestedList) {
+                listener.onGlyphsRequested(stack, rangeStart, rangeEnd)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onGlyphsRequested", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileAction", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onSpriteLoaded(String id, String url) {
-    try {
-      if (!onSpriteLoadedList.isEmpty()) {
-        for (MapView.OnSpriteLoadedListener listener : onSpriteLoadedList) {
-          listener.onSpriteLoaded(id, url);
+    @Suppress("LongParameterList")
+    override fun onTileAction(
+        op: TileOperation,
+        x: Int,
+        y: Int,
+        z: Int,
+        wrap: Int,
+        overscaledZ: Int,
+        sourceID: String,
+    ) {
+        try {
+            for (listener in onTileActionList) {
+                listener.onTileAction(op, x, y, z, wrap, overscaledZ, sourceID)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onTileAction", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onSpriteLoaded", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onSpriteError(String id, String url) {
-    try {
-      if (!onSpriteErrorList.isEmpty()) {
-        for (MapView.OnSpriteErrorListener listener : onSpriteErrorList) {
-          listener.onSpriteError(id, url);
+    override fun onSpriteLoaded(
+        id: String,
+        url: String,
+    ) {
+        try {
+            for (listener in onSpriteLoadedList) {
+                listener.onSpriteLoaded(id, url)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onSpriteLoaded", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onSpriteError", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onSpriteRequested(String id, String url) {
-    try {
-      if (!onSpriteRequestedList.isEmpty()) {
-        for (MapView.OnSpriteRequestedListener listener : onSpriteRequestedList) {
-          listener.onSpriteRequested(id, url);
+    override fun onSpriteError(
+        id: String,
+        url: String,
+    ) {
+        try {
+            for (listener in onSpriteErrorList) {
+                listener.onSpriteError(id, url)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onSpriteError", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onSpriteRequested", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onRenderError() {
-    try {
-      if (!onRenderErrorList.isEmpty()) {
-        for (MapView.OnRenderErrorListener listener : onRenderErrorList) {
-          listener.onRenderError();
+    override fun onSpriteRequested(
+        id: String,
+        url: String,
+    ) {
+        try {
+            for (listener in onSpriteRequestedList) {
+                listener.onSpriteRequested(id, url)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onSpriteRequested", err)
+            throw err
         }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onRenderError", err);
-      throw err;
     }
-  }
 
-  @Override
-  public void onSymbolError(String message) {
-    try {
-      for (MapView.OnSymbolErrorListener listener : onSymbolErrorList) {
-        listener.onSymbolError(message);
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onSymbolError", err);
+    override fun onRenderError() {
+        try {
+            for (listener in onRenderErrorList) {
+                listener.onRenderError()
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onRenderError", err)
+            throw err
+        }
     }
-  }
 
-  void addOnCameraWillChangeListener(MapView.OnCameraWillChangeListener listener) {
-    onCameraWillChangeListenerList.add(listener);
-  }
+    override fun onSymbolError(message: String) {
+        try {
+            for (listener in onSymbolErrorList) {
+                listener.onSymbolError(message)
+            }
+        } catch (err: Throwable) {
+            Logger.e(TAG, "Exception in onSymbolError", err)
+        }
+    }
 
-  void removeOnCameraWillChangeListener(MapView.OnCameraWillChangeListener listener) {
-    onCameraWillChangeListenerList.remove(listener);
-  }
+    fun addOnCameraWillChangeListener(listener: MapView.OnCameraWillChangeListener) {
+        onCameraWillChangeListenerList.add(listener)
+    }
 
-  void addOnCameraIsChangingListener(MapView.OnCameraIsChangingListener listener) {
-    onCameraIsChangingListenerList.add(listener);
-  }
+    fun removeOnCameraWillChangeListener(listener: MapView.OnCameraWillChangeListener) {
+        onCameraWillChangeListenerList.remove(listener)
+    }
 
-  void removeOnCameraIsChangingListener(MapView.OnCameraIsChangingListener listener) {
-    onCameraIsChangingListenerList.remove(listener);
-  }
+    fun addOnCameraIsChangingListener(listener: MapView.OnCameraIsChangingListener) {
+        onCameraIsChangingListenerList.add(listener)
+    }
 
-  void addOnCameraDidChangeListener(MapView.OnCameraDidChangeListener listener) {
-    onCameraDidChangeListenerList.add(listener);
-  }
+    fun removeOnCameraIsChangingListener(listener: MapView.OnCameraIsChangingListener) {
+        onCameraIsChangingListenerList.remove(listener)
+    }
 
-  void removeOnCameraDidChangeListener(MapView.OnCameraDidChangeListener listener) {
-    onCameraDidChangeListenerList.remove(listener);
-  }
+    fun addOnCameraDidChangeListener(listener: MapView.OnCameraDidChangeListener) {
+        onCameraDidChangeListenerList.add(listener)
+    }
 
-  void addOnWillStartLoadingMapListener(MapView.OnWillStartLoadingMapListener listener) {
-    onWillStartLoadingMapListenerList.add(listener);
-  }
+    fun removeOnCameraDidChangeListener(listener: MapView.OnCameraDidChangeListener) {
+        onCameraDidChangeListenerList.remove(listener)
+    }
 
-  void removeOnWillStartLoadingMapListener(MapView.OnWillStartLoadingMapListener listener) {
-    onWillStartLoadingMapListenerList.remove(listener);
-  }
+    fun addOnWillStartLoadingMapListener(listener: MapView.OnWillStartLoadingMapListener) {
+        onWillStartLoadingMapListenerList.add(listener)
+    }
 
-  void addOnDidFinishLoadingMapListener(MapView.OnDidFinishLoadingMapListener listener) {
-    onDidFinishLoadingMapListenerList.add(listener);
-  }
+    fun removeOnWillStartLoadingMapListener(listener: MapView.OnWillStartLoadingMapListener) {
+        onWillStartLoadingMapListenerList.remove(listener)
+    }
 
-  void removeOnDidFinishLoadingMapListener(MapView.OnDidFinishLoadingMapListener listener) {
-    onDidFinishLoadingMapListenerList.remove(listener);
-  }
+    fun addOnDidFinishLoadingMapListener(listener: MapView.OnDidFinishLoadingMapListener) {
+        onDidFinishLoadingMapListenerList.add(listener)
+    }
 
-  void addOnDidFailLoadingMapListener(MapView.OnDidFailLoadingMapListener listener) {
-    onDidFailLoadingMapListenerList.add(listener);
-  }
+    fun removeOnDidFinishLoadingMapListener(listener: MapView.OnDidFinishLoadingMapListener) {
+        onDidFinishLoadingMapListenerList.remove(listener)
+    }
 
-  void removeOnDidFailLoadingMapListener(MapView.OnDidFailLoadingMapListener listener) {
-    onDidFailLoadingMapListenerList.remove(listener);
-  }
+    fun addOnDidFailLoadingMapListener(listener: MapView.OnDidFailLoadingMapListener) {
+        onDidFailLoadingMapListenerList.add(listener)
+    }
 
-  void addOnWillStartRenderingFrameListener(MapView.OnWillStartRenderingFrameListener listener) {
-    onWillStartRenderingFrameList.add(listener);
-  }
+    fun removeOnDidFailLoadingMapListener(listener: MapView.OnDidFailLoadingMapListener) {
+        onDidFailLoadingMapListenerList.remove(listener)
+    }
 
-  void removeOnWillStartRenderingFrameListener(MapView.OnWillStartRenderingFrameListener listener) {
-    onWillStartRenderingFrameList.remove(listener);
-  }
+    fun addOnWillStartRenderingFrameListener(listener: MapView.OnWillStartRenderingFrameListener) {
+        onWillStartRenderingFrameList.add(listener)
+    }
 
-  void addOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameListener listener) {
-    onDidFinishRenderingFrameList.add(listener);
-  }
+    fun removeOnWillStartRenderingFrameListener(listener: MapView.OnWillStartRenderingFrameListener) {
+        onWillStartRenderingFrameList.remove(listener)
+    }
 
-  void removeOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameListener listener) {
-    onDidFinishRenderingFrameList.remove(listener);
-  }
+    fun addOnDidFinishRenderingFrameListener(listener: MapView.OnDidFinishRenderingFrameListener) {
+        onDidFinishRenderingFrameList.add(listener)
+    }
 
-  void addOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameWithStatsListener listener) {
-    onDidFinishRenderingFrameWithStatsList.add(listener);
-  }
+    fun removeOnDidFinishRenderingFrameListener(listener: MapView.OnDidFinishRenderingFrameListener) {
+        onDidFinishRenderingFrameList.remove(listener)
+    }
 
-  void removeOnDidFinishRenderingFrameListener(MapView.OnDidFinishRenderingFrameWithStatsListener listener) {
-    onDidFinishRenderingFrameWithStatsList.remove(listener);
-  }
+    fun addOnDidFinishRenderingFrameListener(listener: MapView.OnDidFinishRenderingFrameWithStatsListener) {
+        onDidFinishRenderingFrameWithStatsList.add(listener)
+    }
 
-  void addOnWillStartRenderingMapListener(MapView.OnWillStartRenderingMapListener listener) {
-    onWillStartRenderingMapListenerList.add(listener);
-  }
+    fun removeOnDidFinishRenderingFrameListener(listener: MapView.OnDidFinishRenderingFrameWithStatsListener) {
+        onDidFinishRenderingFrameWithStatsList.remove(listener)
+    }
 
-  void removeOnWillStartRenderingMapListener(MapView.OnWillStartRenderingMapListener listener) {
-    onWillStartRenderingMapListenerList.remove(listener);
-  }
+    fun addOnWillStartRenderingMapListener(listener: MapView.OnWillStartRenderingMapListener) {
+        onWillStartRenderingMapListenerList.add(listener)
+    }
 
-  void addOnDidFinishRenderingMapListener(MapView.OnDidFinishRenderingMapListener listener) {
-    onDidFinishRenderingMapListenerList.add(listener);
-  }
+    fun removeOnWillStartRenderingMapListener(listener: MapView.OnWillStartRenderingMapListener) {
+        onWillStartRenderingMapListenerList.remove(listener)
+    }
 
-  void removeOnDidFinishRenderingMapListener(MapView.OnDidFinishRenderingMapListener listener) {
-    onDidFinishRenderingMapListenerList.remove(listener);
-  }
+    fun addOnDidFinishRenderingMapListener(listener: MapView.OnDidFinishRenderingMapListener) {
+        onDidFinishRenderingMapListenerList.add(listener)
+    }
 
-  void addOnDidBecomeIdleListener(MapView.OnDidBecomeIdleListener listener) {
-    onDidBecomeIdleListenerList.add(listener);
-  }
+    fun removeOnDidFinishRenderingMapListener(listener: MapView.OnDidFinishRenderingMapListener) {
+        onDidFinishRenderingMapListenerList.remove(listener)
+    }
 
-  void removeOnDidBecomeIdleListener(MapView.OnDidBecomeIdleListener listener) {
-    onDidBecomeIdleListenerList.remove(listener);
-  }
+    fun addOnDidBecomeIdleListener(listener: MapView.OnDidBecomeIdleListener) {
+        onDidBecomeIdleListenerList.add(listener)
+    }
 
-  void addOnDidFinishLoadingStyleListener(MapView.OnDidFinishLoadingStyleListener listener) {
-    onDidFinishLoadingStyleListenerList.add(listener);
-  }
+    fun removeOnDidBecomeIdleListener(listener: MapView.OnDidBecomeIdleListener) {
+        onDidBecomeIdleListenerList.remove(listener)
+    }
 
-  void removeOnDidFinishLoadingStyleListener(MapView.OnDidFinishLoadingStyleListener listener) {
-    onDidFinishLoadingStyleListenerList.remove(listener);
-  }
+    fun addOnDidFinishLoadingStyleListener(listener: MapView.OnDidFinishLoadingStyleListener) {
+        onDidFinishLoadingStyleListenerList.add(listener)
+    }
 
-  void addOnSourceChangedListener(MapView.OnSourceChangedListener listener) {
-    onSourceChangedListenerList.add(listener);
-  }
+    fun removeOnDidFinishLoadingStyleListener(listener: MapView.OnDidFinishLoadingStyleListener) {
+        onDidFinishLoadingStyleListenerList.remove(listener)
+    }
 
-  void removeOnSourceChangedListener(MapView.OnSourceChangedListener listener) {
-    onSourceChangedListenerList.remove(listener);
-  }
+    fun addOnSourceChangedListener(listener: MapView.OnSourceChangedListener) {
+        onSourceChangedListenerList.add(listener)
+    }
 
-  void addOnStyleImageMissingListener(MapView.OnStyleImageMissingListener listener) {
-    onStyleImageMissingListenerList.add(listener);
-  }
+    fun removeOnSourceChangedListener(listener: MapView.OnSourceChangedListener) {
+        onSourceChangedListenerList.remove(listener)
+    }
 
-  void removeOnStyleImageMissingListener(MapView.OnStyleImageMissingListener listener) {
-    onStyleImageMissingListenerList.remove(listener);
-  }
+    fun addOnStyleImageMissingListener(listener: MapView.OnStyleImageMissingListener) {
+        onStyleImageMissingListenerList.add(listener)
+    }
 
-  void addOnCanRemoveUnusedStyleImageListener(MapView.OnCanRemoveUnusedStyleImageListener listener) {
-    onCanRemoveUnusedStyleImageListenerList.add(listener);
-  }
+    fun removeOnStyleImageMissingListener(listener: MapView.OnStyleImageMissingListener) {
+        onStyleImageMissingListenerList.remove(listener)
+    }
 
-  void removeOnCanRemoveUnusedStyleImageListener(MapView.OnCanRemoveUnusedStyleImageListener listener) {
-    onCanRemoveUnusedStyleImageListenerList.remove(listener);
-  }
+    fun addOnCanRemoveUnusedStyleImageListener(listener: MapView.OnCanRemoveUnusedStyleImageListener) {
+        onCanRemoveUnusedStyleImageListenerList.add(listener)
+    }
 
-  public void addOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
-    onPreCompileShaderList.add(callback);
-  }
+    fun removeOnCanRemoveUnusedStyleImageListener(listener: MapView.OnCanRemoveUnusedStyleImageListener) {
+        onCanRemoveUnusedStyleImageListenerList.remove(listener)
+    }
 
-  public void addOnPostCompileShaderListener(MapView.OnPostCompileShaderListener callback) {
-    onPostCompileShaderList.add(callback);
-  }
+    fun addOnPreCompileShaderListener(callback: MapView.OnPreCompileShaderListener) {
+        onPreCompileShaderList.add(callback)
+    }
 
-  public void addOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
-    onShaderCompileFailedList.add(callback);
-  }
+    fun addOnPostCompileShaderListener(callback: MapView.OnPostCompileShaderListener) {
+        onPostCompileShaderList.add(callback)
+    }
 
-  public void addOnGlyphsLoadedListener(MapView.OnGlyphsLoadedListener callback) {
-    onGlyphsLoadedList.add(callback);
-  }
+    fun addOnShaderCompileFailedListener(callback: MapView.OnShaderCompileFailedListener) {
+        onShaderCompileFailedList.add(callback)
+    }
 
-  public void addOnGlyphsErrorListener(MapView.OnGlyphsErrorListener callback) {
-    onGlyphsErrorList.add(callback);
-  }
+    fun addOnGlyphsLoadedListener(callback: MapView.OnGlyphsLoadedListener) {
+        onGlyphsLoadedList.add(callback)
+    }
 
-  public void addOnGlyphsRequestedListener(MapView.OnGlyphsRequestedListener callback) {
-    onGlyphsRequestedList.add(callback);
-  }
+    fun addOnGlyphsErrorListener(callback: MapView.OnGlyphsErrorListener) {
+        onGlyphsErrorList.add(callback)
+    }
 
-  public void addOnTileActionListener(MapView.OnTileActionListener callback) {
-    onTileActionList.add(callback);
-  }
+    fun addOnGlyphsRequestedListener(callback: MapView.OnGlyphsRequestedListener) {
+        onGlyphsRequestedList.add(callback)
+    }
 
-  public void addOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
-    onSpriteLoadedList.add(callback);
-  }
+    fun addOnTileActionListener(callback: MapView.OnTileActionListener) {
+        onTileActionList.add(callback)
+    }
 
-  public void addOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
-    onSpriteErrorList.add(callback);
-  }
+    fun addOnSpriteLoadedListener(callback: MapView.OnSpriteLoadedListener) {
+        onSpriteLoadedList.add(callback)
+    }
 
-  public void addOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
-    onSpriteRequestedList.add(callback);
-  }
+    fun addOnSpriteErrorListener(callback: MapView.OnSpriteErrorListener) {
+        onSpriteErrorList.add(callback)
+    }
 
-  public void addOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
-    onRenderErrorList.add(callback);
-  }
+    fun addOnSpriteRequestedListener(callback: MapView.OnSpriteRequestedListener) {
+        onSpriteRequestedList.add(callback)
+    }
 
-  public void addOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
-    onSymbolErrorList.add(callback);
-  }
+    fun addOnRenderErrorListener(callback: MapView.OnRenderErrorListener) {
+        onRenderErrorList.add(callback)
+    }
 
-  public void removeOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
-    onPreCompileShaderList.remove(callback);
-  }
+    fun addOnSymbolErrorListener(callback: MapView.OnSymbolErrorListener) {
+        onSymbolErrorList.add(callback)
+    }
 
-  public void removeOnPostCompileShaderListener(MapView.OnPostCompileShaderListener callback) {
-    onPostCompileShaderList.remove(callback);
-  }
+    fun removeOnPreCompileShaderListener(callback: MapView.OnPreCompileShaderListener) {
+        onPreCompileShaderList.remove(callback)
+    }
 
-  public void removeOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
-    onShaderCompileFailedList.remove(callback);
-  }
+    fun removeOnPostCompileShaderListener(callback: MapView.OnPostCompileShaderListener) {
+        onPostCompileShaderList.remove(callback)
+    }
 
-  public void removeOnGlyphsLoadedListener(MapView.OnGlyphsLoadedListener callback) {
-    onGlyphsLoadedList.remove(callback);
-  }
+    fun removeOnShaderCompileFailedListener(callback: MapView.OnShaderCompileFailedListener) {
+        onShaderCompileFailedList.remove(callback)
+    }
 
-  public void removeOnGlyphsErrorListener(MapView.OnGlyphsErrorListener callback) {
-    onGlyphsErrorList.remove(callback);
-  }
+    fun removeOnGlyphsLoadedListener(callback: MapView.OnGlyphsLoadedListener) {
+        onGlyphsLoadedList.remove(callback)
+    }
 
-  public void removeOnGlyphsRequestedListener(MapView.OnGlyphsRequestedListener callback) {
-    onGlyphsRequestedList.remove(callback);
-  }
+    fun removeOnGlyphsErrorListener(callback: MapView.OnGlyphsErrorListener) {
+        onGlyphsErrorList.remove(callback)
+    }
 
-  public void removeOnTileActionListener(MapView.OnTileActionListener callback) {
-    onTileActionList.remove(callback);
-  }
+    fun removeOnGlyphsRequestedListener(callback: MapView.OnGlyphsRequestedListener) {
+        onGlyphsRequestedList.remove(callback)
+    }
 
-  public void removeOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
-    onSpriteLoadedList.remove(callback);
-  }
+    fun removeOnTileActionListener(callback: MapView.OnTileActionListener) {
+        onTileActionList.remove(callback)
+    }
 
-  public void removeOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
-    onSpriteErrorList.remove(callback);
-  }
+    fun removeOnSpriteLoadedListener(callback: MapView.OnSpriteLoadedListener) {
+        onSpriteLoadedList.remove(callback)
+    }
 
-  public void removeOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
-    onSpriteRequestedList.remove(callback);
-  }
+    fun removeOnSpriteErrorListener(callback: MapView.OnSpriteErrorListener) {
+        onSpriteErrorList.remove(callback)
+    }
 
-  public void removeOnRenderErrorListener(MapView.OnRenderErrorListener callback) {
-    onRenderErrorList.remove(callback);
-  }
+    fun removeOnSpriteRequestedListener(callback: MapView.OnSpriteRequestedListener) {
+        onSpriteRequestedList.remove(callback)
+    }
 
-  public void removeOnSymbolErrorListener(MapView.OnSymbolErrorListener callback) {
-    onSymbolErrorList.remove(callback);
-  }
+    fun removeOnRenderErrorListener(callback: MapView.OnRenderErrorListener) {
+        onRenderErrorList.remove(callback)
+    }
 
-  void clear() {
-    onCameraWillChangeListenerList.clear();
-    onCameraIsChangingListenerList.clear();
-    onCameraDidChangeListenerList.clear();
-    onWillStartLoadingMapListenerList.clear();
-    onDidFinishLoadingMapListenerList.clear();
-    onDidFailLoadingMapListenerList.clear();
-    onWillStartRenderingFrameList.clear();
-    onDidFinishRenderingFrameList.clear();
-    onWillStartRenderingMapListenerList.clear();
-    onDidFinishRenderingMapListenerList.clear();
-    onDidBecomeIdleListenerList.clear();
-    onDidFinishLoadingStyleListenerList.clear();
-    onSourceChangedListenerList.clear();
-    onStyleImageMissingListenerList.clear();
-    onCanRemoveUnusedStyleImageListenerList.clear();
-    onPreCompileShaderList.clear();
-    onPostCompileShaderList.clear();
-    onShaderCompileFailedList.clear();
-    onGlyphsLoadedList.clear();
-    onGlyphsErrorList.clear();
-    onGlyphsRequestedList.clear();
-    onTileActionList.clear();
-    onSpriteLoadedList.clear();
-    onSpriteErrorList.clear();
-    onSpriteRequestedList.clear();
-    onRenderErrorList.clear();
-    onSymbolErrorList.clear();
-  }
+    fun removeOnSymbolErrorListener(callback: MapView.OnSymbolErrorListener) {
+        onSymbolErrorList.remove(callback)
+    }
+
+    fun clear() {
+        onCameraWillChangeListenerList.clear()
+        onCameraIsChangingListenerList.clear()
+        onCameraDidChangeListenerList.clear()
+        onWillStartLoadingMapListenerList.clear()
+        onDidFinishLoadingMapListenerList.clear()
+        onDidFailLoadingMapListenerList.clear()
+        onWillStartRenderingFrameList.clear()
+        onDidFinishRenderingFrameList.clear()
+        onWillStartRenderingMapListenerList.clear()
+        onDidFinishRenderingMapListenerList.clear()
+        onDidBecomeIdleListenerList.clear()
+        onDidFinishLoadingStyleListenerList.clear()
+        onSourceChangedListenerList.clear()
+        onStyleImageMissingListenerList.clear()
+        onCanRemoveUnusedStyleImageListenerList.clear()
+        onPreCompileShaderList.clear()
+        onPostCompileShaderList.clear()
+        onShaderCompileFailedList.clear()
+        onGlyphsLoadedList.clear()
+        onGlyphsErrorList.clear()
+        onGlyphsRequestedList.clear()
+        onTileActionList.clear()
+        onSpriteLoadedList.clear()
+        onSpriteErrorList.clear()
+        onSpriteRequestedList.clear()
+        onRenderErrorList.clear()
+        onSymbolErrorList.clear()
+    }
+
+    private companion object {
+        const val TAG = "Mbgl-MapChangeReceiver"
+    }
 }

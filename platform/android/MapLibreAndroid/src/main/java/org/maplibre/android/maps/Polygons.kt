@@ -1,22 +1,23 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.annotations.Polygon;
-import org.maplibre.android.annotations.PolygonOptions;
-
-import java.util.List;
+import org.maplibre.android.annotations.Polygon
+import org.maplibre.android.annotations.PolygonOptions
 
 /**
- * Interface that defines convenient methods for working with a {@link Polygon}'s collection.
+ * Interface that defines convenient methods for working with a [Polygon]'s collection.
  */
-interface Polygons {
-  Polygon addBy(@NonNull PolygonOptions polygonOptions, @NonNull MapLibreMap maplibreMap);
+internal interface Polygons {
+    fun addBy(
+        polygonOptions: PolygonOptions,
+        maplibreMap: MapLibreMap,
+    ): Polygon
 
-  List<Polygon> addBy(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MapLibreMap maplibreMap);
+    fun addBy(
+        polygonOptionsList: List<PolygonOptions>,
+        maplibreMap: MapLibreMap,
+    ): List<Polygon>
 
-  void update(Polygon polygon);
+    fun update(polygon: Polygon)
 
-  List<Polygon> obtainAll();
+    fun obtainAll(): List<Polygon>
 }

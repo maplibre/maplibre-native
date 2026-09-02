@@ -1,522 +1,444 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.Bitmap;
-import android.graphics.PointF;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.view.View;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.collection.LongSparseArray;
-
-import org.maplibre.android.MapLibre;
-import org.maplibre.android.R;
-import org.maplibre.android.annotations.Annotation;
-import org.maplibre.android.annotations.BaseMarkerOptions;
-import org.maplibre.android.annotations.Marker;
-import org.maplibre.android.annotations.Polygon;
-import org.maplibre.android.annotations.PolygonOptions;
-import org.maplibre.android.annotations.Polyline;
-import org.maplibre.android.annotations.PolylineOptions;
-import org.maplibre.android.log.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.graphics.PointF
+import android.graphics.RectF
+import androidx.collection.LongSparseArray
+import org.maplibre.android.MapLibre
+import org.maplibre.android.R
+import org.maplibre.android.annotations.Annotation
+import org.maplibre.android.annotations.BaseMarkerOptions
+import org.maplibre.android.annotations.Marker
+import org.maplibre.android.annotations.Polygon
+import org.maplibre.android.annotations.PolygonOptions
+import org.maplibre.android.annotations.Polyline
+import org.maplibre.android.annotations.PolylineOptions
+import org.maplibre.android.log.Logger
 
 /**
  * Responsible for managing and tracking state of Annotations linked to Map. All events related to
- * annotations that occur on {@link MapLibreMap} are forwarded to this class.
- * <p>
- * Responsible for referencing {@link InfoWindowManager}.
- * </p>
- * <p>
+ * annotations that occur on [MapLibreMap] are forwarded to this class.
+ *
+ * Responsible for referencing [InfoWindowManager].
+ *
  * Exposes convenience methods to add/remove/update all subtypes of annotations found in
- * com.mapbox.mapboxsdk.annotations.
- * </p>
+ * org.maplibre.android.annotations.
  */
-class AnnotationManager {
+@Suppress("TooManyFunctions", "LongParameterList")
+internal class AnnotationManager(
+    private val mapView: MapView,
+    private val annotationsArray: LongSparseArray<Annotation>,
+    private val iconManager: IconManager,
+    private val annotationsSource: Annotations,
+    private val markers: Markers,
+    private val polygons: Polygons,
+    private val polylines: Polylines,
+    private val shapeAnnotations: ShapeAnnotations,
+) {
+    private val infoWindowManager = InfoWindowManager()
+    private val selectedMarkers = mutableListOf<Marker>()
 
-  private static final String TAG = "Mbgl-AnnotationManager";
+    private lateinit var maplibreMap: MapLibreMap
+    private var onMarkerClickListener: MapLibreMap.OnMarkerClickListener? = null
+    private var onPolygonClickListener: MapLibreMap.OnPolygonClickListener? = null
+    private var onPolylineClickListener: MapLibreMap.OnPolylineClickListener? = null
 
-  private static final long NO_ANNOTATION_ID = -1;
-
-  @NonNull
-  private final MapView mapView;
-  private final IconManager iconManager;
-  private final InfoWindowManager infoWindowManager = new InfoWindowManager();
-  private final LongSparseArray<Annotation> annotationsArray;
-  private final List<Marker> selectedMarkers = new ArrayList<>();
-
-  private MapLibreMap maplibreMap;
-  @Nullable
-  private MapLibreMap.OnMarkerClickListener onMarkerClickListener;
-  @Nullable
-  private MapLibreMap.OnPolygonClickListener onPolygonClickListener;
-  @Nullable
-  private MapLibreMap.OnPolylineClickListener onPolylineClickListener;
-
-  private Annotations annotations;
-  private ShapeAnnotations shapeAnnotations;
-  private Markers markers;
-  private Polygons polygons;
-  private Polylines polylines;
-
-  AnnotationManager(@NonNull MapView mapView, LongSparseArray<Annotation> annotationsArray,
-                    IconManager iconManager, Annotations annotations, Markers markers, Polygons polygons,
-                    Polylines polylines, ShapeAnnotations shapeAnnotations) {
-    this.mapView = mapView;
-    this.annotationsArray = annotationsArray;
-    this.iconManager = iconManager;
-    this.annotations = annotations;
-    this.markers = markers;
-    this.polygons = polygons;
-    this.polylines = polylines;
-    this.shapeAnnotations = shapeAnnotations;
-  }
-
-  // TODO refactor MapLibreMap out for Projection and Transform
-  // Requires removing MapLibreMap from Annotations by using Peer model from #6912
-  @NonNull
-  AnnotationManager bind(MapLibreMap maplibreMap) {
-    this.maplibreMap = maplibreMap;
-    return this;
-  }
-
-  void update() {
-    infoWindowManager.update();
-  }
-
-  //
-  // Annotations
-  //
-
-  Annotation getAnnotation(long id) {
-    return annotations.obtainBy(id);
-  }
-
-  List<Annotation> getAnnotations() {
-    return annotations.obtainAll();
-  }
-
-  void removeAnnotation(long id) {
-    annotations.removeBy(id);
-  }
-
-  void removeAnnotation(@NonNull Annotation annotation) {
-    if (annotation instanceof Marker) {
-      Marker marker = (Marker) annotation;
-      marker.hideInfoWindow();
-      if (selectedMarkers.contains(marker)) {
-        selectedMarkers.remove(marker);
-      }
-      // do icon cleanup
-      iconManager.iconCleanup(marker.getIcon());
+    // TODO refactor MapLibreMap out for Projection and Transform
+    // Requires removing MapLibreMap from Annotations by using Peer model from #6912
+    fun bind(maplibreMap: MapLibreMap): AnnotationManager {
+        this.maplibreMap = maplibreMap
+        return this
     }
-    annotations.removeBy(annotation);
-  }
 
-  void removeAnnotations(@NonNull List<? extends Annotation> annotationList) {
-    for (Annotation annotation : annotationList) {
-      if (annotation instanceof Marker) {
-        Marker marker = (Marker) annotation;
-        marker.hideInfoWindow();
+    fun update() {
+        infoWindowManager.update()
+    }
+
+    //
+    // Annotations
+    //
+
+    fun getAnnotation(id: Long): Annotation? = annotationsSource.obtainBy(id)
+
+    val annotations: List<Annotation> get() = annotationsSource.obtainAll()
+
+    fun removeAnnotation(id: Long) {
+        annotationsSource.removeBy(id)
+    }
+
+    fun removeAnnotation(annotation: Annotation) {
+        if (annotation is Marker) {
+            annotation.hideInfoWindow()
+            selectedMarkers.remove(annotation)
+            // do icon cleanup
+            annotation.icon?.let { iconManager.iconCleanup(it) }
+        }
+        annotationsSource.removeBy(annotation)
+    }
+
+    fun removeAnnotations(annotationList: List<Annotation>) {
+        for (annotation in annotationList) {
+            if (annotation is Marker) {
+                annotation.hideInfoWindow()
+                selectedMarkers.remove(annotation)
+                annotation.icon?.let { iconManager.iconCleanup(it) }
+            }
+        }
+        annotationsSource.removeBy(annotationList)
+    }
+
+    fun removeAnnotations() {
+        val count = annotationsArray.size()
+        selectedMarkers.clear()
+        for (i in 0 until count) {
+            val annotation = annotationsArray.get(annotationsArray.keyAt(i))
+            if (annotation is Marker) {
+                annotation.hideInfoWindow()
+                annotation.icon?.let { iconManager.iconCleanup(it) }
+            }
+        }
+        annotationsSource.removeAll()
+    }
+
+    //
+    // Markers
+    //
+
+    fun addMarker(
+        markerOptions: BaseMarkerOptions<*, *>,
+        maplibreMap: MapLibreMap,
+    ): Marker = markers.addBy(markerOptions, maplibreMap)
+
+    fun addMarkers(
+        markerOptionsList: List<BaseMarkerOptions<*, *>>,
+        maplibreMap: MapLibreMap,
+    ): List<Marker> = markers.addBy(markerOptionsList, maplibreMap)
+
+    fun updateMarker(
+        updatedMarker: Marker,
+        maplibreMap: MapLibreMap,
+    ) {
+        if (!isAddedToMap(updatedMarker)) {
+            logNonAdded(updatedMarker)
+            return
+        }
+        markers.update(updatedMarker, maplibreMap)
+    }
+
+    fun getMarkers(): List<Marker> = markers.obtainAll()
+
+    fun getMarkersInRect(rectangle: RectF): List<Marker> = markers.obtainAllIn(rectangle)
+
+    fun reloadMarkers() {
+        markers.reload()
+    }
+
+    //
+    // Polygons
+    //
+
+    fun addPolygon(
+        polygonOptions: PolygonOptions,
+        maplibreMap: MapLibreMap,
+    ): Polygon = polygons.addBy(polygonOptions, maplibreMap)
+
+    fun addPolygons(
+        polygonOptionsList: List<PolygonOptions>,
+        maplibreMap: MapLibreMap,
+    ): List<Polygon> = polygons.addBy(polygonOptionsList, maplibreMap)
+
+    fun updatePolygon(polygon: Polygon) {
+        if (!isAddedToMap(polygon)) {
+            logNonAdded(polygon)
+            return
+        }
+        polygons.update(polygon)
+    }
+
+    fun getPolygons(): List<Polygon> = polygons.obtainAll()
+
+    //
+    // Polylines
+    //
+
+    fun addPolyline(
+        polylineOptions: PolylineOptions,
+        maplibreMap: MapLibreMap,
+    ): Polyline = polylines.addBy(polylineOptions, maplibreMap)
+
+    fun addPolylines(
+        polylineOptionsList: List<PolylineOptions>,
+        maplibreMap: MapLibreMap,
+    ): List<Polyline> = polylines.addBy(polylineOptionsList, maplibreMap)
+
+    fun updatePolyline(polyline: Polyline) {
+        if (!isAddedToMap(polyline)) {
+            logNonAdded(polyline)
+            return
+        }
+        polylines.update(polyline)
+    }
+
+    fun getPolylines(): List<Polyline> = polylines.obtainAll()
+
+    // TODO Refactor from here still in progress
+    fun setOnMarkerClickListener(listener: MapLibreMap.OnMarkerClickListener?) {
+        onMarkerClickListener = listener
+    }
+
+    fun setOnPolygonClickListener(listener: MapLibreMap.OnPolygonClickListener?) {
+        onPolygonClickListener = listener
+    }
+
+    fun setOnPolylineClickListener(listener: MapLibreMap.OnPolylineClickListener?) {
+        onPolylineClickListener = listener
+    }
+
+    fun selectMarker(marker: Marker) {
         if (selectedMarkers.contains(marker)) {
-          selectedMarkers.remove(marker);
+            return
         }
-        iconManager.iconCleanup(marker.getIcon());
-      }
-    }
-    annotations.removeBy(annotationList);
-  }
 
-  void removeAnnotations() {
-    Annotation annotation;
-    int count = annotationsArray.size();
-    long[] ids = new long[count];
-    selectedMarkers.clear();
-    for (int i = 0; i < count; i++) {
-      ids[i] = annotationsArray.keyAt(i);
-      annotation = annotationsArray.get(ids[i]);
-      if (annotation instanceof Marker) {
-        Marker marker = (Marker) annotation;
-        marker.hideInfoWindow();
-        iconManager.iconCleanup(marker.getIcon());
-      }
-    }
-    annotations.removeAll();
-  }
-
-  //
-  // Markers
-  //
-
-  Marker addMarker(@NonNull BaseMarkerOptions markerOptions, @NonNull MapLibreMap maplibreMap) {
-    return markers.addBy(markerOptions, maplibreMap);
-  }
-
-  List<Marker> addMarkers(@NonNull List<? extends BaseMarkerOptions> markerOptionsList,
-                          @NonNull MapLibreMap maplibreMap) {
-    return markers.addBy(markerOptionsList, maplibreMap);
-  }
-
-  void updateMarker(@NonNull Marker updatedMarker, @NonNull MapLibreMap maplibreMap) {
-    if (!isAddedToMap(updatedMarker)) {
-      logNonAdded(updatedMarker);
-      return;
-    }
-    markers.update(updatedMarker, maplibreMap);
-  }
-
-  List<Marker> getMarkers() {
-    return markers.obtainAll();
-  }
-
-  @NonNull
-  List<Marker> getMarkersInRect(@NonNull RectF rectangle) {
-    return markers.obtainAllIn(rectangle);
-  }
-
-  void reloadMarkers() {
-    markers.reload();
-  }
-
-  //
-  // Polygons
-  //
-
-  Polygon addPolygon(@NonNull PolygonOptions polygonOptions, @NonNull MapLibreMap maplibreMap) {
-    return polygons.addBy(polygonOptions, maplibreMap);
-  }
-
-  List<Polygon> addPolygons(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MapLibreMap maplibreMap) {
-    return polygons.addBy(polygonOptionsList, maplibreMap);
-  }
-
-  void updatePolygon(@NonNull Polygon polygon) {
-    if (!isAddedToMap(polygon)) {
-      logNonAdded(polygon);
-      return;
-    }
-    polygons.update(polygon);
-  }
-
-  List<Polygon> getPolygons() {
-    return polygons.obtainAll();
-  }
-
-  //
-  // Polylines
-  //
-
-  Polyline addPolyline(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap) {
-    return polylines.addBy(polylineOptions, maplibreMap);
-  }
-
-  List<Polyline> addPolylines(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapLibreMap maplibreMap) {
-    return polylines.addBy(polylineOptionsList, maplibreMap);
-  }
-
-  void updatePolyline(@NonNull Polyline polyline) {
-    if (!isAddedToMap(polyline)) {
-      logNonAdded(polyline);
-      return;
-    }
-    polylines.update(polyline);
-  }
-
-  List<Polyline> getPolylines() {
-    return polylines.obtainAll();
-  }
-
-  // TODO Refactor from here still in progress
-  void setOnMarkerClickListener(@Nullable MapLibreMap.OnMarkerClickListener listener) {
-    onMarkerClickListener = listener;
-  }
-
-  void setOnPolygonClickListener(@Nullable MapLibreMap.OnPolygonClickListener listener) {
-    onPolygonClickListener = listener;
-  }
-
-  void setOnPolylineClickListener(@Nullable MapLibreMap.OnPolylineClickListener listener) {
-    onPolylineClickListener = listener;
-  }
-
-  void selectMarker(@NonNull Marker marker) {
-    if (selectedMarkers.contains(marker)) {
-      return;
-    }
-
-    // Need to deselect any currently selected annotation first
-    if (!infoWindowManager.isAllowConcurrentMultipleOpenInfoWindows()) {
-      deselectMarkers();
-    }
-
-    if (infoWindowManager.isInfoWindowValidForMarker(marker) || infoWindowManager.getInfoWindowAdapter() != null) {
-      infoWindowManager.add(marker.showInfoWindow(maplibreMap, mapView));
-    }
-
-    // only add to selected markers if user didn't handle the click event themselves #3176
-    selectedMarkers.add(marker);
-  }
-
-  void deselectMarkers() {
-    if (selectedMarkers.isEmpty()) {
-      return;
-    }
-
-    for (Marker marker : selectedMarkers) {
-      if (marker != null) {
-        if (marker.isInfoWindowShown()) {
-          marker.hideInfoWindow();
+        // Need to deselect any currently selected annotation first
+        if (!infoWindowManager.isAllowConcurrentMultipleOpenInfoWindows()) {
+            deselectMarkers()
         }
-      }
-    }
 
-    // Removes all selected markers from the list
-    selectedMarkers.clear();
-  }
-
-  void deselectMarker(@NonNull Marker marker) {
-    if (!selectedMarkers.contains(marker)) {
-      return;
-    }
-
-    if (marker.isInfoWindowShown()) {
-      marker.hideInfoWindow();
-    }
-    selectedMarkers.remove(marker);
-  }
-
-  @NonNull
-  List<Marker> getSelectedMarkers() {
-    return selectedMarkers;
-  }
-
-  @NonNull
-  InfoWindowManager getInfoWindowManager() {
-    return infoWindowManager;
-  }
-
-  void adjustTopOffsetPixels(@NonNull MapLibreMap maplibreMap) {
-    int count = annotationsArray.size();
-    for (int i = 0; i < count; i++) {
-      Annotation annotation = annotationsArray.get(i);
-      if (annotation instanceof Marker) {
-        Marker marker = (Marker) annotation;
-        marker.setTopOffsetPixels(
-          iconManager.getTopOffsetPixelsForIcon(marker.getIcon()));
-      }
-    }
-
-    for (Marker marker : selectedMarkers) {
-      if (marker.isInfoWindowShown()) {
-        marker.hideInfoWindow();
-        marker.showInfoWindow(maplibreMap, mapView);
-      }
-    }
-  }
-
-  private boolean isAddedToMap(@Nullable Annotation annotation) {
-    return annotation != null && annotation.getId() != -1 && annotationsArray.indexOfKey(annotation.getId()) > -1;
-  }
-
-  private void logNonAdded(@NonNull Annotation annotation) {
-    Logger.w(TAG, String.format(
-      "Attempting to update non-added %s with value %s", annotation.getClass().getCanonicalName(), annotation)
-    );
-  }
-
-  //
-  // Click event
-  //
-
-  boolean onTap(@NonNull PointF tapPoint) {
-    MarkerHit markerHit = getMarkerHitFromTouchArea(tapPoint);
-    long markerId = new MarkerHitResolver(maplibreMap).execute(markerHit);
-    if (markerId != NO_ANNOTATION_ID) {
-      if (isClickHandledForMarker(markerId)) {
-        return true;
-      }
-    }
-
-    ShapeAnnotationHit shapeAnnotationHit = getShapeAnnotationHitFromTap(tapPoint);
-    Annotation annotation = new ShapeAnnotationHitResolver(shapeAnnotations).execute(shapeAnnotationHit);
-    return annotation != null && handleClickForShapeAnnotation(annotation);
-  }
-
-  private ShapeAnnotationHit getShapeAnnotationHitFromTap(PointF tapPoint) {
-    float touchTargetSide = MapLibre.getApplicationContext().getResources().getDimension(R.dimen.maplibre_eight_dp);
-    RectF tapRect = new RectF(
-      tapPoint.x - touchTargetSide,
-      tapPoint.y - touchTargetSide,
-      tapPoint.x + touchTargetSide,
-      tapPoint.y + touchTargetSide
-    );
-    return new ShapeAnnotationHit(tapRect);
-  }
-
-  private boolean handleClickForShapeAnnotation(Annotation annotation) {
-    if (annotation instanceof Polygon && onPolygonClickListener != null) {
-      onPolygonClickListener.onPolygonClick((Polygon) annotation);
-      return true;
-    } else if (annotation instanceof Polyline && onPolylineClickListener != null) {
-      onPolylineClickListener.onPolylineClick((Polyline) annotation);
-      return true;
-    }
-    return false;
-  }
-
-  private MarkerHit getMarkerHitFromTouchArea(PointF tapPoint) {
-    int touchSurfaceWidth = (int) (iconManager.getHighestIconHeight() * 1.5);
-    int touchSurfaceHeight = (int) (iconManager.getHighestIconWidth() * 1.5);
-    final RectF tapRect = new RectF(tapPoint.x - touchSurfaceWidth,
-      tapPoint.y - touchSurfaceHeight,
-      tapPoint.x + touchSurfaceWidth,
-      tapPoint.y + touchSurfaceHeight
-    );
-    return new MarkerHit(tapRect, getMarkersInRect(tapRect));
-  }
-
-  private boolean isClickHandledForMarker(long markerId) {
-    Marker marker = (Marker) getAnnotation(markerId);
-    boolean handledDefaultClick = onClickMarker(marker);
-    if (!handledDefaultClick) {
-      toggleMarkerSelectionState(marker);
-    }
-    return true;
-  }
-
-  private boolean onClickMarker(@NonNull Marker marker) {
-    return onMarkerClickListener != null && onMarkerClickListener.onMarkerClick(marker);
-  }
-
-  private void toggleMarkerSelectionState(@NonNull Marker marker) {
-    if (!selectedMarkers.contains(marker)) {
-      selectMarker(marker);
-    } else {
-      deselectMarker(marker);
-    }
-  }
-
-  private static class ShapeAnnotationHitResolver {
-
-    private ShapeAnnotations shapeAnnotations;
-
-    ShapeAnnotationHitResolver(ShapeAnnotations shapeAnnotations) {
-      this.shapeAnnotations = shapeAnnotations;
-    }
-
-    @Nullable
-    public Annotation execute(@NonNull ShapeAnnotationHit shapeHit) {
-      Annotation foundAnnotation = null;
-      List<Annotation> annotations = shapeAnnotations.obtainAllIn(shapeHit.tapPoint);
-      if (annotations.size() > 0) {
-        foundAnnotation = annotations.get(0);
-      }
-      return foundAnnotation;
-    }
-  }
-
-  private static class MarkerHitResolver {
-
-    @NonNull
-    private final Projection projection;
-    private final int minimalTouchSize;
-
-    @Nullable
-    private View view;
-
-    private Bitmap bitmap;
-    private int bitmapWidth;
-    private int bitmapHeight;
-    private PointF markerLocation;
-
-    @NonNull
-    private Rect hitRectView = new Rect();
-    @NonNull
-    private RectF hitRectMarker = new RectF();
-    @NonNull
-    private RectF highestSurfaceIntersection = new RectF();
-
-    private long closestMarkerId = NO_ANNOTATION_ID;
-
-    MarkerHitResolver(@NonNull MapLibreMap maplibreMap) {
-      this.projection = maplibreMap.getProjection();
-      this.minimalTouchSize = (int) (32 * MapLibre.getApplicationContext().getResources().getDisplayMetrics().density);
-    }
-
-    public long execute(@NonNull MarkerHit markerHit) {
-      resolveForMarkers(markerHit);
-      return closestMarkerId;
-    }
-
-    private void resolveForMarkers(MarkerHit markerHit) {
-      for (Marker marker : markerHit.markers) {
-        resolveForMarker(markerHit, marker);
-      }
-    }
-
-    private void resolveForMarker(@NonNull MarkerHit markerHit, Marker marker) {
-      markerLocation = projection.toScreenLocation(marker.getPosition());
-      bitmap = marker.getIcon().getBitmap();
-
-      bitmapHeight = bitmap.getHeight();
-      if (bitmapHeight < minimalTouchSize) {
-        bitmapHeight = minimalTouchSize;
-      }
-
-      bitmapWidth = bitmap.getWidth();
-      if (bitmapWidth < minimalTouchSize) {
-        bitmapWidth = minimalTouchSize;
-      }
-
-      hitRectMarker.set(0, 0, bitmapWidth, bitmapHeight);
-      hitRectMarker.offsetTo(
-        markerLocation.x - bitmapWidth / 2,
-        markerLocation.y - bitmapHeight / 2
-      );
-      hitTestMarker(markerHit, marker, hitRectMarker);
-    }
-
-    private void hitTestMarker(MarkerHit markerHit, @NonNull Marker marker, RectF hitRectMarker) {
-      if (hitRectMarker.contains(markerHit.getTapPointX(), markerHit.getTapPointY())) {
-        hitRectMarker.intersect(markerHit.tapRect);
-        if (isRectangleHighestSurfaceIntersection(hitRectMarker)) {
-          highestSurfaceIntersection = new RectF(hitRectMarker);
-          closestMarkerId = marker.getId();
+        if (infoWindowManager.isInfoWindowValidForMarker(marker) || infoWindowManager.getInfoWindowAdapter() != null) {
+            marker.showInfoWindow(maplibreMap, mapView)?.let { infoWindowManager.add(it) }
         }
-      }
+
+        // only add to selected markers if user didn't handle the click event themselves #3176
+        selectedMarkers.add(marker)
     }
 
-    private boolean isRectangleHighestSurfaceIntersection(RectF rectF) {
-      return rectF.width() * rectF.height() > highestSurfaceIntersection.width() * highestSurfaceIntersection.height();
-    }
-  }
+    fun deselectMarkers() {
+        if (selectedMarkers.isEmpty()) {
+            return
+        }
 
-  private static class ShapeAnnotationHit {
-    private final RectF tapPoint;
+        for (marker in selectedMarkers) {
+            if (marker.isInfoWindowShown) {
+                marker.hideInfoWindow()
+            }
+        }
 
-    ShapeAnnotationHit(RectF tapPoint) {
-      this.tapPoint = tapPoint;
-    }
-  }
-
-  private static class MarkerHit {
-    private final RectF tapRect;
-    private final List<Marker> markers;
-
-    MarkerHit(RectF tapRect, List<Marker> markers) {
-      this.tapRect = tapRect;
-      this.markers = markers;
+        // Removes all selected markers from the list
+        selectedMarkers.clear()
     }
 
-    float getTapPointX() {
-      return tapRect.centerX();
+    fun deselectMarker(marker: Marker) {
+        if (!selectedMarkers.contains(marker)) {
+            return
+        }
+
+        if (marker.isInfoWindowShown) {
+            marker.hideInfoWindow()
+        }
+        selectedMarkers.remove(marker)
     }
 
-    float getTapPointY() {
-      return tapRect.centerY();
+    fun getSelectedMarkers(): List<Marker> = selectedMarkers
+
+    fun getInfoWindowManager(): InfoWindowManager = infoWindowManager
+
+    fun adjustTopOffsetPixels(maplibreMap: MapLibreMap) {
+        val count = annotationsArray.size()
+        for (i in 0 until count) {
+            val annotation = annotationsArray.get(i.toLong())
+            if (annotation is Marker) {
+                annotation.icon?.let {
+                    annotation.setTopOffsetPixels(iconManager.getTopOffsetPixelsForIcon(it))
+                }
+            }
+        }
+
+        for (marker in selectedMarkers) {
+            if (marker.isInfoWindowShown) {
+                marker.hideInfoWindow()
+                marker.showInfoWindow(maplibreMap, mapView)
+            }
+        }
     }
-  }
+
+    private fun isAddedToMap(annotation: Annotation?): Boolean =
+        annotation != null && annotation.id != -1L && annotationsArray.indexOfKey(annotation.id) > -1
+
+    private fun logNonAdded(annotation: Annotation) {
+        Logger.w(
+            TAG,
+            "Attempting to update non-added ${annotation.javaClass.canonicalName} with value $annotation",
+        )
+    }
+
+    //
+    // Click event
+    //
+
+    fun onTap(tapPoint: PointF): Boolean {
+        val markerHit = getMarkerHitFromTouchArea(tapPoint)
+        val markerId = MarkerHitResolver(maplibreMap).execute(markerHit)
+        if (markerId != NO_ANNOTATION_ID && isClickHandledForMarker(markerId)) {
+            return true
+        }
+
+        val shapeAnnotationHit = getShapeAnnotationHitFromTap(tapPoint)
+        val annotation = ShapeAnnotationHitResolver(shapeAnnotations).execute(shapeAnnotationHit)
+        return annotation != null && handleClickForShapeAnnotation(annotation)
+    }
+
+    private fun getShapeAnnotationHitFromTap(tapPoint: PointF): ShapeAnnotationHit {
+        val touchTargetSide = MapLibre.getApplicationContext().resources.getDimension(R.dimen.maplibre_eight_dp)
+        val tapRect =
+            RectF(
+                tapPoint.x - touchTargetSide,
+                tapPoint.y - touchTargetSide,
+                tapPoint.x + touchTargetSide,
+                tapPoint.y + touchTargetSide,
+            )
+        return ShapeAnnotationHit(tapRect)
+    }
+
+    private fun handleClickForShapeAnnotation(annotation: Annotation): Boolean {
+        val polygonClickListener = onPolygonClickListener
+        val polylineClickListener = onPolylineClickListener
+        if (annotation is Polygon && polygonClickListener != null) {
+            polygonClickListener.onPolygonClick(annotation)
+            return true
+        } else if (annotation is Polyline && polylineClickListener != null) {
+            polylineClickListener.onPolylineClick(annotation)
+            return true
+        }
+        return false
+    }
+
+    private fun getMarkerHitFromTouchArea(tapPoint: PointF): MarkerHit {
+        val touchSurfaceWidth = (iconManager.highestIconHeight * 1.5).toInt()
+        val touchSurfaceHeight = (iconManager.highestIconWidth * 1.5).toInt()
+        val tapRect =
+            RectF(
+                tapPoint.x - touchSurfaceWidth,
+                tapPoint.y - touchSurfaceHeight,
+                tapPoint.x + touchSurfaceWidth,
+                tapPoint.y + touchSurfaceHeight,
+            )
+        return MarkerHit(tapRect, getMarkersInRect(tapRect))
+    }
+
+    private fun isClickHandledForMarker(markerId: Long): Boolean {
+        val marker = getAnnotation(markerId) as Marker
+        val handledDefaultClick = onClickMarker(marker)
+        if (!handledDefaultClick) {
+            toggleMarkerSelectionState(marker)
+        }
+        return true
+    }
+
+    private fun onClickMarker(marker: Marker): Boolean = onMarkerClickListener?.onMarkerClick(marker) == true
+
+    private fun toggleMarkerSelectionState(marker: Marker) {
+        if (!selectedMarkers.contains(marker)) {
+            selectMarker(marker)
+        } else {
+            deselectMarker(marker)
+        }
+    }
+
+    private class ShapeAnnotationHitResolver(
+        private val shapeAnnotations: ShapeAnnotations,
+    ) {
+        fun execute(shapeHit: ShapeAnnotationHit): Annotation? = shapeAnnotations.obtainAllIn(shapeHit.tapPoint).firstOrNull()
+    }
+
+    private class MarkerHitResolver(
+        maplibreMap: MapLibreMap,
+    ) {
+        private val projection: Projection = maplibreMap.projection
+        private val minimalTouchSize: Int =
+            (
+                32 *
+                    MapLibre
+                        .getApplicationContext()
+                        .resources.displayMetrics.density
+            ).toInt()
+
+        private var bitmapWidth = 0
+        private var bitmapHeight = 0
+
+        private val hitRectMarker = RectF()
+        private var highestSurfaceIntersection = RectF()
+
+        private var closestMarkerId = NO_ANNOTATION_ID
+
+        fun execute(markerHit: MarkerHit): Long {
+            resolveForMarkers(markerHit)
+            return closestMarkerId
+        }
+
+        private fun resolveForMarkers(markerHit: MarkerHit) {
+            for (marker in markerHit.markers) {
+                resolveForMarker(markerHit, marker)
+            }
+        }
+
+        private fun resolveForMarker(
+            markerHit: MarkerHit,
+            marker: Marker,
+        ) {
+            val location = projection.toScreenLocation(marker.position!!)
+            val markerBitmap = marker.icon!!.bitmap!!
+
+            bitmapHeight = markerBitmap.height
+            if (bitmapHeight < minimalTouchSize) {
+                bitmapHeight = minimalTouchSize
+            }
+
+            bitmapWidth = markerBitmap.width
+            if (bitmapWidth < minimalTouchSize) {
+                bitmapWidth = minimalTouchSize
+            }
+
+            hitRectMarker.set(0f, 0f, bitmapWidth.toFloat(), bitmapHeight.toFloat())
+            hitRectMarker.offsetTo(
+                location.x - bitmapWidth / 2,
+                location.y - bitmapHeight / 2,
+            )
+            hitTestMarker(markerHit, marker, hitRectMarker)
+        }
+
+        private fun hitTestMarker(
+            markerHit: MarkerHit,
+            marker: Marker,
+            hitRectMarker: RectF,
+        ) {
+            if (hitRectMarker.contains(markerHit.getTapPointX(), markerHit.getTapPointY())) {
+                hitRectMarker.intersect(markerHit.tapRect)
+                if (isRectangleHighestSurfaceIntersection(hitRectMarker)) {
+                    highestSurfaceIntersection = RectF(hitRectMarker)
+                    closestMarkerId = marker.id
+                }
+            }
+        }
+
+        private fun isRectangleHighestSurfaceIntersection(rectF: RectF): Boolean =
+            rectF.width() * rectF.height() >
+                highestSurfaceIntersection.width() * highestSurfaceIntersection.height()
+    }
+
+    private class ShapeAnnotationHit(
+        val tapPoint: RectF,
+    )
+
+    private class MarkerHit(
+        val tapRect: RectF,
+        val markers: List<Marker>,
+    ) {
+        fun getTapPointX(): Float = tapRect.centerX()
+
+        fun getTapPointY(): Float = tapRect.centerY()
+    }
+
+    private companion object {
+        const val TAG = "Mbgl-AnnotationManager"
+        const val NO_ANNOTATION_ID = -1L
+    }
 }

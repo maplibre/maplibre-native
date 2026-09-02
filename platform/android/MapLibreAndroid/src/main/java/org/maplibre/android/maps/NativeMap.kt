@@ -1,340 +1,399 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
+
+import android.graphics.Bitmap
+import android.graphics.PointF
+import android.graphics.RectF
+import androidx.annotation.IntRange
+import com.google.gson.JsonObject
+import org.maplibre.android.annotations.Marker
+import org.maplibre.android.annotations.Polygon
+import org.maplibre.android.annotations.Polyline
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.geometry.ProjectedMeters
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.Layer
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.style.light.Light
+import org.maplibre.android.style.sources.Source
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.Geometry
+
+@Suppress("TooManyFunctions")
+internal interface NativeMap {
+    //
+    // Lifecycle API
+    //
+
+    fun resizeView(
+        width: Int,
+        height: Int,
+    )
+
+    fun onLowMemory()
+
+    fun destroy()
+
+    val isDestroyed: Boolean
+
+    //
+    // Camera API
+    //
+
+    fun jumpTo(
+        center: LatLng,
+        zoom: Double,
+        pitch: Double,
+        bearing: Double,
+        padding: DoubleArray?,
+    )
+
+    @Suppress("LongParameterList")
+    fun easeTo(
+        center: LatLng,
+        zoom: Double,
+        bearing: Double,
+        pitch: Double,
+        padding: DoubleArray?,
+        duration: Long,
+        easingInterpolator: Boolean,
+    )
+
+    @Suppress("LongParameterList")
+    fun flyTo(
+        center: LatLng,
+        zoom: Double,
+        bearing: Double,
+        pitch: Double,
+        padding: DoubleArray?,
+        duration: Long,
+    )
+
+    fun moveBy(
+        deltaX: Double,
+        deltaY: Double,
+        duration: Long,
+    )
+
+    val cameraPosition: CameraPosition
+
+    // Note for implementors: the ordering of the padding is left, top, right, bottom
+    fun getCameraForLatLngBounds(
+        bounds: LatLngBounds,
+        padding: IntArray,
+        bearing: Double,
+        pitch: Double,
+    ): CameraPosition?
+
+    fun getCameraForGeometry(
+        geometry: Geometry,
+        padding: IntArray,
+        bearing: Double,
+        pitch: Double,
+    ): CameraPosition?
+
+    fun resetPosition()
+
+    fun setLatLng(
+        latLng: LatLng,
+        duration: Long,
+    )
 
-import android.graphics.Bitmap;
-import android.graphics.PointF;
-import android.graphics.RectF;
+    val latLng: LatLng
 
-import androidx.annotation.IntRange;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+    fun setLatLngBounds(latLngBounds: LatLngBounds?)
 
-import com.google.gson.JsonObject;
-import org.maplibre.geojson.Feature;
-import org.maplibre.geojson.Geometry;
-import org.maplibre.android.annotations.Marker;
-import org.maplibre.android.annotations.Polygon;
-import org.maplibre.android.annotations.Polyline;
-import org.maplibre.android.camera.CameraPosition;
-import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.geometry.LatLngBounds;
-import org.maplibre.android.geometry.ProjectedMeters;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.layers.TransitionOptions;
-import org.maplibre.android.style.light.Light;
-import org.maplibre.android.style.sources.Source;
+    fun setVisibleCoordinateBounds(
+        coordinates: Array<LatLng>,
+        padding: RectF,
+        direction: Double,
+        duration: Long,
+    )
 
-import java.util.List;
+    fun setPitch(
+        pitch: Double,
+        duration: Long,
+    )
 
-interface NativeMap {
+    val pitch: Double
 
-  //
-  // Lifecycle API
-  //
+    fun setZoom(
+        zoom: Double,
+        focalPoint: PointF,
+        duration: Long,
+    )
 
-  void resizeView(int width, int height);
+    val zoom: Double
 
-  void onLowMemory();
+    var minZoom: Double
 
-  void destroy();
+    var maxZoom: Double
 
-  boolean isDestroyed();
+    var minPitch: Double
 
-  //
-  // Camera API
-  //
+    var maxPitch: Double
 
-  void jumpTo(@NonNull LatLng center, double zoom, double pitch, double bearing, double[] padding);
+    fun resetZoom()
 
-  void easeTo(@NonNull LatLng center, double zoom, double bearing, double pitch, double[] padding, long duration,
-              boolean easingInterpolator);
+    fun rotateBy(
+        sx: Double,
+        sy: Double,
+        ex: Double,
+        ey: Double,
+        duration: Long,
+    )
 
-  void flyTo(@NonNull LatLng center, double zoom, double bearing, double pitch, double[] padding, long duration);
+    fun setBearing(
+        degrees: Double,
+        duration: Long,
+    )
 
-  void moveBy(double deltaX, double deltaY, long duration);
+    fun setBearing(
+        degrees: Double,
+        fx: Double,
+        fy: Double,
+        duration: Long,
+    )
 
-  @NonNull
-  CameraPosition getCameraPosition();
+    val bearing: Double
 
-  // Note for implementors: the ordering of the padding is left, top, right, bottom
-  CameraPosition getCameraForLatLngBounds(@NonNull LatLngBounds bounds, int[] padding, double bearing, double pitch);
+    fun resetNorth()
 
-  CameraPosition getCameraForGeometry(@NonNull Geometry geometry, int[] padding, double bearing, double pitch);
+    fun cancelTransitions()
 
-  void resetPosition();
+    //
+    // Style API
+    //
 
-  void setLatLng(@NonNull LatLng latLng, long duration);
+    var styleUri: String
 
-  LatLng getLatLng();
+    var styleJson: String
 
-  void setLatLngBounds(@Nullable LatLngBounds latLngBounds);
+    fun isFullyLoaded(): Boolean
 
-  void setVisibleCoordinateBounds(@NonNull LatLng[] coordinates, @NonNull RectF padding,
-                                  double direction, long duration);
+    fun addLayer(layer: Layer)
 
-  void setPitch(double pitch, long duration);
+    fun addLayerBelow(
+        layer: Layer,
+        below: String,
+    )
 
-  double getPitch();
+    fun addLayerAbove(
+        layer: Layer,
+        above: String,
+    )
 
-  void setZoom(double zoom, @NonNull PointF focalPoint, long duration);
+    fun addLayerAt(
+        layer: Layer,
+        @IntRange(from = 0) index: Int,
+    )
 
-  double getZoom();
+    fun getLayers(): List<Layer>
 
-  void setMinZoom(double zoom);
+    fun getLayer(layerId: String): Layer?
 
-  double getMinZoom();
+    fun removeLayer(layerId: String): Boolean
 
-  void setMaxZoom(double zoom);
+    fun removeLayer(layer: Layer): Boolean
 
-  double getMaxZoom();
+    fun removeLayerAt(
+        @IntRange(from = 0) index: Int,
+    ): Boolean
 
-  void setMinPitch(double pitch);
+    fun addSource(source: Source)
 
-  double getMinPitch();
+    fun getSources(): List<Source>
 
-  void setMaxPitch(double pitch);
+    fun getSource(sourceId: String): Source?
 
-  double getMaxPitch();
+    fun removeSource(sourceId: String): Boolean
 
-  void resetZoom();
+    fun removeSource(source: Source): Boolean
 
-  void rotateBy(double sx, double sy, double ex, double ey, long duration);
+    var transitionOptions: TransitionOptions
 
-  void setBearing(double degrees, long duration);
+    fun addImages(images: Array<Image>)
 
-  void setBearing(double degrees, double fx, double fy, long duration);
+    fun getImage(name: String): Bitmap?
 
-  double getBearing();
+    fun removeImage(name: String)
 
-  void resetNorth();
+    fun getLight(): Light?
 
-  void cancelTransitions();
+    //
+    // Content padding API
+    //
 
-  //
-  // Style API
-  //
+    var contentPadding: DoubleArray?
 
-  void setStyleUri(String url);
+    //
+    // Query API
+    //
 
-  @NonNull
-  String getStyleUri();
+    fun queryRenderedFeatures(
+        coordinates: PointF,
+        layerIds: Array<out String>?,
+        filter: Expression?,
+    ): List<Feature>
 
-  void setStyleJson(String newStyleJson);
+    fun queryRenderedFeatures(
+        coordinates: RectF,
+        layerIds: Array<out String>?,
+        filter: Expression?,
+    ): List<Feature>
 
-  @NonNull
-  String getStyleJson();
+    fun setFeatureState(
+        sourceId: String,
+        sourceLayerId: String?,
+        featureId: String,
+        state: JsonObject,
+    )
 
-  boolean isFullyLoaded();
+    fun getFeatureState(
+        sourceId: String,
+        sourceLayerId: String?,
+        featureId: String,
+    ): JsonObject?
 
-  void addLayer(@NonNull Layer layer);
+    fun removeFeatureState(
+        sourceId: String,
+        sourceLayerId: String?,
+        featureId: String?,
+        stateKey: String?,
+    )
 
-  void addLayerBelow(@NonNull Layer layer, @NonNull String below);
+    //
+    // Projection API
+    //
 
-  void addLayerAbove(@NonNull Layer layer, @NonNull String above);
+    fun getMetersPerPixelAtLatitude(lat: Double): Double
 
-  void addLayerAt(@NonNull Layer layer, @IntRange(from = 0) int index);
+    fun projectedMetersForLatLng(latLng: LatLng): ProjectedMeters
 
-  @NonNull
-  List<Layer> getLayers();
+    fun latLngForProjectedMeters(projectedMeters: ProjectedMeters): LatLng
 
-  Layer getLayer(String layerId);
+    fun pixelForLatLng(latLng: LatLng): PointF
 
-  boolean removeLayer(@NonNull String layerId);
+    fun pixelsForLatLngs(
+        input: DoubleArray,
+        output: DoubleArray,
+    )
 
-  boolean removeLayer(@NonNull Layer layer);
+    fun getVisibleCoordinateBounds(output: DoubleArray)
 
-  boolean removeLayerAt(@IntRange(from = 0) int index);
+    fun latLngForPixel(pixel: PointF): LatLng
 
-  void addSource(@NonNull Source source);
+    fun latLngsForPixels(
+        input: DoubleArray,
+        output: DoubleArray,
+    )
 
-  @NonNull
-  List<Source> getSources();
+    //
+    // Utils API
+    //
 
-  Source getSource(@NonNull String sourceId);
+    fun setOnFpsChangedListener(listener: MapLibreMap.OnFpsChangedListener?)
 
-  boolean removeSource(@NonNull String sourceId);
+    fun setDebug(debug: Boolean)
 
-  boolean removeSource(@NonNull Source source);
+    fun getDebug(): Boolean
 
-  void setTransitionOptions(@NonNull TransitionOptions transitionOptions);
+    fun getActionJournalLogFiles(): Array<String>
 
-  @NonNull
-  TransitionOptions getTransitionOptions();
+    fun getActionJournalLog(): Array<String>
 
-  void addImages(Image[] images);
+    fun clearActionJournalLog()
 
-  Bitmap getImage(String name);
+    fun setReachability(status: Boolean)
 
-  void removeImage(String name);
+    fun setApiBaseUrl(baseUrl: String)
 
-  Light getLight();
+    var prefetchTiles: Boolean
 
-  //
-  // Content padding API
-  //
+    @setparam:IntRange(from = 0)
+    @get:IntRange(from = 0)
+    var prefetchZoomDelta: Int
 
-  void setContentPadding(double[] padding);
+    fun setTileCacheEnabled(enabled: Boolean)
 
-  double[] getContentPadding();
+    fun getTileCacheEnabled(): Boolean
 
-  //
-  // Query API
-  //
+    fun setTileLodMinRadius(radius: Double)
 
-  @NonNull
-  List<Feature> queryRenderedFeatures(@NonNull PointF coordinates,
-                                      @Nullable String[] layerIds,
-                                      @Nullable Expression filter);
+    fun getTileLodMinRadius(): Double
 
-  @NonNull
-  List<Feature> queryRenderedFeatures(@NonNull RectF coordinates,
-                                      @Nullable String[] layerIds,
-                                      @Nullable Expression filter);
+    fun setTileLodScale(scale: Double)
 
-  void setFeatureState(@NonNull String sourceId,
-                       @Nullable String sourceLayerId,
-                       @NonNull String featureId,
-                       @NonNull JsonObject state);
+    fun getTileLodScale(): Double
 
-  @Nullable
-  JsonObject getFeatureState(@NonNull String sourceId,
-                             @Nullable String sourceLayerId,
-                             @NonNull String featureId);
+    fun setTileLodPitchThreshold(threshold: Double)
 
-  void removeFeatureState(@NonNull String sourceId,
-                          @Nullable String sourceLayerId,
-                          @Nullable String featureId,
-                          @Nullable String stateKey);
+    fun getTileLodPitchThreshold(): Double
 
-  //
-  // Projection API
-  //
+    fun setTileLodZoomShift(shift: Double)
 
-  double getMetersPerPixelAtLatitude(double lat);
+    fun getTileLodZoomShift(): Double
 
-  ProjectedMeters projectedMetersForLatLng(@NonNull LatLng latLng);
+    fun setGestureInProgress(inProgress: Boolean)
 
-  LatLng latLngForProjectedMeters(@NonNull ProjectedMeters projectedMeters);
+    fun getPixelRatio(): Float
 
-  @NonNull
-  PointF pixelForLatLng(@NonNull LatLng latLng);
+    fun triggerRepaint()
 
-  void pixelsForLatLngs(@NonNull double[] input, @NonNull double[] output);
+    fun isRenderingStatsViewEnabled(): Boolean
 
-  void getVisibleCoordinateBounds(@NonNull double[] output);
+    fun enableRenderingStatsView(value: Boolean)
 
-  LatLng latLngForPixel(@NonNull PointF pixel);
+    fun setFrustumOffset(offset: RectF)
 
-  void latLngsForPixels(@NonNull double[] input, @NonNull double[] output);
+    fun setSwapBehaviorFlush(flush: Boolean)
 
-  //
-  // Utils API
-  //
+    //
+    // Deprecated Annotations API
+    //
 
-  void setOnFpsChangedListener(@NonNull MapLibreMap.OnFpsChangedListener listener);
+    fun addMarker(marker: Marker): Long
 
-  void setDebug(boolean debug);
+    fun addMarkers(markers: List<Marker>): LongArray
 
-  boolean getDebug();
+    fun addPolyline(polyline: Polyline): Long
 
-  String[] getActionJournalLogFiles();
+    fun addPolylines(polylines: List<Polyline>): LongArray
 
-  String[] getActionJournalLog();
+    fun addPolygon(polygon: Polygon): Long
 
-  void clearActionJournalLog();
+    fun addPolygons(polygons: List<Polygon>): LongArray
 
-  void setReachability(boolean status);
+    fun updateMarker(marker: Marker)
 
-  void setApiBaseUrl(String baseUrl);
+    fun updatePolygon(polygon: Polygon)
 
-  void setPrefetchTiles(boolean enable);
+    fun updatePolyline(polyline: Polyline)
 
-  boolean getPrefetchTiles();
+    fun removeAnnotation(id: Long)
 
-  void setPrefetchZoomDelta(@IntRange(from = 0) int delta);
+    fun removeAnnotations(ids: LongArray)
 
-  @IntRange(from = 0)
-  int getPrefetchZoomDelta();
+    fun getTopOffsetPixelsForAnnotationSymbol(symbolName: String): Double
 
-  void setTileCacheEnabled(boolean enabled);
+    fun addAnnotationIcon(
+        symbol: String,
+        width: Int,
+        height: Int,
+        scale: Float,
+        pixels: ByteArray,
+    )
 
-  boolean getTileCacheEnabled();
+    fun removeAnnotationIcon(symbol: String)
 
-  void setTileLodMinRadius(double radius);
+    fun queryPointAnnotations(rectF: RectF): LongArray
 
-  double getTileLodMinRadius();
+    fun queryShapeAnnotations(rectF: RectF): LongArray
 
-  void setTileLodScale(double scale);
+    fun getDensityDependantRectangle(rectangle: RectF): RectF
 
-  double getTileLodScale();
+    val nativePtr: Long
 
-  void setTileLodPitchThreshold(double threshold);
-
-  double getTileLodPitchThreshold();
-
-  void setTileLodZoomShift(double shift);
-
-  double getTileLodZoomShift();
-
-  void setGestureInProgress(boolean inProgress);
-
-  float getPixelRatio();
-
-  void triggerRepaint();
-
-  boolean isRenderingStatsViewEnabled();
-
-  void enableRenderingStatsView(boolean value);
-
-  void setFrustumOffset(RectF offset);
-
-  void setSwapBehaviorFlush(boolean flush);
-
-  //
-  // Deprecated Annotations API
-  //
-
-  long addMarker(Marker marker);
-
-  @NonNull
-  long[] addMarkers(@NonNull List<Marker> markers);
-
-  long addPolyline(Polyline polyline);
-
-  @NonNull
-  long[] addPolylines(@NonNull List<Polyline> polylines);
-
-  long addPolygon(Polygon polygon);
-
-  @NonNull
-  long[] addPolygons(@NonNull List<Polygon> polygons);
-
-  void updateMarker(@NonNull Marker marker);
-
-  void updatePolygon(@NonNull Polygon polygon);
-
-  void updatePolyline(@NonNull Polyline polyline);
-
-  void removeAnnotation(long id);
-
-  void removeAnnotations(long[] ids);
-
-  double getTopOffsetPixelsForAnnotationSymbol(String symbolName);
-
-  void addAnnotationIcon(String symbol, int width, int height, float scale, byte[] pixels);
-
-  void removeAnnotationIcon(String symbol);
-
-  @NonNull
-  long[] queryPointAnnotations(RectF rectF);
-
-  @NonNull
-  long[] queryShapeAnnotations(RectF rectF);
-
-  @NonNull
-  RectF getDensityDependantRectangle(RectF rectangle);
-
-  long getNativePtr();
-
-  void addSnapshotCallback(@NonNull MapLibreMap.SnapshotReadyCallback callback);
+    fun addSnapshotCallback(callback: MapLibreMap.SnapshotReadyCallback)
 }

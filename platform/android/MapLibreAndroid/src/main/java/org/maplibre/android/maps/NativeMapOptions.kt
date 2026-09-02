@@ -1,79 +1,65 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-public class NativeMapOptions {
+/**
+ * The subset of [MapLibreMapOptions] that is passed to the native map.
+ *
+ * The fields of this class are read from the native peer, they must not be renamed.
+ */
+class NativeMapOptions {
+    private val pixelRatio: Float
+    private val crossSourceCollisions: Boolean
 
-  private final float pixelRatio;
-  private final boolean crossSourceCollisions;
+    private val actionJournalEnabled: Boolean
+    private val actionJournalPath: String
+    private val actionJournalLogFileSize: Long
+    private val actionJournalLogFileCount: Long
+    private val actionJournalRenderingReportInterval: Int
+    private val asyncRendererCleanup: Boolean
 
-  private final boolean actionJournalEnabled;
-  private final String actionJournalPath;
-  private final long actionJournalLogFileSize;
-  private final long actionJournalLogFileCount;
-  private final int actionJournalRenderingReportInterval;
-  private final boolean asyncRendererCleanup;
+    private val fastPFOREnabled: Boolean
 
-  private final boolean fastPFOREnabled;
+    constructor(options: MapLibreMapOptions) {
+        pixelRatio = options.pixelRatio
+        crossSourceCollisions = options.crossSourceCollisions
 
-  public NativeMapOptions(MapLibreMapOptions options) {
-    pixelRatio = options.getPixelRatio();
-    crossSourceCollisions = options.getCrossSourceCollisions();
+        actionJournalEnabled = options.actionJournalEnabled
+        actionJournalPath = options.actionJournalPath
+        actionJournalLogFileSize = options.actionJournalLogFileSize
+        actionJournalLogFileCount = options.actionJournalLogFileCount
+        actionJournalRenderingReportInterval = options.actionJournalRenderingReportInterval
+        asyncRendererCleanup = options.asyncRendererCleanup
+        fastPFOREnabled = options.fastPFOREnabled
+    }
 
-    actionJournalEnabled = options.getActionJournalEnabled();
-    actionJournalPath = options.getActionJournalPath();
-    actionJournalLogFileSize = options.getActionJournalLogFileSize();
-    actionJournalLogFileCount = options.getActionJournalLogFileCount();
-    actionJournalRenderingReportInterval = options.getActionJournalRenderingReportInterval();
-    asyncRendererCleanup = options.getAsyncRendererCleanup();
-    fastPFOREnabled = options.getFastPFOREnabled();
-  }
+    constructor(pixelRatio: Float, crossSourceCollisions: Boolean) {
+        this.pixelRatio = pixelRatio
+        this.crossSourceCollisions = crossSourceCollisions
 
-  public NativeMapOptions(float pixelRatio, boolean crossSourceCollisions) {
-    this.pixelRatio = pixelRatio;
-    this.crossSourceCollisions = crossSourceCollisions;
+        actionJournalEnabled = false
+        actionJournalPath = ""
+        actionJournalLogFileSize = 0
+        actionJournalLogFileCount = 0
+        actionJournalRenderingReportInterval = 0
 
-    actionJournalEnabled = false;
-    actionJournalPath = "";
-    actionJournalLogFileSize = 0;
-    actionJournalLogFileCount = 0;
-    actionJournalRenderingReportInterval = 0;
+        asyncRendererCleanup = false
+        fastPFOREnabled = false
+    }
 
-    asyncRendererCleanup = false;
-    fastPFOREnabled = false;
-  }
+    fun pixelRatio(): Float = pixelRatio
 
-  public float pixelRatio() {
-    return pixelRatio;
-  }
+    fun crossSourceCollisions(): Boolean = crossSourceCollisions
 
-  public boolean crossSourceCollisions() {
-    return crossSourceCollisions;
-  }
+    fun actionJournalEnabled(): Boolean = actionJournalEnabled
 
-  public boolean actionJournalEnabled() {
-    return actionJournalEnabled;
-  }
+    fun actionJournalPath(): String = actionJournalPath
 
-  public String actionJournalPath() {
-    return actionJournalPath;
-  }
+    fun actionJournalLogFileSize(): Long = actionJournalLogFileSize
 
-  public long actionJournalLogFileSize() {
-    return actionJournalLogFileSize;
-  }
+    fun actionJournalLogFileCount(): Long = actionJournalLogFileCount
 
-  public long actionJournalLogFileCount() {
-    return actionJournalLogFileCount;
-  }
+    fun actionJournalRenderingReportInterval(): Int = actionJournalRenderingReportInterval
 
-  public int actionJournalRenderingReportInterval() {
-    return actionJournalRenderingReportInterval;
-  }
+    fun asyncRendererCleanup(): Boolean = asyncRendererCleanup
 
-  public boolean asyncRendererCleanup() {
-    return asyncRendererCleanup;
-  }
-
-  public boolean fastPFOREnabled() {
-    return fastPFOREnabled;
-  }
+    fun fastPFOREnabled(): Boolean = fastPFOREnabled
 }

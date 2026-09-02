@@ -11,7 +11,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class TileSetTest {
-
     @Test
     fun testSetBoundsWithFourFloats() {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
@@ -60,10 +59,16 @@ class TileSetTest {
         val tileSet = TileSet("2.1.0", "https://example.com/{z}/{x}/{y}.png")
 
         // Test setting bounds with LatLngBounds
-        val latLngBounds = LatLngBounds.Builder()
-            .include(org.maplibre.android.geometry.LatLng(12.0, 34.0))
-            .include(org.maplibre.android.geometry.LatLng(56.0, 78.0))
-            .build()
+        val latLngBounds =
+            LatLngBounds
+                .Builder()
+                .include(
+                    org.maplibre.android.geometry
+                        .LatLng(12.0, 34.0),
+                ).include(
+                    org.maplibre.android.geometry
+                        .LatLng(56.0, 78.0),
+                ).build()
 
         tileSet.setBounds(latLngBounds)
 

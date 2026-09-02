@@ -1,53 +1,73 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import android.graphics.Bitmap;
+import android.graphics.Bitmap
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.modes.RenderMode
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.expressions.Expression
 
-import androidx.annotation.Nullable;
+internal interface LocationLayerRenderer {
+    fun initializeComponents(style: Style)
 
-import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.maps.Style;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.geometry.LatLng;
+    fun addLayers(positionManager: LocationComponentPositionManager)
 
-interface LocationLayerRenderer {
-  void initializeComponents(Style style);
+    fun removeLayers()
 
-  void addLayers(LocationComponentPositionManager positionManager);
+    fun hide()
 
-  void removeLayers();
+    fun cameraTiltUpdated(tilt: Double)
 
-  void hide();
+    fun cameraBearingUpdated(bearing: Double)
 
-  void cameraTiltUpdated(double tilt);
+    fun show(
+        @RenderMode.Mode renderMode: Int,
+        isStale: Boolean,
+    )
 
-  void cameraBearingUpdated(double bearing);
+    fun styleAccuracy(
+        accuracyAlpha: Float,
+        accuracyColor: Int,
+    )
 
-  void show(@RenderMode.Mode int renderMode, boolean isStale);
+    fun setLatLng(latLng: LatLng)
 
-  void styleAccuracy(float accuracyAlpha, int accuracyColor);
+    fun setGpsBearing(gpsBearing: Float)
 
-  void setLatLng(LatLng latLng);
+    fun setCompassBearing(compassBearing: Float)
 
-  void setGpsBearing(Float gpsBearing);
+    fun setAccuracyRadius(accuracy: Float)
 
-  void setCompassBearing(Float compassBearing);
+    fun styleScaling(scaleExpression: Expression)
 
-  void setAccuracyRadius(Float accuracy);
+    fun setLocationStale(
+        isStale: Boolean,
+        renderMode: Int,
+    )
 
-  void styleScaling(Expression scaleExpression);
+    fun adjustPulsingCircleLayerVisibility(visible: Boolean)
 
-  void setLocationStale(boolean isStale, int renderMode);
+    fun stylePulsingCircle(options: LocationComponentOptions)
 
-  void adjustPulsingCircleLayerVisibility(boolean visible);
+    fun updatePulsingUi(
+        radius: Float,
+        opacity: Float?,
+    )
 
-  void stylePulsingCircle(LocationComponentOptions options);
+    fun updateIconIds(
+        foregroundIconString: String,
+        foregroundStaleIconString: String,
+        backgroundIconString: String,
+        backgroundStaleIconString: String,
+        bearingIconString: String,
+    )
 
-  void updatePulsingUi(float radius, @Nullable Float opacity);
-
-  void updateIconIds(String foregroundIconString, String foregroundStaleIconString, String backgroundIconString,
-                     String backgroundStaleIconString, String bearingIconString);
-
-  void addBitmaps(@RenderMode.Mode int renderMode, @Nullable Bitmap shadowBitmap, Bitmap backgroundBitmap,
-                  Bitmap backgroundStaleBitmap, Bitmap bearingBitmap,
-                  Bitmap foregroundBitmap, Bitmap foregroundStaleBitmap);
+    fun addBitmaps(
+        @RenderMode.Mode renderMode: Int,
+        shadowBitmap: Bitmap?,
+        backgroundBitmap: Bitmap?,
+        backgroundStaleBitmap: Bitmap?,
+        bearingBitmap: Bitmap?,
+        foregroundBitmap: Bitmap?,
+        foregroundStaleBitmap: Bitmap?,
+    )
 }

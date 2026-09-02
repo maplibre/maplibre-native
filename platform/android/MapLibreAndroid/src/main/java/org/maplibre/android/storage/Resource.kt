@@ -1,60 +1,56 @@
-package org.maplibre.android.storage;
+package org.maplibre.android.storage
 
-import androidx.annotation.IntDef;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import androidx.annotation.IntDef
 
 /**
  * Resource provides access to resource types.
  */
-public final class Resource {
-  // Note: Keep this in sync with include/mln/storage/resource.hpp
+object Resource {
+    // Note: Keep this in sync with include/mln/storage/resource.hpp
 
-  /**
-   * Resource type variants.
-   */
-  @IntDef( {UNKNOWN, STYLE, SOURCE, TILE, GLYPHS, SPRITE_IMAGE, SPRITE_JSON})
-  @Retention(RetentionPolicy.SOURCE)
-  public @interface Kind {
-  }
+    /**
+     * Resource type variants.
+     */
+    @IntDef(UNKNOWN, STYLE, SOURCE, TILE, GLYPHS, SPRITE_IMAGE, SPRITE_JSON)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class Kind
 
-  /**
-   * Unknown type
-   */
-  public static final int UNKNOWN = 0;
+    /**
+     * Unknown type
+     */
+    const val UNKNOWN = 0
 
-  /**
-   * Style sheet JSON file
-   */
-  public static final int STYLE = 1;
+    /**
+     * Style sheet JSON file
+     */
+    const val STYLE = 1
 
-  /**
-   * TileJSON file as specified in https://maplibre.org/maplibre-style-spec/root/#sources
-   */
-  public static final int SOURCE = 2;
+    /**
+     * TileJSON file as specified in https://maplibre.org/maplibre-style-spec/root/#sources
+     */
+    const val SOURCE = 2
 
-  /**
-   * A vector or raster tile as described in the style sheet at
-   * https://maplibre.org/maplibre-style-spec/sources/
-   */
-  public static final int TILE = 3;
+    /**
+     * A vector or raster tile as described in the style sheet at
+     * https://maplibre.org/maplibre-style-spec/sources/
+     */
+    const val TILE = 3
 
-  /**
-   * Signed distance field glyphs for text rendering. These are the URLs specified in the style
-   * in https://maplibre.org/maplibre-style-spec/root/#glyphs
-   */
-  public static final int GLYPHS = 4;
+    /**
+     * Signed distance field glyphs for text rendering. These are the URLs specified in the style
+     * in https://maplibre.org/maplibre-style-spec/root/#glyphs
+     */
+    const val GLYPHS = 4
 
-  /**
-   * Image part of a sprite sheet. It is constructed of the prefix in
-   *  https://maplibre.org/maplibre-style-spec/root/#sprite and a PNG file extension.
-   */
-  public static final int SPRITE_IMAGE = 5;
+    /**
+     * Image part of a sprite sheet. It is constructed of the prefix in
+     * https://maplibre.org/maplibre-style-spec/root/#sprite and a PNG file extension.
+     */
+    const val SPRITE_IMAGE = 5
 
-  /**
-   * JSON part of a sprite sheet. It is constructed of the prefix in
-   * https://maplibre.org/maplibre-style-spec/root/#sprite and a JSON file extension.
-   */
-  public static final int SPRITE_JSON = 6;
+    /**
+     * JSON part of a sprite sheet. It is constructed of the prefix in
+     * https://maplibre.org/maplibre-style-spec/root/#sprite and a JSON file extension.
+     */
+    const val SPRITE_JSON = 6
 }

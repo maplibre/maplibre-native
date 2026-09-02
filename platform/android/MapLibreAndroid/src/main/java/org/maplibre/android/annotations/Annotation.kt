@@ -1,152 +1,114 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.maplibre.android.maps.MapView;
-import org.maplibre.android.maps.MapLibreMap;
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 
 /**
  * Annotation is an overlay on top of a Map.
- * <p>
- * Known subclasses are {@link Polygon}, {@link Polyline} and {@link Marker}.
- * </p>
- * <p>
+ *
+ * Known subclasses are [Polygon], [Polyline] and [Marker].
+ *
  * This class manages attachment to a map and identification, but does not require
  * content to be placed at a geographical point.
- * </p>
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/maplibre/maplibre-plugins-android">
- *   MapLibre Annotation Plugin</a> instead
  */
-@Deprecated
-public abstract class Annotation implements Comparable<Annotation> {
+@Deprecated(
+    "As of 7.0.0, use " +
+        "[MapLibre Annotation Plugin](https://github.com/maplibre/maplibre-plugins-android) instead",
+)
+abstract class Annotation protected constructor() : Comparable<Annotation> {
+    /**
+     * The annotation's unique ID.
+     *
+     * This ID is unique for a MapView instance and is suitable for associating your own extra
+     * data with. It is `-1` unless the annotation was added to a MapView.
+     *
+     * Internal C++ id is stored as unsigned int.
+     */
+    var id: Long = -1
 
-  /**
-   * <p>
-   * The annotation id
-   * </p>
-   * Internal C++ id is stored as unsigned int.
-   */
-  private long id = -1; // -1 unless added to a MapView
-  protected MapLibreMap maplibreMap;
-  protected MapView mapView;
+    @JvmField
+    protected var maplibreMap: MapLibreMap? = null
 
-  protected Annotation() {
-  }
+    @JvmField
+    protected var mapView: MapView? = null
 
-  /**
-   * <p>
-   * Gets the annotation's unique ID.
-   * </p>
-   * This ID is unique for a MapView instance and is suitable for associating your own extra
-   * data with.
-   *
-   * @return the assigned id.
-   */
-  public long getId() {
-    return id;
-  }
-
-  /**
-   * Do not use this method, used internally by the SDK.
-   */
-  public void remove() {
-    if (maplibreMap == null) {
-      return;
+    /**
+     * Do not use this method, used internally by the SDK.
+     */
+    fun remove() {
+        maplibreMap?.removeAnnotation(this)
     }
-    maplibreMap.removeAnnotation(this);
-  }
 
-  /**
-   * Do not use this method, used internally by the SDK.
-   *
-   * @param id the assigned id
-   */
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  /**
-   * Do not use this method, used internally by the SDK.
-   *
-   * @param maplibreMap the hosting MapLibreMap
-   */
-  public void setMapLibreMap(MapLibreMap maplibreMap) {
-    this.maplibreMap = maplibreMap;
-  }
-
-  /**
-   * Gets the hosting MapLibreMap.
-   *
-   * @return the MapLibreMap
-   */
-  protected MapLibreMap getMapLibreMap() {
-    return maplibreMap;
-  }
-
-  /**
-   * Do not use this method, used internally by the SDK.
-   *
-   * @param mapView the hosting map view
-   */
-  public void setMapView(MapView mapView) {
-    this.mapView = mapView;
-  }
-
-  /**
-   * Gets the hosting map view.
-   *
-   * @return The MapView
-   */
-  protected MapView getMapView() {
-    return mapView;
-  }
-
-  /**
-   * Compares this Annotation object with another Annotation.
-   *
-   * @param annotation Another Annotation to compare with this object.
-   * @return returns 0 if id's match, 1 if id is lower, -1 if id is higher of another Annotation
-   */
-  @Override
-  public int compareTo(@NonNull Annotation annotation) {
-    if (id < annotation.getId()) {
-      return 1;
-    } else if (id > annotation.getId()) {
-      return -1;
+    /**
+     * Do not use this method, used internally by the SDK.
+     *
+     * @param maplibreMap the hosting MapLibreMap
+     */
+    fun setMapLibreMap(maplibreMap: MapLibreMap?) {
+        this.maplibreMap = maplibreMap
     }
-    return 0;
-  }
 
-  /**
-   * Checks if this Annotation object is equal to another Annotation.
-   *
-   * @param object Another Annotation to check equality with this object.
-   * @return returns true both id's match else returns false.
-   */
-  @Override
-  public boolean equals(@Nullable Object object) {
-    if (this == object) {
-      return true;
-    }
-    if (object == null || !(object instanceof Annotation)) {
-      return false;
-    }
-    Annotation that = (Annotation) object;
-    return id == that.getId();
-  }
+    /**
+     * Gets the hosting MapLibreMap.
+     *
+     * @return the MapLibreMap
+     */
+    protected fun getMapLibreMap(): MapLibreMap? = maplibreMap
 
-  /**
-   * Gives an integer which can be used as the bucket number for storing elements of the set/map.
-   * This bucket number is the address of the element inside the set/map. There's no guarantee
-   * that this hash value will be consistent between different Java implementations, or even
-   * between different execution runs of the same program.
-   *
-   * @return integer value you can use for storing element.
-   */
-  @Override
-  public int hashCode() {
-    return (int) (getId() ^ (getId() >>> 32));
-  }
+    /**
+     * Do not use this method, used internally by the SDK.
+     *
+     * @param mapView the hosting map view
+     */
+    fun setMapView(mapView: MapView?) {
+        this.mapView = mapView
+    }
+
+    /**
+     * Gets the hosting map view.
+     *
+     * @return The MapView
+     */
+    protected fun getMapView(): MapView? = mapView
+
+    /**
+     * Compares this Annotation object with another Annotation.
+     *
+     * @param other Another Annotation to compare with this object.
+     * @return returns 0 if id's match, 1 if id is lower, -1 if id is higher of another Annotation
+     */
+    override fun compareTo(other: Annotation): Int {
+        if (id < other.id) {
+            return 1
+        } else if (id > other.id) {
+            return -1
+        }
+        return 0
+    }
+
+    /**
+     * Checks if this Annotation object is equal to another Annotation.
+     *
+     * @param other Another Annotation to check equality with this object.
+     * @return returns true both id's match else returns false.
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other !is Annotation) {
+            return false
+        }
+        return id == other.id
+    }
+
+    /**
+     * Gives an integer which can be used as the bucket number for storing elements of the set/map.
+     * This bucket number is the address of the element inside the set/map. There's no guarantee
+     * that this hash value will be consistent between different Java implementations, or even
+     * between different execution runs of the same program.
+     *
+     * @return integer value you can use for storing element.
+     */
+    override fun hashCode(): Int = (id xor (id ushr 32)).toInt()
 }

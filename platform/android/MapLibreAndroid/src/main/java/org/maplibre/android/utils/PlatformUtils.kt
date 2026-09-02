@@ -1,35 +1,33 @@
-package org.maplibre.android.utils;
+package org.maplibre.android.utils
 
-public class PlatformUtils {
+object PlatformUtils {
+    @JvmStatic
+    fun isTest(): Boolean = isJUnit() || isRobolectric() || !isAndroid()
 
-  public static boolean isTest() {
-    return isJUnit() || isRobolectric() || !isAndroid();
-  }
+    @JvmStatic
+    fun isJUnit(): Boolean =
+        try {
+            Class.forName("org.junit.Test")
+            true
+        } catch (ignored: ClassNotFoundException) {
+            false
+        }
 
-  public static boolean isJUnit() {
-    try {
-      Class.forName("org.junit.Test");
-      return true;
-    } catch (ClassNotFoundException ignored) {
-      return false;
-    }
-  }
+    @JvmStatic
+    fun isRobolectric(): Boolean =
+        try {
+            Class.forName("org.robolectric.Robolectric")
+            true
+        } catch (ignored: ClassNotFoundException) {
+            false
+        }
 
-  public static boolean isRobolectric() {
-    try {
-      Class.forName("org.robolectric.Robolectric");
-      return true;
-    } catch (ClassNotFoundException ignored) {
-      return false;
-    }
-  }
-
-  public static boolean isAndroid() {
-    try {
-      Class.forName("android.os.Build");
-      return true;
-    } catch (ClassNotFoundException ignored) {
-      return false;
-    }
-  }
+    @JvmStatic
+    fun isAndroid(): Boolean =
+        try {
+            Class.forName("android.os.Build")
+            true
+        } catch (ignored: ClassNotFoundException) {
+            false
+        }
 }

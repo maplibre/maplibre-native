@@ -1,147 +1,121 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.RectF;
-
-import androidx.annotation.NonNull;
-import androidx.collection.LongSparseArray;
-
-import org.maplibre.android.annotations.Annotation;
-import org.maplibre.android.annotations.BaseMarkerOptions;
-import org.maplibre.android.annotations.Icon;
-import org.maplibre.android.annotations.Marker;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.graphics.RectF
+import androidx.collection.LongSparseArray
+import org.maplibre.android.annotations.Annotation
+import org.maplibre.android.annotations.BaseMarkerOptions
+import org.maplibre.android.annotations.Marker
 
 /**
- * Encapsulates {@link Marker}'s functionality.
+ * Encapsulates [Marker]'s functionality.
  */
-class MarkerContainer implements Markers {
+internal class MarkerContainer(
+    private val nativeMapView: NativeMap?,
+    private val annotations: LongSparseArray<Annotation>,
+    private val iconManager: IconManager,
+) : Markers {
+    override fun addBy(
+        markerOptions: BaseMarkerOptions<*, *>,
+        maplibreMap: MapLibreMap,
+    ): Marker {
+        val marker = prepareMarker(markerOptions)
+        val id = nativeMapView?.addMarker(marker) ?: 0
+        marker.setMapLibreMap(maplibreMap)
+        marker.id = id
+        annotations.put(id, marker)
+        return marker
+    }
 
-  private final NativeMap nativeMapView;
-  private final LongSparseArray<Annotation> annotations;
-  private final IconManager iconManager;
+    override fun addBy(
+        markerOptionsList: List<BaseMarkerOptions<*, *>>,
+        maplibreMap: MapLibreMap,
+    ): List<Marker> {
+        val count = markerOptionsList.size
+        val markers = ArrayList<Marker>(count)
+        if (nativeMapView != null && count > 0) {
+            for (markerOptions in markerOptionsList) {
+                markers.add(prepareMarker(markerOptions))
+            }
 
-  MarkerContainer(NativeMap nativeMapView, LongSparseArray<Annotation> annotations, IconManager iconManager) {
-    this.nativeMapView = nativeMapView;
-    this.annotations = annotations;
-    this.iconManager = iconManager;
-  }
-
-  @Override
-  public Marker addBy(@NonNull BaseMarkerOptions markerOptions, @NonNull MapLibreMap maplibreMap) {
-    Marker marker = prepareMarker(markerOptions);
-    long id = nativeMapView != null ? nativeMapView.addMarker(marker) : 0;
-    marker.setMapLibreMap(maplibreMap);
-    marker.setId(id);
-    annotations.put(id, marker);
-    return marker;
-  }
-
-  @NonNull
-  @Override
-  public List<Marker> addBy(@NonNull List<? extends BaseMarkerOptions> markerOptionsList, @NonNull MapLibreMap
-      maplibreMap) {
-    int count = markerOptionsList.size();
-    List<Marker> markers = new ArrayList<>(count);
-    if (nativeMapView != null && count > 0) {
-      BaseMarkerOptions markerOptions;
-      Marker marker;
-      for (int i = 0; i < count; i++) {
-        markerOptions = markerOptionsList.get(i);
-        marker = prepareMarker(markerOptions);
-        markers.add(marker);
-      }
-
-      if (markers.size() > 0) {
-        long[] ids = nativeMapView.addMarkers(markers);
-        for (int i = 0; i < ids.length; i++) {
-          Marker createdMarker = markers.get(i);
-          createdMarker.setMapLibreMap(maplibreMap);
-          createdMarker.setId(ids[i]);
-          annotations.put(ids[i], createdMarker);
+            if (markers.isNotEmpty()) {
+                val ids = nativeMapView.addMarkers(markers)
+                for (i in ids.indices) {
+                    val createdMarker = markers[i]
+                    createdMarker.setMapLibreMap(maplibreMap)
+                    createdMarker.id = ids[i]
+                    annotations.put(ids[i], createdMarker)
+                }
+            }
         }
-      }
-    }
-    return markers;
-  }
-
-  @Override
-  public void update(@NonNull Marker updatedMarker, @NonNull MapLibreMap maplibreMap) {
-    ensureIconLoaded(updatedMarker, maplibreMap);
-    nativeMapView.updateMarker(updatedMarker);
-    annotations.setValueAt(annotations.indexOfKey(updatedMarker.getId()), updatedMarker);
-  }
-
-  @NonNull
-  @Override
-  public List<Marker> obtainAll() {
-    List<Marker> markers = new ArrayList<>();
-    Annotation annotation;
-    for (int i = 0; i < annotations.size(); i++) {
-      annotation = annotations.get(annotations.keyAt(i));
-      if (annotation instanceof Marker) {
-        markers.add((Marker) annotation);
-      }
-    }
-    return markers;
-  }
-
-  @NonNull
-  @Override
-  public List<Marker> obtainAllIn(@NonNull RectF rectangle) {
-    RectF rect = nativeMapView.getDensityDependantRectangle(rectangle);
-    long[] ids = nativeMapView.queryPointAnnotations(rect);
-    List<Long> idsList = new ArrayList<>(ids.length);
-    for (long id : ids) {
-      idsList.add(id);
+        return markers
     }
 
-    List<Marker> annotations = new ArrayList<>(ids.length);
-    List<Annotation> annotationList = obtainAnnotations();
-    int count = annotationList.size();
-    for (int i = 0; i < count; i++) {
-      Annotation annotation = annotationList.get(i);
-      if (annotation instanceof org.maplibre.android.annotations.Marker && idsList.contains(annotation.getId())) {
-        annotations.add((org.maplibre.android.annotations.Marker) annotation);
-      }
+    override fun update(
+        updatedMarker: Marker,
+        maplibreMap: MapLibreMap,
+    ) {
+        ensureIconLoaded(updatedMarker, maplibreMap)
+        nativeMapView!!.updateMarker(updatedMarker)
+        annotations.setValueAt(annotations.indexOfKey(updatedMarker.id), updatedMarker)
     }
 
-    return new ArrayList<>(annotations);
-  }
-
-  @Override
-  public void reload() {
-    iconManager.reloadIcons();
-    int count = annotations.size();
-    for (int i = 0; i < count; i++) {
-      Annotation annotation = annotations.get(i);
-      if (annotation instanceof Marker) {
-        Marker marker = (Marker) annotation;
-        nativeMapView.removeAnnotation(annotation.getId());
-        long newId = nativeMapView.addMarker(marker);
-        marker.setId(newId);
-      }
+    override fun obtainAll(): List<Marker> {
+        val markers = mutableListOf<Marker>()
+        for (i in 0 until annotations.size()) {
+            val annotation = annotations.get(annotations.keyAt(i))
+            if (annotation is Marker) {
+                markers.add(annotation)
+            }
+        }
+        return markers
     }
-  }
 
-  private Marker prepareMarker(BaseMarkerOptions markerOptions) {
-    Marker marker = markerOptions.getMarker();
-    Icon icon = iconManager.loadIconForMarker(marker);
-    marker.setTopOffsetPixels(iconManager.getTopOffsetPixelsForIcon(icon));
-    return marker;
-  }
+    override fun obtainAllIn(rectangle: RectF): List<Marker> {
+        val rect = nativeMapView!!.getDensityDependantRectangle(rectangle)
+        val ids = nativeMapView.queryPointAnnotations(rect)
+        val idsList = ids.toList()
 
-  private void ensureIconLoaded(Marker marker, @NonNull MapLibreMap maplibreMap) {
-    iconManager.ensureIconLoaded(marker, maplibreMap);
-  }
+        val markers = ArrayList<Marker>(ids.size)
+        for (annotation in obtainAnnotations()) {
+            if (annotation is Marker && idsList.contains(annotation.id)) {
+                markers.add(annotation)
+            }
+        }
 
-  @NonNull
-  private List<Annotation> obtainAnnotations() {
-    List<Annotation> annotations = new ArrayList<>();
-    for (int i = 0; i < this.annotations.size(); i++) {
-      annotations.add(this.annotations.get(this.annotations.keyAt(i)));
+        return ArrayList(markers)
     }
-    return annotations;
-  }
+
+    override fun reload() {
+        iconManager.reloadIcons()
+        val count = annotations.size()
+        for (i in 0 until count) {
+            val annotation = annotations.get(i.toLong())
+            if (annotation is Marker) {
+                nativeMapView!!.removeAnnotation(annotation.id)
+                annotation.id = nativeMapView.addMarker(annotation)
+            }
+        }
+    }
+
+    private fun prepareMarker(markerOptions: BaseMarkerOptions<*, *>): Marker {
+        val marker = markerOptions.marker!!
+        val icon = iconManager.loadIconForMarker(marker)
+        marker.setTopOffsetPixels(iconManager.getTopOffsetPixelsForIcon(icon))
+        return marker
+    }
+
+    private fun ensureIconLoaded(
+        marker: Marker,
+        maplibreMap: MapLibreMap,
+    ) {
+        iconManager.ensureIconLoaded(marker, maplibreMap)
+    }
+
+    private fun obtainAnnotations(): List<Annotation> {
+        val result = mutableListOf<Annotation>()
+        for (i in 0 until annotations.size()) {
+            annotations.get(annotations.keyAt(i))?.let { result.add(it) }
+        }
+        return result
+    }
 }

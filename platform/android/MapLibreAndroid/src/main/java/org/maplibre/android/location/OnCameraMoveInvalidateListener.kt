@@ -1,7 +1,5 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-interface OnCameraMoveInvalidateListener {
-
-  void onInvalidateCameraMove();
-
+internal fun interface OnCameraMoveInvalidateListener {
+    fun onInvalidateCameraMove()
 }

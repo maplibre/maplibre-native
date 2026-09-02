@@ -1,32 +1,33 @@
-package org.maplibre.android.maps.renderer;
+package org.maplibre.android.maps.renderer
 
-import android.content.Context;
-import android.view.TextureView;
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.maps.renderer.surfaceview.SurfaceViewMapRenderer;
-import org.maplibre.android.maps.renderer.textureview.TextureViewMapRenderer;
+import android.content.Context
+import android.view.TextureView
+import org.maplibre.android.maps.renderer.surfaceview.SurfaceViewMapRenderer
+import org.maplibre.android.maps.renderer.textureview.TextureViewMapRenderer
 
 /**
- * Vulkan flavor glue. Delegates straight to {@link VulkanRendererStrategy}.
- * Exists only so the shared {@link MapRendererFactory} in main can call
- * {@code RendererStrategy.X(...)} without a per-flavor import.
+ * Vulkan flavor glue. Delegates straight to [VulkanRendererStrategy].
+ * Exists only so the shared [MapRendererFactory] in main can call
+ * `RendererStrategy.X(...)` without a per-flavor import.
  */
-final class RendererStrategy {
+internal object RendererStrategy {
+    fun attachTextureRenderThread(
+        textureView: TextureView,
+        renderer: TextureViewMapRenderer,
+    ) {
+        VulkanRendererStrategy.attachTextureRenderThread(textureView, renderer)
+    }
 
-  private RendererStrategy() {}
-
-  static void attachTextureRenderThread(@NonNull TextureView textureView,
-                                        @NonNull TextureViewMapRenderer renderer) {
-    VulkanRendererStrategy.attachTextureRenderThread(textureView, renderer);
-  }
-
-  static SurfaceViewMapRenderer createSurfaceViewRenderer(@NonNull Context context,
-                                                          String localFontFamily,
-                                                          boolean renderSurfaceOnTop,
-                                                          Runnable initCallback) {
-    return VulkanRendererStrategy.createSurfaceViewRenderer(
-        context, localFontFamily, renderSurfaceOnTop, initCallback);
-  }
+    fun createSurfaceViewRenderer(
+        context: Context,
+        localFontFamily: String?,
+        renderSurfaceOnTop: Boolean,
+        initCallback: Runnable,
+    ): SurfaceViewMapRenderer =
+        VulkanRendererStrategy.createSurfaceViewRenderer(
+            context,
+            localFontFamily,
+            renderSurfaceOnTop,
+            initCallback,
+        )
 }

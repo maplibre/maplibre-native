@@ -1,240 +1,207 @@
-package org.maplibre.android.style.types;
+package org.maplibre.android.style.types
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import org.maplibre.android.utils.ColorUtils;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import org.maplibre.android.utils.ColorUtils
+import java.util.Arrays
 
 /**
- * A component of the {@link Formatted}.
+ * A component of the [Formatted].
+ *
+ * @constructor Creates a formatted section.
+ * @param text      displayed string
+ * @param fontScale scale of the font, setting to null will fall back to style's default settings
+ * @param fontStack main and fallback fonts that are a part of the style,
+ *                  setting null will fall back to style's default settings.
+ *                  The requested font stack has to be a part of the used style.
+ *                  For more information see
+ *                  [the documentation](https://www.mapbox.com/help/define-font-stack/).
+ * @param textColor text color, setting to null will fall back to style's default settings.
+ *                  Value of red, green, blue components must range between 0 and 255,
+ *                  an alpha component must range between 0 and 1.
+ *
+ *                  For more information see
+ *                  [the documentation](https://docs.mapbox.com/mapbox-gl-js/style-spec/#types-color).
  */
 @Keep
-public class FormattedSection {
-  private String text;
-  private Number fontScale;
-  private String[] fontStack;
-  private String textColor;
+class FormattedSection(
+    private val text: String,
+    private var fontScale: Number?,
+    private var fontStack: Array<String>?,
+    private var textColor: String?,
+) {
+    /**
+     * Creates a formatted section.
+     *
+     * @param text displayed string
+     */
+    constructor(text: String) : this(text, null, null, null)
 
-  /**
-   * Creates a formatted section.
-   *
-   * @param text displayed string
-   */
-  public FormattedSection(@NonNull String text) {
-    this(text, null, null, null);
-  }
+    /**
+     * Creates a formatted section.
+     *
+     * @param text      displayed string
+     * @param fontScale scale of the font, setting to null will fall back to style's default settings
+     * @param fontStack main and fallback fonts that are a part of the style,
+     *                  setting null will fall back to style's default settings
+     */
+    @Deprecated(
+        "use FormattedSection(String) and setters or FormattedSection(String, Number, String[], String) instead",
+    )
+    constructor(text: String, fontScale: Number?, fontStack: Array<String>?) : this(text, fontScale, fontStack, null)
 
-  /**
-   * Creates a formatted section.
-   *
-   * @param text      displayed string
-   * @param fontScale scale of the font, setting to null will fall back to style's default settings
-   * @param fontStack main and fallback fonts that are a part of the style,
-   *                  setting null will fall back to style's default settings.
-   *                  The requested font stack has to be a part of the used style.
-   *                  For more information see
-   *                  <a href="https://www.mapbox.com/help/define-font-stack/">the documentation</a>.
-   * @param textColor text color, setting to null will fall back to style's default settings.
-   *                  Value of red, green, blue components must range between 0 and 255,
-   *                  an alpha component must range between 0 and 1.
-   *                  <p>
-   *                  For more information see
-   *                  <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/#types-color">the documentation</a>.
-   */
-  public FormattedSection(@NonNull String text, @Nullable Number fontScale, @Nullable String[] fontStack,
-                          @Nullable String textColor) {
-    this.text = text;
-    this.fontScale = fontScale;
-    this.fontStack = fontStack;
-    this.textColor = textColor;
-  }
+    /**
+     * Creates a formatted section.
+     *
+     * @param text      displayed string
+     * @param fontScale scale of the font, setting to null will fall back to style's default settings
+     */
+    @Deprecated(
+        "use FormattedSection(String) and setters or FormattedSection(String, Number, String[], String) instead",
+    )
+    constructor(text: String, fontScale: Number?) : this(text, fontScale, null, null)
 
-  /**
-   * Creates a formatted section.
-   *
-   * @param text      displayed string
-   * @param fontScale scale of the font, setting to null will fall back to style's default settings
-   * @param fontStack main and fallback fonts that are a part of the style,
-   *                  setting null will fall back to style's default settings
-   * @deprecated use {@link #FormattedSection(String)} and setters
-   * or {@link #FormattedSection(String, Number, String[], String)} instead
-   */
-  @Deprecated
-  public FormattedSection(@NonNull String text, @Nullable Number fontScale, @Nullable String[] fontStack) {
-    this(text, fontScale, fontStack, null);
-  }
+    /**
+     * Creates a formatted section.
+     *
+     * @param text      displayed string
+     * @param fontStack main and fallback fonts that are a part of the style,
+     *                  setting null will fall back to style's default settings
+     */
+    @Deprecated(
+        "use FormattedSection(String) and setters or FormattedSection(String, Number, String[], String) instead",
+    )
+    constructor(text: String, fontStack: Array<String>?) : this(text, null, fontStack, null)
 
-  /**
-   * Creates a formatted section.
-   *
-   * @param text      displayed string
-   * @param fontScale scale of the font, setting to null will fall back to style's default settings
-   * @deprecated use {@link #FormattedSection(String)} and setters
-   * or {@link #FormattedSection(String, Number, String[], String)} instead
-   */
-  @Deprecated
-  public FormattedSection(@NonNull String text, @Nullable Number fontScale) {
-    this(text, fontScale, null, null);
-  }
+    /**
+     * Returns the displayed text.
+     *
+     * @return text
+     */
+    fun getText(): String = text
 
-  /**
-   * Creates a formatted section.
-   *
-   * @param text      displayed string
-   * @param fontStack main and fallback fonts that are a part of the style,
-   *                  setting null will fall back to style's default settings
-   * @deprecated use {@link #FormattedSection(String)} and setters
-   * or {@link #FormattedSection(String, Number, String[], String)} instead
-   */
-  @Deprecated
-  public FormattedSection(@NonNull String text, @Nullable String[] fontStack) {
-    this(text, null, fontStack, null);
-  }
+    /**
+     * Returns displayed text's font scale.
+     *
+     * @return font scale
+     */
+    fun getFontScale(): Number? = fontScale
 
-  /**
-   * Returns the displayed text.
-   *
-   * @return text
-   */
-  @NonNull
-  public String getText() {
-    return text;
-  }
+    /**
+     * Returns the font stack with main and fallback fonts.
+     *
+     * @return font stack
+     */
+    fun getFontStack(): Array<String>? = fontStack
 
-  /**
-   * Returns displayed text's font scale.
-   *
-   * @return font scale
-   */
-  @Nullable
-  public Number getFontScale() {
-    return fontScale;
-  }
+    /**
+     * Returns the text color.
+     *
+     * @return text color
+     */
+    fun getTextColor(): String? = textColor
 
-  /**
-   * Returns the font stack with main and fallback fonts.
-   *
-   * @return font stack
-   */
-  @Nullable
-  public String[] getFontStack() {
-    return fontStack;
-  }
-
-  /**
-   * Returns the text color.
-   *
-   * @return text color
-   */
-  public String getTextColor() {
-    return textColor;
-  }
-
-  /**
-   * Set font scale. Setting to null will fall back to style's default settings.
-   *
-   * @param fontScale fontScale
-   */
-  public void setFontScale(@Nullable Number fontScale) {
-    // called from JNI
-    this.fontScale = fontScale;
-  }
-
-  /**
-   * Set main and fallback fonts that are a part of the style. Setting null will fall back to style's default settings.
-   * <p>
-   * The requested font stack has to be a part of the used style.
-   * For more information see <a href="https://www.mapbox.com/help/define-font-stack/">the documentation</a>.
-   *
-   * @param fontStack fontStack
-   */
-  public void setFontStack(@Nullable String[] fontStack) {
-    // called from JNI
-    this.fontStack = fontStack;
-  }
-
-  /**
-   * Set text color. Setting to null will fall back to style's default settings.
-   * Value of red, green, blue components must range between 0 and 255,
-   * an alpha component must range between 0 and 1.
-   * <p>
-   * For more information see
-   * <a href="https://docs.mapbox.com/mapbox-gl-js/style-spec/#types-color">the documentation</a>.
-   *
-   * @param textColor text color
-   */
-  public void setTextColor(@Nullable String textColor) {
-    this.textColor = textColor;
-  }
-
-  /**
-   * Set the text color.
-   *
-   * @param textColor text color.
-   */
-  public void setTextColor(@ColorInt int textColor) {
-    this.textColor = ColorUtils.colorToRgbaString(textColor);
-  }
-
-  void setTextColor(@NonNull Object textColor) {
-    // called from JNI
-    setTextColor((String) textColor);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    /**
+     * Set font scale. Setting to null will fall back to style's default settings.
+     *
+     * @param fontScale fontScale
+     */
+    fun setFontScale(fontScale: Number?) {
+        // called from JNI
+        this.fontScale = fontScale
     }
 
-    FormattedSection that = (FormattedSection) o;
-
-    if (text != null ? !text.equals(that.text) : that.text != null) {
-      return false;
+    /**
+     * Set main and fallback fonts that are a part of the style.
+     * Setting null will fall back to style's default settings.
+     *
+     * The requested font stack has to be a part of the used style.
+     * For more information see [the documentation](https://www.mapbox.com/help/define-font-stack/).
+     *
+     * @param fontStack fontStack
+     */
+    fun setFontStack(fontStack: Array<String>?) {
+        // called from JNI
+        this.fontStack = fontStack
     }
-    if (fontScale != null ? !fontScale.equals(that.fontScale) : that.fontScale != null) {
-      return false;
+
+    /**
+     * Set text color. Setting to null will fall back to style's default settings.
+     * Value of red, green, blue components must range between 0 and 255,
+     * an alpha component must range between 0 and 1.
+     *
+     * For more information see
+     * [the documentation](https://docs.mapbox.com/mapbox-gl-js/style-spec/#types-color).
+     *
+     * @param textColor text color
+     */
+    fun setTextColor(textColor: String?) {
+        this.textColor = textColor
     }
-    // Probably incorrect - comparing Object[] arrays with Arrays.equals
-    if (!Arrays.equals(fontStack, that.fontStack)) {
-      return false;
+
+    /**
+     * Set the text color.
+     *
+     * @param textColor text color.
+     */
+    fun setTextColor(
+        @ColorInt textColor: Int,
+    ) {
+        this.textColor = ColorUtils.colorToRgbaString(textColor)
     }
-    return textColor != null ? textColor.equals(that.textColor) : that.textColor == null;
-  }
 
-  @Override
-  public int hashCode() {
-    int result = text != null ? text.hashCode() : 0;
-    result = 31 * result + (fontScale != null ? fontScale.hashCode() : 0);
-    result = 31 * result + Arrays.hashCode(fontStack);
-    result = 31 * result + (textColor != null ? textColor.hashCode() : 0);
-    return result;
-  }
+    @JvmName("setTextColor")
+    internal fun setTextColor(textColor: Any) {
+        // called from JNI
+        this.textColor = textColor as String
+    }
 
-  Object[] toArray() {
-    Map<String, Object> params = new HashMap<>();
-    params.put("font-scale", fontScale);
-    params.put("text-font", fontStack);
-    params.put("text-color", textColor);
-    return new Object[] {text, params};
-  }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
 
-  @Override
-  public String toString() {
-    return "FormattedSection{"
-      + "text='" + text + '\''
-      + ", fontScale=" + fontScale
-      + ", fontStack=" + Arrays.toString(fontStack)
-      + ", textColor='" + textColor + '\''
-      + '}';
-  }
+        val that = other as FormattedSection
+
+        if (text != that.text) {
+            return false
+        }
+        if (fontScale != that.fontScale) {
+            return false
+        }
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(fontStack, that.fontStack)) {
+            return false
+        }
+        return textColor == that.textColor
+    }
+
+    override fun hashCode(): Int {
+        var result = text.hashCode()
+        result = 31 * result + (fontScale?.hashCode() ?: 0)
+        result = 31 * result + Arrays.hashCode(fontStack)
+        result = 31 * result + (textColor?.hashCode() ?: 0)
+        return result
+    }
+
+    internal fun toArray(): Array<Any?> {
+        val params: MutableMap<String, Any?> = HashMap()
+        params["font-scale"] = fontScale
+        params["text-font"] = fontStack
+        params["text-color"] = textColor
+        return arrayOf(text, params)
+    }
+
+    override fun toString(): String =
+        (
+            "FormattedSection{" +
+                "text='" + text + '\'' +
+                ", fontScale=" + fontScale +
+                ", fontStack=" + Arrays.toString(fontStack) +
+                ", textColor='" + textColor + '\'' +
+                '}'
+        )
 }

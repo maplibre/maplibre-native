@@ -1,15 +1,13 @@
-package org.maplibre.android;
+package org.maplibre.android
 
 /**
  * Injects the default library loader.
  */
-public interface LibraryLoaderProvider {
-
-  /**
-   * Creates and returns a the default Library Loader.
-   *
-   * @return the default library loader
-   */
-  LibraryLoader getDefaultLibraryLoader();
-
+interface LibraryLoaderProvider {
+    /**
+     * Creates and returns a the default Library Loader.
+     *
+     * @return the default library loader
+     */
+    fun getDefaultLibraryLoader(): LibraryLoader
 }

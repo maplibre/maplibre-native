@@ -1,242 +1,189 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.light;
+package org.maplibre.android.style.light
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.UiThread;
-
-import org.maplibre.android.style.layers.Property;
-import org.maplibre.android.style.layers.TransitionOptions;
-import org.maplibre.android.utils.ColorUtils;
-import org.maplibre.android.utils.ThreadUtils;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils
+import org.maplibre.android.utils.ThreadUtils
 
 /**
  * The global light source.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#light">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#light)
  */
 @UiThread
-public class Light {
+class Light
+    /**
+     * Creates a Light.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) {
 
-  private static final String TAG = "Mbgl-Light";
+    @Keep
+    @Suppress("unused")
+    private var nativePtr: Long
 
-  @Keep
-  private long nativePtr;
+    init {
+        checkThread()
+        this.nativePtr = nativePtr
+    }
 
-  /**
-   * Creates a Light.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  Light(long nativePtr) {
-    checkThread();
-    this.nativePtr = nativePtr;
-  }
+    /**
+     * The Anchor property. Whether extruded geometries are lit relative to the map or viewport.
+     */
+    @get:Property.ANCHOR
+    @setparam:Property.ANCHOR
+    var anchor: String
+        get() {
+            checkThread()
+            return nativeGetAnchor()
+        }
+        set(value) {
+            checkThread()
+            nativeSetAnchor(value)
+        }
 
-  /**
-   * Set the Anchor property. Whether extruded geometries are lit relative to the map or viewport.
-   *
-   * @param anchor as String
-   */
-  public void setAnchor(@Property.ANCHOR String anchor) {
-    checkThread();
-    nativeSetAnchor(anchor);
-  }
+    /**
+     * The Position property. Position of the light source relative to lit (extruded) geometries, in [r radial coordinate, a azimuthal angle, p polar angle] where r indicates the distance from the center of the base of an object to its light, a indicates the position of the light relative to 0&#xB0; (0&#xB0; when `light.anchor` is set to `viewport` corresponds to the top of the viewport, or 0&#xB0; when `light.anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and p indicates the height of the light (from 0&#xB0;, directly above, to 180&#xB0;, directly below).
+     */
+    var position: Position
+        get() {
+            checkThread()
+            return nativeGetPosition()
+        }
+        set(value) {
+            checkThread()
+            nativeSetPosition(value)
+        }
 
-  /**
-   * Get the Anchor property. Whether extruded geometries are lit relative to the map or viewport.
-   *
-   * @return anchor as String
-   */
-   @NonNull
-  @Property.ANCHOR public String getAnchor() {
-    checkThread();
-    return nativeGetAnchor();
-  }
+    /**
+     * The Position property transition options.
+     */
+    var positionTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetPositionTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetPositionTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the Position property. Position of the light source relative to lit (extruded) geometries, in [r radial coordinate, a azimuthal angle, p polar angle] where r indicates the distance from the center of the base of an object to its light, a indicates the position of the light relative to 0&#xB0; (0&#xB0; when `light.anchor` is set to `viewport` corresponds to the top of the viewport, or 0&#xB0; when `light.anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and p indicates the height of the light (from 0&#xB0;, directly above, to 180&#xB0;, directly below).
-   *
-   * @param position of the light
-   */
-  public void setPosition(@NonNull Position position) {
-    checkThread();
-    nativeSetPosition(position);
-  }
+    /**
+     * The Color property. Color tint for lighting extruded geometries.
+     */
+    var color: String
+        get() {
+            checkThread()
+            return nativeGetColor()
+        }
+        set(value) {
+            checkThread()
+            nativeSetColor(value)
+        }
 
-  /**
-   * Get the Position property. Position of the light source relative to lit (extruded) geometries, in [r radial coordinate, a azimuthal angle, p polar angle] where r indicates the distance from the center of the base of an object to its light, a indicates the position of the light relative to 0&#xB0; (0&#xB0; when `light.anchor` is set to `viewport` corresponds to the top of the viewport, or 0&#xB0; when `light.anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and p indicates the height of the light (from 0&#xB0;, directly above, to 180&#xB0;, directly below).
-   *
-   * @return position as Position
-   */
-  @NonNull
-  public Position getPosition() {
-    checkThread();
-    return nativeGetPosition();
-  }
+    /**
+     * Set the Color property. Color tint for lighting extruded geometries.
+     *
+     * @param color as int
+     */
+    fun setColor(@ColorInt color: Int) {
+        checkThread()
+        nativeSetColor(ColorUtils.colorToRgbaString(color))
+    }
 
-  /**
-   * Get the Position property transition options.
-   *
-   * @return transition options for position
-   */
-  @NonNull
-  public TransitionOptions getPositionTransition() {
-    checkThread();
-    return nativeGetPositionTransition();
-  }
+    /**
+     * The Color property transition options.
+     */
+    var colorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetColorTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the Position property transition options.
-   *
-   * @param options transition options for position
-   */
-  public void setPositionTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetPositionTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The Intensity property. Intensity of lighting (on a scale from 0 to 1). Higher numbers will present as more extreme contrast.
+     */
+    var intensity: Float
+        get() {
+            checkThread()
+            return nativeGetIntensity()
+        }
+        set(value) {
+            checkThread()
+            nativeSetIntensity(value)
+        }
 
-  /**
-   * Set the Color property. Color tint for lighting extruded geometries.
-   *
-   * @param color as int
-   */
-  public void setColor(@ColorInt int color) {
-    checkThread();
-    nativeSetColor(ColorUtils.colorToRgbaString(color));
-  }
+    /**
+     * The Intensity property transition options.
+     */
+    var intensityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetIntensityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetIntensityTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the Color property. Color tint for lighting extruded geometries.
-   *
-   * @param color as String
-   */
-  public void setColor(String color) {
-    checkThread();
-    nativeSetColor(color);
-  }
+    private fun checkThread() {
+        ThreadUtils.checkThread(TAG)
+    }
 
-  /**
-   * Get the Color property. Color tint for lighting extruded geometries.
-   *
-   * @return color as String
-   */
-   @NonNull
-   public String getColor() {
-    checkThread();
-    return nativeGetColor();
-  }
+    @Keep
+    private external fun nativeSetAnchor(anchor: String)
 
-  /**
-   * Get the Color property transition options.
-   *
-   * @return transition options for color
-   */
-  @NonNull
-  public TransitionOptions getColorTransition() {
-    checkThread();
-    return nativeGetColorTransition();
-  }
+    @Keep
+    private external fun nativeGetAnchor(): String
 
-  /**
-   * Set the Color property transition options.
-   *
-   * @param options transition options for color
-   */
-  public void setColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetColorTransition(options.getDuration(), options.getDelay());
-  }
+    @Keep
+    private external fun nativeSetPosition(position: Position)
 
-  /**
-   * Set the Intensity property. Intensity of lighting (on a scale from 0 to 1). Higher numbers will present as more extreme contrast.
-   *
-   * @param intensity as Float
-   */
-  public void setIntensity(float intensity) {
-    checkThread();
-    nativeSetIntensity(intensity);
-  }
+    @Keep
+    private external fun nativeGetPosition(): Position
 
-  /**
-   * Get the Intensity property. Intensity of lighting (on a scale from 0 to 1). Higher numbers will present as more extreme contrast.
-   *
-   * @return intensity as Float
-   */
-   @NonNull
-   public float getIntensity() {
-    checkThread();
-    return nativeGetIntensity();
-  }
+    @Keep
+    private external fun nativeGetPositionTransition(): TransitionOptions
 
-  /**
-   * Get the Intensity property transition options.
-   *
-   * @return transition options for intensity
-   */
-  @NonNull
-  public TransitionOptions getIntensityTransition() {
-    checkThread();
-    return nativeGetIntensityTransition();
-  }
+    @Keep
+    private external fun nativeSetPositionTransition(duration: Long, delay: Long)
 
-  /**
-   * Set the Intensity property transition options.
-   *
-   * @param options transition options for intensity
-   */
-  public void setIntensityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetIntensityTransition(options.getDuration(), options.getDelay());
-  }
+    @Keep
+    private external fun nativeSetColor(color: String)
 
-  private void checkThread(){
-    ThreadUtils.checkThread(TAG);
-  }
+    @Keep
+    private external fun nativeGetColor(): String
 
-  @Keep
-  private native void nativeSetAnchor(String anchor);
+    @Keep
+    private external fun nativeGetColorTransition(): TransitionOptions
 
-  @NonNull
-  @Keep
-  private native String nativeGetAnchor();
-  @Keep
-  private native void nativeSetPosition(Position position);
+    @Keep
+    private external fun nativeSetColorTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Position nativeGetPosition();
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetPositionTransition();
+    @Keep
+    private external fun nativeSetIntensity(intensity: Float)
 
-  @Keep
-  private native void nativeSetPositionTransition(long duration, long delay);
-  @Keep
-  private native void nativeSetColor(String color);
+    @Keep
+    private external fun nativeGetIntensity(): Float
 
-  @NonNull
-  @Keep
-  private native String nativeGetColor();
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetColorTransition();
+    @Keep
+    private external fun nativeGetIntensityTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetColorTransition(long duration, long delay);
-  @Keep
-  private native void nativeSetIntensity(float intensity);
+    @Keep
+    private external fun nativeSetIntensityTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native float nativeGetIntensity();
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetIntensityTransition();
-
-  @Keep
-  private native void nativeSetIntensityTransition(long duration, long delay);
+    private companion object {
+        const val TAG = "Mbgl-Light"
+    }
 }

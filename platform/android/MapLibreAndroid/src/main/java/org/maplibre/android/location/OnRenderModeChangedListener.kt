@@ -1,16 +1,17 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import org.maplibre.android.location.modes.RenderMode;
+import org.maplibre.android.location.modes.RenderMode
 
 /**
  * Listener that gets invoked when layer render mode changes.
  */
-public interface OnRenderModeChangedListener {
-
-  /**
-   * Invoked on every {@link RenderMode} change.
-   *
-   * @param currentMode current active {@link RenderMode}.
-   */
-  void onRenderModeChanged(@RenderMode.Mode int currentMode);
+fun interface OnRenderModeChangedListener {
+    /**
+     * Invoked on every [RenderMode] change.
+     *
+     * @param currentMode current active [RenderMode].
+     */
+    fun onRenderModeChanged(
+        @RenderMode.Mode currentMode: Int,
+    )
 }

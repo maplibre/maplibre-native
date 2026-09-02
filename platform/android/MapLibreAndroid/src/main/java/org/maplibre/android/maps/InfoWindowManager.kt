@@ -1,97 +1,67 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.text.TextUtils;
-
-import androidx.annotation.Nullable;
-
-import org.maplibre.android.annotations.InfoWindow;
-import org.maplibre.android.annotations.Marker;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.maplibre.android.annotations.InfoWindow
+import org.maplibre.android.annotations.Marker
 
 /**
  * Responsible for managing InfoWindows shown on the Map.
- * <p>
- * Maintains a {@link List} of opened {@link InfoWindow} and tracks configurations as
- * allowConcurrentMultipleInfoWindows which allows to have multiple {@link InfoWindow} open at the
+ *
+ * Maintains a [List] of opened [InfoWindow] and tracks configurations as
+ * allowConcurrentMultipleInfoWindows which allows to have multiple [InfoWindow] open at the
  * same time. Responsible for managing listeners as
- * {@link MapLibreMap.OnInfoWindowClickListener} and
- * {@link MapLibreMap.OnInfoWindowLongClickListener}.
- * </p>
+ * [MapLibreMap.OnInfoWindowClickListener] and
+ * [MapLibreMap.OnInfoWindowLongClickListener].
  */
-class InfoWindowManager {
+internal class InfoWindowManager {
+    private val infoWindows: MutableList<InfoWindow> = ArrayList()
 
-  private final List<InfoWindow> infoWindows = new ArrayList<>();
+    private var infoWindowAdapter: MapLibreMap.InfoWindowAdapter? = null
+    private var allowConcurrentMultipleInfoWindows = false
 
-  @Nullable
-  private MapLibreMap.InfoWindowAdapter infoWindowAdapter;
-  private boolean allowConcurrentMultipleInfoWindows;
+    private var onInfoWindowClickListener: MapLibreMap.OnInfoWindowClickListener? = null
+    private var onInfoWindowLongClickListener: MapLibreMap.OnInfoWindowLongClickListener? = null
+    private var onInfoWindowCloseListener: MapLibreMap.OnInfoWindowCloseListener? = null
 
-  @Nullable
-  private MapLibreMap.OnInfoWindowClickListener onInfoWindowClickListener;
-  @Nullable
-  private MapLibreMap.OnInfoWindowLongClickListener onInfoWindowLongClickListener;
-  @Nullable
-  private MapLibreMap.OnInfoWindowCloseListener onInfoWindowCloseListener;
-
-  void update() {
-    if (!infoWindows.isEmpty()) {
-      for (InfoWindow infoWindow : infoWindows) {
-        infoWindow.update();
-      }
+    fun update() {
+        for (infoWindow in infoWindows) {
+            infoWindow.update()
+        }
     }
-  }
 
-  void setInfoWindowAdapter(@Nullable MapLibreMap.InfoWindowAdapter infoWindowAdapter) {
-    this.infoWindowAdapter = infoWindowAdapter;
-  }
+    fun setInfoWindowAdapter(infoWindowAdapter: MapLibreMap.InfoWindowAdapter?) {
+        this.infoWindowAdapter = infoWindowAdapter
+    }
 
-  @Nullable
-  MapLibreMap.InfoWindowAdapter getInfoWindowAdapter() {
-    return infoWindowAdapter;
-  }
+    fun getInfoWindowAdapter(): MapLibreMap.InfoWindowAdapter? = infoWindowAdapter
 
-  void setAllowConcurrentMultipleOpenInfoWindows(boolean allow) {
-    allowConcurrentMultipleInfoWindows = allow;
-  }
+    fun setAllowConcurrentMultipleOpenInfoWindows(allow: Boolean) {
+        allowConcurrentMultipleInfoWindows = allow
+    }
 
-  boolean isAllowConcurrentMultipleOpenInfoWindows() {
-    return allowConcurrentMultipleInfoWindows;
-  }
+    fun isAllowConcurrentMultipleOpenInfoWindows(): Boolean = allowConcurrentMultipleInfoWindows
 
-  boolean isInfoWindowValidForMarker(@Nullable Marker marker) {
-    return marker != null && (!TextUtils.isEmpty(marker.getTitle()) || !TextUtils.isEmpty(marker.getSnippet()));
-  }
+    fun isInfoWindowValidForMarker(marker: Marker?): Boolean =
+        marker != null && (!marker.title.isNullOrEmpty() || !marker.snippet.isNullOrEmpty())
 
-  void setOnInfoWindowClickListener(@Nullable MapLibreMap.OnInfoWindowClickListener listener) {
-    onInfoWindowClickListener = listener;
-  }
+    fun setOnInfoWindowClickListener(listener: MapLibreMap.OnInfoWindowClickListener?) {
+        onInfoWindowClickListener = listener
+    }
 
-  @Nullable
-  MapLibreMap.OnInfoWindowClickListener getOnInfoWindowClickListener() {
-    return onInfoWindowClickListener;
-  }
+    fun getOnInfoWindowClickListener(): MapLibreMap.OnInfoWindowClickListener? = onInfoWindowClickListener
 
-  void setOnInfoWindowLongClickListener(@Nullable MapLibreMap.OnInfoWindowLongClickListener listener) {
-    onInfoWindowLongClickListener = listener;
-  }
+    fun setOnInfoWindowLongClickListener(listener: MapLibreMap.OnInfoWindowLongClickListener?) {
+        onInfoWindowLongClickListener = listener
+    }
 
-  @Nullable
-  MapLibreMap.OnInfoWindowLongClickListener getOnInfoWindowLongClickListener() {
-    return onInfoWindowLongClickListener;
-  }
+    fun getOnInfoWindowLongClickListener(): MapLibreMap.OnInfoWindowLongClickListener? = onInfoWindowLongClickListener
 
-  void setOnInfoWindowCloseListener(@Nullable MapLibreMap.OnInfoWindowCloseListener listener) {
-    onInfoWindowCloseListener = listener;
-  }
+    fun setOnInfoWindowCloseListener(listener: MapLibreMap.OnInfoWindowCloseListener?) {
+        onInfoWindowCloseListener = listener
+    }
 
-  @Nullable
-  MapLibreMap.OnInfoWindowCloseListener getOnInfoWindowCloseListener() {
-    return onInfoWindowCloseListener;
-  }
+    fun getOnInfoWindowCloseListener(): MapLibreMap.OnInfoWindowCloseListener? = onInfoWindowCloseListener
 
-  public void add(InfoWindow infoWindow) {
-    infoWindows.add(infoWindow);
-  }
+    fun add(infoWindow: InfoWindow) {
+        infoWindows.add(infoWindow)
+    }
 }

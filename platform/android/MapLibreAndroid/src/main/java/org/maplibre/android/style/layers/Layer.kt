@@ -1,170 +1,167 @@
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.gson.JsonElement;
-import org.maplibre.android.LibraryLoader;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.types.Formatted;
-import org.maplibre.android.utils.ThreadUtils;
-import org.maplibre.android.style.types.Formatted;
+import androidx.annotation.Keep
+import com.google.gson.JsonElement
+import org.maplibre.android.LibraryLoader
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.types.Formatted
+import org.maplibre.android.utils.ThreadUtils
 
 /**
  * Base class for the different Layer types
  */
-public abstract class Layer {
+abstract class Layer {
+    /**
+     * Internal use
+     *
+     * @return the native peer pointer
+     */
+    @Keep
+    var nativePtr: Long = 0
+        private set
 
-  private final static String TAG = "Mbgl-Layer";
+    @Keep
+    @Suppress("unused")
+    private var invalidated = false
 
-  @Keep
-  private long nativePtr;
-  @Keep
-  private boolean invalidated;
-  private boolean detached;
+    private var detached = false
 
-  static {
-    LibraryLoader.load();
-  }
-
-  @Keep
-  protected Layer(long nativePtr) {
-    checkThread();
-    this.nativePtr = nativePtr;
-  }
-
-  public Layer() {
-    checkThread();
-  }
-
-  /**
-   * Validates if layer interaction is happening on the UI thread
-   */
-  protected void checkThread() {
-    ThreadUtils.checkThread(TAG);
-  }
-
-  public void setProperties(@NonNull PropertyValue<?>... properties) {
-    if (detached) {
-      return;
+    @Keep
+    protected constructor(nativePtr: Long) {
+        checkThread()
+        this.nativePtr = nativePtr
     }
 
-    checkThread();
-    if (properties.length == 0) {
-      return;
+    constructor() {
+        checkThread()
     }
 
-    for (PropertyValue<?> property : properties) {
-      Object converted = convertValue(property.value);
-      if (property instanceof PaintPropertyValue) {
-        nativeSetPaintProperty(property.name, converted);
-      } else {
-        nativeSetLayoutProperty(property.name, converted);
-      }
+    /**
+     * Validates if layer interaction is happening on the UI thread
+     */
+    protected open fun checkThread() {
+        ThreadUtils.checkThread(TAG)
     }
-  }
 
-  @NonNull
-  public String getId() {
-    checkThread();
-    return nativeGetId();
-  }
+    fun setProperties(vararg properties: PropertyValue<*>) {
+        if (detached) {
+            return
+        }
 
-  @NonNull
-  public PropertyValue<String> getVisibility() {
-    checkThread();
-    return new PaintPropertyValue<>("visibility", (String) nativeGetVisibility());
-  }
+        checkThread()
+        if (properties.isEmpty()) {
+            return
+        }
 
-  public float getMinZoom() {
-    checkThread();
-    return nativeGetMinZoom();
-  }
-
-  public float getMaxZoom() {
-    checkThread();
-    return nativeGetMaxZoom();
-  }
-
-  public void setMinZoom(float zoom) {
-    checkThread();
-    nativeSetMinZoom(zoom);
-  }
-
-  public void setMaxZoom(float zoom) {
-    checkThread();
-    nativeSetMaxZoom(zoom);
-  }
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
-
-  @NonNull
-  @Keep
-  protected native String nativeGetId();
-
-  @NonNull
-  @Keep
-  protected native Object nativeGetVisibility();
-
-  @Keep
-  protected native void nativeSetLayoutProperty(String name, Object value);
-
-  @Keep
-  protected native void nativeSetPaintProperty(String name, Object value);
-
-  @Keep
-  protected native void nativeSetFilter(Object[] filter);
-
-  @Nullable
-  @Keep
-  protected native JsonElement nativeGetFilter();
-
-  @Keep
-  protected native void nativeSetSourceLayer(String sourceLayer);
-
-  @NonNull
-  @Keep
-  protected native String nativeGetSourceLayer();
-
-  @NonNull
-  @Keep
-  protected native String nativeGetSourceId();
-
-  @Keep
-  protected native float nativeGetMinZoom();
-
-  @Keep
-  protected native float nativeGetMaxZoom();
-
-  @Keep
-  protected native void nativeSetMinZoom(float zoom);
-
-  @Keep
-  protected native void nativeSetMaxZoom(float zoom);
-
-  public long getNativePtr() {
-    return nativePtr;
-  }
-
-  @Nullable
-  private Object convertValue(@Nullable Object value) {
-    if (value instanceof Expression) {
-      return ((Expression) value).toArray();
-    } else if (value instanceof Formatted) {
-      return ((Formatted) value).toArray();
-    } else {
-      return value;
+        for (property in properties) {
+            val converted = convertValue(property.value)
+            if (property is PaintPropertyValue<*>) {
+                nativeSetPaintProperty(property.name, converted)
+            } else {
+                nativeSetLayoutProperty(property.name, converted)
+            }
+        }
     }
-  }
 
-  public void setDetached() {
-    detached = true;
-  }
+    val id: String
+        get() {
+            checkThread()
+            return nativeGetId()
+        }
 
-  public boolean isDetached() {
-    return detached;
-  }
+    val visibility: PropertyValue<String>
+        get() {
+            checkThread()
+            return PaintPropertyValue("visibility", nativeGetVisibility() as String)
+        }
+
+    var minZoom: Float
+        get() {
+            checkThread()
+            return nativeGetMinZoom()
+        }
+        set(zoom) {
+            checkThread()
+            nativeSetMinZoom(zoom)
+        }
+
+    var maxZoom: Float
+        get() {
+            checkThread()
+            return nativeGetMaxZoom()
+        }
+        set(zoom) {
+            checkThread()
+            nativeSetMaxZoom(zoom)
+        }
+
+    @Keep
+    @Throws(Throwable::class)
+    protected open external fun finalize()
+
+    @Keep
+    protected external fun nativeGetId(): String
+
+    @Keep
+    protected external fun nativeGetVisibility(): Any
+
+    @Keep
+    protected external fun nativeSetLayoutProperty(
+        name: String?,
+        value: Any?,
+    )
+
+    @Keep
+    protected external fun nativeSetPaintProperty(
+        name: String?,
+        value: Any?,
+    )
+
+    @Keep
+    protected external fun nativeSetFilter(filter: Array<Any?>?)
+
+    @Keep
+    protected external fun nativeGetFilter(): JsonElement?
+
+    @Keep
+    protected external fun nativeSetSourceLayer(sourceLayer: String?)
+
+    @Keep
+    protected external fun nativeGetSourceLayer(): String
+
+    @Keep
+    protected external fun nativeGetSourceId(): String
+
+    @Keep
+    protected external fun nativeGetMinZoom(): Float
+
+    @Keep
+    protected external fun nativeGetMaxZoom(): Float
+
+    @Keep
+    protected external fun nativeSetMinZoom(zoom: Float)
+
+    @Keep
+    protected external fun nativeSetMaxZoom(zoom: Float)
+
+    private fun convertValue(value: Any?): Any? =
+        when (value) {
+            is Expression -> value.toArray()
+            is Formatted -> value.toArray()
+            else -> value
+        }
+
+    fun setDetached() {
+        detached = true
+    }
+
+    fun isDetached(): Boolean = detached
+
+    private companion object {
+        const val TAG = "Mbgl-Layer"
+
+        init {
+            LibraryLoader.load()
+        }
+    }
 }

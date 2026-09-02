@@ -1,136 +1,117 @@
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.Keep;
+import androidx.annotation.Keep
 
 /**
  * Resembles transition property from the style specification.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/transition/">Transition documentation</a>
+ * @see [Transition documentation](https://maplibre.org/maplibre-style-spec/transition/)
+ *
+ * @param duration the duration of the transition
+ * @param delay the delay to start the transition
+ * @param enablePlacementTransitions the flag that describes whether the fade in/out symbol placement transition
+ * should be enabled. Defaults to true.
  */
-public class TransitionOptions {
+class TransitionOptions(
+    /**
+     * The transition duration.
+     */
+    @field:Keep val duration: Long,
+    /**
+     * The transition delay.
+     */
+    @field:Keep val delay: Long,
+    @field:Keep private val enablePlacementTransitions: Boolean,
+) {
+    /**
+     * Create a transition property based on duration and a delay.
+     *
+     * @param duration the duration of the transition
+     * @param delay    the delay to start the transition
+     */
+    constructor(duration: Long, delay: Long) : this(duration, delay, true)
 
-  @Keep
-  private long duration;
-  @Keep
-  private long delay;
-  @Keep
-  private boolean enablePlacementTransitions;
+    /**
+     * The flag that describes whether the fade in/out symbol placement transition should be enabled.
+     *
+     * True if the fade in/out symbol placement transition should be enabled, false otherwise.
+     */
+    val isEnablePlacementTransitions: Boolean
+        get() = enablePlacementTransitions
 
-  /**
-   * Create a transition property based on duration and a delay.
-   *
-   * @param duration the duration of the transition
-   * @param delay    the delay to start the transition
-   */
-  public TransitionOptions(long duration, long delay) {
-    this(duration, delay, true);
-  }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
 
-  /**
-   * Create a transition property.
-   *
-   * @param duration                   the duration of the transition
-   * @param delay                      the delay to start the transition
-   * @param enablePlacementTransitions the flag that describes whether the fade in/out symbol placement transition
-   *                                   should be enabled. Defaults to true.
-   */
-  public TransitionOptions(long duration, long delay, boolean enablePlacementTransitions) {
-    this.duration = duration;
-    this.delay = delay;
-    this.enablePlacementTransitions = enablePlacementTransitions;
-  }
+        val that = other as TransitionOptions
 
-  /**
-   * Create a transition property based on duration and a delay.
-   *
-   * @param duration the duration of the transition
-   * @param delay    the delay to start the transition
-   * @return a new transition property object
-   * @deprecated use {@link #fromTransitionOptions(long, long, boolean)} instead
-   */
-  @Keep
-  @Deprecated
-  public static TransitionOptions fromTransitionOptions(long duration, long delay) {
-    // Invoked from JNI only
-    return new TransitionOptions(duration, delay);
-  }
-
-  /**
-   * Create a transition property.
-   *
-   * @param duration                   the duration of the transition
-   * @param delay                      the delay to start the transition
-   * @param enablePlacementTransitions the flag that describes whether the fade in/out symbol placement transition
-   *                                   should be enabled. Defaults to true.
-   * @return a new transition property object
-   */
-  @Keep
-  static TransitionOptions fromTransitionOptions(long duration, long delay, boolean enablePlacementTransitions) {
-    // Invoked from JNI only
-    return new TransitionOptions(duration, delay, enablePlacementTransitions);
-  }
-
-  /**
-   * Get the transition duration.
-   *
-   * @return the transition duration
-   */
-  public long getDuration() {
-    return duration;
-  }
-
-  /**
-   * Get the transition delay.
-   *
-   * @return the transition delay
-   */
-  public long getDelay() {
-    return delay;
-  }
-
-  /**
-   * Get the flag that describes whether the fade in/out symbol placement transition should be enabled.
-   *
-   * @return true if the fade in/out symbol placement transition should be enabled, false otherwise
-   */
-  public boolean isEnablePlacementTransitions() {
-    return enablePlacementTransitions;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+        if (duration != that.duration) {
+            return false
+        }
+        if (delay != that.delay) {
+            return false
+        }
+        return enablePlacementTransitions == that.enablePlacementTransitions
     }
 
-    TransitionOptions that = (TransitionOptions) o;
-
-    if (duration != that.duration) {
-      return false;
+    override fun hashCode(): Int {
+        var result = (duration xor (duration ushr 32)).toInt()
+        result = 31 * result + (delay xor (delay ushr 32)).toInt()
+        result = 31 * result + if (enablePlacementTransitions) 1 else 0
+        return result
     }
-    if (delay != that.delay) {
-      return false;
+
+    override fun toString(): String =
+        (
+            "TransitionOptions{" +
+                "duration=" + duration +
+                ", delay=" + delay +
+                ", enablePlacementTransitions=" + enablePlacementTransitions +
+                '}'
+        )
+
+    companion object {
+        /**
+         * Create a transition property based on duration and a delay.
+         *
+         * @param duration the duration of the transition
+         * @param delay    the delay to start the transition
+         * @return a new transition property object
+         */
+        @Keep
+        @JvmStatic
+        @Deprecated("use fromTransitionOptions(long, long, boolean) instead")
+        fun fromTransitionOptions(
+            duration: Long,
+            delay: Long,
+        ): TransitionOptions {
+            // Invoked from JNI only
+            return TransitionOptions(duration, delay)
+        }
+
+        /**
+         * Create a transition property.
+         *
+         * @param duration                   the duration of the transition
+         * @param delay                      the delay to start the transition
+         * @param enablePlacementTransitions the flag that describes whether the fade in/out symbol placement
+         *                                   transition should be enabled. Defaults to true.
+         * @return a new transition property object
+         */
+        @Keep
+        @JvmStatic
+        @JvmName("fromTransitionOptions")
+        internal fun fromTransitionOptions(
+            duration: Long,
+            delay: Long,
+            enablePlacementTransitions: Boolean,
+        ): TransitionOptions {
+            // Invoked from JNI only
+            return TransitionOptions(duration, delay, enablePlacementTransitions)
+        }
     }
-    return enablePlacementTransitions == that.enablePlacementTransitions;
-  }
-
-  @Override
-  public int hashCode() {
-    int result = (int) (duration ^ (duration >>> 32));
-    result = 31 * result + (int) (delay ^ (delay >>> 32));
-    result = 31 * result + (enablePlacementTransitions ? 1 : 0);
-    return result;
-  }
-
-  @Override
-  public String toString() {
-    return "TransitionOptions{"
-      + "duration=" + duration
-      + ", delay=" + delay
-      + ", enablePlacementTransitions=" + enablePlacementTransitions
-      + '}';
-  }
 }

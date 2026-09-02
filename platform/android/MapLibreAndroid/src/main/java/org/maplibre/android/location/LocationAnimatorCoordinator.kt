@@ -1,568 +1,646 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import android.animation.Animator;
-import android.location.Location;
-import android.os.SystemClock;
-import android.util.SparseArray;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
+import android.animation.Animator
+import android.location.Location
+import android.os.SystemClock
+import android.util.SparseArray
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
+import androidx.annotation.Size
+import androidx.annotation.VisibleForTesting
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.LocationComponentConstants.ACCURACY_RADIUS_ANIMATION_DURATION
+import org.maplibre.android.location.LocationComponentConstants.COMPASS_UPDATE_RATE_MS
+import org.maplibre.android.location.LocationComponentConstants.MAX_ANIMATION_DURATION_MS
+import org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS
+import org.maplibre.android.location.MapLibreAnimator.AnimationsValueChangeListener
+import org.maplibre.android.location.Utils.immediateAnimation
+import org.maplibre.android.location.Utils.normalize
+import org.maplibre.android.location.Utils.shortestRotation
+import org.maplibre.android.log.Logger
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.Projection
+import kotlin.math.min
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.Size;
-import androidx.annotation.VisibleForTesting;
+internal class LocationAnimatorCoordinator(
+    private val projection: Projection,
+    private val animatorSetProvider: MapLibreAnimatorSetProvider,
+    private val animatorProvider: MapLibreAnimatorProvider,
+) {
+    @VisibleForTesting
+    val animatorArray = SparseArray<MapLibreAnimator<*>>()
 
-import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MapLibreMap;
-import org.maplibre.android.maps.Projection;
+    @VisibleForTesting
+    val listeners = SparseArray<AnimationsValueChangeListener<*>>()
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+    private var previousLocation: Location? = null
+    private var previousAccuracyRadius = -1f
+    private var previousCompassBearing = -1f
+    private var locationUpdateTimestamp = -1L
+    private var durationMultiplier = 0f
+    private var compassAnimationEnabled = false
+    private var accuracyAnimationEnabled = false
 
-import static org.maplibre.android.location.LocationComponentConstants.ACCURACY_RADIUS_ANIMATION_DURATION;
-import static org.maplibre.android.location.LocationComponentConstants.COMPASS_UPDATE_RATE_MS;
-import static org.maplibre.android.location.LocationComponentConstants.MAX_ANIMATION_DURATION_MS;
-import static org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_CAMERA_COMPASS_BEARING;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_CAMERA_GPS_BEARING;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_CAMERA_LATLNG;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_LAYER_ACCURACY;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_LAYER_LATLNG;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_PADDING;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_PULSING_CIRCLE;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_TILT;
-import static org.maplibre.android.location.MapLibreAnimator.ANIMATOR_ZOOM;
-import static org.maplibre.android.location.Utils.immediateAnimation;
-import static org.maplibre.android.location.Utils.normalize;
-import static org.maplibre.android.location.Utils.shortestRotation;
-
-import org.maplibre.android.camera.CameraPosition;
-import org.maplibre.android.geometry.LatLng;
-
-final class LocationAnimatorCoordinator {
-
-  private static final String TAG = "Mbgl-LocationAnimatorCoordinator";
-
-  @VisibleForTesting
-  final SparseArray<MapLibreAnimator> animatorArray = new SparseArray<>();
-
-  private final Projection projection;
-  private Location previousLocation;
-  private float previousAccuracyRadius = -1;
-  private float previousCompassBearing = -1;
-  private long locationUpdateTimestamp = -1;
-  private float durationMultiplier;
-  private final MapLibreAnimatorProvider animatorProvider;
-  private final MapLibreAnimatorSetProvider animatorSetProvider;
-  private boolean compassAnimationEnabled;
-  private boolean accuracyAnimationEnabled;
-
-  @VisibleForTesting
-  int maxAnimationFps = Integer.MAX_VALUE;
-
-  @VisibleForTesting
-  final SparseArray<MapLibreAnimator.AnimationsValueChangeListener> listeners = new SparseArray<>();
-
-  LocationAnimatorCoordinator(@NonNull Projection projection, @NonNull MapLibreAnimatorSetProvider animatorSetProvider,
-                              @NonNull MapLibreAnimatorProvider animatorProvider) {
-    this.projection = projection;
-    this.animatorProvider = animatorProvider;
-    this.animatorSetProvider = animatorSetProvider;
-  }
-
-  void updateAnimatorListenerHolders(@NonNull Set<AnimatorListenerHolder> listenerHolders) {
-    listeners.clear();
-    for (AnimatorListenerHolder holder : listenerHolders) {
-      listeners.append(holder.getAnimatorType(), holder.getListener());
-    }
-
-    for (int i = 0; i < animatorArray.size(); i++) {
-      @MapLibreAnimator.Type int animatorType = animatorArray.keyAt(i);
-      if (listeners.get(animatorType) == null) {
-        MapLibreAnimator animator = animatorArray.get(animatorType);
-        if (animator != null) {
-          animator.makeInvalid();
+    @VisibleForTesting
+    var maxAnimationFps = Int.MAX_VALUE
+        set(value) {
+            if (value <= 0) {
+                Logger.e(TAG, "Max animation FPS cannot be less or equal to 0.")
+                return
+            }
+            field = value
         }
-      }
-    }
-  }
 
-  void feedNewLocation(@NonNull Location newLocation, @NonNull CameraPosition currentCameraPosition,
-                       boolean isGpsNorth) {
-    feedNewLocation(new Location[] {newLocation}, currentCameraPosition, isGpsNorth, false);
-  }
+    fun updateAnimatorListenerHolders(listenerHolders: Set<AnimatorListenerHolder>) {
+        listeners.clear()
+        for (holder in listenerHolders) {
+            listeners.append(holder.animatorType, holder.listener)
+        }
 
-  void feedNewLocation(@NonNull @Size(min = 1) Location[] newLocations,
-                       @NonNull CameraPosition currentCameraPosition, boolean isGpsNorth, boolean lookAheadUpdate) {
-    Location newLocation = newLocations[newLocations.length - 1];
-    if (previousLocation == null) {
-      previousLocation = newLocation;
-      locationUpdateTimestamp = SystemClock.elapsedRealtime() - TRANSITION_ANIMATION_DURATION_MS;
+        for (i in 0 until animatorArray.size()) {
+            @MapLibreAnimator.Type val animatorType = animatorArray.keyAt(i)
+            if (listeners.get(animatorType) == null) {
+                animatorArray.get(animatorType)?.makeInvalid()
+            }
+        }
     }
 
-    LatLng previousLayerLatLng = getPreviousLayerLatLng();
-    float previousLayerBearing = getPreviousLayerGpsBearing();
-    LatLng previousCameraLatLng = currentCameraPosition.target;
-    float previousCameraBearing = normalize((float) currentCameraPosition.bearing);
-
-    if (previousCameraLatLng == null) {
-      previousCameraLatLng = previousLayerLatLng;
+    fun feedNewLocation(
+        newLocation: Location,
+        currentCameraPosition: CameraPosition,
+        isGpsNorth: Boolean,
+    ) {
+        feedNewLocation(arrayOf(newLocation), currentCameraPosition, isGpsNorth, false)
     }
 
-    // generate targets for layer
-    LatLng[] latLngValues = getLatLngValues(previousLayerLatLng, newLocations);
-    Float[] bearingValues = getBearingValues(previousLayerBearing, newLocations);
-    updateLayerAnimators(latLngValues, bearingValues);
+    fun feedNewLocation(
+        @Size(min = 1) newLocations: Array<Location>,
+        currentCameraPosition: CameraPosition,
+        isGpsNorth: Boolean,
+        lookAheadUpdate: Boolean,
+    ) {
+        val newLocation = newLocations[newLocations.size - 1]
+        if (previousLocation == null) {
+            previousLocation = newLocation
+            locationUpdateTimestamp = SystemClock.elapsedRealtime() - TRANSITION_ANIMATION_DURATION_MS
+        }
 
-    // replace the animation start with the camera's previous value
-    latLngValues[0] = previousCameraLatLng;
-    if (isGpsNorth) {
-      bearingValues = new Float[] {previousCameraBearing, shortestRotation(0f, previousCameraBearing)};
-    } else {
-      bearingValues = getBearingValues(previousCameraBearing, newLocations);
+        val previousLayerLatLng = getPreviousLayerLatLng()
+        val previousLayerBearing = getPreviousLayerGpsBearing()
+        val previousCameraLatLng = currentCameraPosition.target ?: previousLayerLatLng
+        val previousCameraBearing = normalize(currentCameraPosition.bearing.toFloat())
+
+        // generate targets for layer
+        val latLngValues = getLatLngValues(previousLayerLatLng, newLocations)
+        var bearingValues = getBearingValues(previousLayerBearing, newLocations)
+        updateLayerAnimators(latLngValues, bearingValues)
+
+        // replace the animation start with the camera's previous value
+        latLngValues[0] = previousCameraLatLng
+        bearingValues =
+            if (isGpsNorth) {
+                arrayOf(previousCameraBearing, shortestRotation(0f, previousCameraBearing))
+            } else {
+                getBearingValues(previousCameraBearing, newLocations)
+            }
+        updateCameraAnimators(latLngValues, bearingValues)
+
+        val targetLatLng = LatLng(newLocation)
+        val snap =
+            immediateAnimation(projection, previousCameraLatLng, targetLatLng) ||
+                immediateAnimation(projection, previousLayerLatLng, targetLatLng)
+
+        var animationDuration = 0L
+        if (!snap) {
+            val previousUpdateTimeStamp = locationUpdateTimestamp
+            locationUpdateTimestamp = SystemClock.elapsedRealtime()
+
+            animationDuration =
+                if (previousUpdateTimeStamp == 0L) {
+                    0L
+                } else if (lookAheadUpdate) {
+                    val currentTimestamp = System.currentTimeMillis()
+                    if (currentTimestamp > newLocation.time) {
+                        Logger.e(
+                            "LocationAnimatorCoordinator",
+                            "Lookahead enabled, but the target location's timestamp is smaller than current timestamp",
+                        )
+                        0L
+                    } else {
+                        newLocation.time - currentTimestamp
+                    }
+                } else {
+                    // make animation slightly longer with durationMultiplier, defaults to 1.1f
+                    ((locationUpdateTimestamp - previousUpdateTimeStamp) * durationMultiplier).toLong()
+                }
+
+            animationDuration = min(animationDuration, MAX_ANIMATION_DURATION_MS)
+        }
+
+        playAnimators(
+            animationDuration,
+            MapLibreAnimator.ANIMATOR_LAYER_LATLNG,
+            MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
+            MapLibreAnimator.ANIMATOR_CAMERA_LATLNG,
+            MapLibreAnimator.ANIMATOR_CAMERA_GPS_BEARING,
+        )
+
+        previousLocation = newLocation
     }
-    updateCameraAnimators(latLngValues, bearingValues);
 
-    LatLng targetLatLng = new LatLng(newLocation);
-    boolean snap = immediateAnimation(projection, previousCameraLatLng, targetLatLng)
-      || immediateAnimation(projection, previousLayerLatLng, targetLatLng);
+    fun feedNewCompassBearing(
+        targetCompassBearing: Float,
+        currentCameraPosition: CameraPosition,
+    ) {
+        if (previousCompassBearing < 0) {
+            previousCompassBearing = targetCompassBearing
+        }
 
-    long animationDuration = 0;
-    if (!snap) {
-      long previousUpdateTimeStamp = locationUpdateTimestamp;
-      locationUpdateTimestamp = SystemClock.elapsedRealtime();
+        val previousLayerBearing = getPreviousLayerCompassBearing()
+        val previousCameraBearing = currentCameraPosition.bearing.toFloat()
 
-      if (previousUpdateTimeStamp == 0) {
-        animationDuration = 0;
-      } else if (lookAheadUpdate) {
-        long currentTimestamp = System.currentTimeMillis();
-        if (currentTimestamp > newLocation.getTime()) {
-          animationDuration = 0;
-          Logger.e("LocationAnimatorCoordinator",
-            "Lookahead enabled, but the target location's timestamp is smaller than current timestamp");
+        updateCompassAnimators(targetCompassBearing, previousLayerBearing, previousCameraBearing)
+        playAnimators(
+            if (compassAnimationEnabled) COMPASS_UPDATE_RATE_MS else 0L,
+            MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
+            MapLibreAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
+        )
+
+        previousCompassBearing = targetCompassBearing
+    }
+
+    fun feedNewAccuracyRadius(
+        targetAccuracyRadius: Float,
+        noAnimation: Boolean,
+    ) {
+        if (previousAccuracyRadius < 0) {
+            previousAccuracyRadius = targetAccuracyRadius
+        }
+
+        updateAccuracyAnimators(targetAccuracyRadius, getPreviousAccuracyRadius())
+        playAnimators(
+            if (noAnimation || !accuracyAnimationEnabled) 0L else ACCURACY_RADIUS_ANIMATION_DURATION,
+            MapLibreAnimator.ANIMATOR_LAYER_ACCURACY,
+        )
+
+        previousAccuracyRadius = targetAccuracyRadius
+    }
+
+    /**
+     * Initializes the [PulsingLocationCircleAnimator], which is a type of [MapLibreAnimator].
+     * This method also adds the animator to this class' animator array.
+     *
+     * @param options the [LocationComponentOptions] passed to this class upstream from the
+     *                [LocationComponent].
+     */
+    fun startLocationComponentCirclePulsing(options: LocationComponentOptions) {
+        cancelAnimator(MapLibreAnimator.ANIMATOR_PULSING_CIRCLE)
+        val listener = listeners.get(MapLibreAnimator.ANIMATOR_PULSING_CIRCLE)
+        if (listener != null) {
+            @Suppress("UNCHECKED_CAST")
+            val pulsingLocationCircleAnimator =
+                animatorProvider.pulsingCircleAnimator(
+                    listener as AnimationsValueChangeListener<Float>,
+                    maxAnimationFps,
+                    options.pulseSingleDuration(),
+                    options.pulseMaxRadius(),
+                    options.pulseInterpolator() ?: DecelerateInterpolator(),
+                )
+            animatorArray.put(MapLibreAnimator.ANIMATOR_PULSING_CIRCLE, pulsingLocationCircleAnimator)
+            playPulsingAnimator()
+        }
+    }
+
+    fun feedNewZoomLevel(
+        targetZoomLevel: Double,
+        currentCameraPosition: CameraPosition,
+        animationDuration: Long,
+        callback: MapLibreMap.CancelableCallback?,
+    ) {
+        updateZoomAnimator(targetZoomLevel.toFloat(), currentCameraPosition.zoom.toFloat(), callback)
+        playAnimators(animationDuration, MapLibreAnimator.ANIMATOR_ZOOM)
+    }
+
+    fun feedNewPadding(
+        padding: DoubleArray,
+        currentCameraPosition: CameraPosition,
+        animationDuration: Long,
+        callback: MapLibreMap.CancelableCallback?,
+    ) {
+        updatePaddingAnimator(padding, currentCameraPosition.padding!!, callback)
+        playAnimators(animationDuration, MapLibreAnimator.ANIMATOR_PADDING)
+    }
+
+    fun feedNewTilt(
+        targetTilt: Double,
+        currentCameraPosition: CameraPosition,
+        animationDuration: Long,
+        callback: MapLibreMap.CancelableCallback?,
+    ) {
+        updateTiltAnimator(targetTilt.toFloat(), currentCameraPosition.tilt.toFloat(), callback)
+        playAnimators(animationDuration, MapLibreAnimator.ANIMATOR_TILT)
+    }
+
+    private fun getPreviousLayerLatLng(): LatLng {
+        val latLngAnimator = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_LATLNG)
+        return if (latLngAnimator != null) {
+            latLngAnimator.animatedValue as LatLng
         } else {
-          animationDuration = newLocation.getTime() - currentTimestamp;
+            LatLng(previousLocation!!)
         }
-      } else {
-        animationDuration = (long) ((locationUpdateTimestamp - previousUpdateTimeStamp) * durationMultiplier)
-        /* make animation slightly longer with durationMultiplier, defaults to 1.1f */;
-      }
-
-      animationDuration = Math.min(animationDuration, MAX_ANIMATION_DURATION_MS);
     }
 
-    playAnimators(animationDuration,
-      ANIMATOR_LAYER_LATLNG,
-      ANIMATOR_LAYER_GPS_BEARING,
-      ANIMATOR_CAMERA_LATLNG,
-      ANIMATOR_CAMERA_GPS_BEARING);
-
-    previousLocation = newLocation;
-  }
-
-  void feedNewCompassBearing(float targetCompassBearing, @NonNull CameraPosition currentCameraPosition) {
-    if (previousCompassBearing < 0) {
-      previousCompassBearing = targetCompassBearing;
+    private fun getPreviousLayerGpsBearing(): Float {
+        val animator = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING) as MapLibreFloatAnimator?
+        return if (animator != null) {
+            animator.animatedValue as Float
+        } else {
+            previousLocation!!.bearing
+        }
     }
 
-    float previousLayerBearing = getPreviousLayerCompassBearing();
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
-
-    updateCompassAnimators(targetCompassBearing, previousLayerBearing, previousCameraBearing);
-    playAnimators(
-      compassAnimationEnabled ? COMPASS_UPDATE_RATE_MS : 0,
-      ANIMATOR_LAYER_COMPASS_BEARING,
-      ANIMATOR_CAMERA_COMPASS_BEARING);
-
-    previousCompassBearing = targetCompassBearing;
-  }
-
-  void feedNewAccuracyRadius(float targetAccuracyRadius, boolean noAnimation) {
-    if (previousAccuracyRadius < 0) {
-      previousAccuracyRadius = targetAccuracyRadius;
+    private fun getPreviousLayerCompassBearing(): Float {
+        val animator = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING) as MapLibreFloatAnimator?
+        return if (animator != null) {
+            animator.animatedValue as Float
+        } else {
+            previousCompassBearing
+        }
     }
 
-    float previousAccuracyRadius = getPreviousAccuracyRadius();
-    updateAccuracyAnimators(targetAccuracyRadius, previousAccuracyRadius);
-    playAnimators(
-      noAnimation || !accuracyAnimationEnabled ? 0 : ACCURACY_RADIUS_ANIMATION_DURATION,
-      ANIMATOR_LAYER_ACCURACY);
-
-    this.previousAccuracyRadius = targetAccuracyRadius;
-  }
-
-  /**
-   * Initializes the {@link PulsingLocationCircleAnimator}, which is a type of {@link MapLibreAnimator}.
-   * This method also adds the animator to this class' animator array.
-   *
-   * @param options the {@link LocationComponentOptions} passed to this class upstream from the
-   *                {@link LocationComponent}.
-   */
-  void startLocationComponentCirclePulsing(LocationComponentOptions options) {
-    cancelAnimator(ANIMATOR_PULSING_CIRCLE);
-    MapLibreAnimator.AnimationsValueChangeListener listener = listeners.get(ANIMATOR_PULSING_CIRCLE);
-    if (listener != null) {
-      PulsingLocationCircleAnimator pulsingLocationCircleAnimator = animatorProvider.pulsingCircleAnimator(
-        listener,
-        maxAnimationFps,
-        options.pulseSingleDuration(),
-        options.pulseMaxRadius(),
-        options.pulseInterpolator() == null ? new DecelerateInterpolator() : options.pulseInterpolator());
-      animatorArray.put(ANIMATOR_PULSING_CIRCLE, pulsingLocationCircleAnimator);
-      playPulsingAnimator();
-    }
-  }
-
-  void feedNewZoomLevel(double targetZoomLevel, @NonNull CameraPosition currentCameraPosition, long animationDuration,
-                        @Nullable MapLibreMap.CancelableCallback callback) {
-    updateZoomAnimator((float) targetZoomLevel, (float) currentCameraPosition.zoom, callback);
-    playAnimators(animationDuration, ANIMATOR_ZOOM);
-  }
-
-  void feedNewPadding(double[] padding, @NonNull CameraPosition currentCameraPosition, long animationDuration,
-                      @Nullable MapLibreMap.CancelableCallback callback) {
-    updatePaddingAnimator(padding, currentCameraPosition.padding, callback);
-    playAnimators(animationDuration, ANIMATOR_PADDING);
-  }
-
-  void feedNewTilt(double targetTilt, @NonNull CameraPosition currentCameraPosition, long animationDuration,
-                   @Nullable MapLibreMap.CancelableCallback callback) {
-    updateTiltAnimator((float) targetTilt, (float) currentCameraPosition.tilt, callback);
-    playAnimators(animationDuration, ANIMATOR_TILT);
-  }
-
-  private LatLng getPreviousLayerLatLng() {
-    LatLng previousLatLng;
-    MapLibreAnimator latLngAnimator = animatorArray.get(ANIMATOR_LAYER_LATLNG);
-    if (latLngAnimator != null) {
-      previousLatLng = (LatLng) latLngAnimator.getAnimatedValue();
-    } else {
-      previousLatLng = new LatLng(previousLocation);
-    }
-    return previousLatLng;
-  }
-
-  private float getPreviousLayerGpsBearing() {
-    MapLibreFloatAnimator animator = (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_LAYER_GPS_BEARING);
-    float previousBearing;
-    if (animator != null) {
-      previousBearing = (float) animator.getAnimatedValue();
-    } else {
-      previousBearing = previousLocation.getBearing();
-    }
-    return previousBearing;
-  }
-
-  private float getPreviousLayerCompassBearing() {
-    MapLibreFloatAnimator animator = (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_LAYER_COMPASS_BEARING);
-
-    float previousBearing;
-    if (animator != null) {
-      previousBearing = (float) animator.getAnimatedValue();
-    } else {
-      previousBearing = previousCompassBearing;
-    }
-    return previousBearing;
-  }
-
-  private float getPreviousAccuracyRadius() {
-    MapLibreAnimator animator = animatorArray.get(ANIMATOR_LAYER_ACCURACY);
-    float previousRadius;
-    if (animator != null) {
-      previousRadius = (float) animator.getAnimatedValue();
-    } else {
-      previousRadius = previousAccuracyRadius;
-    }
-    return previousRadius;
-  }
-
-  private LatLng[] getLatLngValues(LatLng previousLatLng, Location[] targetLocations) {
-    LatLng[] latLngs = new LatLng[targetLocations.length + 1];
-    latLngs[0] = previousLatLng;
-    for (int i = 1; i < latLngs.length; i++) {
-      latLngs[i] = new LatLng(targetLocations[i - 1]);
-    }
-    return latLngs;
-  }
-
-  private Float[] getBearingValues(Float previousBearing, Location[] targetLocations) {
-    Float[] bearings = new Float[targetLocations.length + 1];
-
-    // Because Location bearing values are normalized to [0, 360]
-    // we need to do the same for the previous bearing value to determine the shortest path
-    bearings[0] = normalize(previousBearing);
-    for (int i = 1; i < bearings.length; i++) {
-      bearings[i] = shortestRotation(targetLocations[i - 1].getBearing(), bearings[i - 1]);
-    }
-    return bearings;
-  }
-
-  private void updateLayerAnimators(LatLng[] latLngValues, Float[] bearingValues) {
-    createNewLatLngAnimator(ANIMATOR_LAYER_LATLNG, latLngValues);
-    createNewFloatAnimator(ANIMATOR_LAYER_GPS_BEARING, bearingValues);
-  }
-
-  private void updateCameraAnimators(LatLng[] latLngValues, Float[] bearingValues) {
-    createNewLatLngAnimator(ANIMATOR_CAMERA_LATLNG, latLngValues);
-    createNewFloatAnimator(ANIMATOR_CAMERA_GPS_BEARING, bearingValues);
-  }
-
-  private void updateCompassAnimators(float targetCompassBearing, float previousLayerBearing,
-                                      float previousCameraBearing) {
-    float normalizedLayerBearing = Utils.shortestRotation(targetCompassBearing, previousLayerBearing);
-    createNewFloatAnimator(ANIMATOR_LAYER_COMPASS_BEARING, previousLayerBearing, normalizedLayerBearing);
-
-    float normalizedCameraBearing = Utils.shortestRotation(targetCompassBearing, previousCameraBearing);
-    createNewFloatAnimator(ANIMATOR_CAMERA_COMPASS_BEARING, previousCameraBearing, normalizedCameraBearing);
-  }
-
-  private void updateAccuracyAnimators(float targetAccuracyRadius, float previousAccuracyRadius) {
-    createNewFloatAnimator(ANIMATOR_LAYER_ACCURACY, previousAccuracyRadius, targetAccuracyRadius);
-  }
-
-  private void updateZoomAnimator(float targetZoomLevel, float previousZoomLevel,
-                                  @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
-    createNewCameraAdapterAnimator(ANIMATOR_ZOOM, new Float[] {previousZoomLevel, targetZoomLevel}, cancelableCallback);
-  }
-
-  private void updatePaddingAnimator(double[] targetPadding, double[] previousPadding,
-                                     @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
-    createNewPaddingAnimator(ANIMATOR_PADDING, new double[][] {previousPadding, targetPadding}, cancelableCallback);
-  }
-
-  private void updateTiltAnimator(float targetTilt, float previousTiltLevel,
-                                  @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
-    createNewCameraAdapterAnimator(ANIMATOR_TILT, new Float[] {previousTiltLevel, targetTilt}, cancelableCallback);
-  }
-
-  private void createNewLatLngAnimator(@MapLibreAnimator.Type int animatorType,
-                                       @NonNull LatLng previous, @NonNull LatLng target) {
-    createNewLatLngAnimator(animatorType, new LatLng[] {previous, target});
-  }
-
-  private void createNewLatLngAnimator(@MapLibreAnimator.Type int animatorType, LatLng[] values) {
-    cancelAnimator(animatorType);
-    MapLibreAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
-    if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.latLngAnimator(values, listener, maxAnimationFps));
-    }
-  }
-
-  private void createNewFloatAnimator(@MapLibreAnimator.Type int animatorType, float previous, float target) {
-    createNewFloatAnimator(animatorType, new Float[] {previous, target});
-  }
-
-  private void createNewFloatAnimator(@MapLibreAnimator.Type int animatorType, @NonNull @Size(min = 2) Float[] values) {
-    cancelAnimator(animatorType);
-    MapLibreAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
-    if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.floatAnimator(values, listener, maxAnimationFps));
-    }
-  }
-
-  private void createNewCameraAdapterAnimator(@MapLibreAnimator.Type int animatorType,
-                                              @NonNull @Size(min = 2) Float[] values,
-                                              @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
-    cancelAnimator(animatorType);
-    MapLibreAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
-    if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.cameraAnimator(values, listener, cancelableCallback));
-    }
-  }
-
-  private void createNewPaddingAnimator(@MapLibreAnimator.Type int animatorType,
-                                        @NonNull @Size(min = 2) double[][] values,
-                                        @Nullable MapLibreMap.CancelableCallback cancelableCallback) {
-    cancelAnimator(animatorType);
-    MapLibreAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
-    if (listener != null) {
-      animatorArray.put(animatorType, animatorProvider.paddingAnimator(values, listener, cancelableCallback));
-    }
-  }
-
-  private float checkGpsNorth(boolean isGpsNorth, float targetCameraBearing) {
-    if (isGpsNorth) {
-      targetCameraBearing = 0;
-    }
-    return targetCameraBearing;
-  }
-
-  private void playAnimators(long duration, @MapLibreAnimator.Type int... animatorTypes) {
-    List<Animator> animators = new ArrayList<>();
-    for (@MapLibreAnimator.Type int animatorType : animatorTypes) {
-      Animator animator = animatorArray.get(animatorType);
-      if (animator != null) {
-        animators.add(animator);
-      }
-    }
-    animatorSetProvider.startAnimation(animators, new LinearInterpolator(), duration);
-  }
-
-  /**
-   * Starts the {@link PulsingLocationCircleAnimator} in the animator array. This method is separate
-   * from {@link #playAnimators(long, int...)} because the MapboxAnimatorSetProvider has many more
-   * customizable animation parameters than the other {@link MapLibreAnimator}s.
-   */
-  private void playPulsingAnimator() {
-    Animator animator = animatorArray.get(ANIMATOR_PULSING_CIRCLE);
-    if (animator != null) {
-      animator.start();
-    }
-  }
-
-  void resetAllCameraAnimations(@NonNull CameraPosition currentCameraPosition, boolean isGpsNorth) {
-    resetCameraCompassAnimation(currentCameraPosition);
-    boolean snap = resetCameraLocationAnimations(currentCameraPosition, isGpsNorth);
-    playAnimators(
-      snap ? 0 : TRANSITION_ANIMATION_DURATION_MS,
-      ANIMATOR_CAMERA_LATLNG,
-      ANIMATOR_CAMERA_GPS_BEARING);
-  }
-
-  private boolean resetCameraLocationAnimations(@NonNull CameraPosition currentCameraPosition, boolean isGpsNorth) {
-    resetCameraGpsBearingAnimation(currentCameraPosition, isGpsNorth);
-    return resetCameraLatLngAnimation(currentCameraPosition);
-  }
-
-  private boolean resetCameraLatLngAnimation(@NonNull CameraPosition currentCameraPosition) {
-    MapLibreLatLngAnimator animator = (MapLibreLatLngAnimator) animatorArray.get(ANIMATOR_CAMERA_LATLNG);
-    if (animator == null) {
-      return false;
+    private fun getPreviousAccuracyRadius(): Float {
+        val animator = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_ACCURACY)
+        return if (animator != null) {
+            animator.animatedValue as Float
+        } else {
+            previousAccuracyRadius
+        }
     }
 
-    LatLng currentTarget = animator.getTarget();
-    LatLng previousCameraTarget = currentCameraPosition.target;
-    if (previousCameraTarget == null) {
-      return false;
+    private fun getLatLngValues(
+        previousLatLng: LatLng,
+        targetLocations: Array<Location>,
+    ): Array<LatLng> =
+        Array(targetLocations.size + 1) { i ->
+            if (i == 0) previousLatLng else LatLng(targetLocations[i - 1])
+        }
+
+    private fun getBearingValues(
+        previousBearing: Float,
+        targetLocations: Array<Location>,
+    ): Array<Float> {
+        val bearings = Array(targetLocations.size + 1) { 0f }
+
+        // Because Location bearing values are normalized to [0, 360]
+        // we need to do the same for the previous bearing value to determine the shortest path
+        bearings[0] = normalize(previousBearing)
+        for (i in 1 until bearings.size) {
+            bearings[i] = shortestRotation(targetLocations[i - 1].bearing, bearings[i - 1])
+        }
+        return bearings
     }
 
-    createNewLatLngAnimator(ANIMATOR_CAMERA_LATLNG, previousCameraTarget, currentTarget);
-
-    return immediateAnimation(projection, previousCameraTarget, currentTarget);
-  }
-
-  private void resetCameraGpsBearingAnimation(@NonNull CameraPosition currentCameraPosition, boolean isGpsNorth) {
-    MapLibreFloatAnimator animator = (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_CAMERA_GPS_BEARING);
-    if (animator == null) {
-      return;
+    private fun updateLayerAnimators(
+        latLngValues: Array<LatLng>,
+        bearingValues: Array<Float>,
+    ) {
+        createNewLatLngAnimator(MapLibreAnimator.ANIMATOR_LAYER_LATLNG, latLngValues)
+        createNewFloatAnimator(MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING, bearingValues)
     }
 
-    float currentTargetBearing = animator.getTarget();
-    currentTargetBearing = checkGpsNorth(isGpsNorth, currentTargetBearing);
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
-    float normalizedCameraBearing = Utils.shortestRotation(currentTargetBearing, previousCameraBearing);
-    createNewFloatAnimator(ANIMATOR_CAMERA_GPS_BEARING, previousCameraBearing, normalizedCameraBearing);
-  }
-
-  private void resetCameraCompassAnimation(@NonNull CameraPosition currentCameraPosition) {
-    MapLibreFloatAnimator animator =
-      (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_CAMERA_COMPASS_BEARING);
-    if (animator == null) {
-      return;
+    private fun updateCameraAnimators(
+        latLngValues: Array<LatLng>,
+        bearingValues: Array<Float>,
+    ) {
+        createNewLatLngAnimator(MapLibreAnimator.ANIMATOR_CAMERA_LATLNG, latLngValues)
+        createNewFloatAnimator(MapLibreAnimator.ANIMATOR_CAMERA_GPS_BEARING, bearingValues)
     }
 
-    float currentTargetBearing = animator.getTarget();
-    float previousCameraBearing = (float) currentCameraPosition.bearing;
-    float normalizedCameraBearing = Utils.shortestRotation(currentTargetBearing, previousCameraBearing);
-    createNewFloatAnimator(ANIMATOR_CAMERA_COMPASS_BEARING, previousCameraBearing, normalizedCameraBearing);
-  }
+    private fun updateCompassAnimators(
+        targetCompassBearing: Float,
+        previousLayerBearing: Float,
+        previousCameraBearing: Float,
+    ) {
+        val normalizedLayerBearing = shortestRotation(targetCompassBearing, previousLayerBearing)
+        createNewFloatAnimator(
+            MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
+            previousLayerBearing,
+            normalizedLayerBearing,
+        )
 
-  void resetAllLayerAnimations() {
-    MapLibreLatLngAnimator latLngAnimator = (MapLibreLatLngAnimator) animatorArray.get(ANIMATOR_LAYER_LATLNG);
-    MapLibreFloatAnimator gpsBearingAnimator = (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_LAYER_GPS_BEARING);
-    MapLibreFloatAnimator compassBearingAnimator =
-      (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_LAYER_COMPASS_BEARING);
-    MapLibreFloatAnimator accuracyAnimator =
-      (MapLibreFloatAnimator) animatorArray.get(ANIMATOR_LAYER_ACCURACY);
-
-    if (latLngAnimator != null && gpsBearingAnimator != null) {
-      LatLng currentLatLng = (LatLng) latLngAnimator.getAnimatedValue();
-      LatLng currentLatLngTarget = latLngAnimator.getTarget();
-      createNewLatLngAnimator(ANIMATOR_LAYER_LATLNG, currentLatLng, currentLatLngTarget);
-
-      float currentGpsBearing = (float) gpsBearingAnimator.getAnimatedValue();
-      float currentGpsBearingTarget = gpsBearingAnimator.getTarget();
-      createNewFloatAnimator(ANIMATOR_LAYER_GPS_BEARING, currentGpsBearing, currentGpsBearingTarget);
-
-      long duration = latLngAnimator.getDuration() - latLngAnimator.getCurrentPlayTime();
-
-      playAnimators(duration, ANIMATOR_LAYER_LATLNG, ANIMATOR_LAYER_GPS_BEARING);
+        val normalizedCameraBearing = shortestRotation(targetCompassBearing, previousCameraBearing)
+        createNewFloatAnimator(
+            MapLibreAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
+            previousCameraBearing,
+            normalizedCameraBearing,
+        )
     }
 
-    if (compassBearingAnimator != null) {
-      float currentLayerBearing = getPreviousLayerCompassBearing();
-      float currentLayerBearingTarget = compassBearingAnimator.getTarget();
-      createNewFloatAnimator(ANIMATOR_LAYER_COMPASS_BEARING, currentLayerBearing, currentLayerBearingTarget);
-      playAnimators(
-        compassAnimationEnabled ? COMPASS_UPDATE_RATE_MS : 0,
-        ANIMATOR_LAYER_COMPASS_BEARING);
+    private fun updateAccuracyAnimators(
+        targetAccuracyRadius: Float,
+        previousAccuracyRadius: Float,
+    ) {
+        createNewFloatAnimator(MapLibreAnimator.ANIMATOR_LAYER_ACCURACY, previousAccuracyRadius, targetAccuracyRadius)
     }
 
-    if (accuracyAnimator != null) {
-      feedNewAccuracyRadius(previousAccuracyRadius, false);
+    private fun updateZoomAnimator(
+        targetZoomLevel: Float,
+        previousZoomLevel: Float,
+        cancelableCallback: MapLibreMap.CancelableCallback?,
+    ) {
+        createNewCameraAdapterAnimator(
+            MapLibreAnimator.ANIMATOR_ZOOM,
+            arrayOf(previousZoomLevel, targetZoomLevel),
+            cancelableCallback,
+        )
     }
-  }
 
-  void cancelZoomAnimation() {
-    cancelAnimator(ANIMATOR_ZOOM);
-  }
-
-  void cancelPaddingAnimation() {
-    cancelAnimator(ANIMATOR_PADDING);
-  }
-
-  void cancelTiltAnimation() {
-    cancelAnimator(ANIMATOR_TILT);
-  }
-
-  void cancelAndRemoveGpsBearingAnimation() {
-    cancelAnimator(ANIMATOR_LAYER_GPS_BEARING);
-    animatorArray.remove(ANIMATOR_LAYER_GPS_BEARING);
-  }
-
-  /**
-   * Cancel the pulsing circle location animator.
-   */
-  void stopPulsingCircleAnimation() {
-    cancelAnimator(ANIMATOR_PULSING_CIRCLE);
-  }
-
-  void cancelAllAnimations() {
-    for (int i = 0; i < animatorArray.size(); i++) {
-      @MapLibreAnimator.Type int animatorType = animatorArray.keyAt(i);
-      cancelAnimator(animatorType);
+    private fun updatePaddingAnimator(
+        targetPadding: DoubleArray,
+        previousPadding: DoubleArray,
+        cancelableCallback: MapLibreMap.CancelableCallback?,
+    ) {
+        createNewPaddingAnimator(
+            MapLibreAnimator.ANIMATOR_PADDING,
+            arrayOf(previousPadding, targetPadding),
+            cancelableCallback,
+        )
     }
-  }
 
-  private void cancelAnimator(@MapLibreAnimator.Type int animatorType) {
-    MapLibreAnimator animator = animatorArray.get(animatorType);
-    if (animator != null) {
-      animator.cancel();
-      animator.removeAllUpdateListeners();
-      animator.removeAllListeners();
+    private fun updateTiltAnimator(
+        targetTilt: Float,
+        previousTiltLevel: Float,
+        cancelableCallback: MapLibreMap.CancelableCallback?,
+    ) {
+        createNewCameraAdapterAnimator(
+            MapLibreAnimator.ANIMATOR_TILT,
+            arrayOf(previousTiltLevel, targetTilt),
+            cancelableCallback,
+        )
     }
-  }
 
-  void setTrackingAnimationDurationMultiplier(float trackingAnimationDurationMultiplier) {
-    this.durationMultiplier = trackingAnimationDurationMultiplier;
-  }
-
-  void setCompassAnimationEnabled(boolean compassAnimationEnabled) {
-    this.compassAnimationEnabled = compassAnimationEnabled;
-  }
-
-  void setAccuracyAnimationEnabled(boolean accuracyAnimationEnabled) {
-    this.accuracyAnimationEnabled = accuracyAnimationEnabled;
-  }
-
-  void setMaxAnimationFps(int maxAnimationFps) {
-    if (maxAnimationFps <= 0) {
-      Logger.e(TAG, "Max animation FPS cannot be less or equal to 0.");
-      return;
+    private fun createNewLatLngAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+        previous: LatLng,
+        target: LatLng,
+    ) {
+        createNewLatLngAnimator(animatorType, arrayOf(previous, target))
     }
-    this.maxAnimationFps = maxAnimationFps;
-  }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun createNewLatLngAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+        values: Array<LatLng>,
+    ) {
+        cancelAnimator(animatorType)
+        val listener = listeners.get(animatorType) as AnimationsValueChangeListener<LatLng>?
+        if (listener != null) {
+            animatorArray.put(animatorType, animatorProvider.latLngAnimator(values, listener, maxAnimationFps))
+        }
+    }
+
+    private fun createNewFloatAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+        previous: Float,
+        target: Float,
+    ) {
+        createNewFloatAnimator(animatorType, arrayOf(previous, target))
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun createNewFloatAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+        @Size(min = 2) values: Array<Float>,
+    ) {
+        cancelAnimator(animatorType)
+        val listener = listeners.get(animatorType) as AnimationsValueChangeListener<Float>?
+        if (listener != null) {
+            animatorArray.put(animatorType, animatorProvider.floatAnimator(values, listener, maxAnimationFps))
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun createNewCameraAdapterAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+        @Size(min = 2) values: Array<Float>,
+        cancelableCallback: MapLibreMap.CancelableCallback?,
+    ) {
+        cancelAnimator(animatorType)
+        val listener = listeners.get(animatorType) as AnimationsValueChangeListener<Float>?
+        if (listener != null) {
+            animatorArray.put(animatorType, animatorProvider.cameraAnimator(values, listener, cancelableCallback))
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun createNewPaddingAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+        @Size(min = 2) values: Array<DoubleArray>,
+        cancelableCallback: MapLibreMap.CancelableCallback?,
+    ) {
+        cancelAnimator(animatorType)
+        val listener = listeners.get(animatorType) as AnimationsValueChangeListener<DoubleArray>?
+        if (listener != null) {
+            animatorArray.put(animatorType, animatorProvider.paddingAnimator(values, listener, cancelableCallback))
+        }
+    }
+
+    private fun checkGpsNorth(
+        isGpsNorth: Boolean,
+        targetCameraBearing: Float,
+    ): Float = if (isGpsNorth) 0f else targetCameraBearing
+
+    private fun playAnimators(
+        duration: Long,
+        @MapLibreAnimator.Type vararg animatorTypes: Int,
+    ) {
+        val animators = mutableListOf<Animator>()
+        for (animatorType in animatorTypes) {
+            animatorArray.get(animatorType)?.let { animators.add(it) }
+        }
+        animatorSetProvider.startAnimation(animators, LinearInterpolator(), duration)
+    }
+
+    /**
+     * Starts the [PulsingLocationCircleAnimator] in the animator array. This method is separate
+     * from [playAnimators] because the MapboxAnimatorSetProvider has many more
+     * customizable animation parameters than the other [MapLibreAnimator]s.
+     */
+    private fun playPulsingAnimator() {
+        animatorArray.get(MapLibreAnimator.ANIMATOR_PULSING_CIRCLE)?.start()
+    }
+
+    fun resetAllCameraAnimations(
+        currentCameraPosition: CameraPosition,
+        isGpsNorth: Boolean,
+    ) {
+        resetCameraCompassAnimation(currentCameraPosition)
+        val snap = resetCameraLocationAnimations(currentCameraPosition, isGpsNorth)
+        playAnimators(
+            if (snap) 0L else TRANSITION_ANIMATION_DURATION_MS,
+            MapLibreAnimator.ANIMATOR_CAMERA_LATLNG,
+            MapLibreAnimator.ANIMATOR_CAMERA_GPS_BEARING,
+        )
+    }
+
+    private fun resetCameraLocationAnimations(
+        currentCameraPosition: CameraPosition,
+        isGpsNorth: Boolean,
+    ): Boolean {
+        resetCameraGpsBearingAnimation(currentCameraPosition, isGpsNorth)
+        return resetCameraLatLngAnimation(currentCameraPosition)
+    }
+
+    private fun resetCameraLatLngAnimation(currentCameraPosition: CameraPosition): Boolean {
+        val animator =
+            animatorArray.get(MapLibreAnimator.ANIMATOR_CAMERA_LATLNG) as MapLibreLatLngAnimator?
+                ?: return false
+
+        val currentTarget = animator.target
+        val previousCameraTarget = currentCameraPosition.target ?: return false
+
+        createNewLatLngAnimator(MapLibreAnimator.ANIMATOR_CAMERA_LATLNG, previousCameraTarget, currentTarget)
+
+        return immediateAnimation(projection, previousCameraTarget, currentTarget)
+    }
+
+    private fun resetCameraGpsBearingAnimation(
+        currentCameraPosition: CameraPosition,
+        isGpsNorth: Boolean,
+    ) {
+        val animator =
+            animatorArray.get(MapLibreAnimator.ANIMATOR_CAMERA_GPS_BEARING) as MapLibreFloatAnimator?
+                ?: return
+
+        val currentTargetBearing = checkGpsNorth(isGpsNorth, animator.target)
+        val previousCameraBearing = currentCameraPosition.bearing.toFloat()
+        val normalizedCameraBearing = shortestRotation(currentTargetBearing, previousCameraBearing)
+        createNewFloatAnimator(
+            MapLibreAnimator.ANIMATOR_CAMERA_GPS_BEARING,
+            previousCameraBearing,
+            normalizedCameraBearing,
+        )
+    }
+
+    private fun resetCameraCompassAnimation(currentCameraPosition: CameraPosition) {
+        val animator =
+            animatorArray.get(MapLibreAnimator.ANIMATOR_CAMERA_COMPASS_BEARING) as MapLibreFloatAnimator?
+                ?: return
+
+        val currentTargetBearing = animator.target
+        val previousCameraBearing = currentCameraPosition.bearing.toFloat()
+        val normalizedCameraBearing = shortestRotation(currentTargetBearing, previousCameraBearing)
+        createNewFloatAnimator(
+            MapLibreAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
+            previousCameraBearing,
+            normalizedCameraBearing,
+        )
+    }
+
+    fun resetAllLayerAnimations() {
+        val latLngAnimator = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_LATLNG) as MapLibreLatLngAnimator?
+        val gpsBearingAnimator =
+            animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING) as MapLibreFloatAnimator?
+        val compassBearingAnimator =
+            animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING) as MapLibreFloatAnimator?
+        val accuracyAnimator = animatorArray.get(MapLibreAnimator.ANIMATOR_LAYER_ACCURACY) as MapLibreFloatAnimator?
+
+        if (latLngAnimator != null && gpsBearingAnimator != null) {
+            val currentLatLng = latLngAnimator.animatedValue as LatLng
+            val currentLatLngTarget = latLngAnimator.target
+            createNewLatLngAnimator(MapLibreAnimator.ANIMATOR_LAYER_LATLNG, currentLatLng, currentLatLngTarget)
+
+            val currentGpsBearing = gpsBearingAnimator.animatedValue as Float
+            val currentGpsBearingTarget = gpsBearingAnimator.target
+            createNewFloatAnimator(
+                MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
+                currentGpsBearing,
+                currentGpsBearingTarget,
+            )
+
+            val duration = latLngAnimator.duration - latLngAnimator.currentPlayTime
+
+            playAnimators(
+                duration,
+                MapLibreAnimator.ANIMATOR_LAYER_LATLNG,
+                MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING,
+            )
+        }
+
+        if (compassBearingAnimator != null) {
+            val currentLayerBearing = getPreviousLayerCompassBearing()
+            val currentLayerBearingTarget = compassBearingAnimator.target
+            createNewFloatAnimator(
+                MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
+                currentLayerBearing,
+                currentLayerBearingTarget,
+            )
+            playAnimators(
+                if (compassAnimationEnabled) COMPASS_UPDATE_RATE_MS else 0L,
+                MapLibreAnimator.ANIMATOR_LAYER_COMPASS_BEARING,
+            )
+        }
+
+        if (accuracyAnimator != null) {
+            feedNewAccuracyRadius(previousAccuracyRadius, false)
+        }
+    }
+
+    fun cancelZoomAnimation() {
+        cancelAnimator(MapLibreAnimator.ANIMATOR_ZOOM)
+    }
+
+    fun cancelPaddingAnimation() {
+        cancelAnimator(MapLibreAnimator.ANIMATOR_PADDING)
+    }
+
+    fun cancelTiltAnimation() {
+        cancelAnimator(MapLibreAnimator.ANIMATOR_TILT)
+    }
+
+    fun cancelAndRemoveGpsBearingAnimation() {
+        cancelAnimator(MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING)
+        animatorArray.remove(MapLibreAnimator.ANIMATOR_LAYER_GPS_BEARING)
+    }
+
+    /**
+     * Cancel the pulsing circle location animator.
+     */
+    fun stopPulsingCircleAnimation() {
+        cancelAnimator(MapLibreAnimator.ANIMATOR_PULSING_CIRCLE)
+    }
+
+    fun cancelAllAnimations() {
+        for (i in 0 until animatorArray.size()) {
+            @MapLibreAnimator.Type val animatorType = animatorArray.keyAt(i)
+            cancelAnimator(animatorType)
+        }
+    }
+
+    private fun cancelAnimator(
+        @MapLibreAnimator.Type animatorType: Int,
+    ) {
+        animatorArray.get(animatorType)?.apply {
+            cancel()
+            removeAllUpdateListeners()
+            removeAllListeners()
+        }
+    }
+
+    fun setTrackingAnimationDurationMultiplier(trackingAnimationDurationMultiplier: Float) {
+        durationMultiplier = trackingAnimationDurationMultiplier
+    }
+
+    fun setCompassAnimationEnabled(compassAnimationEnabled: Boolean) {
+        this.compassAnimationEnabled = compassAnimationEnabled
+    }
+
+    fun setAccuracyAnimationEnabled(accuracyAnimationEnabled: Boolean) {
+        this.accuracyAnimationEnabled = accuracyAnimationEnabled
+    }
+
+    private companion object {
+        private const val TAG = "Mbgl-LocationAnimatorCoordinator"
+    }
 }

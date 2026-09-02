@@ -11,8 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
@@ -20,11 +20,14 @@ import org.maplibre.android.testapp.styles.TestStyles
 /**
  * Test activity showcasing using the scrollBy Camera API by moving x,y pixels above Grenada, Spain.
  */
-class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
+class ScrollByActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var seekBarX: SeekBar
     private lateinit var seekBarY: SeekBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scroll_by)
@@ -38,12 +41,12 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
         seekBarX = findViewById(R.id.seekbar_move_x)
         val textViewX = findViewById<TextView>(R.id.textview_x)
         seekBarX.setOnSeekBarChangeListener(
-            PixelBarChangeListener(textViewX, R.string.scrollby_x_value)
+            PixelBarChangeListener(textViewX, R.string.scrollby_x_value),
         )
         seekBarY = findViewById(R.id.seekbar_move_y)
         val textViewY = findViewById<TextView>(R.id.textview_y)
         seekBarY.setOnSeekBarChangeListener(
-            PixelBarChangeListener(textViewY, R.string.scrollby_y_value)
+            PixelBarChangeListener(textViewY, R.string.scrollby_y_value),
         )
         mapView = findViewById(R.id.mapView)
         mapView.tag = true
@@ -63,7 +66,7 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
             // # --8<-- [start:scrollBy]
             maplibreMap.scrollBy(
                 (seekBarX.progress * MULTIPLIER_PER_PIXEL).toFloat(),
-                (seekBarY.progress * MULTIPLIER_PER_PIXEL).toFloat()
+                (seekBarY.progress * MULTIPLIER_PER_PIXEL).toFloat(),
             )
             // # --8<-- [end:scrollBy]
         }
@@ -104,27 +107,34 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onLowMemory()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             android.R.id.home -> {
                 onBackPressedDispatcher.onBackPressed()
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
-    }
 
     private class PixelBarChangeListener(
         private val valueView: TextView,
         @field:StringRes @param:StringRes
-        private val prefixTextResource: Int
+        private val prefixTextResource: Int,
     ) : OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+        override fun onProgressChanged(
+            seekBar: SeekBar,
+            progress: Int,
+            fromUser: Boolean,
+        ) {
             val value = progress * MULTIPLIER_PER_PIXEL
             valueView.text = String.format(seekBar.resources.getString(prefixTextResource), value)
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar) {}
+
         override fun onStopTrackingTouch(seekBar: SeekBar) {}
     }
 

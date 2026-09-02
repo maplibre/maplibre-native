@@ -14,6 +14,7 @@ import org.maplibre.android.exceptions.MapLibreConfigurationException
 @RunWith(AndroidJUnit4ClassRunner::class)
 class MapLibreTest : AppCenter() {
     private var realToken: String? = null
+
     @Before
     fun setup() {
         realToken = MapLibre.getApiKey()
@@ -48,7 +49,7 @@ class MapLibreTest : AppCenter() {
     @UiThreadTest
     fun setNullApiKey() {
         Assert.assertThrows(
-            MapLibreConfigurationException::class.java
+            MapLibreConfigurationException::class.java,
         ) { MapLibre.setApiKey(null) }
     }
 
@@ -57,7 +58,6 @@ class MapLibreTest : AppCenter() {
         if (realToken?.isNotEmpty() == true) {
             MapLibre.setApiKey(realToken)
         }
-
     }
 
     companion object {

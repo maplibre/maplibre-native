@@ -1,8 +1,5 @@
-package org.maplibre.android.exceptions;
+package org.maplibre.android.exceptions
 
-public class CalledFromWorkerThreadException extends RuntimeException {
-
-  public CalledFromWorkerThreadException(String message) {
-    super(message);
-  }
-}
+class CalledFromWorkerThreadException(
+    message: String?,
+) : RuntimeException(message)

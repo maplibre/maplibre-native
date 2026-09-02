@@ -1,32 +1,25 @@
-package org.maplibre.android.maps.renderer;
+package org.maplibre.android.maps.renderer
 
-import androidx.annotation.Keep;
+import androidx.annotation.Keep
 
 /**
- * Peer class for {@link Runnable}s to be scheduled on the {@link MapRenderer} thread.
+ * Peer class for [Runnable]s to be scheduled on the [MapRenderer] thread.
  * The actual work is performed in the native peer.
+ *
+ * Constructed from the native peer constructor.
+ *
+ * @param nativePtr the native peer's memory address
  */
 @Keep
-class MapRendererRunnable implements Runnable {
+internal class MapRendererRunnable(
+    // Holds the pointer to the native peer after initialisation
+    private val nativePtr: Long,
+) : Runnable {
+    external override fun run()
 
-  // Holds the pointer to the native peer after initialisation
-  private final long nativePtr;
+    @Suppress("unused", "ProtectedMemberInFinalClass")
+    protected external fun finalize()
 
-  /**
-   * Constructed from the native peer constructor
-   *
-   * @param nativePtr the native peer's memory address
-   */
-  MapRendererRunnable(long nativePtr) {
-    this.nativePtr = nativePtr;
-  }
-
-  @Override
-  public native void run();
-
-  @Override
-  protected native void finalize() throws Throwable;
-
-  private native void nativeInitialize();
-
+    @Suppress("unused")
+    private external fun nativeInitialize()
 }

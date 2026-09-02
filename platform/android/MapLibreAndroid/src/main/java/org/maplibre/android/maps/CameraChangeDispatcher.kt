@@ -1,205 +1,175 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.os.Handler;
-import android.os.Message;
-
-import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-
-import java.lang.annotation.Retention;
-import java.lang.ref.WeakReference;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import static org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener;
-import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveCanceledListener;
-import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveListener;
-import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import android.os.Handler
+import android.os.Message
+import androidx.annotation.IntDef
+import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
+import org.maplibre.android.maps.MapLibreMap.OnCameraMoveCanceledListener
+import org.maplibre.android.maps.MapLibreMap.OnCameraMoveListener
+import org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener
+import java.lang.ref.WeakReference
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Class responsible for dispatching camera change events to registered listeners.
  */
-class CameraChangeDispatcher implements MapLibreMap.OnCameraMoveStartedListener, MapLibreMap.OnCameraMoveListener,
-  MapLibreMap.OnCameraMoveCanceledListener, OnCameraIdleListener {
+@Suppress("TooManyFunctions")
+internal class CameraChangeDispatcher :
+    MapLibreMap.OnCameraMoveStartedListener,
+    MapLibreMap.OnCameraMoveListener,
+    MapLibreMap.OnCameraMoveCanceledListener,
+    OnCameraIdleListener {
+    private val handler = CameraChangeHandler(this)
 
-  private final CameraChangeHandler handler = new CameraChangeHandler(this);
+    private var idle = true
+    private var moveStartedReason = 0
 
-  private boolean idle = true;
-  private int moveStartedReason;
+    private val onCameraMoveStarted = CopyOnWriteArrayList<OnCameraMoveStartedListener>()
+    private val onCameraMoveCanceled = CopyOnWriteArrayList<OnCameraMoveCanceledListener>()
+    private val onCameraMove = CopyOnWriteArrayList<OnCameraMoveListener>()
+    private val onCameraIdle = CopyOnWriteArrayList<OnCameraIdleListener>()
 
-  private final CopyOnWriteArrayList<OnCameraMoveStartedListener> onCameraMoveStarted = new CopyOnWriteArrayList<>();
-  private final CopyOnWriteArrayList<OnCameraMoveCanceledListener> onCameraMoveCanceled = new CopyOnWriteArrayList<>();
-  private final CopyOnWriteArrayList<OnCameraMoveListener> onCameraMove = new CopyOnWriteArrayList<>();
-  private final CopyOnWriteArrayList<OnCameraIdleListener> onCameraIdle = new CopyOnWriteArrayList<>();
+    @Retention(AnnotationRetention.SOURCE)
+    @IntDef(MOVE_STARTED, MOVE, MOVE_CANCELED, IDLE)
+    internal annotation class CameraChange
 
-  @Retention(SOURCE)
-  @IntDef( {MOVE_STARTED, MOVE, MOVE_CANCELED, IDLE})
-  @interface CameraChange {
-  }
-
-  private static final int MOVE_STARTED = 0;
-  private static final int MOVE = 1;
-  private static final int MOVE_CANCELED = 2;
-  private static final int IDLE = 3;
-
-  @Override
-  public void onCameraMoveStarted(final int reason) {
-    moveStartedReason = reason;
-    handler.scheduleMessage(MOVE_STARTED);
-  }
-
-  @Override
-  public void onCameraMove() {
-    handler.scheduleMessage(MOVE);
-  }
-
-  @Override
-  public void onCameraMoveCanceled() {
-    handler.scheduleMessage(MOVE_CANCELED);
-  }
-
-  @Override
-  public void onCameraIdle() {
-    handler.scheduleMessage(IDLE);
-  }
-
-  void addOnCameraIdleListener(@NonNull OnCameraIdleListener listener) {
-    onCameraIdle.add(listener);
-  }
-
-  void removeOnCameraIdleListener(@NonNull OnCameraIdleListener listener) {
-    if (onCameraIdle.contains(listener)) {
-      onCameraIdle.remove(listener);
-    }
-  }
-
-  void addOnCameraMoveCancelListener(OnCameraMoveCanceledListener listener) {
-    onCameraMoveCanceled.add(listener);
-  }
-
-  void removeOnCameraMoveCancelListener(OnCameraMoveCanceledListener listener) {
-    if (onCameraMoveCanceled.contains(listener)) {
-      onCameraMoveCanceled.remove(listener);
-    }
-  }
-
-  void addOnCameraMoveStartedListener(OnCameraMoveStartedListener listener) {
-    onCameraMoveStarted.add(listener);
-  }
-
-  void removeOnCameraMoveStartedListener(OnCameraMoveStartedListener listener) {
-    if (onCameraMoveStarted.contains(listener)) {
-      onCameraMoveStarted.remove(listener);
-    }
-  }
-
-  void addOnCameraMoveListener(OnCameraMoveListener listener) {
-    onCameraMove.add(listener);
-  }
-
-  void removeOnCameraMoveListener(OnCameraMoveListener listener) {
-    if (onCameraMove.contains(listener)) {
-      onCameraMove.remove(listener);
-    }
-  }
-
-  private void executeOnCameraMoveStarted() {
-    if (!idle) {
-      return;
-    }
-    idle = false;
-    if (!onCameraMoveStarted.isEmpty()) {
-      for (OnCameraMoveStartedListener cameraMoveStartedListener : onCameraMoveStarted) {
-        cameraMoveStartedListener.onCameraMoveStarted(moveStartedReason);
-      }
-    }
-  }
-
-  private void executeOnCameraMove() {
-    if (!onCameraMove.isEmpty() && !idle) {
-      for (OnCameraMoveListener cameraMoveListener : onCameraMove) {
-        cameraMoveListener.onCameraMove();
-      }
-    }
-  }
-
-  private void executeOnCameraMoveCancelled() {
-    if (!onCameraMoveCanceled.isEmpty() && !idle) {
-      for (OnCameraMoveCanceledListener cameraMoveCanceledListener : onCameraMoveCanceled) {
-        cameraMoveCanceledListener.onCameraMoveCanceled();
-      }
-    }
-  }
-
-  private void executeOnCameraIdle() {
-    if (idle) {
-      return;
-    }
-    idle = true;
-    if (!onCameraIdle.isEmpty()) {
-      for (OnCameraIdleListener cameraIdleListener : onCameraIdle) {
-        cameraIdleListener.onCameraIdle();
-      }
-    }
-  }
-
-  void onDestroy() {
-    handler.removeCallbacksAndMessages(null);
-    onCameraMoveStarted.clear();
-    onCameraMoveCanceled.clear();
-    onCameraMove.clear();
-    onCameraIdle.clear();
-  }
-
-  private static class CameraChangeHandler extends Handler {
-
-    private WeakReference<CameraChangeDispatcher> dispatcherWeakReference;
-
-    CameraChangeHandler(CameraChangeDispatcher dispatcher) {
-      super();
-      this.dispatcherWeakReference = new WeakReference<>(dispatcher);
+    override fun onCameraMoveStarted(reason: Int) {
+        moveStartedReason = reason
+        handler.scheduleMessage(MOVE_STARTED)
     }
 
-    @Override
-    public void handleMessage(@NonNull Message msg) {
-      CameraChangeDispatcher dispatcher = dispatcherWeakReference.get();
-      if (dispatcher != null) {
-        switch (msg.what) {
-          case MOVE_STARTED:
-            dispatcher.executeOnCameraMoveStarted();
-            break;
-          case MOVE:
-            dispatcher.executeOnCameraMove();
-            break;
-          case MOVE_CANCELED:
-            dispatcher.executeOnCameraMoveCancelled();
-            break;
-          case IDLE:
-            dispatcher.executeOnCameraIdle();
-            break;
+    override fun onCameraMove() {
+        handler.scheduleMessage(MOVE)
+    }
+
+    override fun onCameraMoveCanceled() {
+        handler.scheduleMessage(MOVE_CANCELED)
+    }
+
+    override fun onCameraIdle() {
+        handler.scheduleMessage(IDLE)
+    }
+
+    fun addOnCameraIdleListener(listener: OnCameraIdleListener) {
+        onCameraIdle.add(listener)
+    }
+
+    fun removeOnCameraIdleListener(listener: OnCameraIdleListener) {
+        onCameraIdle.remove(listener)
+    }
+
+    fun addOnCameraMoveCancelListener(listener: OnCameraMoveCanceledListener) {
+        onCameraMoveCanceled.add(listener)
+    }
+
+    fun removeOnCameraMoveCancelListener(listener: OnCameraMoveCanceledListener) {
+        onCameraMoveCanceled.remove(listener)
+    }
+
+    fun addOnCameraMoveStartedListener(listener: OnCameraMoveStartedListener) {
+        onCameraMoveStarted.add(listener)
+    }
+
+    fun removeOnCameraMoveStartedListener(listener: OnCameraMoveStartedListener) {
+        onCameraMoveStarted.remove(listener)
+    }
+
+    fun addOnCameraMoveListener(listener: OnCameraMoveListener) {
+        onCameraMove.add(listener)
+    }
+
+    fun removeOnCameraMoveListener(listener: OnCameraMoveListener) {
+        onCameraMove.remove(listener)
+    }
+
+    private fun executeOnCameraMoveStarted() {
+        if (!idle) {
+            return
         }
-      }
+        idle = false
+        for (cameraMoveStartedListener in onCameraMoveStarted) {
+            cameraMoveStartedListener.onCameraMoveStarted(moveStartedReason)
+        }
     }
 
-    void scheduleMessage(@CameraChange int change) {
-      CameraChangeDispatcher dispatcher = dispatcherWeakReference.get();
-      if (dispatcher != null) {
-        // if there is a movement that is cancelled/stopped and restarted in the same code block
-        // we can safely assume that the movement will continue, no need for dispatching unnecessary callbacks sequence
-        if (change == MOVE_STARTED) {
-          boolean shouldReturn = !dispatcher.idle && (hasMessages(IDLE) || hasMessages(MOVE_CANCELED));
-          removeMessages(IDLE);
-          removeMessages(MOVE_CANCELED);
+    private fun executeOnCameraMove() {
+        if (!idle) {
+            for (cameraMoveListener in onCameraMove) {
+                cameraMoveListener.onCameraMove()
+            }
+        }
+    }
 
-          if (shouldReturn) {
-            return;
-          }
+    private fun executeOnCameraMoveCancelled() {
+        if (!idle) {
+            for (cameraMoveCanceledListener in onCameraMoveCanceled) {
+                cameraMoveCanceledListener.onCameraMoveCanceled()
+            }
+        }
+    }
+
+    private fun executeOnCameraIdle() {
+        if (idle) {
+            return
+        }
+        idle = true
+        for (cameraIdleListener in onCameraIdle) {
+            cameraIdleListener.onCameraIdle()
+        }
+    }
+
+    fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+        onCameraMoveStarted.clear()
+        onCameraMoveCanceled.clear()
+        onCameraMove.clear()
+        onCameraIdle.clear()
+    }
+
+    @Suppress("DEPRECATION")
+    private class CameraChangeHandler(
+        dispatcher: CameraChangeDispatcher,
+    ) : Handler() {
+        private val dispatcherWeakReference = WeakReference(dispatcher)
+
+        override fun handleMessage(msg: Message) {
+            val dispatcher = dispatcherWeakReference.get() ?: return
+            when (msg.what) {
+                MOVE_STARTED -> dispatcher.executeOnCameraMoveStarted()
+                MOVE -> dispatcher.executeOnCameraMove()
+                MOVE_CANCELED -> dispatcher.executeOnCameraMoveCancelled()
+                IDLE -> dispatcher.executeOnCameraIdle()
+            }
         }
 
-        Message message = new Message();
-        message.what = change;
-        this.sendMessage(message);
-      }
+        fun scheduleMessage(
+            @CameraChange change: Int,
+        ) {
+            val dispatcher = dispatcherWeakReference.get() ?: return
+
+            // if there is a movement that is cancelled/stopped and restarted in the same code block
+            // we can safely assume that the movement will continue,
+            // no need for dispatching unnecessary callbacks sequence
+            if (change == MOVE_STARTED) {
+                val shouldReturn = !dispatcher.idle && (hasMessages(IDLE) || hasMessages(MOVE_CANCELED))
+                removeMessages(IDLE)
+                removeMessages(MOVE_CANCELED)
+
+                if (shouldReturn) {
+                    return
+                }
+            }
+
+            val message = Message()
+            message.what = change
+            this.sendMessage(message)
+        }
     }
-  }
+
+    private companion object {
+        const val MOVE_STARTED = 0
+        const val MOVE = 1
+        const val MOVE_CANCELED = 2
+        const val IDLE = 3
+    }
 }

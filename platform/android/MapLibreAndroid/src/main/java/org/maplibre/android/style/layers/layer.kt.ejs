@@ -6,257 +6,240 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
 <% if (type === 'location-indicator') { -%>
-package org.maplibre.android.location;
+package org.maplibre.android.location
 <% } else { -%>
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 <% } -%>
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
 <% if (type === 'symbol') { -%>
-import org.maplibre.android.style.types.Formatted;
-import org.maplibre.android.style.types.FormattedSection;
+import org.maplibre.android.style.types.Formatted
 <% } -%>
 <% if (type === 'location-indicator') { -%>
-import org.maplibre.android.style.layers.Layer;
-import org.maplibre.android.style.layers.PropertyValue;
+import org.maplibre.android.style.layers.Layer
+import org.maplibre.android.style.layers.PropertyValue
 <% } -%>
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * <%- doc %>
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-<%- type %>">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-<%- type %>)
  */
 @UiThread
 <% if (type === 'location-indicator') { -%>
-class <%- camelize(type) %>Layer extends Layer {
+internal class <%- camelize(type) %>Layer : Layer {
 <% } else { -%>
-public class <%- camelize(type) %>Layer extends Layer {
+class <%- camelize(type) %>Layer : Layer {
 <% } -%>
 
-  /**
-   * Creates a <%- camelize(type) %>Layer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  <%- camelize(type) %>Layer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a <%- camelize(type) %>Layer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
 <% if (type === 'background' || type === 'location-indicator') { -%>
-  /**
-   * Creates a <%- camelize(type) %>Layer.
-   *
-   * @param layerId the id of the layer
-   */
-  public <%- camelize(type) %>Layer(String layerId) {
-    super();
-    initialize(layerId);
-  }
+    /**
+     * Creates a <%- camelize(type) %>Layer.
+     *
+     * @param layerId the id of the layer
+     */
+    constructor(layerId: String?) : super() {
+        initialize(layerId)
+    }
 
-  @Keep
-  protected native void initialize(String layerId);
+    @Keep
+    protected external fun initialize(layerId: String?)
 
 <% } else { -%>
-  /**
-   * Creates a <%- camelize(type) %>Layer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public <%- camelize(type) %>Layer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
+    /**
+     * Creates a <%- camelize(type) %>Layer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
+    }
 
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
+<% if (type === 'raster' || type === 'hillshade') { -%>
+    /**
+     * Set the source layer.
+     *
+     * @param sourceLayer the source layer to set
+     */
+    fun setSourceLayer(sourceLayer: String?) {
+        checkThread()
+        nativeSetSourceLayer(sourceLayer)
+    }
 
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public <%- camelize(type) %>Layer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
+<% } else { -%>
+    /**
+     * The source layer.
+     */
+    var sourceLayer: String?
+        get() {
+            checkThread()
+            return nativeGetSourceLayer()
+        }
+        set(sourceLayer) {
+            checkThread()
+            nativeSetSourceLayer(sourceLayer)
+        }
+
+<% } -%>
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): <%- camelize(type) %>Layer {
+<% if (type === 'raster' || type === 'hillshade') { -%>
+        setSourceLayer(sourceLayer)
+<% } else { -%>
+        this.sourceLayer = sourceLayer
+<% } -%>
+        return this
+    }
 
 <% } -%>
 <% if (type !== 'background' && type !== 'location-indicator' && type !== 'custom') { -%>
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
 <% } -%>
 <% if (type !== 'background' && type !== 'location-indicator' && type !== 'raster' && type !== 'hillshade') { -%>
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public <%- camelize(type) %>Layer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     */
+    fun setFilter(filter: Expression) {
+        checkThread()
+        nativeSetFilter(filter.toArray())
     }
-  }
+
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     * @return This
+     */
+    fun withFilter(filter: Expression): <%- camelize(type) %>Layer {
+        setFilter(filter)
+        return this
+    }
+
+    /**
+     * A single expression filter.
+     *
+     * Use [setFilter] to set the filter.
+     */
+    val filter: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetFilter()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
+        }
 
 <% } -%>
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public <%- camelize(type) %>Layer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): <%- camelize(type) %>Layer {
+        setProperties(*properties)
+        return this
+    }
 
-  // Property getters
+    // Property getters
 <% for (const property of properties) { -%>
 
-  /**
-   * Get the <%- camelize(property.name) %> property
-   *
-   * @return property wrapper value around <%- propertyType(property) %>
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<<%- propertyType(property) %>> get<%- camelize(property.name) %>() {
-    checkThread();
-    return (PropertyValue<<%- propertyType(property) %>>) new PropertyValue("<%- property.name %>", nativeGet<%- camelize(property.name) %>());
-  }
+    /**
+     * Get the <%- camelize(property.name) %> property
+     *
+     * @return property wrapper value around <%- propertyKotlinBoxedType(property) %>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val <%- camelizeWithLeadingLowercase(property.name) %>: PropertyValue<<%- propertyKotlinBoxedType(property) %>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("<%- property.name %>", nativeGet<%- camelize(property.name) %>())
+            return value as PropertyValue<<%- propertyKotlinBoxedType(property) %>>
+        }
 <% if (property.type == 'color') { -%>
 
-  /**
-   * <%- property.doc %>
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int get<%- camelize(property.name) %>AsInt() {
-    checkThread();
-    PropertyValue<<%- propertyType(property) %>> value = get<%- camelize(property.name) %>();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("<%- property.name %> was set as a Function");
+    /**
+     * <%- property.doc %>
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun get<%- camelize(property.name) %>AsInt(): Int {
+        checkThread()
+        val value = <%- camelizeWithLeadingLowercase(property.name) %>
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("<%- property.name %> was set as a Function")
+        }
     }
-  }
 <% } -%>
 <% if (property.transition) { -%>
 
-  /**
-   * Get the <%- camelize(property.name) %> property transition options
-   *
-   * @return transition options for <%- propertyType(property) %>
-   */
-  @NonNull
-  public TransitionOptions get<%- camelize(property.name) %>Transition() {
-    checkThread();
-    return nativeGet<%- camelize(property.name) %>Transition();
-  }
-
-  /**
-   * Set the <%- camelize(property.name) %> property transition options
-   *
-   * @param options transition options for <%- propertyType(property) %>
-   */
-  public void set<%- camelize(property.name) %>Transition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSet<%- camelize(property.name) %>Transition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * The <%- camelize(property.name) %> property transition options
+     */
+    var <%- camelizeWithLeadingLowercase(property.name) %>Transition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGet<%- camelize(property.name) %>Transition()
+        }
+        set(options) {
+            checkThread()
+            nativeSet<%- camelize(property.name) %>Transition(options.duration, options.delay)
+        }
 <% } -%>
 <% } -%>
 
 <% for (const property of properties) { -%>
-  @NonNull
-  @Keep
-  private native Object nativeGet<%- camelize(property.name) %>();
+    @Keep
+    private external fun nativeGet<%- camelize(property.name) %>(): Any
 
 <% if (property.transition) { -%>
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGet<%- camelize(property.name) %>Transition();
+    @Keep
+    private external fun nativeGet<%- camelize(property.name) %>Transition(): TransitionOptions
 
-  @Keep
-  private native void nativeSet<%- camelize(property.name) %>Transition(long duration, long delay);
+    @Keep
+    private external fun nativeSet<%- camelize(property.name) %>Transition(duration: Long, delay: Long)
 
 <% } -%>
 <% } -%>
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
-
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

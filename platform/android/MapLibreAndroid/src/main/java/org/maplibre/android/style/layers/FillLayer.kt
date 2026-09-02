@@ -1,452 +1,384 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * A filled polygon with an optional stroked border.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-fill">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-fill)
  */
 @UiThread
-public class FillLayer extends Layer {
+class FillLayer : Layer {
 
-  /**
-   * Creates a FillLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  FillLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a FillLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a FillLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public FillLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
-
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
-
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public FillLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Get the source layer.
-   *
-   * @return sourceLayer the source layer to get
-   */
-  @NonNull
-  public String getSourceLayer() {
-    checkThread();
-    return nativeGetSourceLayer();
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   */
-  public void setFilter(@NonNull Expression filter) {
-    checkThread();
-    nativeSetFilter(filter.toArray());
-  }
-
-  /**
-   * Set a single expression filter.
-   *
-   * @param filter the expression filter to set
-   * @return This
-   */
-  @NonNull
-  public FillLayer withFilter(@NonNull Expression filter) {
-    setFilter(filter);
-    return this;
-  }
-
-  /**
-   * Get a single expression filter.
-   *
-   * @return the expression filter to get
-   */
-  @Nullable
-  public Expression getFilter() {
-    checkThread();
-    JsonElement jsonElement = nativeGetFilter();
-    if (jsonElement != null) {
-      return Expression.Converter.convert(jsonElement);
-    } else {
-      return null;
+    /**
+     * Creates a FillLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
     }
-  }
 
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public FillLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  // Property getters
+    /**
+     * The source layer.
+     */
+    var sourceLayer: String?
+        get() {
+            checkThread()
+            return nativeGetSourceLayer()
+        }
+        set(sourceLayer) {
+            checkThread()
+            nativeSetSourceLayer(sourceLayer)
+        }
 
-  /**
-   * Get the FillSortKey property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillSortKey() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-sort-key", nativeGetFillSortKey());
-  }
-
-  /**
-   * Get the FillAntialias property
-   *
-   * @return property wrapper value around Boolean
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getFillAntialias() {
-    checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("fill-antialias", nativeGetFillAntialias());
-  }
-
-  /**
-   * Get the FillOpacity property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillOpacity() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-opacity", nativeGetFillOpacity());
-  }
-
-  /**
-   * Get the FillOpacity property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getFillOpacityTransition() {
-    checkThread();
-    return nativeGetFillOpacityTransition();
-  }
-
-  /**
-   * Set the FillOpacity property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setFillOpacityTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillOpacityTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the FillColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-color", nativeGetFillColor());
-  }
-
-  /**
-   * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getFillColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getFillColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("fill-color was set as a Function");
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): FillLayer {
+        this.sourceLayer = sourceLayer
+        return this
     }
-  }
 
-  /**
-   * Get the FillColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getFillColorTransition() {
-    checkThread();
-    return nativeGetFillColorTransition();
-  }
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  /**
-   * Set the FillColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setFillColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the FillOutlineColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillOutlineColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-outline-color", nativeGetFillOutlineColor());
-  }
-
-  /**
-   * The outline color of the fill. Matches the value of `fill-color` if unspecified.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getFillOutlineColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getFillOutlineColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("fill-outline-color was set as a Function");
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     */
+    fun setFilter(filter: Expression) {
+        checkThread()
+        nativeSetFilter(filter.toArray())
     }
-  }
 
-  /**
-   * Get the FillOutlineColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getFillOutlineColorTransition() {
-    checkThread();
-    return nativeGetFillOutlineColorTransition();
-  }
+    /**
+     * Set a single expression filter.
+     *
+     * @param filter the expression filter to set
+     * @return This
+     */
+    fun withFilter(filter: Expression): FillLayer {
+        setFilter(filter)
+        return this
+    }
 
-  /**
-   * Set the FillOutlineColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setFillOutlineColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillOutlineColorTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * A single expression filter.
+     *
+     * Use [setFilter] to set the filter.
+     */
+    val filter: Expression?
+        get() {
+            checkThread()
+            val jsonElement = nativeGetFilter()
+            return if (jsonElement != null) {
+                Expression.Converter.convert(jsonElement)
+            } else {
+                null
+            }
+        }
 
-  /**
-   * Get the FillTranslate property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getFillTranslate() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("fill-translate", nativeGetFillTranslate());
-  }
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): FillLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  /**
-   * Get the FillTranslate property transition options
-   *
-   * @return transition options for Float[]
-   */
-  @NonNull
-  public TransitionOptions getFillTranslateTransition() {
-    checkThread();
-    return nativeGetFillTranslateTransition();
-  }
+    // Property getters
 
-  /**
-   * Set the FillTranslate property transition options
-   *
-   * @param options transition options for Float[]
-   */
-  public void setFillTranslateTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillTranslateTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Get the FillSortKey property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillSortKey: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-sort-key", nativeGetFillSortKey())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the FillTranslateAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillTranslateAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-translate-anchor", nativeGetFillTranslateAnchor());
-  }
+    /**
+     * Get the FillAntialias property
+     *
+     * @return property wrapper value around Boolean
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillAntialias: PropertyValue<Boolean>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-antialias", nativeGetFillAntialias())
+            return value as PropertyValue<Boolean>
+        }
 
-  /**
-   * Get the FillPattern property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getFillPattern() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("fill-pattern", nativeGetFillPattern());
-  }
+    /**
+     * Get the FillOpacity property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillOpacity: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-opacity", nativeGetFillOpacity())
+            return value as PropertyValue<Float>
+        }
 
-  /**
-   * Get the FillPattern property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getFillPatternTransition() {
-    checkThread();
-    return nativeGetFillPatternTransition();
-  }
+    /**
+     * The FillOpacity property transition options
+     */
+    var fillOpacityTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillOpacityTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillOpacityTransition(options.duration, options.delay)
+        }
 
-  /**
-   * Set the FillPattern property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setFillPatternTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillPatternTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Get the FillColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-color", nativeGetFillColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillSortKey();
+    /**
+     * The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getFillColorAsInt(): Int {
+        checkThread()
+        val value = fillColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("fill-color was set as a Function")
+        }
+    }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillAntialias();
+    /**
+     * The FillColor property transition options
+     */
+    var fillColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillColorTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillOpacity();
+    /**
+     * Get the FillOutlineColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillOutlineColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-outline-color", nativeGetFillOutlineColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillOpacityTransition();
+    /**
+     * The outline color of the fill. Matches the value of `fill-color` if unspecified.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getFillOutlineColorAsInt(): Int {
+        checkThread()
+        val value = fillOutlineColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("fill-outline-color was set as a Function")
+        }
+    }
 
-  @Keep
-  private native void nativeSetFillOpacityTransition(long duration, long delay);
+    /**
+     * The FillOutlineColor property transition options
+     */
+    var fillOutlineColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillOutlineColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillOutlineColorTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillColor();
+    /**
+     * Get the FillTranslate property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillTranslate: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-translate", nativeGetFillTranslate())
+            return value as PropertyValue<Array<Float>>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillColorTransition();
+    /**
+     * The FillTranslate property transition options
+     */
+    var fillTranslateTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillTranslateTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillTranslateTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetFillColorTransition(long duration, long delay);
+    /**
+     * Get the FillTranslateAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillTranslateAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-translate-anchor", nativeGetFillTranslateAnchor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillOutlineColor();
+    /**
+     * Get the FillPattern property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val fillPattern: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("fill-pattern", nativeGetFillPattern())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillOutlineColorTransition();
+    /**
+     * The FillPattern property transition options
+     */
+    var fillPatternTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetFillPatternTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetFillPatternTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetFillOutlineColorTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetFillSortKey(): Any
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillTranslate();
+    @Keep
+    private external fun nativeGetFillAntialias(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillTranslateTransition();
+    @Keep
+    private external fun nativeGetFillOpacity(): Any
 
-  @Keep
-  private native void nativeSetFillTranslateTransition(long duration, long delay);
+    @Keep
+    private external fun nativeGetFillOpacityTransition(): TransitionOptions
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillTranslateAnchor();
+    @Keep
+    private external fun nativeSetFillOpacityTransition(duration: Long, delay: Long)
 
-  @NonNull
-  @Keep
-  private native Object nativeGetFillPattern();
+    @Keep
+    private external fun nativeGetFillColor(): Any
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillPatternTransition();
+    @Keep
+    private external fun nativeGetFillColorTransition(): TransitionOptions
 
-  @Keep
-  private native void nativeSetFillPatternTransition(long duration, long delay);
+    @Keep
+    private external fun nativeSetFillColorTransition(duration: Long, delay: Long)
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    @Keep
+    private external fun nativeGetFillOutlineColor(): Any
 
+    @Keep
+    private external fun nativeGetFillOutlineColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetFillOutlineColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetFillTranslate(): Any
+
+    @Keep
+    private external fun nativeGetFillTranslateTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetFillTranslateTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetFillTranslateAnchor(): Any
+
+    @Keep
+    private external fun nativeGetFillPattern(): Any
+
+    @Keep
+    private external fun nativeGetFillPatternTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetFillPatternTransition(duration: Long, delay: Long)
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

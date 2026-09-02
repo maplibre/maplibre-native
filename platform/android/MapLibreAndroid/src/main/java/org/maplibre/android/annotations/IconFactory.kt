@@ -1,189 +1,175 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
-
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.R;
-import org.maplibre.android.exceptions.TooManyIconsException;
-import org.maplibre.android.utils.BitmapUtils;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.os.Build
+import android.util.DisplayMetrics
+import android.view.WindowManager
+import androidx.annotation.DrawableRes
+import org.maplibre.android.MapStrictMode
+import org.maplibre.android.R
+import org.maplibre.android.exceptions.TooManyIconsException
+import org.maplibre.android.utils.BitmapUtils
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.io.InputStream
 
 /**
  * Factory for creating Icons from bitmap images.
- * <p>
- * icon is used to display bitmaps on top of the map using {@link Marker}.
- * </p>
  *
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/maplibre/maplibre-plugins-android">
- * MapLibre Annotation Plugin</a> instead
+ * icon is used to display bitmaps on top of the map using [Marker].
  */
-@Deprecated
-public final class IconFactory {
+@Deprecated(
+    "As of 7.0.0, use " +
+        "[MapLibre Annotation Plugin](https://github.com/maplibre/maplibre-plugins-android) instead",
+)
+class IconFactory private constructor(
+    private val context: Context,
+) {
+    private var defaultMarker: Icon? = null
+    private val options: BitmapFactory.Options
+    private var nextId = 0
 
-  private static final String ICON_ID_PREFIX = "com.mapbox.icons.icon_";
+    init {
+        var realMetrics: DisplayMetrics? = null
+        val metrics = DisplayMetrics()
+        val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-  private Context context;
-  @SuppressLint("StaticFieldLeak")
-  private static IconFactory instance;
-  private Icon defaultMarker;
-  private BitmapFactory.Options options;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            realMetrics = DisplayMetrics()
+            wm.defaultDisplay.getRealMetrics(realMetrics)
+        }
+        wm.defaultDisplay.getMetrics(metrics)
 
-  private int nextId = 0;
-
-  /**
-   * Get a single instance of IconFactory.
-   *
-   * @param context the context to derive the application context from
-   * @return the single instance of IconFactory
-   */
-  public static synchronized IconFactory getInstance(@NonNull Context context) {
-    if (instance == null) {
-      instance = new IconFactory(context.getApplicationContext());
+        options = BitmapFactory.Options()
+        options.inScaled = true
+        options.inDensity = DisplayMetrics.DENSITY_DEFAULT
+        options.inTargetDensity = metrics.densityDpi
+        if (realMetrics != null) {
+            options.inScreenDensity = realMetrics.densityDpi
+        }
     }
-    return instance;
-  }
 
-  private IconFactory(@NonNull Context context) {
-    this.context = context;
-    DisplayMetrics realMetrics = null;
-    DisplayMetrics metrics = new DisplayMetrics();
-    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    /**
+     * Creates an icon from a given Bitmap image.
+     *
+     * @param bitmap image used for creating the Icon.
+     * @return The icon using the given Bitmap image.
+     */
+    fun fromBitmap(bitmap: Bitmap): Icon = iconFromBitmap(bitmap)
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      realMetrics = new DisplayMetrics();
-      wm.getDefaultDisplay().getRealMetrics(realMetrics);
+    /**
+     * Creates an icon using the resource ID of a Bitmap image.
+     *
+     * @param resourceId The resource ID of a Bitmap image.
+     * @return The icon that was loaded from the asset or `null` if failed to load.
+     */
+    fun fromResource(
+        @DrawableRes resourceId: Int,
+    ): Icon {
+        val drawable = BitmapUtils.getDrawableFromRes(context, resourceId)
+        if (drawable is BitmapDrawable) {
+            return fromBitmap(drawable.bitmap)
+        } else {
+            throw IllegalArgumentException("Failed to decode image. The resource provided must be a Bitmap.")
+        }
     }
-    wm.getDefaultDisplay().getMetrics(metrics);
 
-    options = new BitmapFactory.Options();
-    options.inScaled = true;
-    options.inDensity = DisplayMetrics.DENSITY_DEFAULT;
-    options.inTargetDensity = metrics.densityDpi;
-    if (realMetrics != null) {
-      options.inScreenDensity = realMetrics.densityDpi;
+    /**
+     * Provides an icon using the default marker icon used for [Marker].
+     *
+     * @return An icon with the default [Marker] icon.
+     */
+    fun defaultMarker(): Icon =
+        defaultMarker ?: fromResource(R.drawable.maplibre_marker_icon_default).also {
+            defaultMarker = it
+        }
+
+    /**
+     * Creates an Icon using the name of a Bitmap image in the assets directory.
+     *
+     * @param assetName The name of a Bitmap image in the assets directory.
+     * @return The Icon that was loaded from the asset or null if failed to load.
+     */
+    fun fromAsset(assetName: String): Icon? {
+        val stream: InputStream =
+            try {
+                context.assets.open(assetName)
+            } catch (ioException: IOException) {
+                MapStrictMode.strictModeViolation(ioException)
+                return null
+            }
+        return fromInputStream(stream)
     }
-  }
 
-  /**
-   * Creates an icon from a given Bitmap image.
-   *
-   * @param bitmap image used for creating the Icon.
-   * @return The icon using the given Bitmap image.
-   */
-  public Icon fromBitmap(@NonNull Bitmap bitmap) {
-    if (nextId < 0) {
-      throw new TooManyIconsException();
+    /**
+     * Creates an Icon using the absolute file path of a Bitmap image.
+     *
+     * @param absolutePath The absolute path of the Bitmap image.
+     * @return The Icon that was loaded from the absolute path or null if failed to load.
+     */
+    fun fromPath(absolutePath: String): Icon = iconFromBitmap(BitmapFactory.decodeFile(absolutePath, options))
+
+    /**
+     * Create an Icon using the name of a Bitmap image file located in the internal storage.
+     * In particular, this calls Context#openFileInput(String).
+     *
+     * @param fileName The name of the Bitmap image file.
+     * @return The Icon that was loaded from the asset or null if failed to load.
+     * @see [Using the Internal Storage](https://developer.android.com/guide/topics/data/data-storage.html#filesInternal)
+     */
+    fun fromFile(fileName: String): Icon? {
+        val stream: FileInputStream =
+            try {
+                context.openFileInput(fileName)
+            } catch (fileNotFoundException: FileNotFoundException) {
+                MapStrictMode.strictModeViolation(fileNotFoundException)
+                return null
+            }
+        return fromInputStream(stream)
     }
-    String id = ICON_ID_PREFIX + ++nextId;
-    return new Icon(id, bitmap);
-  }
 
-  /**
-   * Creates an icon using the resource ID of a Bitmap image.
-   *
-   * @param resourceId The resource ID of a Bitmap image.
-   * @return The icon that was loaded from the asset or {@code null} if failed to load.
-   */
-  public Icon fromResource(@DrawableRes int resourceId) {
-    Drawable drawable = BitmapUtils.getDrawableFromRes(context, resourceId);
-    if (drawable instanceof BitmapDrawable) {
-      BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-      return fromBitmap(bitmapDrawable.getBitmap());
-    } else {
-      throw new IllegalArgumentException("Failed to decode image. The resource provided must be a Bitmap.");
+    private fun fromInputStream(stream: InputStream): Icon = iconFromBitmap(BitmapFactory.decodeStream(stream, null, options))
+
+    private fun iconFromBitmap(bitmap: Bitmap?): Icon {
+        if (nextId < 0) {
+            throw TooManyIconsException()
+        }
+        val id = ICON_ID_PREFIX + ++nextId
+        return Icon(id, bitmap)
     }
-  }
 
-  /**
-   * Provides an icon using the default marker icon used for {@link Marker}.
-   *
-   * @return An icon with the default {@link Marker} icon.
-   */
-  public Icon defaultMarker() {
-    if (defaultMarker == null) {
-      defaultMarker = fromResource(R.drawable.maplibre_marker_icon_default);
+    companion object {
+        private const val ICON_ID_PREFIX = "com.mapbox.icons.icon_"
+
+        @SuppressLint("StaticFieldLeak")
+        private var instance: IconFactory? = null
+
+        /**
+         * Get a single instance of IconFactory.
+         *
+         * @param context the context to derive the application context from
+         * @return the single instance of IconFactory
+         */
+        @JvmStatic
+        @Synchronized
+        fun getInstance(context: Context): IconFactory = instance ?: IconFactory(context.applicationContext).also { instance = it }
+
+        /**
+         * Create an Icon using a previously created icon identifier along with a provided Bitmap.
+         *
+         * @param iconId The Icon identifier you'd like to recreate.
+         * @param bitmap a Bitmap used to replace the current one.
+         * @return The Icon using the new Bitmap.
+         */
+        @JvmStatic
+        fun recreate(
+            iconId: String,
+            bitmap: Bitmap,
+        ): Icon = Icon(iconId, bitmap)
     }
-    return defaultMarker;
-  }
-
-  private Icon fromInputStream(@NonNull InputStream is) {
-    Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
-    return fromBitmap(bitmap);
-  }
-
-  /**
-   * Creates an Icon using the name of a Bitmap image in the assets directory.
-   *
-   * @param assetName The name of a Bitmap image in the assets directory.
-   * @return The Icon that was loaded from the asset or null if failed to load.
-   */
-  public Icon fromAsset(@NonNull String assetName) {
-    InputStream is;
-    try {
-      is = context.getAssets().open(assetName);
-    } catch (IOException ioException) {
-      MapStrictMode.strictModeViolation(ioException);
-      return null;
-    }
-    return fromInputStream(is);
-  }
-
-  /**
-   * Creates an Icon using the absolute file path of a Bitmap image.
-   *
-   * @param absolutePath The absolute path of the Bitmap image.
-   * @return The Icon that was loaded from the absolute path or null if failed to load.
-   */
-  public Icon fromPath(@NonNull String absolutePath) {
-    Bitmap bitmap = BitmapFactory.decodeFile(absolutePath, options);
-    return fromBitmap(bitmap);
-  }
-
-  /**
-   * Create an Icon using the name of a Bitmap image file located in the internal storage.
-   * In particular, this calls Context#openFileInput(String).
-   *
-   * @param fileName The name of the Bitmap image file.
-   * @return The Icon that was loaded from the asset or null if failed to load.
-   * @see <a href="https://developer.android.com/guide/topics/data/data-storage.html#filesInternal">
-   * Using the Internal Storage</a>
-   */
-  public Icon fromFile(@NonNull String fileName) {
-    FileInputStream is;
-    try {
-      is = context.openFileInput(fileName);
-    } catch (FileNotFoundException fileNotFoundException) {
-      MapStrictMode.strictModeViolation(fileNotFoundException);
-      return null;
-    }
-    return fromInputStream(is);
-  }
-
-  /**
-   * Create an Icon using a previously created icon identifier along with a provided Bitmap.
-   *
-   * @param iconId The Icon identifier you'd like to recreate.
-   * @param bitmap a Bitmap used to replace the current one.
-   * @return The Icon using the new Bitmap.
-   */
-  public static Icon recreate(@NonNull String iconId, @NonNull Bitmap bitmap) {
-    return new Icon(iconId, bitmap);
-  }
-
 }

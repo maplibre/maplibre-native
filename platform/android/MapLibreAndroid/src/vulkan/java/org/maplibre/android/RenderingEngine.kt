@@ -1,56 +1,50 @@
-package org.maplibre.android;
+package org.maplibre.android
 
-import android.content.Context;
-
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
+import android.content.Context
+import androidx.annotation.Keep
 
 /**
  * Vulkan (and WebGPU) flavor: the rendering engine is fixed at build time.
- * See the opengl flavor's javadoc for the multiBackend contrast.
+ * See the opengl flavor's KDoc for the multiBackend contrast.
  */
 @Keep
-public final class RenderingEngine {
-
-  public enum Type {
-    OPENGL,
-    VULKAN
-  }
-
-  private static volatile Type currentType = Type.VULKAN;
-
-  private RenderingEngine() {}
-
-  @NonNull
-  public static Type getCurrentType() {
-    return currentType;
-  }
-
-  /**
-   * This flavor's engine is fixed at compile time, so there's nothing to select —
-   * always {@link Type#VULKAN}.
-   */
-  @NonNull
-  static Type getDefaultRenderingEngine(@NonNull Context context) {
-    return Type.VULKAN;
-  }
-
-  /**
-   * @throws IllegalStateException if {@link MapLibre#getInstance(android.content.Context)}
-   *     has already been called in this process.
-   * @throws UnsupportedOperationException if {@code type} differs from the
-   *     compiled-in backend
-   */
-  static void setCurrentType(@NonNull Type type) {
-    if (MapLibre.hasInstance()) {
-      throw new IllegalStateException(
-        "RenderingEngine.setCurrentType() must be called before MapLibre.getInstance().");
+object RenderingEngine {
+    enum class Type {
+        OPENGL,
+        VULKAN,
     }
-    if (type != Type.VULKAN) {
-      throw new UnsupportedOperationException(
-        "This MapLibre Android build supports only " + Type.VULKAN
-          + ". Use the multiBackend flavor to switch backends at runtime.");
+
+    /**
+     * The rendering backend used by the currently loaded library.
+     */
+    @JvmStatic
+    @Volatile
+    var currentType: Type = Type.VULKAN
+        private set
+
+    /**
+     * This flavor's engine is fixed at compile time, so there's nothing to select —
+     * always [Type.VULKAN].
+     */
+    @Suppress("UNUSED_PARAMETER")
+    internal fun getDefaultRenderingEngine(context: Context): Type = Type.VULKAN
+
+    /**
+     * @throws IllegalStateException if [MapLibre.getInstance] has already been called in this process.
+     * @throws UnsupportedOperationException if [type] differs from the compiled-in backend
+     */
+    internal fun setCurrentType(type: Type) {
+        if (MapLibre.hasInstance()) {
+            throw IllegalStateException(
+                "RenderingEngine.setCurrentType() must be called before MapLibre.getInstance().",
+            )
+        }
+        if (type != Type.VULKAN) {
+            throw UnsupportedOperationException(
+                "This MapLibre Android build supports only " + Type.VULKAN +
+                    ". Use the multiBackend flavor to switch backends at runtime.",
+            )
+        }
+        currentType = type
     }
-    currentType = type;
-  }
 }

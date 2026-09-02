@@ -1,44 +1,40 @@
-package org.maplibre.android.net;
+package org.maplibre.android.net
 
-import androidx.annotation.Keep;
-
-import org.maplibre.android.LibraryLoader;
+import androidx.annotation.Keep
+import org.maplibre.android.LibraryLoader
 
 /**
  * Updates the native library's connectivity state
  */
-class NativeConnectivityListener implements ConnectivityListener {
+internal class NativeConnectivityListener
+    @Keep
+    constructor(
+        @field:Keep private var nativePtr: Long,
+    ) : ConnectivityListener {
+        @Keep
+        private var invalidated = false
 
-  static {
-    LibraryLoader.load();
-  }
+        constructor() : this(0) {
+            initialize()
+        }
 
-  @Keep
-  private long nativePtr;
-  @Keep
-  private boolean invalidated;
+        override fun onNetworkStateChanged(connected: Boolean) {
+            nativeOnConnectivityStateChanged(connected)
+        }
 
-  @Keep
-  NativeConnectivityListener(long nativePtr) {
-    this.nativePtr = nativePtr;
-  }
+        @Keep
+        protected external fun nativeOnConnectivityStateChanged(connected: Boolean)
 
-  NativeConnectivityListener() {
-    initialize();
-  }
+        @Keep
+        protected external fun initialize()
 
-  @Override
-  public void onNetworkStateChanged(boolean connected) {
-    nativeOnConnectivityStateChanged(connected);
-  }
+        @Keep
+        @Throws(Throwable::class)
+        protected external fun finalize()
 
-  @Keep
-  protected native void nativeOnConnectivityStateChanged(boolean connected);
-
-  @Keep
-  protected native void initialize();
-
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
-}
+        companion object {
+            init {
+                LibraryLoader.load()
+            }
+        }
+    }

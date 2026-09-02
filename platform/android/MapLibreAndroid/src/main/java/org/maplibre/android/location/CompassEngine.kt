@@ -1,55 +1,42 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.location.modes.CameraMode;
-import org.maplibre.android.location.modes.RenderMode;
+import org.maplibre.android.location.modes.CameraMode
+import org.maplibre.android.location.modes.RenderMode
 
 /**
  * Interface defining the source of compass heading data that is
- * consumed by the {@link LocationComponent} when in compass related
- * {@link RenderMode} or
- * {@link CameraMode}s.
+ * consumed by the [LocationComponent] when in compass related
+ * [RenderMode] or [CameraMode]s.
  */
-public interface CompassEngine {
+interface CompassEngine {
+    /**
+     * The last heading value produced and pushed via a compass listener.
+     */
+    val lastHeading: Float
 
-  /**
-   * Adds a {@link CompassListener} that can be used to
-   * receive heading and state changes.
-   *
-   * @param compassListener to be added
-   */
-  void addCompassListener(@NonNull CompassListener compassListener);
+    /**
+     * The last know accuracy status from the sensor manager.
+     *
+     * An integer value which is identical to the `SensorManager` class constants:
+     * - [android.hardware.SensorManager.SENSOR_STATUS_NO_CONTACT]
+     * - [android.hardware.SensorManager.SENSOR_STATUS_UNRELIABLE]
+     * - [android.hardware.SensorManager.SENSOR_STATUS_ACCURACY_LOW]
+     * - [android.hardware.SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM]
+     * - [android.hardware.SensorManager.SENSOR_STATUS_ACCURACY_HIGH]
+     */
+    val lastAccuracySensorStatus: Int
 
-  /**
-   * Removes a {@link CompassListener} that can be used to
-   * receive heading and state changes.
-   *
-   * @param compassListener to be removed
-   */
-  void removeCompassListener(@NonNull CompassListener compassListener);
+    /**
+     * Adds a [CompassListener] that can be used to receive heading and state changes.
+     *
+     * @param compassListener to be added
+     */
+    fun addCompassListener(compassListener: CompassListener)
 
-  /**
-   * Returns the last heading value produced and pushed via
-   * a compass listener.
-   *
-   * @return last heading value
-   */
-  float getLastHeading();
-
-  /**
-   * Provides the last know accuracy status from the sensor manager.
-   * <p>
-   * An integer value which is identical to the {@code SensorManager} class constants:
-   * <ul>
-   * <li>{@link android.hardware.SensorManager#SENSOR_STATUS_NO_CONTACT}</li>
-   * <li>{@link android.hardware.SensorManager#SENSOR_STATUS_UNRELIABLE}</li>
-   * <li>{@link android.hardware.SensorManager#SENSOR_STATUS_ACCURACY_LOW}</li>
-   * <li>{@link android.hardware.SensorManager#SENSOR_STATUS_ACCURACY_MEDIUM}</li>
-   * <li>{@link android.hardware.SensorManager#SENSOR_STATUS_ACCURACY_HIGH}</li>
-   * </ul>
-   *
-   * @return last accuracy status
-   */
-  int getLastAccuracySensorStatus();
+    /**
+     * Removes a [CompassListener] that can be used to receive heading and state changes.
+     *
+     * @param compassListener to be removed
+     */
+    fun removeCompassListener(compassListener: CompassListener)
 }

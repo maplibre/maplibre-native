@@ -1,27 +1,44 @@
-package org.maplibre.android.utils;
+package org.maplibre.android.utils
 
 /**
  * Comparisons from std sdk, which aren't available in API level 15 and below
  */
-public class Compare {
+object Compare {
+    /**
+     * @see java.lang.Integer.compare
+     * @param x left side
+     * @param y right side
+     * @return std compare value
+     */
+    @JvmStatic
+    fun compare(
+        x: Int,
+        y: Int,
+    ): Int =
+        if (x < y) {
+            -1
+        } else if (x == y) {
+            0
+        } else {
+            1
+        }
 
-  /**
-   * @see Integer#compare(int, int)
-   * @param x left side
-   * @param y right side
-   * @return std compare value
-   */
-  public static int compare(int x, int y) {
-    return (x < y) ? -1 : ((x == y) ? 0 : 1);
-  }
-
-  /**
-   * @see Boolean#compare(boolean, boolean)
-   * @param x left side
-   * @param y right side
-   * @return std compare value
-   */
-  public static int compare(boolean x, boolean y) {
-    return (x == y) ? 0 : (x ? 1 : -1);
-  }
+    /**
+     * @see java.lang.Boolean.compare
+     * @param x left side
+     * @param y right side
+     * @return std compare value
+     */
+    @JvmStatic
+    fun compare(
+        x: Boolean,
+        y: Boolean,
+    ): Int =
+        if (x == y) {
+            0
+        } else if (x) {
+            1
+        } else {
+            -1
+        }
 }

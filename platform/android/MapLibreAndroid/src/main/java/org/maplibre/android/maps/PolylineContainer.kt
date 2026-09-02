@@ -1,81 +1,67 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-
-import androidx.annotation.NonNull;
-import androidx.collection.LongSparseArray;
-
-import org.maplibre.android.annotations.Annotation;
-import org.maplibre.android.annotations.Polyline;
-import org.maplibre.android.annotations.PolylineOptions;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.collection.LongSparseArray
+import org.maplibre.android.annotations.Annotation
+import org.maplibre.android.annotations.Polyline
+import org.maplibre.android.annotations.PolylineOptions
 
 /**
- * Encapsulates {@link Polyline}'s functionality.
+ * Encapsulates [Polyline]'s functionality.
  */
-class PolylineContainer implements Polylines {
+internal class PolylineContainer(
+    private val nativeMap: NativeMap?,
+    private val annotations: LongSparseArray<Annotation>,
+) : Polylines {
+    override fun addBy(
+        polylineOptions: PolylineOptions,
+        maplibreMap: MapLibreMap,
+    ): Polyline {
+        val polyline = polylineOptions.polyline
+        val id = nativeMap?.addPolyline(polyline) ?: 0
+        polyline.setMapLibreMap(maplibreMap)
+        polyline.id = id
+        annotations.put(id, polyline)
+        return polyline
+    }
 
-  private final NativeMap nativeMap;
-  private final LongSparseArray<Annotation> annotations;
+    override fun addBy(
+        polylineOptionsList: List<PolylineOptions>,
+        maplibreMap: MapLibreMap,
+    ): List<Polyline> {
+        val count = polylineOptionsList.size
+        val polylines = ArrayList<Polyline>(count)
+        if (nativeMap != null && count > 0) {
+            for (options in polylineOptionsList) {
+                val polyline = options.polyline
+                if (polyline.points.isNotEmpty()) {
+                    polylines.add(polyline)
+                }
+            }
 
-  PolylineContainer(NativeMap nativeMap, LongSparseArray<Annotation> annotations) {
-    this.nativeMap = nativeMap;
-    this.annotations = annotations;
-  }
-
-  @Override
-  public Polyline addBy(@NonNull PolylineOptions polylineOptions, @NonNull MapLibreMap maplibreMap) {
-    Polyline polyline = polylineOptions.getPolyline();
-    long id = nativeMap != null ? nativeMap.addPolyline(polyline) : 0;
-    polyline.setMapLibreMap(maplibreMap);
-    polyline.setId(id);
-    annotations.put(id, polyline);
-    return polyline;
-  }
-
-  @NonNull
-  @Override
-  public List<Polyline> addBy(@NonNull List<PolylineOptions> polylineOptionsList, @NonNull MapLibreMap maplibreMap) {
-    int count = polylineOptionsList.size();
-    Polyline polyline;
-    List<Polyline> polylines = new ArrayList<>(count);
-    if (nativeMap != null && count > 0) {
-      for (PolylineOptions options : polylineOptionsList) {
-        polyline = options.getPolyline();
-        if (!polyline.getPoints().isEmpty()) {
-          polylines.add(polyline);
+            val ids = nativeMap.addPolylines(polylines)
+            for (i in ids.indices) {
+                val polylineCreated = polylines[i]
+                polylineCreated.setMapLibreMap(maplibreMap)
+                polylineCreated.id = ids[i]
+                annotations.put(ids[i], polylineCreated)
+            }
         }
-      }
-
-      long[] ids = nativeMap.addPolylines(polylines);
-      for (int i = 0; i < ids.length; i++) {
-        Polyline polylineCreated = polylines.get(i);
-        polylineCreated.setMapLibreMap(maplibreMap);
-        polylineCreated.setId(ids[i]);
-        annotations.put(ids[i], polylineCreated);
-      }
+        return polylines
     }
-    return polylines;
-  }
 
-  @Override
-  public void update(@NonNull Polyline polyline) {
-    nativeMap.updatePolyline(polyline);
-    annotations.setValueAt(annotations.indexOfKey(polyline.getId()), polyline);
-  }
-
-  @NonNull
-  @Override
-  public List<Polyline> obtainAll() {
-    List<Polyline> polylines = new ArrayList<>();
-    Annotation annotation;
-    for (int i = 0; i < annotations.size(); i++) {
-      annotation = annotations.get(annotations.keyAt(i));
-      if (annotation instanceof Polyline) {
-        polylines.add((Polyline) annotation);
-      }
+    override fun update(polyline: Polyline) {
+        nativeMap!!.updatePolyline(polyline)
+        annotations.setValueAt(annotations.indexOfKey(polyline.id), polyline)
     }
-    return polylines;
-  }
+
+    override fun obtainAll(): List<Polyline> {
+        val polylines = mutableListOf<Polyline>()
+        for (i in 0 until annotations.size()) {
+            val annotation = annotations.get(annotations.keyAt(i))
+            if (annotation is Polyline) {
+                polylines.add(annotation)
+            }
+        }
+        return polylines
+    }
 }

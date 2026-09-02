@@ -1,161 +1,135 @@
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.google.gson.JsonArray;
-import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.exceptions.ConversionException;
-import org.maplibre.android.log.Logger;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.utils.ColorUtils;
-
-import java.util.Arrays;
+import androidx.annotation.ColorInt
+import com.google.gson.JsonArray
+import org.maplibre.android.MapStrictMode
+import org.maplibre.android.exceptions.ConversionException
+import org.maplibre.android.log.Logger
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.utils.ColorUtils
+import java.util.Arrays
 
 /**
  * Properties for Layer
+ *
+ * Not part of the public API.
+ *
+ * @param name the property name
+ * @param value the property value
+ * @see PropertyFactory for construction of [PropertyValue]s
  */
-public class PropertyValue<T> {
+open class PropertyValue<T>(
+    @JvmField val name: String,
+    @JvmField val value: T?,
+) {
+    /**
+     * Returns if this is null
+     *
+     * @return true if this is null, false if not
+     */
+    fun isNull(): Boolean = value == null
 
-  private static final String TAG = "Mbgl-PropertyValue";
+    /**
+     * Returns if this is a expression.
+     *
+     * @return true if this is a expression, false if not
+     */
+    val isExpression: Boolean
+        get() = !isNull() && (value is JsonArray || value is Expression)
 
-  @NonNull
-  public final String name;
-  public final T value;
+    /**
+     * Get the expression of the property.
+     *
+     * @return the property expression
+     */
+    val expression: Expression?
+        get() =
+            if (isExpression) {
+                if (value is JsonArray) Expression.Converter.convert(value) else value as Expression
+            } else {
+                Logger.w(TAG, String.format("%s not an expression, try PropertyValue#getValue()", name))
+                null
+            }
 
-  /**
-   * Not part of the public API.
-   *
-   * @param name  the property name
-   * @param value the property value
-   * @see PropertyFactory for construction of {@link PropertyValue}s
-   */
-  public PropertyValue(@NonNull String name, T value) {
-    this.name = name;
-    this.value = value;
-  }
+    /**
+     * Returns if this is a value.
+     *
+     * @return true if is a value, false if not
+     */
+    fun isValue(): Boolean = !isNull() && !isExpression
 
-  /**
-   * Returns if this is null
-   *
-   * @return true if this is null, false if not
-   */
-  public boolean isNull() {
-    return value == null;
-  }
+    /**
+     * Get the value of the property.
+     *
+     * @return the property value
+     */
+    fun getValue(): T? =
+        if (isValue()) {
+            value
+        } else {
+            Logger.w(TAG, String.format("%s not a value, try PropertyValue#getExpression()", name))
+            null
+        }
 
-  /**
-   * Returns if this is a expression.
-   *
-   * @return true if this is a expression, false if not
-   */
-  public boolean isExpression() {
-    return !isNull() && (value instanceof JsonArray || value instanceof Expression);
-  }
+    /**
+     * Get the color int value of the property if the value is a color.
+     *
+     * @return the color int value of the property, null if not a color value
+     */
+    @ColorInt
+    fun getColorInt(): Int? {
+        if (!isValue() || value !is String) {
+            Logger.e(TAG, String.format("%s is not a String value and can not be converted to a color it", name))
+            return null
+        }
 
-  /**
-   * Get the expression of the property.
-   *
-   * @return the property expression
-   */
-  @Nullable
-  public Expression getExpression() {
-    if (isExpression()) {
-      return value instanceof JsonArray
-        ? Expression.Converter.convert((JsonArray) value)
-        : (Expression) value;
-    } else {
-      Logger.w(TAG, String.format("%s not an expression, try PropertyValue#getValue()", name));
-      return null;
-    }
-  }
-
-  /**
-   * Returns if this is a value.
-   *
-   * @return true if is a value, false if not
-   */
-  public boolean isValue() {
-    return !isNull() && !isExpression();
-  }
-
-  /**
-   * Get the value of the property.
-   *
-   * @return the property value
-   */
-  @Nullable
-  public T getValue() {
-    if (isValue()) {
-      // noinspection unchecked
-      return value;
-    } else {
-      Logger.w(TAG, String.format("%s not a value, try PropertyValue#getExpression()", name));
-      return null;
-    }
-  }
-
-  /**
-   * Get the color int value of the property if the value is a color.
-   *
-   * @return the color int value of the property, null if not a color value
-   */
-  @ColorInt
-  @Nullable
-  public Integer getColorInt() {
-    if (!isValue() || !(value instanceof String)) {
-      Logger.e(TAG, String.format("%s is not a String value and can not be converted to a color it", name));
-      return null;
+        return try {
+            ColorUtils.rgbaToColor(value)
+        } catch (ex: ConversionException) {
+            Logger.e(TAG, String.format("%s could not be converted to a Color int: %s", name, ex.message))
+            MapStrictMode.strictModeViolation(ex)
+            null
+        }
     }
 
-    try {
-      return ColorUtils.rgbaToColor((String) value);
-    } catch (ConversionException ex) {
-      Logger.e(TAG, String.format("%s could not be converted to a Color int: %s", name, ex.getMessage()));
-      MapStrictMode.strictModeViolation(ex);
-      return null;
-    }
-  }
+    /**
+     * Get the string representation of a property value.
+     *
+     * @return the string representation
+     */
+    override fun toString(): String = String.format("%s: %s", name, value)
 
-  /**
-   * Get the string representation of a property value.
-   *
-   * @return the string representation
-   */
-  @Override
-  public String toString() {
-    return String.format("%s: %s", name, value);
-  }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null || javaClass != other.javaClass) {
+            return false
+        }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+        val that = other as PropertyValue<*>
+
+        if (name != that.name) {
+            return false
+        }
+        return if (value != null) {
+            if (value is Array<*>) {
+                Arrays.deepEquals(value, that.value as Array<*>?)
+            } else {
+                value == that.value
+            }
+        } else {
+            that.value == null
+        }
     }
 
-    PropertyValue<?> that = (PropertyValue<?>) o;
-
-    if (!name.equals(that.name)) {
-      return false;
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + (value?.hashCode() ?: 0)
+        return result
     }
-    if (value != null) {
-      if (value instanceof Object[]) {
-        return Arrays.deepEquals((Object[]) value, (Object[]) that.value);
-      }
-      return value.equals(that.value);
-    } else {
-      return that.value == null;
-    }
-  }
 
-  @Override
-  public int hashCode() {
-    int result = name.hashCode();
-    result = 31 * result + (value != null ? value.hashCode() : 0);
-    return result;
-  }
+    private companion object {
+        const val TAG = "Mbgl-PropertyValue"
+    }
 }

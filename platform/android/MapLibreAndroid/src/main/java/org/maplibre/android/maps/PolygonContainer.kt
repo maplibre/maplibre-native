@@ -1,82 +1,68 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-
-import androidx.annotation.NonNull;
-import androidx.collection.LongSparseArray;
-
-import org.maplibre.android.annotations.Annotation;
-import org.maplibre.android.annotations.Polygon;
-import org.maplibre.android.annotations.PolygonOptions;
-
-import java.util.ArrayList;
-import java.util.List;
+import androidx.collection.LongSparseArray
+import org.maplibre.android.annotations.Annotation
+import org.maplibre.android.annotations.Polygon
+import org.maplibre.android.annotations.PolygonOptions
 
 /**
- * Encapsulates {@link Polygon}'s functionality.
+ * Encapsulates [Polygon]'s functionality.
  */
-class PolygonContainer implements Polygons {
+internal class PolygonContainer(
+    private val nativeMap: NativeMap?,
+    private val annotations: LongSparseArray<Annotation>,
+) : Polygons {
+    override fun addBy(
+        polygonOptions: PolygonOptions,
+        maplibreMap: MapLibreMap,
+    ): Polygon {
+        val polygon = polygonOptions.polygon
+        val id = nativeMap?.addPolygon(polygon) ?: 0
+        polygon.id = id
+        polygon.setMapLibreMap(maplibreMap)
+        annotations.put(id, polygon)
+        return polygon
+    }
 
-  private final NativeMap nativeMap;
-  private final LongSparseArray<Annotation> annotations;
+    override fun addBy(
+        polygonOptionsList: List<PolygonOptions>,
+        maplibreMap: MapLibreMap,
+    ): List<Polygon> {
+        val count = polygonOptionsList.size
 
-  PolygonContainer(NativeMap nativeMap, LongSparseArray<Annotation> annotations) {
-    this.nativeMap = nativeMap;
-    this.annotations = annotations;
-  }
+        val polygons = ArrayList<Polygon>(count)
+        if (nativeMap != null && count > 0) {
+            for (polygonOptions in polygonOptionsList) {
+                val polygon = polygonOptions.polygon
+                if (polygon.points.isNotEmpty()) {
+                    polygons.add(polygon)
+                }
+            }
 
-  @Override
-  public Polygon addBy(@NonNull PolygonOptions polygonOptions, @NonNull MapLibreMap maplibreMap) {
-    Polygon polygon = polygonOptions.getPolygon();
-    long id = nativeMap != null ? nativeMap.addPolygon(polygon) : 0;
-    polygon.setId(id);
-    polygon.setMapLibreMap(maplibreMap);
-    annotations.put(id, polygon);
-    return polygon;
-  }
-
-  @NonNull
-  @Override
-  public List<Polygon> addBy(@NonNull List<PolygonOptions> polygonOptionsList, @NonNull MapLibreMap maplibreMap) {
-    int count = polygonOptionsList.size();
-
-    Polygon polygon;
-    List<Polygon> polygons = new ArrayList<>(count);
-    if (nativeMap != null && count > 0) {
-      for (PolygonOptions polygonOptions : polygonOptionsList) {
-        polygon = polygonOptions.getPolygon();
-        if (!polygon.getPoints().isEmpty()) {
-          polygons.add(polygon);
+            val ids = nativeMap.addPolygons(polygons)
+            for (i in ids.indices) {
+                val polygon = polygons[i]
+                polygon.setMapLibreMap(maplibreMap)
+                polygon.id = ids[i]
+                annotations.put(ids[i], polygon)
+            }
         }
-      }
-
-      long[] ids = nativeMap.addPolygons(polygons);
-      for (int i = 0; i < ids.length; i++) {
-        polygon = polygons.get(i);
-        polygon.setMapLibreMap(maplibreMap);
-        polygon.setId(ids[i]);
-        annotations.put(ids[i], polygon);
-      }
+        return polygons
     }
-    return polygons;
-  }
 
-  @Override
-  public void update(@NonNull Polygon polygon) {
-    nativeMap.updatePolygon(polygon);
-    annotations.setValueAt(annotations.indexOfKey(polygon.getId()), polygon);
-  }
-
-  @NonNull
-  @Override
-  public List<Polygon> obtainAll() {
-    List<Polygon> polygons = new ArrayList<>();
-    Annotation annotation;
-    for (int i = 0; i < annotations.size(); i++) {
-      annotation = annotations.get(annotations.keyAt(i));
-      if (annotation instanceof Polygon) {
-        polygons.add((Polygon) annotation);
-      }
+    override fun update(polygon: Polygon) {
+        nativeMap!!.updatePolygon(polygon)
+        annotations.setValueAt(annotations.indexOfKey(polygon.id), polygon)
     }
-    return polygons;
-  }
+
+    override fun obtainAll(): List<Polygon> {
+        val polygons = mutableListOf<Polygon>()
+        for (i in 0 until annotations.size()) {
+            val annotation = annotations.get(annotations.keyAt(i))
+            if (annotation is Polygon) {
+                polygons.add(annotation)
+            }
+        }
+        return polygons
+    }
 }

@@ -1,156 +1,152 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.Bitmap;
-
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.MapLibre;
-import org.maplibre.android.annotations.Icon;
-import org.maplibre.android.annotations.IconFactory;
-import org.maplibre.android.annotations.Marker;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import android.graphics.Bitmap
+import org.maplibre.android.MapLibre
+import org.maplibre.android.annotations.Icon
+import org.maplibre.android.annotations.IconFactory
+import org.maplibre.android.annotations.Marker
 
 /**
  * Responsible for managing icons added to the Map.
- * <p>
- * Maintains a {@link List} of {@link Icon} and  is responsible for initialising default markers.
- * </p>
- * <p>
+ *
+ * Maintains a [List] of [Icon] and  is responsible for initialising default markers.
+ *
  * Keep track of icons added and the resulting average icon size. This is used internally by our
  * gestures detection to calculate the size of a touch target.
- * </p>
  */
-class IconManager {
+internal class IconManager(
+    private val nativeMap: NativeMap?,
+) {
+    private val iconMap: MutableMap<Icon, Int> = HashMap()
 
-  private final Map<Icon, Integer> iconMap = new HashMap<>();
+    var highestIconWidth = 0
+        private set
 
-  private NativeMap nativeMap;
-  private int highestIconWidth;
-  private int highestIconHeight;
+    var highestIconHeight = 0
+        private set
 
-  IconManager(NativeMap nativeMap) {
-    this.nativeMap = nativeMap;
-  }
-
-  Icon loadIconForMarker(@NonNull Marker marker) {
-    Icon icon = marker.getIcon();
-    if (icon == null) {
-      // TODO replace with anchor implementation, we are faking an anchor by adding extra pixels and diving height by 2
-      icon = loadDefaultIconForMarker(marker);
-    } else {
-      updateHighestIconSize(icon);
-    }
-    addIcon(icon);
-    return icon;
-  }
-
-  int getTopOffsetPixelsForIcon(@NonNull Icon icon) {
-    return (int) (nativeMap.getTopOffsetPixelsForAnnotationSymbol(icon.getId()) * nativeMap.getPixelRatio());
-  }
-
-  int getHighestIconWidth() {
-    return highestIconWidth;
-  }
-
-  int getHighestIconHeight() {
-    return highestIconHeight;
-  }
-
-  private Icon loadDefaultIconForMarker(Marker marker) {
-    Icon icon = IconFactory.getInstance(MapLibre.getApplicationContext()).defaultMarker();
-    Bitmap bitmap = icon.getBitmap();
-    updateHighestIconSize(bitmap.getWidth(), bitmap.getHeight() / 2);
-    marker.setIcon(icon);
-    return icon;
-  }
-
-  private void addIcon(@NonNull Icon icon) {
-    addIcon(icon, true);
-  }
-
-  private void addIcon(@NonNull Icon icon, boolean addIconToMap) {
-    if (!iconMap.keySet().contains(icon)) {
-      iconMap.put(icon, 1);
-      if (addIconToMap) {
-        loadIcon(icon);
-      }
-    } else {
-      iconMap.put(icon, iconMap.get(icon) + 1);
-    }
-  }
-
-  private void updateHighestIconSize(Icon icon) {
-    updateHighestIconSize(icon.getBitmap());
-  }
-
-  private void updateHighestIconSize(Bitmap bitmap) {
-    updateHighestIconSize(bitmap.getWidth(), bitmap.getHeight());
-  }
-
-  private void updateHighestIconSize(int width, int height) {
-    if (width > highestIconWidth) {
-      highestIconWidth = width;
+    fun loadIconForMarker(marker: Marker): Icon {
+        var icon = marker.icon
+        if (icon == null) {
+            // TODO replace with anchor implementation,
+            // we are faking an anchor by adding extra pixels and diving height by 2
+            icon = loadDefaultIconForMarker(marker)
+        } else {
+            updateHighestIconSize(icon)
+        }
+        addIcon(icon)
+        return icon
     }
 
-    if (height > highestIconHeight) {
-      highestIconHeight = height;
+    fun getTopOffsetPixelsForIcon(icon: Icon): Int =
+        (
+            nativeMap!!.getTopOffsetPixelsForAnnotationSymbol(icon.id!!) *
+                nativeMap.getPixelRatio()
+        ).toInt()
+
+    private fun loadDefaultIconForMarker(marker: Marker): Icon {
+        val icon = IconFactory.getInstance(MapLibre.getApplicationContext()).defaultMarker()
+        val bitmap = icon.bitmap!!
+        updateHighestIconSize(bitmap.width, bitmap.height / 2)
+        marker.icon = icon
+        return icon
     }
-  }
 
-  private void loadIcon(Icon icon) {
-    Bitmap bitmap = icon.getBitmap();
-    nativeMap.addAnnotationIcon(icon.getId(),
-      bitmap.getWidth(),
-      bitmap.getHeight(),
-      icon.getScale(),
-      icon.toBytes());
-  }
-
-  void reloadIcons() {
-    for (Icon icon : iconMap.keySet()) {
-      loadIcon(icon);
+    private fun addIcon(
+        icon: Icon,
+        addIconToMap: Boolean = true,
+    ) {
+        val refCounter = iconMap[icon]
+        if (refCounter == null) {
+            iconMap[icon] = 1
+            if (addIconToMap) {
+                loadIcon(icon)
+            }
+        } else {
+            iconMap[icon] = refCounter + 1
+        }
     }
-  }
 
-  void ensureIconLoaded(@NonNull Marker marker, @NonNull MapLibreMap maplibreMap) {
-    Icon icon = marker.getIcon();
-    if (icon == null) {
-      icon = loadDefaultIconForMarker(marker);
+    private fun updateHighestIconSize(icon: Icon) {
+        updateHighestIconSize(icon.bitmap!!)
     }
-    addIcon(icon);
-    setTopOffsetPixels(marker, maplibreMap, icon);
-  }
 
-  private void setTopOffsetPixels(Marker marker, @NonNull MapLibreMap maplibreMap, @NonNull Icon icon) {
-    // this seems to be a costly operation according to the profiler so I'm trying to save some calls
-    Marker previousMarker = marker.getId() != -1 ? (Marker) maplibreMap.getAnnotation(marker.getId()) : null;
-    if (previousMarker == null || previousMarker.getIcon() == null || previousMarker.getIcon() != marker.getIcon()) {
-      marker.setTopOffsetPixels(getTopOffsetPixelsForIcon(icon));
+    private fun updateHighestIconSize(bitmap: Bitmap) {
+        updateHighestIconSize(bitmap.width, bitmap.height)
     }
-  }
 
-  void iconCleanup(@NonNull Icon icon) {
-    Integer refCounter = iconMap.get(icon);
-    if (refCounter != null) {
-      refCounter--;
-      if (refCounter == 0) {
-        remove(icon);
-      } else {
-        updateIconRefCounter(icon, refCounter);
-      }
+    private fun updateHighestIconSize(
+        width: Int,
+        height: Int,
+    ) {
+        if (width > highestIconWidth) {
+            highestIconWidth = width
+        }
+
+        if (height > highestIconHeight) {
+            highestIconHeight = height
+        }
     }
-  }
 
-  private void remove(Icon icon) {
-    nativeMap.removeAnnotationIcon(icon.getId());
-    iconMap.remove(icon);
-  }
+    private fun loadIcon(icon: Icon) {
+        val bitmap = icon.bitmap!!
+        nativeMap!!.addAnnotationIcon(
+            icon.id!!,
+            bitmap.width,
+            bitmap.height,
+            icon.scale,
+            icon.toBytes(),
+        )
+    }
 
-  private void updateIconRefCounter(Icon icon, int refCounter) {
-    iconMap.put(icon, refCounter);
-  }
+    fun reloadIcons() {
+        for (icon in iconMap.keys) {
+            loadIcon(icon)
+        }
+    }
 
+    fun ensureIconLoaded(
+        marker: Marker,
+        maplibreMap: MapLibreMap,
+    ) {
+        val icon = marker.icon ?: loadDefaultIconForMarker(marker)
+        addIcon(icon)
+        setTopOffsetPixels(marker, maplibreMap, icon)
+    }
+
+    private fun setTopOffsetPixels(
+        marker: Marker,
+        maplibreMap: MapLibreMap,
+        icon: Icon,
+    ) {
+        // this seems to be a costly operation according to the profiler so I'm trying to save some calls
+        val previousMarker = if (marker.id != -1L) maplibreMap.getAnnotation(marker.id) as Marker? else null
+        if (previousMarker?.icon == null || previousMarker.icon != marker.icon) {
+            marker.setTopOffsetPixels(getTopOffsetPixelsForIcon(icon))
+        }
+    }
+
+    fun iconCleanup(icon: Icon) {
+        val refCounter = iconMap[icon]
+        if (refCounter != null) {
+            val updated = refCounter - 1
+            if (updated == 0) {
+                remove(icon)
+            } else {
+                updateIconRefCounter(icon, updated)
+            }
+        }
+    }
+
+    private fun remove(icon: Icon) {
+        nativeMap!!.removeAnnotationIcon(icon.id!!)
+        iconMap.remove(icon)
+    }
+
+    private fun updateIconRefCounter(
+        icon: Icon,
+        refCounter: Int,
+    ) {
+        iconMap[icon] = refCounter
+    }
 }

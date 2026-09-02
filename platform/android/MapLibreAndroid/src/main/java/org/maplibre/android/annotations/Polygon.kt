@@ -1,111 +1,61 @@
-package org.maplibre.android.annotations;
+package org.maplibre.android.annotations
 
-import android.graphics.Color;
-
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-
-import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.maps.MapLibreMap;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.graphics.Color
+import androidx.annotation.Keep
+import org.maplibre.android.geometry.LatLng
 
 /**
  * Polygon is a geometry annotation that's a closed loop of coordinates.
- * @deprecated As of 7.0.0,
- * use <a href="https://github.com/maplibre/maplibre-plugins-android">
- *   MapLibre Annotation Plugin</a> instead
  */
-@Deprecated
-public final class Polygon extends BasePointCollection {
+@Deprecated(
+    "As of 7.0.0, use " +
+        "[MapLibre Annotation Plugin](https://github.com/maplibre/maplibre-plugins-android) instead",
+)
+class Polygon internal constructor() : BasePointCollection() {
+    /**
+     * The color of the fill region of the polygon, in ARGB format.
+     */
+    @field:Keep
+    var fillColor: Int = Color.BLACK // default fillColor is black
+        set(value) {
+            field = value
+            update()
+        }
 
-  @Keep
-  private int fillColor = Color.BLACK; // default fillColor is black
-  @Keep
-  private int strokeColor = Color.BLACK; // default strokeColor is black
-  @Keep
-  private List<List<LatLng>> holes;
+    /**
+     * The color of the stroke of the polygon, in ARGB format.
+     */
+    @field:Keep
+    var strokeColor: Int = Color.BLACK // default strokeColor is black
+        set(value) {
+            field = value
+            update()
+        }
 
-  Polygon() {
-    super();
-    holes = new ArrayList<>();
-  }
+    /**
+     * The holes of this polygon.
+     *
+     * Reading returns a copy of the holes. Writing takes a copy of the holes, so further
+     * mutations to the provided list will have no effect on this polygon.
+     */
+    @field:Keep
+    var holes: List<List<LatLng>> = ArrayList()
+        get() = ArrayList(field)
+        set(value) {
+            field = ArrayList(value)
+            update()
+        }
 
-  /**
-   * Get the color of the fill region of the polygon.
-   *
-   * @return The color of the fill.
-   */
-  public int getFillColor() {
-    return fillColor;
-  }
-
-  /**
-   * Get the color of the stroke of the polygon.
-   *
-   * @return The color of the stroke.
-   */
-  public int getStrokeColor() {
-    return strokeColor;
-  }
-
-  /**
-   * Returns a copy of the holes.
-   *
-   * @return A {@link List} of {@link List} of {@link LatLng} points making up the holes.
-   */
-  @NonNull
-  public List<List<LatLng>> getHoles() {
-    return new ArrayList<>(holes);
-  }
-
-  /**
-   * Sets the color of the fill region of the polygon.
-   *
-   * @param color The color in ARGB format.
-   */
-  public void setFillColor(int color) {
-    fillColor = color;
-    update();
-  }
-
-  /**
-   * Sets the color of the stroke of the polygon.
-   *
-   * @param color The color in ARGB format.
-   */
-  public void setStrokeColor(int color) {
-    strokeColor = color;
-    update();
-  }
-
-  /**
-   * Sets the holes of this polygon. This method will take a copy of the holes, so further
-   * mutations to holes will have no effect on this polygon.
-   *
-   * @param holes A {@link List} of {@link List} of {@link LatLng} points making up the holes.
-   */
-  public void setHoles(@NonNull List<? extends List<LatLng>> holes) {
-    this.holes = new ArrayList<>(holes);
-    update();
-  }
-
-  /**
-   * Add a hole to the polygon.
-   *
-   * @param hole A {@link List} of {@link List} of {@link LatLng} points making up the hole to be added.
-   */
-  void addHole(List<LatLng> hole) {
-    holes.add(hole);
-    update();
-  }
-
-  @Override
-  void update() {
-    MapLibreMap maplibreMap = getMapLibreMap();
-    if (maplibreMap != null) {
-      maplibreMap.updatePolygon(this);
+    /**
+     * Add a hole to the polygon.
+     *
+     * @param hole A [List] of [LatLng] points making up the hole to be added.
+     */
+    internal fun addHole(hole: List<LatLng>) {
+        holes = holes + listOf(hole)
     }
-  }
+
+    override fun update() {
+        getMapLibreMap()?.updatePolygon(this)
+    }
 }

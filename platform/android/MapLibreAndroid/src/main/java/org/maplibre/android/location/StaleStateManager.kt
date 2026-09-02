@@ -1,100 +1,82 @@
-package org.maplibre.android.location;
+package org.maplibre.android.location
 
-import android.os.Handler;
-import android.os.Message;
-
-import androidx.annotation.NonNull;
-
-import java.lang.ref.WeakReference;
+import android.os.Handler
+import android.os.Message
+import java.lang.ref.WeakReference
 
 /**
- * Class controls the location stale state when the {@link android.location.Location} hasn't
- * been updated in 'x' amount of time. {@link LocationComponentOptions#staleStateTimeout()} can be used to
+ * Class controls the location stale state when the [android.location.Location] hasn't
+ * been updated in 'x' amount of time. [LocationComponentOptions.staleStateTimeout] can be used to
  * control the amount of time before the location's considered stale.
- * {@link LocationComponentOptions#enableStaleState()} is available for disabling this behaviour.
+ * [LocationComponentOptions.enableStaleState] is available for disabling this behaviour.
  */
-class StaleStateManager {
+internal class StaleStateManager(
+    private val innerOnLocationStaleListeners: OnLocationStaleListener,
+    options: LocationComponentOptions,
+) {
+    private var isEnabled: Boolean = options.enableStaleState()
+    private val handler: StaleMessageHandler = StaleMessageHandler(this)
 
-  private boolean isEnabled;
-  private final OnLocationStaleListener innerOnLocationStaleListeners;
-  @NonNull
-  private final StaleMessageHandler handler;
-  private boolean isStale = true;
-  private long delayTime;
+    var isStale = true
+        private set
 
-  private final int staleStateMessage = 1;
+    private var delayTime: Long = options.staleStateTimeout()
 
-  StaleStateManager(OnLocationStaleListener innerListener, LocationComponentOptions options) {
-    innerOnLocationStaleListeners = innerListener;
-    handler = new StaleMessageHandler(this);
-    isEnabled = options.enableStaleState();
-    delayTime = options.staleStateTimeout();
-  }
+    private val staleStateMessage = 1
 
-  void setEnabled(boolean enabled) {
-    if (enabled) {
-      setState(isStale);
-    } else if (isEnabled) {
-      onStop();
-      innerOnLocationStaleListeners.onStaleStateChange(false);
-    }
-    isEnabled = enabled;
-  }
-
-  boolean isStale() {
-    return isStale;
-  }
-
-  void updateLatestLocationTime() {
-    setState(false);
-    postTheCallback();
-  }
-
-  void setDelayTime(long delayTime) {
-    this.delayTime = delayTime;
-    if (handler.hasMessages(staleStateMessage)) {
-      postTheCallback();
-    }
-  }
-
-  void onStart() {
-    if (!isStale) {
-      postTheCallback();
-    }
-  }
-
-  void onStop() {
-    handler.removeCallbacksAndMessages(null);
-  }
-
-  private void postTheCallback() {
-    handler.removeCallbacksAndMessages(null);
-    handler.sendEmptyMessageDelayed(staleStateMessage, delayTime);
-  }
-
-  private void setState(boolean stale) {
-    if (stale != isStale) {
-      isStale = stale;
-      if (isEnabled) {
-        innerOnLocationStaleListeners.onStaleStateChange(stale);
-      }
-    }
-  }
-
-  private static class StaleMessageHandler extends Handler {
-
-    private final WeakReference<StaleStateManager> managerWeakReference;
-
-    private StaleMessageHandler(StaleStateManager staleStateManager) {
-      this.managerWeakReference = new WeakReference<>(staleStateManager);
+    fun setEnabled(enabled: Boolean) {
+        if (enabled) {
+            setState(isStale)
+        } else if (isEnabled) {
+            onStop()
+            innerOnLocationStaleListeners.onStaleStateChange(false)
+        }
+        isEnabled = enabled
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-      StaleStateManager manager = managerWeakReference.get();
-      if (manager != null) {
-        manager.setState(true);
-      }
+    fun updateLatestLocationTime() {
+        setState(false)
+        postTheCallback()
     }
-  }
+
+    fun setDelayTime(delayTime: Long) {
+        this.delayTime = delayTime
+        if (handler.hasMessages(staleStateMessage)) {
+            postTheCallback()
+        }
+    }
+
+    fun onStart() {
+        if (!isStale) {
+            postTheCallback()
+        }
+    }
+
+    fun onStop() {
+        handler.removeCallbacksAndMessages(null)
+    }
+
+    private fun postTheCallback() {
+        handler.removeCallbacksAndMessages(null)
+        handler.sendEmptyMessageDelayed(staleStateMessage, delayTime)
+    }
+
+    private fun setState(stale: Boolean) {
+        if (stale != isStale) {
+            isStale = stale
+            if (isEnabled) {
+                innerOnLocationStaleListeners.onStaleStateChange(stale)
+            }
+        }
+    }
+
+    private class StaleMessageHandler(
+        staleStateManager: StaleStateManager,
+    ) : Handler() {
+        private val managerWeakReference = WeakReference(staleStateManager)
+
+        override fun handleMessage(msg: Message) {
+            managerWeakReference.get()?.setState(true)
+        }
+    }
 }

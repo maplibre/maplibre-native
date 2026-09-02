@@ -1,137 +1,131 @@
-package org.maplibre.android.location.engine;
+package org.maplibre.android.location.engine
 
-import android.annotation.SuppressLint;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.os.Looper;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import timber.log.Timber;
-
-import static org.maplibre.android.location.engine.Utils.isBetterLocation;
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.content.Context
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Bundle
+import android.os.Looper
+import org.maplibre.android.location.engine.Utils.isBetterLocation
+import timber.log.Timber
 
 /**
  * MapLibre replacement for Google Play Services Fused Location Client
- * <p>
+ *
  * Note: fusion will not work in background mode.
  */
-public class MapLibreFusedLocationEngineImpl extends AndroidLocationEngineImpl {
-  private static final String TAG = "MapLibreLocationEngine";
+class MapLibreFusedLocationEngineImpl(
+    context: Context,
+) : AndroidLocationEngineImpl(context) {
+    override fun createListener(callback: LocationEngineCallback<LocationEngineResult>): LocationListener =
+        MapLibreLocationEngineCallbackTransport(callback)
 
-  public MapLibreFusedLocationEngineImpl(@NonNull Context context) {
-    super(context);
-  }
-
-  @NonNull
-  @Override
-  public LocationListener createListener(LocationEngineCallback<LocationEngineResult> callback) {
-    return new MapLibreLocationEngineCallbackTransport(callback);
-  }
-
-  @Override
-  public void getLastLocation(@NonNull LocationEngineCallback<LocationEngineResult> callback) throws SecurityException {
-    Location bestLastLocation = getBestLastLocation();
-    if (bestLastLocation != null) {
-      callback.onSuccess(LocationEngineResult.create(bestLastLocation));
-    } else {
-      callback.onFailure(new Exception("Last location unavailable"));
-    }
-  }
-
-  @SuppressLint("MissingPermission")
-  @Override
-  public void requestLocationUpdates(@NonNull LocationEngineRequest request,
-                                     @NonNull LocationListener listener,
-                                     @Nullable Looper looper) throws SecurityException {
-    super.requestLocationUpdates(request, listener, looper);
-
-    // Start network provider along with gps
-    if (shouldStartNetworkProvider(request.getPriority())) {
-      try {
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-          request.getInterval(), request.getDisplacement(),
-          listener, looper);
-      } catch (IllegalArgumentException iae) {
-        iae.printStackTrace();
-      }
-    }
-  }
-
-  @SuppressLint("MissingPermission")
-  @Override
-  public void requestLocationUpdates(@NonNull LocationEngineRequest request,
-                                     @NonNull PendingIntent pendingIntent) throws SecurityException {
-    super.requestLocationUpdates(request, pendingIntent);
-
-    // Start network provider along with gps
-    if (shouldStartNetworkProvider(request.getPriority())) {
-      try {
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, request.getInterval(),
-          request.getDisplacement(), pendingIntent);
-      } catch (IllegalArgumentException iae) {
-        iae.printStackTrace();
-      }
-    }
-  }
-
-  private Location getBestLastLocation() {
-    Location bestLastLocation = null;
-    for (String provider : locationManager.getAllProviders()) {
-      Location location = getLastLocationFor(provider);
-      if (location == null) {
-        continue;
-      }
-
-      if (isBetterLocation(location, bestLastLocation)) {
-        bestLastLocation = location;
-      }
-    }
-    return bestLastLocation;
-  }
-
-  private boolean shouldStartNetworkProvider(int priority) {
-    return (priority == LocationEngineRequest.PRIORITY_HIGH_ACCURACY
-      || priority == LocationEngineRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-      && currentProvider.equals(LocationManager.GPS_PROVIDER);
-  }
-
-  private static final class MapLibreLocationEngineCallbackTransport implements LocationListener {
-    private final LocationEngineCallback<LocationEngineResult> callback;
-    private Location currentBestLocation;
-
-    MapLibreLocationEngineCallbackTransport(LocationEngineCallback<LocationEngineResult> callback) {
-      this.callback = callback;
+    @Throws(SecurityException::class)
+    override fun getLastLocation(callback: LocationEngineCallback<LocationEngineResult>) {
+        val bestLastLocation = getBestLastLocation()
+        if (bestLastLocation != null) {
+            callback.onSuccess(LocationEngineResult.create(bestLastLocation))
+        } else {
+            callback.onFailure(Exception("Last location unavailable"))
+        }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-      if (isBetterLocation(location, currentBestLocation)) {
-        currentBestLocation = location;
-      }
+    @SuppressLint("MissingPermission")
+    @Throws(SecurityException::class)
+    override fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        listener: LocationListener,
+        looper: Looper?,
+    ) {
+        super.requestLocationUpdates(request, listener, looper)
 
-      if (callback != null) {
-        callback.onSuccess(LocationEngineResult.create(currentBestLocation));
-      }
+        // Start network provider along with gps
+        if (shouldStartNetworkProvider(request.priority)) {
+            try {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    request.interval,
+                    request.displacement,
+                    listener,
+                    looper,
+                )
+            } catch (iae: IllegalArgumentException) {
+                iae.printStackTrace()
+            }
+        }
     }
 
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-      Timber.d( "onStatusChanged: " + provider);
+    @SuppressLint("MissingPermission")
+    @Throws(SecurityException::class)
+    override fun requestLocationUpdates(
+        request: LocationEngineRequest,
+        pendingIntent: PendingIntent?,
+    ) {
+        super.requestLocationUpdates(request, pendingIntent)
+
+        // Start network provider along with gps
+        if (shouldStartNetworkProvider(request.priority)) {
+            try {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    request.interval,
+                    request.displacement,
+                    pendingIntent!!,
+                )
+            } catch (iae: IllegalArgumentException) {
+                iae.printStackTrace()
+            }
+        }
     }
 
-    @Override
-    public void onProviderEnabled(String provider) {
-      Timber.d( "onProviderEnabled: " + provider);
+    private fun getBestLastLocation(): Location? {
+        var bestLastLocation: Location? = null
+        for (provider in locationManager.allProviders) {
+            val location = getLastLocationFor(provider) ?: continue
+
+            if (isBetterLocation(location, bestLastLocation)) {
+                bestLastLocation = location
+            }
+        }
+        return bestLastLocation
     }
 
-    @Override
-    public void onProviderDisabled(String provider) {
-      Timber.d("onProviderDisabled: " + provider);
+    private fun shouldStartNetworkProvider(priority: Int): Boolean =
+        (
+            priority == LocationEngineRequest.PRIORITY_HIGH_ACCURACY ||
+                priority == LocationEngineRequest.PRIORITY_BALANCED_POWER_ACCURACY
+        ) &&
+            currentProvider == LocationManager.GPS_PROVIDER
+
+    private class MapLibreLocationEngineCallbackTransport(
+        private val callback: LocationEngineCallback<LocationEngineResult>,
+    ) : LocationListener {
+        private var currentBestLocation: Location? = null
+
+        override fun onLocationChanged(location: Location) {
+            if (isBetterLocation(location, currentBestLocation)) {
+                currentBestLocation = location
+            }
+
+            callback.onSuccess(LocationEngineResult.create(currentBestLocation))
+        }
+
+        override fun onStatusChanged(
+            provider: String?,
+            status: Int,
+            extras: Bundle?,
+        ) {
+            Timber.d("onStatusChanged: %s", provider)
+        }
+
+        override fun onProviderEnabled(provider: String) {
+            Timber.d("onProviderEnabled: %s", provider)
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Timber.d("onProviderDisabled: %s", provider)
+        }
     }
-  }
 }

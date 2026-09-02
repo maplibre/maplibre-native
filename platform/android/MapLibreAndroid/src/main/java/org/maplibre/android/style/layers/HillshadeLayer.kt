@@ -1,358 +1,308 @@
 // This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
 
-package org.maplibre.android.style.layers;
+package org.maplibre.android.style.layers
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import static org.maplibre.android.utils.ColorUtils.rgbaToColor;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import org.maplibre.android.style.expressions.Expression;
-import org.maplibre.android.style.layers.TransitionOptions;
+import androidx.annotation.ColorInt
+import androidx.annotation.Keep
+import androidx.annotation.UiThread
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.utils.ColorUtils.rgbaToColor
 
 /**
  * Client-side hillshading visualization based on DEM data. The implementation supports Mapbox Terrain RGB, Mapzen Terrarium tiles and custom encodings.
  *
- * @see <a href="https://maplibre.org/maplibre-style-spec/#layers-hillshade">The online documentation</a>
+ * @see [The online documentation](https://maplibre.org/maplibre-style-spec/#layers-hillshade)
  */
 @UiThread
-public class HillshadeLayer extends Layer {
+class HillshadeLayer : Layer {
 
-  /**
-   * Creates a HillshadeLayer.
-   *
-   * @param nativePtr pointer used by core
-   */
-  @Keep
-  HillshadeLayer(long nativePtr) {
-    super(nativePtr);
-  }
+    /**
+     * Creates a HillshadeLayer.
+     *
+     * @param nativePtr pointer used by core
+     */
+    @Keep
+    internal constructor(nativePtr: Long) : super(nativePtr)
 
-  /**
-   * Creates a HillshadeLayer.
-   *
-   * @param layerId  the id of the layer
-   * @param sourceId the id of the source
-   */
-  public HillshadeLayer(String layerId, String sourceId) {
-    super();
-    initialize(layerId, sourceId);
-  }
-
-  @Keep
-  protected native void initialize(String layerId, String sourceId);
-
-  /**
-   * Set the source layer.
-   *
-   * @param sourceLayer the source layer to set
-   */
-  public void setSourceLayer(String sourceLayer) {
-    checkThread();
-    nativeSetSourceLayer(sourceLayer);
-  }
-
-  /**
-   * Set the source Layer.
-   *
-   * @param sourceLayer the source layer to set
-   * @return This
-   */
-  @NonNull
-  public HillshadeLayer withSourceLayer(String sourceLayer) {
-    setSourceLayer(sourceLayer);
-    return this;
-  }
-
-  /**
-   * Get the source id.
-   *
-   * @return id of the source
-   */
-  @NonNull
-  public String getSourceId() {
-    checkThread();
-    return nativeGetSourceId();
-  }
-
-  /**
-   * Set a property or properties.
-   *
-   * @param properties the var-args properties
-   * @return This
-   */
-  @NonNull
-  public HillshadeLayer withProperties(@NonNull PropertyValue<?>... properties) {
-    setProperties(properties);
-    return this;
-  }
-
-  // Property getters
-
-  /**
-   * Get the HillshadeIlluminationDirection property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getHillshadeIlluminationDirection() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("hillshade-illumination-direction", nativeGetHillshadeIlluminationDirection());
-  }
-
-  /**
-   * Get the HillshadeIlluminationAltitude property
-   *
-   * @return property wrapper value around Float[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getHillshadeIlluminationAltitude() {
-    checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("hillshade-illumination-altitude", nativeGetHillshadeIlluminationAltitude());
-  }
-
-  /**
-   * Get the HillshadeIlluminationAnchor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getHillshadeIlluminationAnchor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("hillshade-illumination-anchor", nativeGetHillshadeIlluminationAnchor());
-  }
-
-  /**
-   * Get the HillshadeExaggeration property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getHillshadeExaggeration() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("hillshade-exaggeration", nativeGetHillshadeExaggeration());
-  }
-
-  /**
-   * Get the HillshadeExaggeration property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getHillshadeExaggerationTransition() {
-    checkThread();
-    return nativeGetHillshadeExaggerationTransition();
-  }
-
-  /**
-   * Set the HillshadeExaggeration property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setHillshadeExaggerationTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHillshadeExaggerationTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the HillshadeShadowColor property
-   *
-   * @return property wrapper value around String[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String[]> getHillshadeShadowColor() {
-    checkThread();
-    return (PropertyValue<String[]>) new PropertyValue("hillshade-shadow-color", nativeGetHillshadeShadowColor());
-  }
-
-  /**
-   * Get the HillshadeShadowColor property transition options
-   *
-   * @return transition options for String[]
-   */
-  @NonNull
-  public TransitionOptions getHillshadeShadowColorTransition() {
-    checkThread();
-    return nativeGetHillshadeShadowColorTransition();
-  }
-
-  /**
-   * Set the HillshadeShadowColor property transition options
-   *
-   * @param options transition options for String[]
-   */
-  public void setHillshadeShadowColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHillshadeShadowColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the HillshadeHighlightColor property
-   *
-   * @return property wrapper value around String[]
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String[]> getHillshadeHighlightColor() {
-    checkThread();
-    return (PropertyValue<String[]>) new PropertyValue("hillshade-highlight-color", nativeGetHillshadeHighlightColor());
-  }
-
-  /**
-   * Get the HillshadeHighlightColor property transition options
-   *
-   * @return transition options for String[]
-   */
-  @NonNull
-  public TransitionOptions getHillshadeHighlightColorTransition() {
-    checkThread();
-    return nativeGetHillshadeHighlightColorTransition();
-  }
-
-  /**
-   * Set the HillshadeHighlightColor property transition options
-   *
-   * @param options transition options for String[]
-   */
-  public void setHillshadeHighlightColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHillshadeHighlightColorTransition(options.getDuration(), options.getDelay());
-  }
-
-  /**
-   * Get the HillshadeAccentColor property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getHillshadeAccentColor() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("hillshade-accent-color", nativeGetHillshadeAccentColor());
-  }
-
-  /**
-   * The shading color used to accentuate rugged terrain like sharp cliffs and gorges.
-   *
-   * @return int representation of a rgba string color
-   * @throws RuntimeException thrown if property isn't a value
-   */
-  @ColorInt
-  public int getHillshadeAccentColorAsInt() {
-    checkThread();
-    PropertyValue<String> value = getHillshadeAccentColor();
-    if (value.isValue()) {
-      return rgbaToColor(value.getValue());
-    } else {
-      throw new RuntimeException("hillshade-accent-color was set as a Function");
+    /**
+     * Creates a HillshadeLayer.
+     *
+     * @param layerId  the id of the layer
+     * @param sourceId the id of the source
+     */
+    constructor(layerId: String?, sourceId: String?) : super() {
+        initialize(layerId, sourceId)
     }
-  }
 
-  /**
-   * Get the HillshadeAccentColor property transition options
-   *
-   * @return transition options for String
-   */
-  @NonNull
-  public TransitionOptions getHillshadeAccentColorTransition() {
-    checkThread();
-    return nativeGetHillshadeAccentColorTransition();
-  }
+    @Keep
+    protected external fun initialize(layerId: String?, sourceId: String?)
 
-  /**
-   * Set the HillshadeAccentColor property transition options
-   *
-   * @param options transition options for String
-   */
-  public void setHillshadeAccentColorTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetHillshadeAccentColorTransition(options.getDuration(), options.getDelay());
-  }
+    /**
+     * Set the source layer.
+     *
+     * @param sourceLayer the source layer to set
+     */
+    fun setSourceLayer(sourceLayer: String?) {
+        checkThread()
+        nativeSetSourceLayer(sourceLayer)
+    }
 
-  /**
-   * Get the HillshadeMethod property
-   *
-   * @return property wrapper value around String
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<String> getHillshadeMethod() {
-    checkThread();
-    return (PropertyValue<String>) new PropertyValue("hillshade-method", nativeGetHillshadeMethod());
-  }
+    /**
+     * Set the source Layer.
+     *
+     * @param sourceLayer the source layer to set
+     * @return This
+     */
+    fun withSourceLayer(sourceLayer: String?): HillshadeLayer {
+        setSourceLayer(sourceLayer)
+        return this
+    }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeIlluminationDirection();
+    /**
+     * The id of the source.
+     */
+    val sourceId: String
+        get() {
+            checkThread()
+            return nativeGetSourceId()
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeIlluminationAltitude();
+    /**
+     * Set a property or properties.
+     *
+     * @param properties the var-args properties
+     * @return This
+     */
+    fun withProperties(vararg properties: PropertyValue<*>): HillshadeLayer {
+        setProperties(*properties)
+        return this
+    }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeIlluminationAnchor();
+    // Property getters
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeExaggeration();
+    /**
+     * Get the HillshadeIlluminationDirection property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeIlluminationDirection: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-illumination-direction", nativeGetHillshadeIlluminationDirection())
+            return value as PropertyValue<Array<Float>>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHillshadeExaggerationTransition();
+    /**
+     * Get the HillshadeIlluminationAltitude property
+     *
+     * @return property wrapper value around Array<Float>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeIlluminationAltitude: PropertyValue<Array<Float>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-illumination-altitude", nativeGetHillshadeIlluminationAltitude())
+            return value as PropertyValue<Array<Float>>
+        }
 
-  @Keep
-  private native void nativeSetHillshadeExaggerationTransition(long duration, long delay);
+    /**
+     * Get the HillshadeIlluminationAnchor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeIlluminationAnchor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-illumination-anchor", nativeGetHillshadeIlluminationAnchor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeShadowColor();
+    /**
+     * Get the HillshadeExaggeration property
+     *
+     * @return property wrapper value around Float
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeExaggeration: PropertyValue<Float>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-exaggeration", nativeGetHillshadeExaggeration())
+            return value as PropertyValue<Float>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHillshadeShadowColorTransition();
+    /**
+     * The HillshadeExaggeration property transition options
+     */
+    var hillshadeExaggerationTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHillshadeExaggerationTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHillshadeExaggerationTransition(options.duration, options.delay)
+        }
 
-  @Keep
-  private native void nativeSetHillshadeShadowColorTransition(long duration, long delay);
+    /**
+     * Get the HillshadeShadowColor property
+     *
+     * @return property wrapper value around Array<String>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeShadowColor: PropertyValue<Array<String>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-shadow-color", nativeGetHillshadeShadowColor())
+            return value as PropertyValue<Array<String>>
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeHighlightColor();
+    /**
+     * The HillshadeShadowColor property transition options
+     */
+    var hillshadeShadowColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHillshadeShadowColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHillshadeShadowColorTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHillshadeHighlightColorTransition();
+    /**
+     * Get the HillshadeHighlightColor property
+     *
+     * @return property wrapper value around Array<String>
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeHighlightColor: PropertyValue<Array<String>>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-highlight-color", nativeGetHillshadeHighlightColor())
+            return value as PropertyValue<Array<String>>
+        }
 
-  @Keep
-  private native void nativeSetHillshadeHighlightColorTransition(long duration, long delay);
+    /**
+     * The HillshadeHighlightColor property transition options
+     */
+    var hillshadeHighlightColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHillshadeHighlightColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHillshadeHighlightColorTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeAccentColor();
+    /**
+     * Get the HillshadeAccentColor property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeAccentColor: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-accent-color", nativeGetHillshadeAccentColor())
+            return value as PropertyValue<String>
+        }
 
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetHillshadeAccentColorTransition();
+    /**
+     * The shading color used to accentuate rugged terrain like sharp cliffs and gorges.
+     *
+     * @return int representation of a rgba string color
+     * @throws RuntimeException thrown if property isn't a value
+     */
+    @ColorInt
+    fun getHillshadeAccentColorAsInt(): Int {
+        checkThread()
+        val value = hillshadeAccentColor
+        if (value.isValue()) {
+            return rgbaToColor(value.getValue()!!)
+        } else {
+            throw RuntimeException("hillshade-accent-color was set as a Function")
+        }
+    }
 
-  @Keep
-  private native void nativeSetHillshadeAccentColorTransition(long duration, long delay);
+    /**
+     * The HillshadeAccentColor property transition options
+     */
+    var hillshadeAccentColorTransition: TransitionOptions
+        get() {
+            checkThread()
+            return nativeGetHillshadeAccentColorTransition()
+        }
+        set(options) {
+            checkThread()
+            nativeSetHillshadeAccentColorTransition(options.duration, options.delay)
+        }
 
-  @NonNull
-  @Keep
-  private native Object nativeGetHillshadeMethod();
+    /**
+     * Get the HillshadeMethod property
+     *
+     * @return property wrapper value around String
+     */
+    @Suppress("UNCHECKED_CAST")
+    val hillshadeMethod: PropertyValue<String>
+        get() {
+            checkThread()
+            val value = PropertyValue<Any?>("hillshade-method", nativeGetHillshadeMethod())
+            return value as PropertyValue<String>
+        }
 
-  @Override
-  @Keep
-  protected native void finalize() throws Throwable;
+    @Keep
+    private external fun nativeGetHillshadeIlluminationDirection(): Any
 
+    @Keep
+    private external fun nativeGetHillshadeIlluminationAltitude(): Any
+
+    @Keep
+    private external fun nativeGetHillshadeIlluminationAnchor(): Any
+
+    @Keep
+    private external fun nativeGetHillshadeExaggeration(): Any
+
+    @Keep
+    private external fun nativeGetHillshadeExaggerationTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHillshadeExaggerationTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetHillshadeShadowColor(): Any
+
+    @Keep
+    private external fun nativeGetHillshadeShadowColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHillshadeShadowColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetHillshadeHighlightColor(): Any
+
+    @Keep
+    private external fun nativeGetHillshadeHighlightColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHillshadeHighlightColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetHillshadeAccentColor(): Any
+
+    @Keep
+    private external fun nativeGetHillshadeAccentColorTransition(): TransitionOptions
+
+    @Keep
+    private external fun nativeSetHillshadeAccentColorTransition(duration: Long, delay: Long)
+
+    @Keep
+    private external fun nativeGetHillshadeMethod(): Any
+
+    @Keep
+    @Throws(Throwable::class)
+    protected override external fun finalize()
 }

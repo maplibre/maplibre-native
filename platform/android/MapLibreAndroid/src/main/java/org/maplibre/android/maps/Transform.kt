@@ -1,370 +1,369 @@
-package org.maplibre.android.maps;
+package org.maplibre.android.maps
 
-import android.graphics.PointF;
-import android.os.Handler;
-import android.os.Looper;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-
-import org.maplibre.android.camera.CameraPosition;
-import org.maplibre.android.camera.CameraUpdate;
-import org.maplibre.android.camera.CameraUpdateFactory;
-import org.maplibre.android.constants.MapLibreConstants;
-import org.maplibre.android.geometry.LatLng;
-import org.maplibre.android.log.Logger;
-
-import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener;
+import android.graphics.PointF
+import android.os.Handler
+import android.os.Looper
+import androidx.annotation.UiThread
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.camera.CameraUpdate
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.constants.MapLibreConstants
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.log.Logger
+import org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener
 
 /**
  * Internal use.
- * <p>
+ *
  * Resembles the current Map transformation.
- * </p>
- * <p>
- * Responsible for synchronising {@link CameraPosition} state and notifying camera change listeners.
- * </p>
+ *
+ * Responsible for synchronising [CameraPosition] state and notifying camera change listeners.
  */
-public class Transform implements MapView.OnCameraDidChangeListener {
+@Suppress("TooManyFunctions")
+class Transform internal constructor(
+    private val mapView: MapView,
+    private val nativeMap: NativeMap,
+    private val cameraChangeDispatcher: CameraChangeDispatcher,
+) : MapView.OnCameraDidChangeListener {
+    private val handler = Handler(Looper.getMainLooper())
 
-  private static final String TAG = "Mbgl-Transform";
+    private var currentCameraPosition: CameraPosition? = null
+    private var cameraCancelableCallback: MapLibreMap.CancelableCallback? = null
 
-  private final NativeMap nativeMap;
-  private final MapView mapView;
-  private final Handler handler = new Handler(Looper.getMainLooper());
-
-  @Nullable
-  private CameraPosition cameraPosition;
-  @Nullable
-  private MapLibreMap.CancelableCallback cameraCancelableCallback;
-  private CameraChangeDispatcher cameraChangeDispatcher;
-
-  private final MapView.OnCameraDidChangeListener moveByChangeListener = new MapView.OnCameraDidChangeListener() {
-    @Override
-    public void onCameraDidChange(boolean animated) {
-      if (animated) {
-        cameraChangeDispatcher.onCameraIdle();
-        mapView.removeOnCameraDidChangeListener(this);
-      }
-    }
-  };
-
-  Transform(MapView mapView, NativeMap nativeMap, CameraChangeDispatcher cameraChangeDispatcher) {
-    this.mapView = mapView;
-    this.nativeMap = nativeMap;
-    this.cameraChangeDispatcher = cameraChangeDispatcher;
-  }
-
-  void initialise(@NonNull MapLibreMap maplibreMap, @NonNull MapLibreMapOptions options) {
-    CameraPosition position = options.getCamera();
-    if (position != null && !position.equals(CameraPosition.DEFAULT)) {
-      moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), null);
-    }
-    setMinZoom(options.getMinZoomPreference());
-    setMaxZoom(options.getMaxZoomPreference());
-    setMinPitch(options.getMinPitchPreference());
-    setMaxPitch(options.getMaxPitchPreference());
-  }
-
-  //
-  // Camera API
-  //
-
-  @Nullable
-  @UiThread
-  public CameraPosition getCameraPosition() {
-    if (cameraPosition == null) {
-      cameraPosition = invalidateCameraPosition();
-    }
-    return cameraPosition;
-  }
-
-  @Override
-  public void onCameraDidChange(boolean animated) {
-    if (animated) {
-      invalidateCameraPosition();
-      if (cameraCancelableCallback != null) {
-        final MapLibreMap.CancelableCallback callback = cameraCancelableCallback;
-
-        // nullification has to happen before Handler#post, see https://github.com/robolectric/robolectric/issues/1306
-        cameraCancelableCallback = null;
-
-        handler.post(new Runnable() {
-          @Override
-          public void run() {
-            callback.onFinish();
-          }
-        });
-      }
-      cameraChangeDispatcher.onCameraIdle();
-      mapView.removeOnCameraDidChangeListener(this);
-    }
-  }
-
-  /**
-   * Internal use.
-   */
-  @UiThread
-  public void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update,
-                               @Nullable final MapLibreMap.CancelableCallback callback) {
-    CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
-    if (isValidCameraPosition(cameraPosition)) {
-      cancelTransitions();
-      cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
-      nativeMap.jumpTo(cameraPosition.target, cameraPosition.zoom, cameraPosition.tilt, cameraPosition.bearing,
-        cameraPosition.padding);
-      invalidateCameraPosition();
-      cameraChangeDispatcher.onCameraIdle();
-      handler.post(new Runnable() {
-        @Override
-        public void run() {
-          if (callback != null) {
-            callback.onFinish();
-          }
+    private val moveByChangeListener =
+        object : MapView.OnCameraDidChangeListener {
+            override fun onCameraDidChange(animated: Boolean) {
+                if (animated) {
+                    cameraChangeDispatcher.onCameraIdle()
+                    mapView.removeOnCameraDidChangeListener(this)
+                }
+            }
         }
-      });
-    } else if (callback != null) {
-      callback.onFinish();
-    }
-  }
 
-  @UiThread
-  void easeCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
-                        boolean easingInterpolator,
-                        @Nullable final MapLibreMap.CancelableCallback callback) {
-    CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
-    if (isValidCameraPosition(cameraPosition)) {
-      cancelTransitions();
-      cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
-
-      if (callback != null) {
-        cameraCancelableCallback = callback;
-      }
-      mapView.addOnCameraDidChangeListener(this);
-      nativeMap.easeTo(cameraPosition.target, cameraPosition.zoom, cameraPosition.bearing, cameraPosition.tilt,
-        cameraPosition.padding, durationMs, easingInterpolator);
-    } else if (callback != null) {
-      callback.onFinish();
-    }
-  }
-
-  /**
-   * Internal use.
-   */
-  @UiThread
-  public void animateCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
-                                  @Nullable final MapLibreMap.CancelableCallback callback) {
-    CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
-    if (isValidCameraPosition(cameraPosition)) {
-      cancelTransitions();
-      cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
-
-      if (callback != null) {
-        cameraCancelableCallback = callback;
-      }
-      mapView.addOnCameraDidChangeListener(this);
-      nativeMap.flyTo(cameraPosition.target, cameraPosition.zoom, cameraPosition.bearing,
-        cameraPosition.tilt, cameraPosition.padding, durationMs);
-    } else if (callback != null) {
-      callback.onFinish();
-    }
-  }
-
-  private boolean isValidCameraPosition(@Nullable CameraPosition cameraPosition) {
-    return cameraPosition != null && !cameraPosition.equals(this.cameraPosition);
-  }
-
-  @UiThread
-  @Nullable
-  CameraPosition invalidateCameraPosition() {
-    if (nativeMap != null) {
-      CameraPosition cameraPosition = nativeMap.getCameraPosition();
-      if (this.cameraPosition != null && !this.cameraPosition.equals(cameraPosition)) {
-        cameraChangeDispatcher.onCameraMove();
-      }
-
-      this.cameraPosition = cameraPosition;
-    }
-    return cameraPosition;
-  }
-
-  void cancelTransitions() {
-    // notify user about cancel
-    cameraChangeDispatcher.onCameraMoveCanceled();
-
-    // notify animateCamera and easeCamera about cancelling
-    if (cameraCancelableCallback != null) {
-      final MapLibreMap.CancelableCallback callback = cameraCancelableCallback;
-      cameraChangeDispatcher.onCameraIdle();
-
-      // nullification has to happen before Handler#post, see https://github.com/robolectric/robolectric/issues/1306
-      cameraCancelableCallback = null;
-
-      handler.post(new Runnable() {
-        @Override
-        public void run() {
-          callback.onCancel();
+    internal fun initialise(
+        maplibreMap: MapLibreMap,
+        options: MapLibreMapOptions,
+    ) {
+        val position = options.camera
+        if (position != null && position != CameraPosition.DEFAULT) {
+            moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), null)
         }
-      });
+        minZoom = options.minZoomPreference
+        maxZoom = options.maxZoomPreference
+        minPitch = options.minPitchPreference
+        maxPitch = options.maxPitchPreference
     }
 
-    // cancel ongoing transitions
-    nativeMap.cancelTransitions();
+    //
+    // Camera API
+    //
 
-    cameraChangeDispatcher.onCameraIdle();
-  }
+    @get:UiThread
+    val cameraPosition: CameraPosition?
+        get() {
+            if (currentCameraPosition == null) {
+                currentCameraPosition = invalidateCameraPosition()
+            }
+            return currentCameraPosition
+        }
 
-  @UiThread
-  void resetNorth() {
-    cancelTransitions();
-    nativeMap.resetNorth();
-  }
+    override fun onCameraDidChange(animated: Boolean) {
+        if (animated) {
+            invalidateCameraPosition()
+            cameraCancelableCallback?.let { callback ->
+                // nullification has to happen before Handler#post,
+                // see https://github.com/robolectric/robolectric/issues/1306
+                cameraCancelableCallback = null
 
-  //
-  // non Camera API
-  //
-
-  // Zoom in or out
-
-  double getRawZoom() {
-    return nativeMap.getZoom();
-  }
-
-  void zoomBy(double zoomAddition, @NonNull PointF focalPoint) {
-    setZoom(nativeMap.getZoom() + zoomAddition, focalPoint);
-  }
-
-  void setZoom(double zoom, @NonNull PointF focalPoint) {
-    nativeMap.setZoom(zoom, focalPoint, 0);
-  }
-
-  // Direction
-  double getBearing() {
-    double direction = -nativeMap.getBearing();
-
-    while (direction > 360) {
-      direction -= 360;
-    }
-    while (direction < 0) {
-      direction += 360;
+                handler.post { callback.onFinish() }
+            }
+            cameraChangeDispatcher.onCameraIdle()
+            mapView.removeOnCameraDidChangeListener(this)
+        }
     }
 
-    return direction;
-  }
-
-  double getRawBearing() {
-    return nativeMap.getBearing();
-  }
-
-  void setBearing(double bearing) {
-    nativeMap.setBearing(bearing, 0);
-  }
-
-  void setBearing(double bearing, float focalX, float focalY) {
-    nativeMap.setBearing(bearing, focalX, focalY, 0);
-  }
-
-  void setBearing(double bearing, float focalX, float focalY, long duration) {
-    nativeMap.setBearing(bearing, focalX, focalY, duration);
-  }
-
-
-  //
-  // LatLng / CenterCoordinate
-  //
-
-  LatLng getLatLng() {
-    return nativeMap.getLatLng();
-  }
-
-  //
-  // Pitch / Tilt
-  //
-
-  double getTilt() {
-    return nativeMap.getPitch();
-  }
-
-  void setTilt(Double pitch) {
-    nativeMap.setPitch(pitch, 0);
-  }
-
-  //
-  // Center coordinate
-  //
-
-  LatLng getCenterCoordinate() {
-    return nativeMap.getLatLng();
-  }
-
-  void setCenterCoordinate(LatLng centerCoordinate) {
-    nativeMap.setLatLng(centerCoordinate, 0);
-  }
-
-  void setGestureInProgress(boolean gestureInProgress) {
-    nativeMap.setGestureInProgress(gestureInProgress);
-    if (!gestureInProgress) {
-      invalidateCameraPosition();
+    /**
+     * Internal use.
+     */
+    @UiThread
+    fun moveCamera(
+        maplibreMap: MapLibreMap,
+        update: CameraUpdate,
+        callback: MapLibreMap.CancelableCallback?,
+    ) {
+        val cameraPosition = update.getCameraPosition(maplibreMap)
+        if (isValidCameraPosition(cameraPosition)) {
+            cancelTransitions()
+            cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION)
+            nativeMap.jumpTo(
+                cameraPosition!!.target!!,
+                cameraPosition.zoom,
+                cameraPosition.tilt,
+                cameraPosition.bearing,
+                cameraPosition.padding,
+            )
+            invalidateCameraPosition()
+            cameraChangeDispatcher.onCameraIdle()
+            handler.post { callback?.onFinish() }
+        } else {
+            callback?.onFinish()
+        }
     }
-  }
 
-  void moveBy(double offsetX, double offsetY, long duration) {
-    if (duration > 0) {
-      mapView.addOnCameraDidChangeListener(moveByChangeListener);
+    @UiThread
+    @Suppress("LongParameterList")
+    internal fun easeCamera(
+        maplibreMap: MapLibreMap,
+        update: CameraUpdate,
+        durationMs: Int,
+        easingInterpolator: Boolean,
+        callback: MapLibreMap.CancelableCallback?,
+    ) {
+        val cameraPosition = update.getCameraPosition(maplibreMap)
+        if (isValidCameraPosition(cameraPosition)) {
+            cancelTransitions()
+            cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION)
+
+            if (callback != null) {
+                cameraCancelableCallback = callback
+            }
+            mapView.addOnCameraDidChangeListener(this)
+            nativeMap.easeTo(
+                cameraPosition!!.target!!,
+                cameraPosition.zoom,
+                cameraPosition.bearing,
+                cameraPosition.tilt,
+                cameraPosition.padding,
+                durationMs.toLong(),
+                easingInterpolator,
+            )
+        } else {
+            callback?.onFinish()
+        }
     }
-    nativeMap.moveBy(offsetX, offsetY, duration);
-  }
 
-  //
-  // Min & Max ZoomLevel
-  //
+    /**
+     * Internal use.
+     */
+    @UiThread
+    fun animateCamera(
+        maplibreMap: MapLibreMap,
+        update: CameraUpdate,
+        durationMs: Int,
+        callback: MapLibreMap.CancelableCallback?,
+    ) {
+        val cameraPosition = update.getCameraPosition(maplibreMap)
+        if (isValidCameraPosition(cameraPosition)) {
+            cancelTransitions()
+            cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION)
 
-  void setMinZoom(double minZoom) {
-    if ((minZoom < MapLibreConstants.MINIMUM_ZOOM) || (minZoom > MapLibreConstants.MAXIMUM_ZOOM)) {
-      Logger.e(TAG, String.format("Not setting minZoomPreference, value is in unsupported range: %s", minZoom));
-      return;
+            if (callback != null) {
+                cameraCancelableCallback = callback
+            }
+            mapView.addOnCameraDidChangeListener(this)
+            nativeMap.flyTo(
+                cameraPosition!!.target!!,
+                cameraPosition.zoom,
+                cameraPosition.bearing,
+                cameraPosition.tilt,
+                cameraPosition.padding,
+                durationMs.toLong(),
+            )
+        } else {
+            callback?.onFinish()
+        }
     }
-    nativeMap.setMinZoom(minZoom);
-  }
 
-  double getMinZoom() {
-    return nativeMap.getMinZoom();
-  }
+    private fun isValidCameraPosition(cameraPosition: CameraPosition?): Boolean =
+        cameraPosition != null && cameraPosition != currentCameraPosition
 
-  void setMaxZoom(double maxZoom) {
-    if ((maxZoom < MapLibreConstants.MINIMUM_ZOOM) || (maxZoom > MapLibreConstants.MAXIMUM_ZOOM)) {
-      Logger.e(TAG, String.format("Not setting maxZoomPreference, value is in unsupported range: %s", maxZoom));
-      return;
+    @UiThread
+    internal fun invalidateCameraPosition(): CameraPosition? {
+        val updatedCameraPosition = nativeMap.cameraPosition
+        val previousCameraPosition = currentCameraPosition
+        if (previousCameraPosition != null && previousCameraPosition != updatedCameraPosition) {
+            cameraChangeDispatcher.onCameraMove()
+        }
+
+        currentCameraPosition = updatedCameraPosition
+        return currentCameraPosition
     }
-    nativeMap.setMaxZoom(maxZoom);
-  }
 
-  double getMaxZoom() {
-    return nativeMap.getMaxZoom();
-  }
+    internal fun cancelTransitions() {
+        // notify user about cancel
+        cameraChangeDispatcher.onCameraMoveCanceled()
 
-  void setMinPitch(double minPitch) {
-    if ((minPitch < MapLibreConstants.MINIMUM_PITCH) || (minPitch > MapLibreConstants.MAXIMUM_PITCH)) {
-      Logger.e(TAG, String.format("Not setting minPitchPreference, value is in unsupported range: %s", minPitch));
-      return;
+        // notify animateCamera and easeCamera about cancelling
+        cameraCancelableCallback?.let { callback ->
+            cameraChangeDispatcher.onCameraIdle()
+
+            // nullification has to happen before Handler#post,
+            // see https://github.com/robolectric/robolectric/issues/1306
+            cameraCancelableCallback = null
+
+            handler.post { callback.onCancel() }
+        }
+
+        // cancel ongoing transitions
+        nativeMap.cancelTransitions()
+
+        cameraChangeDispatcher.onCameraIdle()
     }
-    nativeMap.setMinPitch(minPitch);
-  }
 
-  double getMinPitch() {
-    return nativeMap.getMinPitch();
-  }
-
-  void setMaxPitch(double maxPitch) {
-    if ((maxPitch < MapLibreConstants.MINIMUM_PITCH) || (maxPitch > MapLibreConstants.MAXIMUM_PITCH)) {
-      Logger.e(TAG, String.format("Not setting maxPitchPreference, value is in unsupported range: %s", maxPitch));
-      return;
+    @UiThread
+    internal fun resetNorth() {
+        cancelTransitions()
+        nativeMap.resetNorth()
     }
-    nativeMap.setMaxPitch(maxPitch);
-  }
 
-  double getMaxPitch() {
-    return nativeMap.getMaxPitch();
-  }
+    //
+    // non Camera API
+    //
+
+    // Zoom in or out
+
+    internal fun getRawZoom(): Double = nativeMap.zoom
+
+    internal fun zoomBy(
+        zoomAddition: Double,
+        focalPoint: PointF,
+    ) {
+        setZoom(nativeMap.zoom + zoomAddition, focalPoint)
+    }
+
+    internal fun setZoom(
+        zoom: Double,
+        focalPoint: PointF,
+    ) {
+        nativeMap.setZoom(zoom, focalPoint, 0)
+    }
+
+    // Direction
+    internal fun getBearing(): Double {
+        var direction = -nativeMap.bearing
+
+        while (direction > 360) {
+            direction -= 360.0
+        }
+        while (direction < 0) {
+            direction += 360.0
+        }
+
+        return direction
+    }
+
+    internal fun getRawBearing(): Double = nativeMap.bearing
+
+    internal fun setBearing(bearing: Double) {
+        nativeMap.setBearing(bearing, 0)
+    }
+
+    internal fun setBearing(
+        bearing: Double,
+        focalX: Float,
+        focalY: Float,
+    ) {
+        nativeMap.setBearing(bearing, focalX.toDouble(), focalY.toDouble(), 0)
+    }
+
+    internal fun setBearing(
+        bearing: Double,
+        focalX: Float,
+        focalY: Float,
+        duration: Long,
+    ) {
+        nativeMap.setBearing(bearing, focalX.toDouble(), focalY.toDouble(), duration)
+    }
+
+    //
+    // LatLng / CenterCoordinate
+    //
+
+    internal fun getLatLng(): LatLng = nativeMap.latLng
+
+    //
+    // Pitch / Tilt
+    //
+
+    internal fun getTilt(): Double = nativeMap.pitch
+
+    internal fun setTilt(pitch: Double) {
+        nativeMap.setPitch(pitch, 0)
+    }
+
+    //
+    // Center coordinate
+    //
+
+    internal fun getCenterCoordinate(): LatLng = nativeMap.latLng
+
+    internal fun setCenterCoordinate(centerCoordinate: LatLng) {
+        nativeMap.setLatLng(centerCoordinate, 0)
+    }
+
+    internal fun setGestureInProgress(gestureInProgress: Boolean) {
+        nativeMap.setGestureInProgress(gestureInProgress)
+        if (!gestureInProgress) {
+            invalidateCameraPosition()
+        }
+    }
+
+    internal fun moveBy(
+        offsetX: Double,
+        offsetY: Double,
+        duration: Long,
+    ) {
+        if (duration > 0) {
+            mapView.addOnCameraDidChangeListener(moveByChangeListener)
+        }
+        nativeMap.moveBy(offsetX, offsetY, duration)
+    }
+
+    //
+    // Min & Max ZoomLevel
+    //
+
+    internal var minZoom: Double
+        get() = nativeMap.minZoom
+        set(value) {
+            if (value < MapLibreConstants.MINIMUM_ZOOM || value > MapLibreConstants.MAXIMUM_ZOOM) {
+                Logger.e(TAG, "Not setting minZoomPreference, value is in unsupported range: $value")
+                return
+            }
+            nativeMap.minZoom = value
+        }
+
+    internal var maxZoom: Double
+        get() = nativeMap.maxZoom
+        set(value) {
+            if (value < MapLibreConstants.MINIMUM_ZOOM || value > MapLibreConstants.MAXIMUM_ZOOM) {
+                Logger.e(TAG, "Not setting maxZoomPreference, value is in unsupported range: $value")
+                return
+            }
+            nativeMap.maxZoom = value
+        }
+
+    internal var minPitch: Double
+        get() = nativeMap.minPitch
+        set(value) {
+            if (value < MapLibreConstants.MINIMUM_PITCH || value > MapLibreConstants.MAXIMUM_PITCH) {
+                Logger.e(TAG, "Not setting minPitchPreference, value is in unsupported range: $value")
+                return
+            }
+            nativeMap.minPitch = value
+        }
+
+    internal var maxPitch: Double
+        get() = nativeMap.maxPitch
+        set(value) {
+            if (value < MapLibreConstants.MINIMUM_PITCH || value > MapLibreConstants.MAXIMUM_PITCH) {
+                Logger.e(TAG, "Not setting maxPitchPreference, value is in unsupported range: $value")
+                return
+            }
+            nativeMap.maxPitch = value
+        }
+
+    private companion object {
+        const val TAG = "Mbgl-Transform"
+    }
 }

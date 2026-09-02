@@ -1,77 +1,70 @@
-package org.maplibre.android.http;
+package org.maplibre.android.http
 
-import android.content.res.AssetManager;
-import android.os.AsyncTask;
+import android.content.res.AssetManager
+import android.os.AsyncTask
+import org.maplibre.android.MapStrictMode
+import org.maplibre.android.log.Logger
+import java.io.IOException
+import java.io.InputStream
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+@Suppress("DEPRECATION")
+internal class LocalRequestTask(
+    private val assets: AssetManager,
+    private val requestResponse: OnLocalRequestResponse?,
+) : AsyncTask<String, Void, ByteArray?>() {
+    override fun doInBackground(vararg strings: String): ByteArray? =
+        loadFile(
+            assets,
+            "integration/" +
+                strings[0]
+                    .substring(8)
+                    .replace("%20", " ")
+                    .replace("%2c", ","),
+        )
 
-import org.maplibre.android.MapStrictMode;
-import org.maplibre.android.log.Logger;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-class LocalRequestTask extends AsyncTask<String, Void, byte[]> {
-
-  private static final String TAG = "Mbgl-LocalRequestTask";
-
-  private final AssetManager assets;
-  private OnLocalRequestResponse requestResponse;
-
-  LocalRequestTask(@NonNull AssetManager assets, OnLocalRequestResponse requestResponse) {
-    this.assets = assets;
-    this.requestResponse = requestResponse;
-  }
-
-  @Nullable
-  @Override
-  protected byte[] doInBackground(String... strings) {
-    return loadFile(assets,
-      "integration/" + strings[0]
-        .substring(8)
-        .replaceAll("%20", " ")
-        .replaceAll("%2c", ","));
-  }
-
-  @Override
-  protected void onPostExecute(@Nullable byte[] bytes) {
-    super.onPostExecute(bytes);
-    if (bytes != null && requestResponse != null) {
-      requestResponse.onResponse(bytes);
-    }
-  }
-
-  @Nullable
-  private static byte[] loadFile(AssetManager assets, @NonNull String path) {
-    byte[] buffer = null;
-    InputStream input = null;
-    try {
-      input = assets.open(path);
-      int size = input.available();
-      buffer = new byte[size];
-      input.read(buffer);
-    } catch (IOException exception) {
-      logFileError(exception);
-    } finally {
-      if (input != null) {
-        try {
-          input.close();
-        } catch (IOException exception) {
-          logFileError(exception);
+    override fun onPostExecute(bytes: ByteArray?) {
+        super.onPostExecute(bytes)
+        if (bytes != null && requestResponse != null) {
+            requestResponse.onResponse(bytes)
         }
-      }
     }
-    return buffer;
-  }
 
-  private static void logFileError(Exception exception) {
-    String message = "Load file failed";
-    Logger.e(TAG, message, exception);
-    MapStrictMode.strictModeViolation(message, exception);
-  }
+    interface OnLocalRequestResponse {
+        fun onResponse(bytes: ByteArray?)
+    }
 
-  public interface OnLocalRequestResponse {
-    void onResponse(byte[] bytes);
-  }
+    companion object {
+        private const val TAG = "Mbgl-LocalRequestTask"
+
+        private fun loadFile(
+            assets: AssetManager,
+            path: String,
+        ): ByteArray? {
+            var buffer: ByteArray? = null
+            var input: InputStream? = null
+            try {
+                input = assets.open(path)
+                val size = input.available()
+                buffer = ByteArray(size)
+                input.read(buffer)
+            } catch (exception: IOException) {
+                logFileError(exception)
+            } finally {
+                if (input != null) {
+                    try {
+                        input.close()
+                    } catch (exception: IOException) {
+                        logFileError(exception)
+                    }
+                }
+            }
+            return buffer
+        }
+
+        private fun logFileError(exception: Exception) {
+            val message = "Load file failed"
+            Logger.e(TAG, message, exception)
+            MapStrictMode.strictModeViolation(message, exception)
+        }
+    }
 }
