@@ -274,21 +274,24 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillPatternShader";
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) position: vec2<i32>,
+#ifndef HAS_UNIFORM_u_color
+    @location(5) color: vec4<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(5) pattern_from: vec4<u32>,
+    @location(6) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(6) pattern_to: vec4<u32>,
+    @location(7) pattern_to: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    @location(7) opacity: vec2<f32>,
+    @location(8) opacity: vec2<f32>,
 #endif
 };
 
@@ -296,14 +299,17 @@ struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
+#ifndef HAS_UNIFORM_u_color
+    @location(2) color: vec4<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(2) pattern_from: vec4<f32>,
+    @location(3) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(3) pattern_to: vec4<f32>,
+    @location(4) pattern_to: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    @location(4) opacity: f32,
+    @location(5) opacity: f32,
 #endif
 };
 
@@ -315,13 +321,17 @@ struct FillPatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     opacity_t: f32,
+    color_t: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct FillPatternTilePropsUBO {
     pattern_from: vec4<f32>,
     pattern_to: vec4<f32>,
     texsize: vec2<f32>,
-    pad1: f32,
+    sdf: f32,
     pad2: f32,
 };
 
@@ -414,6 +424,9 @@ fn main(in: VertexInput) -> VertexOutput {
         tileZoomRatio,
         pos
     );
+#ifndef HAS_UNIFORM_u_color
+    out.color = unpack_mix_color(in.color, drawable.color_t);
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
 #endif
@@ -432,14 +445,17 @@ fn main(in: VertexInput) -> VertexOutput {
 struct FragmentInput {
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
+#ifndef HAS_UNIFORM_u_color
+    @location(2) color: vec4<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(2) pattern_from: vec4<f32>,
+    @location(3) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(3) pattern_to: vec4<f32>,
+    @location(4) pattern_to: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    @location(4) opacity: f32,
+    @location(5) opacity: f32,
 #endif
 };
 
@@ -447,7 +463,7 @@ struct FillPatternTilePropsUBO {
     pattern_from: vec4<f32>,
     pattern_to: vec4<f32>,
     texsize: vec2<f32>,
-    pad1: f32,
+    sdf: f32,
     pad2: f32,
 };
 
@@ -512,6 +528,21 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         in.opacity;
 #endif
 
+    let color =
+#ifdef HAS_UNIFORM_u_color
+        props.color;
+#else
+        in.color;
+#endif
+
+    if (tileProps.sdf > 0.5) {
+        let sdf_edge = (256.0 - 64.0) / 256.0;
+        let sdf_gamma_a = max(fwidth(color_a.a) * 0.5, 1.0 / 255.0 / 16.0);
+        let sdf_gamma_b = max(fwidth(color_b.a) * 0.5, 1.0 / 255.0 / 16.0);
+        let sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color_a.a);
+        let sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color_b.a);
+        return mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * opacity;
+    }
     return mix(color_a, color_b, props.fade) * opacity;
 }
 )";
@@ -520,21 +551,24 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::WebGPU> {
     static constexpr const char* name = "FillOutlinePatternShader";
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr const char* vertex = R"(
 struct VertexInput {
     @location(4) position: vec2<i32>,
+#ifndef HAS_UNIFORM_u_color
+    @location(5) color: vec4<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(5) pattern_from: vec4<u32>,
+    @location(6) pattern_from: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(6) pattern_to: vec4<u32>,
+    @location(7) pattern_to: vec4<u32>,
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    @location(7) opacity: vec2<f32>,
+    @location(8) opacity: vec2<f32>,
 #endif
 };
 
@@ -543,14 +577,17 @@ struct VertexOutput {
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
     @location(2) v_pos: vec2<f32>,
+#ifndef HAS_UNIFORM_u_color
+    @location(3) color: vec4<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(3) pattern_from: vec4<f32>,
+    @location(4) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(4) pattern_to: vec4<f32>,
+    @location(5) pattern_to: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    @location(5) opacity: f32,
+    @location(6) opacity: f32,
 #endif
 };
 
@@ -562,13 +599,17 @@ struct FillOutlinePatternDrawableUBO {
     pattern_from_t: f32,
     pattern_to_t: f32,
     opacity_t: f32,
+    color_t: f32,
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
 };
 
 struct FillOutlinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
     pattern_to: vec4<f32>,
     texsize: vec2<f32>,
-    pad1: f32,
+    sdf: f32,
     pad2: f32,
 };
 
@@ -665,6 +706,9 @@ fn main(in: VertexInput) -> VertexOutput {
         pos
     );
     out.v_pos = (ndcXY + vec2<f32>(1.0, 1.0)) * 0.5 * paintParams.world_size;
+#ifndef HAS_UNIFORM_u_color
+    out.color = unpack_mix_color(in.color, drawable.color_t);
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
     out.pattern_from = pattern_from;
 #endif
@@ -681,17 +725,21 @@ fn main(in: VertexInput) -> VertexOutput {
 
     static constexpr const char* fragment = R"(
 struct FragmentInput {
+    @builtin(position) position: vec4<f32>,
     @location(0) v_pos_a: vec2<f32>,
     @location(1) v_pos_b: vec2<f32>,
     @location(2) v_pos: vec2<f32>,
+#ifndef HAS_UNIFORM_u_color
+    @location(3) color: vec4<f32>,
+#endif
 #ifndef HAS_UNIFORM_u_pattern_from
-    @location(3) pattern_from: vec4<f32>,
+    @location(4) pattern_from: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_pattern_to
-    @location(4) pattern_to: vec4<f32>,
+    @location(5) pattern_to: vec4<f32>,
 #endif
 #ifndef HAS_UNIFORM_u_opacity
-    @location(5) opacity: f32,
+    @location(6) opacity: f32,
 #endif
 };
 
@@ -699,7 +747,7 @@ struct FillOutlinePatternTilePropsUBO {
     pattern_from: vec4<f32>,
     pattern_to: vec4<f32>,
     texsize: vec2<f32>,
-    pad1: f32,
+    sdf: f32,
     pad2: f32,
 };
 
@@ -764,6 +812,24 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
         in.opacity;
 #endif
 
+    let color =
+#ifdef HAS_UNIFORM_u_color
+        props.color;
+#else
+        in.color;
+#endif
+
+    let dist = length(in.v_pos - in.position.xy);
+    let alpha = 1.0 - smoothstep(0.0, 1.0, dist);
+
+    if (tileProps.sdf > 0.5) {
+        let sdf_edge = (256.0 - 64.0) / 256.0;
+        let sdf_gamma_a = max(fwidth(color_a.a) * 0.5, 1.0 / 255.0 / 16.0);
+        let sdf_gamma_b = max(fwidth(color_b.a) * 0.5, 1.0 / 255.0 / 16.0);
+        let sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color_a.a);
+        let sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color_b.a);
+        return mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * alpha * opacity;
+    }
     return mix(color_a, color_b, props.fade) * opacity;
 }
 )";

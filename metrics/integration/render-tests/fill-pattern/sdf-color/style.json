@@ -1,0 +1,121 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 192,
+      "height": 96
+    }
+  },
+  "center": [0, 0],
+  "zoom": 2.5,
+  "sprite": "local://sprites/sprite",
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "kind": "constant"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[-11, -5], [-6, -5], [-6, 5], [-11, 5], [-11, -5]]]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "kind": "data-driven",
+              "color": "blue"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[-5.5, -5], [-0.5, -5], [-0.5, 5], [-5.5, 5], [-5.5, -5]]]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "kind": "data-driven",
+              "color": "purple"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[0.5, -5], [5.5, -5], [5.5, 5], [0.5, 5], [0.5, -5]]]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "kind": "rgba"
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[6, -5], [11, -5], [11, 5], [6, 5], [6, -5]]]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#f4f4f4"
+      }
+    },
+    {
+      "id": "constant-sdf",
+      "type": "fill",
+      "source": "geojson",
+      "filter": ["==", ["get", "kind"], "constant"],
+      "paint": {
+        "fill-antialias": true,
+        "fill-color": "#e63946",
+        "fill-opacity": 0.65,
+        "fill-pattern": "dot.sdf"
+      }
+    },
+    {
+      "id": "data-driven-sdf",
+      "type": "fill",
+      "source": "geojson",
+      "filter": ["==", ["get", "kind"], "data-driven"],
+      "paint": {
+        "fill-antialias": true,
+        "fill-color": [
+          "match",
+          ["get", "color"],
+          "blue",
+          "#0066ff",
+          "purple",
+          "#9b32d0",
+          "#111111"
+        ],
+        "fill-opacity": [
+          "match",
+          ["get", "color"],
+          "purple",
+          0.5,
+          1
+        ],
+        "fill-pattern": "dot.sdf"
+      }
+    },
+    {
+      "id": "rgba-regression",
+      "type": "fill",
+      "source": "geojson",
+      "filter": ["==", ["get", "kind"], "rgba"],
+      "paint": {
+        "fill-color": "#00ff00",
+        "fill-pattern": "motorway_lg_4"
+      }
+    }
+  ]
+}
