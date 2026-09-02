@@ -33,7 +33,8 @@ import org.maplibre.android.style.terrain.Terrain
  *
  * cmd values: terrain_on|terrain_off|terrain_toggle, mode_quality|mode_balanced|
  * mode_performance, stats_on|stats_off|stats_toggle, burst_on|burst_off|burst_toggle,
- * abovelog_on|abovelog_off|abovelog_toggle.
+ * abovelog_on|abovelog_off|abovelog_toggle, exag_up|exag_down|exag_reset|
+ * exag_sweep_on|exag_sweep_off|exag_sweep_toggle.
  * Initial state can also be set with launch extras: --ez terrain false --es mode performance
  * --ez stats true.
  *
@@ -43,9 +44,16 @@ import org.maplibre.android.style.terrain.Terrain
  * (set a mode, start the burst, read the PERF-HUD worst-frame/jank log) shows their real trade
  * (Quality: one big hitch, instant detail; Performance: smoother, progressive pop-in).
  *
+ * `exag_sweep_*` ramps `exaggeration` down and back up in steps, replacing the style's
+ * terrain on every step. That is the one runtime terrain change none of the fixed-exaggeration
+ * activities used to make, and it is how an orphaned terrain mesh per replacement went
+ * unnoticed until it was found on iOS/Metal (see TERRAIN.md, Backend parity). Lowering is the
+ * telling direction: stale surfaces taller than the live one occlude it.
+ *
  * @param terrainSourceId the raster-dem source id the style wires terrain to; used to
  *   re-enable terrain after it was toggled off.
- * @param exaggeration terrain exaggeration to restore on re-enable (match the style).
+ * @param exaggeration terrain exaggeration the style starts at, and the base the runtime
+ *   exaggeration controls move from.
  * @param statsFont font for the stats HUD text. The built-in HUD is a SymbolLayer with no
  *   text-font, so it falls back to Open Sans, which not every glyph server provides. Pass a
  *   font the hosting style's glyph endpoint actually serves (e.g. "Noto Sans Regular" for
@@ -75,6 +83,8 @@ class TerrainTestOptions(
         private set
     var aboveGroundLog = false
         private set
+    var exaggerationValue = exaggeration
+        private set
 
     private val cmdReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -94,6 +104,12 @@ class TerrainTestOptions(
                 "abovelog_on" -> setAboveGroundLog(true)
                 "abovelog_off" -> setAboveGroundLog(false)
                 "abovelog_toggle" -> setAboveGroundLog(!aboveGroundLog)
+                "exag_up" -> setExaggeration(exaggerationValue + EXAG_STEP)
+                "exag_down" -> setExaggeration(exaggerationValue - EXAG_STEP)
+                "exag_reset" -> setExaggeration(exaggeration)
+                "exag_sweep_on" -> setExagSweeping(true)
+                "exag_sweep_off" -> setExagSweeping(false)
+                "exag_sweep_toggle" -> setExagSweeping(!exagSweeping)
                 else -> return
             }
             activity.invalidateOptionsMenu()
@@ -119,6 +135,7 @@ class TerrainTestOptions(
 
     fun onDestroy() {
         setBursting(false)
+        setExagSweeping(false)
         runCatching { activity.unregisterReceiver(cmdReceiver) }
     }
 
@@ -165,6 +182,12 @@ class TerrainTestOptions(
             isCheckable = true
             isChecked = aboveGroundLog
         }
+        menu.add(0, MENU_EXAG_UP, 3, "Exaggeration +$EXAG_STEP")
+        menu.add(0, MENU_EXAG_DOWN, 4, "Exaggeration -$EXAG_STEP")
+        menu.add(0, MENU_TOGGLE_EXAG_SWEEP, 5, "Exaggeration sweep").apply {
+            isCheckable = true
+            isChecked = exagSweeping
+        }
         val sub = menu.addSubMenu("Terrain load mode")
         sub.add(MODE_GROUP, MENU_MODE_QUALITY, 0, "Quality (default)")
         sub.add(MODE_GROUP, MENU_MODE_BALANCED, 1, "Balanced")
@@ -187,12 +210,16 @@ class TerrainTestOptions(
             MENU_MODE_QUALITY -> setLoadMode(TerrainLoadMode.QUALITY)
             MENU_MODE_BALANCED -> setLoadMode(TerrainLoadMode.BALANCED)
             MENU_MODE_PERFORMANCE -> setLoadMode(TerrainLoadMode.PERFORMANCE)
+            MENU_EXAG_UP -> setExaggeration(exaggerationValue + EXAG_STEP)
+            MENU_EXAG_DOWN -> setExaggeration(exaggerationValue - EXAG_STEP)
+            MENU_TOGGLE_EXAG_SWEEP -> setExagSweeping(!exagSweeping)
             else -> return false
         }
         item.isChecked = when (item.itemId) {
             MENU_TOGGLE_TERRAIN -> terrainEnabled
             MENU_TOGGLE_STATS -> statsEnabled
             MENU_TOGGLE_ABOVELOG -> aboveGroundLog
+            MENU_TOGGLE_EXAG_SWEEP -> exagSweeping
             else -> true // exclusive mode group unchecks the others
         }
         return true
@@ -200,8 +227,41 @@ class TerrainTestOptions(
 
     private fun setTerrainEnabled(on: Boolean) {
         terrainEnabled = on
-        style?.setTerrain(if (on) Terrain(source = terrainSourceId, exaggeration = exaggeration) else null)
+        style?.setTerrain(if (on) Terrain(source = terrainSourceId, exaggeration = exaggerationValue) else null)
         toast("Terrain ${if (on) "on" else "off"}")
+    }
+
+    // Replaces the style's terrain rather than toggling it, which is the path that used to
+    // orphan the previous terrain mesh in the orchestrator.
+    private fun setExaggeration(value: Float, notify: Boolean = true) {
+        exaggerationValue = value.coerceIn(EXAG_MIN, EXAG_MAX)
+        if (terrainEnabled) {
+            style?.setTerrain(Terrain(source = terrainSourceId, exaggeration = exaggerationValue))
+        }
+        if (notify) toast("Exaggeration %.1f".format(exaggerationValue))
+    }
+
+    private val exagHandler = Handler(Looper.getMainLooper())
+    private var exagSweeping = false
+    private var exagRising = false
+    private val exagSweepRunnable = object : Runnable {
+        override fun run() {
+            if (exagRising) {
+                if (exaggerationValue >= EXAG_SWEEP_HIGH) exagRising = false
+            } else if (exaggerationValue <= EXAG_SWEEP_LOW) {
+                exagRising = true
+            }
+            setExaggeration(exaggerationValue + if (exagRising) EXAG_STEP else -EXAG_STEP, notify = false)
+            if (exagSweeping) exagHandler.postDelayed(this, EXAG_SWEEP_INTERVAL_MS)
+        }
+    }
+
+    private fun setExagSweeping(on: Boolean) {
+        if (exagSweeping == on) return
+        exagSweeping = on
+        exagHandler.removeCallbacks(exagSweepRunnable)
+        if (on) exagHandler.post(exagSweepRunnable)
+        toast("Exaggeration sweep ${if (on) "on" else "off"}")
     }
 
     private fun setLoadMode(mode: TerrainLoadMode) {
@@ -278,5 +338,17 @@ class TerrainTestOptions(
         private const val MENU_MODE_BALANCED = 3
         private const val MENU_MODE_PERFORMANCE = 4
         private const val MENU_TOGGLE_ABOVELOG = 6
+        private const val MENU_EXAG_UP = 7
+        private const val MENU_EXAG_DOWN = 8
+        private const val MENU_TOGGLE_EXAG_SWEEP = 9
+
+        // Exaggeration sweep: a range wide enough that a stale surface left behind by one step
+        // visibly towers over the next one down.
+        private const val EXAG_STEP = 0.5f
+        private const val EXAG_MIN = 0.0f
+        private const val EXAG_MAX = 10.0f
+        private const val EXAG_SWEEP_LOW = 1.0f
+        private const val EXAG_SWEEP_HIGH = 4.0f
+        private const val EXAG_SWEEP_INTERVAL_MS = 700L
     }
 }
