@@ -91,9 +91,47 @@
   XCTAssertTrue([collection.shapes.firstObject isMemberOfClass:[MLNPolylineFeature class]]);
 }
 
-- (void)testMLNShapeSourceWithEmptyGeometries {
+- (void)testMLNShapeSourceWithNullGeometry {
+  NSData *data = [@"{\"type\":\"Feature\",\"properties\":{},\"geometry\":null}"
+      dataUsingEncoding:NSUTF8StringEncoding];
+  NSError *error = nil;
+  MLNShape *shape = [MLNShape shapeWithData:data encoding:NSUTF8StringEncoding error:&error];
+
+  XCTAssertNil(error);
+  XCTAssertTrue([shape isKindOfClass:[MLNEmptyFeature class]]);
+
+  MLNShapeSource *source;
+  XCTAssertNoThrow(source = [[MLNShapeSource alloc] initWithIdentifier:@"source-id"
+                                                                 shape:shape
+                                                               options:nil]);
+  XCTAssertNotNil(source.shape);
+}
+
+- (void)testMLNShapeSourceWithEmptyFeatureCoordinates {
+  NSArray<NSString *> *geometryTypes =
+      @[ @"Point", @"MultiPoint", @"LineString", @"MultiLineString", @"Polygon", @"MultiPolygon" ];
+  for (NSString *geometryType in geometryTypes) {
+    NSString *geoJSON =
+        [NSString stringWithFormat:@"{\"type\":\"Feature\",\"properties\":{},\"geometry\":{"
+                                   @"\"type\":\"%@\",\"coordinates\":[ ]}}",
+                                   geometryType];
+    NSData *data = [geoJSON dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error = nil;
+    MLNShape *shape = [MLNShape shapeWithData:data encoding:NSUTF8StringEncoding error:&error];
+
+    XCTAssertNil(error);
+    XCTAssertTrue([shape isKindOfClass:[MLNEmptyFeature class]]);
+
+    MLNShapeSource *source;
+    XCTAssertNoThrow(source = [[MLNShapeSource alloc] initWithIdentifier:@"source-id"
+                                                                   shape:shape
+                                                                 options:nil]);
+    XCTAssertNotNil(source.shape);
+  }
+}
+
+- (void)testMLNShapeSourceWithEmptyFeatureAndValidSibling {
   NSString *geoJSON = @"{\"type\":\"FeatureCollection\",\"features\":["
-                       "{\"type\":\"Feature\",\"properties\":{},\"geometry\":null},"
                        "{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\","
                        "\"coordinates\":[]}},"
                        "{\"type\":\"Feature\",\"properties\":{\"name\":\"Café\"},"
@@ -107,32 +145,14 @@
                                                      error:&error];
 
   XCTAssertNil(error);
-  XCTAssertEqual(collection.shapes.count, 3UL);
+  XCTAssertEqual(collection.shapes.count, 2UL);
   XCTAssertTrue([collection.shapes[0] isKindOfClass:[MLNEmptyFeature class]]);
-  XCTAssertTrue([collection.shapes[1] isKindOfClass:[MLNEmptyFeature class]]);
-  XCTAssertTrue([collection.shapes[2] isKindOfClass:[MLNPointFeature class]]);
-  XCTAssertEqualObjects([collection.shapes[2] attributeForKey:@"name"], @"Café");
+  XCTAssertTrue([collection.shapes[1] isKindOfClass:[MLNPointFeature class]]);
+  XCTAssertEqualObjects([collection.shapes[1] attributeForKey:@"name"], @"Café");
 
   MLNShapeSource *source;
   XCTAssertNoThrow(source = [[MLNShapeSource alloc] initWithIdentifier:@"source-id"
                                                                  shape:collection
-                                                               options:nil]);
-  XCTAssertNotNil(source.shape);
-}
-
-- (void)testMLNShapeSourceWithEmptyTopLevelGeometry {
-  NSData *data =
-      [@"{\"type\":\"Point\",\"coordinates\":[]}" dataUsingEncoding:NSUTF8StringEncoding];
-  NSError *error = nil;
-  MLNShape *shape = [MLNShape shapeWithData:data encoding:NSUTF8StringEncoding error:&error];
-
-  XCTAssertNil(error);
-  XCTAssertTrue([shape isKindOfClass:[MLNShapeCollection class]]);
-  XCTAssertEqual(((MLNShapeCollection *)shape).shapes.count, 0UL);
-
-  MLNShapeSource *source;
-  XCTAssertNoThrow(source = [[MLNShapeSource alloc] initWithIdentifier:@"source-id"
-                                                                 shape:shape
                                                                options:nil]);
   XCTAssertNotNil(source.shape);
 }

@@ -17,64 +17,78 @@ static BOOL MLNIsGeoJSONGeometryType(NSString *type) {
          [type isEqualToString:@"Polygon"] || [type isEqualToString:@"MultiPolygon"];
 }
 
-static id MLNGeoJSONObjectByReplacingEmptyCoordinates(id object, BOOL *changed) {
-  if ([object isKindOfClass:[NSArray class]]) {
-    NSArray *array = object;
-    NSMutableArray *updatedArray = nil;
-    for (NSUInteger index = 0; index < array.count; index++) {
-      id updatedObject = MLNGeoJSONObjectByReplacingEmptyCoordinates(array[index], changed);
-      if (updatedObject != array[index]) {
-        if (!updatedArray) {
-          updatedArray = [array mutableCopy];
-        }
-        updatedArray[index] = updatedObject;
-      }
-    }
-    return updatedArray ?: object;
+static NSRegularExpression *MLNEmptyArrayRegularExpression(void) {
+  static NSRegularExpression *regularExpression;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    regularExpression = [NSRegularExpression regularExpressionWithPattern:@"\\[\\s*\\]"
+                                                                  options:0
+                                                                    error:nil];
+  });
+  return regularExpression;
+}
+
+static BOOL MLNReplaceEmptyFeatureCoordinates(id object) {
+  if (![object isKindOfClass:[NSMutableDictionary class]]) {
+    return NO;
   }
 
-  if (![object isKindOfClass:[NSDictionary class]]) {
-    return object;
-  }
-
-  NSDictionary *dictionary = object;
+  NSMutableDictionary *dictionary = object;
   NSString *type = dictionary[@"type"];
   if (![type isKindOfClass:[NSString class]]) {
-    return object;
+    return NO;
   }
-  id coordinates = dictionary[@"coordinates"];
-  if (MLNIsGeoJSONGeometryType(type) && [coordinates isKindOfClass:[NSArray class]] &&
-      [coordinates count] == 0) {
-    *changed = YES;
-    return [NSNull null];
-  }
-
-  NSString *childKey = nil;
   if ([type isEqualToString:@"Feature"]) {
-    childKey = @"geometry";
-  } else if ([type isEqualToString:@"FeatureCollection"]) {
-    childKey = @"features";
-  } else if ([type isEqualToString:@"GeometryCollection"]) {
-    childKey = @"geometries";
+    id geometry = dictionary[@"geometry"];
+    if (![geometry isKindOfClass:[NSDictionary class]]) {
+      return NO;
+    }
+
+    NSString *geometryType = geometry[@"type"];
+    id coordinates = geometry[@"coordinates"];
+    if (![geometryType isKindOfClass:[NSString class]] || !MLNIsGeoJSONGeometryType(geometryType) ||
+        ![coordinates isKindOfClass:[NSArray class]] || [coordinates count] != 0) {
+      return NO;
+    }
+
+    dictionary[@"geometry"] = [NSNull null];
+    return YES;
   }
 
-  if (!childKey) {
-    return object;
+  if (![type isEqualToString:@"FeatureCollection"]) {
+    return NO;
   }
 
-  id child = dictionary[childKey];
-  if (!child) {
-    return object;
+  NSArray *features = dictionary[@"features"];
+  if (![features isKindOfClass:[NSArray class]]) {
+    return NO;
   }
 
-  id updatedChild = MLNGeoJSONObjectByReplacingEmptyCoordinates(child, changed);
-  if (updatedChild == child) {
-    return object;
+  BOOL changed = NO;
+  for (id feature in features) {
+    changed |= MLNReplaceEmptyFeatureCoordinates(feature);
+  }
+  return changed;
+}
+
+static NSString *MLNGeoJSONStringByReplacingEmptyFeatureCoordinates(NSString *string) {
+  NSRange range = NSMakeRange(0, string.length);
+  if (![MLNEmptyArrayRegularExpression() firstMatchInString:string options:0 range:range]) {
+    return string;
   }
 
-  NSMutableDictionary *updatedDictionary = [dictionary mutableCopy];
-  updatedDictionary[childKey] = updatedChild;
-  return updatedDictionary;
+  NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+  id jsonObject = [NSJSONSerialization JSONObjectWithData:data
+                                                  options:NSJSONReadingMutableContainers
+                                                    error:nil];
+  if (!MLNReplaceEmptyFeatureCoordinates(jsonObject)) {
+    return string;
+  }
+
+  NSData *updatedData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
+  NSString *updatedString = [[NSString alloc] initWithData:updatedData
+                                                  encoding:NSUTF8StringEncoding];
+  return updatedString ?: string;
 }
 
 @implementation MLNShape
@@ -90,36 +104,16 @@ static id MLNGeoJSONObjectByReplacingEmptyCoordinates(id object, BOOL *changed) 
     return nil;
   }
 
+  NSString *normalizedString = MLNGeoJSONStringByReplacingEmptyFeatureCoordinates(string);
   try {
-    const auto geojson = mapbox::geojson::parse(string.UTF8String);
+    const auto geojson = mapbox::geojson::parse(normalizedString.UTF8String);
     return MLNShapeFromGeoJSON(geojson);
   } catch (std::runtime_error &err) {
-    NSString *failureReason = @(err.what());
-    NSData *utf8Data = [string dataUsingEncoding:NSUTF8StringEncoding];
-    id jsonObject = [NSJSONSerialization JSONObjectWithData:utf8Data options:0 error:nil];
-    BOOL changed = NO;
-    id updatedJSONObject = MLNGeoJSONObjectByReplacingEmptyCoordinates(jsonObject, &changed);
-    if (changed) {
-      if ([updatedJSONObject isKindOfClass:[NSNull class]]) {
-        updatedJSONObject = @{@"type" : @"GeometryCollection", @"geometries" : @[]};
-      }
-      NSData *updatedData = [NSJSONSerialization dataWithJSONObject:updatedJSONObject
-                                                            options:NSJSONWritingFragmentsAllowed
-                                                              error:nil];
-      NSString *updatedString = [[NSString alloc] initWithData:updatedData
-                                                      encoding:NSUTF8StringEncoding];
-      try {
-        const auto geojson = mapbox::geojson::parse(updatedString.UTF8String);
-        return MLNShapeFromGeoJSON(geojson);
-      } catch (std::runtime_error &updatedError) {
-        failureReason = @(updatedError.what());
-      }
-    }
     if (outError) {
       *outError = [NSError errorWithDomain:MLNErrorDomain
                                       code:MLNErrorCodeUnknown
                                   userInfo:@{
-                                    NSLocalizedFailureReasonErrorKey : failureReason,
+                                    NSLocalizedFailureReasonErrorKey : @(err.what()),
                                   }];
     }
     return nil;
