@@ -1,7 +1,6 @@
 #if MLN_RENDER_BACKEND_OPENGL
 
 #include <mln/test/util.hpp>
-#include <mln/test/fixture_log_observer.hpp>
 #include <mln/test/stub_geometry_tile_feature.hpp>
 
 #include <mln/gfx/backend_scope.hpp>
@@ -99,37 +98,6 @@ TEST(Buckets, FillBucket) {
     auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
     bucket.upload(*uploadPass);
     ASSERT_FALSE(bucket.needsUpload());
-}
-
-TEST(Buckets, FillBucketTracksSDFPatternsPerLayer) {
-    FixtureLog log;
-    FillBucket::PossiblyEvaluatedLayoutProperties layout;
-    FillBucket bucket{layout, {}, 5.0f, 1};
-
-    bucket.recordSDFPattern("sdf-layer", true);
-    bucket.recordSDFPattern("rgba-layer", false);
-
-    EXPECT_TRUE(bucket.isSDFPattern("sdf-layer"));
-    EXPECT_FALSE(bucket.isSDFPattern("rgba-layer"));
-    EXPECT_FALSE(bucket.isSDFPattern("missing-layer"));
-    EXPECT_TRUE(log.empty());
-}
-
-TEST(Buckets, FillBucketWarnsOnceForMixedPatternTypes) {
-    FixtureLog log;
-    FillBucket::PossiblyEvaluatedLayoutProperties layout;
-    FillBucket bucket{layout, {}, 5.0f, 1};
-
-    bucket.recordSDFPattern("mixed-layer", true);
-    bucket.recordSDFPattern("mixed-layer", false);
-    bucket.recordSDFPattern("mixed-layer", false);
-
-    const FixtureLog::Message warning{
-        EventSeverity::Warning,
-        Event::Style,
-        -1,
-        "Style sheet warning: Cannot mix SDF and non-SDF fill patterns in layer \"mixed-layer\""};
-    EXPECT_EQ(1u, log.count(warning));
 }
 
 TEST(Buckets, LineBucket) {

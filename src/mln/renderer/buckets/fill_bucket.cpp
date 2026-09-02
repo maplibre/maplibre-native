@@ -6,7 +6,21 @@
 #include <mln/util/math.hpp>
 #include <mln/gfx/fill_generator.hpp>
 
+#include <mutex>
+
 namespace mln {
+
+namespace {
+
+bool shouldWarnAboutMixedSDFPatterns(const std::string& layerID) {
+    static std::mutex mutex;
+    static mln::unordered_set<std::string> warnedLayers;
+
+    const std::lock_guard lock(mutex);
+    return warnedLayers.emplace(layerID).second;
+}
+
+} // namespace
 
 FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
@@ -26,7 +40,7 @@ FillBucket::~FillBucket() {
 
 void FillBucket::recordSDFPattern(const std::string& layerID, const bool sdf) {
     const auto [it, inserted] = sdfPatterns.emplace(layerID, sdf);
-    if (!inserted && it->second != sdf && mixedSDFPatternLayers.emplace(layerID).second) {
+    if (!inserted && it->second != sdf && shouldWarnAboutMixedSDFPatterns(layerID)) {
         Log::Warning(Event::Style,
                      "Style sheet warning: Cannot mix SDF and non-SDF fill patterns in layer \"" + layerID + "\"");
     }
