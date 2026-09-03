@@ -200,8 +200,7 @@ public:
             const auto& paint = static_cast<const LayerPropertiesType&>(*layerProperties).evaluated;
             const auto& patternProperty = paint.template get<PatternPropertyType>();
             if (patternProperty.isConstant()) {
-                const auto pattern = patternProperty.constantOr(
-                    Faded<style::expression::Image>{.from = "", .to = ""});
+                const auto pattern = patternProperty.constantOr(Faded<style::expression::Image>{.from = "", .to = ""});
                 recordSDFPattern(layerID, pattern.from.id());
                 recordSDFPattern(layerID, pattern.to.id());
             }
