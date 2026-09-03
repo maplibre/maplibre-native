@@ -466,17 +466,32 @@ void Texture2D::destroySampler(bool deferred) {
 }
 
 void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& buffer) {
-    const auto barrier = vk::ImageMemoryBarrier()
-                             .setImage(imageAllocation->image)
-                             .setOldLayout(imageLayout)
-                             .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
-                             .setSrcAccessMask({})
-                             .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
-                             .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                             .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
+    auto barrier = vk::ImageMemoryBarrier()
+                       .setImage(imageAllocation->image)
+                       .setOldLayout(imageLayout)
+                       .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
+                       .setSrcAccessMask({})
+                       .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                       .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                       .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                       .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
-    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+    vk::PipelineStageFlags srcMask = vk::PipelineStageFlagBits::eTopOfPipe;
+
+    if (imageLayout == vk::ImageLayout::eUndefined) {
+        barrier.setSrcAccessMask({});
+        srcMask = vk::PipelineStageFlagBits::eTopOfPipe;
+    } else if (imageLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+        barrier.setSrcAccessMask(vk::AccessFlagBits::eShaderRead);
+        srcMask = vk::PipelineStageFlagBits::eFragmentShader;
+    } else if (imageLayout == vk::ImageLayout::eGeneral) {
+        barrier.setSrcAccessMask(vk::AccessFlagBits::eTransferWrite);
+        srcMask = vk::PipelineStageFlagBits::eTransfer;
+    } else {
+        assert(false);
+    }
+
+    buffer->pipelineBarrier(srcMask,
                             vk::PipelineStageFlagBits::eTransfer,
                             {},
                             nullptr,
@@ -488,6 +503,8 @@ void Texture2D::transitionToTransferWriteLayout(const vk::UniqueCommandBuffer& b
 }
 
 void Texture2D::transitionToTransferReadLayout(const vk::UniqueCommandBuffer& buffer) {
+    assert(imageLayout == vk::ImageLayout::eTransferDstOptimal);
+
     const auto barrier = vk::ImageMemoryBarrier()
                              .setImage(imageAllocation->image)
                              .setOldLayout(imageLayout)
@@ -510,6 +527,8 @@ void Texture2D::transitionToTransferReadLayout(const vk::UniqueCommandBuffer& bu
 }
 
 void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buffer) {
+    assert(imageLayout == vk::ImageLayout::eTransferSrcOptimal || imageLayout == vk::ImageLayout::eTransferDstOptimal);
+
     const auto srcAccessMask = imageLayout == vk::ImageLayout::eTransferSrcOptimal ? vk::AccessFlagBits::eTransferRead
                                                                                    : vk::AccessFlagBits::eTransferWrite;
 
@@ -535,6 +554,8 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
 }
 
 void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer) {
+    assert(imageLayout == vk::ImageLayout::eTransferDstOptimal);
+
     const auto barrier = vk::ImageMemoryBarrier()
                              .setImage(imageAllocation->image)
                              .setOldLayout(imageLayout)
