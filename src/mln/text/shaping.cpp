@@ -385,7 +385,10 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
         // often appear without surrounding spaces.
         if (i < logicalInput.length() - 1) {
             const bool allowsIdeographicBreak = util::i18n::allowsIdeographicBreaking(codePoint);
-            if (section.imageID || allowsIdeographicBreak || util::i18n::allowsWordBreaking(codePoint)) {
+            const bool allowsBreakBeforeNext = i != logicalInput.length() - 2 &&
+                                               util::i18n::allowsWordBreakingBefore(logicalInput.getCharCodeAt(i + 1));
+            if (section.imageID || allowsIdeographicBreak || util::i18n::allowsWordBreaking(codePoint) ||
+                allowsBreakBeforeNext) {
                 const bool penalizableIdeographicBreak = allowsIdeographicBreak && hasServerSuggestedBreaks;
                 const std::size_t nextIndex = i + 1;
                 potentialBreaks.push_back(evaluateBreak(
