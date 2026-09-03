@@ -11,16 +11,6 @@
 #include <mln/util/traits.hpp>
 #include <mln/util/logging.hpp>
 
-#define MBGL_CONSTRUCTOR(f) \
-    static void f(void);    \
-    struct f##_t_ {         \
-        f##_t_(void) {      \
-            f();            \
-        }                   \
-    };                      \
-    static f##_t_ f##_;     \
-    static void f(void)
-
 namespace mapbox {
 namespace sqlite {
 
@@ -107,14 +97,15 @@ public:
     int64_t changes = 0;
 };
 
+namespace {
+
 #ifndef NDEBUG
 void logSqlMessage(void*, const int err, const char* msg) {
     mln::Log::Record(mln::EventSeverity::Debug, mln::Event::Database, std::to_string(err) + msg);
 }
 #endif
 
-// NOLINTBEGIN(misc-use-anonymous-namespace)
-MBGL_CONSTRUCTOR(initialize) {
+void initialize() {
     if (sqlite3_libversion_number() / 1000000 != SQLITE_VERSION_NUMBER / 1000000) {
         char message[96];
         snprintf(message,
@@ -131,7 +122,12 @@ MBGL_CONSTRUCTOR(initialize) {
     sqlite3_config(SQLITE_CONFIG_LOG, &logSqlMessage, nullptr);
 #endif
 }
-// NOLINTEND(misc-use-anonymous-namespace)
+
+const struct Initializer {
+    Initializer() { initialize(); }
+} initializer;
+
+} // namespace
 
 std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
     sqlite3* db = nullptr;
