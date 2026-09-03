@@ -34,6 +34,7 @@ protected:
     virtual ~Renderable() = default;
 
 public:
+    /// Returns the renderable dimensions in physical pixels.
     Size getSize() const { return size; }
 
     template <typename T>
@@ -50,8 +51,12 @@ public:
 
     bool operator!=(const Renderable& other) const { return resource.get() != other.resource.get(); }
 
-protected:
+private:
     Size size;
+
+protected:
+    void setRenderableSize(const Size& size_) noexcept { size = size_; }
+
     std::unique_ptr<RenderableResource> resource;
 };
 

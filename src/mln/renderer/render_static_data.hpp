@@ -48,7 +48,6 @@ public:
     std::optional<gfx::Renderbuffer<gfx::RenderbufferPixelType::Depth>> depthRenderbuffer;
     bool has3D = false;
     bool uploaded = false;
-    Size backendSize;
 
     std::unique_ptr<gfx::ShaderRegistry> shaders;
 

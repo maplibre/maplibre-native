@@ -235,7 +235,7 @@ OffscreenTexture::OffscreenTexture(Context& context,
                                    const gfx::TextureChannelDataType type,
                                    [[maybe_unused]] bool depth,
                                    bool stencil)
-    : gfx::OffscreenTexture(size,
+    : gfx::OffscreenTexture(size_,
                             std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type, stencil)) {}
 
 bool OffscreenTexture::isRenderable() {

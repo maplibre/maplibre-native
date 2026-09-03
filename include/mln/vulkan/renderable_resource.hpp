@@ -128,7 +128,7 @@ protected:
     ~Renderable() override = default;
 
 public:
-    void setSize(const Size& size_) { size = size_; }
+    void setSize(const Size& size_) { setRenderableSize(size_); }
 };
 
 } // namespace vulkan

@@ -66,6 +66,7 @@ public:
                     double tileLodScale,
                     double tileLodPitchThreshold,
                     TileLodMode tileLodMode,
+                    Size renderableSize,
                     const gfx::ScissorRect&);
     ~PaintParameters();
 
@@ -112,6 +113,7 @@ public:
     TimePoint timePoint;
 
     float pixelRatio;
+    const Size renderableSize;
     std::array<float, 2> pixelsToGLUnits;
 
     gfx::ShaderRegistry& shaders;

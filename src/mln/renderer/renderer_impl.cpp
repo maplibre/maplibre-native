@@ -191,7 +191,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     const auto& renderTreeParameters = renderTree.getParameters();
     staticData->has3D = renderTreeParameters.has3D;
-    staticData->backendSize = backend.getDefaultRenderable().getSize();
+    const Size renderableSize = backend.getDefaultRenderable().getSize();
 
     // Set when the drape render budget defers a target this frame, so a follow-up frame is
     // requested (via needsRepaint) to let the deferred targets catch up progressively.
@@ -204,7 +204,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     observer->onWillStartRenderingFrame();
 
     const TransformState& state = renderTreeParameters.transformParams.state;
-    const Size& size = staticData->backendSize;
     const EdgeInsets& frustumOffset = state.getFrustumOffset();
     const gfx::ScissorRect scissorRect = {
         .x = static_cast<int32_t>(frustumOffset.left() * pixelRatio),
@@ -213,8 +212,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 #else
         .y = static_cast<int32_t>(frustumOffset.top() * pixelRatio),
 #endif
-        .width = size.width - static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
-        .height = size.height - static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
+        .width = renderableSize.width -
+                 static_cast<uint32_t>((frustumOffset.left() + frustumOffset.right()) * pixelRatio),
+        .height = renderableSize.height -
+                  static_cast<uint32_t>((frustumOffset.top() + frustumOffset.bottom()) * pixelRatio),
     };
 
     PaintParameters parameters{
@@ -235,6 +236,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         updateParameters->tileLodScale,
         updateParameters->tileLodPitchThreshold,
         updateParameters->tileLodMode,
+        renderableSize,
         scissorRect,
     };
 
@@ -494,7 +496,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     }
 
     const Size atlasSize = parameters.patternAtlas.getPixelSize();
-    const auto& worldSize = parameters.staticData.backendSize;
+    const auto& worldSize = parameters.renderableSize;
     const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
         .pattern_atlas_texsize = {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
         .units_to_pixels = {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
@@ -526,8 +528,6 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // attachments, but share the same depth rbo between them.
     const auto common3DPass = [&] {
         if (parameters.staticData.has3D) {
-            parameters.staticData.backendSize = parameters.backend.getDefaultRenderable().getSize();
-
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 #if MLN_RENDER_BACKEND_OPENGL
@@ -536,10 +536,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
             // TODO is this needed?
             // if (!parameters.staticData.depthRenderbuffer ||
-            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.renderableSize) {
             //    parameters.staticData.depthRenderbuffer =
             //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-            //            parameters.staticData.backendSize);
+            //            parameters.renderableSize);
             //}
             // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }

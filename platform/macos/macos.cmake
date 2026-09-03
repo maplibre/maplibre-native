@@ -144,12 +144,23 @@ add_test(
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 find_program(ARMERGE NAMES armerge)
+find_program(
+    LLVM_OBJCOPY
+    NAMES llvm-objcopy
+    HINTS
+        /opt/homebrew/opt/llvm/bin
+        /usr/local/opt/llvm/bin
+)
 
 if(MLN_CREATE_AMALGAMATION)
-    if ("${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    if(NOT ARMERGE)
         message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
     endif()
+    if(NOT LLVM_OBJCOPY)
+        message(FATAL_ERROR "llvm-objcopy required when MLN_CREATE_AMALGAMATION=ON")
+    endif()
     message(STATUS "Found armerge: ${ARMERGE}")
+    message(STATUS "Found llvm-objcopy: ${LLVM_OBJCOPY}")
     include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
     set(STATIC_LIBS "")
 
@@ -161,7 +172,7 @@ if(MLN_CREATE_AMALGAMATION)
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND ${ARMERGE} --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
@@ -170,6 +181,12 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-icu>
             $<TARGET_FILE:mlt-cpp>
             ${STATIC_LIBS}
+        # In Mach-O/Itanium ABI names, ZTI/ZTS/ZTV identify typeinfo,
+        # type names, and vtables, while St denotes std::.
+        # Keep them global so C++ exception matching works in downstream code.
+        COMMAND ${LLVM_OBJCOPY} --wildcard
+            "--globalize-symbol=__ZT[ISV]St*"
+            libmbgl-core-amalgam.a
     )
 
 endif()

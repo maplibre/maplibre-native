@@ -160,8 +160,6 @@ public:
     WGPUTexture currentTexture = nullptr;
     WGPUTextureView currentTextureView = nullptr;
     bool needsPresent = false;
-
-    Size framebufferSize;
 };
 
 AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window_)
@@ -303,9 +301,8 @@ AndroidWebGPURendererBackend::AndroidWebGPURendererBackend(ANativeWindow* window
     const int w = ANativeWindow_getWidth(window);
     const int h = ANativeWindow_getHeight(window);
     if (w > 0 && h > 0) {
-        impl->framebufferSize = {static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
-        size = impl->framebufferSize;
-        configureSurface(impl->framebufferSize.width, impl->framebufferSize.height);
+        setRenderableSize({static_cast<uint32_t>(w), static_cast<uint32_t>(h)});
+        configureSurface(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
     }
 }
 
@@ -508,8 +505,7 @@ void AndroidWebGPURendererBackend::createDepthStencilTexture(uint32_t width, uin
 void AndroidWebGPURendererBackend::resizeFramebuffer(int width, int height) {
     if (width <= 0 || height <= 0) return;
 
-    impl->framebufferSize = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
-    size = impl->framebufferSize;
+    setRenderableSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
     if (impl->currentTextureView) {
         wgpuTextureViewRelease(impl->currentTextureView);
@@ -520,16 +516,16 @@ void AndroidWebGPURendererBackend::resizeFramebuffer(int width, int height) {
         impl->currentTexture = nullptr;
     }
 
-    configureSurface(impl->framebufferSize.width, impl->framebufferSize.height);
+    configureSurface(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
 }
 
 PremultipliedImage AndroidWebGPURendererBackend::readFramebuffer() {
-    if (!impl->currentTexture || !impl->device || !impl->queue || impl->framebufferSize.width == 0 ||
-        impl->framebufferSize.height == 0) {
-        return PremultipliedImage(impl->framebufferSize.isEmpty() ? Size(2, 2) : impl->framebufferSize);
+    const auto framebufferSize = getSize();
+    if (!impl->currentTexture || !impl->device || !impl->queue || framebufferSize.isEmpty()) {
+        return PremultipliedImage(framebufferSize.isEmpty() ? Size(2, 2) : framebufferSize);
     }
 
-    const auto& fbSize = impl->framebufferSize;
+    const auto& fbSize = framebufferSize;
     constexpr uint32_t bytesPerPixel = 4;
     constexpr uint32_t bytesPerRowAlignment = 256u;
     const uint32_t rowStride = fbSize.width * bytesPerPixel;
@@ -683,7 +679,8 @@ void* AndroidWebGPURendererBackend::getCurrentTextureView() {
     auto status = static_cast<WGPUSurfaceGetCurrentTextureStatus>(surfaceTexture.status);
     if (status == WGPUSurfaceGetCurrentTextureStatus_Outdated || status == WGPUSurfaceGetCurrentTextureStatus_Lost) {
         wgpuTextureRelease(surfaceTexture.texture);
-        configureSurface(impl->framebufferSize.width, impl->framebufferSize.height);
+        const auto framebufferSize = getSize();
+        configureSurface(framebufferSize.width, framebufferSize.height);
         return nullptr;
     }
 
@@ -698,10 +695,9 @@ void* AndroidWebGPURendererBackend::getCurrentTextureView() {
     // Actual texture size may differ from configured size (Vulkan currentExtent clamping)
     const uint32_t texW = wgpuTextureGetWidth(surfaceTexture.texture);
     const uint32_t texH = wgpuTextureGetHeight(surfaceTexture.texture);
-    if (texW != size.width || texH != size.height) {
+    if (const auto framebufferSize = getSize(); texW != framebufferSize.width || texH != framebufferSize.height) {
         if (texW > 0 && texH > 0) {
-            size = {texW, texH};
-            impl->framebufferSize = size;
+            setRenderableSize({texW, texH});
             createDepthStencilTexture(texW, texH);
         }
     }
@@ -759,7 +755,7 @@ void* AndroidWebGPURendererBackend::getDepthStencilView() {
 }
 
 mln::Size AndroidWebGPURendererBackend::getFramebufferSize() const {
-    return impl->framebufferSize;
+    return getSize();
 }
 
 } // namespace android
