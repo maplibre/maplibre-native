@@ -8,7 +8,9 @@
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
 #include <mln/util/io.hpp>
+#include <mln/util/rapidjson.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/client_options.hpp>
 
@@ -69,6 +71,216 @@ TEST(Style, Properties) {
     ASSERT_EQ(0, *style.getDefaultCamera().zoom);
     ASSERT_EQ(0, *style.getDefaultCamera().bearing);
     ASSERT_EQ(0, *style.getDefaultCamera().pitch);
+}
+
+TEST(Style, GlobalState) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    // Defaults from the root "state" property are used as the initial global state.
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "state": {
+            "showLabels": {"default": true},
+            "categories": {"default": ["restaurant", "hotel"]},
+            "noDefault": {}
+        },
+        "sources": {},
+        "layers": []
+    })STYLE");
+
+    auto state = style.getGlobalState();
+    ASSERT_EQ(2u, state.size());
+    EXPECT_EQ(Value(true), state.at("showLabels"));
+    EXPECT_EQ(Value(mapbox::base::ValueArray({Value("restaurant"), Value("hotel")})), state.at("categories"));
+    EXPECT_EQ(state.end(), state.find("noDefault"));
+
+    // Setting a property updates the state.
+    style.setGlobalStateProperty("showLabels", false);
+    EXPECT_EQ(Value(false), style.getGlobalState().at("showLabels"));
+
+    // Properties that are not defined in the style can also be set.
+    style.setGlobalStateProperty("custom", 42.0);
+    EXPECT_EQ(Value(42.0), style.getGlobalState().at("custom"));
+
+    // A null value resets the property to its default.
+    style.setGlobalStateProperty("showLabels", NullValue());
+    EXPECT_EQ(Value(true), style.getGlobalState().at("showLabels"));
+
+    // A null value on a property without default resets to null.
+    style.setGlobalStateProperty("custom", NullValue());
+    EXPECT_EQ(Value(NullValue()), style.getGlobalState().at("custom"));
+
+    // Loading a new style resets the global state.
+    style.loadJSON(R"STYLE({"version": 8, "sources": {}, "layers": []})STYLE");
+    EXPECT_TRUE(style.getGlobalState().empty());
+
+    // As in GL JS, setting an absent property to null creates an observable
+    // null-valued entry even though both forms evaluate to null in expressions.
+    const auto beforeNull = style.getGlobalStateShared();
+    style.setGlobalStateProperty("neverSet", NullValue());
+    EXPECT_NE(beforeNull, style.getGlobalStateShared());
+    state = style.getGlobalState();
+    ASSERT_EQ(1u, state.size());
+    EXPECT_EQ(Value(NullValue()), state.at("neverSet"));
+
+    // Repeating the same null assignment remains a no-op.
+    const auto afterNull = style.getGlobalStateShared();
+    style.setGlobalStateProperty("neverSet", NullValue());
+    EXPECT_EQ(afterNull, style.getGlobalStateShared());
+}
+
+TEST(Style, GlobalStateNumericEquality) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "state": {"minSpeed": {"default": 50}},
+        "sources": {},
+        "layers": []
+    })STYLE");
+
+    // Setting the same numeric value with a different arithmetic type
+    // (integer default vs. runtime double) must be treated as unchanged.
+    const auto before = style.getGlobalStateShared();
+    style.setGlobalStateProperty("minSpeed", 50.0);
+    EXPECT_EQ(before, style.getGlobalStateShared());
+
+    style.setGlobalStateProperty("minSpeed", 51.0);
+    EXPECT_NE(before, style.getGlobalStateShared());
+}
+
+TEST(Style, GlobalStateVisibility) {
+    util::RunLoop loop;
+    FixtureLog log;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "state": {"showBackground": {"default": true}},
+        "sources": {},
+        "layers": [{
+            "id": "background",
+            "type": "background",
+            "layout": {
+                "visibility": ["case", ["to-boolean", ["global-state", "showBackground"]], "visible", "none"]
+            }
+        }]
+    })STYLE");
+
+    Layer* layer = style.getLayer("background");
+    ASSERT_TRUE(layer);
+    // Parsing the layer happens before it has access to the style's global
+    // state, but a valid expression must not emit a spurious warning.
+    EXPECT_TRUE(log.empty()) << log.unchecked();
+    // The default from the root "state" property applies.
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    style.setGlobalStateProperty("showBackground", false);
+    EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+
+    style.setGlobalStateProperty("showBackground", NullValue());
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    // Setting a constant visibility replaces the expression: further state
+    // changes no longer apply.
+    layer->setVisibility(VisibilityType::None);
+    style.setGlobalStateProperty("showBackground", true);
+    EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+}
+
+TEST(Style, VisibilityExpressionSetAtRuntime) {
+    util::RunLoop loop;
+    FixtureLog log;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "state": {"showBackground": {"default": false}},
+        "sources": {},
+        "layers": [{"id": "background", "type": "background"}]
+    })STYLE");
+
+    Layer* layer = style.getLayer("background");
+    ASSERT_TRUE(layer);
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    // A visibility expression set after the style has loaded must be
+    // evaluated against the current global state right away.
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    document.Parse<0>(R"(["case", ["to-boolean", ["global-state", "showBackground"]], "visible", "none"])");
+    ASSERT_FALSE(document.HasParseError());
+    const JSValue* json = &document;
+    auto error = layer->setProperty("visibility", conversion::Convertible(json));
+    EXPECT_FALSE(error);
+    EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+
+    // Runtime global state (not only style defaults) applies as well.
+    style.setGlobalStateProperty("showBackground", true);
+    ASSERT_TRUE(layer);
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    document.Parse<0>(R"(["case", ["to-boolean", ["global-state", "showBackground"]], "none", "visible"])");
+    ASSERT_FALSE(document.HasParseError());
+    error = layer->setProperty("visibility", conversion::Convertible(json));
+    EXPECT_FALSE(error);
+    EXPECT_EQ(VisibilityType::None, layer->getVisibility());
+    EXPECT_TRUE(log.empty()) << log.unchecked();
+}
+
+TEST(Style, LayerAddedAfterGlobalStateUpdateUsesCurrentState) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"STYLE({"version": 8, "sources": {}, "layers": []})STYLE");
+    style.setGlobalStateProperty("showLayer", false);
+
+    auto layer = std::make_unique<LineLayer>("line", "source");
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    document.Parse<0>(R"(["case", ["to-boolean", ["global-state", "showLayer"]], "visible", "none"])");
+    ASSERT_FALSE(document.HasParseError());
+    const JSValue* json = &document;
+    ASSERT_FALSE(layer->setProperty("visibility", conversion::Convertible(json)));
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
+
+    Layer* addedLayer = style.addLayer(std::move(layer));
+    ASSERT_NE(addedLayer, nullptr);
+    EXPECT_EQ(VisibilityType::None, addedLayer->getVisibility());
+}
+
+TEST(Style, VisibilityExpressionRejectsOtherDependencies) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "sources": {},
+        "layers": [{"id": "background", "type": "background"}]
+    })STYLE");
+
+    Layer* layer = style.getLayer("background");
+    ASSERT_TRUE(layer);
+
+    // Visibility expressions may only depend on the global state.
+    rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> document;
+    document.Parse<0>(R"(["case", [">", ["zoom"], 10], "visible", "none"])");
+    ASSERT_FALSE(document.HasParseError());
+    const JSValue* json = &document;
+    auto error = layer->setProperty("visibility", conversion::Convertible(json));
+    EXPECT_TRUE(error);
+    EXPECT_EQ(VisibilityType::Visible, layer->getVisibility());
 }
 
 TEST(Style, DuplicateSource) {
@@ -155,6 +367,31 @@ TEST(Style, LoadJSONCancelsPendingLoadURL) {
     // The style should still show our JSON content, not the URL content
     ASSERT_EQ("Test Style", style.getName());
     ASSERT_NE("Streets", style.getName());
+}
+
+TEST(Style, PublicLoadStateDoesNotWaitForResources) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<::StubFileSource>(
+        ResourceOptions::Default(), ClientOptions(), StubFileSource::ResponseType::Manual);
+    style::Style style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    EXPECT_FALSE(style.isLoaded());
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "sources": {
+            "pending": {
+                "type": "geojson",
+                "data": { "type": "FeatureCollection", "features": [] }
+            }
+        },
+        "layers": []
+    })STYLE");
+    EXPECT_TRUE(style.isLoaded());
+
+    style.loadURL("http://some-url");
+    EXPECT_FALSE(style.isLoaded());
 }
 
 TEST(Style, SourceImplsOrder) {

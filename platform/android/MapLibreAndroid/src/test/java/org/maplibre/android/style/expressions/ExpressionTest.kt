@@ -402,6 +402,14 @@ class ExpressionTest : BaseTest() {
 
     @Test
     @Throws(Exception::class)
+    fun testGlobalState() {
+        val expected = arrayOf<Any>("global-state", "chargerType")
+        val actual = Expression.globalState("chargerType").toArray()
+        Assert.assertTrue("expression should match", Arrays.deepEquals(expected, actual))
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun testId() {
         val expected = arrayOf<Any>("id")
         val actual = Expression.id().toArray()

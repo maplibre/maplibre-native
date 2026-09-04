@@ -58,6 +58,7 @@ private:
     void updateColorRamp();
 
     std::shared_ptr<PremultipliedImage> colorRamp;
+    std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
     gfx::Texture2DPtr colorRampTexture2D;
 
     gfx::ShaderGroupPtr lineShaderGroup;

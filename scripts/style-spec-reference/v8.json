@@ -28,6 +28,7 @@
     "center": {
       "type": "array",
       "value": "number",
+      "length": 2,
       "doc": "Default map center in longitude and latitude.  The style center will be used only if the map has not been positioned by other means (e.g. map options or user interaction).",
       "example": [
         -73.9749,
@@ -94,6 +95,26 @@
           "js": "5.0.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/2941",
           "ios": "https://github.com/maplibre/maplibre-native/issues/2941"
+        }
+      }
+    },
+    "state": {
+      "type": "state",
+      "default": {},
+      "doc": "An object used to define default values when using the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.",
+      "example": {
+        "chargerType": {
+          "default": ["CCS", "CHAdeMO", "Type2"]
+        },
+        "minPreferredChargingSpeed": {
+          "default": 50
+        }
+      },
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       }
     },
@@ -192,15 +213,14 @@
           "ios": "0.1.0"
         },
         "omit to use local fonts": {
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/3302",
+          "js": "5.11.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/165",
           "ios": "https://github.com/maplibre/maplibre-native/issues/165"
         }
       }
     },
     "font-faces": {
-      "type": "array",
-      "value": "fontFaces",
+      "type": "fontFaces",
       "doc": "The `font-faces` property can be used to specify what font files to use for rendering text. Font faces contain information needed to render complex texts such as [Devanagari](https://en.wikipedia.org/wiki/Devanagari), [Khmer](https://en.wikipedia.org/wiki/Khmer_script) among many others.<h2>Unicode range</h2>The optional `unicode-range` property can be used to only use a particular font file for characters within the specified unicode range(s). Its value should be an array of strings, each indicating a start and end of a unicode range, similar to the [CSS descriptor with the same name](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/unicode-range). This allows specifying multiple non-consecutive unicode ranges. When not specified, the default value is `U+0-10FFFF`, meaning the font file will be used for all unicode characters.\n\nRefer to the [Unicode Character Code Charts](https://www.unicode.org/charts/) to see ranges for scripts supported by Unicode. To see what unicode code-points are available in a font, use a tool like [FontDrop](https://fontdrop.info/).\n\n<h2>Font Resolution</h2>For every name in a symbol layer’s [`text-font`](./layers.md/#text-font) array, characters are matched if they are covered one of the by the font files in the corresponding entry of the `font-faces` map. Any still-unmatched characters then fall back to the [`glyphs`](./glyphs.md) URL if provided.\n\n<h2>Supported Fonts</h2>What type of fonts are supported is implementation-defined. Unsupported fonts are ignored.",
       "example": {
         "Noto Sans Regular": [{
@@ -223,7 +243,7 @@
       },
       "sdk-support": {
         "basic functionality": {
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/50",
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/6637",
           "android": "11.13.0",
           "ios": "6.18.0"
         }
@@ -363,9 +383,9 @@
           "js": "supported"
         },
         "mlt": {
-          "android": "https://github.com/maplibre/maplibre-native/issues/3721",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3721",
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/6258"
+          "android": "12.1.0",
+          "ios": "6.20.0",
+          "js": "5.12.0"
         }
       }
     },
@@ -634,7 +654,7 @@
       "doc": "Size of the tile buffer on each side. A value of 0 produces no buffer. A value of 512 produces a buffer as wide as the tile itself. Larger values produce fewer rendering artifacts near tile edges and slower performance."
     },
     "filter": {
-      "type": "*",
+      "type": "filter",
       "doc": "An expression for filtering features prior to processing them for rendering."
     },
     "tolerance": {
@@ -927,9 +947,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_fill": {
@@ -974,9 +1005,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_circle": {
@@ -1021,9 +1063,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_heatmap": {
@@ -1044,9 +1097,20 @@
           "js": "0.41.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_fill-extrusion": {
@@ -1081,9 +1145,20 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_line": {
@@ -1242,9 +1317,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_symbol": {
@@ -2259,6 +2345,7 @@
           "zoom"
         ]
       },
+      "example": ["center", "left", "right"],
       "property-type": "data-constant"
     },
     "text-variable-anchor-offset": {
@@ -2291,6 +2378,7 @@
           "feature"
         ]
       },
+      "example": ["top", [0, 4], "left", [3, 0], "bottom", [1, 1]],
       "property-type": "data-driven"
     },
     "text-anchor": {
@@ -2697,9 +2785,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_raster": {
@@ -2720,9 +2819,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_hillshade": {
@@ -2743,9 +2853,20 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_color-relief": {
@@ -2763,15 +2884,36 @@
       "doc": "Whether this layer is displayed.",
       "sdk-support": {
         "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3408",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+        },
+        "`global state` expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "filter": {
-    "type": "array",
-    "value": "*",
-    "doc": "A filter selects specific features from a layer."
+    "type": "boolean",
+    "doc": "A filter selects specific features from a layer.",
+    "expression": {
+      "interpolated": false,
+      "parameters": [
+        "zoom",
+        "feature"
+      ]
+    },
+    "property-type": "data-driven"
   },
   "filter_operator": {
     "type": "enum",
@@ -2908,12 +3050,12 @@
   },
   "expression": {
     "type": "array",
-    "value": "*",
+    "value": "expression_name",
     "minimum": 1,
-    "doc": "An expression defines a function that can be used for data-driven style properties or feature filters."
+    "doc": "An expression defines a function that can be used for data-driven style properties or feature filters. The first element of an expression array is a string naming the expression operator, e.g. `\"*\"` or `\"case\"`. Elements that follow (if any) are the _arguments_ to the expression. Each argument is either a literal value (a string, number, boolean, or `null`), or another expression array."
   },
   "expression_name": {
-    "doc": "",
+    "doc": "First element in an expression array. May be followed by a number of arguments.",
     "type": "enum",
     "values": {
       "let": {
@@ -2921,25 +3063,25 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["var_1_name", "var_1_value", "...", "var_n_name", "var_n_value", "expression"],
+              "parameters": ["var_name_1", "var_value_1", "...", "var_name_n", "var_value_n", "expression"],
               "output-type": "any"
             }
           ],
           "parameters": [
             {
-              "name": "var_i_name",
+              "name": "var_name_i",
               "type": "string literal",
-              "description": "The name of the i-th variable."
+              "doc": "The name of the i-th variable."
             },
             {
-              "name": "var_i_value",
+              "name": "var_value_i",
               "type": "any",
-              "description": "The value of the i-th variable."
+              "doc": "The value of the i-th variable."
             },
             {
               "name": "expression",
               "type": "any",
-              "description": "The expression within which the named variables can be referenced."
+              "doc": "The expression within which the named variables can be referenced."
             }
           ]
         },
@@ -2966,7 +3108,7 @@
             {
               "name": "var_name",
               "type": "string literal",
-              "description": "The name of the variable bound using `let`."
+              "doc": "The name of the variable bound using `let`."
             }
           ]
         },
@@ -3038,13 +3180,13 @@
             },
             {
               "name": "type",
-              "type": "\"string\" | \"number\" | \"boolean\"",
-              "description": "The asserted type of the input array."
+              "type": ["string", "number", "boolean"],
+              "doc": "The asserted type of the input array."
             },
             {
               "name": "length",
               "type": "number literal",
-              "description": "The asserted length of the input array."
+              "doc": "The asserted length of the input array."
             }
           ]
         },
@@ -3071,12 +3213,12 @@
             {
               "name": "index",
               "type": "number",
-              "description": "The index into `array`."
+              "doc": "The index into `array`."
             },
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The array of items to retrieve the specified item from."
+              "doc": "The array of items to retrieve the specified item from."
             }
           ]
         },
@@ -3107,22 +3249,22 @@
             {
               "name": "item",
               "type": "T",
-              "description": "The needle to search for within `array`."
+              "doc": "The needle to search for within `array`."
             },
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The haystack through which to search for `item`."
+              "doc": "The haystack through which to search for `item`."
             },
             {
               "name": "substring",
               "type": "string",
-              "description": "The needle to search for within `string`."
+              "doc": "The needle to search for within `string`."
             },
             {
               "name": "string",
               "type": "string",
-              "description": "The haystack through which to search for `substring`."
+              "doc": "The haystack through which to search for `substring`."
             }
           ]
         },
@@ -3153,27 +3295,27 @@
             {
               "name": "item",
               "type": "T",
-              "description": "The needle to search for within `array`."
+              "doc": "The needle to search for within `array`."
             },
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The haystack through which to search for `item`."
+              "doc": "The haystack through which to search for `item`."
             },
             {
               "name": "substring",
               "type": "string",
-              "description": "The needle to search for within `string`."
+              "doc": "The needle to search for within `string`."
             },
             {
               "name": "string",
               "type": "string",
-              "description": "The haystack through which to search for `substring`."
+              "doc": "The haystack through which to search for `substring`."
             },
             {
               "name": "from_index",
               "type": "number",
-              "description": "The index from where to begin the search."
+              "doc": "The index from where to begin the search."
             }
           ]
         },
@@ -3204,22 +3346,22 @@
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The original array from which to extract the subarray."
+              "doc": "The original array from which to extract the subarray."
             },
             {
               "name": "string",
               "type": "string",
-              "description": "The original string from which to extract the substring."
+              "doc": "The original string from which to extract the substring."
             },
             {
               "name": "start_index",
               "type": "number",
-              "description": "The inclusive index from which `slice` extracts items or characters from the subarray or substring."
+              "doc": "The inclusive index from which `slice` extracts items or characters from the subarray or substring."
             },
             {
               "name": "end_index",
               "type": "number",
-              "description": "The non-inclusive index up to which `slice` extracts items or characters from the subarray or substring."
+              "doc": "The non-inclusive index up to which `slice` extracts items or characters from the subarray or substring."
             }
           ]
         },
@@ -3254,7 +3396,7 @@
             {
               "name": "fallback",
               "type": "any",
-              "description": "The result when no condition evaluates to true."
+              "doc": "The result when no condition evaluates to true."
             }
           ]
         },
@@ -3280,23 +3422,23 @@
           "parameters": [
             {
               "name": "input",
-              "type": "string | number",
-              "description": "Any expression."
+              "type": ["string", "number"],
+              "doc": "Any expression."
             },
             {
               "name": "label_i",
-              "type": "string literal | number literal | array<string literal> | array<number literal>",
-              "description": "The i-th literal value or array of literal values to match the input against."
+              "type": ["string literal", "number literal", "array<string literal>", "array<number literal>"],
+              "doc": "The i-th literal value or array of literal values to match the input against."
             },
             {
               "name": "output_i",
               "type": "any",
-              "description": "The result when the i-th label is the first label to match the input."
+              "doc": "The result when the i-th label is the first label to match the input."
             },
             {
               "name": "fallback",
               "type": "any",
-              "description": "The result when no label matches the input."
+              "doc": "The result when no label matches the input."
             }
           ]
         },
@@ -3341,7 +3483,7 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input", "output_0", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "parameters": ["input", "output_0", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
               "output-type": "any"
             }
           ],
@@ -3349,22 +3491,22 @@
             {
               "name": "input",
               "type": "number",
-              "description": "Any numeric expression."
+              "doc": "Any numeric expression."
             },
             {
               "name": "output_0",
               "type": "any",
-              "description": "The result when the `input` is less than the first stop."
+              "doc": "The result when the `input` is less than the first stop."
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal",
-              "description": "The value of the i-th stop against which the `input` is compared."
+              "doc": "The value of the i-th stop against which the `input` is compared."
             },
             {
-              "name": "stop_i_output",
+              "name": "stop_output_i",
               "type": "any",
-              "description": "The result when the i-th stop is the last stop less than the `input`."
+              "doc": "The result when the i-th stop is the last stop less than the `input`."
             }
           ]
         },
@@ -3379,34 +3521,34 @@
         }
       },
       "interpolate": {
-        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, `color`, `array<color>`, or `projection`.\n\nInterpolation types:\n\n- `[\"linear\"]`, or an expression returning one of those types: Interpolates linearly between the pair of stops just less than and just greater than the input.\n\n- `[\"exponential\", base]`: Interpolates exponentially between the stops just less than and just greater than the input. `base` controls the rate at which the output increases: higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.\n\n- `[\"cubic-bezier\", x1, y1, x2, y2]`: Interpolates using the cubic bezier curve defined by the given control points.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, `color`, `array<color>`, or `projection`.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
-              "output-type": "number | array<number> | color | array<color> | projection"
+              "parameters": ["interpolation_type", "input", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
+              "output-type": ["number", "array<number>", "color", "array<color>", "projection"]
             }
           ],
           "parameters": [
             {
               "name": "interpolation_type",
-              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]",
-              "description": "The interpolation type."
+              "type": "interpolation",
+              "doc": "The interpolation type."
             },
             {
               "name": "input",
               "type": "number",
-              "description": "Any numeric expression."
+              "doc": "Any numeric expression."
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal",
-              "description": "The value of the i-th stop against which the `input` is compared."
+              "doc": "The value of the i-th stop against which the `input` is compared."
             },
             {
-              "name": "stop_i_output",
-              "type": "number | array<number> | color | array<color> | projection",
-              "description": "The output value corresponding to the i-th stop."
+              "name": "stop_output_i",
+              "type": ["number", "array<number>", "color", "array<color>", "projection"],
+              "doc": "The output value corresponding to the i-th stop."
             }
           ]
         },
@@ -3425,26 +3567,27 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
-              "output-type": "color | array<color>"
+              "parameters": ["interpolation_type", "input", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
+              "output-type": ["color", "array<color>"]
             }
           ],
           "parameters": [
             {
               "name": "interpolation_type",
-              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]"
+              "type": "interpolation",
+              "doc": "The interpolation type."
             },
             {
               "name": "input",
               "type": "number"
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal"
             },
             {
-              "name": "stop_i_output",
-              "type": "color | array<color>"
+              "name": "stop_output_i",
+              "type": ["color", "array<color>"]
             }
           ]
         },
@@ -3463,26 +3606,27 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
-              "output-type": "color | array<color>"
+              "parameters": ["interpolation_type", "input", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
+              "output-type": ["color", "array<color>"]
             }
           ],
           "parameters": [
             {
               "name": "interpolation_type",
-              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]"
+              "type": "interpolation",
+              "doc": "The interpolation type."
             },
             {
               "name": "input",
               "type": "number"
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal"
             },
             {
-              "name": "stop_i_output",
-              "type": "color | array<color>"
+              "name": "stop_output_i",
+              "type": ["color", "array<color>"]
             }
           ]
         },
@@ -3687,7 +3831,7 @@
         }
       },
       "collator": {
-        "doc": "Returns a `collator` for use in locale-dependent comparison operations. The `case-sensitive` and `diacritic-sensitive` options default to `false`. The `locale` argument specifies the IETF language tag of the locale to use. If none is provided, the default locale is used. If the requested locale is not available, the `collator` will use a system-defined fallback locale. Use `resolved-locale` to test the results of locale fallback behavior.",
+        "doc": "Returns a `collator` for use in locale-dependent comparison operations. Use `resolved-locale` to test the results of locale fallback behavior.",
         "syntax": {
           "overloads": [
             {
@@ -3698,7 +3842,25 @@
           "parameters": [
             {
               "name": "options",
-              "type": "{ \"case-sensitive\"?: boolean, \"diacritic-sensitive\"?: boolean, \"locale\"?: string }"
+              "type": {
+                "case-sensitive": {
+                  "type": "boolean",
+                  "default": false,
+                  "example": true,
+                  "doc": "If characters of different case-ness are considered different"
+                },
+                "diacritic-sensitive": {
+                  "type": "boolean",
+                  "default": false,
+                  "example": true,
+                  "doc": "If characters with different diacritics are considered different"
+                },
+                "locale": {
+                  "type": "string",
+                  "example": "en",
+                  "doc": "IETF language tag of the locale to use. If none is provided, the default locale is used. If the requested locale is not available, the `collator` will use a system-defined fallback locale."
+                }
+              }
             }
           ]
         },
@@ -3713,7 +3875,7 @@
         }
       },
       "format": {
-        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object that supports the following properties:\n\n- `\"text-font\"`: Overrides the font stack specified by the root layout property.\n\n- `\"text-color\"`: Overrides the color specified by the root paint property.\n\n- `\"font-scale\"`: Applies a scaling factor on `text-size` as specified by the root layout property.\n\n- `\"vertical-align\"`: Aligns vertically text section or image in relation to the row it belongs to. Possible values are: \n\t- `\"bottom\"` *default*: align the bottom of this section with the bottom of other sections.\n<img alt=\"Visual representation of bottom alignment\" src=\"https://github.com/user-attachments/assets/0474a2fd-a4b2-417c-9187-7a13a28695bc\"/>\n\t- `\"center\"`: align the center of this section with the center of other sections.\n<img alt=\"Visual representation of center alignment\" src=\"https://github.com/user-attachments/assets/92237455-be6d-4c5d-b8f6-8127effc1950\"/>\n\t- `\"top\"`: align the top of this section with the top of other sections.\n<img alt=\"Visual representation of top alignment\" src=\"https://github.com/user-attachments/assets/45dccb28-d977-4abb-a006-4ea9792b7c53\"/>\n\t- Refer to [the design proposal](https://github.com/maplibre/maplibre-style-spec/issues/832) for more details.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
+        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
         "syntax": {
           "overloads": [
             {
@@ -3724,11 +3886,44 @@
           "parameters": [
             {
               "name": "input_i",
-              "type": "string | image"
+              "type": ["string", "image"]
             },
             {
               "name": "style_overrides_i",
-              "type": "{ \"text-font\"?: string, \"text-color\"?: color, \"font-scale\"?: number, \"vertical-align\"?: \"bottom\" | \"center\" | \"top\" }"
+              "type": {
+                "text-font": {
+                  "type": "string",
+                  "doc": "Overrides the font stack specified by the root layout property.",
+                  "example": "Arial Unicode MS Regular"
+                },
+                "text-color": {
+                  "type": "color",
+                  "doc": "Overrides the color specified by the root paint property.",
+                  "example": "#333"
+                },
+                "font-scale": {
+                  "type": "number",
+                  "doc":"Applies a scaling factor on `text-size` as specified by the root layout property.",
+                  "example": 1.2
+                },
+                "vertical-align": {
+                  "type": "enum",
+                  "doc": "Aligns a vertical text section or image in relation to the row it belongs to. Refer to [the design proposal](https://github.com/maplibre/maplibre-style-spec/issues/832) for more details.",
+                  "default": "bottom",
+                  "example": "bottom",
+                  "values": {
+                    "bottom": {
+                      "doc": "align the bottom of this section with the bottom of other sections.\n![Visual representation of bottom alignment](https://github.com/user-attachments/assets/0474a2fd-a4b2-417c-9187-7a13a28695bc)"
+                    },
+                    "center": {
+                      "doc": "align the center of this section with the center of other sections.\n![Visual representation of center alignment](https://github.com/user-attachments/assets/92237455-be6d-4c5d-b8f6-8127effc1950)"
+                    },
+                    "top": {
+                      "doc": "align the top of this section with the top of other sections.\n![Visual representation of top alignment](https://github.com/user-attachments/assets/45dccb28-d977-4abb-a006-4ea9792b7c53)"
+                    }
+                  }
+                }
+              }
             }
           ]
         },
@@ -3793,8 +3988,35 @@
           }
         }
       },
+      "global-state": {
+        "doc": "Retrieves a property value from global state that can be set with platform-specific APIs. Defaults can be provided using the [`state`](https://maplibre.org/maplibre-style-spec/root/#state) root property. Returns `null` if no value nor default value is set for the retrieved property.",
+        "group": "Lookup",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string literal",
+              "doc": "The name of the global state property to retrieve."
+            }
+          ]
+        },
+        "example": ["global-state", "someProperty"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.6.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+          }
+        }
+      },
       "number-format": {
-        "doc": "Converts the input number into a string representation using the providing formatting rules. If set, the `locale` argument specifies the locale to use, as a BCP 47 language tag. If set, the `currency` argument specifies an ISO 4217 code to use for currency-style formatting. If set, the `min-fraction-digits` and `max-fraction-digits` arguments specify the minimum and maximum number of fractional digits to include.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "doc": "Converts the input number into a string representation using the provided format_options.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
         "syntax": {
           "overloads": [
             {
@@ -3805,11 +4027,39 @@
           "parameters": [
             {
               "name": "input",
-              "type": "number"
+              "type": "number",
+              "doc": "number to format"
             },
             {
               "name": "format_options",
-              "type": "{ \"locale\"?: string, \"currency\"?: string, \"min-fraction-digits\"?: number, \"max-fraction-digits\"?: number }"
+              "type": {
+                "locale": {
+                  "type": "string",
+                  "example": "en",
+                  "doc": "Specifies the locale to use, as a BCP 47 language tag"
+                },
+                "currency": {
+                  "type": "string",
+                  "example": "USD",
+                  "doc": "An ISO 4217 code to use for currency-style formatting"
+                },
+                "unit": {
+                  "type": "string",
+                  "example": "meter",
+                  "doc": "A CLDR or ECMA-402 unit to use for quantity-style formatting"
+                },
+                "min-fraction-digits": {
+                  "type": "number",
+                  "example": 1,
+                  "doc": "Minimum number of fractional digits to include"
+                },
+                "max-fraction-digits": {
+                  "type": "number",
+                  "example": 2,
+                  "doc": "Maximum number of fractional digits to include"
+                }
+              },
+              "doc": "Format options for the number"
             }
           ]
         },
@@ -3820,6 +4070,11 @@
             "js": "0.54.0",
             "android": "8.4.0",
             "ios": "supported"
+          },
+          "`unit` property": {
+            "js": "https://github.com/maplibre/maplibre-gl-js/issues/7024",
+            "android": "https://github.com/maplibre/maplibre-native/issues/4071",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/4071"
           }
         }
       },
@@ -3988,7 +4243,7 @@
         }
       },
       "rgba": {
-        "doc": "Creates a color value from red, green, blue components, which must range between 0 and 255, and an alpha component which must range between 0 and 1. If any component is out of range, the expression is an error.",
+        "doc": "Creates a color value from red, green, blue components, which must range between 0 and 255, and an alpha component which must range between zero and one. If any component is out of range, the expression is an error.",
         "syntax": {
           "overloads": [
             {
@@ -4038,12 +4293,12 @@
             {
               "name": "property_name",
               "type": "string",
-              "description": "The name of the property to retrieve the value of."
+              "doc": "The name of the property to retrieve the value of."
             },
             {
               "name": "object",
               "type": "object",
-              "description": "The object to retrieve the value from."
+              "doc": "The object to retrieve the value from."
             }
           ]
         },
@@ -4070,12 +4325,12 @@
             {
               "name": "property_name",
               "type": "string",
-              "description": "The name of the property to test for the presence of."
+              "doc": "The name of the property to test for the presence of."
             },
             {
               "name": "object",
               "type": "object",
-              "description": "The object in which to test for the presence of the `property_name` property."
+              "doc": "The object in which to test for the presence of the `property_name` property."
             }
           ]
         },
@@ -4101,7 +4356,7 @@
           "parameters": [
             {
               "name": "array_or_string",
-              "type": "array | string"
+              "type": ["array", "string"]
             }
           ]
         },
@@ -4370,17 +4625,17 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The number from which to subtract `input_2`."
+              "doc": "The number from which to subtract `input_2`."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The number to subtract from `input_1`."
+              "doc": "The number to subtract from `input_1`."
             },
             {
               "name": "single_input",
               "type": "number",
-              "description": "The number to subtract from 0."
+              "doc": "The number to subtract from 0."
             }
           ]
         },
@@ -4407,12 +4662,12 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The dividend."
+              "doc": "The dividend."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The divisor."
+              "doc": "The divisor."
             }
           ]
         },
@@ -4439,12 +4694,12 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The dividend."
+              "doc": "The dividend."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The divisor."
+              "doc": "The divisor."
             }
           ]
         },
@@ -4471,12 +4726,12 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The base."
+              "doc": "The base."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The exponent."
+              "doc": "The exponent."
             }
           ]
         },
@@ -4503,7 +4758,7 @@
             {
               "name": "input",
               "type": "number",
-              "description": "The radicand."
+              "doc": "The radicand."
             }
           ]
         },
@@ -4954,7 +5209,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -4994,7 +5249,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5038,7 +5293,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5082,7 +5337,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5126,7 +5381,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5170,7 +5425,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5423,6 +5678,66 @@
             "js": "0.45.0",
             "android": "6.5.0",
             "ios": "4.2.0"
+          }
+        }
+      },
+      "split": {
+        "doc": "Returns an array of substrings formed by splitting an input string by a separator string.",
+        "group": "String",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "separator"],
+              "output-type": "array<string>"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            },
+            {
+              "name": "separator",
+              "type": "string"
+            }
+          ]
+        },
+        "example": ["split", ["get", "name"], ";"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.20.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/4133",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/4133"
+          }
+        }
+      },
+      "join": {
+        "doc": "Returns a string formed by concatenating the elements of the input array, inserting a separator between each element.",
+        "group": "String",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "separator"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "array"
+            },
+            {
+              "name": "separator",
+              "type": "string"
+            }
+          ]
+        },
+        "example": ["join", ["split", ["get", "name"], ";"], "\n"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.20.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/4133",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/4133"
           }
         }
       }
@@ -7870,6 +8185,151 @@
     "*": {
       "type": "string",
       "doc": "A name of a feature property to use as ID for feature state."
+    }
+  },
+  "interpolation": {
+    "type": "array",
+    "value": "interpolation_name",
+    "minimum": 1,
+    "doc": "An interpolation defines how to transition between items. The first element of an interpolation array is a string naming the interpolation operator, e.g. `\"linear\"` or `\"exponential\"`. Elements that follow (if any) are the _arguments_ to the interpolation."
+  },
+  "interpolation_name": {
+    "doc": "First element in an interpolation array. May be followed by a number of arguments.",
+    "type": "enum",
+    "values": {
+      "linear": {
+        "doc": "Interpolates linearly between the pair of stops just less than and just greater than the input",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "interpolation"
+            }
+          ],
+          "parameters": []
+        },
+        "example": ["linear"],
+        "sdk-support": {
+          "interpolate": {
+            "js": "0.42.0",
+            "android": "6.0.0",
+            "ios": "4.0.0"
+          },
+          "interpolate-hcl": {
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          },
+          "interpolate-lab":{
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          }
+        }
+      },
+      "exponential": {
+        "doc": "Interpolates exponentially between the stops just less than and just greater than the input.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [
+                "base"
+              ],
+              "output-type": "interpolation"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "base",
+              "type": "number literal",
+              "doc": "rate at which the output increases in `f(x) = x^r`. Values higher than 1 increase, close to one behaves linearly, and below one decrease."
+            }
+          ]
+        },
+        "example": [
+          "exponential",
+          2
+        ],
+        "sdk-support": {
+          "interpolate": {
+            "js": "0.42.0",
+            "android": "6.0.0",
+            "ios": "4.0.0"
+          },
+          "interpolate-hcl": {
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          },
+          "interpolate-lab":{
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          }
+        }
+      },
+      "cubic-bezier": {
+        "doc": "Interpolates using the cubic bézier curve defined by the given control points.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [
+                "x1",
+                "y1",
+                "x2",
+                "y2"
+              ],
+              "output-type": "interpolation"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "x1",
+              "type": "number literal",
+              "doc": "X-coordinate of the first control point. Must be between zero and one for a valid monotonic easing curve. Controls how quickly the curve speeds up at the beginning."
+            },
+            {
+              "name": "y1",
+              "type": "number literal",
+              "doc": "Y-coordinate of the first control point. Typically between zero and one, but may exceed this range for overshoot effects. Influences the starting slope of the curve."
+            },
+            {
+              "name": "x2",
+              "type": "number literal",
+              "doc": "X-coordinate of the second control point. Must be between zero and one for a valid monotonic easing curve. Controls when the curve begins to decelerate toward the end."
+            },
+            {
+              "name": "y2",
+              "type": "number literal",
+              "doc": "Y-coordinate of the second control point. Typically between zero and one, but may exceed this range for overshoot effects. Influences the ending slope of the curve."
+            }
+          ]
+        },
+        "example": [
+          "cubic-bezier",
+          2,
+          3,
+          2,
+          3
+        ],
+        "sdk-support": {
+          "interpolate": {
+            "js": "0.42.0",
+            "android": "6.0.0",
+            "ios": "4.0.0"
+          },
+          "interpolate-hcl": {
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          },
+          "interpolate-lab":{
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          }
+        }
+      }
     }
   }
 }

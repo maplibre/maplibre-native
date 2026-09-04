@@ -291,7 +291,8 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
         }
 
         if (options.filter && !(*options.filter)(style::expression::EvaluationContext{static_cast<float>(tileID.z),
-                                                                                      geometryTileFeature.get()})) {
+                                                                                      geometryTileFeature.get()}
+                                                     .withGlobalState(options.globalState.get()))) {
             continue;
         }
 

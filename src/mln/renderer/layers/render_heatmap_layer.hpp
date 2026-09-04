@@ -60,6 +60,7 @@ private:
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
     std::shared_ptr<PremultipliedImage> colorRamp;
+    std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
     SegmentVector segments;
 

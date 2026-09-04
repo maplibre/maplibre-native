@@ -83,6 +83,11 @@ public:
     virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}
     virtual void setMask(TileMask&&) {}
 
+    // Notifies this tile of the style's current global state, used to
+    // evaluate "global-state" expressions during layout. Must be called
+    // before setLayers() to take effect for the subsequent re-layout.
+    virtual void setGlobalState(const std::shared_ptr<const GlobalStateMap>&) {}
+
     virtual void queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>& result,
                                        const GeometryCoordinates& queryGeometry,
                                        const TransformState&,

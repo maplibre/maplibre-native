@@ -2,6 +2,7 @@
 
 #include <mln/map/mode.hpp>
 #include <mln/actor/scheduler.hpp>
+#include <mln/util/feature.hpp>
 
 #include <memory>
 #include <numbers>
@@ -39,6 +40,7 @@ public:
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
+    std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     bool isUpdateSynchronous = false;
 };
 

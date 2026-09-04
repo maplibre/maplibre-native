@@ -14,6 +14,8 @@ import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import org.maplibre.android.R
 import org.maplibre.android.attribution.AttributionLayout
 import org.maplibre.android.attribution.AttributionMeasure
@@ -42,7 +44,13 @@ open class MapSnapshotter(context: Context, options: Options) {
     @Keep
     private val nativePtr: Long = 0
     private val context: Context
-    private var fullyLoaded = false
+    // Not cached: core resets the load state whenever a new style is set.
+    private val styleLoaded: Boolean
+        get() = nativeIsStyleLoaded()
+
+    // Sources, layers, and images from Options.builder are applied to the
+    // first loaded style only.
+    private var builderApplied = false
     private val options: Options
     private var callback: SnapshotReadyCallback? = null
     private var errorHandler: ErrorHandler? = null
@@ -436,6 +444,9 @@ open class MapSnapshotter(context: Context, options: Options) {
     @Keep
     external fun setStyleJson(styleJson: String?)
 
+    @Keep
+    private external fun nativeIsStyleLoaded(): Boolean
+
     /**
      * Adds the layer to the map. The layer must be newly created and not added to the snapshotter before
      *
@@ -690,8 +701,8 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     protected fun onDidFinishLoadingStyle() {
-        if (!fullyLoaded) {
-            fullyLoaded = true
+        if (!builderApplied) {
+            builderApplied = true
             val builder = options.builder
             if (builder != null) {
                 for (source in builder.sources) {
@@ -726,7 +737,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     fun getLayer(layerId: String): Layer? {
         checkThread()
-        return if (fullyLoaded) nativeGetLayer(layerId) else null
+        return if (styleLoaded) nativeGetLayer(layerId) else null
     }
 
     /**
@@ -737,7 +748,39 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     fun getSource(sourceId: String): Source? {
         checkThread()
-        return if (fullyLoaded) nativeGetSource(sourceId) else null
+        return if (styleLoaded) nativeGetSource(sourceId) else null
+    }
+
+    /**
+     * Set a global state property on the style that is used by the snapshotter, used by the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
+     *
+     * Setting a null value (or [com.google.gson.JsonNull]) resets the property to the default
+     * defined in the style's root `state` property, or to null if there is none.
+     *
+     * Only takes effect once the style is loaded; when the style is set by URL, call this
+     * from [Observer.onDidFinishLoadingStyle].
+     *
+     * @param name the name of the state property
+     * @param value the new value of the state property
+     */
+    fun setGlobalStateProperty(name: String, value: JsonElement?) {
+        checkThread()
+        if (styleLoaded) {
+            nativeSetGlobalStateProperty(name, value)
+        }
+    }
+
+    /**
+     * Get a snapshot of the current global state of the style that is used by the snapshotter,
+     * used by the
+     * [global-state](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.
+     *
+     * @return the current global state, or an empty object if the style is not loaded yet
+     */
+    fun getGlobalState(): JsonObject {
+        checkThread()
+        return if (styleLoaded) nativeGetGlobalState() else JsonObject()
     }
 
     /**
@@ -805,6 +848,12 @@ open class MapSnapshotter(context: Context, options: Options) {
 
     @Keep
     private external fun nativeGetSource(sourceId: String): Source
+
+    @Keep
+    private external fun nativeSetGlobalStateProperty(name: String, value: JsonElement?)
+
+    @Keep
+    private external fun nativeGetGlobalState(): JsonObject
 
     @Keep
     @Throws(Throwable::class)

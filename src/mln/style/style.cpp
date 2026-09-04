@@ -39,6 +39,10 @@ std::string Style::getURL() const {
     return impl->getURL();
 }
 
+bool Style::isLoaded() const {
+    return impl->loaded;
+}
+
 std::string Style::getName() const {
     return impl->getName();
 }
@@ -69,6 +73,15 @@ void Style::setLight(std::unique_ptr<Light> light) {
 Light* Style::getLight() {
     impl->mutated = true;
     return impl->getLight();
+}
+
+GlobalStateMap Style::getGlobalState() const {
+    return impl->getGlobalState();
+}
+
+void Style::setGlobalStateProperty(const std::string& name, const Value& value) {
+    impl->mutated = true;
+    impl->setGlobalStateProperty(name, value);
 }
 
 const Light* Style::getLight() const {

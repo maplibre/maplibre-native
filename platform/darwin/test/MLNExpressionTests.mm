@@ -922,6 +922,16 @@ using namespace std::string_literals;
   }
 }
 
+- (void)testGlobalStateExpressionObject {
+  {
+    NSArray *jsonExpression = @[ @"global-state", @"chargerType" ];
+    NSExpression *expression = [NSExpression expressionWithMLNJSONObject:jsonExpression];
+    XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, jsonExpression);
+    XCTAssertThrowsSpecificNamed([expression expressionValueWithObject:nil context:nil],
+                                 NSException, NSInvalidArgumentException);
+  }
+}
+
 - (void)testStringFormattingExpressionObject {
   NSArray *arguments = @[ MLNConstantExpression(@"MacDonald") ];
   {

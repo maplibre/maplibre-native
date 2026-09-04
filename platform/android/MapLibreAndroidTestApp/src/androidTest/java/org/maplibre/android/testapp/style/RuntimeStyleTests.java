@@ -8,6 +8,10 @@ import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+
+import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.BackgroundLayer;
 import org.maplibre.android.style.layers.CircleLayer;
@@ -74,6 +78,69 @@ public class RuntimeStyleTests extends EspressoTest {
   public void testGetAddRemoveLayer() {
     validateTestSetup();
     onView(withId(R.id.mapView)).perform(new AddRemoveLayerAction());
+  }
+
+  @Test
+  public void testVisibilityExpression() {
+    validateTestSetup();
+    onView(withId(R.id.mapView)).perform(new BaseViewAction() {
+      @Override
+      public void perform(UiController uiController, View view) {
+        Style style = maplibreMap.getStyle();
+        assertNotNull(style);
+        Layer layer = style.getLayers().get(0);
+
+        layer.setProperties(PropertyFactory.visibility(
+          Expression.switchCase(
+            Expression.toBool(Expression.globalState("showLayer")),
+            Expression.literal(Property.VISIBLE),
+            Expression.literal(Property.NONE))));
+        assertEquals(Property.NONE, layer.getVisibility().getValue());
+
+        style.setGlobalStateProperty("showLayer", new JsonPrimitive(true));
+        assertEquals(Property.VISIBLE, layer.getVisibility().getValue());
+
+        style.setGlobalStateProperty("showLayer", new JsonPrimitive(false));
+        assertEquals(Property.NONE, layer.getVisibility().getValue());
+
+        // The expression can be read back; parsing wraps the untyped state
+        // value with a string type assertion.
+        layer.setProperties(PropertyFactory.visibility(Expression.globalState("vis")));
+        Expression expression = layer.getVisibilityExpression();
+        assertNotNull(expression);
+        assertEquals(
+          java.util.Arrays.deepToString(new Object[] {"string", new Object[] {"global-state", "vis"}}),
+          java.util.Arrays.deepToString(expression.toArray()));
+
+        // A constant visibility has no expression.
+        layer.setProperties(PropertyFactory.visibility(Property.VISIBLE));
+        assertNull(layer.getVisibilityExpression());
+      }
+    });
+  }
+
+  @Test
+  public void testGlobalState() {
+    validateTestSetup();
+    onView(withId(R.id.mapView)).perform(new BaseViewAction() {
+      @Override
+      public void perform(UiController uiController, View view) {
+        Style style = maplibreMap.getStyle();
+        assertNotNull(style);
+
+        style.setGlobalStateProperty("showLabels", new JsonPrimitive(true));
+        assertEquals(new JsonPrimitive(true), style.getGlobalState().get("showLabels"));
+
+        style.setGlobalStateProperty("showLabels", new JsonPrimitive(false));
+        assertEquals(new JsonPrimitive(false), style.getGlobalState().get("showLabels"));
+
+        // A null value resets the property to the style's default, which is
+        // null since the test style defines no "state" property.
+        style.setGlobalStateProperty("showLabels", null);
+        JsonElement reset = style.getGlobalState().get("showLabels");
+        assertTrue(reset == null || reset.isJsonNull());
+      }
+    });
   }
 
   @Test

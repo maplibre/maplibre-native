@@ -62,6 +62,25 @@ RendererObserver& nullObserver() {
     return observer;
 }
 
+// The keys whose values differ between two global state snapshots. Values of
+// unchanged keys are copied verbatim between snapshots, so exact equality is
+// sufficient here.
+std::set<std::string> diffGlobalStateKeys(const GlobalStateMap& previous, const GlobalStateMap& current) {
+    std::set<std::string> keys;
+    for (const auto& entry : current) {
+        const auto it = previous.find(entry.first);
+        if (it == previous.end() || !(it->second == entry.second)) {
+            keys.insert(entry.first);
+        }
+    }
+    for (const auto& entry : previous) {
+        if (current.find(entry.first) == current.end()) {
+            keys.insert(entry.first);
+        }
+    }
+    return keys;
+}
+
 class RenderTreeImpl final : public RenderTree {
 public:
     RenderTreeImpl(std::unique_ptr<RenderTreeParameters> parameters_,
@@ -183,8 +202,19 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const auto transitionDuration = transitionOptions.duration.value_or(
         isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero());
 
+    const bool globalStateChanged = globalState != updateParameters->globalState;
+    std::shared_ptr<const std::set<std::string>> changedGlobalStateKeys;
+    if (globalStateChanged && globalState && updateParameters->globalState) {
+        changedGlobalStateKeys = std::make_shared<const std::set<std::string>>(
+            diffGlobalStateKeys(*globalState, *updateParameters->globalState));
+    }
+    globalState = updateParameters->globalState;
+
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
+    evaluationParameters.globalState = globalState;
+    evaluationParameters.globalStateChanged = globalStateChanged;
+    evaluationParameters.changedGlobalStateKeys = changedGlobalStateKeys;
 
     TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
                                   .debugOptions = updateParameters->debugOptions,
@@ -201,7 +231,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                   .tileLodMode = updateParameters->tileLodMode,
-                                  .dynamicTextureAtlas = dynamicTextureAtlas};
+                                  .dynamicTextureAtlas = dynamicTextureAtlas,
+                                  .globalState = globalState};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);
@@ -214,7 +245,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         renderLight.transition(transitionParameters);
     }
 
-    if (lightChanged || zoomChanged || renderLight.hasTransition()) {
+    if (lightChanged || zoomChanged || globalStateChanged || renderLight.hasTransition()) {
         renderLight.evaluate(evaluationParameters);
     }
 
@@ -315,8 +346,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
                                            (layer.getStyleDependencies() & Dependency::Zoom);
 
-        if (layerAddedOrChanged || zoomChangedAndMatters || evaluationParameters.hasCrossfade ||
-            layer.hasTransition()) {
+        // Similarly, only re-evaluate on a global state change if the layer
+        // references the global state.
+        const bool globalStateChangedAndMatters = globalStateChanged && !layerAddedOrChanged &&
+                                                  (layer.getStyleDependencies() & Dependency::GlobalState);
+
+        if (layerAddedOrChanged || zoomChangedAndMatters || globalStateChangedAndMatters ||
+            evaluationParameters.hasCrossfade || layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
@@ -383,9 +419,29 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
+                    // A global state change requires a relayout of this
+                    // layer's source if one of the changed state properties
+                    // is referenced by anything that is baked into the tile's
+                    // buckets: the filter, layout properties, or data-driven
+                    // paint properties (i.e. expressions retained in the
+                    // evaluated properties).
+                    const bool globalStateRequiresRelayout = [&] {
+                        if (!globalStateChanged || !((layer.baseImpl->getLayoutDependencies() |
+                                                      layer.evaluatedProperties->getEvaluatedDependencies()) &
+                                                     expression::Dependency::GlobalState)) {
+                            return false;
+                        }
+                        if (!changedGlobalStateKeys) {
+                            return true;
+                        }
+                        std::set<std::string> refs;
+                        layer.baseImpl->collectLayoutGlobalStateRefs(refs);
+                        layer.evaluatedProperties->collectEvaluatedGlobalStateRefs(refs);
+                        return expression::globalStateRefsIntersect(&refs, changedGlobalStateKeys.get());
+                    }();
                     sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
                                            constantsMaskChanged.contains(layerId) ||
-                                           hasLayoutDifference(layerDiff, layerId));
+                                           hasLayoutDifference(layerDiff, layerId) || globalStateRequiresRelayout);
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
                         if (zoomFitsLayer) {
@@ -627,9 +683,12 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
 
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const ScreenLineString& geometry,
-    const RenderedQueryOptions& options,
+    const RenderedQueryOptions& options_,
     const std::unordered_map<std::string, const RenderLayer*>& layers) const {
     MLN_TRACE_FUNC();
+
+    RenderedQueryOptions options = options_;
+    options.globalState = globalState;
 
     std::unordered_set<std::string> sourceIDs;
     std::unordered_map<std::string, const RenderLayer*> filteredLayers;
@@ -700,11 +759,14 @@ std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineS
 }
 
 std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& sourceID,
-                                                             const SourceQueryOptions& options) const {
+                                                             const SourceQueryOptions& options_) const {
     MLN_TRACE_FUNC();
 
     const RenderSource* source = getRenderSource(sourceID);
     if (!source) return {};
+
+    SourceQueryOptions options = options_;
+    options.globalState = globalState;
 
     return source->querySourceFeatures(options);
 }

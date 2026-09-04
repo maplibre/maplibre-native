@@ -104,6 +104,29 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) BOOL performsPlacementTransitions;
 
+// MARK: Global State
+
+/**
+ A snapshot of the map's current global state, used by the `global-state`
+ style expression.
+
+ Initial values are the defaults defined in the style's root `state` property.
+ */
+@property (nonatomic, readonly, copy) NSDictionary<NSString *, id> *globalState;
+
+/**
+ Sets a global state property, used by the `global-state` style expression.
+
+ Setting a value of `nil` or `NSNull` resets the property to the default
+ defined in the style's root `state` property, or to null if there is none.
+
+ @param value The new value of the state property. May be a Foundation
+    instance corresponding to a JSON value: `NSString`, `NSNumber`, `NSArray`,
+    `NSDictionary`, or `NSNull`.
+ @param propertyName The name of the state property.
+ */
+- (void)setGlobalStateValue:(nullable id)value forProperty:(NSString *)propertyName;
+
 /**
  Returns a source with the given identifier in the current style.
 

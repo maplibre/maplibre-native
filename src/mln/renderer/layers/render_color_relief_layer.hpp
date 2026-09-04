@@ -52,6 +52,7 @@ private:
     // Color ramp data
     uint32_t colorRampSize = 256;
     bool colorRampChanged = true;
+    std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
 
     // FIX 1: Changed type and name to correctly hold float elevation data
     std::shared_ptr<std::vector<float>> elevationStopsData; // Elevation values for each stop

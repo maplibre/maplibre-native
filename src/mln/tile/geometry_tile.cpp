@@ -192,6 +192,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
                            TileObserver* observer_)
     : Tile(Kind::Geometry, id_, std::move(sourceID_), observer_),
       ImageRequestor(parameters.imageManager),
+      globalState(parameters.globalState),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.isUpdateSynchronous,
@@ -322,8 +323,15 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     }
 
     ++correlationID;
-    worker.self().invoke(
-        &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(&GeometryTileWorker::setLayers,
+                         std::move(impls),
+                         globalState,
+                         imageManager->getAvailableImages(),
+                         correlationID);
+}
+
+void GeometryTile::setGlobalState(const std::shared_ptr<const GlobalStateMap>& globalState_) {
+    globalState = globalState_;
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -560,7 +568,8 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
 
                 // Apply filter, if any
                 if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
-                                          static_cast<float>(this->id.overscaledZ), feature.get()})) {
+                                          static_cast<float>(this->id.overscaledZ), feature.get()}
+                                                             .withGlobalState(options.globalState.get()))) {
                     continue;
                 }
 
