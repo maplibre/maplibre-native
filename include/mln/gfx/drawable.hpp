@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/gfx/drawable_data.hpp>
+#include <mln/plugin/plugin_api.h>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gfx/uniform_buffer.hpp>
 #include <mln/tile/tile_id.hpp>
@@ -69,6 +70,9 @@ public:
 
     /// Draw the drawable
     virtual void draw(PaintParameters&) const = 0;
+
+    /// Append backend buffer views for plugin-aware geometry metadata.
+    virtual void collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>&) const {}
 
     /// Drawable name is used for debugging and troubleshooting
     const std::string& getName() const { return name; }

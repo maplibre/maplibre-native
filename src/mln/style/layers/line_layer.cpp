@@ -798,7 +798,8 @@ std::optional<Error> LineLayer::setPropertyInternal(const std::string& name, con
 }
 
 StyleProperty LineLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> LineLayer::mutableBaseImpl() const {

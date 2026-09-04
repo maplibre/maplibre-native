@@ -999,32 +999,31 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/work_request.cpp
 )
 list(APPEND SRC_FILES
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer.hpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_render.hpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_factory.hpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer.cpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_render.cpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_drawable_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_host.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_layer_host.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_registry.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_registry.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_shader.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_shader.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/layout/plugin_layout.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/layout/plugin_layout.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/buckets/plugin_bucket.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/buckets/plugin_bucket.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/layers/plugin_style_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/layers/plugin_style_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/plugin_property.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/plugin_property.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_plugin_style_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_plugin_style_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/plugin_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/plugin_layer_tweaker.cpp
 )
 
 include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/metal.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/vulkan.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/webgpu.cmake)
-
-list(APPEND
-    SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mln/layermanager/custom_drawable_layer_factory.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_custom_drawable_layer.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_custom_drawable_layer.hpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer_impl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer_impl.hpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer.cpp
-)
 
 # Harfbuzz text shaping
 set(SHAPE_TARGETS, "")

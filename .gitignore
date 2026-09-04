@@ -5,6 +5,7 @@
 /platform/android/armeabi-v7a
 /platform/android/MapLibreAndroid/build
 /platform/android/MapLibrePlugin/build
+/platform/android/MapLibrePlugin/gradle/gradle-daemon-jvm.properties
 /platform/android/MapLibreAndroidTestApp/build
 /platform/android/buildSrc/build
 /platform/android/x86

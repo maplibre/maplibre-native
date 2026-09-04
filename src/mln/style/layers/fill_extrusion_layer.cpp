@@ -550,7 +550,8 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 }
 
 StyleProperty FillExtrusionLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> FillExtrusionLayer::mutableBaseImpl() const {

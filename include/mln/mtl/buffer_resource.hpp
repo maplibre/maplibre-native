@@ -44,6 +44,15 @@ public:
 
     Context& getContext() const noexcept { return context; }
     const MTLBufferPtr& getMetalBuffer() const noexcept { return buffer; }
+    /**
+     * Materialize buffers that would ordinarily be bound with setVertexBytes.
+     *
+     * Existing-layer plugins receive native backend buffer handles. Small
+     * Metal vertex buffers are normally retained as CPU bytes as an internal
+     * optimization, so the adapter calls this before exposing them through
+     * the plugin ABI.
+     */
+    MTL::Buffer* materializeMetalBuffer() const;
 
     bool isValid() const noexcept { return buffer || !raw.empty(); }
     operator bool() const noexcept { return isValid(); }
@@ -80,7 +89,7 @@ public:
 
 protected:
     Context& context;
-    MTLBufferPtr buffer;
+    mutable MTLBufferPtr buffer;
     std::vector<std::uint8_t> raw;
     NS::UInteger size;
     NS::UInteger usage;
