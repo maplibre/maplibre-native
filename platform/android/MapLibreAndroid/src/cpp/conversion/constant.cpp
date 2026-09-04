@@ -44,6 +44,16 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>:
     return result;
 }
 
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, VerticalGradient>::operator()(
+    jni::JNIEnv& env, const VerticalGradient& value) const {
+    const auto values = value.toArray(); // std::array<float, 2>{depth, referenceHeight}
+    auto result = jni::Array<jni::Float>::New(env, values.size());
+    for (size_t i = 0; i < values.size(); i++) {
+        result.Set(env, i, jni::Box(env, values[i]));
+    }
+    return result;
+}
+
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, VariableAnchorOffsetCollection>::operator()(
     jni::JNIEnv& env, const VariableAnchorOffsetCollection& value) const {
     auto variableAnchorOffsets = jni::Array<jni::Object<>>::New(env, value.size() * 2);

@@ -237,6 +237,32 @@ private:  // Private utilities for converting from mgl to mbgl values
     }
   }
 
+  // VerticalGradient type (supports Booleans and float arrays w/ sizes 1 to 2).
+  // NSNumber covers both cases, so check for the array first; a bare NSNumber is treated as
+  // the Boolean form, matching `fill-extrusion-vertical-gradient`'s original type.
+  void getMBGLValue(id rawValue, mln::VerticalGradient &mbglValue) {
+    if ([rawValue isKindOfClass:[NSArray class]]) {
+      NSArray *array = (NSArray *)rawValue;
+      if (array.count < 1 || array.count > 2) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Vertical gradient array should have from 1 to 2 elements."];
+      }
+      std::array<float, 2> values;
+      for (size_t i = 0; i < array.count; ++i) {
+        getMBGLValue(array[i], values[i]);
+      }
+      const std::span<const float> span(values.begin(), array.count);
+      if (!mln::VerticalGradient::isInRange(span)) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"Vertical gradient %s", mln::VerticalGradient::rangeErrorMessage];
+      }
+      mbglValue = mln::VerticalGradient(span);
+    } else if ([rawValue isKindOfClass:[NSNumber class]]) {
+      NSNumber *number = (NSNumber *)rawValue;
+      mbglValue = mln::VerticalGradient(number.boolValue);
+    }
+  }
+
   // Color
   void getMBGLValue(MLNColor *rawValue, mln::Color &mbglValue) { mbglValue = rawValue.mgl_color; }
 
@@ -340,6 +366,14 @@ private:  // Private utilities for converting from mbgl to mgl values
   // Padding type
   static NSValue *toMLNRawStyleValue(const mln::Padding &mbglStopValue) {
     return [NSValue mgl_valueWithPaddingArray:mbglStopValue.toArray()];
+  }
+
+  // VerticalGradient type. Always reported as the two-element array form rather than a
+  // Boolean: `true` round-trips to `[depth, 150]`, which selects the same legacy shading
+  // model, and `false` to a zero depth, which the shader treats as a no-op.
+  static NSArray<NSNumber *> *toMLNRawStyleValue(const mln::VerticalGradient &mbglStopValue) {
+    const auto values = mbglStopValue.toArray();
+    return @[ @(values[0]), @(values[1]) ];
   }
 
   // Color
