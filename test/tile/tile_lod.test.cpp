@@ -1,20 +1,16 @@
-#include <gmock/gmock.h>
-
-#include <algorithm>
-#include <mln/map/map.hpp>
-#include <mln/map/map_observer.hpp>
 #include <mln/gfx/headless_frontend.hpp>
-#include <mln/util/run_loop.hpp>
-#include <mln/util/io.hpp>
-#include <mln/util/logging.hpp>
-#include <mln/style/style.hpp>
-#include <mln/style/layers/fill_layer.hpp>
-#include <mln/style/layers/line_layer.hpp>
+#include <mln/map/map_observer.hpp>
+#include <mln/map/map.hpp>
 #include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/style.hpp>
 #include <mln/test/util.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
 
-#include <filesystem>
+#include <gtest/gtest.h>
+
+#include <algorithm>
 
 using namespace mln;
 using namespace mln::util;

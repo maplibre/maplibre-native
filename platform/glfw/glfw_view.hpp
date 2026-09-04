@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mln/map/map.hpp>
 #include <mln/map/map_snapshotter.hpp>
+#include <mln/map/map.hpp>
 #include <mln/util/geometry.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/timer.hpp>
 
-#include <utility>
 #include <optional>
+#include <utility>
 
-#if (defined(MLN_RENDER_BACKEND_OPENGL) || defined(MLN_RENDER_BACKEND_VULKAN) || \
-     defined(MLN_RENDER_BACKEND_WEBGPU)) &&                                      \
+#if (defined(MLN_RENDER_BACKEND_OPENGL) || defined(MLN_RENDER_BACKEND_VULKAN) || defined(MLN_RENDER_BACKEND_METAL) || \
+     defined(MLN_RENDER_BACKEND_WEBGPU)) &&                                                                           \
     !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
 #define ENABLE_LOCATION_INDICATOR
 #endif
@@ -71,6 +71,7 @@ public:
     // mln::MapObserver implementation
     void onDidFinishLoadingStyle() override;
     void onWillStartRenderingFrame() override;
+    void onDidFinishRenderingFrame(const RenderFrameStatus &) override;
 
 protected:
     // mln::Backend implementation
@@ -119,6 +120,12 @@ private:
 
     mln::AnnotationIDs animatedAnnotationIDs;
     std::vector<double> animatedAnnotationAddedTimes;
+
+#ifdef ENABLE_LOCATION_INDICATOR
+    mln::style::LocationIndicatorLayer *getPuckLayer();
+    void updatePuckLocation();
+    void updatePuckState();
+#endif
 
 private:
     void toggle3DExtrusions(bool visible);
@@ -170,6 +177,5 @@ private:
 
 #ifdef ENABLE_LOCATION_INDICATOR
     bool puckFollowsCameraCenter = false;
-    mln::style::LocationIndicatorLayer *puck = nullptr;
 #endif
 };

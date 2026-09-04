@@ -1,11 +1,12 @@
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
+
+#include <mln/map/transform_state.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
-#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/renderer/layers/render_fill_extrusion_layer.hpp>
 #include <mln/renderer/render_static_data.hpp>
-#include <mln/map/transform_state.hpp>
-#include <mln/util/math.hpp>
+#include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/util/constants.hpp>
+#include <mln/util/math.hpp>
 
 #include <variant>
 
@@ -56,7 +57,7 @@ FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties& layout_,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
     const float zoom,
-    const uint32_t)
+    const uint32_t /* overscaling */)
     : layout(std::move(layout_)) {
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(
@@ -76,6 +77,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const PatternLayerMap& patternDependencies,
                                      std::size_t index,
                                      const CanonicalTileID& canonical) {
+    const auto vertexOffset = vertices.elements();
+
     for (auto& polygon : classifyRings(geometry)) {
         // Optimize polygons with many interior rings for earcut tessellation.
         limitHoles(polygon, 500);
@@ -216,6 +219,13 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                 feature, vertices.elements(), index, patternPositions, it->second, canonical);
         } else {
             pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
+        }
+    }
+
+    if (retainFeaturesById) {
+        const auto vertexCount = vertices.elements() - vertexOffset;
+        if (vertexCount > 0) {
+            retainFeature(feature, vertexOffset, vertexCount);
         }
     }
 }

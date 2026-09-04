@@ -90,6 +90,10 @@ void RenderSource::onSymbolError(const std::string& message) {
     observer->onSymbolError(*this, message);
 }
 
+const std::string& RenderSource::getId() const {
+    return baseImpl->id;
+}
+
 bool RenderSource::isEnabled() const {
     return enabled;
 }

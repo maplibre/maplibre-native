@@ -4,10 +4,10 @@
 #include <mln/style/image_impl.hpp>
 #include <mln/style/layer_impl.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
-
 #include <mln/util/identity.hpp>
 
 #include <atomic>
+#include <cstdint>
 
 namespace mln {
 
@@ -29,8 +29,9 @@ class Bucket {
 public:
     Bucket(const Bucket&) = delete;
     Bucket& operator=(const Bucket&) = delete;
-
     virtual ~Bucket() = default;
+
+    virtual void reserveFeatures(std::size_t vertexCount) { retainedFeatures.reserve(vertexCount); }
 
     // Feature geometries are also used to populate the feature index.
     // Obtaining these is a costly operation, so we do it only once, and
@@ -79,13 +80,32 @@ public:
     const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
     void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
 
+    void setRetainFeaturesById(bool value) { retainFeaturesById = value; }
+    void retainFeature(const GeometryTileFeature& feature, std::size_t vertexOffset, std::size_t vertexCount) {
+        retainedFeatures.emplace_back(RetainedFeature{
+            .featureId = getRetainFeatureID(feature), .vertexOffset = vertexOffset, .vertexCount = vertexCount});
+    }
+    const auto& getRetainedFeatures() const { return retainedFeatures; }
+
+    static std::string getRetainFeatureID(const GeometryTileFeature&);
+
 protected:
     Bucket() = default;
+
     std::atomic<bool> uploaded{false};
 
     util::SimpleIdentity bucketID;
 
     std::optional<std::thread::id> renderThreadID;
+
+    bool retainFeaturesById = false;
+
+    struct RetainedFeature {
+        std::string featureId;
+        std::size_t vertexOffset;
+        std::size_t vertexCount;
+    };
+    std::vector<RetainedFeature> retainedFeatures;
 };
 
 } // namespace mln

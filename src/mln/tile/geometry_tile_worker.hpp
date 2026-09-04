@@ -36,16 +36,17 @@ class GeometryTileWorker {
 public:
     GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self,
                        OptionalActorRef<GeometryTile> parent,
-                       const TaggedScheduler& scheduler_,
+                       const TaggedScheduler& scheduler,
                        OverscaledTileID,
-                       std::string,
-                       const std::atomic<bool>&,
+                       std::string sourceID,
+                       const std::atomic<bool>& obsolete,
                        MapMode,
                        float pixelRatio,
-                       bool showCollisionBoxes_,
+                       bool showCollisionBoxes,
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
-                       TileObserver* observer);
+                       bool captureRenderedFeatures,
+                       TileObserver*);
     ~GeometryTileWorker();
 
     void setObserver(TileObserver* observer);
@@ -91,6 +92,7 @@ private:
     const std::atomic<bool>& obsolete;
     const MapMode mode;
     const float pixelRatio;
+    const bool captureRenderedFeatures;
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mln::unordered_map<std::string, LayerRenderData> renderData;

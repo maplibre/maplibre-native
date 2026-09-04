@@ -317,7 +317,7 @@ void Parser::parseLayers(const JSValue& value) {
         }
 
         const std::string layerID = {id.GetString(), id.GetStringLength()};
-        if (layersMap.find(layerID) != layersMap.end()) {
+        if (layersMap.contains(layerID)) {
             Log::Warning(Event::ParseStyle, "duplicate layer id " + layerID);
             continue;
         }
@@ -327,15 +327,13 @@ void Parser::parseLayers(const JSValue& value) {
     }
 
     for (const auto& id : ids) {
-        auto it = layersMap.find(id);
-
-        parseLayer(it->first, it->second.first, it->second.second);
+        if (const auto it = layersMap.find(id); it != layersMap.end()) {
+            parseLayer(it->first, it->second.first, it->second.second);
+        }
     }
 
     for (const auto& id : ids) {
-        auto it = layersMap.find(id);
-
-        if (it->second.second) {
+        if (const auto it = layersMap.find(id); it != layersMap.end() && it->second.second) {
             layers.emplace_back(std::move(it->second.second));
         }
     }

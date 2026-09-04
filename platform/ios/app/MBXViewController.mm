@@ -3053,6 +3053,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   if (self.frameTimeGraphEnabled) {
     [self.frameTimeGraphView updatePathWithFrameDuration:renderingStats.encodingTime];
   }
+  if (renderingStats.frameRenderedFeatures.count > 0) {
+    NSMutableString *msg = [NSMutableString string];
+    for (MLNSourceLayerID *key in renderingStats.frameRenderedFeatures) {
+      NSArray<MLNFeatureInfo *> *features = renderingStats.frameRenderedFeatures[key];
+      [msg appendFormat:@"%@: %lu, ", key.layerID, static_cast<unsigned long>(features.count)];
+    }
+    const auto total = [mapView renderedFeatureCountForFeatureID:nil LayerID:nil SourceID:nil];
+    NSLog(@"mapViewDidFinishRenderingFrame: %@\nTotal rendered features: %u", msg, total);
+  }
 }
 
 - (void)mapView:(nonnull MLNMapView *)mapView

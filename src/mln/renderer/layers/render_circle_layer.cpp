@@ -2,23 +2,23 @@
 
 #include <mln/geometry/feature_index.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_builder.hpp>
 #include <mln/gfx/shader_group.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/renderer/buckets/circle_bucket.hpp>
-#include <mln/renderer/render_tile.hpp>
-#include <mln/renderer/paint_parameters.hpp>
-#include <mln/style/layers/circle_layer_impl.hpp>
-#include <mln/tile/tile.hpp>
-#include <mln/util/math.hpp>
-#include <mln/util/intersection_tests.hpp>
-#include <mln/util/containers.hpp>
-
-#include <mln/gfx/drawable_builder.hpp>
-#include <mln/renderer/layers/circle_layer_tweaker.hpp>
 #include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/layers/circle_layer_tweaker.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/shaders/circle_layer_ubo.hpp>
 #include <mln/shaders/shader_program_base.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/tile/tile.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/intersection_tests.hpp>
+#include <mln/util/math.hpp>
 
 namespace mln {
 
@@ -154,20 +154,187 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 }
 
 namespace {
+using namespace vector;
+using namespace matrix;
 
 constexpr auto CircleShaderGroupName = "CircleShader";
+
+// The common part of the three variations on circle vertex transform
+struct VertexBoundHelper {
+    using BucketVertex = decltype(CircleBucket::VertexVector::Vertex::a1);
+
+    VertexBoundHelper(const BucketVertex& vertex_,
+                      const mat4& tileMatrix,
+                      float radius_,
+                      float strokeWidth,
+                      const vec2& extrudeScale,
+                      bool useProjectedCenter)
+        : vertex(vertex_),
+          matrix(tileMatrix),
+          center{std::trunc(vertex[0] / 2.0), std::trunc(vertex[1] / 2.0)},
+          extrude{gl_fmod(vec(vertex[0], vertex[1]), 2.0) * 2 - 1},
+          radius{extrude * extrudeScale * (radius_ + strokeWidth)},
+          projectedCenter(useProjectedCenter ? matrix * vector::vec(center, 0, 1) : vec4{}) {}
+
+    const BucketVertex& vertex;
+    const mat4& matrix;
+    const vec2 center;          // circle center (view space)
+    const vec2 extrude;         // corner offset (view space)
+    const vec2 radius;          // scaled corner offset (view space)
+    const vec4 projectedCenter; // projected center (clip space, optional)
+};
 
 } // namespace
 
 using namespace shaders;
 
+void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
+                                                const RenderTile& tile,
+                                                const CircleBinders& binders,
+                                                const style::CirclePaintProperties::PossiblyEvaluated& evaluated,
+                                                const TransformState& state,
+                                                const TransformParameters& transformParams) {
+    using namespace vector;
+
+    const auto& tileID = tile.getOverscaledTileID();
+
+    const bool alphaIsConstant = evaluated.get<CircleOpacity>().isConstant();
+    const bool strokeAlphaIsConstant = evaluated.get<CircleStrokeOpacity>().isConstant();
+    const auto& alphaBinder = binders.get<CircleOpacity>();
+    const auto& strokeAlphaBinder = binders.get<CircleStrokeOpacity>();
+    if (alphaIsConstant && strokeAlphaIsConstant &&
+        std::get<0>(alphaBinder->uniformValue(evaluated.get<CircleOpacity>())) == 0 &&
+        std::get<0>(strokeAlphaBinder->uniformValue(evaluated.get<CircleStrokeOpacity>())) == 0) {
+        return;
+    }
+
+    const bool colorIsConstant = evaluated.get<CircleColor>().isConstant();
+    const bool strokeColorIsConstant = evaluated.get<CircleStrokeColor>().isConstant();
+    const auto& colorBinder = binders.template get<CircleColor>();
+    const auto& strokeColorBinder = binders.template get<CircleStrokeColor>();
+    if (colorIsConstant && strokeColorIsConstant &&
+        std::get<0>(colorBinder->uniformValue(evaluated.get<CircleColor>())).a == 0 &&
+        std::get<0>(strokeColorBinder->uniformValue(evaluated.get<CircleStrokeColor>())).a == 0) {
+        return;
+    }
+
+    constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+    constexpr bool nearClipped = false;
+    constexpr bool aligned = false;
+    constexpr bool is3d = false;
+    constexpr bool enableDepth = true;
+    constexpr std::int32_t subLayerIndex = 0;
+    constexpr std::optional<mln::Point<double>> origin = std::nullopt;
+
+    const auto zoom = state.getZoom();
+    const auto zoomFraction = state.getZoomFraction();
+    const auto cameraToCenterDistance = state.getCameraToCenterDistance();
+    const auto pixelsToTileUnits = tileID.toUnwrapped().pixelsToTileUnits(1.0f, zoom);
+
+    const auto translation = evaluated.get<CircleTranslate>();
+    const auto translationAnchor = evaluated.get<CircleTranslateAnchor>();
+    const auto radius = constOrDefault<CircleRadius>(evaluated);
+    const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
+    const bool scaleWithMap = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
+    const auto strokeWidth = constOrDefault<CircleStrokeWidth>(evaluated);
+    const auto extrudeScale = pitchWithMap ? vec2{pixelsToTileUnits, pixelsToTileUnits}
+                                           : vec2{{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
+    const bool preTransformedVertices = !pitchWithMap;
+
+    // Select the appropriate vertex transform function based on the pitch and scale settings.
+    // The transform is applied to each vertex of the circle geometry to compute its position
+    // in clip space.
+    std::function<vec3(const VertexBoundHelper&)> getVertexImpl;
+    if (pitchWithMap) {
+        if (scaleWithMap) {
+            getVertexImpl = [](const VertexBoundHelper& v) {
+                return vec(v.center + v.radius, 0);
+            };
+        } else {
+            getVertexImpl = [=](const VertexBoundHelper& v) {
+                const auto clipScale = (v.projectedCenter[3] / cameraToCenterDistance);
+                return vec(v.center + v.radius * clipScale, 0);
+            };
+        }
+    } else {
+        getVertexImpl = [=](const VertexBoundHelper& v) {
+            const auto clipScale = scaleWithMap ? cameraToCenterDistance : v.projectedCenter[3];
+            const vec4 clipPos = v.projectedCenter + vec(v.radius * clipScale, 0, 0);
+            return slice<0, 3>(clipPos) / clipPos[3];
+        };
+    }
+
+    std::optional<mat4> tileMatrix;
+
+    const auto& features = bucket.getRetainedFeatures();
+    stats.renderedFeatures.reserve(features.size());
+
+    for (std::size_t i = 0; i < features.size(); ++i) {
+        const auto& featureEntry = features[i];
+        const auto& featureID = featureEntry.featureId;
+        assert(!featureID.empty());
+
+        // Consider only the value for the first vertex of this feature, for now.
+        const auto vertexOffset = featureEntry.vertexOffset;
+
+        if (!alphaIsConstant || !strokeAlphaIsConstant) {
+            const auto& [alphaVertex] = alphaBinder->getVertexValue(vertexOffset);
+            const auto& [strokeAlphaVertex] = strokeAlphaBinder->getVertexValue(vertexOffset);
+            const auto interpAlpha = alphaIsConstant ? std::array<float, 2>{1, 1} : alphaVertex.a1;
+            const auto interpStrokeAlpha = strokeAlphaIsConstant ? std::array<float, 2>{1, 1} : strokeAlphaVertex.a1;
+            if (mln::util::interpolate(interpAlpha[0], interpAlpha[1], zoomFraction) == 0 &&
+                mln::util::interpolate(interpStrokeAlpha[0], interpStrokeAlpha[1], zoomFraction) == 0) {
+                continue;
+            }
+        }
+        if (!colorIsConstant) {
+            const auto& [colorVertex] = colorBinder->getVertexValue(vertexOffset);
+            const auto& [strokeColorVertex] = strokeColorBinder->getVertexValue(vertexOffset);
+            const auto alpha = unpack_mix_alpha(colorVertex.a1, zoomFraction);
+            const auto strokeAlpha = unpack_mix_alpha(strokeColorVertex.a1, zoomFraction);
+            if (alpha == 0 && strokeAlpha == 0) {
+                continue;
+            }
+        }
+
+        // Compute the tile matrix once
+        if (!tileMatrix.has_value()) {
+            tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
+                                                     state,
+                                                     transformParams,
+                                                     layerIndex,
+                                                     translation,
+                                                     translationAnchor,
+                                                     origin,
+                                                     is3d,
+                                                     enableDepth,
+                                                     subLayerIndex,
+                                                     nearClipped,
+                                                     inViewportPixelUnits,
+                                                     aligned);
+        }
+
+        const auto getVertex = [&](std::size_t vi) {
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
+            const bool useProjectedCenter = !pitchWithMap || !scaleWithMap;
+            return getVertexImpl({vertex, *tileMatrix, radius, strokeWidth, extrudeScale, useProjectedCenter});
+        };
+        if (const auto bound = computeFeatureNDCBound(
+                featureEntry.vertexCount, *tileMatrix, preTransformedVertices, getVertex)) {
+            stats.addRenderedFeature(featureID, *bound, {tileID});
+        }
+    }
+}
+
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
-                               const TransformState&,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const TransformState& transformState,
+                               const std::shared_ptr<UpdateParameters>& updateParameters,
                                const PaintParameters&,
-                               const RenderTree&,
+                               const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
+    stats.renderedFeatures.clear();
+
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -227,6 +394,11 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             removeTile(renderPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
+
+        if (updateParameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(bucket, tile, paintPropertyBinders, evaluated, transformState, params);
+        }
 
         // If there are already drawables for this tile, update their UBOs and move on to the next tile.
         auto updateExisting = [&](gfx::Drawable& drawable) {

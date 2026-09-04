@@ -452,6 +452,7 @@ public:
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
 
+- (void)initDefaults;
 @end
 
 @implementation MLNMapView {
@@ -510,14 +511,25 @@ public:
   CFTimeInterval _frameDurations;
 
   MLNRenderingStats *_renderingStats;
+
+  BOOL _createdFromIB;
+  BOOL _fastPFOREnabled;
+  BOOL _featureInfoEnabled;
 }
 
 // MARK: - Setup & Teardown -
+
+- (void)initDefaults {
+  _createdFromIB = NO;
+  _fastPFOREnabled = NO;
+  _featureInfoEnabled = NO;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@", NSStringFromCGRect(frame));
+    [self initDefaults];
     [self commonInitWithOptions:nil];
     self.styleURL = nil;
     MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
@@ -529,6 +541,7 @@ public:
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromCGRect(frame), styleURL);
+    [self initDefaults];
     [self commonInitWithOptions:nil];
     self.styleURL = styleURL;
     MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
@@ -540,6 +553,7 @@ public:
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
+    [self initDefaults];
     [self commonInitWithOptions:nil];
     self.styleJSON = styleJSON;
     _initialStyleJSON = [styleJSON copy];
@@ -552,6 +566,7 @@ public:
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@ with options", NSStringFromCGRect(frame));
+    [self initDefaults];
     [self commonInitWithOptions:options];
 
     if (options) {
@@ -581,11 +596,28 @@ public:
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder {
   if (self = [super initWithCoder:decoder]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
-    [self commonInitWithOptions:nil];
-    self.styleURL = nil;
-    MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    [self initDefaults];
+    _createdFromIB = YES;
+    // Options from IB set after this method and before `awakeFromNib` ...
   }
   return self;
+}
+
+- (void)awakeFromNib {
+  // ... options from IB set, continue initialization
+  [super awakeFromNib];
+  MLNMapOptions *options = [[MLNMapOptions alloc] init];
+  options.fastPFOREnabled = _fastPFOREnabled;
+  options.featureInfoEnabled = _featureInfoEnabled;
+  [self commonInitWithOptions:options];
+  self.styleURL = nil;
+
+  // Constraint installation was skipped in `didMoveToSuperview`
+  // in this case, because the subviews did not exist yet.
+  if (self.superview && _createdFromIB) {
+    [self installConstraints];
+  }
+  MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
 }
 
 + (NSSet<NSString *> *)keyPathsForValuesAffectingStyle {
@@ -711,7 +743,8 @@ public:
       .withConstrainMode(mln::ConstrainMode::None)
       .withViewportMode(mln::ViewportMode::Default)
       .withCrossSourceCollisions(enableCrossSourceCollisions)
-      .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled);
+      .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled)
+      .withRenderedFeatureInfo(mlnMapoptions.featureInfoEnabled);
 
   mln::TileServerOptions *tileServerOptions =
       [[MLNSettings sharedSettings] tileServerOptionsInternal];
@@ -1484,7 +1517,7 @@ public:
     [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
   }
 
-  // Compass, logo and attribution button constraints needs to be updated.z
+  // Compass, logo and attribution button constraints needs to be updated.
   [self installConstraints];
 }
 
@@ -1790,7 +1823,7 @@ public:
 
 - (void)didMoveToSuperview {
   [self validateDisplayLink];
-  if (self.superview) {
+  if (self.superview && !_createdFromIB) {
     [self installConstraints];
   }
   [super didMoveToSuperview];
@@ -6691,6 +6724,16 @@ static void *windowScreenContext = &windowScreenContext;
   return MLNFeaturesFromMBGLFeatures(features);
 }
 
+- (unsigned)renderedFeatureCountForFeatureID:(nullable NSString *)featureID_
+                                     LayerID:(nullable NSString *)layerID_
+                                    SourceID:(nullable NSString *)sourceID_ {
+  const auto featureID =
+      featureID_ ? featureID_.UTF8String : std::optional<std::string>(std::nullopt);
+  const auto layerID = layerID_ ? layerID_.UTF8String : std::optional<std::string>(std::nullopt);
+  const auto sourceID = sourceID_ ? sourceID_.UTF8String : std::optional<std::string>(std::nullopt);
+  return static_cast<unsigned>(self.mbglMap.getRenderedFeatureCount(featureID, layerID, sourceID));
+}
+
 // MARK: - Utility -
 
 - (void)animateWithDelay:(NSTimeInterval)delay animations:(void (^)(void))animations {
@@ -6899,6 +6942,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     [_renderingStats setCoreData:stats];
+    [_renderingStats setFeatureInfo:stats];
     [self.delegate mapViewDidFinishRenderingFrame:self
                                     fullyRendered:fullyRendered
                                    renderingStats:_renderingStats];
@@ -7853,6 +7897,20 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)setShowsHeading:(BOOL)showsHeading {
   MLNLogDebug(@"Setting showsHeading: %@", MLNStringFromBOOL(showsHeading));
   self.showsUserHeadingIndicator = showsHeading;
+}
+
+- (BOOL)fastPFOREnabled {
+  return _fastPFOREnabled;
+}
+- (void)setFastPFOREnabled:(BOOL)fastPFOREnabled {
+  _fastPFOREnabled = fastPFOREnabled;
+}
+
+- (BOOL)featureInfoEnabled {
+  return _featureInfoEnabled;
+}
+- (void)setFeatureInfoEnabled:(BOOL)featureInfoEnabled {
+  _featureInfoEnabled = featureInfoEnabled;
 }
 
 @end
