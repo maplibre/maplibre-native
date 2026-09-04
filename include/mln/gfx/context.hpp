@@ -15,6 +15,7 @@
 #include <string>
 #include <mutex>
 #include <shared_mutex>
+#include <unordered_set>
 
 namespace mln {
 
@@ -83,6 +84,14 @@ public:
 
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
 
+    /// Create an offscreen texture with explicit depth/stencil attachments. Terrain drape
+    /// targets need a stencil to clip overlapping draped tiles against each other, as
+    /// maplibre-gl-js does for its render-to-texture framebuffer.
+    virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size,
+                                                                     TextureChannelDataType,
+                                                                     bool depth,
+                                                                     bool stencil) = 0;
+
     template <RenderbufferPixelType pixelType>
     Renderbuffer<pixelType> createRenderbuffer(const Size size) {
         return {size, createRenderbufferResource(pixelType, size)};
@@ -94,6 +103,34 @@ public:
 
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
+
+    // Per-frame budget for constructing new-tile drawables, counted per *tile* (not per
+    // layer): a burst of newly revealed tiles otherwise builds all their drawables in one
+    // frame, stalling it for tens to hundreds of ms. RenderOrchestrator::updateLayers resets
+    // the budget each frame; a layer's update() calls allowNewTileBuild(tileKey) before
+    // building a new tile. The first layer to reach a given tile spends one budget unit and
+    // records the tile, so every layer of that tile builds together (no half-built tiles);
+    // once the budget is spent, further new tiles are deferred and retried next frame. The
+    // key is a hash of the tile id (avoids a gfx->tile dependency); a rare collision only
+    // lets an extra tile through, which is harmless.
+    void resetNewTileBuildBudget(int maxNewTiles) {
+        newTileBudget = maxNewTiles;
+        newTileBuildDeferred = false;
+        newTilesAllowed.clear();
+    }
+    bool allowNewTileBuild(std::size_t tileKey) {
+        if (newTilesAllowed.contains(tileKey)) {
+            return true; // another layer already started this tile this frame
+        }
+        if (newTileBudget <= 0) {
+            newTileBuildDeferred = true;
+            return false;
+        }
+        --newTileBudget;
+        newTilesAllowed.insert(tileKey);
+        return true;
+    }
+    bool newTileBuildWasDeferred() const { return newTileBuildDeferred; }
 
     void threadSafeAccessRenderingStats(const std::function<void(RenderingStats&)>& function) {
         std::scoped_lock lock(renderingStatsMutex);
@@ -138,10 +175,14 @@ public:
     /// Create a tile layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
                                                    std::size_t initialCapacity,
-                                                   std::string name) = 0;
+                                                   std::string name,
+                                                   bool renderToTerrain) = 0;
 
     /// Create a layer group implementation
-    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) = 0;
+    virtual LayerGroupPtr createLayerGroup(int32_t layerIndex,
+                                           std::size_t initialCapacity,
+                                           std::string name,
+                                           bool renderToTerrain) = 0;
 
     /// Create a texture
     virtual Texture2DPtr createTexture2D() = 0;
@@ -149,8 +190,9 @@ public:
     /// Create a dynamic texture
     virtual DynamicTexturePtr createDynamicTexture(Size size, TexturePixelType pixelType) = 0;
 
-    /// Create a render target
-    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type) = 0;
+    /// Create a render target. `stencil` attaches a stencil buffer, which terrain drape
+    /// targets need to clip overlapping draped tiles against each other.
+    virtual RenderTargetPtr createRenderTarget(const Size size, const TextureChannelDataType type, bool stencil) = 0;
 
     /// Resets the context state to defaults
     virtual void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) = 0;
@@ -189,6 +231,12 @@ protected:
     std::shared_mutex renderingStatsMutex;
     gfx::RenderingStats stats;
     ContextObserver* observer;
+
+    // Progressive new-tile build budget (see resetNewTileBuildBudget). Defaults to
+    // effectively unlimited so any path that never resets it is unaffected.
+    int newTileBudget = 1 << 30;
+    bool newTileBuildDeferred = false;
+    std::unordered_set<std::size_t> newTilesAllowed;
 };
 
 } // namespace gfx

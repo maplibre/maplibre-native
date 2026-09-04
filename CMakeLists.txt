@@ -184,6 +184,9 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/tile_layer_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layer_tweaker.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/render_terrain.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/dem_elevation_provider.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/texture_pool.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/background_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/background_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/circle_layer_tweaker.cpp
@@ -208,6 +211,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/raster_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/symbol_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/symbol_layer_tweaker.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/terrain_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/collision_layer_tweaker.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/collision_layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/shaders/shader_program_base.cpp
@@ -311,6 +315,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/rotation.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/source.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/source_options.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/terrain.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/conversion/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/expression/assertion.hpp
@@ -389,6 +394,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/style/style_property.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/style.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/transition_options.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/terrain.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/style/terrain_observer.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/undefined.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/style/variable_anchor_offset_collection.hpp
@@ -679,6 +686,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/storage/resource_transform.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/storage/response.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/collection.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/terrain.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/terrain_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/color_ramp_property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/constant.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/sprite.cpp
@@ -699,6 +708,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/source.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/source_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/stringify.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/terrain.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/tileset.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/conversion/transition_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/custom_tile_loader.cpp

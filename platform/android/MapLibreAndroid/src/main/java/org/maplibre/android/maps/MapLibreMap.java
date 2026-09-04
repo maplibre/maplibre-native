@@ -417,6 +417,38 @@ public final class MapLibreMap {
   }
 
   /**
+   * Selects the 3D-terrain progressive-loading budget. Trades initial-load sharpness for
+   * smoother interaction on weaker GPUs by spreading new-tile builds and drape re-renders
+   * across frames. Default is {@link TerrainLoadMode#QUALITY} (no budget). Has no effect
+   * when terrain is not enabled.
+   *
+   * @param mode the terrain load mode
+   */
+  public void setTerrainLoadMode(@NonNull TerrainLoadMode mode) {
+    nativeMapView.setTerrainLoadMode(mode.ordinal());
+  }
+
+  /**
+   * Debug: when enabled, the renderer logs the camera eye's clearance over the 3D terrain
+   * ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the per-frame
+   * elevation sampling is skipped entirely when off, so it has no cost unless enabled.
+   *
+   * @param enabled whether to emit the above-ground debug log
+   */
+  public void setDebugAboveGroundLog(boolean enabled) {
+    nativeMapView.setDebugAboveGroundLog(enabled);
+  }
+
+  /**
+   * @return the current terrain load mode
+   * @see MapLibreMap#setTerrainLoadMode(TerrainLoadMode)
+   */
+  @NonNull
+  public TerrainLoadMode getTerrainLoadMode() {
+    return TerrainLoadMode.values()[nativeMapView.getTerrainLoadMode()];
+  }
+
+  /**
    * Camera based tile level of detail controls
    *
    * @param threshold pitch angle in radians above which LOD calculation is performed
@@ -537,7 +569,7 @@ public final class MapLibreMap {
    * @param minPitch The new minimum Pitch.
    */
   public void setMinPitchPreference(
-    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH) double minPitch) {
+    @FloatRange(from = MapLibreConstants.MINIMUM_PITCH, to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double minPitch) {
     transform.setMinPitch(minPitch);
   }
 
@@ -561,13 +593,13 @@ public final class MapLibreMap {
    * Sets the maximum Pitch the map can be displayed at.
    * </p>
    * <p>
-   * The default and upper bound for maximum Pitch is 60.
+   * The default maximum Pitch is 60; values up to 85 are accepted.
    * </p>
    *
    * @param maxPitch The new maximum Pitch.
    */
   public void setMaxPitchPreference(@FloatRange(from = MapLibreConstants.MINIMUM_PITCH,
-    to = MapLibreConstants.MAXIMUM_PITCH) double maxPitch) {
+    to = MapLibreConstants.MAXIMUM_PITCH_LIMIT) double maxPitch) {
     transform.setMaxPitch(maxPitch);
   }
 

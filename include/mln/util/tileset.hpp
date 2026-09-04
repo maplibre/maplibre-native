@@ -34,6 +34,8 @@ public:
     std::optional<RasterEncoding> rasterEncoding;
     std::optional<VectorEncoding> vectorEncoding;
     std::optional<LatLngBounds> bounds;
+    // Not in the TileJSON spec, but servers publish it and maplibre-gl-js honours it.
+    std::optional<uint16_t> tileSize;
 
     Tileset(std::vector<std::string> tiles_ = std::vector<std::string>(),
             Range<uint8_t> zoomRange_ = {0, util::DEFAULT_MAX_ZOOM},

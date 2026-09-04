@@ -35,6 +35,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.terrain.Terrain;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
@@ -890,6 +891,30 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setTerrainLoadMode(int mode) {
+    if (checkState("setTerrainLoadMode")) {
+      return;
+    }
+    nativeSetTerrainLoadMode(mode);
+  }
+
+  @Override
+  public void setDebugAboveGroundLog(boolean enabled) {
+    if (checkState("setDebugAboveGroundLog")) {
+      return;
+    }
+    nativeSetDebugAboveGroundLog(enabled);
+  }
+
+  @Override
+  public int getTerrainLoadMode() {
+    if (checkState("getTerrainLoadMode")) {
+      return 0;
+    }
+    return nativeGetTerrainLoadMode();
+  }
+
+  @Override
   public void setTileLodPitchThreshold(double threshold) {
     if (checkState("setTileLodPitchThreshold")) {
       return;
@@ -1171,6 +1196,31 @@ final class NativeMapView implements NativeMap {
       return null;
     }
     return nativeGetLight();
+  }
+
+  @Override
+  public void setTerrain(@Nullable Terrain terrain) {
+    if (checkState("setTerrain")) {
+      return;
+    }
+    if (terrain == null) {
+      nativeRemoveTerrain();
+    } else {
+      nativeSetTerrain(terrain.getSource(), terrain.getExaggeration());
+    }
+  }
+
+  @Override
+  @Nullable
+  public Terrain getTerrain() {
+    if (checkState("getTerrain")) {
+      return null;
+    }
+    String sourceId = nativeGetTerrainSourceId();
+    if (sourceId == null) {
+      return null;
+    }
+    return new Terrain(sourceId, nativeGetTerrainExaggeration());
   }
 
   @Override
@@ -1775,6 +1825,19 @@ final class NativeMapView implements NativeMap {
   private native Light nativeGetLight();
 
   @Keep
+  private native void nativeSetTerrain(String sourceId, float exaggeration);
+
+  @Keep
+  private native void nativeRemoveTerrain();
+
+  @Nullable
+  @Keep
+  private native String nativeGetTerrainSourceId();
+
+  @Keep
+  private native float nativeGetTerrainExaggeration();
+
+  @Keep
   private native void nativeSetPrefetchTiles(boolean enable);
 
   @Keep
@@ -1803,6 +1866,15 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native double nativeGetTileLodScale();
+
+  @Keep
+  private native void nativeSetTerrainLoadMode(int mode);
+
+  @Keep
+  private native void nativeSetDebugAboveGroundLog(boolean enabled);
+
+  @Keep
+  private native int nativeGetTerrainLoadMode();
 
   @Keep
   private native void nativeSetTileLodPitchThreshold(double threshold);

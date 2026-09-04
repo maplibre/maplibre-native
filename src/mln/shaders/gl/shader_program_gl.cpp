@@ -177,7 +177,10 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
         }
 
-        return std::make_shared<ShaderProgramGL>(std::move(program), std::move(attrs), std::move(samplerLocations));
+        auto shader = std::make_shared<ShaderProgramGL>(
+            std::move(program), std::move(attrs), std::move(samplerLocations));
+        shader->uniformBlocks = uniformBlocksInfo;
+        return shader;
     } catch (const std::exception& e) {
         context.getObserver().onShaderCompileFailed(
             programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
