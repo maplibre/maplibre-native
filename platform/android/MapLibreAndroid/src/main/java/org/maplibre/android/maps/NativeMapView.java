@@ -35,6 +35,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.sky.Sky;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
@@ -1174,6 +1175,23 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  @Nullable
+  public Sky getSky() {
+    if (checkState("getSky")) {
+      return null;
+    }
+    return nativeGetSky();
+  }
+
+  @Override
+  public void setSky(@Nullable Sky sky) {
+    if (checkState("setSky")) {
+      return;
+    }
+    nativeSetSky(sky);
+  }
+
+  @Override
   public float getPixelRatio() {
     return pixelRatio;
   }
@@ -1773,6 +1791,13 @@ final class NativeMapView implements NativeMap {
   @NonNull
   @Keep
   private native Light nativeGetLight();
+
+  @Nullable
+  @Keep
+  private native Sky nativeGetSky();
+
+  @Keep
+  private native void nativeSetSky(@Nullable Sky sky);
 
   @Keep
   private native void nativeSetPrefetchTiles(boolean enable);

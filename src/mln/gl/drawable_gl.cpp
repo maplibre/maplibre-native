@@ -43,7 +43,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     }
 
     if (enableDepth) {
-        context.setDepthMode(getIs3D() ? parameters.depthModeFor3D()
+        context.setDepthMode(getIs3D() ? parameters.depthModeFor3D(getDepthType())
                                        : parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType()));
     } else {
         context.setDepthMode(gfx::DepthMode::disabled());
@@ -52,8 +52,15 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     // force disable depth test for debugging
     // context.setDepthMode({gfx::DepthFunctionType::Always, gfx::DepthMaskType::ReadOnly, {0,1}});
 
-    // For 3D mode, stenciling is handled by the layer group
-    if (!is3D) {
+    if (stencilWriteRef) {
+        context.setStencilMode(gfx::StencilMode{gfx::StencilMode::Always{},
+                                                *stencilWriteRef,
+                                                0b11111111,
+                                                gfx::StencilOpType::Keep,
+                                                gfx::StencilOpType::Keep,
+                                                gfx::StencilOpType::Replace});
+    } else if (!is3D) {
+        // For 3D mode, stenciling is handled by the layer group
         context.setStencilMode(makeStencilMode(parameters));
     }
 

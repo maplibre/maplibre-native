@@ -21,6 +21,7 @@
 #include <mln/shaders/mtl/debug.hpp>
 #include <mln/shaders/mtl/fill.hpp>
 #include <mln/shaders/mtl/fill_extrusion.hpp>
+#include <mln/shaders/mtl/globe_depth.hpp>
 #include <mln/shaders/mtl/heatmap.hpp>
 #include <mln/shaders/mtl/heatmap_texture.hpp>
 #include <mln/shaders/mtl/hillshade.hpp>
@@ -28,6 +29,7 @@
 #include <mln/shaders/mtl/line.hpp>
 #include <mln/shaders/mtl/location_indicator.hpp>
 #include <mln/shaders/mtl/raster.hpp>
+#include <mln/shaders/mtl/sky.hpp>
 #include <mln/shaders/mtl/symbol.hpp>
 #include <mln/shaders/mtl/widevector.hpp>
 
@@ -88,6 +90,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::SkyShader,
+                  shaders::BuiltIn::AtmosphereShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
@@ -104,6 +108,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillExtrusionInstancedShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::FillExtrusionPatternInstancedShader,
+                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,

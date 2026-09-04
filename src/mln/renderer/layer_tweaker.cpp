@@ -1,4 +1,6 @@
 #include <mln/renderer/layer_tweaker.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/drawable.hpp>
 
 #include <mln/map/transform_state.hpp>
 #include <mln/style/layer_properties.hpp>
@@ -7,6 +9,7 @@
 #include <mln/shaders/layer_ubo.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/containers.hpp>
+#include <mln/util/convert.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/util/monotonic_timer.hpp>
@@ -43,6 +46,62 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     return RenderTile::translateVtxMatrix(
         tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
+
+ProjectionData LayerTweaker::getProjectionData(const UnwrappedTileID& tileID,
+                                               const PaintParameters& parameters,
+                                               const std::array<float, 2>& translation,
+                                               style::TranslateAnchorType anchor,
+                                               bool nearClipped,
+                                               bool inViewportPixelUnits,
+                                               const gfx::Drawable& drawable,
+                                               bool aligned) {
+    auto data = parameters.state.getProjectionDataForMatrix(
+        tileID,
+        getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable, aligned));
+    if (!inViewportPixelUnits) {
+        data.translate = util::cast<double>(
+            RenderTile::tileUnitTranslation(tileID, translation, anchor, parameters.state));
+    }
+#if MLN_GLOBE_DEPTH_OFFSET_IN_SHADER
+    // The same per-layer shift `multiplyWithProjectionMatrix` bakes into the Mercator matrix.
+    if (!drawable.getIs3D() && drawable.getEnableDepth()) {
+        data.depthOffset = ((1 + parameters.currentLayer) * PaintParameters::numSublayers -
+                            drawable.getSubLayerIndex()) *
+                           PaintParameters::depthEpsilon;
+    }
+#endif
+    return data;
+}
+
+shaders::ProjectionUBO LayerTweaker::toProjectionUBO(const ProjectionData& data) {
+    return {.matrix = util::cast<float>(data.mainMatrix),
+            .fallback_matrix = util::cast<float>(data.fallbackMatrix),
+            .tile_mercator_coords = util::cast<float>(data.tileMercatorCoords),
+            .clipping_plane = util::cast<float>(data.clippingPlane),
+            .projection_transition = static_cast<float>(data.projectionTransition),
+            .depth_offset = static_cast<float>(data.depthOffset),
+            .translate = util::cast<float>(data.translate)};
+}
+
+float LayerTweaker::globeExtrudeScale(const UnwrappedTileID& tileID, float zoom, double latitudeScale) {
+    return static_cast<float>(tileID.pixelsToTileUnits(1.0f, zoom) /
+                              (util::EXTENT * static_cast<double>(1ull << tileID.canonical.z)) * util::M2PI *
+                              latitudeScale);
+}
+
+#if MLN_UBO_CONSOLIDATION
+void LayerTweaker::uploadProjectionUBOs(gfx::UniformBufferArray& layerUniforms,
+                                        const std::vector<shaders::ProjectionUBO>& ubos,
+                                        gfx::Context& context) {
+    const size_t size = sizeof(shaders::ProjectionUBO) * ubos.size();
+    if (!projectionUniformBuffer || projectionUniformBuffer->getSize() < size) {
+        projectionUniformBuffer = context.createUniformBuffer(ubos.data(), size, false, true);
+    } else {
+        projectionUniformBuffer->update(ubos.data(), size);
+    }
+    layerUniforms.set(shaders::idProjectionUBO, projectionUniformBuffer);
+}
+#endif
 
 void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
     evaluatedProperties = std::move(newProps);

@@ -26,6 +26,20 @@
         "uses_ubos": true
     },
     {
+        "name": "SkyShader",
+        "header": "sky",
+        "glsl_vert": "sky.vertex.glsl",
+        "glsl_frag": "sky.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "AtmosphereShader",
+        "header": "atmosphere",
+        "glsl_vert": "atmosphere.vertex.glsl",
+        "glsl_frag": "atmosphere.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "CircleShader",
         "header": "circle",
         "glsl_vert": "circle.vertex.glsl",
@@ -128,6 +142,13 @@
         "header": "fill_extrusion_pattern_instanced",
         "glsl_vert": "_empty.glsl",
         "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "GlobeDepthShader",
+        "header": "globe_depth",
+        "glsl_vert": "globe_depth.vertex.glsl",
+        "glsl_frag": "globe_depth.fragment.glsl",
         "uses_ubos": true
     },
     {

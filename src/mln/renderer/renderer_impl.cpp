@@ -290,6 +290,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        if (auto* sky = orchestrator.getSkyLayerGroup()) {
+            sky->upload(*uploadPass);
+        }
+        if (auto* globeDepth = orchestrator.getGlobeDepthLayerGroup()) {
+            globeDepth->upload(*uploadPass);
+        }
+        if (auto* atmosphere = orchestrator.getAtmosphereLayerGroup()) {
+            atmosphere->upload(*uploadPass);
+        }
 
         // Give the render targets a chance to upload
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
@@ -389,12 +398,34 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        // draw layer groups, opaque pass
-        parameters.currentLayer = 0;
-        orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer++;
-        });
+        // draw layer groups, opaque pass: front to back with the depth buffer, except on the globe,
+        // where 2D layers carry no depth and are painted bottom to top.
+        if (renderTreeParameters.transformParams.state.isGlobeRendering()) {
+            parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
+            orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+                layerGroup.render(orchestrator, parameters);
+                if (parameters.currentLayer > 0) {
+                    parameters.currentLayer--;
+                }
+            });
+        } else {
+            parameters.currentLayer = 0;
+            orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
+                layerGroup.render(orchestrator, parameters);
+                parameters.currentLayer++;
+            });
+        }
+    };
+
+    const auto drawableSkyPass = [&] {
+        if (auto* sky = orchestrator.getSkyLayerGroup()) {
+            const auto debugGroup(parameters.renderPass->createDebugGroup("sky"));
+            parameters.pass = RenderPass::Translucent;
+            parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                                PaintParameters::depthEpsilon;
+            parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) + 1;
+            sky->render(orchestrator, parameters);
+        }
     };
 
     const auto drawableTranslucentPass = [&] {
@@ -402,6 +433,11 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.pass = RenderPass::Translucent;
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
+
+        // The planet goes into the depth buffer first, so 3D geometry behind the horizon stays hidden.
+        if (auto* globeDepth = orchestrator.getGlobeDepthLayerGroup()) {
+            globeDepth->render(orchestrator, parameters);
+        }
 
         // draw layer groups, translucent pass
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
@@ -438,6 +474,17 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         }
     };
 
+    const auto drawableAtmospherePass = [&] {
+        if (auto* atmosphere = orchestrator.getAtmosphereLayerGroup()) {
+            const auto debugGroup(parameters.renderPass->createDebugGroup("atmosphere"));
+            parameters.pass = RenderPass::Translucent;
+            parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
+                                                PaintParameters::depthEpsilon;
+            parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) + 1;
+            atmosphere->render(orchestrator, parameters);
+        }
+    };
+
     if (parameters.staticData.has3D) {
         common3DPass();
         drawable3DPass();
@@ -445,8 +492,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     drawableTargetsPass();
     commonClearPass();
     context.bindGlobalUniformBuffers(*parameters.renderPass);
+    drawableSkyPass();
     drawableOpaquePass();
     drawableTranslucentPass();
+    drawableAtmospherePass();
     drawableDebugOverlays();
 
     // Give the layers a chance to do cleanup

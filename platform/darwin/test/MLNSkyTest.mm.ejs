@@ -1,0 +1,86 @@
+<%
+  const properties = locals.properties;
+-%>
+// This file is generated.
+// Edit platform/darwin/scripts/generate-style-code.mjs, then run `make darwin-style-code`.
+
+#import <XCTest/XCTest.h>
+#import <Mapbox.h>
+
+#import "MLNSky_Private.h"
+#import "../../darwin/src/NSDate+MLNAdditions.h"
+
+#import <mln/style/sky.hpp>
+#include <mln/style/transition_options.hpp>
+
+@interface MLNSkyTest : XCTestCase
+@end
+
+@implementation MLNSkyTest
+
+- (void)testDefaultInitializationAndReset {
+    MLNSky *sky = [[MLNSky alloc] init];
+    XCTAssertNotNil(sky.atmosphereBlend);
+
+    sky.atmosphereBlend = [NSExpression expressionForConstantValue:@0.25];
+    sky.atmosphereBlend = nil;
+
+    XCTAssertNotNil(sky.atmosphereBlend);
+    auto coreSky = sky.mbglSky;
+    XCTAssertEqual(mln::style::Sky::getDefaultAtmosphereBlend(), coreSky.getAtmosphereBlend());
+}
+
+- (void)testProperties {
+    MLNTransition defaultTransition = MLNTransitionMake(0, 0);
+    MLNTransition transition = MLNTransitionMake(6, 3);
+    mln::style::TransitionOptions transitionOptions { { MLNDurationFromTimeInterval(6) }, { MLNDurationFromTimeInterval(3) } };
+
+<% for (const property of properties) { -%>
+    // <%- property.name %>
+    {
+        mln::style::Sky sky;
+        MLNSky *mglSky = [[MLNSky alloc] initWithMBGLSky:&sky];
+        auto skyFromMLNSky = mglSky.mbglSky;
+
+        XCTAssertEqual(sky.getDefault<%- camelize(property.name) -%>(), skyFromMLNSky.get<%- camelize(property.name) -%>());
+<% if (property.transition) { -%>
+        auto propertyTransition = skyFromMLNSky.get<%- camelize(property.name) -%>Transition();
+        XCTAssert(propertyTransition.delay && MLNTimeIntervalFromDuration(*propertyTransition.delay) == defaultTransition.delay);
+        XCTAssert(propertyTransition.duration && MLNTimeIntervalFromDuration(*propertyTransition.duration) == defaultTransition.duration);
+<% } -%>
+
+        mln::style::PropertyValue<<%- mbglType(property) %>> propertyValue = { <%- mbglTestValue(property, 'sky') %> };
+        sky.set<%- camelize(property.name) -%>(propertyValue);
+<% if (property.transition) { -%>
+        sky.set<%- camelize(property.name) -%>Transition(transitionOptions);
+<% } -%>
+
+        mglSky = [[MLNSky alloc] initWithMBGLSky:&sky];
+        skyFromMLNSky = mglSky.mbglSky;
+        XCTAssertEqual(sky.get<%- camelize(property.name) -%>(), skyFromMLNSky.get<%- camelize(property.name) -%>());
+<% if (property.transition) { -%>
+        propertyTransition = skyFromMLNSky.get<%- camelize(property.name) -%>Transition();
+        XCTAssert(propertyTransition.delay && MLNTimeIntervalFromDuration(*propertyTransition.delay) == transition.delay);
+        XCTAssert(propertyTransition.duration && MLNTimeIntervalFromDuration(*propertyTransition.duration) == transition.duration);
+<% } -%>
+    }
+
+<% } -%>
+}
+
+- (void)testZoomExpressionRoundTrip {
+    mln::style::Sky sky;
+    MLNSky *mglSky = [[MLNSky alloc] initWithMBGLSky:&sky];
+    NSExpression *expression = [NSExpression expressionWithMLNJSONObject:@[
+        @"interpolate", @[@"linear"], @[@"zoom"], @0, @1, @12, @0
+    ]];
+
+    mglSky.atmosphereBlend = expression;
+    auto coreSky = mglSky.mbglSky;
+    XCTAssertTrue(coreSky.getAtmosphereBlend().isExpression());
+
+    MLNSky *roundTripped = [[MLNSky alloc] initWithMBGLSky:&coreSky];
+    XCTAssertEqualObjects(roundTripped.atmosphereBlend, expression);
+}
+
+@end

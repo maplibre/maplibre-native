@@ -55,6 +55,7 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "MLNShapeCollection.h"
 #import "MLNShapeOfflineRegion.h"
 #import "MLNShapeSource.h"
+#import "MLNSky.h"
 #import "MLNSource.h"
 #import "MLNStyle.h"
 #import "MLNStyleLayer.h"

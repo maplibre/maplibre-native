@@ -117,8 +117,10 @@ public:
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
         const auto zoom = parameters.state.getZoom();
 
-        const auto matrix = LayerTweaker::getTileMatrix(
+        const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+        const auto& matrix = projection.fallbackMatrix;
+        const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         const shaders::LineEvaluatedPropsUBO propsUBO = {.color = options.color,
                                                          .blur = options.blur,
@@ -182,12 +184,21 @@ public:
             drawableUniformBuffer->update(&drawableUBO, sizeof(drawableUBO));
         }
 
+        if (!projectionUniformBuffer) {
+            projectionUniformBuffer = parameters.context.createUniformBuffer(
+                &projectionUBO, sizeof(projectionUBO), false, true);
+            layerUniforms->set(idProjectionUBO, projectionUniformBuffer);
+        } else {
+            projectionUniformBuffer->update(&projectionUBO, sizeof(projectionUBO));
+        }
+
         layerUniforms->createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, sizeof(propsUBO), parameters.context);
         layerUniforms->bind(*parameters.renderPass);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &propsUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, parameters.context);
 #endif
     };
 
@@ -198,6 +209,7 @@ private:
 #if MLN_UBO_CONSOLIDATION
     gfx::UniqueUniformBufferArray layerUniforms;
     gfx::UniformBufferPtr drawableUniformBuffer;
+    gfx::UniformBufferPtr projectionUniformBuffer;
 #endif
 
     gfx::UniformBufferPtr expressionUniformBuffer;
@@ -230,8 +242,10 @@ public:
         }
 
         mat4 projMatrix = parameters.transformParams.projMatrix;
-        const auto matrix = LayerTweaker::getTileMatrix(
+        const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+        const auto& matrix = projection.fallbackMatrix;
+        const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         matf4 mvpMatrix, mvpMatrixDiff, mvMatrix, mvMatrixDiff, pMatrix, pMatrixDiff;
         matrix::diffsplit(mvpMatrix, mvpMatrixDiff, matrix);
@@ -268,6 +282,7 @@ public:
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
         drawableUniforms.createOrUpdate(idWideVectorUniformWideVecUBO, &wideVec, parameters.context);
+        drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, parameters.context);
     };
 
 private:
@@ -302,8 +317,10 @@ public:
 #endif
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = LayerTweaker::getTileMatrix(
+        const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+        const auto& matrix = projection.fallbackMatrix;
+        const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         const shaders::FillEvaluatedPropsUBO propsUBO = {/* .color = */ .color = options.color,
                                                          /* .outline_color = */ .outline_color = Color::white(),
@@ -337,12 +354,21 @@ public:
             drawableUniformBuffer->update(&drawableUBO, sizeof(drawableUBO));
         }
 
+        if (!projectionUniformBuffer) {
+            projectionUniformBuffer = parameters.context.createUniformBuffer(
+                &projectionUBO, sizeof(projectionUBO), false, true);
+            layerUniforms->set(idProjectionUBO, projectionUniformBuffer);
+        } else {
+            projectionUniformBuffer->update(&projectionUBO, sizeof(projectionUBO));
+        }
+
         layerUniforms->createOrUpdate(idFillEvaluatedPropsUBO, &propsUBO, sizeof(propsUBO), parameters.context);
         layerUniforms->bind(*parameters.renderPass);
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &propsUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, parameters.context);
 #endif
     };
 
@@ -353,6 +379,7 @@ private:
 #if MLN_UBO_CONSOLIDATION
     gfx::UniqueUniformBufferArray layerUniforms;
     gfx::UniformBufferPtr drawableUniformBuffer;
+    gfx::UniformBufferPtr projectionUniformBuffer;
 #endif
 };
 
@@ -377,8 +404,10 @@ public:
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        const auto matrix = LayerTweaker::getTileMatrix(
+        const auto projection = LayerTweaker::getProjectionData(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+        const auto& matrix = projection.fallbackMatrix;
+        const auto projectionUBO = LayerTweaker::toProjectionUBO(projection);
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(
             1.0f, options.scaleWithMap ? tileID.canonical.z : parameters.state.getZoom());
@@ -406,11 +435,32 @@ public:
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
+#if MLN_UBO_CONSOLIDATION
+        if (!layerUniforms) {
+            layerUniforms = parameters.context.createLayerUniformBufferArray();
+        }
+        if (!projectionUniformBuffer) {
+            projectionUniformBuffer = parameters.context.createUniformBuffer(
+                &projectionUBO, sizeof(projectionUBO), false, true);
+            layerUniforms->set(idProjectionUBO, projectionUniformBuffer);
+            drawable.setUBOIndex(0);
+        } else {
+            projectionUniformBuffer->update(&projectionUBO, sizeof(projectionUBO));
+        }
+        layerUniforms->bind(*parameters.renderPass);
+#else
+        drawableUniforms.createOrUpdate(idProjectionUBO, &projectionUBO, parameters.context);
+#endif
     };
 
 private:
     CustomDrawableLayerHost::Interface::SymbolOptions options;
     CustomDrawableLayerHost::Interface::SymbolTweakerCallback callback;
+
+#if MLN_UBO_CONSOLIDATION
+    gfx::UniqueUniformBufferArray layerUniforms;
+    gfx::UniformBufferPtr projectionUniformBuffer;
+#endif
 };
 
 class GeometryDrawableTweaker : public gfx::DrawableTweaker {
@@ -532,7 +582,7 @@ util::SimpleIdentity CustomDrawableLayerHost::Interface::addPolyline(const LineS
             constexpr int32_t zoom = 0;
             GeometryCoordinates tileCoordinates;
             for (const auto& coord : coordinates) {
-                const auto point = Projection::project(LatLng(coord.y, coord.x), zoom);
+                const auto point = mln::Projection::project(LatLng(coord.y, coord.x), zoom);
                 tileCoordinates.push_back(Point<int16_t>(static_cast<int16_t>(point.x * mln::util::EXTENT),
                                                          static_cast<int16_t>(point.y * mln::util::EXTENT)));
             }
@@ -834,6 +884,14 @@ void CustomDrawableLayerHost::Interface::removeDrawable(const util::SimpleIdenti
     tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) { return drawable.getID() == id; });
 }
 
+namespace {
+
+gfx::ProjectionVariant projectionVariantFor(const TransformState& state) {
+    return state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
+}
+
+} // namespace
+
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
     assert(shaderGroup);
@@ -847,14 +905,14 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
                                                  idLineOffsetVertexAttribute,
                                                  idLineWidthVertexAttribute}};
 
-    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariantFor(state));
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderWideVector() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("WideVectorShader");
     if (!shaderGroup) return gfx::ShaderPtr();
 
-    return shaderGroup->getOrCreateShader(context, {});
+    return shaderGroup->getOrCreateShader(context, {}, gfx::ProjectionVariant::Mercator);
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
@@ -863,15 +921,15 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_opacity"},
                                                 {idFillColorVertexAttribute, idFillOpacityVertexAttribute}};
 
-    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariantFor(state));
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
-    return context.getGenericShader(shaders, "CustomSymbolIconShader");
+    return context.getGenericShader(shaders, "CustomSymbolIconShader", projectionVariantFor(state));
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::geometryShaderDefault() const {
-    return context.getGenericShader(shaders, "CustomGeometryShader");
+    return context.getGenericShader(shaders, "CustomGeometryShader", gfx::ProjectionVariant::Mercator);
 }
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,

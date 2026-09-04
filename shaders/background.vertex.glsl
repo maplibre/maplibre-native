@@ -4,5 +4,5 @@ layout (std140) uniform BackgroundDrawableUBO {
 };
 
 void main() {
-    gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = projectTile(a_pos, a_pos);
 }

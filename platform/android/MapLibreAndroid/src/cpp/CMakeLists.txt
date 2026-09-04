@@ -183,6 +183,8 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/layers/location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/light.cpp
             ${PROJECT_SOURCE_DIR}/style/light.hpp
+            ${PROJECT_SOURCE_DIR}/style/sky.cpp
+            ${PROJECT_SOURCE_DIR}/style/sky.hpp
             ${PROJECT_SOURCE_DIR}/style/position.cpp
             ${PROJECT_SOURCE_DIR}/style/position.hpp
             ${PROJECT_SOURCE_DIR}/style/sources/custom_geometry_source.cpp

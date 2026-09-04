@@ -1,3 +1,5 @@
+#include <cmath>
+#include <mln/util/constants.hpp>
 #include <mln/renderer/layers/circle_layer_tweaker.hpp>
 
 #include <mln/gfx/context.hpp>
@@ -61,8 +63,12 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
     std::vector<CircleDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
+    const double latitudeScale = parameters.state.isGlobeRendering()
+                                     ? std::cos(util::deg2rad(parameters.state.getLatLng().latitude()))
+                                     : 1.0;
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -80,10 +86,18 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.fallbackMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, zoom);
+        const auto globeExtrudeScale = LayerTweaker::globeExtrudeScale(tileID, zoom, latitudeScale);
         const auto extrudeScale = pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                : parameters.pixelsToGLUnits;
 
@@ -103,7 +117,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .stroke_color_t = std::get<0>(binders->get<CircleStrokeColor>()->interpolationFactor(zoom)),
             .stroke_width_t = std::get<0>(binders->get<CircleStrokeWidth>()->interpolationFactor(zoom)),
             .stroke_opacity_t = std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
-            .pad1 = 0,
+            .globe_extrude_scale = globeExtrudeScale,
             .pad2 = 0,
             .pad3 = 0
         };
@@ -125,6 +139,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     }
 
     layerUniforms.set(idCircleDrawableUBO, drawableUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

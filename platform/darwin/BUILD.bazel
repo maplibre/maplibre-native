@@ -84,6 +84,7 @@ filegroup(
     srcs = [
         "test/MLNDocumentationGuideTests.swift",
         "test/MLNLightTest.mm.ejs",
+        "test/MLNSkyTest.mm.ejs",
         "test/MLNStyleLayerTests.mm.ejs",
     ],
     visibility = ["//visibility:public"],
@@ -94,6 +95,8 @@ filegroup(
     srcs = [
         "src/MLNLight.h.ejs",
         "src/MLNLight.mm.ejs",
+        "src/MLNSky.h.ejs",
+        "src/MLNSky.mm.ejs",
         "src/MLNStyleLayer.h.ejs",
         "src/MLNStyleLayer.mm.ejs",
         "src/MLNStyleLayer_Private.h.ejs",
@@ -156,6 +159,7 @@ objc_library(
 
 objc_library(
     name = "shared_tests_objcpp_srcs",
+    testonly = True,
     srcs = glob(
         [
             "test/*.h",
@@ -164,7 +168,7 @@ objc_library(
         exclude = [
             "test/MLNOfflineStorageTests.mm",
         ],
-    ),
+    ) + ["test/MLNSkyTest.mm"],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + ["-Wno-deprecated-declarations"],
     visibility = [
         "//platform/ios/test:__pkg__",
@@ -181,6 +185,7 @@ swift_library(
     data = [
         "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
+        "test/globe.json",
         "test/one-liner.json",
     ],
     visibility = [
