@@ -39,6 +39,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idRasterDrawableUBO) readonly bu
     RasterDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(set = LAYER_SET_INDEX, binding = idRasterEvaluatedPropsUBO) uniform RasterEvaluatedPropsUBO {
     vec4 spin_weights;
     vec2 tl_parent;
@@ -60,7 +64,7 @@ layout(location = 1) out vec2 frag_position1;
 void main() {
     const RasterDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
-    gl_Position = drawable.matrix * vec4(in_position, 0, 1);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
     // We are using Int16 for texture position coordinates to give us enough precision for

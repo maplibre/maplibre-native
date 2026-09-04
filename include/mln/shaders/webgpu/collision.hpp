@@ -53,13 +53,18 @@ struct GlobalPaintParamsUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(4) var<uniform> projection: ProjectionUBO;
+@group(0) @binding(5) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
+#ifdef PROJECTION_GLOBE
+    let projected_point = projectTile(vec2<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y)), projection);
+#else
     let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
+#endif
     let camera_to_anchor_distance = projected_point.w;
 
     let collision_perspective_ratio = clamp(
@@ -67,7 +72,15 @@ fn main(in: VertexInput) -> VertexOutput {
         0.0,
         4.0);
 
+#ifdef PROJECTION_GLOBE
+    out.position = projectTile(vec2<f32>(f32(in.position.x), f32(in.position.y)), projection);
+    // Boxes just past the horizon stay visible, as in GL JS; ones far behind it are clipped.
+    if (out.position.z / out.position.w < 1.1) {
+        out.position.z = 0.0;
+    }
+#else
     out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+#endif
     let extrude_shift = vec2<f32>(f32(in.extrude.x), f32(in.extrude.y)) + in.shift;
     out.position.x += extrude_shift.x * tile_props.extrude_scale.x * out.position.w * collision_perspective_ratio;
     out.position.y += extrude_shift.y * tile_props.extrude_scale.y * out.position.w * collision_perspective_ratio;
@@ -155,7 +168,8 @@ struct CollisionTilePropsUBO {
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(2) var<uniform> drawable: CollisionDrawableUBO;
-@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(4) var<uniform> projection: ProjectionUBO;
+@group(0) @binding(5) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -163,7 +177,11 @@ fn main(in: VertexInput) -> VertexOutput {
 
 
 
+#ifdef PROJECTION_GLOBE
+    let projected_point = projectTile(vec2<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y)), projection);
+#else
     let projected_point = drawable.matrix * vec4<f32>(f32(in.anchor_position.x), f32(in.anchor_position.y), 0.0, 1.0);
+#endif
     let camera_to_anchor_distance = projected_point.w;
 
     let perspective = max(camera_to_anchor_distance, 1e-6);
@@ -172,7 +190,15 @@ fn main(in: VertexInput) -> VertexOutput {
         0.0,
         4.0);
 
+#ifdef PROJECTION_GLOBE
+    var position = projectTile(vec2<f32>(f32(in.position.x), f32(in.position.y)), projection);
+    // Circles just past the horizon stay visible, as in GL JS; ones far behind it are clipped.
+    if (position.z / position.w < 1.1) {
+        position.z = 0.0;
+    }
+#else
     var position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+#endif
     let padding_factor = 1.2;
     let extrude_vec = vec2<f32>(f32(in.extrude.x), f32(in.extrude.y));
     position.x += extrude_vec.x * tile_props.extrude_scale.x * padding_factor * position.w * collision_perspective_ratio;
@@ -204,7 +230,7 @@ struct CollisionTilePropsUBO {
     pad1: f32,
 };
 
-@group(0) @binding(4) var<uniform> tile_props: CollisionTilePropsUBO;
+@group(0) @binding(5) var<uniform> tile_props: CollisionTilePropsUBO;
 
 @fragment
 fn main(in: FragmentInput) -> @location(0) vec4<f32> {

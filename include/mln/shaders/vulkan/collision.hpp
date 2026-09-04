@@ -10,6 +10,7 @@ constexpr auto collisionShaderPrelude = R"(
 
 #define idCollisionDrawableUBO      drawableUBOStartId
 #define idCollisionTilePropsUBO     drawableUBOStartId + 1
+#define idCollisionProjectionUBO    drawableUBOStartId + 2
 
 )";
 
@@ -40,19 +41,35 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCollisionTilePropsUBO) uniform 
     float pad1;
 } tileProps;
 
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idCollisionProjectionUBO) uniform CollisionProjectionUBO {
+    ProjectionUBO projection;
+} collisionProjection;
+
 layout(location = 0) out float frag_placed;
 layout(location = 1) out float frag_notUsed;
 
 void main() {
 
+#ifdef PROJECTION_GLOBE
+    vec4 projectedPoint = projectTile(vec2(in_anchor_position), collisionProjection.projection);
+#else
     vec4 projectedPoint = drawable.matrix * vec4(in_anchor_position, 0.0, 1.0);
+#endif
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field boxes in pitched/overzoomed tiles
         4.0);
 
+#ifdef PROJECTION_GLOBE
+    gl_Position = projectTile(vec2(in_position), collisionProjection.projection);
+    // Boxes just past the horizon stay visible, as in GL JS; ones far behind it are clipped.
+    if (gl_Position.z / gl_Position.w < 1.1) {
+        gl_Position.z = 0.0;
+    }
+#else
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+#endif
     gl_Position.xy += (in_extrude + in_shift) * tileProps.extrude_scale * gl_Position.w * collision_perspective_ratio;
     applySurfaceTransform();
 
@@ -116,6 +133,10 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCollisionTilePropsUBO) uniform 
     float pad1;
 } tileProps;
 
+layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = idCollisionProjectionUBO) uniform CollisionProjectionUBO {
+    ProjectionUBO projection;
+} collisionProjection;
+
 layout(location = 0) out float frag_placed;
 layout(location = 1) out float frag_notUsed;
 layout(location = 2) out float frag_radius;
@@ -124,7 +145,11 @@ layout(location = 4) out vec2 frag_extrude_scale;
 
 void main() {
 
+#ifdef PROJECTION_GLOBE
+    vec4 projectedPoint = projectTile(vec2(in_anchor_position), collisionProjection.projection);
+#else
     vec4 projectedPoint = drawable.matrix * vec4(in_anchor_position, 0, 1);
+#endif
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
@@ -132,7 +157,15 @@ void main() {
         4.0);
 
     float padding_factor = 1.2; // Pad the vertices slightly to make room for anti-alias blur
+#ifdef PROJECTION_GLOBE
+    gl_Position = projectTile(vec2(in_position), collisionProjection.projection);
+    // Circles just past the horizon stay visible, as in GL JS; ones far behind it are clipped.
+    if (gl_Position.z / gl_Position.w < 1.1) {
+        gl_Position.z = 0.0;
+    }
+#else
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+#endif
     gl_Position.xy += in_extrude * tileProps.extrude_scale * padding_factor * gl_Position.w * collision_perspective_ratio;
     applySurfaceTransform();
 

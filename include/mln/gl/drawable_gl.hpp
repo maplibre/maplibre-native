@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <mln/gfx/drawable.hpp>
 #include <mln/gfx/draw_mode.hpp>
 #include <mln/gl/vertex_array.hpp>
@@ -44,6 +45,9 @@ public:
 
     void setVertexAttrId(const size_t id);
 
+    /// Write this value into the stencil buffer instead of testing against the tile's clip value.
+    void setStencilWriteRef(std::optional<int32_t> value) { stencilWriteRef = value; }
+
     void upload(gfx::UploadPass&);
 
     void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
@@ -63,6 +67,8 @@ protected:
 private:
     gfx::ColorMode makeColorMode(PaintParameters&) const;
     gfx::StencilMode makeStencilMode(PaintParameters&) const;
+
+    std::optional<int32_t> stencilWriteRef;
 
     void uploadTextures() const;
 

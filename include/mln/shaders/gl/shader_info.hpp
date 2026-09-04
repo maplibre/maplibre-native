@@ -87,6 +87,13 @@ struct ShaderInfo<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL> {
 };
 
 template <>
+struct ShaderInfo<BuiltIn::GlobeDepthShader, gfx::Backend::Type::OpenGL> {
+    static const std::vector<AttributeInfo> attributes;
+    static const std::vector<UniformBlockInfo> uniformBlocks;
+    static const std::vector<TextureInfo> textures;
+};
+
+template <>
 struct ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
     static const std::vector<AttributeInfo> attributes;
     static const std::vector<UniformBlockInfo> uniformBlocks;

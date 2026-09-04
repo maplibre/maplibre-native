@@ -31,7 +31,16 @@ in float v_gamma_scale;
 #pragma mapbox: define lowp float blur
 #pragma mapbox: define lowp float opacity
 
+#ifdef PROJECTION_GLOBE
+in float v_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(v_tile_x)) {
+        discard;
+    }
+#endif
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
 

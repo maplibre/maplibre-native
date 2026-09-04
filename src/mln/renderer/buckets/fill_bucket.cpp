@@ -40,7 +40,9 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                                       lineIndexes,
                                       lineSegments,
                                       basicLines,
-                                      basicLineSegments);
+                                      basicLineSegments,
+                                      canonical,
+                                      subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z));
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
@@ -60,7 +62,14 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
     // generate buffers
-    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
+    gfx::generateFillAndOutineBuffers(geometry,
+                                      vertices,
+                                      triangles,
+                                      triangleSegments,
+                                      basicLines,
+                                      basicLineSegments,
+                                      canonical,
+                                      subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z));
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);

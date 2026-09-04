@@ -1,0 +1,68 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A layer with minzoom 0 stays visible at zoom -1.5 on the globe.",
+      "width": 512,
+      "height": 512
+    }
+  },
+  "center": [
+    0.0,
+    80.0
+  ],
+  "zoom": -1.5,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "land": {
+      "type": "geojson",
+      "data": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -180,
+              -85.0511287798
+            ],
+            [
+              180,
+              -85.0511287798
+            ],
+            [
+              180,
+              85.0511287798
+            ],
+            [
+              -180,
+              85.0511287798
+            ],
+            [
+              -180,
+              -85.0511287798
+            ]
+          ]
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#202040"
+      }
+    },
+    {
+      "id": "land",
+      "type": "fill",
+      "source": "land",
+      "minzoom": 0,
+      "paint": {
+        "fill-color": "#cceeff"
+      }
+    }
+  ]
+}
