@@ -1247,9 +1247,12 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
                                float sortKey) {
     constexpr const uint16_t instanceCount = 1;
 
-    const uint16_t baseInstance = buffer.segments.empty() ? 0 : buffer.segments.back().instanceCount;
-    if (buffer.segments.empty() || baseInstance + instanceCount > std::numeric_limits<uint16_t>::max() ||
+    if (buffer.segments.empty() ||
+        buffer.segments.back().instanceCount + instanceCount > std::numeric_limits<uint16_t>::max() ||
         std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
+        const uint16_t baseInstance = buffer.segments.empty()
+                                          ? 0
+                                          : buffer.segments.back().baseInstance + buffer.segments.back().instanceCount;
         buffer.segments.emplace_back(RenderStaticData::symbolSegment(baseInstance, sortKey));
     }
 
