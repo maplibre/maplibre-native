@@ -83,7 +83,8 @@ gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
 
 void HeadlessBackend::ensureResource() {
     if (!resource) {
-        resource = std::make_unique<HeadlessRenderableResource>(*this, static_cast<mtl::Context&>(getContext()), size);
+        resource = std::make_unique<HeadlessRenderableResource>(
+            *this, static_cast<mtl::Context&>(getContext()), getSize());
     }
 }
 

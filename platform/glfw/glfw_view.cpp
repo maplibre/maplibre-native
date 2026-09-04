@@ -313,10 +313,10 @@ GLFWView::GLFWView(bool fullscreen_,
 #if defined(__APPLE__) && !defined(MLN_RENDER_BACKEND_VULKAN)
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
+    backend->setFramebufferSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
 #endif
 
-    pixelRatio = static_cast<float>(backend->getSize().width) / width;
+    pixelRatio = static_cast<float>(backend->getFramebufferSize().width) / width;
 
     glfwMakeContextCurrent(nullptr);
 
@@ -1027,7 +1027,7 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
 #ifdef __APPLE__
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    view->backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
+    view->backend->setFramebufferSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
 #endif
 }
 
@@ -1035,7 +1035,7 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     MLN_TRACE_FUNC();
 
     auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
-    view->backend->setSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+    view->backend->setFramebufferSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
     // This is only triggered when the framebuffer is resized, but not the
     // window. It can happen when you move the window between screens with a
