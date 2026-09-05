@@ -1,5 +1,6 @@
 #include "android_renderer_frontend.hpp"
 
+#include <mln/renderer/update_parameters.hpp>
 #include <mln/tile/tile_operation.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/renderer/renderer.hpp>
@@ -168,6 +169,7 @@ void AndroidRendererFrontend::setObserver(RendererObserver& observer) {
 
 void AndroidRendererFrontend::update(std::shared_ptr<UpdateParameters> params) {
     MLN_TRACE_FUNC();
+    styleTerrain = params && params->terrain.has_value();
     updateParams = std::move(params);
     updateAsyncTask->send();
 }
@@ -263,6 +265,28 @@ std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const Screen
     }
 
     return {};
+}
+
+std::optional<double> AndroidRendererFrontend::queryTerrainElevation(const mln::LatLng& latLng,
+                                                                     const std::chrono::milliseconds& timeout) const {
+    if (const auto& actor = mapRenderer.actor()) {
+        auto future = actor->ask(&Renderer::queryTerrainElevation, latLng);
+        if (future.wait_for(timeout) == std::future_status::ready) {
+            return future.get();
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<mln::LatLng> AndroidRendererFrontend::queryTerrainPick(const ScreenCoordinate& pixel,
+                                                                     const std::chrono::milliseconds& timeout) const {
+    if (const auto& actor = mapRenderer.actor()) {
+        auto future = actor->ask(&Renderer::queryTerrainPick, pixel);
+        if (future.wait_for(timeout) == std::future_status::ready) {
+            return future.get();
+        }
+    }
+    return std::nullopt;
 }
 
 AnnotationIDs AndroidRendererFrontend::queryPointAnnotations(const ScreenBox& box) const {
