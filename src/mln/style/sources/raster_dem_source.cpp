@@ -33,6 +33,13 @@ void RasterDEMSource::setTilesetOverrides(Tileset& tileset) {
         if (const auto encoding = options->rasterEncoding) {
             tileset.rasterEncoding = encoding;
         }
+        // Inline zoom range wins over the TileJSON's, as in maplibre-gl-js.
+        if (const auto minzoom = options->minzoom) {
+            tileset.zoomRange.min = *minzoom;
+        }
+        if (const auto maxzoom = options->maxzoom) {
+            tileset.zoomRange.max = *maxzoom;
+        }
     }
 }
 
