@@ -140,6 +140,16 @@ public:
      */
     std::optional<double> getElevationAtLatLng(const LatLng& latLng) const;
 
+    /**
+     * @brief Coordinate of the draped surface under a screen pixel (y-down view pixels, as
+     * rendered-feature queries use). The pixel's view ray is marched from just below the camera
+     * down to sea level, sampling the terrain height at each candidate plane, and the first
+     * crossing (the nearest surface, so a ridge in front wins) is bisected. Inverse of
+     * Map::pixelForLatLng(latLng, elevation). nullopt without terrain, without a camera
+     * altitude, when the camera is inside the terrain, or when the ray never meets the surface.
+     */
+    std::optional<LatLng> pickLatLng(const TransformState& state, const ScreenCoordinate& pixel) const;
+
     /// Zoom levels of DEM ancestors kept loaded above the cover (TileParameters::retainAncestorLevels).
     /// The cover follows the declared maxzoom (16 with overzoom), while layers can draw from tiles
     /// as shallow as ~z9 (far-field distance LOD, low-maxzoom sources), so reach eight levels up;

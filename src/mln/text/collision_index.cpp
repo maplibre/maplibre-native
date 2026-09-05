@@ -112,8 +112,9 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
                                                     Point<float> shift,
                                                     const mat4& posMatrix,
                                                     const float textPixelRatio,
-                                                    const CollisionBoundaries& tileEdges) const {
-    auto boundaries = getProjectedCollisionBoundaries(posMatrix, shift, textPixelRatio, box);
+                                                    const CollisionBoundaries& tileEdges,
+                                                    const SymbolElevationFn* getElevation) const {
+    auto boundaries = getProjectedCollisionBoundaries(posMatrix, shift, textPixelRatio, box, getElevation);
     IntersectStatus result;
     const float x1 = boundaries[0];
     const float y1 = boundaries[1];
@@ -160,11 +161,13 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
     const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
-    std::vector<ProjectedCollisionBox>& projectedBoxes) {
+    std::vector<ProjectedCollisionBox>& projectedBoxes,
+    const SymbolElevationFn* getElevation) {
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
         const CollisionBox& box = feature.boxes.front();
-        auto collisionBoundaries = getProjectedCollisionBoundaries(posMatrix, shift, textPixelRatio, box);
+        auto collisionBoundaries = getProjectedCollisionBoundaries(
+            posMatrix, shift, textPixelRatio, box, getElevation);
         projectedBoxes.emplace_back(
             collisionBoundaries[0], collisionBoundaries[1], collisionBoundaries[2], collisionBoundaries[3]);
         if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) || !isInsideGrid(collisionBoundaries) ||
@@ -186,7 +189,8 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
                                 collisionDebug,
                                 avoidEdges,
                                 collisionGroupPredicate,
-                                projectedBoxes);
+                                projectedBoxes,
+                                getElevation);
     }
 }
 
@@ -203,17 +207,18 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
     const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
-    std::vector<ProjectedCollisionBox>& projectedBoxes) {
+    std::vector<ProjectedCollisionBox>& projectedBoxes,
+    const SymbolElevationFn* getElevation) {
     assert(feature.alongLine);
     assert(projectedBoxes.empty());
     const auto tileUnitAnchorPoint = symbol.anchorPoint;
-    const auto projectedAnchor = projectAnchor(posMatrix, tileUnitAnchorPoint);
+    const auto projectedAnchor = projectAnchor(posMatrix, tileUnitAnchorPoint, getElevation);
 
     const float fontScale = fontSize / 24;
     const float lineOffsetX = symbol.lineOffset[0] * fontSize;
     const float lineOffsetY = symbol.lineOffset[1] * fontSize;
 
-    const auto labelPlaneAnchorPoint = project(tileUnitAnchorPoint, labelPlaneMatrix).first;
+    const auto labelPlaneAnchorPoint = project(tileUnitAnchorPoint, labelPlaneMatrix, getElevation).first;
 
     const auto firstAndLastGlyph = placeFirstAndLastGlyph(fontScale,
                                                           lineOffsetX,
@@ -223,7 +228,8 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
                                                           tileUnitAnchorPoint,
                                                           symbol,
                                                           labelPlaneMatrix,
-                                                          /*return tile distance*/ true);
+                                                          /*return tile distance*/ true,
+                                                          getElevation);
 
     bool collisionDetected = false;
     bool inGrid = false;
@@ -264,7 +270,7 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
             continue;
         }
 
-        const auto projectedPoint = projectPoint(posMatrix, circle.anchor);
+        const auto projectedPoint = projectPoint(posMatrix, circle.anchor, getElevation);
         const float tileUnitRadius = (circle.x2 - circle.x1) / 2;
         const float radius = tileUnitRadius * tileToViewport;
 
@@ -422,16 +428,28 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
     return result;
 }
 
-std::pair<float, float> CollisionIndex::projectAnchor(const mat4& posMatrix, const Point<float>& point) const {
-    vec4 p = {{point.x, point.y, 0, 1}};
+// The z of the projected point is the terrain elevation (exaggerated metres; the
+// projection matrix bakes pixelsPerMeter, as for the elevated symbol vertices), or
+// 0 without terrain. Without this, boxes are laid out where the label would sit at
+// sea level and the elevated label overlaps its neighbours on pitched terrain.
+namespace {
+vec4 elevatedPoint(const Point<float>& point, const SymbolElevationFn* getElevation) {
+    return {{point.x, point.y, getElevation ? (*getElevation)(point) : 0.0, 1}};
+}
+} // namespace
+
+std::pair<float, float> CollisionIndex::projectAnchor(const mat4& posMatrix,
+                                                      const Point<float>& point,
+                                                      const SymbolElevationFn* getElevation) const {
+    vec4 p = elevatedPoint(point, getElevation);
     matrix::transformMat4(p, p, posMatrix);
     return std::make_pair(0.5f + 0.5f * (transformState.getCameraToCenterDistance() / static_cast<float>(p[3])),
                           static_cast<float>(p[3]));
 }
 
-std::pair<Point<float>, float> CollisionIndex::projectAndGetPerspectiveRatio(const mat4& posMatrix,
-                                                                             const Point<float>& point) const {
-    vec4 p = {{point.x, point.y, 0, 1}};
+std::pair<Point<float>, float> CollisionIndex::projectAndGetPerspectiveRatio(
+    const mat4& posMatrix, const Point<float>& point, const SymbolElevationFn* getElevation) const {
+    vec4 p = elevatedPoint(point, getElevation);
     matrix::transformMat4(p, p, posMatrix);
     auto size = transformState.getSize();
     return std::make_pair(Point<float>(static_cast<float>(((p[0] / p[3] + 1) / 2) * size.width + viewportPadding),
@@ -442,8 +460,10 @@ std::pair<Point<float>, float> CollisionIndex::projectAndGetPerspectiveRatio(con
                           0.5f + 0.5f * transformState.getCameraToCenterDistance() / static_cast<float>(p[3]));
 }
 
-Point<float> CollisionIndex::projectPoint(const mat4& posMatrix, const Point<float>& point) const {
-    vec4 p = {{point.x, point.y, 0, 1}};
+Point<float> CollisionIndex::projectPoint(const mat4& posMatrix,
+                                          const Point<float>& point,
+                                          const SymbolElevationFn* getElevation) const {
+    vec4 p = elevatedPoint(point, getElevation);
     matrix::transformMat4(p, p, posMatrix);
     auto size = transformState.getSize();
     return Point<float>{static_cast<float>((((p[0] / p[3] + 1) / 2) * size.width) + viewportPadding),
@@ -453,8 +473,9 @@ Point<float> CollisionIndex::projectPoint(const mat4& posMatrix, const Point<flo
 CollisionBoundaries CollisionIndex::getProjectedCollisionBoundaries(const mat4& posMatrix,
                                                                     Point<float> shift,
                                                                     float textPixelRatio,
-                                                                    const CollisionBox& box) const {
-    const auto projectedPoint = projectAndGetPerspectiveRatio(posMatrix, box.anchor);
+                                                                    const CollisionBox& box,
+                                                                    const SymbolElevationFn* getElevation) const {
+    const auto projectedPoint = projectAndGetPerspectiveRatio(posMatrix, box.anchor, getElevation);
     const float tileToViewport = textPixelRatio * projectedPoint.second;
     return CollisionBoundaries{{
         (box.x1 + shift.x) * tileToViewport + projectedPoint.first.x,

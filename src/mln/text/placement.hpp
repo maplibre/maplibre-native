@@ -123,6 +123,9 @@ public:
 
     virtual ~Placement();
     virtual void placeLayers(const RenderLayerReferences&);
+    /// 3D terrain for this placement round (or null): collision boxes are then projected
+    /// at the terrain elevation, where the elevated symbols render. Set before placeLayers.
+    void setTerrain(const RenderTerrain* terrain) { placementTerrain = terrain; }
     /// `terrain` (optional) lifts CPU-projected line labels onto draped 3D terrain.
     void updateLayerBuckets(const RenderLayer&,
                             const TransformState&,
@@ -170,8 +173,8 @@ protected:
                                           Point<float> /*shift*/,
                                           std::vector<style::TextVariableAnchorType>&,
                                           const mat4& /*posMatrix*/,
-                                          float /*textPixelRatio*/
-    ) {
+                                          float /*textPixelRatio*/,
+                                          const SymbolElevationFn* /*getElevation*/) {
         return true;
     }
 
@@ -190,6 +193,7 @@ protected:
     bool isTiltedView() const;
 
     std::shared_ptr<const UpdateParameters> updateParameters;
+    const RenderTerrain* placementTerrain = nullptr;
     CollisionIndex collisionIndex;
 
     style::TransitionOptions transitionOptions;

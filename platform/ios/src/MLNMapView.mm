@@ -4569,8 +4569,19 @@ static void *windowScreenContext = &windowScreenContext;
 /// Converts a point in the view’s coordinate system to a geographic coordinate.
 - (mln::LatLng)convertPoint:(CGPoint)point toLatLngFromView:(nullable UIView *)view {
   CGPoint convertedPoint = [self convertPoint:point fromView:view];
-  return self.mbglMap.latLngForPixel(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
-      .wrapped();
+  const mln::ScreenCoordinate pixel(convertedPoint.x, convertedPoint.y);
+  // With 3D terrain, the pixel's view ray meets the draped surface before sea level, so the
+  // sea-level unprojection would land well past the spot under the finger. Inverse of
+  // convertLatLng:toPointToView:. The renderer runs on the main thread on iOS, so the terrain
+  // pick is safe here; it returns nullopt without terrain.
+  if (_rendererFrontend) {
+    if (mln::Renderer *renderer = _rendererFrontend->getRenderer()) {
+      if (const auto surface = renderer->queryTerrainPick(pixel)) {
+        return surface->wrapped();
+      }
+    }
+  }
+  return self.mbglMap.latLngForPixel(pixel).wrapped();
 }
 
 - (CGPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate

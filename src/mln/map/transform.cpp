@@ -735,6 +735,14 @@ LatLng Transform::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng
     return state.screenCoordinateToLatLng(flippedPoint, wrapMode);
 }
 
+LatLng Transform::screenCoordinateToLatLng(const ScreenCoordinate& point,
+                                           double elevationMeters,
+                                           LatLng::WrapMode wrapMode) const {
+    ScreenCoordinate flippedPoint = point;
+    flippedPoint.y = state.getSize().height - flippedPoint.y;
+    return state.screenCoordinateToLatLng(flippedPoint, elevationMeters, wrapMode);
+}
+
 double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     double centerOffsetY = 0.5 * (insets.top() - insets.bottom()); // See TransformState::getCenterOffset.
     if (centerOffsetY == 0.0) {

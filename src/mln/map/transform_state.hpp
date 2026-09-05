@@ -234,8 +234,17 @@ public:
     /// lands where the terrain mesh and elevated symbols draw that location.
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, double elevationMeters, vec4&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
+    /// Unprojects onto the plane `elevationMeters` above sea level (same units as
+    /// latLngToScreenCoordinate's elevation) instead of sea level.
+    LatLng screenCoordinateToLatLng(const ScreenCoordinate&,
+                                    double elevationMeters,
+                                    LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
-    TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
+    // `targetZ` is the world z (metres above sea level, see latLngToScreenCoordinate) of the
+    // plane the screen point is unprojected onto; 0 = sea level.
+    TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&,
+                                                    uint8_t atZoom,
+                                                    double targetZ = 0.0) const;
 
     double zoomScale(double zoom) const;
     double scaleZoom(double scale) const;

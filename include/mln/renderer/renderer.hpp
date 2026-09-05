@@ -65,6 +65,10 @@ public:
     /// loaded, or nullopt without terrain. Feed it to `Map::pixelForLatLng(latLng, elevation)`
     /// to place markers on the draped surface. Must be called on the render thread.
     std::optional<double> queryTerrainElevation(const LatLng&) const;
+    /// Coordinate of the draped 3D-terrain surface under a screen pixel (view pixels, y-down),
+    /// or nullopt without terrain: the inverse of `pixelForLatLng(latLng, elevation)`, for taps
+    /// and picks. Must be called on the render thread.
+    std::optional<LatLng> queryTerrainPick(const ScreenCoordinate&) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
     AnnotationIDs getAnnotationIDs(const std::vector<Feature>&) const;

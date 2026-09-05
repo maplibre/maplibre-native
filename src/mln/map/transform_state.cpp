@@ -781,18 +781,18 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng,
     return {p[0] / p[3], size.height - p[1] / p[3]};
 }
 
-TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point, uint8_t atZoom) const {
+TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point,
+                                                                uint8_t atZoom,
+                                                                double targetZ) const {
     if (size.isEmpty()) {
         return {.p = {}, .z = 0};
     }
-
-    float targetZ = 0;
 
     double flippedY = size.height - point.y;
 
     // since we don't know the correct projected z value for the point,
     // unproject two points to get a line and then find the point on that
-    // line with z=0
+    // line with z=targetZ
 
     vec4 coord0;
     vec4 coord1;
@@ -817,6 +817,13 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {
     auto coord = screenCoordinateToTileCoordinate(point, 0);
+    return Projection::unproject(coord.p, 1. / util::tileSize_D, wrapMode);
+}
+
+LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point,
+                                                double elevationMeters,
+                                                LatLng::WrapMode wrapMode) const {
+    auto coord = screenCoordinateToTileCoordinate(point, 0, elevationMeters);
     return Projection::unproject(coord.p, 1. / util::tileSize_D, wrapMode);
 }
 
