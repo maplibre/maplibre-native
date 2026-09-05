@@ -3,14 +3,6 @@ package org.maplibre.android.maps
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.ShapeDrawable
-import org.maplibre.android.MapLibreInjector
-import org.maplibre.android.constants.MapLibreConstants
-import org.maplibre.android.style.layers.CannotAddLayerException
-import org.maplibre.android.style.layers.SymbolLayer
-import org.maplibre.android.style.layers.TransitionOptions
-import org.maplibre.android.style.sources.CannotAddSourceException
-import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.android.utils.ConfigUtils
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -20,13 +12,20 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.MapLibreInjector
+import org.maplibre.android.constants.MapLibreConstants
+import org.maplibre.android.style.layers.CannotAddLayerException
+import org.maplibre.android.style.layers.SymbolLayer
+import org.maplibre.android.style.layers.TransitionOptions
+import org.maplibre.android.style.sources.CannotAddSourceException
+import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.android.utils.ConfigUtils
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class StyleTest : BaseTest() {
-
     private lateinit var maplibreMap: MapLibreMap
 
     private lateinit var nativeMapView: NativeMap
@@ -42,15 +41,16 @@ class StyleTest : BaseTest() {
         MockitoAnnotations.initMocks(this)
         MapLibreInjector.inject(context, "abcdef", ConfigUtils.getMockedOptions())
         nativeMapView = mockk(relaxed = true)
-        maplibreMap = MapLibreMap(
-            nativeMapView,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        maplibreMap =
+            MapLibreMap(
+                nativeMapView,
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                emptyList(),
+            )
         every { nativeMapView.isDestroyed } returns false
         maplibreMap.injectLocationComponent(spyk())
     }
@@ -86,7 +86,7 @@ class StyleTest : BaseTest() {
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
                 layer,
-                MapLibreConstants.LAYER_ID_ANNOTATIONS
+                MapLibreConstants.LAYER_ID_ANNOTATIONS,
             )
         }
     }
@@ -163,7 +163,7 @@ class StyleTest : BaseTest() {
         verify(exactly = 1) {
             nativeMapView.addLayerBelow(
                 layer,
-                MapLibreConstants.LAYER_ID_ANNOTATIONS
+                MapLibreConstants.LAYER_ID_ANNOTATIONS,
             )
         }
     }
@@ -184,8 +184,11 @@ class StyleTest : BaseTest() {
     fun testWithFromLoadingLayerBelow() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
-            .withLayerBelow(layer, "below")
+        val builder =
+            Style
+                .Builder()
+                .fromUri(Style.getPredefinedStyle("Streets"))
+                .withLayerBelow(layer, "below")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -196,8 +199,11 @@ class StyleTest : BaseTest() {
     fun testWithFromLoadingLayerAbove() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
-            .withLayerBelow(layer, "below")
+        val builder =
+            Style
+                .Builder()
+                .fromUri(Style.getPredefinedStyle("Streets"))
+                .withLayerBelow(layer, "below")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -207,8 +213,11 @@ class StyleTest : BaseTest() {
     @Test
     fun testWithFromLoadingTransitionOptions() {
         val transitionOptions = TransitionOptions(100, 200)
-        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
-            .withTransition(transitionOptions)
+        val builder =
+            Style
+                .Builder()
+                .fromUri(Style.getPredefinedStyle("Streets"))
+                .withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -291,8 +300,11 @@ class StyleTest : BaseTest() {
     @Test
     fun testGetNullWhileLoading() {
         val transitionOptions = TransitionOptions(100, 200)
-        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
-            .withTransition(transitionOptions)
+        val builder =
+            Style
+                .Builder()
+                .fromUri(Style.getPredefinedStyle("Streets"))
+                .withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
         Assert.assertNull(maplibreMap.style)
         maplibreMap.notifyStyleLoaded()
@@ -369,7 +381,7 @@ class StyleTest : BaseTest() {
             Assert.assertEquals(
                 "Source that failed to be added shouldn't be cached",
                 source1,
-                maplibreMap.style!!.getSource("source1")
+                maplibreMap.style!!.getSource("source1"),
             )
         }
     }
@@ -393,7 +405,7 @@ class StyleTest : BaseTest() {
             Assert.assertEquals(
                 "Layer that failed to be added shouldn't be cached",
                 layer1,
-                maplibreMap.style!!.getLayer("layer1")
+                maplibreMap.style!!.getLayer("layer1"),
             )
         }
     }
@@ -412,7 +424,7 @@ class StyleTest : BaseTest() {
         every {
             nativeMapView.addLayerBelow(
                 any(),
-                ""
+                "",
             )
         } throws CannotAddLayerException("Duplicate ID")
 
@@ -422,7 +434,7 @@ class StyleTest : BaseTest() {
             Assert.assertEquals(
                 "Layer that failed to be added shouldn't be cached",
                 layer1,
-                maplibreMap.style!!.getLayer("layer1")
+                maplibreMap.style!!.getLayer("layer1"),
             )
         }
     }
@@ -441,7 +453,7 @@ class StyleTest : BaseTest() {
         every {
             nativeMapView.addLayerAbove(
                 any(),
-                ""
+                "",
             )
         } throws CannotAddLayerException("Duplicate ID")
 
@@ -451,7 +463,7 @@ class StyleTest : BaseTest() {
             Assert.assertEquals(
                 "Layer that failed to be added shouldn't be cached",
                 layer1,
-                maplibreMap.style!!.getLayer("layer1")
+                maplibreMap.style!!.getLayer("layer1"),
             )
         }
     }
@@ -475,7 +487,7 @@ class StyleTest : BaseTest() {
             Assert.assertEquals(
                 "Layer that failed to be added shouldn't be cached",
                 layer1,
-                maplibreMap.style!!.getLayer("layer1")
+                maplibreMap.style!!.getLayer("layer1"),
             )
         }
     }

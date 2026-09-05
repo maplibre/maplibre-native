@@ -32,17 +32,19 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
             parksLayer.setProperties(
                 PropertyFactory.visibility(Property.VISIBLE),
                 PropertyFactory.circleRadius(8f),
-                PropertyFactory.circleColor(Color.argb(1, 55, 148, 179))
+                PropertyFactory.circleColor(Color.argb(1, 55, 148, 179)),
             )
-            val parks = VectorSource(
-                "parks_source",
-                "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a"
-            )
+            val parks =
+                VectorSource(
+                    "parks_source",
+                    "maptiler://sources/7ac429c7-c96e-46dd-8c3e-13d48988986a",
+                )
             maplibreMap.setStyle(
-                Style.Builder()
+                Style
+                    .Builder()
                     .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                     .withSource(parks)
-                    .withLayer(parksLayer)
+                    .withLayer(parksLayer),
             )
         }
     }

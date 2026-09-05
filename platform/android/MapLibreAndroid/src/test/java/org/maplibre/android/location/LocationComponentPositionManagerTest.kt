@@ -1,7 +1,5 @@
 package org.maplibre.android.location
 
-import org.maplibre.android.maps.Style
-import org.maplibre.android.style.layers.Layer
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertFalse
@@ -10,11 +8,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.Layer
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
 class LocationComponentPositionManagerTest : BaseTest() {
-
     private lateinit var style: Style
     private lateinit var layer: Layer
 

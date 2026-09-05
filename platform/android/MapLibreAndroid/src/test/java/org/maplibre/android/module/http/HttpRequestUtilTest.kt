@@ -1,7 +1,5 @@
 package org.maplibre.android.module.http
 
-import org.maplibre.android.MapLibreInjector
-import org.maplibre.android.utils.ConfigUtils
 import io.mockk.mockk
 import okhttp3.Call
 import org.junit.Assert.assertEquals
@@ -10,11 +8,12 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.MapLibreInjector
+import org.maplibre.android.utils.ConfigUtils
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class HttpRequestUtilTest : BaseTest() {
-
     @Test
     fun replaceHttpClient() {
         MapLibreInjector.inject(mockk(relaxed = true), "", ConfigUtils.getMockedOptions())
@@ -26,7 +25,7 @@ class HttpRequestUtilTest : BaseTest() {
         assertEquals(
             "Http client should have set to the mocked client",
             httpMock,
-            HttpRequestImpl.client
+            HttpRequestImpl.client,
         )
 
         HttpRequestUtil.setOkHttpClient(null)
@@ -34,7 +33,7 @@ class HttpRequestUtilTest : BaseTest() {
         assertEquals(
             "Http client should have been reset to the default client",
             HttpRequestImpl.defaultClient,
-            HttpRequestImpl.client
+            HttpRequestImpl.client,
         )
 
         MapLibreInjector.clear()

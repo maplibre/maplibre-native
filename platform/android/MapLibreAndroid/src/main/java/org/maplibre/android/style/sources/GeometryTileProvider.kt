@@ -1,8 +1,8 @@
 package org.maplibre.android.style.sources
 
 import androidx.annotation.WorkerThread
-import org.maplibre.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.geojson.FeatureCollection
 
 /**
  * Interface that defines methods for working with [CustomGeometrySource].
@@ -16,5 +16,8 @@ interface GeometryTileProvider {
      * @return Return a @{link FeatureCollection} to be displayed in the requested tile.
      */
     @WorkerThread
-    fun getFeaturesForBounds(bounds: LatLngBounds, zoomLevel: Int): FeatureCollection
+    fun getFeaturesForBounds(
+        bounds: LatLngBounds,
+        zoomLevel: Int,
+    ): FeatureCollection
 }

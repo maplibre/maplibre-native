@@ -3,10 +3,10 @@ package org.maplibre.android.style.sources
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import com.google.gson.JsonObject
+import org.maplibre.android.style.expressions.Expression
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Geometry
-import org.maplibre.android.style.expressions.Expression
 import java.net.URI
 import java.net.URL
 import java.util.*
@@ -68,7 +68,12 @@ class GeoJsonSource : Source {
      * @param options options
      */
     constructor(id: String?, geoJson: String?, options: GeoJsonOptions?) : super() {
-        require(!(geoJson == null || geoJson.startsWith("http") || geoJson.startsWith("asset") || geoJson.startsWith("file"))) { "Expected a raw json body" }
+        require(
+            !(
+                geoJson == null || geoJson.startsWith("http") || geoJson.startsWith("asset") ||
+                    geoJson.startsWith("file")
+            ),
+        ) { "Expected a raw json body" }
         initialize(id, options)
         setGeoJson(geoJson)
     }
@@ -415,7 +420,10 @@ class GeoJsonSource : Source {
      * @param state     a JSON object with the state key-value pairs to merge
      * @return true if the source is attached to a map and the update was dispatched
      */
-    fun setFeatureState(featureId: String, state: JsonObject): Boolean {
+    fun setFeatureState(
+        featureId: String,
+        state: JsonObject,
+    ): Boolean {
         checkThread()
         return nativeSetFeatureState(null, featureId, state)
     }
@@ -440,7 +448,10 @@ class GeoJsonSource : Source {
      * @param stateKey  the state key to remove, or null to remove all keys
      * @return true if the source is attached to a map and the update was dispatched
      */
-    fun removeFeatureState(featureId: String?, stateKey: String?): Boolean {
+    fun removeFeatureState(
+        featureId: String?,
+        stateKey: String?,
+    ): Boolean {
         checkThread()
         return nativeRemoveFeatureState(null, featureId, stateKey)
     }
@@ -506,7 +517,11 @@ class GeoJsonSource : Source {
      * @param offset  offset is the amount of points to skip (for pagination)
      * @return a list of features for the underlying leaves
      */
-    fun getClusterLeaves(cluster: Feature, limit: Long, offset: Long): FeatureCollection {
+    fun getClusterLeaves(
+        cluster: Feature,
+        limit: Long,
+        offset: Long,
+    ): FeatureCollection {
         checkThread()
         return FeatureCollection.fromFeatures(nativeGetClusterLeaves(cluster, limit, offset)!!)
     }
@@ -528,7 +543,10 @@ class GeoJsonSource : Source {
     }
 
     @Keep
-    protected external fun initialize(layerId: String?, options: Any?)
+    protected external fun initialize(
+        layerId: String?,
+        options: Any?,
+    )
 
     @Keep
     protected external fun nativeSetUrl(url: String?)
@@ -549,13 +567,17 @@ class GeoJsonSource : Source {
     private external fun nativeSetGeometry(geometry: Geometry?)
 
     @Keep
-    private external fun querySourceFeatures(filter: Array<Any>?): Array<Feature>
+    private external fun querySourceFeatures(filter: Array<Any?>?): Array<Feature>
 
     @Keep
     private external fun nativeGetClusterChildren(feature: Feature): Array<Feature?>?
 
     @Keep
-    private external fun nativeGetClusterLeaves(feature: Feature, limit: Long, offset: Long): Array<Feature?>?
+    private external fun nativeGetClusterLeaves(
+        feature: Feature,
+        limit: Long,
+        offset: Long,
+    ): Array<Feature?>?
 
     @Keep
     private external fun nativeGetClusterExpansionZoom(feature: Feature): Int

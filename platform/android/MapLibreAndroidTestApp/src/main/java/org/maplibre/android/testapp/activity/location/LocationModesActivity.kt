@@ -67,7 +67,7 @@ class LocationModesActivity :
                     return@setOnClickListener
                 }
                 showModeListDialog()
-            }
+            },
         )
         locationTrackingBtn = findViewById(R.id.button_location_tracking)
         locationTrackingBtn.setOnClickListener(
@@ -76,7 +76,7 @@ class LocationModesActivity :
                     return@setOnClickListener
                 }
                 showTrackingListDialog()
-            }
+            },
         )
         if (savedInstanceState != null) {
             cameraMode = savedInstanceState.getInt(SAVED_STATE_CAMERA)
@@ -87,23 +87,27 @@ class LocationModesActivity :
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
         } else {
-            permissionsManager = PermissionsManager(object : PermissionsListener {
-                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-                    Toast.makeText(
-                        this@LocationModesActivity,
-                        "You need to accept location permissions.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            permissionsManager =
+                PermissionsManager(
+                    object : PermissionsListener {
+                        override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                            Toast
+                                .makeText(
+                                    this@LocationModesActivity,
+                                    "You need to accept location permissions.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                override fun onPermissionResult(granted: Boolean) {
-                    if (granted) {
-                        mapView.getMapAsync(this@LocationModesActivity)
-                    } else {
-                        finish()
-                    }
-                }
-            })
+                        override fun onPermissionResult(granted: Boolean) {
+                            if (granted) {
+                                mapView.getMapAsync(this@LocationModesActivity)
+                            } else {
+                                finish()
+                            }
+                        }
+                    },
+                )
             permissionsManager!!.requestLocationPermissions(this)
         }
     }
@@ -111,7 +115,7 @@ class LocationModesActivity :
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -128,12 +132,12 @@ class LocationModesActivity :
                     .useSpecializedLocationLayer(true)
                     .useDefaultLocationEngine(true)
                     .locationEngineRequest(
-                        LocationEngineRequest.Builder(750)
+                        LocationEngineRequest
+                            .Builder(750)
                             .setFastestInterval(750)
                             .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                            .build()
-                    )
-                    .build()
+                            .build(),
+                    ).build(),
             )
             toggleStyle()
             locationComponent!!.isLocationComponentEnabled = true
@@ -190,10 +194,11 @@ class LocationModesActivity :
                     override fun onFinish() {
                         locationComponent!!.tiltWhileTracking(60.0)
                     }
-                }
+                },
             )
             if (locationComponent!!.cameraMode == CameraMode.NONE) {
-                Toast.makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
+                Toast
+                    .makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
                     .show()
             }
         } else if (id == R.id.action_component_padding_animation_while_tracking) {
@@ -203,8 +208,10 @@ class LocationModesActivity :
                     paddingRandom.nextDouble() * 500,
                     paddingRandom.nextDouble() * 500,
                     paddingRandom.nextDouble() * 500,
-                    paddingRandom.nextDouble() * 500
-                ), 1000L, object : CancelableCallback {
+                    paddingRandom.nextDouble() * 500,
+                ),
+                1000L,
+                object : CancelableCallback {
                     override fun onCancel() {
                         // No impl
                     }
@@ -212,9 +219,11 @@ class LocationModesActivity :
                     override fun onFinish() {
                         locationComponent!!.zoomWhileTracking(16.0)
                     }
-                })
-            if (locationComponent!!.getCameraMode() == CameraMode.NONE) {
-                Toast.makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
+                },
+            )
+            if (locationComponent!!.cameraMode == CameraMode.NONE) {
+                Toast
+                    .makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -226,19 +235,23 @@ class LocationModesActivity :
             return
         }
         defaultStyle = !defaultStyle
-        var options = LocationComponentOptions.createFromAttributes(
-            this,
-            if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
-        )
+        var options =
+            LocationComponentOptions.createFromAttributes(
+                this,
+                if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent,
+            )
         if (defaultStyle) {
-            val padding: IntArray = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val padding: IntArray =
+                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     intArrayOf(0, 750, 0, 0)
                 } else {
                     intArrayOf(0, 250, 0, 0)
                 }
-            options = options.toBuilder()
-                .padding(padding)
-                .build()
+            options =
+                options
+                    .toBuilder()
+                    .padding(padding)
+                    .build()
         }
         locationComponent!!.applyStyle(options)
     }
@@ -254,7 +267,7 @@ class LocationModesActivity :
                         "Bright"
                     } else {
                         "Pastel"
-                    }
+                    },
                 )
 
             maplibreMap.setStyle(Style.Builder().fromUri(styleUrl))
@@ -267,11 +280,12 @@ class LocationModesActivity :
         }
         protectedGestureArea!!.layoutParams.height = 0
         protectedGestureArea!!.layoutParams.width = 0
-        val options = locationComponent!!
-            .locationComponentOptions
-            .toBuilder()
-            .trackingGesturesManagement(false)
-            .build()
+        val options =
+            locationComponent!!
+                .locationComponentOptions
+                .toBuilder()
+                .trackingGesturesManagement(false)
+                .build()
         locationComponent!!.applyStyle(options)
     }
 
@@ -282,13 +296,14 @@ class LocationModesActivity :
         val rectF = RectF(0f, 0f, mapView.width / 2f, mapView.height / 2f)
         protectedGestureArea!!.layoutParams.height = rectF.bottom.toInt()
         protectedGestureArea!!.layoutParams.width = rectF.right.toInt()
-        val options = locationComponent!!
-            .locationComponentOptions
-            .toBuilder()
-            .trackingGesturesManagement(true)
-            .trackingMultiFingerProtectedMoveArea(rectF)
-            .trackingMultiFingerMoveThreshold(500f)
-            .build()
+        val options =
+            locationComponent!!
+                .locationComponentOptions
+                .toBuilder()
+                .trackingGesturesManagement(true)
+                .trackingMultiFingerProtectedMoveArea(rectF)
+                .trackingMultiFingerMoveThreshold(500f)
+                .build()
         locationComponent!!.applyStyle(options)
     }
 
@@ -342,11 +357,12 @@ class LocationModesActivity :
         modes.add("Normal")
         modes.add("Compass")
         modes.add("GPS")
-        val profileAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            modes
-        )
+        val profileAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                modes,
+            )
         val listPopup = ListPopupWindow(this)
         listPopup.setAdapter(profileAdapter)
         listPopup.anchorView = locationModeBtn
@@ -366,7 +382,9 @@ class LocationModesActivity :
     }
 
     @SuppressLint("SetTextI18n")
-    private fun setRendererMode(@RenderMode.Mode mode: Int) {
+    private fun setRendererMode(
+        @RenderMode.Mode mode: Int,
+    ) {
         renderMode = mode
         locationComponent!!.renderMode = mode
         if (mode == RenderMode.NORMAL) {
@@ -387,11 +405,12 @@ class LocationModesActivity :
         trackingTypes.add("Tracking Compass")
         trackingTypes.add("Tracking GPS")
         trackingTypes.add("Tracking GPS North")
-        val profileAdapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            trackingTypes
-        )
+        val profileAdapter =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_list_item_1,
+                trackingTypes,
+            )
         val listPopup = ListPopupWindow(this)
         listPopup.setAdapter(profileAdapter)
         listPopup.anchorView = locationTrackingBtn
@@ -418,7 +437,9 @@ class LocationModesActivity :
         listPopup.show()
     }
 
-    private fun setCameraTrackingMode(@CameraMode.Mode mode: Int) {
+    private fun setCameraTrackingMode(
+        @CameraMode.Mode mode: Int,
+    ) {
         locationComponent!!.setCameraMode(
             mode,
             1200,
@@ -426,22 +447,28 @@ class LocationModesActivity :
             null,
             45.0,
             object : OnLocationCameraTransitionListener {
-                override fun onLocationCameraTransitionFinished(@CameraMode.Mode cameraMode: Int) {
-                    Toast.makeText(
-                        this@LocationModesActivity,
-                        "Transition finished",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                override fun onLocationCameraTransitionFinished(
+                    @CameraMode.Mode cameraMode: Int,
+                ) {
+                    Toast
+                        .makeText(
+                            this@LocationModesActivity,
+                            "Transition finished",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
 
-                override fun onLocationCameraTransitionCanceled(@CameraMode.Mode cameraMode: Int) {
-                    Toast.makeText(
-                        this@LocationModesActivity,
-                        "Transition canceled",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                override fun onLocationCameraTransitionCanceled(
+                    @CameraMode.Mode cameraMode: Int,
+                ) {
+                    Toast
+                        .makeText(
+                            this@LocationModesActivity,
+                            "Transition canceled",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
-            }
+            },
         )
     }
 

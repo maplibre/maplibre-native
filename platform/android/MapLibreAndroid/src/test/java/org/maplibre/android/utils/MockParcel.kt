@@ -9,7 +9,10 @@ import org.mockito.stubbing.Answer
 
 object MockParcel {
     @JvmOverloads
-    fun obtain(`object`: Parcelable, describeContentsValue: Int = 0): Parcelable? {
+    fun obtain(
+        `object`: Parcelable,
+        describeContentsValue: Int = 0,
+    ): Parcelable? {
         testDescribeContents(`object`, describeContentsValue)
         testParcelableArray(`object`)
         return testParcelable(`object`)
@@ -40,21 +43,30 @@ object MockParcel {
         assertArrayEquals("parcel should match initial object", objects, parcelableArray)
     }
 
-    fun testDescribeContents(`object`: Parcelable, describeContentsValue: Int) {
+    fun testDescribeContents(
+        `object`: Parcelable,
+        describeContentsValue: Int,
+    ) {
         if (describeContentsValue == 0) {
-            assertEquals("""
+            assertEquals(
+                """
 Expecting a describeContents() value of 0 for a ${`object`.javaClass.simpleName} instance.
 You can provide a different value for describeContentValue through the obtain method.""",
-                    0,
-                    `object`.describeContents().toLong())
+                0,
+                `object`.describeContents().toLong(),
+            )
         } else {
-            assertEquals("Expecting a describeContents() value of $describeContentsValue",
-                    describeContentsValue.toLong(),
-                    `object`.describeContents().toLong())
+            assertEquals(
+                "Expecting a describeContents() value of $describeContentsValue",
+                describeContentsValue.toLong(),
+                `object`.describeContents().toLong(),
+            )
         }
     }
 
-    private class ParcelMocker private constructor(private val `object`: Any) {
+    private class ParcelMocker private constructor(
+        private val `object`: Any,
+    ) {
         private val objects: MutableList<Any>
         private val mockedParcel: Parcel
         private var position = 0
@@ -72,31 +84,34 @@ You can provide a different value for describeContentValue through the obtain me
         }
 
         private fun setupWrites() {
-            val writeValueAnswer: Answer<Void> = Answer { invocation ->
-                val parameter = invocation.arguments[0]
-                objects.add(parameter)
-                null
-            }
-            val writeArrayAnswer: Answer<Void> = Answer { invocation ->
-                val parameters = invocation.arguments[0] as Array<Any>
-                objects.add(parameters.size)
-                for (o in parameters) {
-                    objects.add(o)
+            val writeValueAnswer: Answer<Void> =
+                Answer { invocation ->
+                    val parameter = invocation.arguments[0]
+                    objects.add(parameter)
+                    null
                 }
-                null
-            }
-            val writeIntArrayAnswer: Answer<Void> = Answer { invocation ->
-                val parameters = invocation.arguments[0] as IntArray
-                if (parameters != null) {
+            val writeArrayAnswer: Answer<Void> =
+                Answer { invocation ->
+                    val parameters = invocation.arguments[0] as Array<Any>
                     objects.add(parameters.size)
                     for (o in parameters) {
                         objects.add(o)
                     }
-                } else {
-                    objects.add(-1)
+                    null
                 }
-                null
-            }
+            val writeIntArrayAnswer: Answer<Void> =
+                Answer { invocation ->
+                    val parameters = invocation.arguments[0] as IntArray
+                    if (parameters != null) {
+                        objects.add(parameters.size)
+                        for (o in parameters) {
+                            objects.add(o)
+                        }
+                    } else {
+                        objects.add(-1)
+                    }
+                    null
+                }
             doAnswer(writeValueAnswer).`when`(mockedParcel).writeByte(ArgumentMatchers.anyByte())
             doAnswer(writeValueAnswer).`when`(mockedParcel).writeLong(ArgumentMatchers.anyLong())
             doAnswer(writeValueAnswer).`when`(mockedParcel).writeString(ArgumentMatchers.anyString())
@@ -104,8 +119,12 @@ You can provide a different value for describeContentValue through the obtain me
             doAnswer(writeIntArrayAnswer).`when`(mockedParcel).writeIntArray(ArgumentMatchers.any(IntArray::class.java))
             doAnswer(writeValueAnswer).`when`(mockedParcel).writeDouble(ArgumentMatchers.anyDouble())
             doAnswer(writeValueAnswer).`when`(mockedParcel).writeFloat(ArgumentMatchers.anyFloat())
-            doAnswer(writeValueAnswer).`when`(mockedParcel).writeParcelable(ArgumentMatchers.any(Parcelable::class.java), ArgumentMatchers.eq(0))
-            doAnswer(writeArrayAnswer).`when`(mockedParcel).writeParcelableArray(ArgumentMatchers.any(Array<Parcelable>::class.java), ArgumentMatchers.eq(0))
+            doAnswer(
+                writeValueAnswer,
+            ).`when`(mockedParcel).writeParcelable(ArgumentMatchers.any(Parcelable::class.java), ArgumentMatchers.eq(0))
+            doAnswer(
+                writeArrayAnswer,
+            ).`when`(mockedParcel).writeParcelableArray(ArgumentMatchers.any(Array<Parcelable>::class.java), ArgumentMatchers.eq(0))
         }
 
         private fun setupReads() {
@@ -129,17 +148,19 @@ You can provide a different value for describeContentValue through the obtain me
                 }
                 array
             }
-            `when`(mockedParcel.createIntArray()).then(Answer {
-                val size = objects[position++] as Int
-                if (size == -1) {
-                    return@Answer null
-                }
-                val array = IntArray(size)
-                for (i in 0 until size) {
-                    array[i] = objects[position++] as Int
-                }
-                array
-            })
+            `when`(mockedParcel.createIntArray()).then(
+                Answer {
+                    val size = objects[position++] as Int
+                    if (size == -1) {
+                        return@Answer null
+                    }
+                    val array = IntArray(size)
+                    for (i in 0 until size) {
+                        array[i] = objects[position++] as Int
+                    }
+                    array
+                },
+            )
         }
 
         private fun setupOthers() {

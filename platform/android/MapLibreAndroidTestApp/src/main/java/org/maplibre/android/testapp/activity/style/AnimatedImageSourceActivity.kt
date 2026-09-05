@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngQuad
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.RasterLayer
@@ -27,10 +27,13 @@ import org.maplibre.android.utils.BitmapUtils
  * MapLibre Native equivalent of https://maplibre.org/maplibre-gl-js/docs/examples/animate-images/
  *
  */
-class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
+class AnimatedImageSourceActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_animated_image_source)
@@ -41,19 +44,21 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         // --8<-- [start:onMapReady]
-        val quad = LatLngQuad(
-            LatLng(46.437, -80.425),
-            LatLng(46.437, -71.516),
-            LatLng(37.936, -71.516),
-            LatLng(37.936, -80.425)
-        )
+        val quad =
+            LatLngQuad(
+                LatLng(46.437, -80.425),
+                LatLng(46.437, -71.516),
+                LatLng(37.936, -71.516),
+                LatLng(37.936, -80.425),
+            )
         val imageSource = ImageSource(ID_IMAGE_SOURCE, quad, R.drawable.southeast_radar_0)
         val layer = RasterLayer(ID_IMAGE_LAYER, ID_IMAGE_SOURCE)
         map.setStyle(
-            Style.Builder()
+            Style
+                .Builder()
                 .fromUri(TestStyles.AMERICANA)
                 .withSource(imageSource)
-                .withLayer(layer)
+                .withLayer(layer),
         ) { style: Style? ->
             runnable = RefreshImageRunnable(imageSource, handler)
             runnable?.let {
@@ -98,10 +103,11 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private class RefreshImageRunnable internal constructor(
         private val imageSource: ImageSource,
-        private val handler: Handler
+        private val handler: Handler,
     ) : Runnable {
         private val drawables: Array<Bitmap?>
         private var drawableIndex: Int
+
         fun getBitmap(resourceId: Int): Bitmap? {
             val context = MapLibre.getApplicationContext()
             val drawable = BitmapUtils.getDrawableFromRes(context, resourceId)
@@ -112,13 +118,13 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         override fun run() {
-             // --8<-- [start:setImage]
+            // --8<-- [start:setImage]
             imageSource.setImage(drawables[drawableIndex++]!!)
             if (drawableIndex > 3) {
                 drawableIndex = 0
             }
             handler.postDelayed(this, 1000)
-             // --8<-- [end:setImage]
+            // --8<-- [end:setImage]
         }
 
         init {

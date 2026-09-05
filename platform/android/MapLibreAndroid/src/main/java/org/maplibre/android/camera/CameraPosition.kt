@@ -21,481 +21,496 @@ import java.util.Arrays
  */
 class CameraPosition
 /**
- * Constructs a CameraPosition.
- *
- * @param target  The target location to align with the center of the screen.
- * @param centerAltitude  The altitude of the target location to align with the center of the
- * screen, in meters above sea level.
- * @param zoom    Zoom level at target. See zoom(float) for details of restrictions.
- * @param tilt    The camera angle, in degrees, from the nadir (directly down). See tilt(float)
- * for details of restrictions.
- * @param bearing Direction that the camera is pointing in, in degrees clockwise from north.
- * This value will be normalized to be within 0 degrees inclusive and 360 degrees
- * exclusive.
- * @param roll Roll of the camera, in degrees clockwise.
- * @param fov Vertical field of view of the camera, in degrees.
- * @param padding Padding in pixels. Specified in left, top, right, bottom order.
- * @throws NullPointerException     if target is null
- * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
- */
- @Keep internal constructor(
-
-    /**
-     * The location that the camera is pointing at.
-     */
-    @field:Keep
-    @JvmField
-    val target: LatLng?,
-
-    /**
-     * The altitude of the location that the camera is pointing at, in meters above sea level.
-     */
-    @field:Keep
-    @JvmField
-    val centerAltitude: Double,
-
-    /**
-     * Zoom level near the center of the screen. See [Builder.zoom] for the definition of the camera's
-     * zoom level.
-     */
-    @field:Keep
-    @JvmField
-    val zoom: Double,
-
-    /**
-     * The angle, in degrees, of the camera angle from the nadir (directly facing the Earth).
-     * See [Builder.tilt] for details of restrictions on the range of values.
-     */
-    @field:Keep
-    @JvmField
-    val tilt: Double,
-
-    /**
-     * Direction that the camera is pointing in, in degrees clockwise from north.
-     */
-    @field:Keep
-    @JvmField
-    val bearing: Double,
-
-    /**
-     * Roll of the camera, in degrees clockwise.
-     */
-    @field:Keep
-    @JvmField
-    val roll: Double,
-
-    /**
-     * Vertical field of view of the camera, in degrees.
-     */
-    @field:Keep
-    @JvmField
-    val fov: Double,
-
-    /**
-     * Padding in pixels. Specified in left, top, right, bottom order.
-     * See [Builder.padding] for the definition of the camera's padding.
-     */
-    @field:Keep
-    @JvmField
-    val padding: DoubleArray?
-
-) : Parcelable {
-
-    /**
      * Constructs a CameraPosition.
      *
      * @param target  The target location to align with the center of the screen.
+     * @param centerAltitude  The altitude of the target location to align with the center of the
+     * screen, in meters above sea level.
      * @param zoom    Zoom level at target. See zoom(float) for details of restrictions.
      * @param tilt    The camera angle, in degrees, from the nadir (directly down). See tilt(float)
      * for details of restrictions.
      * @param bearing Direction that the camera is pointing in, in degrees clockwise from north.
      * This value will be normalized to be within 0 degrees inclusive and 360 degrees
      * exclusive.
+     * @param roll Roll of the camera, in degrees clockwise.
+     * @param fov Vertical field of view of the camera, in degrees.
      * @param padding Padding in pixels. Specified in left, top, right, bottom order.
      * @throws NullPointerException     if target is null
      * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
      */
-    @Keep internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double, padding: DoubleArray?) : this(target, 0.0, zoom, tilt, bearing, 0.0, MapLibreConstants.DEFAULT_FOV, padding)
+    @Keep
+    internal constructor(
+        /**
+         * The location that the camera is pointing at.
+         */
+        @field:Keep
+        @JvmField
+        val target: LatLng?,
+        /**
+         * The altitude of the location that the camera is pointing at, in meters above sea level.
+         */
+        @field:Keep
+        @JvmField
+        val centerAltitude: Double,
+        /**
+         * Zoom level near the center of the screen. See [Builder.zoom] for the definition of the camera's
+         * zoom level.
+         */
+        @field:Keep
+        @JvmField
+        val zoom: Double,
+        /**
+         * The angle, in degrees, of the camera angle from the nadir (directly facing the Earth).
+         * See [Builder.tilt] for details of restrictions on the range of values.
+         */
+        @field:Keep
+        @JvmField
+        val tilt: Double,
+        /**
+         * Direction that the camera is pointing in, in degrees clockwise from north.
+         */
+        @field:Keep
+        @JvmField
+        val bearing: Double,
+        /**
+         * Roll of the camera, in degrees clockwise.
+         */
+        @field:Keep
+        @JvmField
+        val roll: Double,
+        /**
+         * Vertical field of view of the camera, in degrees.
+         */
+        @field:Keep
+        @JvmField
+        val fov: Double,
+        /**
+         * Padding in pixels. Specified in left, top, right, bottom order.
+         * See [Builder.padding] for the definition of the camera's padding.
+         */
+        @field:Keep
+        @JvmField
+        val padding: DoubleArray?,
+    ) : Parcelable {
+        /**
+         * Constructs a CameraPosition.
+         *
+         * @param target  The target location to align with the center of the screen.
+         * @param zoom    Zoom level at target. See zoom(float) for details of restrictions.
+         * @param tilt    The camera angle, in degrees, from the nadir (directly down). See tilt(float)
+         * for details of restrictions.
+         * @param bearing Direction that the camera is pointing in, in degrees clockwise from north.
+         * This value will be normalized to be within 0 degrees inclusive and 360 degrees
+         * exclusive.
+         * @param padding Padding in pixels. Specified in left, top, right, bottom order.
+         * @throws NullPointerException     if target is null
+         * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
+         */
+        @Keep
+        internal constructor(
+            target: LatLng?,
+            zoom: Double,
+            tilt: Double,
+            bearing: Double,
+            padding: DoubleArray?,
+        ) : this(target, 0.0, zoom, tilt, bearing, 0.0, MapLibreConstants.DEFAULT_FOV, padding)
 
-    /**
-     * Constructs a CameraPosition.
-     *
-     * @param target  The target location to align with the center of the screen.
-     * @param zoom    Zoom level at target. See zoom(float) for details of restrictions.
-     * @param tilt    The camera angle, in degrees, from the nadir (directly down). See tilt(float)
-     * for details of restrictions.
-     * @param bearing Direction that the camera is pointing in, in degrees clockwise from north.
-     * This value will be normalized to be within 0 degrees inclusive and 360 degrees
-     * exclusive.
-     * @throws NullPointerException     if target is null
-     * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
-     */
-    @Deprecated("use {@link CameraPosition#CameraPosition(LatLng, double, double, double, double[])} instead.")
-    internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double) : this(target, zoom, tilt, bearing, null) {
-    }
-
-    /**
-     * Describe the kinds of special objects contained in this Parcelable's
-     * marshalled representation.
-     *
-     * @return integer 0.
-     */
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    /**
-     * Flatten this object in to a Parcel.
-     *
-     * @param out   The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written. May be 0 or
-     * [.PARCELABLE_WRITE_RETURN_VALUE].
-     */
-    override fun writeToParcel(out: Parcel, flags: Int) {
-        out.writeDouble(bearing)
-        out.writeParcelable(target, flags)
-        out.writeDouble(centerAltitude)
-        out.writeDouble(tilt)
-        out.writeDouble(roll)
-        out.writeDouble(fov)
-        out.writeDouble(zoom)
-        if (padding != null) {
-            val length = padding.size
-            out.writeInt(length)
-            for (v in padding) {
-                out.writeDouble(v)
-            }
-        } else {
-            out.writeInt(-1)
+        /**
+         * Constructs a CameraPosition.
+         *
+         * @param target  The target location to align with the center of the screen.
+         * @param zoom    Zoom level at target. See zoom(float) for details of restrictions.
+         * @param tilt    The camera angle, in degrees, from the nadir (directly down). See tilt(float)
+         * for details of restrictions.
+         * @param bearing Direction that the camera is pointing in, in degrees clockwise from north.
+         * This value will be normalized to be within 0 degrees inclusive and 360 degrees
+         * exclusive.
+         * @throws NullPointerException     if target is null
+         * @throws IllegalArgumentException if tilt is outside the range of 0 to 90 degrees inclusive.
+         */
+        @Deprecated("use {@link CameraPosition#CameraPosition(LatLng, double, double, double, double[])} instead.")
+        internal constructor(target: LatLng?, zoom: Double, tilt: Double, bearing: Double) : this(target, zoom, tilt, bearing, null) {
         }
-    }
 
-    /**
-     * Returns a String with the camera target, zoom, bearing and tilt.
-     *
-     * @return A String with CameraPosition information.
-     */
-    override fun toString(): String {
-        return ("Target: " + target + ", Center Altitude:" + centerAltitude + ", Zoom:" + zoom + ", Bearing:" + bearing + ", Tilt:" + tilt + ", Roll:" + roll + ", FOV:" + fov + ", Padding:" + Arrays.toString(padding))
-    }
+        /**
+         * Describe the kinds of special objects contained in this Parcelable's
+         * marshalled representation.
+         *
+         * @return integer 0.
+         */
+        override fun describeContents(): Int = 0
 
-    /**
-     * Compares this [CameraPosition] object with another [CameraPosition] and
-     * determines if their target, zoom, tilt, and bearing match.
-     *
-     * @param other Another [CameraPosition] to compare with this object.
-     * @return True if target, zoom, tilt, and bearing match this [CameraPosition] object.
-     * Else, false.
-     */
-    override fun equals(other: Any?): Boolean {
-        if (this === other) {
+        /**
+         * Flatten this object in to a Parcel.
+         *
+         * @param out   The Parcel in which the object should be written.
+         * @param flags Additional flags about how the object should be written. May be 0 or
+         * [.PARCELABLE_WRITE_RETURN_VALUE].
+         */
+        override fun writeToParcel(
+            out: Parcel,
+            flags: Int,
+        ) {
+            out.writeDouble(bearing)
+            out.writeParcelable(target, flags)
+            out.writeDouble(centerAltitude)
+            out.writeDouble(tilt)
+            out.writeDouble(roll)
+            out.writeDouble(fov)
+            out.writeDouble(zoom)
+            if (padding != null) {
+                val length = padding.size
+                out.writeInt(length)
+                for (v in padding) {
+                    out.writeDouble(v)
+                }
+            } else {
+                out.writeInt(-1)
+            }
+        }
+
+        /**
+         * Returns a String with the camera target, zoom, bearing and tilt.
+         *
+         * @return A String with CameraPosition information.
+         */
+        override fun toString(): String =
+            (
+                "Target: " + target + ", Center Altitude:" + centerAltitude + ", Zoom:" + zoom + ", Bearing:" + bearing + ", Tilt:" + tilt +
+                    ", Roll:" +
+                    roll +
+                    ", FOV:" +
+                    fov +
+                    ", Padding:" +
+                    Arrays.toString(padding)
+            )
+
+        /**
+         * Compares this [CameraPosition] object with another [CameraPosition] and
+         * determines if their target, zoom, tilt, and bearing match.
+         *
+         * @param other Another [CameraPosition] to compare with this object.
+         * @return True if target, zoom, tilt, and bearing match this [CameraPosition] object.
+         * Else, false.
+         */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other == null || javaClass != other.javaClass) {
+                return false
+            }
+            val cameraPosition = other as CameraPosition
+            if (target != null && target != cameraPosition.target) {
+                return false
+            } else if (centerAltitude != cameraPosition.centerAltitude) {
+                return false
+            } else if (zoom != cameraPosition.zoom) {
+                return false
+            } else if (tilt != cameraPosition.tilt) {
+                return false
+            } else if (roll != cameraPosition.roll) {
+                return false
+            } else if (fov != cameraPosition.fov) {
+                return false
+            } else if (bearing != cameraPosition.bearing) {
+                return false
+            } else if (!Arrays.equals(padding, cameraPosition.padding)) {
+                return false
+            }
             return true
         }
-        if (other == null || javaClass != other.javaClass) {
-            return false
-        }
-        val cameraPosition = other as CameraPosition
-        if (target != null && target != cameraPosition.target) {
-            return false
-        } else if (centerAltitude != cameraPosition.centerAltitude) {
-            return false
-        } else if (zoom != cameraPosition.zoom) {
-            return false
-        } else if (tilt != cameraPosition.tilt) {
-            return false
-        } else if (roll != cameraPosition.roll) {
-            return false
-        } else if (fov != cameraPosition.fov) {
-            return false
-        } else if (bearing != cameraPosition.bearing) {
-            return false
-        } else if (!Arrays.equals(padding, cameraPosition.padding)) {
-            return false
-        }
-        return true
-    }
-
-    /**
-     * Gives an integer which can be used as the bucket number for storing elements of the set/map.
-     * This bucket number is the address of the element inside the set/map. There's no guarantee
-     * that this hash value will be consistent between different Java implementations, or even
-     * between different execution runs of the same program.
-     *
-     * @return integer value you can use for storing element.
-     */
-    override fun hashCode(): Int {
-        var result: Int
-        var temp: Long
-        temp = java.lang.Double.doubleToLongBits(bearing)
-        result = (temp xor (temp ushr 32)).toInt()
-        result = 31 * result + (target?.hashCode() ?: 0)
-        temp = java.lang.Double.doubleToLongBits(centerAltitude)
-        result = 31 * result + (temp xor (temp ushr 32)).toInt()
-        temp = java.lang.Double.doubleToLongBits(tilt)
-        result = 31 * result + (temp xor (temp ushr 32)).toInt()
-        temp = java.lang.Double.doubleToLongBits(roll)
-        result = 31 * result + (temp xor (temp ushr 32)).toInt()
-        temp = java.lang.Double.doubleToLongBits(fov)
-        result = 31 * result + (temp xor (temp ushr 32)).toInt()
-        temp = java.lang.Double.doubleToLongBits(zoom)
-        result = 31 * result + (temp xor (temp ushr 32)).toInt()
-        result = 31 * result + Arrays.hashCode(padding)
-        return result
-    }
-
-    /**
-     * Builder for composing CameraPosition objects.
-     */
-    class Builder {
-        private var bearing = -1.0
-        private var target: LatLng? = null
-        private var centerAltitude = -1.0
-        private var tilt = -1.0
-        private var roll = -1.0
-        private var fov = -1.0
-        private var zoom = -1.0
-        private var padding: DoubleArray? = null
 
         /**
-         * Create an empty builder.
-         */
-        constructor() : super() {}
-
-        /**
-         * Create a builder with an existing CameraPosition data.
+         * Gives an integer which can be used as the bucket number for storing elements of the set/map.
+         * This bucket number is the address of the element inside the set/map. There's no guarantee
+         * that this hash value will be consistent between different Java implementations, or even
+         * between different execution runs of the same program.
          *
-         * @param previous Existing CameraPosition values to use
+         * @return integer value you can use for storing element.
          */
-        constructor(previous: CameraPosition?) : super() {
-            if (previous != null) {
-                bearing = previous.bearing
-                target = previous.target
-                centerAltitude = previous.centerAltitude
-                tilt = previous.tilt
-                roll = previous.roll
-                fov = previous.fov
-                zoom = previous.zoom
-                padding = previous.padding
-            }
+        override fun hashCode(): Int {
+            var result: Int
+            var temp: Long
+            temp = java.lang.Double.doubleToLongBits(bearing)
+            result = (temp xor (temp ushr 32)).toInt()
+            result = 31 * result + (target?.hashCode() ?: 0)
+            temp = java.lang.Double.doubleToLongBits(centerAltitude)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(tilt)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(roll)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(fov)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            temp = java.lang.Double.doubleToLongBits(zoom)
+            result = 31 * result + (temp xor (temp ushr 32)).toInt()
+            result = 31 * result + Arrays.hashCode(padding)
+            return result
         }
 
         /**
-         * Create a builder with an existing CameraPosition data.
-         *
-         * @param typedArray TypedArray containing attribute values
+         * Builder for composing CameraPosition objects.
          */
-        constructor(typedArray: TypedArray?) : super() {
-            if (typedArray != null) {
-                bearing = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraBearing, 0.0f).toDouble()
-                val lat = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTargetLat, 0.0f).toDouble()
-                val lng = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTargetLng, 0.0f).toDouble()
-                target = LatLng(lat, lng)
-                centerAltitude = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraCenterAltitude, 0.0f).toDouble()
-                tilt = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f).toDouble()
-                roll = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraRoll, 0.0f).toDouble()
-                fov = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraFov, 36.86989764584402f).toDouble()
-                zoom = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f).toDouble()
-            }
-        }
+        class Builder {
+            private var bearing = -1.0
+            private var target: LatLng? = null
+            private var centerAltitude = -1.0
+            private var tilt = -1.0
+            private var roll = -1.0
+            private var fov = -1.0
+            private var zoom = -1.0
+            private var padding: DoubleArray? = null
 
-        /**
-         * Create a builder from an existing CameraPositionUpdate update.
-         *
-         * @param update Update containing camera options
-         */
-        constructor(update: CameraPositionUpdate?) : super() {
-            if (update != null) {
-                bearing = update.bearing
-                target = update.target
-                centerAltitude = update.centerAltitude
-                tilt = update.tilt
-                roll = update.roll
-                fov = update.fov
-                zoom = update.zoom
-                padding = update.padding
-            }
-        }
+            /**
+             * Create an empty builder.
+             */
+            constructor() : super() {}
 
-        /**
-         * Create builder from an existing CameraPositionUpdate update.
-         *
-         * @param update Update containing camera options
-         */
-        constructor(update: ZoomUpdate?) : super() {
-            if (update != null) {
-                zoom = update.zoom
-            }
-        }
-
-        /**
-         * Sets the direction that the camera is pointing in, in degrees clockwise from north.
-         *
-         * @param bearing Bearing
-         * @return this
-         */
-        fun bearing(bearing: Double): Builder {
-            var direction = bearing
-            while (direction >= 360) {
-                direction -= 360.0
-            }
-            while (direction < 0) {
-                direction += 360.0
-            }
-            this.bearing = direction
-            return this
-        }
-
-        /**
-         * Sets the location where the camera is pointing at.
-         *
-         * @param location target of the camera
-         * @return this
-         */
-        fun target(location: LatLng?): Builder {
-            target = location
-            return this
-        }
-
-        /**
-         * Set the altitude of the location where the camera is pointing at in meters above sea level
-         *
-         * @param centerAltitude altitude of the location where the camera is pointing at
-         * @return this
-         */
-        fun centerAltitude(centerAltitude: Double): Builder {
-            this.centerAltitude = centerAltitude
-            return this
-        }
-
-        /**
-         * Set the tilt of the camera in degrees
-         *
-         *
-         * value is clamped to [MapLibreConstants.MINIMUM_TILT] and [MapLibreConstants.MAXIMUM_TILT].
-         *
-         *
-         * @param tilt Tilt value of the camera
-         * @return this
-         */
-        fun tilt(@FloatRange(from = MapLibreConstants.MINIMUM_TILT, to = MapLibreConstants.MAXIMUM_TILT) tilt: Double): Builder {
-            this.tilt = MathUtils.clamp(tilt, MapLibreConstants.MINIMUM_TILT, MapLibreConstants.MAXIMUM_TILT)
-            return this
-        }
-
-        /**
-         * Set the roll of the camera in degrees
-         *
-         * @param roll Roll value of the camera
-         * @return this
-         */
-        fun roll(roll: Double): Builder {
-            this.roll = roll
-            return this
-        }
-
-        /**
-         * Set the vertical field of view of the camera in degrees
-         *
-         * @param fov Vertical field of view of the camera
-         * @return this
-         */
-        fun fov(fov: Double): Builder {
-            this.fov = fov
-            return this
-        }
-
-        /**
-         * Set the zoom of the camera
-         *
-         *
-         * Zoom ranges from [MapLibreConstants.MINIMUM_ZOOM] to [MapLibreConstants.MAXIMUM_ZOOM]
-         *
-         *
-         * @param zoom Zoom value of the camera
-         * @return this
-         */
-        fun zoom(@FloatRange(from = MapLibreConstants.MINIMUM_ZOOM.toDouble(), to = MapLibreConstants.MAXIMUM_ZOOM.toDouble()) zoom: Double): Builder {
-            this.zoom = zoom
-            return this
-        }
-
-        /**
-         * Padding in pixels that shifts the viewport by the specified amount.
-         * Applied padding is going to persist and impact following camera transformations.
-         *
-         *
-         * Specified in left, top, right, bottom order.
-         *
-         *
-         * @param padding Camera padding
-         * @return this
-         */
-        fun padding(@Size(4) padding: DoubleArray?): Builder {
-            this.padding = padding
-            return this
-        }
-
-        /**
-         * Padding in pixels that shifts the viewport by the specified amount.
-         * Applied padding is going to persist and impact following camera transformations.
-         *
-         *
-         * Specified in left, top, right, bottom order.
-         *
-         *
-         * @return this
-         */
-        fun padding(left: Double, top: Double, right: Double, bottom: Double): Builder {
-            padding = doubleArrayOf(left, top, right, bottom)
-            return this
-        }
-
-        /**
-         * Builds the CameraPosition.
-         *
-         * @return CameraPosition
-         */
-        fun build(): CameraPosition {
-            return CameraPosition(target, zoom, tilt, bearing, padding)
-        }
-    }
-
-    companion object {
-        @JvmField
-        val DEFAULT = CameraPosition(LatLng(), 0.0, 0.0, 0.0, doubleArrayOf(0.0, 0.0, 0.0, 0.0))
-
-        @JvmField
-        val CREATOR: Parcelable.Creator<CameraPosition> = object : Parcelable.Creator<CameraPosition> {
-            override fun createFromParcel(parcel: Parcel): CameraPosition {
-                val bearing = parcel.readDouble()
-
-                // Use deprecated method on Tiramisu to avoid platform bug
-                // https://github.com/maplibre/maplibre-native/issues/1276
-                @Suppress("DEPRECATION")
-                val target = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
-                    parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)
-                } else {
-                    parcel.readParcelable(LatLng::class.java.classLoader)
+            /**
+             * Create a builder with an existing CameraPosition data.
+             *
+             * @param previous Existing CameraPosition values to use
+             */
+            constructor(previous: CameraPosition?) : super() {
+                if (previous != null) {
+                    bearing = previous.bearing
+                    target = previous.target
+                    centerAltitude = previous.centerAltitude
+                    tilt = previous.tilt
+                    roll = previous.roll
+                    fov = previous.fov
+                    zoom = previous.zoom
+                    padding = previous.padding
                 }
-                val centerAltitude = parcel.readDouble()
-                val tilt = parcel.readDouble()
-                val roll = parcel.readDouble()
-                val fov = parcel.readDouble()
-                val zoom = parcel.readDouble()
-                var padding: DoubleArray? = null
-                val paddingSize = parcel.readInt()
-                if (paddingSize > 0) {
-                    padding = DoubleArray(paddingSize)
-                    for (i in 0 until paddingSize) {
-                        padding[i] = parcel.readDouble()
+            }
+
+            /**
+             * Create a builder with an existing CameraPosition data.
+             *
+             * @param typedArray TypedArray containing attribute values
+             */
+            constructor(typedArray: TypedArray?) : super() {
+                if (typedArray != null) {
+                    bearing = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraBearing, 0.0f).toDouble()
+                    val lat = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTargetLat, 0.0f).toDouble()
+                    val lng = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTargetLng, 0.0f).toDouble()
+                    target = LatLng(lat, lng)
+                    centerAltitude = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraCenterAltitude, 0.0f).toDouble()
+                    tilt = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraTilt, 0.0f).toDouble()
+                    roll = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraRoll, 0.0f).toDouble()
+                    fov = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraFov, 36.86989764584402f).toDouble()
+                    zoom = typedArray.getFloat(R.styleable.maplibre_MapView_maplibre_cameraZoom, 0.0f).toDouble()
+                }
+            }
+
+            /**
+             * Create a builder from an existing CameraPositionUpdate update.
+             *
+             * @param update Update containing camera options
+             */
+            constructor(update: CameraPositionUpdate?) : super() {
+                if (update != null) {
+                    bearing = update.bearing
+                    target = update.target
+                    centerAltitude = update.centerAltitude
+                    tilt = update.tilt
+                    roll = update.roll
+                    fov = update.fov
+                    zoom = update.zoom
+                    padding = update.padding
+                }
+            }
+
+            /**
+             * Create builder from an existing CameraPositionUpdate update.
+             *
+             * @param update Update containing camera options
+             */
+            constructor(update: ZoomUpdate?) : super() {
+                if (update != null) {
+                    zoom = update.zoom
+                }
+            }
+
+            /**
+             * Sets the direction that the camera is pointing in, in degrees clockwise from north.
+             *
+             * @param bearing Bearing
+             * @return this
+             */
+            fun bearing(bearing: Double): Builder {
+                var direction = bearing
+                while (direction >= 360) {
+                    direction -= 360.0
+                }
+                while (direction < 0) {
+                    direction += 360.0
+                }
+                this.bearing = direction
+                return this
+            }
+
+            /**
+             * Sets the location where the camera is pointing at.
+             *
+             * @param location target of the camera
+             * @return this
+             */
+            fun target(location: LatLng?): Builder {
+                target = location
+                return this
+            }
+
+            /**
+             * Set the altitude of the location where the camera is pointing at in meters above sea level
+             *
+             * @param centerAltitude altitude of the location where the camera is pointing at
+             * @return this
+             */
+            fun centerAltitude(centerAltitude: Double): Builder {
+                this.centerAltitude = centerAltitude
+                return this
+            }
+
+            /**
+             * Set the tilt of the camera in degrees
+             *
+             *
+             * value is clamped to [MapLibreConstants.MINIMUM_TILT] and [MapLibreConstants.MAXIMUM_TILT].
+             *
+             *
+             * @param tilt Tilt value of the camera
+             * @return this
+             */
+            fun tilt(
+                @FloatRange(from = MapLibreConstants.MINIMUM_TILT, to = MapLibreConstants.MAXIMUM_TILT) tilt: Double,
+            ): Builder {
+                this.tilt = MathUtils.clamp(tilt, MapLibreConstants.MINIMUM_TILT, MapLibreConstants.MAXIMUM_TILT)
+                return this
+            }
+
+            /**
+             * Set the roll of the camera in degrees
+             *
+             * @param roll Roll value of the camera
+             * @return this
+             */
+            fun roll(roll: Double): Builder {
+                this.roll = roll
+                return this
+            }
+
+            /**
+             * Set the vertical field of view of the camera in degrees
+             *
+             * @param fov Vertical field of view of the camera
+             * @return this
+             */
+            fun fov(fov: Double): Builder {
+                this.fov = fov
+                return this
+            }
+
+            /**
+             * Set the zoom of the camera
+             *
+             *
+             * Zoom ranges from [MapLibreConstants.MINIMUM_ZOOM] to [MapLibreConstants.MAXIMUM_ZOOM]
+             *
+             *
+             * @param zoom Zoom value of the camera
+             * @return this
+             */
+            fun zoom(
+                @FloatRange(from = MapLibreConstants.MINIMUM_ZOOM.toDouble(), to = MapLibreConstants.MAXIMUM_ZOOM.toDouble()) zoom: Double,
+            ): Builder {
+                this.zoom = zoom
+                return this
+            }
+
+            /**
+             * Padding in pixels that shifts the viewport by the specified amount.
+             * Applied padding is going to persist and impact following camera transformations.
+             *
+             *
+             * Specified in left, top, right, bottom order.
+             *
+             *
+             * @param padding Camera padding
+             * @return this
+             */
+            fun padding(
+                @Size(4) padding: DoubleArray?,
+            ): Builder {
+                this.padding = padding
+                return this
+            }
+
+            /**
+             * Padding in pixels that shifts the viewport by the specified amount.
+             * Applied padding is going to persist and impact following camera transformations.
+             *
+             *
+             * Specified in left, top, right, bottom order.
+             *
+             *
+             * @return this
+             */
+            fun padding(
+                left: Double,
+                top: Double,
+                right: Double,
+                bottom: Double,
+            ): Builder {
+                padding = doubleArrayOf(left, top, right, bottom)
+                return this
+            }
+
+            /**
+             * Builds the CameraPosition.
+             *
+             * @return CameraPosition
+             */
+            fun build(): CameraPosition = CameraPosition(target, zoom, tilt, bearing, padding)
+        }
+
+        companion object {
+            @JvmField
+            val DEFAULT = CameraPosition(LatLng(), 0.0, 0.0, 0.0, doubleArrayOf(0.0, 0.0, 0.0, 0.0))
+
+            @JvmField
+            val CREATOR: Parcelable.Creator<CameraPosition> =
+                object : Parcelable.Creator<CameraPosition> {
+                    override fun createFromParcel(parcel: Parcel): CameraPosition {
+                        val bearing = parcel.readDouble()
+
+                        // Use deprecated method on Tiramisu to avoid platform bug
+                        // https://github.com/maplibre/maplibre-native/issues/1276
+                        @Suppress("DEPRECATION")
+                        val target =
+                            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
+                                parcel.readParcelable(LatLng::class.java.classLoader, LatLng::class.java)
+                            } else {
+                                parcel.readParcelable(LatLng::class.java.classLoader)
+                            }
+                        val centerAltitude = parcel.readDouble()
+                        val tilt = parcel.readDouble()
+                        val roll = parcel.readDouble()
+                        val fov = parcel.readDouble()
+                        val zoom = parcel.readDouble()
+                        var padding: DoubleArray? = null
+                        val paddingSize = parcel.readInt()
+                        if (paddingSize > 0) {
+                            padding = DoubleArray(paddingSize)
+                            for (i in 0 until paddingSize) {
+                                padding[i] = parcel.readDouble()
+                            }
+                        }
+                        return CameraPosition(target, centerAltitude, zoom, tilt, bearing, roll, fov, padding)
                     }
-                }
-                return CameraPosition(target, centerAltitude, zoom, tilt, bearing, roll, fov, padding)
-            }
 
-            override fun newArray(size: Int): Array<CameraPosition?> {
-                return arrayOfNulls(size)
-            }
+                    override fun newArray(size: Int): Array<CameraPosition?> = arrayOfNulls(size)
+                }
         }
     }
-}

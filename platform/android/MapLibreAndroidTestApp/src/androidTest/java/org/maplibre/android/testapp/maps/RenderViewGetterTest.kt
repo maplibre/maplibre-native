@@ -6,20 +6,19 @@ import android.view.ViewGroup
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import org.maplibre.android.AppCenter
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMapOptions
-import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.AppCenter
+import org.maplibre.android.maps.MapLibreMapOptions
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import java.util.concurrent.CountDownLatch
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class RenderViewGetterTest : AppCenter() {
-
     @Rule
     @JvmField
     var rule = ActivityTestRule(FeatureOverviewActivity::class.java)
@@ -41,11 +40,13 @@ class RenderViewGetterTest : AppCenter() {
     @UiThreadTest
     fun testTextureView() {
         rootView = rule.activity.findViewById(android.R.id.content)
-        mapView = MapView(
-            rule.activity,
-            MapLibreMapOptions.createFromAttributes(rule.activity, null)
-                .textureMode(true)
-        )
+        mapView =
+            MapView(
+                rule.activity,
+                MapLibreMapOptions
+                    .createFromAttributes(rule.activity, null)
+                    .textureMode(true),
+            )
         assertNotNull(mapView.renderView)
         assertTrue(mapView.renderView is TextureView)
     }

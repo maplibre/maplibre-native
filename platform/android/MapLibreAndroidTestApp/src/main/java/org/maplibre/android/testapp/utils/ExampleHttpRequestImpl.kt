@@ -1,7 +1,7 @@
 package org.maplibre.android.testapp.utils
 
-import org.maplibre.android.http.HttpResponder
 import org.maplibre.android.http.HttpRequest
+import org.maplibre.android.http.HttpResponder
 import org.maplibre.android.module.http.HttpRequestImpl
 
 /*
@@ -10,23 +10,37 @@ import org.maplibre.android.module.http.HttpRequestImpl
  * requests made by the library.
  */
 class ExampleHttpRequestImpl : HttpRequest {
-    override fun executeRequest(httpRequest: HttpResponder, nativePtr: Long, resourceUrl: String,
-                                dataRange: String, etag: String, modified: String, offlineUsage: Boolean)
-    {
+    override fun executeRequest(
+        httpRequest: HttpResponder,
+        nativePtr: Long,
+        resourceUrl: String,
+        dataRange: String,
+        etag: String,
+        modified: String,
+        offlineUsage: Boolean,
+    ) {
         // Load all json documents and any pbf ending with a 0.
         if (resourceUrl.endsWith(".json") || resourceUrl.endsWith("0.pbf")) {
             impl.executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage)
         } else {
             // All other requests get an instant 404!
             httpRequest.onResponse(
-                    /* responseCode */ 404,
-                    /* eTag */ etag,
-                    /* lastModified */ "",
-                    /* cacheControl */ "",
-                    /* expires */ "",
-                    /* retryAfter */ "",
-                    /* xRateLimitReset */ "",
-                    /* body */ byteArrayOf(0x0)
+                // responseCode
+                404,
+                // eTag
+                etag,
+                // lastModified
+                "",
+                // cacheControl
+                "",
+                // expires
+                "",
+                // retryAfter
+                "",
+                // xRateLimitReset
+                "",
+                // body
+                byteArrayOf(0x0),
             )
         }
     }

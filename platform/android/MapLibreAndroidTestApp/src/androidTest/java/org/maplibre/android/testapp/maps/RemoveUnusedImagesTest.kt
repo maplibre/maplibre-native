@@ -3,6 +3,11 @@ package org.maplibre.android.testapp.maps
 import android.graphics.Bitmap
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import org.junit.Assert.assertNotNull
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 import org.maplibre.android.AppCenter
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -11,11 +16,6 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
-import org.junit.Assert.assertNotNull
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class RemoveUnusedImagesTest : AppCenter() {
-
     @Rule
     @JvmField
     var rule = ActivityTestRule(EspressoTestActivity::class.java)
@@ -56,30 +55,34 @@ class RemoveUnusedImagesTest : AppCenter() {
 
             // Remove layer and source, so that rendered tiles are no longer used, therefore, map must
             // notify client about unused images.
-            mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
-                override fun onDidBecomeIdle() {
-                    mapView.removeOnDidBecomeIdleListener(this)
-                    maplibreMap.style!!.removeLayer("icon")
-                    maplibreMap.style!!.removeSource("geojson")
-                }
-            })
+            mapView.addOnDidBecomeIdleListener(
+                object : MapView.OnDidBecomeIdleListener {
+                    override fun onDidBecomeIdle() {
+                        mapView.removeOnDidBecomeIdleListener(this)
+                        maplibreMap.style!!.removeLayer("icon")
+                        maplibreMap.style!!.removeSource("geojson")
+                    }
+                },
+            )
 
             mapView.addOnCanRemoveUnusedStyleImageListener {
                 canRemoveCallbackLatch.countDown()
                 if (cameraMoveRequested.compareAndSet(false, true)) {
                     maplibreMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.0, 120.0), 8.0))
-                    mapView.addOnDidFinishRenderingFrameListener(object : MapView.OnDidFinishRenderingFrameListener {
-                        override fun onDidFinishRenderingFrame(
-                            fully: Boolean,
-                            frameEncodingTime: Double,
-                            frameRenderingTime: Double
-                        ) {
-                            mapView.removeOnDidFinishRenderingFrameListener(this)
-                            assertNotNull(maplibreMap.style!!.getImage("small"))
-                            assertNotNull(maplibreMap.style!!.getImage("large"))
-                            imageStillPresentLatch.countDown()
-                        }
-                    })
+                    mapView.addOnDidFinishRenderingFrameListener(
+                        object : MapView.OnDidFinishRenderingFrameListener {
+                            override fun onDidFinishRenderingFrame(
+                                fully: Boolean,
+                                frameEncodingTime: Double,
+                                frameRenderingTime: Double,
+                            ) {
+                                mapView.removeOnDidFinishRenderingFrameListener(this)
+                                assertNotNull(maplibreMap.style!!.getImage("small"))
+                                assertNotNull(maplibreMap.style!!.getImage("large"))
+                                imageStillPresentLatch.countDown()
+                            }
+                        },
+                    )
                 }
                 false
             }
@@ -90,7 +93,7 @@ class RemoveUnusedImagesTest : AppCenter() {
 
         if (!hasCanRemoveCallback || !imagesStayedPresent) {
             throw TimeoutException(
-                "hasCanRemoveCallback=$hasCanRemoveCallback, imagesStayedPresent=$imagesStayedPresent"
+                "hasCanRemoveCallback=$hasCanRemoveCallback, imagesStayedPresent=$imagesStayedPresent",
             )
         }
     }

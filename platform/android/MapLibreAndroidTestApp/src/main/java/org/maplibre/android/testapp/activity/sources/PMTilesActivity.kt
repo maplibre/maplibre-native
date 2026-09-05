@@ -25,10 +25,12 @@ class PMTilesActivity : AppCompatActivity() {
         mapView.getMapAsync { map ->
             // --8<-- [start:loadStyle]
             map.setStyle("https://demotiles.maplibre.org/pmtiles/raster/style-imagery.json") { style ->
-                map.cameraPosition = CameraPosition.Builder()
-                    .target(LatLng(47.5, 12.0))
-                    .zoom(9.0)
-                    .build()
+                map.cameraPosition =
+                    CameraPosition
+                        .Builder()
+                        .target(LatLng(47.5, 12.0))
+                        .zoom(9.0)
+                        .build()
                 // --8<-- [end:loadStyle]
                 addPlaces(style)
             }
@@ -37,32 +39,34 @@ class PMTilesActivity : AppCompatActivity() {
 
     private fun addPlaces(style: Style) {
         // --8<-- [start:addSource]
-        val overtureSource = VectorSource(
-            "overture-places",
-            "pmtiles://https://overturemaps-tiles-us-west-2-beta.s3.amazonaws.com/2026-01-21/places.pmtiles"
-        )
+        val overtureSource =
+            VectorSource(
+                "overture-places",
+                "pmtiles://https://overturemaps-tiles-us-west-2-beta.s3.amazonaws.com/2026-01-21/places.pmtiles",
+            )
         style.addSource(overtureSource)
         val overtureLayer = CircleLayer("overture-layer", "overture-places")
-        overtureLayer.setSourceLayer("place")
+        overtureLayer.sourceLayer = "place"
         overtureLayer.setProperties(
             PropertyFactory.circleColor(Color.parseColor("#f5c800")),
             PropertyFactory.circleRadius(4f),
-            PropertyFactory.circleOpacity(0.6f)
+            PropertyFactory.circleOpacity(0.6f),
         )
         style.addLayer(overtureLayer)
         // --8<-- [end:addSource]
 
-        val foursquareSource = VectorSource(
-            "foursquare-places",
-            "pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles"
-        )
+        val foursquareSource =
+            VectorSource(
+                "foursquare-places",
+                "pmtiles://https://oliverwipfli.ch/data/foursquare-os-places-10M-2024-11-20.pmtiles",
+            )
         style.addSource(foursquareSource)
         val foursquareLayer = CircleLayer("foursquare-layer", "foursquare-places")
-        foursquareLayer.setSourceLayer("place")
+        foursquareLayer.sourceLayer = "place"
         foursquareLayer.setProperties(
             PropertyFactory.circleColor(Color.parseColor("#2dd9fe")),
             PropertyFactory.circleRadius(4f),
-            PropertyFactory.circleOpacity(0.6f)
+            PropertyFactory.circleOpacity(0.6f),
         )
         style.addLayer(foursquareLayer)
     }
@@ -71,20 +75,44 @@ class PMTilesActivity : AppCompatActivity() {
     private fun addLocalRasterSource(style: Style) {
         // --8<-- [start:loadFromFile]
         val path = getExternalFilesDir(null)?.absolutePath + "/watercolor.pmtiles"
-        val source = RasterSource(
-            "watercolor",
-            "pmtiles://file://$path",
-            256
-        )
+        val source =
+            RasterSource(
+                "watercolor",
+                "pmtiles://file://$path",
+                256,
+            )
         style.addSource(source)
         style.addLayer(RasterLayer("watercolor", "watercolor"))
         // --8<-- [end:loadFromFile]
     }
 
-    override fun onStart() { super.onStart(); mapView.onStart() }
-    override fun onResume() { super.onResume(); mapView.onResume() }
-    override fun onPause() { super.onPause(); mapView.onPause() }
-    override fun onStop() { super.onStop(); mapView.onStop() }
-    override fun onLowMemory() { super.onLowMemory(); mapView.onLowMemory() }
-    override fun onDestroy() { super.onDestroy(); mapView.onDestroy() }
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapView.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mapView.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView.onLowMemory()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.onDestroy()
+    }
 }

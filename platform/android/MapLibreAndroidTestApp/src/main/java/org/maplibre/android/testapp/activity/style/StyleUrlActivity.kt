@@ -16,7 +16,6 @@ import org.maplibre.android.testapp.styles.TestStyles
  * Activity to demonstrate loading a style dynamically from a URL.
  */
 class StyleUrlActivity : AppCompatActivity() {
-
     private lateinit var mapView: MapView
     private var mapLibreMap: MapLibreMap? = null
 
@@ -29,17 +28,18 @@ class StyleUrlActivity : AppCompatActivity() {
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
 
-        val styles = arrayOf(
-            TestStyles.DEMOTILES,
-            TestStyles.AMERICANA,
-            TestStyles.OPENFREEMAP_LIBERTY,
-            TestStyles.OPENFREEMAP_BRIGHT,
-            TestStyles.PROTOMAPS_LIGHT,
-            TestStyles.PROTOMAPS_DARK,
-            TestStyles.PROTOMAPS_GRAYSCALE,
-            TestStyles.PROTOMAPS_WHITE,
-            TestStyles.PROTOMAPS_BLACK
-        )
+        val styles =
+            arrayOf(
+                TestStyles.DEMOTILES,
+                TestStyles.AMERICANA,
+                TestStyles.OPENFREEMAP_LIBERTY,
+                TestStyles.OPENFREEMAP_BRIGHT,
+                TestStyles.PROTOMAPS_LIGHT,
+                TestStyles.PROTOMAPS_DARK,
+                TestStyles.PROTOMAPS_GRAYSCALE,
+                TestStyles.PROTOMAPS_WHITE,
+                TestStyles.PROTOMAPS_BLACK,
+            )
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, styles)
         urlInput.setAdapter(adapter)
 

@@ -4,23 +4,22 @@ import android.graphics.PointF
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import org.junit.Assert.assertArrayEquals
-import org.maplibre.android.AppCenter
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
-import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.activity.espresso.DeviceIndependentTestActivity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.AppCenter
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.activity.espresso.DeviceIndependentTestActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class ScreenCoordinateConversion : AppCenter() {
-
     @Rule
     @JvmField
     var rule = ActivityTestRule(DeviceIndependentTestActivity::class.java)
@@ -50,12 +49,12 @@ class ScreenCoordinateConversion : AppCenter() {
                 assertEquals(
                     pointFirst.x,
                     convertedFirst.x,
-                    DELTA_FLOAT
+                    DELTA_FLOAT,
                 )
                 assertEquals(
                     pointFirst.y,
                     convertedFirst.y,
-                    DELTA_FLOAT
+                    DELTA_FLOAT,
                 )
 
                 // check second latlng value
@@ -64,12 +63,12 @@ class ScreenCoordinateConversion : AppCenter() {
                 assertEquals(
                     pointSecond.x,
                     convertedSecond.x,
-                    DELTA_FLOAT
+                    DELTA_FLOAT,
                 )
                 assertEquals(
                     pointSecond.y,
                     convertedSecond.y,
-                    DELTA_FLOAT
+                    DELTA_FLOAT,
                 )
                 latch.countDown()
             }
@@ -95,12 +94,12 @@ class ScreenCoordinateConversion : AppCenter() {
                 assertEquals(
                     latLngFirst.latitude,
                     convertedFirst.latitude,
-                    DELTA_DOUBLE
+                    DELTA_DOUBLE,
                 )
                 assertEquals(
                     latLngFirst.longitude,
                     convertedFirst.longitude,
-                    DELTA_DOUBLE
+                    DELTA_DOUBLE,
                 )
 
                 // check second latlng value
@@ -109,12 +108,12 @@ class ScreenCoordinateConversion : AppCenter() {
                 assertEquals(
                     latLngSecond.latitude,
                     convertedSecond.latitude,
-                    DELTA_DOUBLE
+                    DELTA_DOUBLE,
                 )
                 assertEquals(
                     latLngSecond.longitude,
                     convertedSecond.longitude,
-                    DELTA_DOUBLE
+                    DELTA_DOUBLE,
                 )
                 latch.countDown()
             }

@@ -3,13 +3,13 @@ package org.maplibre.android.testapp.style
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.action.MapLibreMapAction
-import org.maplibre.android.testapp.activity.EspressoTest
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.action.MapLibreMapAction
+import org.maplibre.android.testapp.activity.EspressoTest
 import java.util.*
 
 /**
@@ -17,7 +17,6 @@ import java.util.*
  */
 @RunWith(AndroidJUnit4ClassRunner::class)
 class ImageTest : EspressoTest() {
-
     companion object {
         private const val IMAGE_ID = "test.image"
     }
