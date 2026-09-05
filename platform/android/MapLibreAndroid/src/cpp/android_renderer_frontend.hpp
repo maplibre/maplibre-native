@@ -66,6 +66,14 @@ public:
     AnnotationIDs queryPointAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box, const std::chrono::milliseconds& timeout) const;
 
+    // 3D terrain (bounded render-thread round trips; nullopt without terrain or on timeout)
+    std::optional<double> queryTerrainElevation(const mln::LatLng&, const std::chrono::milliseconds& timeout) const;
+    std::optional<mln::LatLng> queryTerrainPick(const ScreenCoordinate&,
+                                                const std::chrono::milliseconds& timeout) const;
+    /// Whether the last update carried a style `terrain` (map thread only): lets projection
+    /// calls skip the render-thread round trip on a flat map.
+    bool hasStyleTerrain() const { return styleTerrain; }
+
     // Feature extension query
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,
                                                  const Feature& feature,
@@ -83,6 +91,7 @@ private:
     util::RunLoop* mapRunLoop;
     std::unique_ptr<util::AsyncTask> updateAsyncTask;
     std::shared_ptr<UpdateParameters> updateParams;
+    bool styleTerrain = false;
 };
 
 } // namespace android

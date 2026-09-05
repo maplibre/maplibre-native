@@ -768,7 +768,17 @@ jni::Local<jni::Object<LatLng>> NativeMapView::latLngForProjectedMeters(JNIEnv& 
 }
 
 jni::Local<jni::Object<PointF>> NativeMapView::pixelForLatLng(JNIEnv& env, jdouble latitude, jdouble longitude) {
-    mln::ScreenCoordinate pixel = map->pixelForLatLng(mln::LatLng(latitude, longitude));
+    const mln::LatLng latLng(latitude, longitude);
+    // With 3D terrain, project onto the draped surface so markers and view overlays sit on the
+    // ground they mark rather than at sea level. The elevation lives on the render thread: a
+    // bounded round trip, skipped entirely when the style has no terrain. The batch
+    // pixelsForLatLngs stays at sea level.
+    std::optional<double> elevation;
+    if (rendererFrontend->hasStyleTerrain()) {
+        elevation = rendererFrontend->queryTerrainElevation(latLng, terrainQueryTimeout);
+    }
+    const mln::ScreenCoordinate pixel = elevation ? map->pixelForLatLng(latLng, *elevation)
+                                                  : map->pixelForLatLng(latLng);
     return PointF::New(env, static_cast<float>(pixel.x), static_cast<float>(pixel.y));
 }
 
@@ -799,7 +809,16 @@ void NativeMapView::pixelsForLatLngs(JNIEnv& env,
 }
 
 jni::Local<jni::Object<LatLng>> NativeMapView::latLngForPixel(JNIEnv& env, jfloat x, jfloat y) {
-    return LatLng::New(env, map->latLngForPixel(mln::ScreenCoordinate(x, y)));
+    const mln::ScreenCoordinate pixel(x, y);
+    // With 3D terrain, the pixel's view ray meets the draped surface before sea level; pick
+    // the surface (Renderer::queryTerrainPick) so taps land under the finger. The batch
+    // latLngsForPixels stays at sea level.
+    if (rendererFrontend->hasStyleTerrain()) {
+        if (const auto surface = rendererFrontend->queryTerrainPick(pixel, terrainQueryTimeout)) {
+            return LatLng::New(env, *surface);
+        }
+    }
+    return LatLng::New(env, map->latLngForPixel(pixel));
 }
 
 void NativeMapView::latLngsForPixels(JNIEnv& env,
