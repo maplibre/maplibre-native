@@ -1,3 +1,7 @@
+#include <cstring>
+#include <mln/util/image.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gfx/context.hpp>
 #include <mln/gfx/drawable.hpp>
 
 #include <mln/gfx/color_mode.hpp>
@@ -88,6 +92,25 @@ const std::shared_ptr<Bucket>& Drawable::getBucket() const {
 void Drawable::setRenderTile(Immutable<std::vector<RenderTile>> renderTiles_, const RenderTile* tile_) {
     impl->renderTiles = std::move(renderTiles_);
     impl->renderTile = tile_;
+}
+
+} // namespace gfx
+} // namespace mln
+
+
+namespace mln {
+namespace gfx {
+
+const Texture2DPtr& Context::getPlaceholderTexture2D() {
+    if (!placeholderTexture2D) {
+        auto image = std::make_shared<PremultipliedImage>(Size{1, 1});
+        std::memset(image->data.get(), 0, image->bytes());
+        placeholderTexture2D = createTexture2D();
+        placeholderTexture2D->setImage(image);
+        placeholderTexture2D->setSamplerConfiguration(
+            {.filter = TextureFilterType::Nearest, .wrapU = TextureWrapType::Clamp, .wrapV = TextureWrapType::Clamp});
+    }
+    return placeholderTexture2D;
 }
 
 } // namespace gfx
