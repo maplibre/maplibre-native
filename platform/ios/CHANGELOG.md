@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## 6.29.0
 
+- iOS: Accept GeoJSON features with empty coordinate arrays.
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
 - fix(core): repaint feature-state-driven symbol paint properties ([#4445](https://github.com/maplibre/maplibre-native/pull/4445)).
 - Make string expressions operate on unicode ([#4344](https://github.com/maplibre/maplibre-native/pull/4344)).
