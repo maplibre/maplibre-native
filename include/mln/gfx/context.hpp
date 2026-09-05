@@ -172,6 +172,16 @@ public:
     /// Get the generic shader with the specified name
     virtual gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) = 0;
 
+    /// Compile shader programs off the render thread where the backend supports it (Metal).
+    /// A program's drawables are skipped for the frames its library is still compiling and the
+    /// renderer keeps requesting frames until every pending compile has landed, so first use of
+    /// a shader (a new symbol permutation, the terrain pass) no longer stalls the render thread
+    /// - on iOS that thread is the main thread, and a terrain style's first draped frame stalled
+    /// it for over a second. Off by default so single-frame renders (render tests, snapshots)
+    /// stay deterministic.
+    virtual void setAsyncShaderCompilation(bool) {}
+    virtual bool hasPendingShaderCompiles() const { return false; }
+
     /// Create a tile layer group implementation
     virtual TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
                                                    std::size_t initialCapacity,

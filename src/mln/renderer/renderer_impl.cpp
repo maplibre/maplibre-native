@@ -102,6 +102,7 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC();
     auto& context = backend.getContext();
+    context.setAsyncShaderCompilation(asyncShaderCompilation);
     context.setObserver(this);
 
     assert(updateParameters);
@@ -747,7 +748,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // budget deferred any new tile, so deferred drapes/tiles catch up progressively even
         // after the interaction stops.
         renderTreeParameters.needsRepaint || drapeWorkDeferred || context.newTileBuildWasDeferred() ||
-            terrainCoverPending,
+            terrainCoverPending || context.hasPendingShaderCompiles(),
         renderTreeParameters.placementChanged,
         context.threadSafeCopyRenderingStats());
 

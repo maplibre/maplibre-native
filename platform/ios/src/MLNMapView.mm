@@ -700,6 +700,10 @@ public:
           : std::nullopt;
   auto renderer = std::make_unique<mln::Renderer>(_mbglView->getRendererBackend(),
                                                   config.scaleFactor, localFontFamilyName);
+  // MapLibre renders on the main thread here, and compiling a Metal shader from source on first
+  // use took the main thread for up to ~1.2 s per program (3D terrain's first draped frame, new
+  // symbol permutations). Compile off-thread; drawables wait a frame or two instead.
+  renderer->setAsyncShaderCompilation(true);
   BOOL enableCrossSourceCollisions = !config.perSourceCollisions;
   _rendererFrontend = std::make_unique<MLNRenderFrontend>(std::move(renderer), self,
                                                           _mbglView->getRendererBackend());

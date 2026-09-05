@@ -1,5 +1,7 @@
 #include <mln/mtl/context.hpp>
 
+#include <chrono>
+
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/mtl/command_encoder.hpp>
 #include <mln/mtl/drawable_builder.hpp>
@@ -144,7 +146,63 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         source.data(), NS::UTF8StringEncoding); // NOLINT(bugprone-suspicious-stringview-data-usage)
 
     const auto& device = backend.getDevice();
+    const auto compileStart = std::chrono::steady_clock::now();
+
+    // Asynchronous path: hand back a program whose functions arrive later, and let Metal compile
+    // the library on its own queue. The clipping mask program stays synchronous - it is drawn
+    // through Context::renderTileClippingMasks rather than a drawable, so it has no "skip this
+    // frame" path. Observer post-compile / failure callbacks belong to the render thread and are
+    // not raised from the completion handler.
+    if (asyncShaderCompilation && shaderID != shaders::BuiltIn::ClippingMaskProgram) {
+        auto pending = std::make_shared<ShaderProgram::PendingFunctions>();
+        auto shader = std::make_unique<ShaderProgram>(name, backend, pending);
+        pendingShaderCompiles->fetch_add(1);
+        device->newLibrary(
+            nsSource,
+            options.get(),
+            [pending,
+             counter = pendingShaderCompiles,
+             shaderName = name,
+             vertName = std::string(vertexName),
+             fragName = std::string(fragmentName),
+             compileStart](MTL::Library* library, NS::Error* compileError) {
+                auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
+                MTLFunctionPtr vert;
+                MTLFunctionPtr frag;
+                if (library && !compileError) {
+                    vert = NS::TransferPtr(library->newFunction(NS::String::string(vertName.c_str(), NS::UTF8StringEncoding)));
+                    if (!fragName.empty()) {
+                        frag = NS::TransferPtr(
+                            library->newFunction(NS::String::string(fragName.c_str(), NS::UTF8StringEncoding)));
+                    }
+                }
+                const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    std::chrono::steady_clock::now() - compileStart)
+                                    .count();
+                if (!vert || (!fragName.empty() && !frag)) {
+                    const auto errPtr = compileError ? compileError->localizedDescription()->utf8String() : nullptr;
+                    const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
+                    Log::Error(Event::Shader, shaderName + " async compile failed" + errStr);
+                    pending->failed.store(true);
+                } else {
+                    std::scoped_lock lock(pending->mutex);
+                    pending->vertex = std::move(vert);
+                    pending->fragment = std::move(frag);
+                    Log::Info(Event::Shader, shaderName + " compiled asynchronously in " + std::to_string(ms) + " ms");
+                }
+                pending->ready.store(true, std::memory_order_release);
+                counter->fetch_sub(1);
+            });
+        return shader;
+    }
+
     auto library = NS::TransferPtr(device->newLibrary(nsSource, options.get(), &error));
+    Log::Info(Event::Shader,
+              name + " compiled in " +
+                  std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                     std::chrono::steady_clock::now() - compileStart)
+                                     .count()) +
+                  " ms");
     if (!library || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();

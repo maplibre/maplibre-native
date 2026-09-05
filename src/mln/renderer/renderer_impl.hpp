@@ -70,6 +70,8 @@ private:
     TexturePool texturePool{drapeTileSize * drapeQualityFactor};
 
     gfx::RendererBackend& backend;
+    /// Applied to the context every frame; see gfx::Context::setAsyncShaderCompilation.
+    bool asyncShaderCompilation = false;
 
     RendererObserver* observer;
 
