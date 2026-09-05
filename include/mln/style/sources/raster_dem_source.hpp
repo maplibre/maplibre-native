@@ -10,10 +10,11 @@ namespace style {
 struct SourceOptions {
     std::optional<Tileset::RasterEncoding> rasterEncoding = std::nullopt;
     std::optional<Tileset::VectorEncoding> vectorEncoding = std::nullopt;
-    // Inline style overrides applied on top of a fetched TileJSON, matching maplibre-gl-js
-    // (`extend(tileJSON, options)` in load_tilejson.ts). A raster-dem source served from an
-    // archive whose TileJSON stops at its deepest stored zoom can declare a higher `maxzoom`
-    // so terrain meshes and drapes at the display zoom while the DEM overzooms.
+    // Inline style overrides applied on top of a fetched TileJSON, matching maplibre-gl-js:
+    // https://github.com/maplibre/maplibre-gl-js/blob/32e555b2c114d6b60da4acd824d272182c656bbe/src/source/load_tilejson.ts#L39
+    // A raster-dem source served from an archive whose TileJSON stops at its deepest stored zoom
+    // can declare a higher `maxzoom` so terrain meshes and drapes at the display zoom while the
+    // DEM overzooms.
     std::optional<uint8_t> minzoom = std::nullopt;
     std::optional<uint8_t> maxzoom = std::nullopt;
 };
