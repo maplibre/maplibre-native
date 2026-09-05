@@ -131,6 +131,7 @@ union FillDrawableUnionUBO {
     FillOutlinePatternDrawableUBO fillOutlinePatternDrawableUBO;
     FillOutlineTriangulatedDrawableUBO fillOutlineTriangulatedDrawableUBO;
 };
+static_assert(sizeof(FillDrawableUnionUBO) == 7 * 16);
 
 union FillTilePropsUnionUBO {
     FillPatternTilePropsUBO fillPatternTilePropsUBO;

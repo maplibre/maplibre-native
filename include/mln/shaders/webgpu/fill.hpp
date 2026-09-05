@@ -41,7 +41,8 @@ struct FillDrawableUBO {
 
 struct FillDrawableUnionUBO {
     fill: FillDrawableUBO,
-    padding: vec4<f32>,
+    padding1: vec4<f32>,
+    padding2: vec4<f32>,
 };
 
 struct FillEvaluatedPropsUBO {
@@ -165,7 +166,8 @@ struct FillOutlineDrawableUBO {
 
 struct FillOutlineDrawableUnionUBO {
     fill: FillOutlineDrawableUBO,
-    padding: vec4<f32>,
+    padding1: vec4<f32>,
+    padding2: vec4<f32>,
 };
 
 struct GlobalPaintParamsUBO {
@@ -863,7 +865,8 @@ struct FillOutlineTriangulatedDrawableUnionUBO {
     matrix_col2: vec4<f32>,
     matrix_col3: vec4<f32>,
     params: vec4<f32>,
-    padding: vec4<f32>,
+    padding1: vec4<f32>,
+    padding2: vec4<f32>,
 };
 
 struct GlobalPaintParamsUBO {
