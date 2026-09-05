@@ -140,6 +140,12 @@ public:
      */
     std::optional<double> getElevationAtLatLng(const LatLng& latLng) const;
 
+    /// Zoom levels of DEM ancestors kept loaded above the cover (TileParameters::retainAncestorLevels).
+    /// The cover follows the declared maxzoom (16 with overzoom), while layers can draw from tiles
+    /// as shallow as ~z9 (far-field distance LOD, low-maxzoom sources), so reach eight levels up;
+    /// the tile count shrinks by 4x per level, so this is a handful of tiles.
+    static constexpr uint8_t demAncestorLevels = 8;
+
     /**
      * @brief Per-tile elevation sampler for CPU-side symbol projection (line-placed labels):
      * tile-local point -> exaggerated metres, from the DEM tile covering `tileID` or its
