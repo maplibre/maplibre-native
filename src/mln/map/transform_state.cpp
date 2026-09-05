@@ -768,9 +768,7 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, 
     return latLngToScreenCoordinate(latLng, 0.0, p);
 }
 
-ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng,
-                                                          double elevationMeters,
-                                                          vec4& p) const {
+ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, double elevationMeters, vec4& p) const {
     if (size.isEmpty()) {
         return {};
     }

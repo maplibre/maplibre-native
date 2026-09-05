@@ -211,6 +211,7 @@ private:
     RendererObserver* observer;
 
     ZoomHistory zoomHistory;
+
 public:
     /// Surface coordinate under a screen pixel on 3D terrain (RenderTerrain::pickLatLng), or
     /// nullopt without terrain. Must be called on the render thread.

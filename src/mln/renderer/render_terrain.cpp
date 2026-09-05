@@ -783,7 +783,8 @@ std::optional<double> RenderTerrain::getElevationAtLatLng(const LatLng& latLng) 
     if (!best) {
         return std::nullopt;
     }
-    return static_cast<double>(getElevationWithExaggeration(best->id, static_cast<float>(bestX), static_cast<float>(bestY)));
+    return static_cast<double>(
+        getElevationWithExaggeration(best->id, static_cast<float>(bestX), static_cast<float>(bestY)));
 }
 
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {

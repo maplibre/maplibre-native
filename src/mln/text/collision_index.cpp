@@ -166,8 +166,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
         const CollisionBox& box = feature.boxes.front();
-        auto collisionBoundaries = getProjectedCollisionBoundaries(
-            posMatrix, shift, textPixelRatio, box, getElevation);
+        auto collisionBoundaries = getProjectedCollisionBoundaries(posMatrix, shift, textPixelRatio, box, getElevation);
         projectedBoxes.emplace_back(
             collisionBoundaries[0], collisionBoundaries[1], collisionBoundaries[2], collisionBoundaries[3]);
         if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) || !isInsideGrid(collisionBoundaries) ||

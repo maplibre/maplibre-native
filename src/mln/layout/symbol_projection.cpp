@@ -223,9 +223,11 @@ Point<float> projectTruncatedLineSegment(const Point<float>& previousTilePoint,
     // all the way out from within the viewport to a (very distant) point near
     // the plane of the camera. We wouldn't be able to render the label anyway
     // once it crossed the plane of the camera.
-    const Point<float> projectedUnitVertex =
-        project(previousTilePoint + util::unit<float>(previousTilePoint - currentTilePoint), projectionMatrix, getElevation)
-            .first;
+    const Point<float> projectedUnitVertex = project(previousTilePoint +
+                                                         util::unit<float>(previousTilePoint - currentTilePoint),
+                                                     projectionMatrix,
+                                                     getElevation)
+                                                 .first;
     const Point<float> projectedUnitSegment = previousProjectedPoint - projectedUnitVertex;
 
     return previousProjectedPoint + (projectedUnitSegment * (minimumLength / util::mag<float>(projectedUnitSegment)));

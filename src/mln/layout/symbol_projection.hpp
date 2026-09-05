@@ -67,16 +67,17 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
                          const TransformState&,
                          const SymbolElevationFn* getElevation = nullptr);
 
-std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float fontScale,
-                                                                          float lineOffsetX,
-                                                                          float lineOffsetY,
-                                                                          bool flip,
-                                                                          const Point<float>& anchorPoint,
-                                                                          const Point<float>& tileAnchorPoint,
-                                                                          const PlacedSymbol& symbol,
-                                                                          const mat4& labelPlaneMatrix,
-                                                                          bool returnTileDistance,
-                                                                          const SymbolElevationFn* getElevation = nullptr);
+std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(
+    float fontScale,
+    float lineOffsetX,
+    float lineOffsetY,
+    bool flip,
+    const Point<float>& anchorPoint,
+    const Point<float>& tileAnchorPoint,
+    const PlacedSymbol& symbol,
+    const mat4& labelPlaneMatrix,
+    bool returnTileDistance,
+    const SymbolElevationFn* getElevation = nullptr);
 
 void hideGlyphs(std::size_t numGlyphs, SymbolBucket::DynamicAttributeVector& dynamicVertexArray);
 void addDynamicAttributes(const Point<float>& anchorPoint,
