@@ -877,7 +877,10 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicAttributeData());
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
-                const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
+                // On 3D terrain the anchor sits on the surface, so project it with its elevation
+                // (as maplibre-gl-js does for variable anchors); the shader treats the result as final.
+                const auto projectedAnchor = project(
+                    tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix, getElevation);
                 const float perspectiveRatio = 0.5f +
                                                0.5f * (state.getCameraToCenterDistance() / projectedAnchor.second);
                 float renderTextSize = evaluateSizeForFeature(partiallyEvaluatedSize, symbol) * perspectiveRatio /
@@ -901,8 +904,10 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 // plane.
                 Point<float> shiftedAnchor;
                 if (pitchWithMap) {
-                    shiftedAnchor =
-                        project(Point<float>(tileAnchor.x + shift.x, tileAnchor.y + shift.y), labelPlaneMatrix).first;
+                    shiftedAnchor = project(Point<float>(tileAnchor.x + shift.x, tileAnchor.y + shift.y),
+                                            labelPlaneMatrix,
+                                            getElevation)
+                                        .first;
                 } else if (rotateWithMap) {
                     auto rotated = util::rotate(shift, -state.getPitch());
                     shiftedAnchor = Point<float>(projectedAnchor.first.x + rotated.x,
