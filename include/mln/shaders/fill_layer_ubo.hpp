@@ -48,15 +48,19 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
-    /* 96 */
+    /* 96 */ float color_t;
+    /*100 */ float pad1;
+    /*104 */ float pad2;
+    /*108 */ float pad3;
+    /*112 */
 };
-static_assert(sizeof(FillPatternDrawableUBO) == 6 * 16);
+static_assert(sizeof(FillPatternDrawableUBO) == 7 * 16);
 
 struct alignas(16) FillPatternTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */ std::array<float, 2> texsize;
-    /* 40 */ float pad1;
+    /* 40 */ float sdf;
     /* 44 */ float pad2;
     /* 48 */
 };
@@ -75,15 +79,19 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
-    /* 96 */
+    /* 96 */ float color_t;
+    /*100 */ float pad1;
+    /*104 */ float pad2;
+    /*108 */ float pad3;
+    /*112 */
 };
-static_assert(sizeof(FillOutlinePatternDrawableUBO) == 6 * 16);
+static_assert(sizeof(FillOutlinePatternDrawableUBO) == 7 * 16);
 
 struct alignas(16) FillOutlinePatternTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */ std::array<float, 2> texsize;
-    /* 40 */ float pad1;
+    /* 40 */ float sdf;
     /* 44 */ float pad2;
     /* 48 */
 };

@@ -5739,13 +5739,8 @@
     "fill-color": {
       "type": "color",
       "default": "#000000",
-      "doc": "The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.",
+      "doc": "The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.",
       "transition": true,
-      "requires": [
-        {
-          "!": "fill-pattern"
-        }
-      ],
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",

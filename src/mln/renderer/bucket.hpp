@@ -44,6 +44,9 @@ public:
 
     virtual void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {}
 
+    virtual void recordSDFPattern(const std::string&, bool) {}
+    virtual bool isSDFPattern(const std::string&) const { return false; }
+
     // As long as this bucket has a Prepare render pass, this function is
     // getting called. Typically, this only happens once when the bucket is
     // being rendered for the first time.

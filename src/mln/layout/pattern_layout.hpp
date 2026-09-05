@@ -188,11 +188,35 @@ public:
                       const bool /*showCollisionBoxes*/,
                       const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<BucketType>(layout, layerPropertiesMap, zoom, overscaling);
+
+        const auto recordSDFPattern = [&](const std::string& layerID, const std::string& imageID) {
+            const auto position = patternPositions.find(imageID);
+            if (position != patternPositions.end()) {
+                bucket->recordSDFPattern(layerID, position->second.sdf);
+            }
+        };
+
+        for (const auto& [layerID, layerProperties] : layerPropertiesMap) {
+            const auto& paint = static_cast<const LayerPropertiesType&>(*layerProperties).evaluated;
+            const auto& patternProperty = paint.template get<PatternPropertyType>();
+            if (patternProperty.isConstant()) {
+                const auto pattern = patternProperty.constantOr(Faded<style::expression::Image>{.from = "", .to = ""});
+                recordSDFPattern(layerID, pattern.from.id());
+                recordSDFPattern(layerID, pattern.to.id());
+            }
+        }
+
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
             std::unique_ptr<GeometryTileFeature> feature = std::move(patternFeature.feature);
             const PatternLayerMap& patterns = patternFeature.getPatterns();
             const GeometryCollection& geometries = feature->getGeometries();
+
+            for (const auto& [layerID, pattern] : patterns) {
+                recordSDFPattern(layerID, pattern.min);
+                recordSDFPattern(layerID, pattern.mid);
+                recordSDFPattern(layerID, pattern.max);
+            }
 
             bucket->addFeature(*feature, geometries, patternPositions, patterns, i, canonical);
             featureIndex->insert(geometries, i, sourceLayerID, bucketLeaderID);
