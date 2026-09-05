@@ -170,14 +170,15 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
                 MTLFunctionPtr vert;
                 MTLFunctionPtr frag;
                 if (library && !compileError) {
-                    vert = NS::TransferPtr(library->newFunction(NS::String::string(vertName.c_str(), NS::UTF8StringEncoding)));
+                    vert = NS::TransferPtr(
+                        library->newFunction(NS::String::string(vertName.c_str(), NS::UTF8StringEncoding)));
                     if (!fragName.empty()) {
                         frag = NS::TransferPtr(
                             library->newFunction(NS::String::string(fragName.c_str(), NS::UTF8StringEncoding)));
                     }
                 }
-                const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                    std::chrono::steady_clock::now() - compileStart)
+                const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() -
+                                                                                      compileStart)
                                     .count();
                 if (!vert || (!fragName.empty() && !frag)) {
                     const auto errPtr = compileError ? compileError->localizedDescription()->utf8String() : nullptr;
