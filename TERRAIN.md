@@ -315,7 +315,7 @@ filled in by @daviani on an iPhone 16 Pro Max / iOS 26.6, built for device with
 | builds | yes | yes | **yes** (bazel, for device) | yes (Dawn) |
 | terrain renders | yes | **yes, verified on device** | **yes, verified on device** | untested |
 | terrain off->on (all 3 load modes) | yes | **yes, verified** | **yes** (via style JSON; load modes not separated) | untested |
-| symbol occlusion | yes | looks correct on device | untested (code path is complete; see below) | untested |
+| symbol occlusion | yes | looks correct on device | verified on the iOS simulator (2026-09-05) after scaling the fade ramp to native's 1 px near plane and packing the depth as exact base-256 digits | untested |
 | **fill-extrusion elevation** | yes | **yes** (2026-08-01, render test pixel-matches the GL baseline) | **yes** (2026-08-02, shaders sample the DEM; CI confirmation pending) | yes |
 | instanced depth pass | yes (GL-only by design) | n/a (per-tile path) | n/a | n/a |
 
