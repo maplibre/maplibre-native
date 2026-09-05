@@ -117,10 +117,11 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     // API validation aborts on the mismatch.
     std::optional<std::size_t> cacheKey;
     if (reuseHash.has_value()) {
-        cacheKey = mln::util::hash(reuseHash.value(),
-                                   static_cast<std::size_t>(colorFormat),
-                                   static_cast<std::size_t>(depthFormat.value_or(MTL::PixelFormat::PixelFormatInvalid)),
-                                   static_cast<std::size_t>(stencilFormat.value_or(MTL::PixelFormat::PixelFormatInvalid)));
+        cacheKey = mln::util::hash(
+            reuseHash.value(),
+            static_cast<std::size_t>(colorFormat),
+            static_cast<std::size_t>(depthFormat.value_or(MTL::PixelFormat::PixelFormatInvalid)),
+            static_cast<std::size_t>(stencilFormat.value_or(MTL::PixelFormat::PixelFormatInvalid)));
         if (auto it = renderPipelineStateCache.find(*cacheKey); it != renderPipelineStateCache.end()) {
             return it->second;
         }

@@ -97,7 +97,6 @@ void Drawable::setRenderTile(Immutable<std::vector<RenderTile>> renderTiles_, co
 } // namespace gfx
 } // namespace mln
 
-
 namespace mln {
 namespace gfx {
 
