@@ -99,6 +99,9 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             drawable.setTexture(
                 terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
                 idCircleDEMTexture);
+        } else {
+            // Keep the declared DEM sampler bound for Metal API validation (never sampled).
+            drawable.setTexture(context.getPlaceholderTexture2D(), idCircleDEMTexture);
         }
 
         // The terrain surface writes depth (so its skirts get occluded); circles
