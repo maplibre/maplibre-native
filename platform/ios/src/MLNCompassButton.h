@@ -18,6 +18,11 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) MLNOrnamentVisibility compassVisibility;
 
+/**
+ Sets whether the compass uses white style.
+ */
+@property (nonatomic, assign) BOOL shouldWhiteStyle;
+
 @end
 
 NS_ASSUME_NONNULL_END
