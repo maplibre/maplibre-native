@@ -1,4 +1,5 @@
 #include <mln/text/placement.hpp>
+#include <mln/renderer/render_terrain.hpp>
 
 #include <mln/layout/symbol_layout.hpp>
 #include <mln/renderer/bucket.hpp>
@@ -749,11 +750,14 @@ void Placement::commit() {
                                      : (getPrevPlacement() ? getPrevPlacement()->fadeStartTime : TimePoint{});
 }
 
-void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformState& state, bool updateOpacities) const {
+void Placement::updateLayerBuckets(const RenderLayer& layer,
+                                   const TransformState& state,
+                                   bool updateOpacities,
+                                   const RenderTerrain* terrain) const {
     std::set<uint32_t> seenCrossTileIDs;
     for (const auto& item : layer.getPlacementData()) {
         if (!item.sortKeyRange || item.sortKeyRange->isFirstRange()) {
-            item.bucket.get().updateVertices(*this, updateOpacities, state, item.tile, seenCrossTileIDs);
+            item.bucket.get().updateVertices(*this, updateOpacities, state, item.tile, seenCrossTileIDs, terrain);
         }
     }
 }
@@ -775,8 +779,16 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
 
 bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                                  const TransformState& state,
-                                                 const RenderTile& tile) const {
+                                                 const RenderTile& tile,
+                                                 const RenderTerrain* terrain) const {
     using namespace style;
+    // With 3D terrain, line-placed labels are projected here on the CPU and must be lifted
+    // onto the surface (the vertex shader elevates point symbols only).
+    std::optional<SymbolElevationFn> elevation;
+    if (terrain) {
+        elevation = terrain->elevationSampler(tile.id);
+    }
+    const SymbolElevationFn* getElevation = elevation ? &*elevation : nullptr;
     const auto& layout = *bucket.layout;
     const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point;
     const bool hasVariableAnchors = bucket.hasVariableTextAnchors() && bucket.hasTextData();
@@ -798,7 +810,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    getElevation);
                 result = true;
             }
             if (bucket.hasIconData()) {
@@ -810,7 +823,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    getElevation);
                 result = true;
             }
         }
@@ -826,7 +840,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 keepUpright,
                                 tile,
                                 *bucket.textSizeBinder,
-                                state);
+                                state,
+                                getElevation);
             result = true;
         }
     } else if (hasVariableAnchors) {
