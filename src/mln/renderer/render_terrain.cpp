@@ -1,4 +1,5 @@
 #include <mln/renderer/render_terrain.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -639,6 +640,103 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID, float x, float 
 
 float RenderTerrain::getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const {
     return getElevation(tileID, x, y) * getExaggeration();
+}
+
+std::optional<std::function<float(const Point<float>&)>> RenderTerrain::elevationSampler(
+    const UnwrappedTileID& tileID) const {
+    if (!demSource || !isEnabled()) {
+        return std::nullopt;
+    }
+    const auto renderTiles = demSource->getRawRenderTiles();
+    const RenderTile* demRenderTile = nullptr;
+    int bestZoom = -1;
+    for (const auto& renderTile : *renderTiles) {
+        const UnwrappedTileID& candidate = renderTile.id;
+        if (!(candidate == tileID || tileID.isChildOf(candidate)) ||
+            static_cast<int>(candidate.canonical.z) <= bestZoom) {
+            continue;
+        }
+        const auto& tile = renderTile.getTile();
+        if (tile.kind != Tile::Kind::RasterDEM) {
+            continue;
+        }
+        auto* demTile = const_cast<RasterDEMTile*>(static_cast<const RasterDEMTile*>(&tile));
+        auto* bucket = demTile->getBucket();
+        if (!bucket || !bucket->getDEMData().getImagePtr() || bucket->getDEMData().dim <= 0) {
+            continue;
+        }
+        bestZoom = candidate.canonical.z;
+        demRenderTile = &renderTile;
+    }
+    if (!demRenderTile) {
+        return std::nullopt;
+    }
+    auto* demTile = const_cast<RasterDEMTile*>(static_cast<const RasterDEMTile*>(&demRenderTile->getTile()));
+    const DEMData* demData = &demTile->getBucket()->getDEMData();
+    const auto off = demSubTileOffset(tileID.canonical, demRenderTile->id.canonical);
+    const float exaggeration = getExaggeration();
+    const float dim = static_cast<float>(demData->dim);
+    return [demData, off, exaggeration, dim](const Point<float>& p) -> float {
+        const float xInDem = (off.dx * util::EXTENT + p.x) / off.scale;
+        const float yInDem = (off.dy * util::EXTENT + p.y) / off.scale;
+        const float px = util::clamp(xInDem / util::EXTENT * dim, 0.0f, dim - 1.0f);
+        const float py = util::clamp(yInDem / util::EXTENT * dim, 0.0f, dim - 1.0f);
+        const auto x0 = static_cast<int32_t>(std::floor(px));
+        const auto y0 = static_cast<int32_t>(std::floor(py));
+        const float fx = px - static_cast<float>(x0);
+        const float fy = py - static_cast<float>(y0);
+        const float tl = static_cast<float>(demData->get(x0, y0));
+        const float tr = static_cast<float>(demData->get(x0 + 1, y0));
+        const float bl = static_cast<float>(demData->get(x0, y0 + 1));
+        const float br = static_cast<float>(demData->get(x0 + 1, y0 + 1));
+        const float top = tl + (tr - tl) * fx;
+        const float bottom = bl + (br - bl) * fx;
+        return (top + (bottom - top) * fy) * exaggeration;
+    };
+}
+
+std::optional<double> RenderTerrain::getElevationAtLatLng(const LatLng& latLng) const {
+    if (!demSource || !isEnabled()) {
+        return std::nullopt;
+    }
+    const auto renderTiles = demSource->getRawRenderTiles();
+    // Deepest loaded DEM tile *with data* that contains the point. Tiles past the archive's
+    // stored zoom come back empty (noContent) yet still sit in the render set, so skip them
+    // or the deepest match samples nothing and reads as sea level.
+    const RenderTile* best = nullptr;
+    double bestX = 0;
+    double bestY = 0;
+    for (const auto& renderTile : *renderTiles) {
+        const UnwrappedTileID& id = renderTile.id;
+        const auto z = static_cast<int32_t>(id.canonical.z);
+        if (best && z <= static_cast<int32_t>(best->id.canonical.z)) {
+            continue;
+        }
+        const auto& tile = renderTile.getTile();
+        if (tile.kind != Tile::Kind::RasterDEM) {
+            continue;
+        }
+        auto* demTile = const_cast<RasterDEMTile*>(static_cast<const RasterDEMTile*>(&tile));
+        auto* bucket = demTile->getBucket();
+        if (!bucket || !bucket->getDEMData().getImagePtr() || bucket->getDEMData().dim <= 0) {
+            continue;
+        }
+        // The integer-zoom overload projects into tile units (world size 2^z), not pixels.
+        const Point<double> world = Projection::project(latLng, z);
+        const double tilesAcross = std::pow(2.0, z);
+        const double tx = world.x - (static_cast<double>(id.canonical.x) + static_cast<double>(id.wrap) * tilesAcross);
+        const double ty = world.y - static_cast<double>(id.canonical.y);
+        if (tx < 0.0 || tx >= 1.0 || ty < 0.0 || ty >= 1.0) {
+            continue;
+        }
+        best = &renderTile;
+        bestX = tx * util::EXTENT;
+        bestY = ty * util::EXTENT;
+    }
+    if (!best) {
+        return std::nullopt;
+    }
+    return static_cast<double>(getElevationWithExaggeration(best->id, static_cast<float>(bestX), static_cast<float>(bestY)));
 }
 
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {

@@ -117,6 +117,10 @@ public:
 
     // Projection
     ScreenCoordinate pixelForLatLng(const LatLng&) const;
+    /// Screen position of a point `elevationMeters` above sea level. With 3D terrain, pass the
+    /// (exaggerated) terrain height at that location - see `Renderer::queryTerrainElevation` -
+    /// so annotations and markers land on the draped surface rather than at sea level.
+    ScreenCoordinate pixelForLatLng(const LatLng&, double elevationMeters) const;
     LatLng latLngForPixel(const ScreenCoordinate&) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;

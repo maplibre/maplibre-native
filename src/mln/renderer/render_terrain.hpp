@@ -8,6 +8,8 @@
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/renderer/texture_pool.hpp>
 #include <mln/util/mat4.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <array>
 #include <memory>
@@ -15,6 +17,7 @@
 #include <set>
 #include <string>
 #include <optional>
+#include <functional>
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
@@ -129,6 +132,20 @@ public:
      * @return Elevation in meters with exaggeration multiplier applied
      */
     float getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const;
+
+    /**
+     * @brief Exaggerated terrain height (metres) at a geographic coordinate, sampled from the
+     * deepest loaded DEM tile covering it. Render-thread only. nullopt when terrain is off or
+     * no DEM tile covers the point yet.
+     */
+    std::optional<double> getElevationAtLatLng(const LatLng& latLng) const;
+
+    /**
+     * @brief Per-tile elevation sampler for CPU-side symbol projection (line-placed labels):
+     * tile-local point -> exaggerated metres, from the DEM tile covering `tileID` or its
+     * closest loaded ancestor. Valid for the current frame only. nullopt without DEM data.
+     */
+    std::optional<std::function<float(const Point<float>&)>> elevationSampler(const UnwrappedTileID& tileID) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier

@@ -432,6 +432,12 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
 }
 
+ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng, double elevationMeters) const {
+    LatLng unwrappedLatLng = latLng.wrapped();
+    unwrappedLatLng.unwrapForShortestPath(impl->transform.getLatLng());
+    return impl->transform.latLngToScreenCoordinate(unwrappedLatLng, elevationMeters);
+}
+
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
     return impl->transform.screenCoordinateToLatLng(pixel);
 }

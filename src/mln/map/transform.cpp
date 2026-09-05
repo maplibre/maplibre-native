@@ -722,6 +722,13 @@ ScreenCoordinate Transform::latLngToScreenCoordinate(const LatLng& latLng) const
     return point;
 }
 
+ScreenCoordinate Transform::latLngToScreenCoordinate(const LatLng& latLng, double elevationMeters) const {
+    vec4 p;
+    ScreenCoordinate point = state.latLngToScreenCoordinate(latLng, elevationMeters, p);
+    point.y = state.getSize().height - point.y;
+    return point;
+}
+
 LatLng Transform::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {
     ScreenCoordinate flippedPoint = point;
     flippedPoint.y = state.getSize().height - flippedPoint.y;
