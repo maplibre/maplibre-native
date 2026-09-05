@@ -122,6 +122,10 @@ public:
     /// so annotations and markers land on the draped surface rather than at sea level.
     ScreenCoordinate pixelForLatLng(const LatLng&, double elevationMeters) const;
     LatLng latLngForPixel(const ScreenCoordinate&) const;
+    /// Geographic position of the point where the screen pixel's view ray crosses the plane
+    /// `elevationMeters` above sea level (exaggerated terrain units, as pixelForLatLng). A
+    /// terrain-aware pick marches this along the ray - see MLNMapView convertPoint:toLatLngFromView:.
+    LatLng latLngForPixel(const ScreenCoordinate&, double elevationMeters) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
 

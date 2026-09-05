@@ -573,6 +573,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         symbolBucketsChanged |= renderTreeParameters->placementChanged;
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters, placementController.getPlacement());
+            placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
             placementController.setPlacement(std::move(placement));
             crossTileSymbolIndex.pruneUnusedLayers(usedSymbolLayers);
@@ -592,6 +593,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters);
             placement->collectPlacedSymbolData(placedSymbolDataCollected);
+            placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
             placementController.setPlacement(std::move(placement));
         }
@@ -693,6 +695,13 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     }
 }
 
+std::optional<LatLng> RenderOrchestrator::pickTerrainLatLng(const ScreenCoordinate& pixel) const {
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        return renderTerrain->pickLatLng(transformState, pixel);
+    }
+    return std::nullopt;
+}
+
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const ScreenLineString& geometry,
     const RenderedQueryOptions& options,
@@ -712,11 +721,27 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     mat4 projMatrix;
     transformState.getProjMatrix(projMatrix);
 
+    // Tile-source and shape-annotation queries unproject the screen geometry at sea level. On
+    // 3D terrain a tapped pixel's ray meets the draped surface first, so substitute, for each
+    // point, the sea-level projection of the surface coordinate under it: the sea-level
+    // unprojection downstream then yields that surface coordinate. Symbols keep the original
+    // screen geometry - their collision boxes already sit at the terrain elevation.
+    ScreenLineString surfaceGeometry = geometry;
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        for (auto& point : surfaceGeometry) {
+            if (const auto surface = renderTerrain->pickLatLng(transformState, point)) {
+                ScreenCoordinate projected = transformState.latLngToScreenCoordinate(*surface);
+                projected.y = transformState.getSize().height - projected.y; // back to y-down
+                point = projected;
+            }
+        }
+    }
+
     std::unordered_map<std::string, std::vector<Feature>> resultsByLayer;
     for (const auto& sourceID : sourceIDs) {
         if (RenderSource* renderSource = getRenderSource(sourceID)) {
             auto sourceResults = renderSource->queryRenderedFeatures(
-                geometry, transformState, filteredLayers, options, projMatrix);
+                surfaceGeometry, transformState, filteredLayers, options, projMatrix);
             std::ranges::move(sourceResults, std::inserter(resultsByLayer, resultsByLayer.begin()));
         }
     }
@@ -728,7 +753,7 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
         const RenderLayer* layer = pair.second;
         layer->populateDynamicRenderFeatureIndex(dynamicIndex);
     }
-    dynamicIndex.query(resultsByLayer, geometry, transformState);
+    dynamicIndex.query(resultsByLayer, surfaceGeometry, transformState);
     std::vector<Feature> result;
 
     if (resultsByLayer.empty()) {

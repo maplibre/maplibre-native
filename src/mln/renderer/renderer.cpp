@@ -109,6 +109,10 @@ std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID,
     return impl->orchestrator.querySourceFeatures(sourceID, options);
 }
 
+std::optional<LatLng> Renderer::queryTerrainPick(const ScreenCoordinate& pixel) const {
+    return impl->orchestrator.pickTerrainLatLng(pixel);
+}
+
 std::optional<double> Renderer::queryTerrainElevation(const LatLng& latLng) const {
     if (const RenderTerrain* terrain = impl->orchestrator.getRenderTerrain()) {
         return terrain->getElevationAtLatLng(latLng);
