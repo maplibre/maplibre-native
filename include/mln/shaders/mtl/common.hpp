@@ -102,46 +102,64 @@ inline float get_elevation(float2 pos,
     return elevation * dem_exaggeration;
 }
 
-// Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp),
-// converted to NDC z, as in the maplibre-gl-js prelude
+// Unpack a depth value packed by the terrain depth pass (mtl/terrain_depth.hpp):
+// four base-256 digits, each stored exactly as k/255 in the RGBA8 target, so the
+// decode is exact to float precision. The pass packs Metal window depth in [0, 1]
+// (rendered with the terrain tweaker's [0, 1]-remapped matrix); the symbol matrices
+// carry no such remap, so convert back to GL NDC [-1, 1] to match pos.z / pos.w.
 inline float unpack_depth(float4 rgba_depth) {
-    const float4 bit_shift = float4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift) * 2.0 - 1.0;
+    const float4 digits = round(rgba_depth * 255.0);
+    const float4 weights = float4(1.0 / 256.0, 1.0 / 65536.0, 1.0 / 16777216.0, 1.0 / 4294967296.0);
+    return dot(digits, weights) * 2.0 - 1.0;
 }
 
 // Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully
 // hidden, with a soft ramp over ~0.002 NDC depth and a small bias so geometry
 // sitting exactly on the terrain surface (e.g. a label anchored to it) does not
 // occlude itself. Matches the maplibre-gl-js depthOpacity() prelude function.
+//
+// `depth_ramp` scales the gl-js ramp (500 per NDC unit) to this projection. gl-js uses
+// a near plane of height / 50 while native's TransformState::getProjMatrix uses 1
+// (one pixel at the view centre), which compresses every fragment's NDC depth into
+// the top ~0.1%: a label 100 px behind a ridge differs by ~1e-4, and at 500 the
+// gl-js ramp would fade it by 5%. Scaling by the near-plane ratio keeps gl-js's
+// behaviour (fully hidden ~0.11 view-heights behind the surface at the centre
+// distance, self-occlusion bias ~5 px); see calculate_visibility for the value.
 inline float depth_opacity(float3 frag,
                            texture2d<float, access::sample> depth_texture,
-                           sampler depth_sampler) {
+                           sampler depth_sampler,
+                           float depth_ramp) {
     const float2 uv = frag.xy * 0.5 + 0.5;
-    const float d = unpack_depth(depth_texture.sample(depth_sampler, float2(uv.x, 1.0 - uv.y))) + 0.0001 -
-                    frag.z;
-    return 1.0 - max(0.0, min(1.0, -d * 500.0));
+    const float bias = 0.05 / depth_ramp; // gl-js: 0.0001 * 500
+    const float d = unpack_depth(depth_texture.sample(depth_sampler, float2(uv.x, 1.0 - uv.y))) + bias - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * depth_ramp));
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth texture and enable flag are
 // passed as arguments.
+// `camera_to_center_distance` (GlobalPaintParamsUBO) is 1.5 x the view height in
+// native's projection, so the near-plane ratio (height / 50) / 1 gives a ramp of
+// 500 * height / 50 = 10 * height = 6.67 * camera_to_center_distance.
 inline float calculate_visibility(float4 pos,
                                   texture2d<float, access::sample> depth_texture,
                                   sampler depth_sampler,
-                                  float depth_enabled) {
+                                  float depth_enabled,
+                                  float camera_to_center_distance) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
+    const float depth_ramp = 6.67 * camera_to_center_distance;
     const float3 frag = pos.xyz / pos.w;
     // check if coordinate is fully visible
-    const float d = depth_opacity(frag, depth_texture, depth_sampler);
+    const float d = depth_opacity(frag, depth_texture, depth_sampler, depth_ramp);
     if (d > 0.95) {
         return 1.0;
     }
     // if not, sample some pixels above: a label whose anchor is just behind a
     // ridge still shows if its glyphs poke above it (maplibre-gl-js behaviour)
-    return (d + depth_opacity(frag + float3(0.0, 0.01, 0.0), depth_texture, depth_sampler)) / 2.0;
+    return (d + depth_opacity(frag + float3(0.0, 0.01, 0.0), depth_texture, depth_sampler, depth_ramp)) / 2.0;
 }
 
 template<class ForwardIt, class T>
