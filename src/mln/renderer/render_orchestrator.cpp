@@ -264,6 +264,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
     tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
 
+    // The DEM source additionally keeps coarser ancestors of its cover loaded so that every
+    // tile another layer draws from - shallower far-field LOD tiles, overzoomed sources with
+    // a low maxzoom - has a DEM ancestor to bind for elevation (see TileParameters).
+    TileParameters demTileParameters = tileParameters;
+    demTileParameters.retainAncestorLevels = terrainEnabled ? RenderTerrain::demAncestorLevels : 0;
+
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
@@ -466,7 +472,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
-        source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
+        const bool isDEMSource = terrainEnabled && sourceImpl->id == renderTerrain->getSourceID();
+        source->update(sourceImpl,
+                       filteredLayersForSource,
+                       sourceNeedsRendering,
+                       sourceNeedsRelayout,
+                       isDEMSource ? demTileParameters : tileParameters);
         filteredLayersForSource.clear();
 
         // Update all layers with their new renderability status, if it changed.
