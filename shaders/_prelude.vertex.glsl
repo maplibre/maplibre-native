@@ -151,38 +151,48 @@ vec4 apply_drape_transform(vec4 clip, mat4 matrix, vec4 target_tile) {
     return clip;
 }
 
-// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl).
-// Matches maplibre-gl-js unpack(): the depth pass packs gl_Position.z/gl_Position.w
-// (clip-space NDC z) directly, so no window-depth remap (no *2-1, no glDepthRange dependency).
+// Unpack a depth value packed by the terrain depth pass (terrain_depth.fragment.glsl): four
+// base-256 digits of the window depth, each stored exactly as k / 255 in the RGBA8 target, so
+// the decode is exact to float precision (the gl-js fract/bit_mask scheme stores k / 256 into a
+// unorm8 that holds n / 255, an error of up to 0.002 - far more than the depth differences the
+// test looks for at native's 1 px near plane). Converted back to clip-space NDC z to match the
+// pos.z / pos.w compared in calculate_visibility.
 float unpack_depth(vec4 rgba_depth) {
-    const highp vec4 bit_shift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgba_depth, bit_shift);
+    const highp vec4 weights = vec4(1.0 / 256.0, 1.0 / 65536.0, 1.0 / 16777216.0, 1.0 / 4294967296.0);
+    highp vec4 digits = floor(rgba_depth * 255.0 + 0.5);
+    return dot(digits, weights) * 2.0 - 1.0;
 }
 
 // Opacity of a fragment behind the terrain, in [0, 1]: 1 fully visible, 0 fully hidden,
 // with a soft ramp and a small bias so geometry sitting exactly on the terrain surface
 // (e.g. a label anchored to it) does not occlude itself. Matches maplibre-gl-js depthOpacity().
-highp float depth_opacity(vec3 frag, sampler2D depth_texture) {
-    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + 0.0001 - frag.z;
-    // gl-js uses 500 (ramp over ~0.002 NDC). Our perspective depth is compressed into a tighter
-    // NDC band near the far plane, so behind-ridge separations are only a few 1e-4; steepen to
-    // 5000 so those fully occlude. On-surface labels keep d = +0.0001 > 0 and stay fully visible.
-    return 1.0 - max(0.0, min(1.0, -d * 5000.0));
+// `depth_ramp` scales the gl-js ramp (500 per NDC unit) to this projection: gl-js uses a near
+// plane of height / 50 where native's TransformState::getProjMatrix uses 1 (one pixel at the
+// view centre), which compresses every fragment's NDC depth into the top ~0.1%. Scaling by the
+// near-plane ratio keeps gl-js's behaviour (fully hidden ~0.11 view-heights behind the surface
+// at the centre distance, self-occlusion bias ~5 px).
+highp float depth_opacity(vec3 frag, sampler2D depth_texture, highp float depth_ramp) {
+    highp float bias = 0.05 / depth_ramp; // gl-js: 0.0001 * 500
+    highp float d = unpack_depth(texture(depth_texture, frag.xy * 0.5 + 0.5)) + bias - frag.z;
+    return 1.0 - max(0.0, min(1.0, -d * depth_ramp));
 }
 
 // Whether a clip-space position is visible in front of the terrain, from the
 // packed terrain depth texture, matching maplibre-gl-js calculate_visibility().
 // Unlike gl-js (global terrain uniforms), the depth sampler and enable flag are
-// passed as arguments.
-float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled) {
+// passed as arguments. `camera_to_center_distance` is 1.5 x the view height in
+// native's projection, so the near-plane ratio (height / 50) gives a ramp of
+// 500 * height / 50 = 10 * height = 6.67 * camera_to_center_distance.
+float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enabled, highp float camera_to_center_distance) {
     if (depth_enabled == 0.0) {
         return 1.0;
     }
+    highp float depth_ramp = 6.67 * camera_to_center_distance;
     vec3 frag = pos.xyz / pos.w;
-    highp float d = depth_opacity(frag, depth_texture);
+    highp float d = depth_opacity(frag, depth_texture, depth_ramp);
     if (d > 0.95) {
         return 1.0;
     }
     // a label whose anchor is just behind a ridge still shows if its glyphs poke above it
-    return (d + depth_opacity(frag + vec3(0.0, 0.01, 0.0), depth_texture)) / 2.0;
+    return (d + depth_opacity(frag + vec3(0.0, 0.01, 0.0), depth_texture, depth_ramp)) / 2.0;
 }
