@@ -424,6 +424,9 @@ private:
     int width = 64;
     int height = 64;
 
+    // Terrain-aware projection round trips (pixelForLatLng / latLngForPixel on 3D terrain)
+    static constexpr auto terrainQueryTimeout = std::chrono::milliseconds(200);
+
     // Ensure these are initialised last
     std::unique_ptr<mln::Map> map;
 };
