@@ -402,6 +402,8 @@ private:
     int height = 64;
 
     static constexpr auto annotationRequestTimeout = std::chrono::milliseconds(200);
+    // Terrain-aware projection round trips (pixelForLatLng / latLngForPixel on 3D terrain)
+    static constexpr auto terrainQueryTimeout = std::chrono::milliseconds(200);
 
     // Ensure these are initialised last
     std::unique_ptr<mln::Map> map;

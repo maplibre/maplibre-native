@@ -5,10 +5,17 @@
 #include <mln/text/collision_feature.hpp>
 #include <mln/util/grid_index.hpp>
 #include <mln/map/transform_state.hpp>
+#include <mln/util/geometry.hpp>
+
+#include <functional>
 
 #include <array>
 
 namespace mln {
+
+/// Same alias as in layout/symbol_projection.hpp (not included here: its `project`
+/// overloads would hide unrelated `project` calls in translation units using this header).
+using SymbolElevationFn = std::function<float(const Point<float>&)>;
 
 class PlacedSymbol;
 
@@ -34,7 +41,8 @@ public:
                                         Point<float> shift,
                                         const mat4& posMatrix,
                                         float textPixelRatio,
-                                        const CollisionBoundaries& tileEdges) const;
+                                        const CollisionBoundaries& tileEdges,
+                                        const SymbolElevationFn* getElevation = nullptr) const;
     std::pair<bool, bool> placeFeature(
         const CollisionFeature& feature,
         Point<float> shift,
@@ -49,8 +57,10 @@ public:
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
         const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
-        std::vector<ProjectedCollisionBox>& /*out*/
-    );
+        std::vector<ProjectedCollisionBox>& /*out*/,
+        /// On 3D terrain: tile-local point -> exaggerated metres, so the boxes are
+        /// projected where the elevated symbol actually renders (gl-js getElevation)
+        const SymbolElevationFn* getElevation = nullptr);
 
     void insertFeature(const CollisionFeature& feature,
                        const std::vector<ProjectedCollisionBox>&,
@@ -85,8 +95,8 @@ private:
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
         const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
-        std::vector<ProjectedCollisionBox>& /*out*/
-    );
+        std::vector<ProjectedCollisionBox>& /*out*/,
+        const SymbolElevationFn* getElevation);
 
     float approximateTileDistance(const TileDistance& tileDistance,
                                   float lastSegmentAngle,
@@ -94,14 +104,20 @@ private:
                                   float cameraToAnchorDistance,
                                   bool pitchWithMap);
 
-    std::pair<float, float> projectAnchor(const mat4& posMatrix, const Point<float>& point) const;
+    std::pair<float, float> projectAnchor(const mat4& posMatrix,
+                                          const Point<float>& point,
+                                          const SymbolElevationFn* getElevation) const;
     std::pair<Point<float>, float> projectAndGetPerspectiveRatio(const mat4& posMatrix,
-                                                                 const Point<float>& point) const;
-    Point<float> projectPoint(const mat4& posMatrix, const Point<float>& point) const;
+                                                                 const Point<float>& point,
+                                                                 const SymbolElevationFn* getElevation) const;
+    Point<float> projectPoint(const mat4& posMatrix,
+                              const Point<float>& point,
+                              const SymbolElevationFn* getElevation = nullptr) const;
     CollisionBoundaries getProjectedCollisionBoundaries(const mat4& posMatrix,
                                                         Point<float> shift,
                                                         float textPixelRatio,
-                                                        const CollisionBox& box) const;
+                                                        const CollisionBox& box,
+                                                        const SymbolElevationFn* getElevation) const;
 
     const TransformState transformState;
 

@@ -8,6 +8,8 @@
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/renderer/texture_pool.hpp>
 #include <mln/util/mat4.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <array>
 #include <memory>
@@ -15,6 +17,7 @@
 #include <set>
 #include <string>
 #include <optional>
+#include <functional>
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
@@ -129,6 +132,36 @@ public:
      * @return Elevation in meters with exaggeration multiplier applied
      */
     float getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const;
+
+    /**
+     * @brief Exaggerated terrain height (metres) at a geographic coordinate, sampled from the
+     * deepest loaded DEM tile covering it. Render-thread only. nullopt when terrain is off or
+     * no DEM tile covers the point yet.
+     */
+    std::optional<double> getElevationAtLatLng(const LatLng& latLng) const;
+
+    /**
+     * @brief Coordinate of the draped surface under a screen pixel (y-down view pixels, as
+     * rendered-feature queries use). The pixel's view ray is marched from just below the camera
+     * down to sea level, sampling the terrain height at each candidate plane, and the first
+     * crossing (the nearest surface, so a ridge in front wins) is bisected. Inverse of
+     * Map::pixelForLatLng(latLng, elevation). nullopt without terrain, without a camera
+     * altitude, when the camera is inside the terrain, or when the ray never meets the surface.
+     */
+    std::optional<LatLng> pickLatLng(const TransformState& state, const ScreenCoordinate& pixel) const;
+
+    /// Zoom levels of DEM ancestors kept loaded above the cover (TileParameters::retainAncestorLevels).
+    /// The cover follows the declared maxzoom (16 with overzoom), while layers can draw from tiles
+    /// as shallow as ~z9 (far-field distance LOD, low-maxzoom sources), so reach eight levels up;
+    /// the tile count shrinks by 4x per level, so this is a handful of tiles.
+    static constexpr uint8_t demAncestorLevels = 8;
+
+    /**
+     * @brief Per-tile elevation sampler for CPU-side symbol projection (line-placed labels):
+     * tile-local point -> exaggerated metres, from the DEM tile covering `tileID` or its
+     * closest loaded ancestor. Valid for the current frame only. nullopt without DEM data.
+     */
+    std::optional<std::function<float(const Point<float>&)>> elevationSampler(const UnwrappedTileID& tileID) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier
