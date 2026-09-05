@@ -12,6 +12,7 @@
 namespace mln {
 
 class SymbolBucket;
+class RenderTerrain;
 class SymbolInstance;
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
 class UpdateParameters;
@@ -122,7 +123,11 @@ public:
 
     virtual ~Placement();
     virtual void placeLayers(const RenderLayerReferences&);
-    void updateLayerBuckets(const RenderLayer&, const TransformState&, bool updateOpacities) const;
+    /// `terrain` (optional) lifts CPU-projected line labels onto draped 3D terrain.
+    void updateLayerBuckets(const RenderLayer&,
+                            const TransformState&,
+                            bool updateOpacities,
+                            const RenderTerrain* terrain = nullptr) const;
     virtual float symbolFadeChange(TimePoint now) const;
     virtual bool hasTransitions(TimePoint now) const;
     virtual bool transitionsEnabled() const;
@@ -171,7 +176,10 @@ protected:
     }
 
     // Returns `true` if bucket vertices were updated; returns `false` otherwise.
-    bool updateBucketDynamicAttributeData(SymbolBucket&, const TransformState&, const RenderTile& tile) const;
+    bool updateBucketDynamicAttributeData(SymbolBucket&,
+                                          const TransformState&,
+                                          const RenderTile& tile,
+                                          const RenderTerrain* terrain = nullptr) const;
     void updateBucketOpacities(SymbolBucket&, const TransformState&, std::set<uint32_t>&) const;
     void markUsedJustification(SymbolBucket&,
                                style::TextVariableAnchorType,

@@ -229,6 +229,10 @@ public:
     // Conversion
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
+    /// Projects a point that sits `elevationMeters` above sea level (e.g. on draped 3D terrain,
+    /// exaggeration already applied). The camera matrix scales z from metres to pixels, so this
+    /// lands where the terrain mesh and elevated symbols draw that location.
+    ScreenCoordinate latLngToScreenCoordinate(const LatLng&, double elevationMeters, vec4&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
     TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
