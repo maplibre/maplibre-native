@@ -16,6 +16,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.TerrainLoadMode
+import org.maplibre.android.maps.TerrainSkirtLength
 import org.maplibre.android.style.layers.PropertyFactory.textFont
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.terrain.Terrain
@@ -34,7 +35,8 @@ import org.maplibre.android.style.terrain.Terrain
  * cmd values: terrain_on|terrain_off|terrain_toggle, mode_quality|mode_balanced|
  * mode_performance, stats_on|stats_off|stats_toggle, burst_on|burst_off|burst_toggle,
  * abovelog_on|abovelog_off|abovelog_toggle, exag_up|exag_down|exag_reset|
- * exag_sweep_on|exag_sweep_off|exag_sweep_toggle.
+ * exag_sweep_on|exag_sweep_off|exag_sweep_toggle,
+ * skirts_auto|skirts_none|skirts_toggle.
  * Initial state can also be set with launch extras: --ez terrain false --es mode performance
  * --ez stats true.
  *
@@ -43,6 +45,10 @@ import org.maplibre.android.style.terrain.Terrain
  * Unlike smooth panning, this actually makes the [TerrainLoadMode] budgets bind, so an A/B run
  * (set a mode, start the burst, read the PERF-HUD worst-frame/jank log) shows their real trade
  * (Quality: one big hitch, instant detail; Performance: smoother, progressive pop-in).
+ *
+ * `skirts_*` switches [TerrainSkirtLength]. `none` shows what a transparent background
+ * gets: no vertical curtains hanging off the tile edges, at the cost of hairline stitches
+ * where neighbouring tiles sit at different zoom levels. Watch a tile-zoom boundary.
  *
  * `exag_sweep_*` ramps `exaggeration` down and back up in steps, replacing the style's
  * terrain on every step. That is the one runtime terrain change none of the fixed-exaggeration
@@ -83,6 +89,8 @@ class TerrainTestOptions(
         private set
     var aboveGroundLog = false
         private set
+    var skirtLength = TerrainSkirtLength.AUTO
+        private set
     var exaggerationValue = exaggeration
         private set
 
@@ -110,6 +118,12 @@ class TerrainTestOptions(
                 "exag_sweep_on" -> setExagSweeping(true)
                 "exag_sweep_off" -> setExagSweeping(false)
                 "exag_sweep_toggle" -> setExagSweeping(!exagSweeping)
+                "skirts_auto" -> setSkirtLength(TerrainSkirtLength.AUTO)
+                "skirts_none" -> setSkirtLength(TerrainSkirtLength.NONE)
+                "skirts_toggle" -> setSkirtLength(
+                    if (skirtLength == TerrainSkirtLength.AUTO) TerrainSkirtLength.NONE
+                    else TerrainSkirtLength.AUTO
+                )
                 else -> return
             }
             activity.invalidateOptionsMenu()
@@ -188,6 +202,10 @@ class TerrainTestOptions(
             isCheckable = true
             isChecked = exagSweeping
         }
+        menu.add(0, MENU_TOGGLE_SKIRTS, 6, "Tile skirts").apply {
+            isCheckable = true
+            isChecked = skirtLength == TerrainSkirtLength.AUTO
+        }
         val sub = menu.addSubMenu("Terrain load mode")
         sub.add(MODE_GROUP, MENU_MODE_QUALITY, 0, "Quality (default)")
         sub.add(MODE_GROUP, MENU_MODE_BALANCED, 1, "Balanced")
@@ -213,6 +231,10 @@ class TerrainTestOptions(
             MENU_EXAG_UP -> setExaggeration(exaggerationValue + EXAG_STEP)
             MENU_EXAG_DOWN -> setExaggeration(exaggerationValue - EXAG_STEP)
             MENU_TOGGLE_EXAG_SWEEP -> setExagSweeping(!exagSweeping)
+            MENU_TOGGLE_SKIRTS -> setSkirtLength(
+                if (skirtLength == TerrainSkirtLength.AUTO) TerrainSkirtLength.NONE
+                else TerrainSkirtLength.AUTO
+            )
             else -> return false
         }
         item.isChecked = when (item.itemId) {
@@ -220,6 +242,7 @@ class TerrainTestOptions(
             MENU_TOGGLE_STATS -> statsEnabled
             MENU_TOGGLE_ABOVELOG -> aboveGroundLog
             MENU_TOGGLE_EXAG_SWEEP -> exagSweeping
+            MENU_TOGGLE_SKIRTS -> skirtLength == TerrainSkirtLength.AUTO
             else -> true // exclusive mode group unchecks the others
         }
         return true
@@ -273,6 +296,13 @@ class TerrainTestOptions(
 
     // Debug: the native above-ground clearance log (ABOVE-GROUND ...). Off by default and gated in
     // the renderer, so the per-frame elevation sampling only runs while this is on.
+    private fun setSkirtLength(length: TerrainSkirtLength) {
+        if (skirtLength == length) return
+        skirtLength = length
+        map?.setTerrainSkirtLength(length)
+        toast("Tile skirts ${if (length == TerrainSkirtLength.AUTO) "auto" else "off"}")
+    }
+
     private fun setAboveGroundLog(on: Boolean) {
         aboveGroundLog = on
         map?.setDebugAboveGroundLog(on)
@@ -341,6 +371,7 @@ class TerrainTestOptions(
         private const val MENU_EXAG_UP = 7
         private const val MENU_EXAG_DOWN = 8
         private const val MENU_TOGGLE_EXAG_SWEEP = 9
+        private const val MENU_TOGGLE_SKIRTS = 10
 
         // Exaggeration sweep: a range wide enough that a stale surface left behind by one step
         // visibly towers over the next one down.

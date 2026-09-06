@@ -604,6 +604,14 @@ TerrainLoadMode Map::getTerrainLoadMode() const {
     return impl->terrainLoadMode;
 }
 
+void Map::setTerrainSkirtLength(TerrainSkirtLength length) {
+    impl->terrainSkirtLength = length;
+}
+
+TerrainSkirtLength Map::getTerrainSkirtLength() const {
+    return impl->terrainSkirtLength;
+}
+
 void Map::setDebugAboveGroundLog(bool enabled) {
     impl->debugAboveGroundLog = enabled;
 }

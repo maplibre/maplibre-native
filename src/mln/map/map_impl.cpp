@@ -146,6 +146,7 @@ void Map::Impl::onUpdate() {
                                .tileLodZoomShift = tileLodZoomShift,
                                .tileLodMode = tileLodMode,
                                .terrainLoadMode = terrainLoadMode,
+                               .terrainSkirtLength = terrainSkirtLength,
                                .debugAboveGroundLog = debugAboveGroundLog};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));

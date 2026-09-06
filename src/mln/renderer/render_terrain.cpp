@@ -209,6 +209,21 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         tweaker = std::make_unique<TerrainLayerTweaker>(this);
     }
 
+    // The skirts are baked into the shared mesh, so a change of setting has to drop the mesh
+    // and every tile drawable holding a buffer built from it.
+    if (updateParameters && updateParameters->terrainSkirtLength != meshSkirtLength) {
+        meshSkirtLength = updateParameters->terrainSkirtLength;
+        mesh.reset();
+        if (layerGroup) {
+            layerGroup->clearDrawables();
+        }
+        if (depthLayerGroup) {
+            depthLayerGroup->clearDrawables();
+            depthDirty = true;
+        }
+        tilesWithDrawables.clear();
+    }
+
     // If we don't have a DEM source, we can't create terrain drawables
     if (!demSource) {
         return;
@@ -795,7 +810,7 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
     // vertex shader) plus a skirt: each tile edge is duplicated into a curtain
     // that the shader drops by u_ele_delta, hiding the cracks between neighbouring
     // tiles at different zoom levels. Ported from maplibre-gl-js Terrain
-    // getTerrainMesh()/_buildSkirts().
+    // getTerrainMesh()/_buildSkirts(). TerrainSkirtLength::None builds the bare grid.
     const size_t gridSize = MESH_SIZE;
     const size_t vps = gridSize + 1; // vertices per side
     const float step = static_cast<float>(util::EXTENT) / static_cast<float>(gridSize);
@@ -834,58 +849,61 @@ void RenderTerrain::generateMesh(gfx::Context& /*context*/) {
         }
     }
 
-    // Top/bottom skirt rows (reference the grid's top/bottom edge rows)
-    const auto extent = static_cast<float>(util::EXTENT);
-    const uint16_t offsetTop = static_cast<uint16_t>(vertices.size() / 4);
-    const uint16_t offsetTopEdge = 0;
-    const uint16_t offsetBottom = static_cast<uint16_t>(offsetTop + vps);
-    const uint16_t offsetBottomEdge = static_cast<uint16_t>(vps * gridSize);
-    for (size_t x = 0; x < vps; ++x) {
-        addVert(x * step, 0.0f, 1);
-    }
-    for (size_t x = 0; x < vps; ++x) {
-        addVert(x * step, extent, 1);
-    }
-    for (uint16_t x = 0; x < gridSize; ++x) {
-        indices.insert(indices.end(),
-                       {static_cast<uint16_t>(offsetBottomEdge + x),
-                        static_cast<uint16_t>(offsetBottom + x),
-                        static_cast<uint16_t>(offsetBottom + x + 1),
-                        static_cast<uint16_t>(offsetBottomEdge + x),
-                        static_cast<uint16_t>(offsetBottom + x + 1),
-                        static_cast<uint16_t>(offsetBottomEdge + x + 1),
-                        static_cast<uint16_t>(offsetTopEdge + x),
-                        static_cast<uint16_t>(offsetTop + x + 1),
-                        static_cast<uint16_t>(offsetTop + x),
-                        static_cast<uint16_t>(offsetTopEdge + x),
-                        static_cast<uint16_t>(offsetTopEdge + x + 1),
-                        static_cast<uint16_t>(offsetTop + x + 1)});
-    }
+    // Skirts are baked into the shared mesh; TerrainSkirtLength::None leaves the bare grid.
+    if (meshSkirtLength != TerrainSkirtLength::None) {
+        // Top/bottom skirt rows (reference the grid's top/bottom edge rows)
+        const auto extent = static_cast<float>(util::EXTENT);
+        const uint16_t offsetTop = static_cast<uint16_t>(vertices.size() / 4);
+        const uint16_t offsetTopEdge = 0;
+        const uint16_t offsetBottom = static_cast<uint16_t>(offsetTop + vps);
+        const uint16_t offsetBottomEdge = static_cast<uint16_t>(vps * gridSize);
+        for (size_t x = 0; x < vps; ++x) {
+            addVert(x * step, 0.0f, 1);
+        }
+        for (size_t x = 0; x < vps; ++x) {
+            addVert(x * step, extent, 1);
+        }
+        for (uint16_t x = 0; x < gridSize; ++x) {
+            indices.insert(indices.end(),
+                           {static_cast<uint16_t>(offsetBottomEdge + x),
+                            static_cast<uint16_t>(offsetBottom + x),
+                            static_cast<uint16_t>(offsetBottom + x + 1),
+                            static_cast<uint16_t>(offsetBottomEdge + x),
+                            static_cast<uint16_t>(offsetBottom + x + 1),
+                            static_cast<uint16_t>(offsetBottomEdge + x + 1),
+                            static_cast<uint16_t>(offsetTopEdge + x),
+                            static_cast<uint16_t>(offsetTop + x + 1),
+                            static_cast<uint16_t>(offsetTop + x),
+                            static_cast<uint16_t>(offsetTopEdge + x),
+                            static_cast<uint16_t>(offsetTopEdge + x + 1),
+                            static_cast<uint16_t>(offsetTop + x + 1)});
+        }
 
-    // Left/right skirt frames (self-contained strips of paired surface/skirt verts)
-    const uint16_t offsetLeft = static_cast<uint16_t>(vertices.size() / 4);
-    const uint16_t offsetRight = static_cast<uint16_t>(offsetLeft + vps * 2);
-    for (int edge = 0; edge <= 1; ++edge) {
-        for (size_t y = 0; y < vps; ++y) {
-            for (int16_t z = 0; z <= 1; ++z) {
-                addVert(static_cast<float>(edge) * extent, y * step, z);
+        // Left/right skirt frames (self-contained strips of paired surface/skirt verts)
+        const uint16_t offsetLeft = static_cast<uint16_t>(vertices.size() / 4);
+        const uint16_t offsetRight = static_cast<uint16_t>(offsetLeft + vps * 2);
+        for (int edge = 0; edge <= 1; ++edge) {
+            for (size_t y = 0; y < vps; ++y) {
+                for (int16_t z = 0; z <= 1; ++z) {
+                    addVert(static_cast<float>(edge) * extent, y * step, z);
+                }
             }
         }
-    }
-    for (uint16_t y = 0; y < gridSize * 2; y += 2) {
-        indices.insert(indices.end(),
-                       {static_cast<uint16_t>(offsetLeft + y),
-                        static_cast<uint16_t>(offsetLeft + y + 1),
-                        static_cast<uint16_t>(offsetLeft + y + 3),
-                        static_cast<uint16_t>(offsetLeft + y),
-                        static_cast<uint16_t>(offsetLeft + y + 3),
-                        static_cast<uint16_t>(offsetLeft + y + 2),
-                        static_cast<uint16_t>(offsetRight + y),
-                        static_cast<uint16_t>(offsetRight + y + 3),
-                        static_cast<uint16_t>(offsetRight + y + 1),
-                        static_cast<uint16_t>(offsetRight + y),
-                        static_cast<uint16_t>(offsetRight + y + 2),
-                        static_cast<uint16_t>(offsetRight + y + 3)});
+        for (uint16_t y = 0; y < gridSize * 2; y += 2) {
+            indices.insert(indices.end(),
+                           {static_cast<uint16_t>(offsetLeft + y),
+                            static_cast<uint16_t>(offsetLeft + y + 1),
+                            static_cast<uint16_t>(offsetLeft + y + 3),
+                            static_cast<uint16_t>(offsetLeft + y),
+                            static_cast<uint16_t>(offsetLeft + y + 3),
+                            static_cast<uint16_t>(offsetLeft + y + 2),
+                            static_cast<uint16_t>(offsetRight + y),
+                            static_cast<uint16_t>(offsetRight + y + 3),
+                            static_cast<uint16_t>(offsetRight + y + 1),
+                            static_cast<uint16_t>(offsetRight + y),
+                            static_cast<uint16_t>(offsetRight + y + 2),
+                            static_cast<uint16_t>(offsetRight + y + 3)});
+        }
     }
 
     mesh = TerrainMesh{nullptr, // vertexBuffer - created when building the drawable

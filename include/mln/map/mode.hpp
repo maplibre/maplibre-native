@@ -78,6 +78,17 @@ constexpr TerrainLoadBudget terrainLoadBudget(TerrainLoadMode mode) {
     }
 }
 
+/// Controls the vertical skirts extruded from every terrain tile edge. They hide the
+/// hairline gaps (stitches) between neighbouring tiles at different zoom levels, but show
+/// as vertical artifacts where the map has a transparent background - so which one you
+/// want is a per-map tradeoff. Default is Auto. Mirrors maplibre-gl-js
+/// `MapOptions.terrainSkirtLength`.
+enum class TerrainSkirtLength : uint8_t {
+    Auto, ///< Skirt every tile edge by ~1/5 of the tile's width at the current zoom. Default.
+    None, ///< Build no skirts at all: no vertical artifacts over a transparent background,
+          ///< at the cost of visible stitches between tiles at different zoom levels.
+};
+
 enum class MapDebugOptions : EnumType {
     NoDebug = 0,
     TileBorders = 1 << 1,

@@ -212,6 +212,13 @@ public:
     void setTerrainLoadMode(TerrainLoadMode mode);
     TerrainLoadMode getTerrainLoadMode() const;
 
+    /// Selects whether terrain tiles are skirted (see TerrainSkirtLength). Default is Auto.
+    /// None suits a map drawn over a transparent background, where the skirts would show as
+    /// vertical artifacts. Changing it rebuilds the terrain mesh and every tile drawable.
+    /// No effect when terrain is not enabled.
+    void setTerrainSkirtLength(TerrainSkirtLength length);
+    TerrainSkirtLength getTerrainSkirtLength() const;
+
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
     /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
     /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.

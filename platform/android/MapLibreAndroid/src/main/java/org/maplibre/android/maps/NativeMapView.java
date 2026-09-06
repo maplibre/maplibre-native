@@ -915,6 +915,22 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setTerrainSkirtLength(int length) {
+    if (checkState("setTerrainSkirtLength")) {
+      return;
+    }
+    nativeSetTerrainSkirtLength(length);
+  }
+
+  @Override
+  public int getTerrainSkirtLength() {
+    if (checkState("getTerrainSkirtLength")) {
+      return 0;
+    }
+    return nativeGetTerrainSkirtLength();
+  }
+
+  @Override
   public void setTileLodPitchThreshold(double threshold) {
     if (checkState("setTileLodPitchThreshold")) {
       return;
@@ -1875,6 +1891,12 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native int nativeGetTerrainLoadMode();
+
+  @Keep
+  private native void nativeSetTerrainSkirtLength(int length);
+
+  @Keep
+  private native int nativeGetTerrainSkirtLength();
 
   @Keep
   private native void nativeSetTileLodPitchThreshold(double threshold);

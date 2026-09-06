@@ -161,6 +161,7 @@ struct TestMetadata {
     std::string description;
     mln::MapMode mapMode = mln::MapMode::Static;
     mln::MapDebugOptions debug = mln::MapDebugOptions::NoDebug;
+    mln::TerrainSkirtLength terrainSkirtLength = mln::TerrainSkirtLength::Auto;
     bool crossSourceCollisions = true;
     bool axonometric = false;
     double xSkew = 0.0;

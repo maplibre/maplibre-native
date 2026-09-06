@@ -415,6 +415,39 @@ TEST(Map, SetStyleDefaultCamera) {
     EXPECT_DOUBLE_EQ(*camera.zoom, 0.5);
 }
 
+// The terrain skirt setting is a per-map render option, not a style property, so it reaches
+// the renderer on UpdateParameters. Assert both ends: the accessor round-trips and the value
+// actually rides along to the frontend.
+TEST(Map, TerrainSkirtLength) {
+    class ForwardingHeadlessFrontend : public HeadlessFrontend {
+    public:
+        using HeadlessFrontend::HeadlessFrontend;
+        ~ForwardingHeadlessFrontend() override = default;
+        void update(std::shared_ptr<UpdateParameters> params) override {
+            lastSkirtLength = params->terrainSkirtLength;
+            HeadlessFrontend::update(std::move(params));
+        }
+        std::optional<TerrainSkirtLength> lastSkirtLength;
+    };
+
+    MapTest<StubFileSource, ForwardingHeadlessFrontend> test;
+    EXPECT_EQ(test.map.getTerrainSkirtLength(), TerrainSkirtLength::Auto);
+
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map.setTerrainSkirtLength(TerrainSkirtLength::None);
+    EXPECT_EQ(test.map.getTerrainSkirtLength(), TerrainSkirtLength::None);
+
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+    ASSERT_TRUE(test.frontend.lastSkirtLength.has_value());
+    EXPECT_EQ(*test.frontend.lastSkirtLength, TerrainSkirtLength::None);
+
+    test.map.setTerrainSkirtLength(TerrainSkirtLength::Auto);
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+    EXPECT_EQ(*test.frontend.lastSkirtLength, TerrainSkirtLength::Auto);
+}
+
 TEST(Map, ProjectionMode) {
     MapTest<> test;
 

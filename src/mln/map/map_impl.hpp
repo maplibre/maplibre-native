@@ -116,6 +116,7 @@ public:
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
     TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
+    TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
     bool debugAboveGroundLog = false;
 };
 

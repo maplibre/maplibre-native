@@ -298,9 +298,16 @@ Implemented:
   that hangs below the surface by `u_elevation_offset` (gl-js `u_ele_delta`),
   hiding the cracks/stitches between neighbouring tiles at different zoom
   levels. The skirt flag rides in the mesh vertex's z (native analog of gl-js
-  `a_pos3d.z`); `TerrainSkirtLength` is styleable ("auto" or a length) and the
-  terrain depth pass drops the skirts too so they occlude correctly. Render
-  tests `terrain/skirts-auto` and `terrain/skirts-none` cover it.
+  `a_pos3d.z`); the terrain depth pass drops the skirts too so they occlude
+  correctly. Skirts can be turned off per map with `Map::setTerrainSkirtLength`
+  (`TerrainSkirtLength::Auto` / `None`; Android `MapLibreMap.setTerrainSkirtLength`),
+  matching gl-js's `MapOptions.terrainSkirtLength`. `None` suits a transparent
+  background, where the skirts would otherwise show as vertical artifacts, at the
+  cost of visible stitches; it builds the bare grid rather than shortening the
+  curtain, and changing it at runtime rebuilds the mesh and every tile drawable.
+  Render tests `terrain/skirts-auto` and `terrain/skirts-none` select it through the
+  `terrainSkirtLength` test-metadata field, but do **not** currently cover it - their
+  baselines hold no terrain, so both render identically either way (see Testing).
 - The terrain **mesh** vertex shader now samples the DEM through the shared
   `get_elevation()` prelude helper (backfilled 1px border, NEAREST fetch +
   post-decode bilinear on pixel centres), the same path the elevated layers
@@ -980,7 +987,7 @@ from entering the terrain in the first place rather than correcting afterwards.
     | occlusion-debug | renders correctly | black bands | Metal-only |
     | fill-extrusion | passes | black bands | Metal-only |
     | default | blank | blank | camera/exaggeration (below) |
-    | skirts-auto / skirts-none | blank | blank | missing ancestor-pyramid fixtures |
+    | skirts-auto / skirts-none | blank | blank | missing ancestor-pyramid fixtures (they now "pass" vacuously against blank baselines - see 2026-09-05 below) |
     | pitched-world | (unclassified) | over-filled | zoom -2.5, see zoom-0 relief item |
 
     1. **Metal black bands - ROOT CAUSE FOUND AND FIXED (96f0a95).** The black
@@ -1101,6 +1108,18 @@ from entering the terrain in the first place rather than correcting afterwards.
     Verify with the decode-both-ways check above when adding DEM fixtures; the
     failure mode is silent.
 
+  - **2026-09-05 - `skirts-auto` / `skirts-none` pass, but VACUOUSLY. Do not read them
+    as covering the skirt option.** Measured on the local Linux/WSL GL runner (they
+    pass there with or without this branch's changes, so the "still fail" line below is
+    stale for these two): both tests render **byte-identical** output (same md5), and
+    their two `expected.png` are byte-identical to each other as well - the baselines
+    were captured while terrain was not rendering at all, so each image is just the
+    draped geojson line and polygon on a transparent background, with no terrain
+    surface and therefore no skirts to differ over. They would pass whether or not
+    `TerrainSkirtLength` works, and they did not detect the option being unimplemented
+    for as long as it was. Re-baseline them only once terrain actually renders in the
+    still-render path (the fixture problem below); until then the skirt option is
+    covered only by on-device eyeballing (`skirts_toggle` in TerrainTestOptions).
   - **Current status after the fix (local Windows GL runner):**
     `terrain/fill-extrusion` (new, see below) **passes**; `default`,
     `pitched-world`, `skirts-auto`, `skirts-none`, `occlusion-debug` still fail -

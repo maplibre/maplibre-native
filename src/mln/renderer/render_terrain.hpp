@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/map/mode.hpp>
 #include <mln/style/terrain_impl.hpp>
 #include <mln/util/immutable.hpp>
 #include <mln/tile/tile_id.hpp>
@@ -280,6 +281,9 @@ private:
 
     // Terrain mesh (shared across all tiles)
     std::optional<TerrainMesh> mesh;
+    // The skirt setting the cached mesh was built with. update() drops the mesh and every
+    // tile drawable built from it when the map's setting no longer matches.
+    TerrainSkirtLength meshSkirtLength = TerrainSkirtLength::Auto;
 
     // Layer group for terrain drawables
     LayerGroupBasePtr layerGroup;

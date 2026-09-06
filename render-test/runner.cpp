@@ -667,6 +667,7 @@ void resetContext(const TestMetadata& metadata, TestContext& ctx) {
                               .withXSkew(metadata.xSkew)
                               .withYSkew(metadata.ySkew));
     map.setDebug(metadata.debug);
+    map.setTerrainSkirtLength(metadata.terrainSkirtLength);
     map.getStyle().loadJSON(serializeJsonValue(metadata.document));
 }
 

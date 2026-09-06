@@ -449,6 +449,26 @@ public final class MapLibreMap {
   }
 
   /**
+   * Selects whether terrain tiles are skirted. Default is {@link TerrainSkirtLength#AUTO}.
+   * {@link TerrainSkirtLength#NONE} suits a map drawn over a transparent background, where the
+   * skirts would show as vertical artifacts. Has no effect when terrain is not enabled.
+   *
+   * @param length the terrain skirt length
+   */
+  public void setTerrainSkirtLength(@NonNull TerrainSkirtLength length) {
+    nativeMapView.setTerrainSkirtLength(length.ordinal());
+  }
+
+  /**
+   * @return the current terrain skirt length
+   * @see MapLibreMap#setTerrainSkirtLength(TerrainSkirtLength)
+   */
+  @NonNull
+  public TerrainSkirtLength getTerrainSkirtLength() {
+    return TerrainSkirtLength.values()[nativeMapView.getTerrainSkirtLength()];
+  }
+
+  /**
    * Camera based tile level of detail controls
    *
    * @param threshold pitch angle in radians above which LOD calculation is performed

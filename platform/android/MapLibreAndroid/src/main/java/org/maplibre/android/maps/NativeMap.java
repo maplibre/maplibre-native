@@ -280,6 +280,10 @@ interface NativeMap {
 
   int getTerrainLoadMode();
 
+  void setTerrainSkirtLength(int length);
+
+  int getTerrainSkirtLength();
+
   void setTileLodPitchThreshold(double threshold);
 
   double getTileLodPitchThreshold();

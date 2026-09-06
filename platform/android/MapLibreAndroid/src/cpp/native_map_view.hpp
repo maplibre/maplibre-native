@@ -340,6 +340,10 @@ public:
 
     jni::jint getTerrainLoadMode(JNIEnv&);
 
+    void setTerrainSkirtLength(JNIEnv&, jni::jint);
+
+    jni::jint getTerrainSkirtLength(JNIEnv&);
+
     void setDebugAboveGroundLog(JNIEnv&, jni::jboolean);
 
     void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
