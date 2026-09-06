@@ -73,17 +73,17 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         const auto debugGroupClip = parameters.encoder->createDebugGroup(label_clip.c_str());
 #endif
 
-        // If we're using stencil clipping, we need to handle 3D features separately
-        if (stencilTiles && !stencilTiles->empty()) {
-            visitDrawables([&](const gfx::Drawable& drawable) {
-                if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                    features3d = true;
-                    if (drawable.getEnableStencil()) {
-                        stencil3d = true;
-                    }
+        // If we're using stencil clipping, we need to handle 3D features separately.
+        // A group without clip tiles (the globe depth prepass) still has to set its own
+        // stencil mode, or its 3D drawables inherit the previous layer's tile test.
+        visitDrawables([&](const gfx::Drawable& drawable) {
+            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+                features3d = true;
+                if (drawable.getEnableStencil()) {
+                    stencil3d = true;
                 }
-            });
-        }
+            }
+        });
 
         // If we're doing 3D stenciling and have any features
         // to draw, set up the single-value stencil mask.

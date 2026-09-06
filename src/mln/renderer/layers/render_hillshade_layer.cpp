@@ -1,4 +1,5 @@
 #include <mln/renderer/layers/render_hillshade_layer.hpp>
+
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/sources/render_raster_dem_source.hpp>
@@ -153,11 +154,17 @@ static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
-                                  [[maybe_unused]] const TransformState& state,
+                                  const TransformState& state,
                                   const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const PaintParameters& paintParameters,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
+    if (updateProjectionVariant(state)) {
+        hillshadeShader.reset();
+        if (projectionVariant == gfx::ProjectionVariant::Mercator) {
+            globeMeshes.clear();
+        }
+    }
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -180,11 +187,12 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!hillshadePrepareShader) {
-        hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);
+        hillshadePrepareShader = context.getGenericShader(
+            shaders, HillshadePrepareShaderGroupName, gfx::ProjectionVariant::Mercator);
     }
 
     if (!hillshadeShader) {
-        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName);
+        hillshadeShader = context.getGenericShader(shaders, HillshadeShaderGroupName, projectionVariant);
     }
 
     if (!hillshadePrepareShader || !hillshadeShader) {
@@ -310,7 +318,12 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices;
         auto* segments = &staticDataSegments;
 
-        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+        if (projectionVariant == gfx::ProjectionVariant::Globe) {
+            const auto& globeMesh = globeMeshes.get(tileID.canonical, &HillshadeBucket::layoutVertex);
+            vertices = globeMesh.vertices;
+            indices = globeMesh.indices;
+            segments = &globeMesh.segments;
+        } else if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
             vertices = bucket.sharedVertices;
             indices = bucket.sharedIndices;
             segments = &bucket.segments;

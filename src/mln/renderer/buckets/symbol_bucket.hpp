@@ -272,8 +272,11 @@ public:
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
     std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
     void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) override;
-    void updateVertices(
-        const Placement&, bool updateOpacities, const TransformState&, const RenderTile&, std::set<uint32_t>&) override;
+    void updateVertices(const Placement&,
+                        bool updateOpacities,
+                        const TransformState&,
+                        const BucketPlacementData&,
+                        std::set<uint32_t>&) override;
     bool hasTextData() const;
     bool hasIconData() const;
     bool hasSdfIconData() const;

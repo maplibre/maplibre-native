@@ -1,4 +1,5 @@
 #include <mln/renderer/render_layer.hpp>
+#include <mln/map/transform_state.hpp>
 
 #include <mln/gfx/context.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -50,7 +51,8 @@ bool RenderLayer::needsRendering() const {
 
 bool RenderLayer::supportsZoom(float zoom) const {
     // TODO: shall we use rounding or epsilon comparisons?
-    return baseImpl->minZoom <= zoom && baseImpl->maxZoom >= zoom;
+    // A minimum of 0 is "no minimum": the globe zooms below 0 toward the poles.
+    return baseImpl->minZoom <= std::max(zoom, 0.0f) && baseImpl->maxZoom >= zoom;
 }
 
 void RenderLayer::prepare(const LayerPrepareParameters& params) {
@@ -143,6 +145,16 @@ std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileI
         return n;
     }
     return 0;
+}
+
+bool RenderLayer::updateProjectionVariant(const TransformState& state) {
+    const auto variant = state.isGlobeRendering() ? gfx::ProjectionVariant::Globe : gfx::ProjectionVariant::Mercator;
+    if (variant == projectionVariant) {
+        return false;
+    }
+    projectionVariant = variant;
+    removeAllDrawables();
+    return true;
 }
 
 std::size_t RenderLayer::removeAllDrawables() {

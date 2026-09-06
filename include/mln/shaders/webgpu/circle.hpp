@@ -26,7 +26,7 @@ struct CircleDrawableUBO {
     stroke_color_t: f32,
     stroke_width_t: f32,
     stroke_opacity_t: f32,
-    pad1: f32,
+    globe_extrude_scale: f32,
     pad2: f32,
     pad3: f32,
 };
@@ -64,7 +64,8 @@ struct GlobalIndexUBO {
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<CircleDrawableUBO>;
-@group(0) @binding(4) var<uniform> props: CircleEvaluatedPropsUBO;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<uniform> props: CircleEvaluatedPropsUBO;
 )";
 
     static constexpr auto vertex = R"(
@@ -138,19 +139,45 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let radius_with_stroke = radius + stroke_width;
 
+    let projection = projectionVector[globalIndex.value];
     var position: vec4<f32>;
     if (pitch_with_map) {
+#ifdef PROJECTION_GLOBE
+        let center_vector = projectToSphere(circle_center + projection.translate, vec2<f32>(0.0, 0.0), projection);
+        var angle_scale = drawable.globe_extrude_scale;
+#endif
         var corner_position = circle_center;
         if (scale_with_map) {
             corner_position += scaled_extrude * radius_with_stroke;
+#ifdef PROJECTION_GLOBE
+            angle_scale *= radius_with_stroke;
+#endif
         } else {
+#ifdef PROJECTION_GLOBE
+            let projected_center = interpolateProjection(circle_center, center_vector, 0.0, projection);
+            angle_scale *= radius_with_stroke * (projected_center.w / paintParams.camera_to_center_distance);
+#else
             let projected_center = drawable.matrix * vec4<f32>(circle_center, 0.0, 1.0);
+#endif
             corner_position += scaled_extrude * radius_with_stroke *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
+#ifdef PROJECTION_GLOBE
+        let corner_vector = globeRotateVector(center_vector, extrude * angle_scale);
+        position = interpolateProjection(corner_position, corner_vector, 0.0, projection);
+#else
         position = drawable.matrix * vec4<f32>(corner_position, 0.0, 1.0);
+#endif
     } else {
+#ifdef PROJECTION_GLOBE
+        position = projectTile(circle_center, projection);
+        if (position.z / position.w > 1.0) {
+            position.x = 10000.0;
+            position.y = 10000.0;
+        }
+#else
         position = drawable.matrix * vec4<f32>(circle_center, 0.0, 1.0);
+#endif
         var factor = position.w;
         if (scale_with_map) {
             factor = paintParams.camera_to_center_distance;

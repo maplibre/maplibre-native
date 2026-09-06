@@ -69,7 +69,7 @@ struct CircleDrawableUBO {
     float stroke_color_t;
     float stroke_width_t;
     float stroke_opacity_t;
-    float pad1;
+    float globe_extrude_scale;
     float pad2;
     float pad3;
 };
@@ -77,6 +77,10 @@ struct CircleDrawableUBO {
 layout(std140, set = LAYER_SET_INDEX, binding = idCircleDrawableUBO) readonly buffer CircleDrawableUBOVector {
     CircleDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
 
 layout(set = LAYER_SET_INDEX, binding = idCircleEvaluatedPropsUBO) uniform CircleEvaluatedPropsUBO {
     vec4 color;
@@ -144,22 +148,49 @@ void main() {
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
     const vec2 circle_center = floor(in_position * 0.5);
 
+#ifdef PROJECTION_GLOBE
+    const ProjectionUBO projection = projectionVector.projection_ubo[constant.ubo_index];
+#endif
     if (props.pitch_with_map) {
+#ifdef PROJECTION_GLOBE
+        const vec3 center_vector = projectToSphere(circle_center + projection.translate, vec2(0.0, 0.0), projection);
+        float angle_scale = drawable.globe_extrude_scale;
+#endif
         vec2 corner_position = circle_center;
         if (props.scale_with_map) {
             corner_position += scaled_extrude * (radius + stroke_width);
+#ifdef PROJECTION_GLOBE
+            angle_scale *= (radius + stroke_width);
+#endif
         } else {
             // Pitching the circle with the map effectively scales it with the map
             // To counteract the effect for pitch-scale: viewport, we rescale the
             // whole circle based on the pitch scaling effect at its central point
+#ifdef PROJECTION_GLOBE
+            const vec4 projected_center = interpolateProjection(circle_center, center_vector, 0.0, projection);
+            angle_scale *= (radius + stroke_width) * (projected_center.w / paintParams.camera_to_center_distance);
+#else
             const vec4 projected_center = drawable.matrix * vec4(circle_center, 0, 1);
+#endif
             corner_position += scaled_extrude * (radius + stroke_width) *
                                (projected_center.w / paintParams.camera_to_center_distance);
         }
 
+#ifdef PROJECTION_GLOBE
+        const vec3 corner_vector = globeRotateVector(center_vector, extrude * angle_scale);
+        gl_Position = interpolateProjection(corner_position, corner_vector, 0.0, projection);
+#else
         gl_Position = drawable.matrix * vec4(corner_position, 0, 1);
+#endif
     } else {
+#ifdef PROJECTION_GLOBE
+        gl_Position = projectTile(circle_center, projection);
+        if (gl_Position.z / gl_Position.w > 1.0) {
+            gl_Position.xy = vec2(10000.0);
+        }
+#else
         gl_Position = drawable.matrix * vec4(circle_center, 0, 1);
+#endif
 
         const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : gl_Position.w;
         gl_Position.xy += scaled_extrude * (radius + stroke_width) * factor;

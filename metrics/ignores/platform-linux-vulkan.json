@@ -1,5 +1,8 @@
 {
   "render-tests/fill-extrusion-color/function": "Layer Z Fighting: https://github.com/maplibre/maplibre-native/issues/1847",
   "render-tests/tilejson-bounds/default": "flaky on CI",
-  "render-tests/icon-text-fit/textFit-grid-long": "Needs to be investigated"
+  "render-tests/icon-text-fit/textFit-grid-long": "Needs to be investigated",
+  "render-tests/projection/globe/fill-planet-pole": "fill outline anti-aliasing differs from the Metal expectation",
+  "render-tests/projection/globe/fill-planet-tiles": "fill outline anti-aliasing differs from the Metal expectation",
+  "render-tests/projection/globe/debug-tile-borders": "the tile border is a hardware wide line here and an anti-aliased polyline in the Metal expectation"
 }

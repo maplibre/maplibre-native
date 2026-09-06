@@ -5,6 +5,7 @@
 #include <mln/style/conversion/source.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/conversion/light.hpp>
+#include <mln/style/conversion/projection.hpp>
 #include <mln/style/conversion/sprite.hpp>
 #include <mln/style/conversion/transition_options.hpp>
 #include <mln/style/conversion_impl.hpp>
@@ -110,6 +111,10 @@ StyleParseResult Parser::parse(const std::string& json) {
 
     if (document.HasMember("light")) {
         parseLight(document["light"]);
+    }
+
+    if (document.HasMember("projection")) {
+        parseProjection(document["projection"]);
     }
 
     if (document.HasMember("sources")) {
@@ -234,6 +239,16 @@ void Parser::parseLight(const JSValue& value) {
     }
 
     light = *converted;
+}
+
+void Parser::parseProjection(const JSValue& value) {
+    conversion::Error error;
+    std::optional<Projection> converted = conversion::convert<Projection>(value, error);
+    if (!converted) {
+        Log::Warning(Event::ParseStyle, error.message);
+        return;
+    }
+    projection = *converted;
 }
 
 void Parser::parseSources(const JSValue& value) {

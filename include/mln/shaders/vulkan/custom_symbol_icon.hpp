@@ -36,6 +36,14 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = idCustomSymbolDrawableUBO) unifor
     float pad3;
 } drawable;
 
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(location = 0) out vec2 frag_tex;
 
 vec2 rotateVec2(vec2 v, float angle) {
@@ -52,6 +60,7 @@ vec2 ellipseRotateVec2(vec2 v, float angle, float radiusRatio /* A/B */) {
 }
 
 void main() {
+    const ProjectionUBO projection = projectionVector.projection_ubo[constant.ubo_index];
     const vec2 extrude = mod(in_position, 2.0) * 2.0 - 1.0;
     const vec2 anchor = (drawable.anchor - vec2(0.5, 0.5)) * 2.0;
     const vec2 center = floor(in_position * 0.5);
@@ -63,13 +72,13 @@ void main() {
         if (drawable.scale_with_map) {
             corner *= drawable.extrude_scale;
         } else {
-            vec4 projected_center = drawable.matrix * vec4(center, 0, 1);
+            vec4 projected_center = projectTile(center, projection);
             corner *= drawable.extrude_scale * (projected_center.w / drawable.camera_to_center_distance);
         }
         corner = center + rotateVec2(corner, angle);
-        position = drawable.matrix * vec4(corner, 0, 1);
+        position = projectTile(corner, projection);
     } else {
-        position = drawable.matrix * vec4(center, 0, 1);
+        position = projectTile(center, projection);
         const float factor = drawable.scale_with_map ? drawable.camera_to_center_distance : position.w;
         position.xy += ellipseRotateVec2(corner * drawable.extrude_scale * factor, angle, drawable.aspect_ratio);
     }
