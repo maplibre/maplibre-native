@@ -21,7 +21,9 @@ public:
 
     void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout, bool runSynchronously);
 
-    void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&) override;
+    void querySourceFeatures(std::vector<Feature>& result,
+                             const SourceQueryOptions&,
+                             const GlobalStateMap* globalState) override;
 
 private:
     std::shared_ptr<style::GeoJSONData> data;

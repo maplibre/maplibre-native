@@ -58,10 +58,13 @@ public:
                                const TransformState&,
                                const std::unordered_map<std::string, const RenderLayer*>& layers,
                                const RenderedQueryOptions& options,
+                               const GlobalStateMap* globalState,
                                const mat4& projMatrix,
                                const SourceFeatureState& featureState) override;
 
-    void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&) override;
+    void querySourceFeatures(std::vector<Feature>& result,
+                             const SourceQueryOptions&,
+                             const GlobalStateMap* globalState) override;
 
     float getQueryPadding(const std::unordered_map<std::string, const RenderLayer*>&) override;
 

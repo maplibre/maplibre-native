@@ -344,6 +344,7 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
     const TransformState& transformState,
     const std::unordered_map<std::string, const RenderLayer*>& layers,
     const RenderedQueryOptions& options,
+    const GlobalStateMap* globalState,
     const mat4& projMatrix,
     const SourceFeatureState& featureState) const {
     std::unordered_map<std::string, std::vector<Feature>> result;
@@ -399,17 +400,18 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         }
 
         tile.queryRenderedFeatures(
-            result, tileSpaceQueryGeometry, transformState, layers, options, projMatrix, featureState);
+            result, tileSpaceQueryGeometry, transformState, layers, options, globalState, projMatrix, featureState);
     }
 
     return result;
 }
 
-std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& options) const {
+std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& options,
+                                                      const GlobalStateMap* globalState) const {
     std::vector<Feature> result;
 
     for (const auto& pair : tiles) {
-        pair.second->querySourceFeatures(result, options);
+        pair.second->querySourceFeatures(result, options, globalState);
     }
 
     return result;
