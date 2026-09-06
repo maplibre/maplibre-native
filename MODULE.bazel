@@ -31,10 +31,10 @@ single_version_override(
     version = "3.3.0",
 )
 
-node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node")
 node.toolchain(node_version = "20.14.0")
 
-npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
     name = "npm",
     data = ["package.json"],
@@ -70,18 +70,10 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 
 http_archive(
     name = "glfw",
-    build_file = "@//vendor:glfw.BUILD",
+    build_file = "//vendor:glfw.BUILD",
     integrity = "sha256-tewASycS/Qjohh3CcUKPBId1IAot9xnM9XUUO6dJo+k=",
     strip_prefix = "glfw-3.4",
     urls = ["https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"],
-)
-
-new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
-
-new_git_repository(
-    name = "tinyobjloader",
-    commit = "3bb554cf74428d7db13418b4aca1b9752a1d2be8",
-    remote = "https://github.com/tinyobjloader/tinyobjloader.git",
 )
 
 swift_deps = use_extension("@rules_swift_package_manager//:extensions.bzl", "swift_deps")

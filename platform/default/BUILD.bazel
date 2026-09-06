@@ -87,11 +87,14 @@ cc_library(
             "src/mln/util/webp_reader.cpp",
         ],
         "//platform/macos:macos_libuv_loop": [
+            "src/mln/layermanager/layer_manager.cpp",
             "src/mln/util/async_task.cpp",
             "src/mln/util/run_loop.cpp",
             "src/mln/util/timer.cpp",
         ],
-        "//platform/macos:macos_cfrunloop_loop": [],
+        "//platform/macos:macos_cfrunloop_loop": [
+            "src/mln/layermanager/layer_manager.cpp",
+        ],
         "//conditions:default": [],
     }),
     hdrs = [
@@ -144,6 +147,7 @@ cc_library(
         "//platform/ios:__pkg__",
         "//platform/linux:__pkg__",
         "//platform/macos:__pkg__",
+        "//render-test:__pkg__",
         "//test:__pkg__",
     ],
     deps = [

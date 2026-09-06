@@ -682,7 +682,8 @@ std::optional<Error> LocationIndicatorLayer::setPropertyInternal(const std::stri
 }
 
 StyleProperty LocationIndicatorLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> LocationIndicatorLayer::mutableBaseImpl() const {

@@ -57,7 +57,6 @@ cc_binary(
     deps = [
         "//:maplibre_lib",
         "@glfw",
-        "@tinyobjloader",
     ] + select({
         "@platforms//os:macos": ["metal_backend"],
         "@platforms//os:linux": ["//platform/linux:impl"],

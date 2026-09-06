@@ -86,10 +86,10 @@ std::vector<mln::filesystem::path> getTestExpectations(const mln::filesystem::pa
 }
 
 mln::filesystem::path getValidPath(const std::string& manifestPath, const std::string& path) {
-    const static mln::filesystem::path BasePath{manifestPath};
+    const mln::filesystem::path basePath{manifestPath};
     mln::filesystem::path result{path};
     if (result.is_relative()) {
-        result = BasePath / result;
+        result = basePath / result;
     }
     if (mln::filesystem::exists(result)) {
         return result.lexically_normal();

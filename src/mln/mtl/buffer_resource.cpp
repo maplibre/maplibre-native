@@ -79,6 +79,19 @@ BufferResource BufferResource::clone() const {
     return {context, contents(), size, usage, isIndexBuffer, persistent};
 }
 
+MTL::Buffer* BufferResource::materializeMetalBuffer() const {
+    if (!buffer && !raw.empty()) {
+        auto& device = context.getBackend().getDevice();
+        buffer = NS::TransferPtr(device->newBuffer(raw.data(), size, usage));
+        if (buffer) {
+            auto& stats = context.renderingStats();
+            stats.totalBuffers++;
+            stats.totalBufferObjs++;
+        }
+    }
+    return buffer.get();
+}
+
 BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     assert(&context == &other.context);
     if (isValid()) {

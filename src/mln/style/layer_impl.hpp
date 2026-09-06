@@ -3,11 +3,13 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/types.hpp>
 #include <mln/style/filter.hpp>
+#include <mln/style/plugin_property.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
 #include <limits>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -45,6 +47,8 @@ public:
     // Returns pointer to the statically allocated layer type info structure.
     virtual const LayerTypeInfo* getTypeInfo() const noexcept = 0;
 
+    virtual bool isPluginStyleLayer() const noexcept { return false; }
+
     // Populates the given \a fontStack with fonts being used by the layer.
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
@@ -58,6 +62,11 @@ public:
     float minZoom = -std::numeric_limits<float>::infinity();
     float maxZoom = std::numeric_limits<float>::infinity();
     VisibilityType visibility = VisibilityType::Visible;
+
+    // Typed constant/expression values supplied by runtime plugins. The
+    // property schema is process-wide; values belong to immutable layer state.
+    std::map<std::string, PluginPropertyValue> pluginProperties;
+    std::map<std::string, TransitionOptions> pluginPropertyTransitions;
 
 protected:
     Impl(const Impl&) = default;
