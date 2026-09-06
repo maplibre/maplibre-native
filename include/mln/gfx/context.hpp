@@ -155,6 +155,12 @@ public:
     /// Create a new vertex attribute array
     virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
 
+    /// A shared 1x1 zero texture to bind wherever a shader declares a sampler the current
+    /// frame has no real texture for (e.g. the DEM / terrain-depth slots of the symbol, circle
+    /// and fill-extrusion shaders when 3D terrain is off). Metal's API validation aborts on an
+    /// unbound sampler even when the shader never samples it; Vulkan already binds a dummy.
+    const Texture2DPtr& getPlaceholderTexture2D();
+
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
 
@@ -231,6 +237,7 @@ protected:
     std::shared_mutex renderingStatsMutex;
     gfx::RenderingStats stats;
     ContextObserver* observer;
+    Texture2DPtr placeholderTexture2D;
 
     // Progressive new-tile build budget (see resetNewTileBuildBudget). Defaults to
     // effectively unlimited so any path that never resets it is unaffected.
