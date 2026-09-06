@@ -73,6 +73,15 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
 // matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // texture and dem_* values are passed in as arguments rather than read from globals.
+// Decode one DEM texel to meters. The clamp at the call sites matters: read() out of range
+// is undefined where the sampler's clamp-to-edge used to cover it, and a tile with no DEM of
+// its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+inline float dem_texel(texture2d<float, access::sample> dem, int2 texel, float4 dem_unpack) {
+    float4 data = dem.read(uint2(texel)) * 255.0;
+    data.a = -1.0;
+    return dot(data, dem_unpack);
+}
+
 inline float get_elevation(float2 pos,
                            texture2d<float, access::sample> dem,
                            sampler dem_sampler,
@@ -86,19 +95,13 @@ inline float get_elevation(float2 pos,
     }
     const float2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
     const float2 f = fract(coord);
-    const float2 c = (floor(coord) + 0.5) / (dem_dim + 4.0);
-    const float d = 1.0 / (dem_dim + 4.0);
-    float4 tl = dem.sample(dem_sampler, c) * 255.0;
-    tl.a = -1.0;
-    float4 tr = dem.sample(dem_sampler, c + float2(d, 0.0)) * 255.0;
-    tr.a = -1.0;
-    float4 bl = dem.sample(dem_sampler, c + float2(0.0, d)) * 255.0;
-    bl.a = -1.0;
-    float4 br = dem.sample(dem_sampler, c + float2(d, d)) * 255.0;
-    br.a = -1.0;
-    const float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
-                                mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
-                                f.y);
+    const int2 c = int2(floor(coord));
+    const int2 hi = int2(dem.get_width(), dem.get_height()) - 1;
+    const float tl = dem_texel(dem, clamp(c, int2(0), hi), dem_unpack);
+    const float tr = dem_texel(dem, clamp(c + int2(1, 0), int2(0), hi), dem_unpack);
+    const float bl = dem_texel(dem, clamp(c + int2(0, 1), int2(0), hi), dem_unpack);
+    const float br = dem_texel(dem, clamp(c + int2(1, 1), int2(0), hi), dem_unpack);
+    const float elevation = mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
     return elevation * dem_exaggeration;
 }
 

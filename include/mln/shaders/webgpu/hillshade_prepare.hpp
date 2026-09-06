@@ -67,8 +67,8 @@ struct HillshadePrepareTilePropsUBO {
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
 
-fn getElevation(coord: vec2<f32>) -> f32 {
-    var data = textureSample(dem_texture, texture_sampler, coord) * 255.0;
+fn getElevation(texel: vec2<i32>) -> f32 {
+    var data = textureLoad(dem_texture, texel, 0) * 255.0;
     data.a = -1.0;
     return dot(data, tileProps.unpack);
 }
@@ -79,17 +79,20 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
     return vec4<f32>(1.0, 1.0, 1.0, 1.0);
 #endif
 
-    let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
+    // in.tex_coord sits on the centre of the DEM texel this fragment derives from - the
+    // vertex stage maps the ring-inclusive target onto texels 1..dim+2 - so floor picks it
+    // exactly.
+    let texel = vec2<i32>(floor(in.tex_coord * tileProps.dimension));
     let tileSize = tileProps.dimension.x - 4.0;
 
-    let a = getElevation(in.tex_coord + vec2<f32>(-epsilon.x, -epsilon.y));
-    let b = getElevation(in.tex_coord + vec2<f32>(0.0, -epsilon.y));
-    let c = getElevation(in.tex_coord + vec2<f32>(epsilon.x, -epsilon.y));
-    let d = getElevation(in.tex_coord + vec2<f32>(-epsilon.x, 0.0));
-    let f = getElevation(in.tex_coord + vec2<f32>(epsilon.x, 0.0));
-    let g = getElevation(in.tex_coord + vec2<f32>(-epsilon.x, epsilon.y));
-    let h = getElevation(in.tex_coord + vec2<f32>(0.0, epsilon.y));
-    let i = getElevation(in.tex_coord + vec2<f32>(epsilon.x, epsilon.y));
+    let a = getElevation(texel + vec2<i32>(-1, -1));
+    let b = getElevation(texel + vec2<i32>(0, -1));
+    let c = getElevation(texel + vec2<i32>(1, -1));
+    let d = getElevation(texel + vec2<i32>(-1, 0));
+    let f = getElevation(texel + vec2<i32>(1, 0));
+    let g = getElevation(texel + vec2<i32>(-1, 1));
+    let h = getElevation(texel + vec2<i32>(0, 1));
+    let i = getElevation(texel + vec2<i32>(1, 1));
 
     var exaggerationFactor = 0.3;
     if (tileProps.zoom < 4.5) {

@@ -89,19 +89,13 @@ fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionDrawableUBO) ->
     }
     let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 2.0;
     let f = fract(coord);
-    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 4.0);
-    let d = 1.0 / (drawable.dem_dim + 4.0);
-    var tl = textureSampleLevel(dem_texture, dem_sampler, c, 0.0) * 255.0;
-    tl.a = -1.0;
-    var tr = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
-    tr.a = -1.0;
-    var bl = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
-    bl.a = -1.0;
-    var br = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
-    br.a = -1.0;
-    let elevation = mix(mix(dot(tl, drawable.dem_unpack), dot(tr, drawable.dem_unpack), f.x),
-                        mix(dot(bl, drawable.dem_unpack), dot(br, drawable.dem_unpack), f.x),
-                        f.y);
+    let c = vec2<i32>(floor(coord));
+    let hi = vec2<i32>(textureDimensions(dem_texture, 0)) - vec2<i32>(1);
+    let tl = dem_texel(dem_texture, clamp(c, vec2<i32>(0), hi), drawable.dem_unpack);
+    let tr = dem_texel(dem_texture, clamp(c + vec2<i32>(1, 0), vec2<i32>(0), hi), drawable.dem_unpack);
+    let bl = dem_texel(dem_texture, clamp(c + vec2<i32>(0, 1), vec2<i32>(0), hi), drawable.dem_unpack);
+    let br = dem_texel(dem_texture, clamp(c + vec2<i32>(1, 1), vec2<i32>(0), hi), drawable.dem_unpack);
+    let elevation = mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
     return elevation * drawable.dem_exaggeration;
 }
 

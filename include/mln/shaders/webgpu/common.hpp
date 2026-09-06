@@ -44,6 +44,15 @@ fn gl_mod(x: vec2<f32>, y: vec2<f32>) -> vec2<f32> {
 // matching the maplibre-gl-js get_elevation() prelude function. Unlike gl-js (global
 // terrain uniforms), MapLibre Native carries the DEM data per-drawable, so the DEM
 // texture and dem_* values are passed in as arguments rather than read from globals.
+// Decode one DEM texel to meters. The clamp at the call sites matters: textureLoad out of
+// range is undefined where the sampler's clamp-to-edge used to cover it, and a tile with
+// no DEM of its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+fn dem_texel(dem: texture_2d<f32>, texel: vec2<i32>, dem_unpack: vec4<f32>) -> f32 {
+    var data = textureLoad(dem, texel, 0) * 255.0;
+    data.a = -1.0;
+    return dot(data, dem_unpack);
+}
+
 fn get_elevation(pos: vec2<f32>,
                  dem: texture_2d<f32>,
                  dem_sampler: sampler,
@@ -57,19 +66,13 @@ fn get_elevation(pos: vec2<f32>,
     }
     let coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
     let f = fract(coord);
-    let c = (floor(coord) + 0.5) / (dem_dim + 4.0);
-    let d = 1.0 / (dem_dim + 4.0);
-    var tl = textureSampleLevel(dem, dem_sampler, c, 0.0) * 255.0;
-    tl.a = -1.0;
-    var tr = textureSampleLevel(dem, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;
-    tr.a = -1.0;
-    var bl = textureSampleLevel(dem, dem_sampler, c + vec2<f32>(0.0, d), 0.0) * 255.0;
-    bl.a = -1.0;
-    var br = textureSampleLevel(dem, dem_sampler, c + vec2<f32>(d, d), 0.0) * 255.0;
-    br.a = -1.0;
-    let elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
-                        mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
-                        f.y);
+    let c = vec2<i32>(floor(coord));
+    let hi = vec2<i32>(textureDimensions(dem, 0)) - vec2<i32>(1);
+    let tl = dem_texel(dem, clamp(c, vec2<i32>(0), hi), dem_unpack);
+    let tr = dem_texel(dem, clamp(c + vec2<i32>(1, 0), vec2<i32>(0), hi), dem_unpack);
+    let bl = dem_texel(dem, clamp(c + vec2<i32>(0, 1), vec2<i32>(0), hi), dem_unpack);
+    let br = dem_texel(dem, clamp(c + vec2<i32>(1, 1), vec2<i32>(0), hi), dem_unpack);
+    let elevation = mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
     return elevation * dem_exaggeration;
 }
 

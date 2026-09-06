@@ -71,9 +71,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     };
 }
 
-float getElevation(float2 coord, float bias, texture2d<float, access::sample> image, sampler image_sampler, float4 unpack) {
+float getElevation(int2 texel, texture2d<float, access::sample> image, float4 unpack) {
     // Convert encoded elevation value to meters
-    float4 data = image.sample(image_sampler, coord) * 255.0;
+    float4 data = image.read(uint2(texel)) * 255.0;
     data.a = -1.0;
     return dot(data, unpack);
 }
@@ -86,7 +86,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-    float2 epsilon = 1.0 / tileProps.dimension;
+    // in.pos sits on the centre of the DEM texel this fragment derives from - the vertex
+    // stage maps the ring-inclusive target onto texels 1..dim+2 - so floor picks it exactly.
+    int2 texel = int2(floor(in.pos * tileProps.dimension));
     float tileSize = tileProps.dimension.x - 4.0;
 
     // queried pixels (using Sobel operator kernel):
@@ -103,15 +105,15 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     // | g | h | i |
     // |   |   |   |
     // +-----------+
-    float a = getElevation(in.pos + float2(-epsilon.x, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
-    float b = getElevation(in.pos + float2(0, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
-    float c = getElevation(in.pos + float2(epsilon.x, -epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
-    float d = getElevation(in.pos + float2(-epsilon.x, 0), 0.0, image, image_sampler, tileProps.unpack);
-  //float e = getElevation(in.pos, 0.0, image, image_sampler, tileProps.unpack);
-    float f = getElevation(in.pos + float2(epsilon.x, 0), 0.0, image, image_sampler, tileProps.unpack);
-    float g = getElevation(in.pos + float2(-epsilon.x, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
-    float h = getElevation(in.pos + float2(0, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
-    float i = getElevation(in.pos + float2(epsilon.x, epsilon.y), 0.0, image, image_sampler, tileProps.unpack);
+    float a = getElevation(texel + int2(-1, -1), image, tileProps.unpack);
+    float b = getElevation(texel + int2(0, -1), image, tileProps.unpack);
+    float c = getElevation(texel + int2(1, -1), image, tileProps.unpack);
+    float d = getElevation(texel + int2(-1, 0), image, tileProps.unpack);
+  //float e = getElevation(texel, image, tileProps.unpack);
+    float f = getElevation(texel + int2(1, 0), image, tileProps.unpack);
+    float g = getElevation(texel + int2(-1, 1), image, tileProps.unpack);
+    float h = getElevation(texel + int2(0, 1), image, tileProps.unpack);
+    float i = getElevation(texel + int2(1, 1), image, tileProps.unpack);
 
     // Convert the raw pixel-space derivative (slope) into world-space slope.
     // The conversion factor is: tileSize / (8 * meters_per_pixel).

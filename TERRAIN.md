@@ -209,7 +209,11 @@ The terrain system consists of several key components:
      when no tile is loaded
    - Their vertex shaders call the shared `get_elevation()` prelude helper,
      which does manual bilinear interpolation on DEM pixel centers using the
-     2px backfilled tile border, matching maplibre-gl-js
+     2px backfilled tile border, matching maplibre-gl-js. The four corner texels are
+     addressed exactly with `texelFetch` and an explicit clamp to `textureSize - 1`
+     (gl-js #8145) rather than by normalised coordinates through a NEAREST sampler;
+     the clamp is what keeps the 1x1 placeholder DEM in range, since an out-of-range
+     `texelFetch` is undefined where the sampler's clamp-to-edge was not.
 
 8. **CPU Elevation Queries** (`RenderTerrain::getElevation`)
    - DEM tile lookup with ancestor fallback and bilinear interpolation,
@@ -309,7 +313,7 @@ Implemented:
   `terrainSkirtLength` test-metadata field, but do **not** currently cover it - their
   baselines hold no terrain, so both render identically either way (see Testing).
 - The terrain **mesh** vertex shader now samples the DEM through the shared
-  `get_elevation()` prelude helper (backfilled 2px border, NEAREST fetch +
+  `get_elevation()` prelude helper (backfilled 2px border, exact `texelFetch` +
   post-decode bilinear on pixel centres), the same path the elevated layers
   use, matching maplibre-gl-js
 - Hillshade prepare-target lifetime fixed (no more OOM / monotonic GPU-memory

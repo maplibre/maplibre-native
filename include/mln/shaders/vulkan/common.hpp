@@ -239,6 +239,15 @@ float calculate_visibility(vec4 pos, sampler2D depth_texture, float depth_enable
     return (d + depth_opacity(frag + vec3(0.0, -0.01, 0.0), depth_texture)) / 2.0;
 }
 
+// Decode one DEM texel to meters. The clamp at the call sites matters: texelFetch out of
+// range is undefined where the sampler's clamp-to-edge used to cover it, and a tile with
+// no DEM of its own is bound the 1x1 placeholder, whose only valid texel is (0, 0).
+float dem_texel(sampler2D dem, ivec2 texel, vec4 dem_unpack) {
+    vec4 data = texelFetch(dem, texel, 0) * 255.0;
+    data.a = -1.0;
+    return dot(data, dem_unpack);
+}
+
 float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
                     float dem_dim, float dem_exaggeration, float dem_enabled) {
     if (dem_enabled == 0.0) {
@@ -246,19 +255,13 @@ float get_elevation(vec2 pos, sampler2D dem, vec4 dem_coords, vec4 dem_unpack,
     }
     vec2 coord = (pos * dem_coords.x + dem_coords.yz) * dem_dim + 2.0;
     vec2 f = fract(coord);
-    vec2 c = (floor(coord) + 0.5) / (dem_dim + 4.0);
-    float d = 1.0 / (dem_dim + 4.0);
-    vec4 tl = textureLod(dem, c, 0.0) * 255.0;
-    tl.a = -1.0;
-    vec4 tr = textureLod(dem, c + vec2(d, 0.0), 0.0) * 255.0;
-    tr.a = -1.0;
-    vec4 bl = textureLod(dem, c + vec2(0.0, d), 0.0) * 255.0;
-    bl.a = -1.0;
-    vec4 br = textureLod(dem, c + vec2(d, d), 0.0) * 255.0;
-    br.a = -1.0;
-    float elevation = mix(mix(dot(tl, dem_unpack), dot(tr, dem_unpack), f.x),
-                          mix(dot(bl, dem_unpack), dot(br, dem_unpack), f.x),
-                          f.y);
+    ivec2 c = ivec2(floor(coord));
+    ivec2 hi = textureSize(dem, 0) - 1;
+    float tl = dem_texel(dem, clamp(c, ivec2(0), hi), dem_unpack);
+    float tr = dem_texel(dem, clamp(c + ivec2(1, 0), ivec2(0), hi), dem_unpack);
+    float bl = dem_texel(dem, clamp(c + ivec2(0, 1), ivec2(0), hi), dem_unpack);
+    float br = dem_texel(dem, clamp(c + ivec2(1, 1), ivec2(0), hi), dem_unpack);
+    float elevation = mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
     return elevation * dem_exaggeration;
 }
 

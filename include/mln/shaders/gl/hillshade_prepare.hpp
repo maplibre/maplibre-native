@@ -45,15 +45,19 @@ layout (std140) uniform HillshadePrepareTilePropsUBO {
     highp float u_maxzoom;
 };
 
-float getElevation(vec2 coord, float bias) {
+float getElevation(ivec2 texel) {
     // Convert encoded elevation value to meters
-    vec4 data = texture(u_image, coord) * 255.0;
+    vec4 data = texelFetch(u_image, texel, 0) * 255.0;
     data.a = -1.0;
     return dot(data, u_unpack);
 }
 
 void main() {
-    vec2 epsilon = 1.0 / u_dimension;
+    // v_pos sits on the centre of the DEM texel this fragment derives from - the vertex
+    // shader maps the ring-inclusive target onto texels 1..dim+2 - so floor picks it
+    // exactly. Taken from v_pos rather than the fragment position builtin, whose y origin
+    // differs between GL and Metal/Vulkan/WebGPU.
+    ivec2 texel = ivec2(floor(v_pos * u_dimension));
     float tileSize = u_dimension.x - 4.0;
 
     // queried pixels (using Sobel operator kernel):
@@ -71,15 +75,15 @@ void main() {
     // |   |   |   |
     // +-----------+
 
-    float a = getElevation(v_pos + vec2(-epsilon.x, -epsilon.y), 0.0);
-    float b = getElevation(v_pos + vec2(0, -epsilon.y), 0.0);
-    float c = getElevation(v_pos + vec2(epsilon.x, -epsilon.y), 0.0);
-    float d = getElevation(v_pos + vec2(-epsilon.x, 0), 0.0);
-  //float e = getElevation(v_pos, 0.0);
-    float f = getElevation(v_pos + vec2(epsilon.x, 0), 0.0);
-    float g = getElevation(v_pos + vec2(-epsilon.x, epsilon.y), 0.0);
-    float h = getElevation(v_pos + vec2(0, epsilon.y), 0.0);
-    float i = getElevation(v_pos + vec2(epsilon.x, epsilon.y), 0.0);
+    float a = getElevation(texel + ivec2(-1, -1));
+    float b = getElevation(texel + ivec2(0, -1));
+    float c = getElevation(texel + ivec2(1, -1));
+    float d = getElevation(texel + ivec2(-1, 0));
+  //float e = getElevation(texel);
+    float f = getElevation(texel + ivec2(1, 0));
+    float g = getElevation(texel + ivec2(-1, 1));
+    float h = getElevation(texel + ivec2(0, 1));
+    float i = getElevation(texel + ivec2(1, 1));
 
     // Convert the raw pixel-space derivative (slope) into world-space slope.
     // The conversion factor is: tileSize / (8 * meters_per_pixel).

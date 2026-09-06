@@ -125,8 +125,9 @@ fn getElevationStop(stop: i32, color_ramp_size: i32) -> f32 {
 }
 
 fn getColorStop(stop: i32, color_ramp_size: i32) -> vec4<f32> {
-    let x = (f32(stop) + 0.5) / f32(color_ramp_size);
-    return textureSample(color_stops_texture, texture_sampler, vec2<f32>(x, 0.5));
+    // One texel per stop in a single row, and this shader interpolates between stops
+    // itself, so load the exact index rather than sampling.
+    return textureLoad(color_stops_texture, vec2<i32>(stop, 0), 0);
 }
 
 @fragment
