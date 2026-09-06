@@ -278,6 +278,14 @@ public:
 
     jni::Local<jni::Object<Light>> getLight(JNIEnv&);
 
+    void setTerrain(JNIEnv&, const jni::String& sourceId, jni::jfloat exaggeration);
+
+    void removeTerrain(JNIEnv&);
+
+    jni::Local<jni::String> getTerrainSourceId(JNIEnv&);
+
+    jni::jfloat getTerrainExaggeration(JNIEnv&);
+
     jni::Local<jni::Array<jni::Object<Layer>>> getLayers(JNIEnv&);
 
     jni::Local<jni::Object<Layer>> getLayer(JNIEnv&, const jni::String&);
@@ -327,6 +335,16 @@ public:
     void setTileLodScale(JNIEnv&, jni::jdouble);
 
     jni::jdouble getTileLodScale(JNIEnv&);
+
+    void setTerrainLoadMode(JNIEnv&, jni::jint);
+
+    jni::jint getTerrainLoadMode(JNIEnv&);
+
+    void setTerrainSkirtLength(JNIEnv&, jni::jint);
+
+    jni::jint getTerrainSkirtLength(JNIEnv&);
+
+    void setDebugAboveGroundLog(JNIEnv&, jni::jboolean);
 
     void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);
 

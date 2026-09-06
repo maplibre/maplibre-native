@@ -80,7 +80,7 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 #endif
 
     let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
-    let tileSize = tileProps.dimension.x - 2.0;
+    let tileSize = tileProps.dimension.x - 4.0;
 
     let a = getElevation(in.tex_coord + vec2<f32>(-epsilon.x, -epsilon.y));
     let b = getElevation(in.tex_coord + vec2<f32>(0.0, -epsilon.y));

@@ -296,6 +296,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   // saving and restoring when the application's state changes.
   self.currentState = [MBXStateManager sharedManager].currentState;
 
+  [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelVerbose;
+  [MLNLoggingConfiguration sharedConfiguration].handler =
+      ^(MLNLoggingLevel level, NSString *fileName, NSUInteger line, NSString *message) {
+        NSLog(@"%@:%ld %@", fileName, line, message);
+      };
+
   if (!self.currentState) {
     // Create a new state with the below default values
     self.currentState = [[MBXState alloc] init];
@@ -2528,6 +2534,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   /// Style that does not require an `apiKey` nor any further configuration
   [self.styleNames addObject:@"OpenFreeMap Liberty"];
   [self.styleURLs addObject:[NSURL URLWithString:@"https://tiles.openfreemap.org/styles/liberty"]];
+
+  [self.styleNames addObject:@"Terrain "];
+  // [self.styleURLs addObject:[NSURL
+  // URLWithString:@"https://demotiles.maplibre.org/styles/osm-bright-gl-terrain/style.json"]];
+  [self.styleURLs
+      addObject:[NSURL URLWithString:@"https://styles.phoenixmaps.app/terrain-test-style.json"]];
 
   [self.styleNames addObject:@"MapLibre Basic"];
   [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];

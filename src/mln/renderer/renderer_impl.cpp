@@ -13,6 +13,8 @@
 #include <mln/renderer/renderer_observer.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/texture_pool.hpp>
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/shaders/program_parameters.hpp>
 #include <mln/util/convert.hpp>
@@ -23,6 +25,14 @@
 #include <mln/gfx/drawable_tweaker.hpp>
 #include <mln/renderer/layer_tweaker.hpp>
 #include <mln/renderer/render_target.hpp>
+#include <mln/renderer/layer_group.hpp> // drape signature: TileLayerGroup::visitDrawables
+#include <mln/renderer/bucket.hpp>      // drape signature: Bucket::getID content revision
+#include <mln/util/hash.hpp>            // drape signature: hash_combine
+#include <map>
+#include <mln/renderer/render_terrain.hpp>
+#include <mln/renderer/dem_elevation_provider.hpp>
+#include <mln/renderer/layers/terrain_layer_tweaker.hpp>
+#include <mln/util/tile_cover.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mln/mtl/renderer_backend.hpp>
@@ -183,6 +193,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     staticData->has3D = renderTreeParameters.has3D;
     const Size renderableSize = backend.getDefaultRenderable().getSize();
 
+    // Set when the drape render budget defers a target this frame, so a follow-up frame is
+    // requested (via needsRepaint) to let the deferred targets catch up progressively.
+    bool drapeWorkDeferred = false;
+
     if (renderState == RenderState::Never) {
         observer->onWillStartRenderingMap();
     }
@@ -216,6 +230,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         *staticData,
         renderTree.getLineAtlas(),
         renderTree.getPatternAtlas(),
+        texturePool,
         frameCount,
         updateParameters->tileLodMinRadius,
         updateParameters->tileLodScale,
@@ -227,9 +242,39 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
+    parameters.terrain = orchestrator.getRenderTerrain();
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
 
     const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
+
+    // Number of terrain drape targets in this frame's cover; drives the re-enable follow-up
+    // frame and the drape re-bake trigger below (0 while terrain is off or its cover is empty).
+    std::size_t frameDrapeTargetCount = 0;
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        // Drape targets must exist before RenderTerrain::update drapes into them,
+        // so build the same mesh cover it will use - the elevation-aware LOD ideal
+        // cover taken from the view (not the DEM's loaded tiles) - and allocate one
+        // drape target per tile. Same `state`/`updateParameters` as the update call,
+        // so the two sets match; stale targets (tiles that left the cover) are
+        // released so the pool tracks the view instead of growing unbounded.
+        // Bind the DEM source before computing the cover: it is otherwise first
+        // bound inside RenderTerrain::update (which runs after this pool is
+        // built), leaving the first frame with an empty cover and no terrain -
+        // permanent blankness in single-frame still renders (the render tests).
+        terrain->prepareSource(orchestrator);
+        const std::set<UnwrappedTileID> demTileIDs = terrain->computeMeshCover(state, updateParameters);
+        for (const auto& id : demTileIDs) {
+            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
+        }
+        texturePool.removeStaleRenderTargets(demTileIDs);
+        frameDrapeTargetCount = demTileIDs.size();
+        // Hand the exact cover to RenderTerrain so its mesh matches this pool
+        terrain->setFrameMeshCover(demTileIDs);
+    } else {
+        // The pool persists across frames, so release the drape targets when
+        // terrain is disabled instead of holding their textures indefinitely
+        texturePool.removeStaleRenderTargets({});
+    }
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -260,10 +305,29 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                                   renderTreeParameters.transformParams.state,
                                   updateParameters,
                                   parameters,
-                                  renderTree);
+                                  renderTree,
+                                  texturePool);
     }
 
     orchestrator.processChanges();
+    orchestrator.addRenderTargets(texturePool);
+
+    // Create the terrain occlusion depth target before the upload phase, so the
+    // symbol tweaker binds the real depth texture for THIS frame instead of the
+    // far-plane placeholder (in single-frame renders like the render tests the
+    // placeholder would otherwise never be replaced and occlusion never engage).
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        terrain->prepareDepthTarget(parameters);
+    }
+
+    // Draped layer groups are not routed into individual render targets here;
+    // each drape RenderTarget renders every overlapping draped drawable itself
+    // (RenderTarget::renderDrapedLayerGroups), so a tile at a different zoom than
+    // the terrain cover is drawn into every target it covers, like gl-js.
+
+    // Per-drape-target content signatures live in the member perTargetDrapeSignature, cached
+    // across frames and rebuilt only when the drape content changes (below). parameters
+    // points into it for the drape targets pass.
 
     // Upload layer groups
     {
@@ -276,12 +340,131 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // Update the debug layer groups
         orchestrator.updateDebugLayerGroups(renderTree, parameters);
 
+        // Compute the frame-global draped-content signature once (see
+        // PaintParameters::drapedContentSignature) and each drape target's own signature
+        // (perTargetDrapeSignature), so RenderTarget::render can skip re-rendering - and
+        // re-scanning - a target whose content is unchanged. Both fold the covering-tile
+        // ids of all draped drawables, the draped group count, and the INTEGER tile-zoom
+        // (not the continuous zoom), so pan / pitch / in-level pinch reuse the baked drape
+        // textures and drapes re-render only when the covering tiles or integer zoom change
+        // (matches maplibre-gl-js). The paint-property epoch is deliberately not folded in:
+        // a paint change that alters draped geometry rebuilds its drawables (new covering
+        // set, captured below), whereas folding the global epoch would re-render every drape
+        // on any transition (e.g. a single label fading in).
+        const bool terrainActive = orchestrator.getRenderTerrain() != nullptr;
+        bool drapedContentChanged = true;
+        if (terrainActive) {
+            const int32_t zoomLevel = static_cast<int32_t>(parameters.state.getZoom());
+            // Single pass over all draped drawables: fold each covering-tile hash into the
+            // global signature and record (tile, hash) in a flat vector. A target's own
+            // signature is then an order-independent sum of the hashes whose tile overlaps
+            // it. Key on the COVERING TILE id, not the drawable-instance id, which churns on
+            // every bucket rebuild/fade (consistent with RenderTarget::computeDrapeCoverage).
+            std::size_t signature = 0;
+            std::size_t drapedGroupCount = 0;
+            std::vector<std::pair<UnwrappedTileID, std::size_t>> drapedTiles;
+            drapedTiles.reserve(1024);
+            orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+                if (layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
+                    !layerGroup.shouldRenderToTerrain()) {
+                    return;
+                }
+                drapedGroupCount++;
+                static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
+                    if (!drawable.getEnabled() || !drawable.getTileID()) {
+                        return;
+                    }
+                    const UnwrappedTileID tile = drawable.getTileID()->toUnwrapped();
+                    std::size_t h = 0;
+                    util::hash_combine(h, tile.wrap);
+                    util::hash_combine(h, tile.canonical.z);
+                    util::hash_combine(h, tile.canonical.x);
+                    util::hash_combine(h, tile.canonical.y);
+                    // Fold the source bucket's identity so an in-place content upgrade - a drape
+                    // built from an over-zoomed ancestor bucket, then the tile's own native bucket
+                    // loads under the same covering-tile id - re-renders the drape instead of
+                    // serving the stale low-detail bake until the next zoom. Keyed on the bucket id
+                    // (stable across paint/fade), not the drawable id (which churns every frame).
+                    // Excluded for hillshade: its drape samples a separate DEM "prepare" target with
+                    // its own render lifecycle, and folding its bucket here broke it on initial load.
+                    if (drawable.getName() != "hillshade") {
+                        if (const auto& bucket = drawable.getBucket()) {
+                            util::hash_combine(h, bucket->getID().id());
+                        }
+                    }
+                    util::hash_combine(signature, h);
+                    drapedTiles.emplace_back(tile, h);
+                });
+            });
+            util::hash_combine(signature, drapedGroupCount);
+            util::hash_combine(signature, zoomLevel);
+            parameters.drapedContentSignature = signature;
+            // Also treat the content as changed on the frame the drape cover reappears (fresh
+            // targets after terrain was off / had an empty cover): the draped drawables still
+            // hold screen-space UBOs from rendering to screen, so the tweakers must run to
+            // re-establish tile-local drape UBOs before the targets are baked, or the map is
+            // blank until the view moves.
+            const bool coverJustReappeared = frameDrapeTargetCount > 0 && !terrainHadCoverLastFrame;
+            drapedContentChanged = (lastDrapedContentSignature != signature) || coverJustReappeared;
+            lastDrapedContentSignature = signature;
+
+            // Rebuild the per-target signature map only when the drape content actually
+            // changed. When it did not (steady panning, idle, in-level pinch) the map is
+            // identical to last frame's, so reusing the cached member skips this
+            // O(targets x draped-tiles) pass - pure per-frame overhead otherwise, and the
+            // dominant per-frame cost on CPU-encode-bound low-end GPUs. Because the global
+            // signature folds the covering-tile set, group count and integer zoom, an
+            // unchanged signature guarantees the same targets with the same per-target sums.
+            if (drapedContentChanged) {
+                perTargetDrapeSignature.clear();
+                orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+                    const auto& tid = renderTarget.getDrapeTileID();
+                    if (!tid) {
+                        return;
+                    }
+                    std::size_t sig = 0;
+                    for (const auto& [tile, h] : drapedTiles) {
+                        if (tile == *tid || tile.isChildOf(*tid) || tid->isChildOf(tile)) {
+                            sig += h;
+                        }
+                    }
+                    util::hash_combine(sig, drapedGroupCount);
+                    util::hash_combine(sig, zoomLevel);
+                    perTargetDrapeSignature[*tid] = sig;
+                });
+            }
+            parameters.perTargetDrapeSignature = &perTargetDrapeSignature;
+        }
+        // Latch whether the drape cover had targets this frame, for the re-bake trigger above.
+        terrainHadCoverLastFrame = frameDrapeTargetCount > 0;
+
         // Tweakers are run in the upload pass so they can set up uniforms.
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.runTweakers(renderTree, parameters);
+            // Skip a draped layer group's tweaker when the drape content is unchanged: its
+            // cached drape texture is not re-rendered this frame, and drapes are
+            // camera-independent (tile-local matrix), so the recomputed per-drawable camera
+            // UBOs would go unused. A real change moves the signature and re-runs the tweaker
+            // the same frame the drape re-renders, keeping the two consistent.
+            const bool skipDrapedTweaker = terrainActive && !drapedContentChanged && layerGroup.shouldRenderToTerrain();
+            if (!skipDrapedTweaker) {
+                layerGroup.runTweakers(renderTree, parameters);
+            }
             parameters.currentLayer++;
         });
+
+        // Run terrain tweaker if terrain is enabled
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            if (auto* terrainTweaker = terrain->getTweaker()) {
+                if (const auto& layerGroup = terrain->getLayerGroup()) {
+                    terrainTweaker->execute(*layerGroup, parameters);
+                }
+                if (const auto& depthLayerGroup = terrain->getDepthLayerGroup()) {
+                    terrainTweaker->execute(*depthLayerGroup, parameters);
+                }
+            }
+        }
+
         parameters.currentLayer = 0;
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
             layerGroup.runTweakers(renderTree, parameters);
@@ -290,6 +473,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
         // Give the layers a chance to upload
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+
+        // The terrain depth layer group is deliberately not registered with the
+        // orchestrator (it renders only in RenderTerrain::renderDepth), so the
+        // visitLayerGroups upload above does not cover it. Upload it explicitly:
+        // without this its drawables never get vertex buffers, the Vulkan binds
+        // fail silently and the depth pass records nothing, so the occlusion
+        // depth texture stays at the far plane and symbols are never hidden
+        // behind terrain (GL builds attribute state at draw time and got away
+        // with it).
+        if (auto* terrain = orchestrator.getRenderTerrain()) {
+            if (const auto& depthLayerGroup = terrain->getDepthLayerGroup()) {
+                depthLayerGroup->upload(*uploadPass);
+            }
+        }
 
         // Give the render targets a chance to upload
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
@@ -310,9 +507,20 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         .pixel_ratio = parameters.pixelRatio,
         .map_zoom = static_cast<float>(parameters.state.getZoom()),
         .pad1 = 0,
+        // Target tile while drawing into a terrain drape target (w != 0);
+        // the per-target buffers set it in RenderTarget::updateDrapeGlobalUBO
+        .drape_tile = {0.0f, 0.0f, 0.0f, 0.0f},
     };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
+
+    // Refresh each terrain drape target's copy of the global paint params
+    // (same values plus the target tile in drape_tile)
+    if (orchestrator.getRenderTerrain()) {
+        texturePool.visitRenderTargets([&](std::shared_ptr<RenderTarget>& renderTarget) {
+            renderTarget->updateDrapeGlobalUBO(globalPaintParamsUBO, context);
+        });
+    }
 
     // - 3D PASS
     // -------------------------------------------------------------------------------------
@@ -352,9 +560,38 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     };
 
     const auto drawableTargetsPass = [&] {
-        // draw render targets
-        orchestrator.visitRenderTargets(
-            [&](RenderTarget& renderTarget) { renderTarget.render(orchestrator, renderTree, parameters); });
+        // Render targets are held in insertion order, but the terrain drape targets
+        // consume the others: draping the hillshade layer samples the texture its
+        // prepare pass renders. A drape target added in an earlier frame therefore
+        // sits ahead of a prepare target added later and would sample it before it
+        // was drawn this frame - reading black, which the hillshade decodes as the
+        // maximum slope (the prepare pass encodes flat as 0.5, not 0), shading the
+        // whole tile solid. Draw the producers first, then the drapes that sample
+        // them.
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+            if (!renderTarget.getDrapeTileID()) {
+                renderTarget.render(orchestrator, renderTree, parameters);
+            }
+        });
+        // Drape render budget: cap how many drape targets actually re-render per frame. A
+        // burst of dirty targets (tilt/pan changing coverage) otherwise stalls one frame for
+        // tens of ms each; instead render up to the budget and defer the rest (they keep their
+        // stale texture), requesting a follow-up frame so they catch up progressively.
+        // Never-rendered targets always render (avoid blank tiles). The cap comes from the
+        // map's TerrainLoadMode; Quality (default) is unlimited.
+        const int drapeCap = terrainLoadBudget(updateParameters->terrainLoadMode).drapeRerendersPerFrame;
+        int drapeBudget = drapeCap > 0 ? drapeCap : (1 << 30);
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
+            if (renderTarget.getDrapeTileID()) {
+                const auto res = renderTarget.render(
+                    orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
+                if (res == RenderTarget::RenderResult::Rendered) {
+                    --drapeBudget;
+                } else if (res == RenderTarget::RenderResult::Deferred) {
+                    drapeWorkDeferred = true;
+                }
+            }
+        });
     };
 
     const auto commonClearPass = [&] {
@@ -392,7 +629,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // draw layer groups, opaque pass
         parameters.currentLayer = 0;
         orchestrator.visitLayerGroupsReversed([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
+            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
+                  layerGroup.shouldRenderToTerrain())) {
+                layerGroup.render(orchestrator, parameters);
+            }
             parameters.currentLayer++;
         });
     };
@@ -403,10 +643,14 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         parameters.depthRangeSize = 1 - (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
-        // draw layer groups, translucent pass
+        // draw layer groups, translucent pass; draped groups render only into the
+        // terrain render targets (RenderTarget::renderDrapedLayerGroups)
         parameters.currentLayer = static_cast<uint32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            layerGroup.render(orchestrator, parameters);
+            if (!(parameters.terrain && layerGroup.getType() == LayerGroupBase::Type::TileLayerGroup &&
+                  layerGroup.shouldRenderToTerrain())) {
+                layerGroup.render(orchestrator, parameters);
+            }
             if (parameters.currentLayer > 0) {
                 parameters.currentLayer--;
             }
@@ -443,6 +687,10 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         drawable3DPass();
     }
     drawableTargetsPass();
+    // Terrain depth pass for symbol occlusion (sampled by calculate_visibility)
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        terrain->renderDepth(orchestrator, renderTree, parameters);
+    }
     commonClearPass();
     context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();
@@ -479,9 +727,27 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     context.renderingStats().encodingTime = renderTree.getElapsedTime() - context.renderingStats().renderingTime;
 
+    // A terrain that is enabled but produced an empty drape cover this frame (its DEM source
+    // is not resolved until RenderTerrain::update, which runs after computeMeshCover) needs a
+    // follow-up frame or it would idle blank until the view is panned - most visible when
+    // terrain is toggled back on over an otherwise static map. Bounded so it cannot spin.
+    bool terrainCoverPending = false;
+    if (orchestrator.getRenderTerrain() && frameDrapeTargetCount == 0) {
+        if (terrainCoverRetryFrames > 0) {
+            --terrainCoverRetryFrames;
+            terrainCoverPending = true;
+        }
+    } else {
+        terrainCoverRetryFrames = 4;
+    }
+
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
-        renderTreeParameters.needsRepaint,
+        // Request a follow-up frame if the drape budget deferred any target or the tile-build
+        // budget deferred any new tile, so deferred drapes/tiles catch up progressively even
+        // after the interaction stops.
+        renderTreeParameters.needsRepaint || drapeWorkDeferred || context.newTileBuildWasDeferred() ||
+            terrainCoverPending,
         renderTreeParameters.placementChanged,
         context.threadSafeCopyRenderingStats());
 
@@ -498,6 +764,9 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
 void Renderer::Impl::reduceMemoryUse() {
     assert(gfx::BackendScope::exists());
+    // The drape targets are the largest reclaimable GPU allocation (one
+    // tile-sized texture per terrain tile); they are rebuilt on the next frame
+    texturePool.removeStaleRenderTargets({});
     backend.getContext().reduceMemoryUsage();
 }
 

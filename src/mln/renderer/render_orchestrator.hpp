@@ -5,6 +5,7 @@
 #include <mln/renderer/renderer.hpp>
 #include <mln/renderer/render_source_observer.hpp>
 #include <mln/renderer/render_light.hpp>
+#include <mln/renderer/texture_pool.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/layer.hpp>
@@ -18,6 +19,7 @@
 
 #include <map>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -26,6 +28,7 @@ namespace mln {
 class ChangeRequest;
 class RendererObserver;
 class RenderSource;
+class RenderTerrain;
 class UpdateParameters;
 class RenderStaticData;
 class RenderedQueryOptions;
@@ -123,10 +126,10 @@ public:
 
     template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroupsReversed(Func f) {
-        for (auto rit = layerGroupsByLayerIndex.rbegin(); rit != layerGroupsByLayerIndex.rend(); ++rit) {
-            if (rit->second) {
+        for (auto& rit : std::ranges::reverse_view(layerGroupsByLayerIndex)) {
+            if (rit.second) {
                 try {
-                    f(*rit->second);
+                    f(*rit.second);
                 } catch (...) {
                     observer->onRenderError(std::current_exception());
                 }
@@ -139,12 +142,14 @@ public:
                       const TransformState&,
                       const std::shared_ptr<UpdateParameters>&,
                       const PaintParameters& paintParameters,
-                      const RenderTree&);
+                      const RenderTree&,
+                      const TexturePool& texturePool);
 
     void processChanges();
 
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
+    void addRenderTargets(const TexturePool& texturePool);
 
     template <typename Func /* void(RenderTarget&) */>
     void visitRenderTargets(Func f) {
@@ -166,11 +171,13 @@ public:
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
+    RenderSource* getRenderSource(const std::string& id) const;
+
+    RenderTerrain* getRenderTerrain() const { return renderTerrain.get(); }
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
-
-    RenderSource* getRenderSource(const std::string& id) const;
 
     RenderLayer* getRenderLayer(const std::string& id);
     const RenderLayer* getRenderLayer(const std::string& id) const;
@@ -218,6 +225,7 @@ private:
     std::unordered_map<std::string, std::unique_ptr<RenderSource>> renderSources;
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
+    std::unique_ptr<RenderTerrain> renderTerrain;
 
     CrossTileSymbolIndex crossTileSymbolIndex;
     PlacementController placementController;

@@ -66,8 +66,17 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
-            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
+        // Heatmap tile drawables render into the heatmap layer's own render
+        // target, never into the terrain drape targets (gl-js does not drape it)
+        const auto matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          {0.f, 0.f},
+                                          TranslateAnchorType::Viewport,
+                                          nearClipped,
+                                          inViewportPixelUnits,
+                                          drawable,
+                                          /*aligned=*/false,
+                                          /*renderToTerrain=*/false);
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {

@@ -80,7 +80,7 @@ void main() {
 #endif
 
     const vec2 epsilon = 1.0 / tileProps.dimension;
-    const float tileSize = tileProps.dimension.x - 2.0;
+    const float tileSize = tileProps.dimension.x - 4.0;
 
     // queried pixels (using Sobel operator kernel):
     // +-----------+

@@ -596,6 +596,30 @@ TileLodMode Map::getTileLodMode() const {
     return impl->tileLodMode;
 }
 
+void Map::setTerrainLoadMode(TerrainLoadMode mode) {
+    impl->terrainLoadMode = mode;
+}
+
+TerrainLoadMode Map::getTerrainLoadMode() const {
+    return impl->terrainLoadMode;
+}
+
+void Map::setTerrainSkirtLength(TerrainSkirtLength length) {
+    impl->terrainSkirtLength = length;
+}
+
+TerrainSkirtLength Map::getTerrainSkirtLength() const {
+    return impl->terrainSkirtLength;
+}
+
+void Map::setDebugAboveGroundLog(bool enabled) {
+    impl->debugAboveGroundLog = enabled;
+}
+
+bool Map::getDebugAboveGroundLog() const {
+    return impl->debugAboveGroundLog;
+}
+
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
 }

@@ -236,6 +236,20 @@
         "uses_ubos": true
     },
     {
+        "name": "TerrainShader",
+        "header": "terrain",
+        "glsl_vert": "terrain.vertex.glsl",
+        "glsl_frag": "terrain.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "TerrainDepthShader",
+        "header": "terrain_depth",
+        "glsl_vert": "terrain_depth.vertex.glsl",
+        "glsl_frag": "terrain_depth.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "WideVectorShader",
         "header": "wide_vector",
         "glsl_vert": "_empty.glsl",

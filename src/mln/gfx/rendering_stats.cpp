@@ -4,7 +4,9 @@
 #include <mln/style/layers/symbol_layer.hpp>
 #include <mln/style/layers/symbol_layer_impl.hpp>
 #include <mln/util/monotonic_timer.hpp>
+#include <mln/util/logging.hpp>
 
+#include <algorithm>
 #include <initializer_list>
 #include <sstream>
 #include <iomanip>
@@ -13,18 +15,18 @@ namespace mln {
 namespace gfx {
 
 bool RenderingStats::isZero() const {
-    const auto expectedZeros = {numActiveTextures,
-                                numTextureBindings,
-                                numBuffers,
-                                numVertexBuffers,
-                                numIndexBuffers,
-                                numUniformBuffers,
-                                numFrameBuffers,
-                                memTextures,
-                                memBuffers,
-                                memIndexBuffers,
-                                memVertexBuffers,
-                                memUniformBuffers};
+    const std::initializer_list<int64_t> expectedZeros = {numActiveTextures,
+                                                          numTextureBindings,
+                                                          numBuffers,
+                                                          numVertexBuffers,
+                                                          numIndexBuffers,
+                                                          numUniformBuffers,
+                                                          numFrameBuffers,
+                                                          memTextures,
+                                                          memBuffers,
+                                                          memIndexBuffers,
+                                                          memVertexBuffers,
+                                                          memUniformBuffers};
     return std::ranges::all_of(expectedZeros, [](auto x) { return x == 0; });
 }
 
@@ -60,6 +62,11 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     memUniformBuffers += r.memUniformBuffers;
     stencilClears += r.stencilClears;
     stencilUpdates += r.stencilUpdates;
+    numDrapeTargetsRendered += r.numDrapeTargetsRendered;
+    numDrapeCoverageScans += r.numDrapeCoverageScans;
+    terrainUpdateTime += r.terrainUpdateTime;
+    terrainTweakerTime += r.terrainTweakerTime;
+    terrainDepthTime += r.terrainDepthTime;
     return *this;
 }
 
@@ -106,6 +113,11 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, memUniformBuffers, "memUniformBuffers", sep);
     optionalStatLine(ss, stencilClears, "stencilClears", sep);
     optionalStatLine(ss, stencilUpdates, "stencilUpdates", sep);
+    optionalStatLine(ss, numDrapeTargetsRendered, "numDrapeTargetsRendered", sep);
+    optionalStatLine(ss, numDrapeCoverageScans, "numDrapeCoverageScans", sep);
+    optionalStatLine(ss, terrainUpdateTime, "terrainUpdateTime", sep);
+    optionalStatLine(ss, terrainTweakerTime, "terrainTweakerTime", sep);
+    optionalStatLine(ss, terrainDepthTime, "terrainDepthTime", sep);
     return ss.str();
 }
 #endif
@@ -236,6 +248,23 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     renderingTime += stats.renderingTime;
 
     const auto currentTime = util::MonotonicTimer::now().count();
+
+    // Per-frame wall-clock timing for the worst-frame / jank lines. Skip the first frame
+    // (no previous timestamp) and idle gaps > 1 s (the map renders on demand, so a pause
+    // between interactions is not a render hitch). maxEncodingTime is the largest single
+    // frame's CPU encode cost - the work the terrain load-mode budgets spread across frames.
+    if (lastFrameTime > 0.0) {
+        const double frameTime = currentTime - lastFrameTime;
+        if (frameTime < 1.0) {
+            maxFrameTime = std::max(maxFrameTime, frameTime);
+            if (frameTime > options.jankThreshold) {
+                ++jankFrames;
+            }
+        }
+    }
+    lastFrameTime = currentTime;
+    maxEncodingTime = std::max(maxEncodingTime, stats.encodingTime);
+
     if (currentTime - lastUpdate < options.updateInterval) {
         return;
     }
@@ -243,8 +272,26 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     std::stringstream ss;
     ss << std::setprecision(3) << std::fixed;
 
+    // Frames actually rendered over the elapsed interval (frameCount is incremented once
+    // per update() call, i.e. per rendered frame, and reset after each HUD refresh below).
+    const double elapsed = currentTime - lastUpdate;
+    const double fps = elapsed > 0 ? frameCount / elapsed : 0.0;
+    ss << "FPS: " << std::setw(7) << fps << "\n";
     ss << "Encoding time (ms): " << std::setw(7) << encodingTime / frameCount * 1000 << "\n";
     ss << "Rendering time (ms): " << std::setw(7) << renderingTime / frameCount * 1000 << "\n";
+    // Worst-frame / jank expose the frame-time spikes an average FPS hides (what the terrain
+    // load-mode budgets trade against). maxEncodeMs is the largest single-frame CPU encode cost.
+    ss << "Worst frame (ms): " << std::setw(7) << maxFrameTime * 1000 << "\n";
+    ss << "Jank frames/interval: " << jankFrames << "\n";
+    ss << "Max encode (ms): " << std::setw(7) << maxEncodingTime * 1000 << "\n";
+
+    // Machine-parseable per-interval line for the load-mode A/B benchmark (grep PERF-HUD).
+    {
+        std::stringstream perf;
+        perf << std::setprecision(3) << std::fixed << "PERF-HUD fps=" << fps << " worstFrameMs=" << maxFrameTime * 1000
+             << " jank=" << jankFrames << " maxEncodeMs=" << maxEncodingTime * 1000;
+        Log::Info(Event::Render, perf.str());
+    }
 
     printNumber(ss, "Frame count", stats.numFrames, true);
     printNumber(ss, "Draw calls", stats.numDrawCalls, true);
@@ -284,6 +331,9 @@ void RenderingStatsView::update(style::Style& style, const gfx::RenderingStats& 
     frameCount = 0;
     encodingTime = 0.0;
     renderingTime = 0.0;
+    maxFrameTime = 0.0;
+    jankFrames = 0;
+    maxEncodingTime = 0.0;
     lastUpdate = currentTime;
 }
 

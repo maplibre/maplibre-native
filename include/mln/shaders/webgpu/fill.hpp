@@ -58,6 +58,20 @@ struct GlobalIndexUBO {
     pad0: vec3<u32>,
 };
 
+struct GlobalPaintParamsUBO {
+    pattern_atlas_texsize: vec2<f32>,
+    units_to_pixels: vec2<f32>,
+    world_size: vec2<f32>,
+    camera_to_center_distance: f32,
+    symbol_fade_change: f32,
+    aspect_ratio: f32,
+    pixel_ratio: f32,
+    map_zoom: f32,
+    pad1: f32,
+    drape_tile: vec4<f32>,
+};
+
+@group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<FillDrawableUnionUBO>;
 @group(0) @binding(5) var<uniform> props: FillEvaluatedPropsUBO;
@@ -68,7 +82,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let raw_clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let clip = apply_drape_transform(raw_clip, drawable.matrix, paintParams.drape_tile);
     out.position = clip;
 
     var color: vec4<f32>;
@@ -178,6 +193,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct FillOutlineEvaluatedPropsUBO {
@@ -205,7 +221,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     // Transform position using the matrix
     let drawable = drawableVector[globalIndex.value].fill;
-    let clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let raw_clip = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let clip = apply_drape_transform(raw_clip, drawable.matrix, paintParams.drape_tile);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
     out.position = clip;
@@ -344,6 +361,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -398,7 +416,8 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let raw_clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = apply_drape_transform(raw_clip, drawable.matrix, paintParams.drape_tile);
     out.position = clip;
     out.v_pos_a = get_pattern_pos(
         drawable.pixel_coord_upper,
@@ -591,6 +610,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -645,7 +665,8 @@ fn main(in: VertexInput) -> VertexOutput {
     );
 
     let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let raw_clip = drawable.matrix * vec4<f32>(pos, 0.0, 1.0);
+    let clip = apply_drape_transform(raw_clip, drawable.matrix, paintParams.drape_tile);
     let invW = 1.0 / clip.w;
     let ndcXY = clip.xy * invW;
 
@@ -810,6 +831,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 struct GlobalIndexUBO {
@@ -849,7 +871,8 @@ fn main(in: VertexInput) -> VertexOutput {
 
     let projected_extrude = matrix * vec4<f32>(extrude_vec, 0.0, 0.0);
     let base = matrix * vec4<f32>(pos, 0.0, 1.0);
-    let clip = base + projected_extrude;
+    let raw_clip = base + projected_extrude;
+    let clip = apply_drape_transform(raw_clip, matrix, paintParams.drape_tile);
     out.position = clip;
 
     let extrude_length_without_perspective = length(dist);
@@ -890,6 +913,7 @@ struct GlobalPaintParamsUBO {
     pixel_ratio: f32,
     map_zoom: f32,
     pad1: f32,
+    drape_tile: vec4<f32>,
 };
 
 @group(0) @binding(0) var<uniform> paintParams: GlobalPaintParamsUBO;

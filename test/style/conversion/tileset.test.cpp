@@ -24,6 +24,43 @@ TEST(Tileset, ErrorHandling) {
     EXPECT_FALSE((bool)converted);
 }
 
+TEST(Tileset, TileSize) {
+    Error error;
+    std::optional<Tileset> converted = convertJSON<Tileset>(
+        R"JSON({
+        "tiles": ["http://mytiles"],
+        "tileSize": 512
+    })JSON",
+        error);
+
+    ASSERT_TRUE((bool)converted);
+    ASSERT_TRUE((bool)converted->tileSize);
+    EXPECT_EQ(512, *converted->tileSize);
+}
+
+TEST(Tileset, TileSizeAbsent) {
+    Error error;
+    std::optional<Tileset> converted = convertJSON<Tileset>(
+        R"JSON({
+        "tiles": ["http://mytiles"]
+    })JSON",
+        error);
+
+    ASSERT_TRUE((bool)converted);
+    EXPECT_FALSE((bool)converted->tileSize);
+}
+
+TEST(Tileset, InvalidTileSize) {
+    for (const auto* json : {R"JSON({"tiles": ["http://mytiles"], "tileSize": 0})JSON",
+                             R"JSON({"tiles": ["http://mytiles"], "tileSize": -256})JSON",
+                             R"JSON({"tiles": ["http://mytiles"], "tileSize": 70000})JSON",
+                             R"JSON({"tiles": ["http://mytiles"], "tileSize": "512"})JSON"}) {
+        Error error;
+        std::optional<Tileset> converted = convertJSON<Tileset>(json, error);
+        EXPECT_FALSE((bool)converted) << json;
+    }
+}
+
 TEST(Tileset, InvalidBounds) {
     {
         Error error;

@@ -87,7 +87,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
     float2 epsilon = 1.0 / tileProps.dimension;
-    float tileSize = tileProps.dimension.x - 2.0;
+    float tileSize = tileProps.dimension.x - 4.0;
 
     // queried pixels (using Sobel operator kernel):
     // +-----------+

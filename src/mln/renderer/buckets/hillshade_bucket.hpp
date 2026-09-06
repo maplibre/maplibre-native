@@ -14,6 +14,10 @@
 
 namespace mln {
 
+namespace gfx {
+class Texture2D;
+} // namespace gfx
+
 using HillshadeBinders = PaintPropertyBinders<style::HillshadePaintProperties::DataDrivenProperties>;
 using HillshadeLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::texture_pos>>;
 
@@ -32,6 +36,12 @@ public:
 
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
+
+    /// The DEM image uploaded for the color-relief layer, which samples it directly rather
+    /// than through a prepare pass. Held here because the pixels only change when the tile
+    /// (re)loads or a neighbour backfills the border, not per frame. Kept separate from the
+    /// hillshade prepare texture, which needs NEAREST filtering where this needs Linear.
+    std::shared_ptr<gfx::Texture2D> colorReliefDEMTexture;
 
     TileMask mask{{0, 0, 0}};
 

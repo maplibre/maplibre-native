@@ -177,12 +177,13 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
     return {
-        .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
+        .position = apply_drape_transform(drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f), drawable.matrix, paintParams.drape_tile),
 #if !defined(HAS_UNIFORM_u_color)
         .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
 #endif
@@ -252,7 +253,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     device const FillOutlineDrawableUBO& drawable = drawableVector[uboIndex].fillOutlineDrawableUBO;
 
-    const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
+    float4 rawPosition = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
+    const float4 position = apply_drape_transform(rawPosition, drawable.matrix, paintParams.drape_tile);
     return {
         .position       = position,
         .pos            = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
@@ -520,7 +522,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
     const float2 pos2 = float2(vertx.position);
-    const float4 position = drawable.matrix * float4(pos2, 0, 1);
+    float4 rawPosition = drawable.matrix * float4(pos2, 0, 1);
+    const float4 position = apply_drape_transform(rawPosition, drawable.matrix, paintParams.drape_tile);
 
     return {
         .position       = position,
@@ -645,7 +648,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
     const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
-    const float4 position = drawable.matrix * float4(pos, 0.0, 1.0) + projected_extrude;
+    float4 rawPosition = drawable.matrix * float4(pos, 0.0, 1.0) + projected_extrude;
+    const float4 position = apply_drape_transform(rawPosition, drawable.matrix, paintParams.drape_tile);
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
