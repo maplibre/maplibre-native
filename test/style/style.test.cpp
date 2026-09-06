@@ -9,6 +9,7 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
+#include <mln/util/exception.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/rapidjson.hpp>
 #include <mln/util/run_loop.hpp>
@@ -392,6 +393,29 @@ TEST(Style, PublicLoadStateDoesNotWaitForResources) {
 
     style.loadURL("http://some-url");
     EXPECT_FALSE(style.isLoaded());
+}
+
+TEST(Style, GlobalStatePropertyRequiresLoadedStyle) {
+    util::RunLoop loop;
+
+    auto fileSource = std::make_shared<::StubFileSource>(StubFileSource::ResponseType::Synchronous);
+    style::Style style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+
+    ASSERT_FALSE(style.isLoaded());
+    EXPECT_THROW(style.setGlobalStateProperty("showLabels", false), util::MisuseException);
+    EXPECT_TRUE(style.getGlobalState().empty());
+
+    style.loadJSON(R"STYLE({
+        "version": 8,
+        "state": {"showLabels": {"default": true}},
+        "sources": {},
+        "layers": []
+    })STYLE");
+
+    ASSERT_TRUE(style.isLoaded());
+    EXPECT_EQ(Value(true), style.getGlobalState().at("showLabels"));
+    EXPECT_NO_THROW(style.setGlobalStateProperty("showLabels", false));
+    EXPECT_EQ(Value(false), style.getGlobalState().at("showLabels"));
 }
 
 TEST(Style, SourceImplsOrder) {

@@ -758,17 +758,16 @@ open class MapSnapshotter(context: Context, options: Options) {
      * Setting a null value (or [com.google.gson.JsonNull]) resets the property to the default
      * defined in the style's root `state` property, or to null if there is none.
      *
-     * Only takes effect once the style is loaded; when the style is set by URL, call this
-     * from [Observer.onDidFinishLoadingStyle].
+     * When the style is set by URL, call this from [Observer.onDidFinishLoadingStyle].
      *
      * @param name the name of the state property
      * @param value the new value of the state property
+     * @throws IllegalStateException if the style has not finished loading
      */
     fun setGlobalStateProperty(name: String, value: JsonElement?) {
         checkThread()
-        if (styleLoaded) {
-            nativeSetGlobalStateProperty(name, value)
-        }
+        check(styleLoaded) { "Style is not done loading." }
+        nativeSetGlobalStateProperty(name, value)
     }
 
     /**
