@@ -5,10 +5,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.maplibre.geojson.Feature
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.geojson.LineString
-import org.maplibre.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
@@ -20,13 +16,19 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityCollectionUpdateOnStyleChangeBinding
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.LineString
+import org.maplibre.geojson.Point
 import java.util.*
 
 /**
  * Test activity that verifies whether the GeoJsonSource transition over style changes can be smooth.
  */
-class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, Style.OnStyleLoaded {
-
+class CollectionUpdateOnStyleChange :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    Style.OnStyleLoaded {
     private lateinit var binding: ActivityCollectionUpdateOnStyleChangeBinding
     private lateinit var maplibreMap: MapLibreMap
     private var currentStyleIndex: Int = 0
@@ -38,12 +40,12 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
         setupStyleChangeView()
-        Toast.makeText(
-            this,
-            "Make sure that the collection doesn't blink on style change",
-            Toast.LENGTH_LONG
-        )
-            .show()
+        Toast
+            .makeText(
+                this,
+                "Make sure that the collection doesn't blink on style change",
+                Toast.LENGTH_LONG,
+            ).show()
     }
 
     override fun onMapReady(map: MapLibreMap) {
@@ -58,11 +60,12 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
     private fun setupLayer(style: Style) {
         // # --8<-- [start:setupLayer]
         val source = GeoJsonSource("source", featureCollection)
-        val lineLayer = LineLayer("layer", "source")
-            .withProperties(
-                PropertyFactory.lineColor(Color.RED),
-                PropertyFactory.lineWidth(10f)
-            )
+        val lineLayer =
+            LineLayer("layer", "source")
+                .withProperties(
+                    PropertyFactory.lineColor(Color.RED),
+                    PropertyFactory.lineWidth(10f),
+                )
 
         style.addSource(source)
         style.addLayer(lineLayer)
@@ -116,14 +119,15 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
     }
 
     companion object {
-
-        private val STYLES = arrayOf(
-            TestStyles.getPredefinedStyleWithFallback("Streets"),
-            TestStyles.getPredefinedStyleWithFallback("Outdoor"),
-            TestStyles.getPredefinedStyleWithFallback("Bright"),
-            TestStyles.getPredefinedStyleWithFallback("Pastel"),
-            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
-            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+        private val STYLES =
+            arrayOf(
+                TestStyles.getPredefinedStyleWithFallback("Streets"),
+                TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+                TestStyles.getPredefinedStyleWithFallback("Bright"),
+                TestStyles.getPredefinedStyleWithFallback("Pastel"),
+                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+            )
 
         private val featureCollection: FeatureCollection
 

@@ -34,36 +34,42 @@ class MapSnapshotterLocalStyleActivity : AppCompatActivity() {
         setContentView(R.layout.activity_map_snapshotter_marker)
         val container = findViewById<View>(R.id.container)
         container.viewTreeObserver
-            .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    // # --8<-- [start:readStyleJson]
-                    val styleJson = resources.openRawResource(R.raw.demotiles).reader().readText()
-                    // # --8<-- [end:readStyleJson]
-                    Timber.i("Starting snapshot")
-                    // # --8<-- [start:createMapSnapshotter]
-                    mapSnapshotter = MapSnapshotter(
-                        applicationContext,
-                        MapSnapshotter.Options(
-                            container.measuredWidth.coerceAtMost(1024),
-                            container.measuredHeight.coerceAtMost(1024)
-                        )
-                            .withStyleBuilder(Style.Builder().fromJson(styleJson))
-                            .withCameraPosition(
-                                CameraPosition.Builder().target(LatLng(LATITUDE, LONGITUDE))
-                                    .zoom(ZOOM).build()
+            .addOnGlobalLayoutListener(
+                object : OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        container.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        // # --8<-- [start:readStyleJson]
+                        val styleJson = resources.openRawResource(R.raw.demotiles).reader().readText()
+                        // # --8<-- [end:readStyleJson]
+                        Timber.i("Starting snapshot")
+                        // # --8<-- [start:createMapSnapshotter]
+                        mapSnapshotter =
+                            MapSnapshotter(
+                                applicationContext,
+                                MapSnapshotter
+                                    .Options(
+                                        container.measuredWidth.coerceAtMost(1024),
+                                        container.measuredHeight.coerceAtMost(1024),
+                                    ).withStyleBuilder(Style.Builder().fromJson(styleJson))
+                                    .withCameraPosition(
+                                        CameraPosition
+                                            .Builder()
+                                            .target(LatLng(LATITUDE, LONGITUDE))
+                                            .zoom(ZOOM)
+                                            .build(),
+                                    ),
                             )
-                    )
-                    // # --8<-- [end:createMapSnapshotter]
-                    // # --8<-- [start:createSnapshot]
-                    mapSnapshotter.start({ snapshot ->
-                        Timber.i("Snapshot ready")
-                        val imageView = findViewById<View>(R.id.snapshot_image) as ImageView
-                        imageView.setImageBitmap(snapshot.bitmap)
-                    }) { error -> Timber.e(error )}
-                    // # --8<-- [end:createSnapshot]
-                }
-            })
+                        // # --8<-- [end:createMapSnapshotter]
+                        // # --8<-- [start:createSnapshot]
+                        mapSnapshotter.start({ snapshot ->
+                            Timber.i("Snapshot ready")
+                            val imageView = findViewById<View>(R.id.snapshot_image) as ImageView
+                            imageView.setImageBitmap(snapshot.bitmap)
+                        }) { error -> Timber.e(error) }
+                        // # --8<-- [end:createSnapshot]
+                    }
+                },
+            )
     }
 
     override fun onStop() {

@@ -5,17 +5,20 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.print.PrintHelper
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the Snapshot API to print a Map.
  */
-class PrintActivity : AppCompatActivity(), MapLibreMap.SnapshotReadyCallback {
+class PrintActivity :
+    AppCompatActivity(),
+    MapLibreMap.SnapshotReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_print)

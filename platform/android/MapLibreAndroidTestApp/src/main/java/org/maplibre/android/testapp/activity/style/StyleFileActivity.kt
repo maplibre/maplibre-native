@@ -11,8 +11,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
@@ -28,6 +28,7 @@ import java.io.FileWriter
 class StyleFileActivity : AppCompatActivity() {
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_style_file)
@@ -44,7 +45,7 @@ class StyleFileActivity : AppCompatActivity() {
                         withContext(Dispatchers.Main) {
                             cacheStylePath?.let {
                                 maplibreMap.setStyle(
-                                    Style.Builder().fromUri("file://$it")
+                                    Style.Builder().fromUri("file://$it"),
                                 )
                             }
                         }
@@ -54,8 +55,8 @@ class StyleFileActivity : AppCompatActivity() {
                 fabStyleJson.setColorFilter(
                     ContextCompat.getColor(
                         this@StyleFileActivity,
-                        R.color.primary
-                    )
+                        R.color.primary,
+                    ),
                 )
                 fabStyleJson.setOnClickListener { view: View ->
                     lifecycleScope.launch(Dispatchers.IO) {
@@ -84,29 +85,30 @@ class StyleFileActivity : AppCompatActivity() {
     /**
      * Task to write a style file to local disk and load it in the map view
      */
-    private fun createStyleFileTask(
-        context: Context,
-    ): String? {
-        return try {
+    private fun createStyleFileTask(context: Context): String? =
+        try {
             val cacheStyleFile = File.createTempFile("my-", ".style.json")
             cacheStyleFile.createNewFile()
             Timber.i("Writing style file to: %s", cacheStyleFile.getAbsolutePath())
             writeToFile(
                 cacheStyleFile,
-                ResourceUtils.readRawResource(context, R.raw.local_style)
+                ResourceUtils.readRawResource(context, R.raw.local_style),
             )
             cacheStyleFile.absolutePath
         } catch (exception: Exception) {
-            Toast.makeText(
-                context,
-                "Could not create style file in cache dir",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    context,
+                    "Could not create style file in cache dir",
+                    Toast.LENGTH_SHORT,
+                ).show()
             null
         }
-    }
 
-    private fun writeToFile(file: File?, contents: String) {
+    private fun writeToFile(
+        file: File?,
+        contents: String,
+    ) {
         var writer: BufferedWriter? = null
         try {
             writer = BufferedWriter(FileWriter(file))

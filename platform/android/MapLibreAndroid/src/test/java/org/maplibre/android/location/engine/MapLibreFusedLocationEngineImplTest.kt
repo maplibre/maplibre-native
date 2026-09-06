@@ -19,6 +19,7 @@ import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.argumentCaptor
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
@@ -29,93 +30,134 @@ class MapLibreFusedLocationEngineImplTest : BaseTest() {
     private val locationManagerMock: LocationManager? = null
     private var engine: LocationEngine? = null
     private var maplibreFusedLocationEngineImpl: MapLibreFusedLocationEngineImpl? = null
+
     @Before
     fun setUp() {
         val context = mock(Context::class.java)
         `when`(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(locationManagerMock)
         maplibreFusedLocationEngineImpl = MapLibreFusedLocationEngineImpl(context)
-        engine = LocationEngineProxy(maplibreFusedLocationEngineImpl)
+        engine = LocationEngineProxy(maplibreFusedLocationEngineImpl!!)
     }
 
     // J2K: rewrite test to not use "@get"
     @Test
     fun getLastLocation() {
-            val latch = CountDownLatch(1)
-            val resultRef = AtomicReference<LocationEngineResult>()
-            val callback = getCallback(resultRef, latch)
-            val location = getMockLocation(LATITUDE, LONGITUDE)
-            val expectedResult = getMockEngineResult(location)
-            `when`(locationManagerMock!!.allProviders).thenReturn(mutableListOf("gps", "network"))
-            `when`(locationManagerMock.getLastKnownLocation(anyString())).thenReturn(location)
-            engine!!.getLastLocation(callback)
-            assertTrue(latch.await(5, TimeUnit.SECONDS))
-            val result = resultRef.get()
-            assertThat(result.lastLocation).isEqualTo(expectedResult.lastLocation)
+        val latch = CountDownLatch(1)
+        val resultRef = AtomicReference<LocationEngineResult>()
+        val callback = getCallback(resultRef, latch)
+        val location = getMockLocation(LATITUDE, LONGITUDE)
+        val expectedResult = getMockEngineResult(location)
+        `when`(locationManagerMock!!.allProviders).thenReturn(mutableListOf("gps", "network"))
+        `when`(locationManagerMock.getLastKnownLocation(anyString())).thenReturn(location)
+        engine!!.getLastLocation(callback)
+        assertTrue(latch.await(5, TimeUnit.SECONDS))
+        val result = resultRef.get()
+        assertThat(result.lastLocation).isEqualTo(expectedResult.lastLocation)
     }
 
     @Test
     fun createListener() {
         // J2K: IDE suggestion "as LocationEngineCallback<LocationEngineResult>"
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         val locationListener = maplibreFusedLocationEngineImpl!!.createListener(callback)
         val mockLocation = getMockLocation(LATITUDE, LONGITUDE)
         locationListener.onLocationChanged(mockLocation)
-        val argument = ArgumentCaptor.forClass(LocationEngineResult::class.java)
+        val argument = argumentCaptor<LocationEngineResult>()
         verify(callback).onSuccess(argument.capture())
-        val result = argument.value
+        val result = argument.firstValue
         assertThat(result.lastLocation).isSameAs(mockLocation)
     }
 
     @Test
     fun requestLocationUpdatesOutdoors() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         // J2K: IDE suggestion "as LocationEngineCallback<LocationEngineResult>"
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         val looper = mock(Looper::class.java)
         `when`(locationManagerMock!!.getBestProvider(any(Criteria::class.java), anyBoolean())).thenReturn("gps")
         engine!!.requestLocationUpdates(request, callback, looper)
-        verify(locationManagerMock, times(2)).requestLocationUpdates(anyString(),
-                anyLong(), anyFloat(), any(LocationListener::class.java), any(Looper::class.java))
+        verify(locationManagerMock, times(2)).requestLocationUpdates(
+            anyString(),
+            anyLong(),
+            anyFloat(),
+            any(LocationListener::class.java),
+            any(Looper::class.java),
+        )
     }
 
     @Test
     fun requestLocationUpdatesIndoors() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         // J2K: IDE suggestion "as LocationEngineCallback<LocationEngineResult>"
-        val callback: LocationEngineCallback<LocationEngineResult> = mock(LocationEngineCallback::class.java) as LocationEngineCallback<LocationEngineResult>
+        val callback: LocationEngineCallback<LocationEngineResult> =
+            mock(
+                LocationEngineCallback::class.java,
+            ) as LocationEngineCallback<LocationEngineResult>
         val looper = mock(Looper::class.java)
         `when`(locationManagerMock!!.getBestProvider(any(Criteria::class.java), anyBoolean())).thenReturn("network")
         engine!!.requestLocationUpdates(request, callback, looper)
-        verify(locationManagerMock, times(1)).requestLocationUpdates(anyString(),
-                anyLong(), anyFloat(), any(LocationListener::class.java), any(Looper::class.java))
+        verify(locationManagerMock, times(1)).requestLocationUpdates(
+            anyString(),
+            anyLong(),
+            anyFloat(),
+            any(LocationListener::class.java),
+            any(Looper::class.java),
+        )
     }
 
     @Test
     fun requestLocationUpdatesOutdoorsWithPendingIntent() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         val pendingIntent = mock(PendingIntent::class.java)
         `when`(locationManagerMock!!.getBestProvider(any(Criteria::class.java), anyBoolean())).thenReturn("gps")
         engine!!.requestLocationUpdates(request, pendingIntent)
-        verify(locationManagerMock, times(2)).requestLocationUpdates(anyString(),
-                anyLong(), anyFloat(), any(PendingIntent::class.java))
+        verify(locationManagerMock, times(2)).requestLocationUpdates(
+            anyString(),
+            anyLong(),
+            anyFloat(),
+            any(PendingIntent::class.java),
+        )
     }
 
     @Test
     fun requestLocationUpdatesIndoorsWithPendingIntent() {
-        val request = LocationEngineRequest.Builder(10)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY).build()
+        val request =
+            LocationEngineRequest
+                .Builder(10)
+                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                .build()
         val pendingIntent = mock(PendingIntent::class.java)
         `when`(locationManagerMock!!.getBestProvider(any(Criteria::class.java), anyBoolean())).thenReturn("network")
         engine!!.requestLocationUpdates(request, pendingIntent)
-        verify(locationManagerMock, times(1)).requestLocationUpdates(anyString(),
-                anyLong(), anyFloat(), any(PendingIntent::class.java))
+        verify(locationManagerMock, times(1)).requestLocationUpdates(
+            anyString(),
+            anyLong(),
+            anyFloat(),
+            any(PendingIntent::class.java),
+        )
     }
 
-// J2k: // TODO: see https://github.com/maplibre/maplibre-native/issues/1949
 /*
+    J2k: // TODO: see https://github.com/maplibre/maplibre-native/issues/1949
+
     // J2K: rewrite test to not use "@get", rename to "getLastLocationNull"
     @Test(expected = NullPointerException::class)
     fun getLastLocationNull() {
@@ -137,9 +179,11 @@ class MapLibreFusedLocationEngineImplTest : BaseTest() {
     companion object {
         private const val LATITUDE = 37.7749
         private const val LONGITUDE = 122.4194
+
         private fun getCallback(
-                resultRef: AtomicReference<LocationEngineResult>,
-                latch: CountDownLatch): LocationEngineCallback<LocationEngineResult> {
+            resultRef: AtomicReference<LocationEngineResult>,
+            latch: CountDownLatch,
+        ): LocationEngineCallback<LocationEngineResult> {
             // J2K: remove '?' from LocationEngineResult?
             return object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult) {
@@ -153,11 +197,12 @@ class MapLibreFusedLocationEngineImplTest : BaseTest() {
             }
         }
 
-        private fun getMockEngineResult(location: Location): LocationEngineResult {
-            return LocationEngineResult.create(location)
-        }
+        private fun getMockEngineResult(location: Location): LocationEngineResult = LocationEngineResult.create(location)
 
-        private fun getMockLocation(lat: Double, lon: Double): Location {
+        private fun getMockLocation(
+            lat: Double,
+            lon: Double,
+        ): Location {
             val location = mock(Location::class.java)
             location.latitude = lat
             location.longitude = lon

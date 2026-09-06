@@ -11,8 +11,13 @@ import org.maplibre.android.geometry.LatLng
  * @see MapSnapshotter
  */
 @Keep
-class MapSnapshot private constructor(val nativePtr: Long, bitmap: Bitmap, attributions: Array<String>, showLogo: Boolean, showAttribution: Boolean) {
-
+class MapSnapshot private constructor(
+    val nativePtr: Long,
+    bitmap: Bitmap,
+    attributions: Array<String>,
+    showLogo: Boolean,
+    showAttribution: Boolean,
+) {
     /**
      * @return the large
      */

@@ -2,13 +2,15 @@ package org.maplibre.android.testapp.storage
 
 import android.app.Activity
 import androidx.annotation.WorkerThread
+import org.junit.Assert
 import org.maplibre.android.AppCenter
 import org.maplibre.android.storage.FileSource
-import org.junit.Assert
 import java.io.File
 import java.util.concurrent.CountDownLatch
 
-class FileSourceTestUtils(private val activity: Activity) : AppCenter() {
+class FileSourceTestUtils(
+    private val activity: Activity,
+) : AppCenter() {
     val originalPath = FileSource.getResourcesCachePath(activity)
     val testPath = "$originalPath/test"
     val testPath2 = "$originalPath/test2"
@@ -52,7 +54,7 @@ class FileSourceTestUtils(private val activity: Activity) : AppCenter() {
                     override fun onError(message: String) {
                         Assert.fail("Resource path change failed - path: $requestedPath, message: $message")
                     }
-                }
+                },
             )
         }
         latch.await()

@@ -11,17 +11,20 @@ import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 
-class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallback {
+class LocationComponentActivationActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var permissionsManager: PermissionsManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_activation_builder)
@@ -30,23 +33,27 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
         } else {
-            permissionsManager = PermissionsManager(object : PermissionsListener {
-                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-                    Toast.makeText(
-                        this@LocationComponentActivationActivity,
-                        "You need to accept location permissions.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            permissionsManager =
+                PermissionsManager(
+                    object : PermissionsListener {
+                        override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                            Toast
+                                .makeText(
+                                    this@LocationComponentActivationActivity,
+                                    "You need to accept location permissions.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                override fun onPermissionResult(granted: Boolean) {
-                    if (granted) {
-                        mapView.getMapAsync(this@LocationComponentActivationActivity)
-                    } else {
-                        finish()
-                    }
-                }
-            })
+                        override fun onPermissionResult(granted: Boolean) {
+                            if (granted) {
+                                mapView.getMapAsync(this@LocationComponentActivationActivity)
+                            } else {
+                                finish()
+                            }
+                        }
+                    },
+                )
             permissionsManager!!.requestLocationPermissions(this)
         }
     }
@@ -54,7 +61,7 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -63,24 +70,27 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(
-            TestStyles.getPredefinedStyleWithFallback("Bright")
+            TestStyles.getPredefinedStyleWithFallback("Bright"),
         ) { style: Style -> activateLocationComponent(style) }
     }
 
     @SuppressLint("MissingPermission")
     private fun activateLocationComponent(style: Style) {
         val locationComponent = maplibreMap.locationComponent
-        val locationComponentOptions = LocationComponentOptions.builder(this)
-            .elevation(5f)
-            .accuracyAlpha(.6f)
-            .accuracyColor(Color.GREEN)
-            .foregroundDrawable(R.drawable.maplibre_logo_helmet)
-            .build()
-        val locationComponentActivationOptions = LocationComponentActivationOptions
-            .builder(this, style)
-            .locationComponentOptions(locationComponentOptions)
-            .useDefaultLocationEngine(true)
-            .build()
+        val locationComponentOptions =
+            LocationComponentOptions
+                .builder(this)
+                .elevation(5f)
+                .accuracyAlpha(.6f)
+                .accuracyColor(Color.GREEN)
+                .foregroundDrawable(R.drawable.maplibre_logo_helmet)
+                .build()
+        val locationComponentActivationOptions =
+            LocationComponentActivationOptions
+                .builder(this, style)
+                .locationComponentOptions(locationComponentOptions)
+                .useDefaultLocationEngine(true)
+                .build()
         locationComponent.activateLocationComponent(locationComponentActivationOptions)
         locationComponent.isLocationComponentEnabled = true
         locationComponent.renderMode = RenderMode.NORMAL

@@ -2,6 +2,7 @@ package org.maplibre.android.style.sources
 
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.expressions.Expression.ExpressionLiteral
+
 /**
  * Builder class for composing GeoJsonSource objects.
  *
@@ -100,7 +101,7 @@ class GeoJsonOptions : HashMap<String?, Any?>() {
         return this
     }
 
-     /**
+    /**
      * Minimum number of points to form a cluster
      *
      * @param clusterMinPoints minimum number of points to form a cluster - Defaults to 2
@@ -123,7 +124,11 @@ class GeoJsonOptions : HashMap<String?, Any?>() {
      * @param mapExpr map expression produces the value of a single point, it shall be a valid expression
      * @return the current instance for chaining
      */
-    fun withClusterProperty(propertyName: String, operatorExpr: Expression, mapExpr: Expression): GeoJsonOptions {
+    fun withClusterProperty(
+        propertyName: String,
+        operatorExpr: Expression,
+        mapExpr: Expression,
+    ): GeoJsonOptions {
         val properties = if (containsKey("clusterProperties")) get("clusterProperties") as HashMap<String, Array<Any>>? else HashMap()
         val operator = if (operatorExpr is ExpressionLiteral) operatorExpr.toValue() else operatorExpr.toArray()
         val map: Any = mapExpr.toArray()
