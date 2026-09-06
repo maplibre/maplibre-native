@@ -92,7 +92,8 @@ Resource Resource::tile(const std::string& urlTemplate,
                         int32_t y,
                         int8_t z,
                         Tileset::Scheme scheme,
-                        LoadingMethod loadingMethod) {
+                        LoadingMethod loadingMethod,
+                        std::string_view acceptHeader) {
     bool supportsRatio = urlTemplate.find("{ratio}") != std::string::npos;
     if (scheme == Tileset::Scheme::TMS) {
         y = (1 << z) - y - 1;
@@ -126,7 +127,8 @@ Resource Resource::tile(const std::string& urlTemplate,
                                        .x = x,
                                        .y = y,
                                        .z = z},
-                    loadingMethod};
+                    loadingMethod,
+                    acceptHeader};
 }
 
 } // namespace mln
