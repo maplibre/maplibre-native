@@ -513,6 +513,7 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                          const TransformState& transformState,
                                          const std::unordered_map<std::string, const RenderLayer*>& layers,
                                          const RenderedQueryOptions& options,
+                                         const GlobalStateMap* globalState,
                                          const mat4& projMatrix,
                                          const SourceFeatureState& featureState) {
     MLN_TRACE_FUNC();
@@ -532,13 +533,16 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                       util::tileSize_D * id.overscaleFactor(),
                                       std::pow(2, transformState.getZoom() - id.overscaledZ),
                                       options,
+                                      globalState,
                                       id.toUnwrapped(),
                                       layers,
                                       queryPadding * transformState.maxPitchScaleFactor(),
                                       featureState);
 }
 
-void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {
+void GeometryTile::querySourceFeatures(std::vector<Feature>& result,
+                                       const SourceQueryOptions& options,
+                                       const GlobalStateMap* globalState) {
     MLN_TRACE_FUNC();
 
     // Data not yet available, or tile is empty
@@ -565,7 +569,7 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
                 // Apply filter, if any
                 if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
                                           static_cast<float>(this->id.overscaledZ), feature.get()}
-                                                             .withGlobalState(options.globalState.get()))) {
+                                                             .withGlobalState(globalState))) {
                     continue;
                 }
 

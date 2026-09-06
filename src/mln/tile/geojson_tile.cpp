@@ -36,7 +36,9 @@ void GeoJSONTile::updateData(std::shared_ptr<style::GeoJSONData> data_, bool nee
         runSynchronously);
 }
 
-void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {
+void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result,
+                                      const SourceQueryOptions& options,
+                                      const GlobalStateMap* globalState) {
     MLN_TRACE_FUNC();
 
     // Ignore the sourceLayer, there is only one
@@ -49,7 +51,7 @@ void GeoJSONTile::querySourceFeatures(std::vector<Feature>& result, const Source
                 // Apply filter, if any
                 if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
                                           static_cast<float>(this->id.overscaledZ), feature.get()}
-                                                             .withGlobalState(options.globalState.get()))) {
+                                                             .withGlobalState(globalState))) {
                     continue;
                 }
 

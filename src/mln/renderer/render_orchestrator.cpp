@@ -670,6 +670,7 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
         auto& queryData = wrappedQueryData.get();
         auto bucketSymbols = queryData.featureIndex->lookupSymbolFeatures(renderedSymbols[queryData.bucketInstanceId],
                                                                           options,
+                                                                          globalState.get(),
                                                                           crossTileSymbolIndexLayers,
                                                                           queryData.tileID,
                                                                           queryData.featureSortOrder);
@@ -683,12 +684,9 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
 
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const ScreenLineString& geometry,
-    const RenderedQueryOptions& options_,
+    const RenderedQueryOptions& options,
     const std::unordered_map<std::string, const RenderLayer*>& layers) const {
     MLN_TRACE_FUNC();
-
-    RenderedQueryOptions options = options_;
-    options.globalState = globalState;
 
     std::unordered_set<std::string> sourceIDs;
     std::unordered_map<std::string, const RenderLayer*> filteredLayers;
@@ -707,7 +705,7 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     for (const auto& sourceID : sourceIDs) {
         if (RenderSource* renderSource = getRenderSource(sourceID)) {
             auto sourceResults = renderSource->queryRenderedFeatures(
-                geometry, transformState, filteredLayers, options, projMatrix);
+                geometry, transformState, filteredLayers, options, globalState.get(), projMatrix);
             std::ranges::move(sourceResults, std::inserter(resultsByLayer, resultsByLayer.begin()));
         }
     }
@@ -759,16 +757,13 @@ std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineS
 }
 
 std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& sourceID,
-                                                             const SourceQueryOptions& options_) const {
+                                                             const SourceQueryOptions& options) const {
     MLN_TRACE_FUNC();
 
     const RenderSource* source = getRenderSource(sourceID);
     if (!source) return {};
 
-    SourceQueryOptions options = options_;
-    options.globalState = globalState;
-
-    return source->querySourceFeatures(options);
+    return source->querySourceFeatures(options, globalState.get());
 }
 
 FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(
