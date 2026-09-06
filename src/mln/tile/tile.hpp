@@ -80,13 +80,9 @@ public:
     // tile (and i.e. it was successfully updated); returns `false` otherwise.
     virtual bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) = 0;
     virtual void setShowCollisionBoxes(const bool) {}
-    virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}
+    virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&,
+                           std::shared_ptr<const GlobalStateMap>) {}
     virtual void setMask(TileMask&&) {}
-
-    // Notifies this tile of the style's current global state, used to
-    // evaluate "global-state" expressions during layout. Must be called
-    // before setLayers() to take effect for the subsequent re-layout.
-    virtual void setGlobalState(const std::shared_ptr<const GlobalStateMap>&) {}
 
     virtual void queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>& result,
                                        const GeometryCoordinates& queryGeometry,
