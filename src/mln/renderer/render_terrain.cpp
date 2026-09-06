@@ -594,8 +594,42 @@ void RenderTerrain::logAboveGroundMargin(const TransformState& state) {
     Log::Info(Event::Render, os.str());
 }
 
-float RenderTerrain::getElevation(const UnwrappedTileID& tileID, float x, float y) const {
+bool RenderTerrain::normalizeTileCoordinates(UnwrappedTileID& tileID, float& x, float& y) {
+    constexpr float extent = static_cast<float>(util::EXTENT);
+    if (x >= 0.0f && x < extent && y >= 0.0f && y < extent) {
+        return true;
+    }
+
+    const auto offsetX = static_cast<int64_t>(std::floor(x / extent));
+    const auto offsetY = static_cast<int64_t>(std::floor(y / extent));
+
+    const int64_t dim = int64_t{1} << tileID.canonical.z;
+    const int64_t tileY = static_cast<int64_t>(tileID.canonical.y) + offsetY;
+    if (tileY < 0 || tileY >= dim) {
+        // Past a pole. The tile grid does not continue, so there is nothing to sample.
+        return false;
+    }
+
+    // Rounding can leave the shifted coordinate exactly on the far edge, which belongs to
+    // the next tile over; keep it inside the tile we just resolved.
+    x = util::clamp(x - static_cast<float>(offsetX) * extent, 0.0f, std::nextafter(extent, 0.0f));
+    y = util::clamp(y - static_cast<float>(offsetY) * extent, 0.0f, std::nextafter(extent, 0.0f));
+
+    // x wraps around the world rather than ending: hand the constructor a global tile x and
+    // let it derive the wrap.
+    const int64_t globalX = static_cast<int64_t>(tileID.wrap) * dim + static_cast<int64_t>(tileID.canonical.x) +
+                            offsetX;
+    tileID = UnwrappedTileID(tileID.canonical.z, globalX, tileY);
+    return true;
+}
+
+float RenderTerrain::getElevation(const UnwrappedTileID& tileID_, float x, float y) const {
     if (!demSource) {
+        return 0.0f;
+    }
+
+    UnwrappedTileID tileID = tileID_;
+    if (!normalizeTileCoordinates(tileID, x, y)) {
         return 0.0f;
     }
 

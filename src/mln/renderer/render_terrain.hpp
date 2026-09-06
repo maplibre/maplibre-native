@@ -114,10 +114,27 @@ public:
                 UniqueChangeRequestVec& changes);
 
     /**
+     * @brief Move tile-local coordinates outside [0, EXTENT) onto the neighbouring tile
+     *
+     * Geometry that crosses a tile edge - a label placed along a line, or a map centre
+     * near a boundary - asks for elevation beyond the tile it started in. Clamping such a
+     * coordinate to the tile edge answers with the wrong elevation and looks plausible;
+     * resolving it to the tile that actually contains the point does not. Mirrors
+     * maplibre-gl-js `OverscaledTileID.normalizeCoordinates` (#7040).
+     *
+     * @param tileID [in,out] the tile the coordinates are relative to; replaced by the tile
+     *               that contains them, wrapping around the antimeridian
+     * @param x [in,out] x relative to the tile, may start outside [0, EXTENT)
+     * @param y [in,out] y relative to the tile, may start outside [0, EXTENT)
+     * @return false when the point lies past a pole, where there is no tile to resolve to
+     */
+    static bool normalizeTileCoordinates(UnwrappedTileID& tileID, float& x, float& y);
+
+    /**
      * @brief Get elevation at a specific tile coordinate
      * @param tileID The tile containing the coordinate
-     * @param x X coordinate within the tile
-     * @param y Y coordinate within the tile
+     * @param x X coordinate within the tile, may be outside [0, EXTENT)
+     * @param y Y coordinate within the tile, may be outside [0, EXTENT)
      * @return Elevation in meters (or 0 if no DEM data available)
      */
     float getElevation(const UnwrappedTileID& tileID, float x, float y) const;

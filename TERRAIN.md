@@ -934,6 +934,88 @@ building blocks; see the reverted commits for the reference implementation. The
 right Phase 4 fix is the terrain-anchored centre above, which prevents the camera
 from entering the terrain in the first place rather than correcting afterwards.
 
+**Correction to the note above (2026-09-06):** `updateStateFromCamera` does not force the
+centre altitude to 0 as such - it walks the camera ray until it meets z = 0
+(`travel = -position[2] / dz`) and derives the altitude from that intersection, which comes
+out at 0 *because* the centre is defined as the sea-level hit. Same conclusion, but the
+mechanism is what has to change: `z` is a by-product of the centre definition, not an
+independent anchor, which is why feeding a terrain height into `setCenterAltitude` fights
+the derivation instead of moving the camera.
+
+#### What maplibre-gl-js has done since this was written
+
+The research above dates from 2026-07. Upstream has since hardened this exact path, and the
+shape of the fix is now clearer than `getCenterClampedToGround` alone suggested:
+
+- **#8230** changed *where* the centre elevation is sampled - from
+  `getElevationForLngLatZoom(center, tileZoom)` to `getElevationForLngLat(center, transform)`.
+  Their reasoning matches the drift seen here: the centre elevation was read from the DEM at
+  the transform's tile zoom, which can differ from the drawn terrain surface, so at the end of
+  a gesture the recalculated centre and the next frame disagreed and the camera moved
+  vertically. The fix is to sample **the rendered surface**, not a zoom-picked DEM tile.
+- **#8213** made elevation lookups sample that same surface, so `project()` round-trips
+  `unproject()`.
+- **#8025**, plus #8230's `resetElevationCache` guard (reset only when the renderable tile set
+  actually changes), is what makes a per-frame centre-elevation query affordable.
+- **#8158** replaced the coords-framebuffer picking with a CPU raycast; **#8067** keeps the
+  grabbed terrain point through pan/zoom gestures; **#7267** / **#7135** add elevation to
+  `jumpTo` and to bounds calculations.
+
+#### The dependency Phase 4 shares with elevated labels
+
+Phase 4 and the open "elevation for CPU-projected along-line labels" item are the same
+problem underneath: both need a CPU elevation query that is correct and cheap. Native's
+`RenderTerrain::getElevation` is currently neither, and has **no callers outside**
+`render_terrain.cpp` (only the above-ground debug log), so none of this is exercised today:
+
+1. It scans every DEM render tile linearly on each call to find the covering tile. Fine for
+   one debug line per frame; unusable per glyph or per frame. This is what #8025 addresses.
+2. Coordinates outside `[0, EXTENT)` are **clamped to the tile edge** rather than resolved to
+   the neighbouring tile, so it returns a plausible wrong elevation instead of an obvious
+   zero. gl-js #7040 (`OverscaledTileID.normalizeCoordinates`) is the fix; it matters for the
+   camera too, as soon as the centre sits near a tile edge.
+3. It samples the DEM **cover**, not the surface actually meshed and drawn - precisely the
+   distinction #8213 / #8230 identify as the source of frame-to-frame disagreement.
+
+For the label side the hook points are few and clean once that query exists:
+`symbol_projection.cpp`'s `project()` hardcodes `z = 0` and has 7 call sites, plus three
+projection primitives in `collision_index.cpp`. The word "elevation" appears nowhere in the
+2,747 lines of `placement.cpp` / `collision_index.cpp` / `symbol_projection.cpp`.
+
+#### Order of work
+
+1. **Fix the elevation query** - neighbour-tile resolution, a coverage index in place of the
+   linear scan, and sampling the rendered surface. Unit-testable, no visual risk, and it is
+   the floor both other items stand on.
+   - **(done 2026-09-06)** Neighbour-tile resolution:
+     `RenderTerrain::normalizeTileCoordinates` resolves coordinates outside `[0, EXTENT)`
+     onto the tile that contains them, wrapping across the antimeridian and reporting
+     failure past a pole; `getElevation` runs it first. Covered by `TerrainElevation.*` in
+     `test/renderer/terrain_elevation.test.cpp`. The in-DEM `px`/`py` clamp is still there,
+     but it is now a bound on the ancestor sub-tile mapping rather than the thing quietly
+     answering out-of-tile queries with an edge elevation.
+   - **(deferred, deliberately)** The coverage index. The obvious cache - tile id to
+     `const DEMData*`, rebuilt per frame - is a use-after-free waiting to happen: the
+     DEMData is owned by a `unique_ptr` bucket on the tile, so a tile evicted between
+     frames leaves a dangling entry, and the placement ordering trap below means a
+     consumer would read the index a frame before `update()` refreshes it. The per-call
+     linear scan is only a problem once there are hot callers, so build the cache with the
+     first real consumer, scoped to a frame, rather than inventing the hazard ahead of
+     need.
+   - **(open)** Rendered-surface sampling. Worth confirming how much divergence native
+     actually has before porting #8213's machinery: gl-js picked its DEM tile by *zoom*,
+     where `getElevation` already walks the DEM render set for the deepest covering tile -
+     which may already be what the GPU draws. Measure before building.
+2. **Phase 4 proper** - give `TransformState` a decoupled elevation (centre as a lng/lat
+   anchor plus a terrain height) and then the centre-clamped-to-ground behaviour.
+3. **Elevated line labels** - thread the query through placement, then gl-js #7040's
+   coordinate normalisation on top.
+
+Ordering trap for step 2: placement runs at `RenderOrchestrator::update` (~line 561) but
+`renderTerrain->update()` does not run until `updateLayers` (~line 1052), so anything reading
+terrain during placement sees the previous frame's state - the same first-frame ordering bug
+`prepareSource()` was extracted to fix. Resolve that before wiring either consumer.
+
 ### Cleanup before merging
 
 - **(done)** Removed the TEMP terrain diagnostics: the throttled drape-coverage
