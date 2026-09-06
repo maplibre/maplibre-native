@@ -754,6 +754,11 @@ void RenderTerrain::prepareDepthTarget(PaintParameters& parameters) {
         }
         // Far plane everywhere the terrain does not cover (unpack_depth(1,1,1,1) ~ 1.0)
         depthRenderTarget->setClearColor(Color::white());
+        // The packed digits must not be filtered: blending neighbouring texels'
+        // channels decodes to garbage (offscreen textures default to Linear)
+        depthRenderTarget->getTexture()->setSamplerConfiguration({.filter = gfx::TextureFilterType::Nearest,
+                                                                  .wrapU = gfx::TextureWrapType::Clamp,
+                                                                  .wrapV = gfx::TextureWrapType::Clamp});
     }
     // (Re)attach the depth layer group; it may not have existed yet when the
     // target was first created on an early frame

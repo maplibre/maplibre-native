@@ -54,14 +54,20 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]]) {
-    // Pack the fragment depth into RGBA8, matching the maplibre-gl-js
-    // terrain_depth shader; unpacked by unpack_depth() for calculate_visibility()
-    const float depth = in.position.z;
-    const float4 bit_shift = float4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
-    const float4 bit_mask = float4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
-    float4 res = fract(depth * bit_shift);
-    res -= res.xxyz * bit_mask;
-    return half4(res);
+    // Pack the window depth into RGBA8 as four base-256 digits, each written as
+    // k / 255 so it survives the unorm8 target exactly (the gl-js fract/bit_mask
+    // scheme stores k / 256, which unorm8 rounds by up to 0.002 - at native's near
+    // plane of 1 px that is 20x the depth difference the occlusion test looks
+    // for). Decoded by unpack_depth() for calculate_visibility().
+    float r = min(in.position.z, 0.99999994) * 256.0;
+    const float d0 = floor(r);
+    r = (r - d0) * 256.0;
+    const float d1 = floor(r);
+    r = (r - d1) * 256.0;
+    const float d2 = floor(r);
+    r = (r - d2) * 256.0;
+    const float d3 = floor(r);
+    return half4(float4(d0, d1, d2, d3) / 255.0);
 }
 )";
 };
