@@ -150,6 +150,13 @@ supported raster-dem encodings work:
 - **Terrarium** (`"encoding": "terrarium"`):
   `elevation = (R * 256 + G + B / 256) - 32768`
 
+Terrarium encodes "no data" as RGB(0, 0, 0), which decodes to -32768 m.
+`DEMData::get()` reads that back as 0 rather than letting a void drag the tile's
+elevation range - and the frustum test built on it - below the sea floor
+(maplibre-gl-js #6982). The GPU decode in `get_elevation()` is unguarded, as it is
+in gl-js, so a void still displaces the mesh; only the CPU-side range and elevation
+queries are protected.
+
 ## Implementation Details
 
 ### Architecture

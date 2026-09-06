@@ -135,3 +135,24 @@ TEST(DEMData, BackfillNeighbor) {
     // backfulls BottomLeft neighbor
     EXPECT_TRUE(dem0.get(4, -1) == dem1.get(0, 3));
 };
+
+TEST(DEMData, TerrariumNoData) {
+    // A fresh image is all zeroes, i.e. terrarium no-data, bar one pixel put at a real
+    // 256 m (129 * 256 - 32768). 128 would decode to 0 m and prove nothing.
+    PremultipliedImage image({4, 4});
+    for (size_t i = 3; i < image.bytes(); i += 4) {
+        image.data[i] = 1; // alpha, as fakeImage does
+    }
+    image.data[(1 * 4 + 1) * 4] = 129;
+
+    DEMData terrarium(image, Tileset::RasterEncoding::Terrarium);
+    EXPECT_EQ(terrarium.get(0, 0), 0);
+    EXPECT_EQ(terrarium.get(1, 1), 256);
+    // No-data must not drag the tile's elevation range below sea level.
+    EXPECT_EQ(terrarium.getMinElevation(), 0);
+    EXPECT_EQ(terrarium.getMaxElevation(), 256);
+
+    // Mapbox encoding has no no-data value; the same pixels decode as they always did.
+    DEMData mapbox(image, Tileset::RasterEncoding::Mapbox);
+    EXPECT_EQ(mapbox.get(0, 0), -10000);
+};

@@ -5,6 +5,11 @@
 
 namespace mln {
 
+namespace {
+// Terrarium encodes "no data" as RGB(0, 0, 0), which unpacks to this elevation.
+constexpr int32_t terrariumNoData = -32768;
+} // namespace
+
 DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _encoding)
     : dim(_image.size.height),
       // extra two pixels per row for border backfilling on either edge
@@ -109,7 +114,14 @@ void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy
 int32_t DEMData::get(const int32_t x, const int32_t y) const {
     const auto& unpack = getUnpackVector();
     const uint8_t* value = image->data.get() + idx(x, y) * 4;
-    return static_cast<int32_t>(value[0] * unpack[0] + value[1] * unpack[1] + value[2] * unpack[2] - unpack[3]);
+    const auto elevation = static_cast<int32_t>(value[0] * unpack[0] + value[1] * unpack[1] + value[2] * unpack[2] -
+                                                unpack[3]);
+    // Reading no-data as -32768 m would drag the tile's elevation range (and the frustum
+    // test built on it) down with it.
+    if (encoding == Tileset::RasterEncoding::Terrarium && elevation == terrariumNoData) {
+        return 0;
+    }
+    return elevation;
 }
 
 const std::array<float, 4>& DEMData::getUnpackVector() const {
