@@ -148,6 +148,58 @@ void testApplyTextFit(const Rect<uint16_t>& rectangle,
     ASSERT_EQ(icon.bottom(), expectedBottom);
 }
 
+TEST(Shaping, BreakBeforeLeftParenthesis) {
+    GlyphPosition glyphPosition;
+    glyphPosition.metrics.width = 18;
+    glyphPosition.metrics.height = 18;
+    glyphPosition.metrics.left = 2;
+    glyphPosition.metrics.top = -8;
+    glyphPosition.metrics.advance = 21;
+
+    BiDi bidi;
+    const std::vector<std::string> fontStack{{"font-stack"}};
+    const SectionOptions sectionOptions(1.0f, fontStack, GlyphIDType::FontPBF, 0);
+    GlyphMap glyphs;
+    GlyphPositions glyphPositions;
+    for (const char16_t id : {u'o', u'a', u'(', u')', u' '}) {
+        Glyph glyph;
+        glyph.id = id;
+        glyph.metrics = glyphPosition.metrics;
+        glyphs[FontStackHasher()(fontStack)].emplace(id, Immutable<Glyph>(makeMutable<Glyph>(std::move(glyph))));
+        glyphPositions[FontStackHasher()(fontStack)].emplace(id, glyphPosition);
+    }
+    ImagePositions imagePositions;
+
+    const auto glyphsPerLine = [&](const std::u16string& text) {
+        const Shaping shaping = getShaping(TaggedString(text, sectionOptions),
+                                           5 * ONE_EM,
+                                           ONE_EM, // lineHeight
+                                           style::SymbolAnchorType::Center,
+                                           style::TextJustifyType::Center,
+                                           0,              // spacing
+                                           {{0.0f, 0.0f}}, // translate
+                                           WritingModeType::Horizontal,
+                                           bidi,
+                                           glyphs,
+                                           glyphPositions,
+                                           imagePositions,
+                                           16.0f, // layoutTextSize
+                                           16.0f, // layoutTextSizeAtBucketZoomLevel
+                                           /*allowVerticalPlacement*/ false);
+        std::vector<std::size_t> counts;
+        for (const auto& line : shaping.positionedLines) {
+            counts.push_back(line.positionedGlyphs.size());
+        }
+        return counts;
+    };
+
+    // The break goes before the parenthesis, so it opens the second line instead of closing the first.
+    EXPECT_EQ(glyphsPerLine(u"oooooooo(aaaaaaaaa)"), (std::vector<std::size_t>{8, 11}));
+    EXPECT_EQ(glyphsPerLine(u"oooooooo (aaaaaaaaa)"), (std::vector<std::size_t>{8, 11}));
+    // A trailing parenthesis never becomes a line of its own.
+    EXPECT_EQ(glyphsPerLine(u"oooooooo("), (std::vector<std::size_t>{9}));
+}
+
 TEST(Shaping, applyTextFit) {
     float textSize = 4;
     float fontScale = 4;
