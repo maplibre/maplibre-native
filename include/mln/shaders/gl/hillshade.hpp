@@ -190,7 +190,11 @@ void igor_hillshade(vec2 deriv) {
 }
 
 void main() {
-    vec4 pixel = texture(u_image, v_pos);
+    // The prepare target carries a 1px ring of derivatives from outside the tile, so that
+    // bilinear filtering at the tile edge blends against a real neighbour. Inset past it.
+    vec2 size = vec2(textureSize(u_image, 0));
+    vec2 texturePos = (v_pos * (size - 2.0) + 1.0) / size;
+    vec4 pixel = texture(u_image, texturePos);
 
     // Scale the derivative based on the mercator distortion at this latitude (v_pos.y)
     float scaleFactor = cos(radians((u_latrange[0] - u_latrange[1]) * (1.0 - v_pos.y) + u_latrange[1]));

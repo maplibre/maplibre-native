@@ -230,7 +230,11 @@ void main() {
 
     const HillshadeTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
-    vec4 pixel = texture(image_sampler, frag_position);
+    // The prepare target carries a 1px ring of derivatives from outside the tile, so that
+    // bilinear filtering at the tile edge blends against a real neighbour. Inset past it.
+    const vec2 size = vec2(textureSize(image_sampler, 0));
+    const vec2 texturePos = (frag_position * (size - 2.0) + 1.0) / size;
+    vec4 pixel = texture(image_sampler, texturePos);
 
     // Scale the derivative based on the mercator distortion at this latitude
     float scaleFactor = cos(radians((tileProps.latrange[0] - tileProps.latrange[1]) * frag_position.y + tileProps.latrange[1]));

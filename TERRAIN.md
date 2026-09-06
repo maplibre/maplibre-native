@@ -209,7 +209,7 @@ The terrain system consists of several key components:
      when no tile is loaded
    - Their vertex shaders call the shared `get_elevation()` prelude helper,
      which does manual bilinear interpolation on DEM pixel centers using the
-     1px backfilled tile border, matching maplibre-gl-js
+     2px backfilled tile border, matching maplibre-gl-js
 
 8. **CPU Elevation Queries** (`RenderTerrain::getElevation`)
    - DEM tile lookup with ancestor fallback and bilinear interpolation,
@@ -309,7 +309,7 @@ Implemented:
   `terrainSkirtLength` test-metadata field, but do **not** currently cover it - their
   baselines hold no terrain, so both render identically either way (see Testing).
 - The terrain **mesh** vertex shader now samples the DEM through the shared
-  `get_elevation()` prelude helper (backfilled 1px border, NEAREST fetch +
+  `get_elevation()` prelude helper (backfilled 2px border, NEAREST fetch +
   post-decode bilinear on pixel centres), the same path the elevated layers
   use, matching maplibre-gl-js
 - Hillshade prepare-target lifetime fixed (no more OOM / monotonic GPU-memory
@@ -1120,6 +1120,17 @@ from entering the terrain in the first place rather than correcting afterwards.
     for as long as it was. Re-baseline them only once terrain actually renders in the
     still-render path (the fixture problem below); until then the skirt option is
     covered only by on-device eyeballing (`skirts_toggle` in TerrainTestOptions).
+  - **2026-09-05 - `terrain/fill-extrusion`'s baseline was refreshed for the 2px DEM
+    border (gl-js #8302).** The wider border changed 45 of 262144 pixels: the buildings
+    near a DEM tile seam sit ~1px lower. That is the fix working, not a regression -
+    with a 1px border the bilinear `tr`/`br` fetch at the tile's far edge ran off the
+    texture and was **clamped** to the single border ring, flattening the elevation
+    along every seam; with 2px it reaches a real backfilled neighbour pixel. Proven by
+    experiment: collapsing the outer ring onto the inner one (emulating the old clamp)
+    makes the old image return exactly. The refreshed `expected.png` differs from the
+    device-captured one in those 45 pixels and **nowhere else**, so it carries no
+    software-rasterizer drift. `default`, `occlusion-debug` and `pitched-world` fail
+    identically with and without this branch's changes.
   - **Current status after the fix (local Windows GL runner):**
     `terrain/fill-extrusion` (new, see below) **passes**; `default`,
     `pitched-world`, `skirts-auto`, `skirts-none`, `occlusion-debug` still fail -

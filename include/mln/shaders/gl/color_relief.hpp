@@ -40,8 +40,8 @@ void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
     gl_Position = apply_drape_transform(gl_Position, u_matrix, u_drape_tile);
 
-    highp vec2 epsilon = 1.0 / u_dimension;
-    float scale = (u_dimension.x - 2.0) / u_dimension.x;
+    highp vec2 epsilon = 2.0 / u_dimension;
+    float scale = (u_dimension.x - 4.0) / u_dimension.x;
     v_pos = (a_texture_pos / 8192.0) * scale + epsilon;
 
     // Handle poles

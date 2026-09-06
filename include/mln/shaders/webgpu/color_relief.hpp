@@ -69,8 +69,8 @@ fn main(in: VertexInput) -> VertexOutput {
     out.position = apply_drape_transform(drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0), drawable.matrix, paintParams.drape_tile);
 
     let a_pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
-    let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
-    let scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    let epsilon = vec2<f32>(2.0, 2.0) / tileProps.dimension;
+    let scale = (tileProps.dimension.x - 4.0) / tileProps.dimension.x;
     out.frag_position = (a_pos / 8192.0) * scale + epsilon;
 
     // Handle poles

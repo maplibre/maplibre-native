@@ -78,8 +78,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 position = apply_drape_transform(rawPosition, drawable.matrix, paintParams.drape_tile);
 
     // Calculate texture coordinate
-    float2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    float2 epsilon = 2.0 / tileProps.dimension;
+    float scale = (tileProps.dimension.x - 4.0) / tileProps.dimension.x;
     float2 pos = (float2(vertx.pos) / 8192.0) * scale + epsilon;
 
     // Handle poles (use vertx.pos, not texture_pos, to match GLSL a_pos)

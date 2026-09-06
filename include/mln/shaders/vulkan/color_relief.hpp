@@ -62,8 +62,8 @@ void main() {
     gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
     applySurfaceTransform(constant.drape_tile);
 
-    highp vec2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    highp vec2 epsilon = 2.0 / tileProps.dimension;
+    float scale = (tileProps.dimension.x - 4.0) / tileProps.dimension.x;
     frag_position = (vec2(in_position) / 8192.0) * scale + epsilon;
 
     // Handle poles (use in_position to match GLSL a_pos)

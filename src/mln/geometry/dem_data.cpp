@@ -12,15 +12,18 @@ constexpr int32_t terrariumNoData = -32768;
 
 DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _encoding)
     : dim(_image.size.height),
-      // extra two pixels per row for border backfilling on either edge
-      stride(dim + 2),
+      // extra two pixels per row for border backfilling on either edge. Two, not one, so a
+      // bilinear fetch centred on an edge pixel still has a full neighbourhood - and so the
+      // hillshade prepare pass can derive a 1px ring outside the tile, which needs DEM
+      // samples two pixels out. Matches maplibre-gl-js #8302.
+      stride(dim + 4),
       encoding(_encoding) {
     image = std::make_shared<PremultipliedImage>(Size(static_cast<uint32_t>(stride), static_cast<uint32_t>(stride)));
     if (_image.size.height != _image.size.width) {
         throw std::runtime_error("raster-dem tiles must be square.");
     }
 
-    auto* dest = reinterpret_cast<uint32_t*>(image->data.get()) + stride + 1;
+    auto* dest = reinterpret_cast<uint32_t*>(image->data.get()) + stride * 2 + 2;
     auto* source = reinterpret_cast<uint32_t*>(_image.data.get());
     for (int32_t y = 0; y < dim; y++) {
         memcpy(dest, source, dim * 4);
@@ -29,25 +32,23 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _enco
     }
 
     // in order to avoid flashing seams between tiles, here we are initially
-    // populating a 1px border of pixels around the image with the data of the
+    // populating a 2px border of pixels around the image with the data of the
     // nearest pixel from the image. this data is eventually replaced when the
     // tile's neighboring tiles are loaded and the accurate data can be
     // backfilled using DEMData#backfillBorder
 
     auto* data = reinterpret_cast<uint32_t*>(image->data.get());
-    for (int32_t x = 0; x < dim; x++) {
-        auto rowOffset = stride * (x + 1);
-        // left vertical border
-        data[rowOffset] = data[rowOffset + 1];
-
-        // right vertical border
-        data[rowOffset + dim + 1] = data[rowOffset + dim];
+    if (dim > 0) {
+        for (int32_t y = -2; y < dim + 2; y++) {
+            auto* src = data + idx(0, std::clamp(y, 0, dim - 1));
+            auto* dst = data + idx(0, y);
+            if (y < 0 || y >= dim) {
+                memcpy(dst, src, dim * 4);
+            }
+            dst[-2] = dst[-1] = src[0];
+            dst[dim] = dst[dim + 1] = src[dim - 1];
+        }
     }
-
-    // top horizontal border with corners
-    memcpy(data, data + stride, stride * 4);
-    // bottom horizontal border with corners
-    memcpy(data + (dim + 1) * stride, data + dim * stride, stride * 4);
 
     // The elevation range of the tile, used to give the tile a height when testing
     // it against the view frustum (see util::tileCover): terrain rising towards the
@@ -68,7 +69,7 @@ DEMData::DEMData(const PremultipliedImage& _image, Tileset::RasterEncoding _enco
 }
 
 // This function takes the DEMData from a neighboring tile and backfills the
-// edge/corner data in order to create a one pixel "buffer" of image data around
+// edge/corner data in order to create a two pixel "buffer" of image data around
 // the tile. This is necessary because the hillshade formula calculates the
 // dx/dz, dy/dz derivatives at each pixel of the tile by querying the 8
 // surrounding pixels, and if we don't have the pixel buffer we get seams at
@@ -89,14 +90,14 @@ void DEMData::backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy
     int32_t yMax = dy * dim + dim;
 
     if (dx == -1)
-        xMin = xMax - 1;
+        xMin = xMax - 2;
     else if (dx == 1)
-        xMax = xMin + 1;
+        xMax = xMin + 2;
 
     if (dy == -1)
-        yMin = yMax - 1;
+        yMin = yMax - 2;
     else if (dy == 1)
-        yMax = yMin + 1;
+        yMax = yMin + 2;
 
     int32_t ox = -dx * dim;
     int32_t oy = -dy * dim;

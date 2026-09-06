@@ -20,8 +20,8 @@ TEST(DEMData, ConstructorMapbox) {
     DEMData demdata(image, Tileset::RasterEncoding::Mapbox);
 
     EXPECT_EQ(demdata.dim, 16);
-    EXPECT_EQ(demdata.stride, 18);
-    EXPECT_EQ(demdata.getImage()->bytes(), size_t(18 * 18 * 4));
+    EXPECT_EQ(demdata.stride, 20);
+    EXPECT_EQ(demdata.getImage()->bytes(), size_t(20 * 20 * 4));
 };
 
 TEST(DEMData, ConstructorTerrarium) {
@@ -29,62 +29,63 @@ TEST(DEMData, ConstructorTerrarium) {
     DEMData demdata(image, Tileset::RasterEncoding::Terrarium);
 
     EXPECT_EQ(demdata.dim, 16);
-    EXPECT_EQ(demdata.stride, 18);
-    EXPECT_EQ(demdata.getImage()->bytes(), size_t(18 * 18 * 4));
+    EXPECT_EQ(demdata.stride, 20);
+    EXPECT_EQ(demdata.getImage()->bytes(), size_t(20 * 20 * 4));
 };
 
 TEST(DEMData, InitialBackfill) {
     PremultipliedImage image1 = fakeImage({4, 4});
     DEMData dem1(image1, Tileset::RasterEncoding::Mapbox);
 
-    bool nonempty = true;
-    // checking that a 1 px border around the fake image has been populated
-    // with a non-empty pixel value
-    for (int x = -1; x < 5; x++) {
-        for (int y = -1; y < 5; y++) {
-            if (dem1.get(x, y) == -65536) {
-                nonempty = false;
-                break;
-            }
-        }
-    }
-    EXPECT_TRUE(nonempty);
-
+    // both border columns of DEM data are initially equal to the nearest column of data
     bool verticalBorderMatch = true;
-    int vertx[] = {-1, 4};
-    for (int x : vertx) {
-        for (int y = 0; y < 4; y++) {
-            if (dem1.get(x, y) != dem1.get(x < 0 ? x + 1 : x - 1, y)) {
+    for (int y = 0; y < 4; y++) {
+        for (int x : {-2, -1}) {
+            if (dem1.get(x, y) != dem1.get(0, y)) {
                 verticalBorderMatch = false;
-                break;
+            }
+        }
+        for (int x : {4, 5}) {
+            if (dem1.get(x, y) != dem1.get(3, y)) {
+                verticalBorderMatch = false;
             }
         }
     }
-    // vertical border of DEM data is initially equal to next column of data
     EXPECT_TRUE(verticalBorderMatch);
 
-    // horizontal borders empty
+    // both border rows of DEM data are initially equal to the nearest row of data
     bool horizontalBorderMatch = true;
-    int horiz[] = {-1, 4};
-    for (int y : horiz) {
-        for (int x = 0; x < 4; x++) {
-            if (dem1.get(x, y) != dem1.get(x, y < 0 ? y + 1 : y - 1)) {
+    for (int x = 0; x < 4; x++) {
+        for (int y : {-2, -1}) {
+            if (dem1.get(x, y) != dem1.get(x, 0)) {
                 horizontalBorderMatch = false;
-                break;
+            }
+        }
+        for (int y : {4, 5}) {
+            if (dem1.get(x, y) != dem1.get(x, 3)) {
+                horizontalBorderMatch = false;
             }
         }
     }
-    // horizontal border of DEM data is initially equal to next row of data
-
     EXPECT_TRUE(horizontalBorderMatch);
-    // -1, 1 corner initially equal to closest corner data
-    EXPECT_TRUE(dem1.get(-1, 4) == dem1.get(0, 3));
-    // 1, 1 corner initially equal to closest corner data
-    EXPECT_TRUE(dem1.get(4, 4) == dem1.get(3, 3));
-    // -1, -1 corner initially equal to closest corner data
-    EXPECT_TRUE(dem1.get(-1, -1) == dem1.get(0, 0));
-    // -1, 1 corner initially equal to closest corner data
-    EXPECT_TRUE(dem1.get(4, -1) == dem1.get(3, 0));
+
+    // every corner cell is initially equal to the closest corner pixel
+    for (int x : {-2, -1}) {
+        for (int y : {-2, -1}) {
+            EXPECT_EQ(dem1.get(x, y), dem1.get(0, 0));
+        }
+        for (int y : {4, 5}) {
+            EXPECT_EQ(dem1.get(x, y), dem1.get(0, 3));
+        }
+    }
+    for (int x : {4, 5}) {
+        for (int y : {-2, -1}) {
+            EXPECT_EQ(dem1.get(x, y), dem1.get(3, 0));
+        }
+        for (int y : {4, 5}) {
+            EXPECT_EQ(dem1.get(x, y), dem1.get(3, 3));
+        }
+    }
 };
 
 TEST(DEMData, BackfillNeighbor) {
@@ -94,46 +95,55 @@ TEST(DEMData, BackfillNeighbor) {
     PremultipliedImage image2 = fakeImage({4, 4});
     DEMData dem1(image2, Tileset::RasterEncoding::Mapbox);
 
+    // Each neighbour fills two pixels deep, so the border carries the neighbour's two
+    // nearest columns/rows rather than just its edge.
     dem0.backfillBorder(dem1, -1, 0);
     for (int y = 0; y < 4; y++) {
-        // dx = -1, dy = 0, so the left edge of dem1 should equal the right edge
-        // of dem0 backfills Left neighbor
-        EXPECT_TRUE(dem0.get(-1, y) == dem1.get(3, y));
+        // dx = -1, dy = 0: the left border of dem0 is the right edge of dem1
+        EXPECT_EQ(dem0.get(-1, y), dem1.get(3, y));
+        EXPECT_EQ(dem0.get(-2, y), dem1.get(2, y));
     }
 
     dem0.backfillBorder(dem1, 0, -1);
     // backfills TopCenter neighbor
     for (int x = 0; x < 4; x++) {
-        EXPECT_TRUE(dem0.get(x, -1) == dem1.get(x, 3));
+        EXPECT_EQ(dem0.get(x, -1), dem1.get(x, 3));
+        EXPECT_EQ(dem0.get(x, -2), dem1.get(x, 2));
     }
 
     dem0.backfillBorder(dem1, 1, 0);
     // backfills Right neighbor
     for (int y = 0; y < 4; y++) {
-        EXPECT_TRUE(dem0.get(4, y) == dem1.get(0, y));
+        EXPECT_EQ(dem0.get(4, y), dem1.get(0, y));
+        EXPECT_EQ(dem0.get(5, y), dem1.get(1, y));
     }
 
     dem0.backfillBorder(dem1, 0, 1);
     // backfills BottomCenter neighbor
     for (int x = 0; x < 4; x++) {
-        EXPECT_TRUE(dem0.get(x, 4) == dem1.get(x, 0));
+        EXPECT_EQ(dem0.get(x, 4), dem1.get(x, 0));
+        EXPECT_EQ(dem0.get(x, 5), dem1.get(x, 1));
     }
 
     dem0.backfillBorder(dem1, -1, 1);
-    // backfulls TopRight neighbor
-    EXPECT_TRUE(dem0.get(-1, 4) == dem1.get(3, 0));
+    // backfills BottomLeft neighbor
+    EXPECT_EQ(dem0.get(-1, 4), dem1.get(3, 0));
+    EXPECT_EQ(dem0.get(-2, 5), dem1.get(2, 1));
 
     dem0.backfillBorder(dem1, 1, 1);
-    // backfulls BottomRight neighbor
-    EXPECT_TRUE(dem0.get(4, 4) == dem1.get(0, 0));
+    // backfills BottomRight neighbor
+    EXPECT_EQ(dem0.get(4, 4), dem1.get(0, 0));
+    EXPECT_EQ(dem0.get(5, 5), dem1.get(1, 1));
 
     dem0.backfillBorder(dem1, -1, -1);
-    // backfulls TopLeft neighbor
-    EXPECT_TRUE(dem0.get(-1, -1) == dem1.get(3, 3));
+    // backfills TopLeft neighbor
+    EXPECT_EQ(dem0.get(-1, -1), dem1.get(3, 3));
+    EXPECT_EQ(dem0.get(-2, -2), dem1.get(2, 2));
 
     dem0.backfillBorder(dem1, 1, -1);
-    // backfulls BottomLeft neighbor
-    EXPECT_TRUE(dem0.get(4, -1) == dem1.get(0, 3));
+    // backfills TopRight neighbor
+    EXPECT_EQ(dem0.get(4, -1), dem1.get(0, 3));
+    EXPECT_EQ(dem0.get(5, -2), dem1.get(1, 2));
 };
 
 TEST(DEMData, TerrariumNoData) {

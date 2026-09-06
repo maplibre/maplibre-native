@@ -419,7 +419,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
 
             const auto unpackVector = demData.getUnpackVector();
             tilePropsUBO.unpack = {{unpackVector[0], unpackVector[1], unpackVector[2], unpackVector[3]}};
-            // Use stride (dim + 2) for dimension, as the texture includes a 1-pixel border
+            // Use stride (dim + 4) for dimension, as the texture includes a 2-pixel border
             tilePropsUBO.dimension = {{static_cast<float>(demData.stride), static_cast<float>(demData.stride)}};
             tilePropsUBO.color_ramp_size = static_cast<int32_t>(colorRampSize);
             tilePropsUBO.pad_tile0 = 0.0f;

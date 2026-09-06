@@ -82,15 +82,15 @@ struct GlobalIndexUBO {
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
 
 // Terrain elevation (meters) at a tile-local coordinate, bilinear on DEM pixel
-// centers (1px backfilled border), matching maplibre-gl-js get_elevation().
+// centers (2px backfilled border), matching maplibre-gl-js get_elevation().
 fn fillExtrusionElevation(pos: vec2<f32>, drawable: FillExtrusionDrawableUBO) -> f32 {
     if (drawable.dem_enabled == 0.0) {
         return 0.0;
     }
-    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 1.0;
+    let coord = (pos * drawable.dem_coords.x + drawable.dem_coords.yz) * drawable.dem_dim + 2.0;
     let f = fract(coord);
-    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 2.0);
-    let d = 1.0 / (drawable.dem_dim + 2.0);
+    let c = (floor(coord) + 0.5) / (drawable.dem_dim + 4.0);
+    let d = 1.0 / (drawable.dem_dim + 4.0);
     var tl = textureSampleLevel(dem_texture, dem_sampler, c, 0.0) * 255.0;
     tl.a = -1.0;
     var tr = textureSampleLevel(dem_texture, dem_sampler, c + vec2<f32>(d, 0.0), 0.0) * 255.0;

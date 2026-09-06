@@ -256,7 +256,10 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
 
         if (!bucket.renderTargetPrepared) {
             // Set up tile render target
-            const uint16_t tilesize = bucket.getDEMData().dim;
+            // One pixel wider than the tile on every side: the ring holds derivatives computed
+            // from the DEM's 2px border, so the hillshade draw's bilinear filter has a real
+            // neighbour to blend against at the tile edge instead of clamping (gl-js #8302).
+            const uint16_t tilesize = bucket.getDEMData().dim + 2;
             auto renderTarget = context.createRenderTarget(
                 {tilesize, tilesize}, gfx::TextureChannelDataType::UnsignedByte, /*stencil=*/false);
             if (!renderTarget) {

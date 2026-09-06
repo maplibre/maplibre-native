@@ -214,7 +214,11 @@ fn main(in: FragmentInput) -> @location(0) vec4<f32> {
 #endif
 
     let tileProps = tilePropsVector[globalIndex.value];
-    let pixel = textureSample(hillshade_texture, texture_sampler, in.tex_coord);
+    // The prepare target carries a 1px ring of derivatives from outside the tile, so that
+    // bilinear filtering at the tile edge blends against a real neighbour. Inset past it.
+    let size = vec2<f32>(textureDimensions(hillshade_texture, 0));
+    let texturePos = (in.tex_coord * (size - 2.0) + 1.0) / size;
+    let pixel = textureSample(hillshade_texture, texture_sampler, texturePos);
 
     let latRange = tileProps.latrange;
     let latitude = (latRange.x - latRange.y) * in.tex_coord.y + latRange.y;
