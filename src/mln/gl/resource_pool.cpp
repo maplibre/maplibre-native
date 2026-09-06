@@ -171,7 +171,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
         // must have been deleted behind the pool's back. Reconcile the bookkeeping so
         // the stale description does not corrupt the storage accounting.
         const auto staleStorage = existing->second.getStorageSize();
-        Log::Error(Event::OpenGL,
+        Log::Error(Event::GraphicsBackend,
                    "Texture2DPool: GL reused texture id " + util::toString(id) +
                        " which is still tracked (stale size " + util::toString(staleStorage) + " bytes)");
         if (auto stale_it = pool.find(existing->second); stale_it != pool.end()) {
@@ -208,7 +208,7 @@ void Texture2DPool::checkStatsConsistency(const char* where) {
         return;
     }
     statsDivergenceReported = true;
-    Log::Error(Event::OpenGL,
+    Log::Error(Event::GraphicsBackend,
                std::string("Texture2DPool stats divergence in ") + where +
                    ": memTextures=" + util::toString(context->renderingStats().memTextures) +
                    " trackedStorage=" + util::toString(trackedStorage) + " poolStorage=" + util::toString(poolStorage) +
@@ -264,7 +264,7 @@ void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
                                  " live=" + util::toString(descriptions.size()) +
                                  " allocs=" + util::toString(allocCount) + " reuses=" + util::toString(reuseCount) +
                                  " releases=" + util::toString(releaseCount) + " freed=" + util::toString(freedCount);
-        Log::Error(Event::OpenGL, dump);
+        Log::Error(Event::GraphicsBackend, dump);
 #ifdef __ANDROID__
         // Abort with the dump as the abort message so it persists in the tombstone
         // and dropbox crash entry (logcat does not survive a reboot).
