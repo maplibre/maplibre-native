@@ -54,6 +54,7 @@ public:
     // Setting a null value resets the property to the default defined in the
     // style's root "state" property (or null if there is none).
     GlobalStateMap getGlobalState() const;
+    /// Throws if the style has not finished loading.
     void setGlobalStateProperty(const std::string& name, const Value& value);
 
     // Images

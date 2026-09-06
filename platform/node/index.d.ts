@@ -184,6 +184,7 @@ declare module '@maplibre/maplibre-gl-native' {
      * Set a property of the map's global state, used by the `global-state` expression.
      * A `null` value resets the property to the default defined in the style's
      * root `state` property, or to null if there is none.
+     * @throws If the style has not finished loading.
      */
     setGlobalStateProperty: (name: string, value: unknown) => void;
 

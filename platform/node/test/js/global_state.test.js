@@ -14,6 +14,17 @@ var style = {
 };
 
 test('Map#globalState', function(t) {
+    t.test('rejects updates before a style is loaded', function(t) {
+        var map = new mbgl.Map({request: function() {}});
+
+        t.throws(function() {
+            map.setGlobalStateProperty('showLabels', false);
+        }, /Style is not done loading/);
+
+        map.release();
+        t.end();
+    });
+
     t.test('applies defaults from the style root state property', function(t) {
         var map = new mbgl.Map({request: function() {}});
         map.load(style);

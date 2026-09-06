@@ -5,6 +5,7 @@
 #include <mln/style/source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/style_impl.hpp>
+#include <mln/util/exception.hpp>
 #include <mln/util/instrumentation.hpp>
 
 namespace mln {
@@ -80,6 +81,10 @@ GlobalStateMap Style::getGlobalState() const {
 }
 
 void Style::setGlobalStateProperty(const std::string& name, const Value& value) {
+    if (!impl->loaded) {
+        throw util::MisuseException("Style is not done loading.");
+    }
+
     impl->mutated = true;
     impl->setGlobalStateProperty(name, value);
 }
