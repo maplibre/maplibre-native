@@ -59,15 +59,19 @@ struct alignas(16) FillPatternDrawableUBO {
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
-    /* 96 */
+    /* 96 */ float color_t;
+    /*100 */ float pad1;
+    /*104 */ float pad2;
+    /*108 */ float pad3;
+    /*112 */
 };
-static_assert(sizeof(FillPatternDrawableUBO) == 6 * 16, "wrong size");
+static_assert(sizeof(FillPatternDrawableUBO) == 7 * 16, "wrong size");
 
 struct alignas(16) FillPatternTilePropsUBO {
     /*  0 */ float4 pattern_from;
     /* 16 */ float4 pattern_to;
     /* 32 */ float2 texsize;
-    /* 40 */ float pad1;
+    /* 40 */ float sdf;
     /* 44 */ float pad2;
     /* 48 */
 };
@@ -86,15 +90,19 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 84 */ float pattern_from_t;
     /* 88 */ float pattern_to_t;
     /* 92 */ float opacity_t;
-    /* 96 */
+    /* 96 */ float color_t;
+    /*100 */ float pad1;
+    /*104 */ float pad2;
+    /*108 */ float pad3;
+    /*112 */
 };
-static_assert(sizeof(FillOutlinePatternDrawableUBO) == 6 * 16, "wrong size");
+static_assert(sizeof(FillOutlinePatternDrawableUBO) == 7 * 16, "wrong size");
 
 struct alignas(16) FillOutlinePatternTilePropsUBO {
     /*  0 */ float4 pattern_from;
     /* 16 */ float4 pattern_to;
     /* 32 */ float2 texsize;
-    /* 40 */ float pad1;
+    /* 40 */ float sdf;
     /* 44 */ float pad2;
     /* 48 */
 };
@@ -300,7 +308,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -310,14 +318,17 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 position [[attribute(0)]];
 
+#if !defined(HAS_UNIFORM_u_color)
+    float4 color [[attribute(1)]];
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
+    ushort4 pattern_from [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+    ushort4 pattern_to [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(4)]];
 #endif
 };
 
@@ -326,6 +337,9 @@ struct FragmentStage {
     float2 v_pos_a;
     float2 v_pos_b;
 
+#if !defined(HAS_UNIFORM_u_color)
+    half4 color;
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
 #endif
@@ -377,6 +391,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = drawable.matrix * float4(postion, 0, 1),
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
+#if !defined(HAS_UNIFORM_u_color)
+        .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
 #endif
@@ -419,6 +436,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto opacity        = in.opacity;
 #endif
 
+#if defined(HAS_UNIFORM_u_color)
+    const auto color          = half4(props.color);
+#else
+    const auto color          = in.color;
+#endif
+
     const float2 pattern_tl_a = pattern_from.xy;
     const float2 pattern_br_a = pattern_from.zw;
     const float2 pattern_tl_b = pattern_to.xy;
@@ -432,6 +455,14 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float2 pos2 = mix(pattern_tl_b / tileProps.texsize, pattern_br_b / tileProps.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
+    if (tileProps.sdf > 0.5) {
+        const float sdf_edge = (256.0 - 64.0) / 256.0;
+        const float sdf_gamma_a = max(fwidth(color1.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_gamma_b = max(fwidth(color2.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color1.a);
+        const float sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color2.a);
+        return half4(mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * opacity);
+    }
     return half4(mix(color1, color2, props.fade) * opacity);
 }
 )";
@@ -443,7 +474,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
@@ -453,14 +484,17 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
 struct VertexStage {
     short2 position [[attribute(0)]];
 
+#if !defined(HAS_UNIFORM_u_color)
+    float4 color [[attribute(1)]];
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
+    ushort4 pattern_from [[attribute(2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+    ushort4 pattern_to [[attribute(3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(4)]];
 #endif
 };
 
@@ -470,6 +504,9 @@ struct FragmentStage {
     float2 v_pos_b;
     float2 v_pos;
 
+#if !defined(HAS_UNIFORM_u_color)
+    half4 color;
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
     half4 pattern_from;
 #endif
@@ -528,6 +565,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos2),
         .v_pos          = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
 
+#if !defined(HAS_UNIFORM_u_color)
+        .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+#endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_from   = half4(pattern_from),
 #endif
@@ -570,6 +610,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const auto opacity        = in.opacity;
 #endif
 
+#if defined(HAS_UNIFORM_u_color)
+    const auto color          = half4(props.color);
+#else
+    const auto color          = in.color;
+#endif
+
     const float2 pattern_tl_a = pattern_from.xy;
     const float2 pattern_br_a = pattern_from.zw;
     const float2 pattern_tl_b = pattern_to.xy;
@@ -584,9 +630,17 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
     // TODO: Should triangate the lines into triangles to support thick line and edge antialiased.
-    //float dist = length(in.v_pos - in.position.xy);
-    //float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
+    const float dist = length(in.v_pos - in.position.xy);
+    const float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
+    if (tileProps.sdf > 0.5) {
+        const float sdf_edge = (256.0 - 64.0) / 256.0;
+        const float sdf_gamma_a = max(fwidth(color1.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_gamma_b = max(fwidth(color2.a) * 0.5, 1.0 / 255.0 / 16.0);
+        const float sdf_alpha_a = smoothstep(sdf_edge - sdf_gamma_a, sdf_edge + sdf_gamma_a, color1.a);
+        const float sdf_alpha_b = smoothstep(sdf_edge - sdf_gamma_b, sdf_edge + sdf_gamma_b, color2.a);
+        return half4(mix(color * sdf_alpha_a, color * sdf_alpha_b, props.fade) * alpha * opacity);
+    }
     return half4(mix(color1, color2, props.fade) * opacity);
 }
 )";
