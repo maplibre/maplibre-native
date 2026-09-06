@@ -41,8 +41,8 @@ public:
     void reset();
 
     std::unique_ptr<TileRenderData> createRenderData() override;
-    void setLayers(const std::vector<Immutable<style::LayerProperties>>&) override;
-    void setGlobalState(const std::shared_ptr<const GlobalStateMap>&) override;
+    void setLayers(const std::vector<Immutable<style::LayerProperties>>&,
+                   std::shared_ptr<const GlobalStateMap>) override;
     void setShowCollisionBoxes(bool showCollisionBoxes) override;
 
     void onGlyphsAvailable(GlyphMap, HBShapeRequests) override;
@@ -110,9 +110,6 @@ protected:
 
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
-
-    // The style's global state, forwarded to the worker for use during layout.
-    std::shared_ptr<const GlobalStateMap> globalState;
 
 private:
     void markObsolete();

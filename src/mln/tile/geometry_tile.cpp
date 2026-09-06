@@ -192,7 +192,6 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
                            TileObserver* observer_)
     : Tile(Kind::Geometry, id_, std::move(sourceID_), observer_),
       ImageRequestor(parameters.imageManager),
-      globalState(parameters.globalState),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.isUpdateSynchronous,
@@ -294,7 +293,8 @@ std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
     return std::make_unique<GeometryTileRenderData>(layoutResult, atlasTextures);
 }
 
-void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers) {
+void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers,
+                             std::shared_ptr<const GlobalStateMap> globalState) {
     MLN_TRACE_FUNC();
 
     // Mark the tile as pending again if it was complete before to prevent
@@ -325,13 +325,9 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     ++correlationID;
     worker.self().invoke(&GeometryTileWorker::setLayers,
                          std::move(impls),
-                         globalState,
+                         std::move(globalState),
                          imageManager->getAvailableImages(),
                          correlationID);
-}
-
-void GeometryTile::setGlobalState(const std::shared_ptr<const GlobalStateMap>& globalState_) {
-    globalState = globalState_;
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {

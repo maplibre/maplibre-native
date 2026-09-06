@@ -164,8 +164,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
 
         if (needsRelayout) {
-            tile.setGlobalState(parameters.globalState);
-            tile.setLayers(layers);
+            tile.setLayers(layers, parameters.globalState);
         }
     };
     auto getTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
@@ -191,8 +190,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (!tile) {
             tile = createTile(tileID, observer);
             if (!tile) return nullptr;
-            tile->setGlobalState(parameters.globalState);
-            tile->setLayers(layers);
+            tile->setLayers(layers, parameters.globalState);
         }
 
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
