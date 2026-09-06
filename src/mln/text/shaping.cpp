@@ -5,6 +5,8 @@
 #include <mln/math/minmax.hpp>
 #include <mln/text/bidi.hpp>
 
+#include <unicode/uchar.h>
+
 #include <algorithm>
 #include <list>
 #include <cmath>
@@ -405,6 +407,73 @@ std::set<std::size_t> determineLineBreaks(const TaggedString& logicalInput,
     return leastBadBreaks(evaluateBreak(logicalInput.length(), currentX, targetWidth, potentialBreaks, 0, true));
 }
 
+namespace {
+
+constexpr std::size_t maxUprightLetterRun = 3;
+
+// Longer uppercase runs are words, while short runs such as "JR" and "A1" are codes.
+bool runIsUpright(const TaggedString& line, std::size_t start, std::size_t end) {
+    bool hasDigit = false;
+    bool isNumber = true;
+    bool isShortUppercaseCode = end - start <= maxUprightLetterRun;
+    for (std::size_t i = start; i < end; ++i) {
+        const auto category = U_GET_GC_MASK(line.getCharCodeAt(i));
+        hasDigit |= (category & U_GC_ND_MASK) != 0;
+        isNumber &= (category & (U_GC_ND_MASK | U_GC_P_MASK | U_GC_S_MASK)) != 0;
+        isShortUppercaseCode &= (category & (U_GC_LU_MASK | U_GC_ND_MASK)) != 0;
+    }
+    return (hasDigit && isNumber) || isShortUppercaseCode;
+}
+
+// Punctuation such as the hyphen in "1-2" needs a vertical presentation form
+// now that its neighbors are upright. The glyph is replaced during shaping.
+void markSurroundedPunctuationUpright(const TaggedString& line, std::vector<bool>& verticals) {
+    const auto isText = [&](std::size_t i) {
+        const auto& section = line.getSection(i);
+        return section.type == GlyphIDType::FontPBF && !section.imageID;
+    };
+    for (std::size_t i = 0; i < line.length(); ++i) {
+        if (!verticals[i] && isText(i) && util::i18n::verticalizePunctuation(line.getCharCodeAt(i)) &&
+            (i == 0 || verticals[i - 1]) && (i + 1 == line.length() || verticals[i + 1])) {
+            verticals[i] = true;
+        }
+    }
+}
+
+// Keep words and combining marks together; images and shaped glyph IDs delimit runs.
+std::vector<bool> determineLineVerticals(const TaggedString& line) {
+    std::vector<bool> verticals(line.length(), false);
+    const auto isText = [&](std::size_t i) {
+        const auto& section = line.getSection(i);
+        return section.type == GlyphIDType::FontPBF && !section.imageID;
+    };
+    for (std::size_t i = 0; i < line.length(); ++i) {
+        verticals[i] = isText(i) && util::i18n::hasUprightVerticalOrientation(line.getCharCodeAt(i));
+    }
+
+    const auto isRunCharacter = [&](std::size_t i) {
+        return isText(i) && !verticals[i] && !util::i18n::isWhitespace(line.getCharCodeAt(i));
+    };
+    for (std::size_t start = 0; start < line.length(); ++start) {
+        if (!isRunCharacter(start)) continue;
+        std::size_t end = start + 1;
+        while (end < line.length() && isRunCharacter(end)) ++end;
+        if (runIsUpright(line, start, end)) {
+            for (std::size_t i = start; i < end; ++i) {
+                const auto chr = line.getCharCodeAt(i);
+                verticals[i] = (U_GET_GC_MASK(chr) & (U_GC_LU_MASK | U_GC_ND_MASK)) != 0 &&
+                               !util::i18n::isCharInComplexShapingScript(chr);
+            }
+        }
+        start = end - 1;
+    }
+
+    markSurroundedPunctuationUpright(line, verticals);
+    return verticals;
+}
+
+} // namespace
+
 void shapeLines(Shaping& shaping,
                 std::vector<TaggedString>& lines,
                 const float spacing,
@@ -443,6 +512,10 @@ void shapeLines(Shaping& shaping,
             continue;
         }
 
+        const auto lineVerticals = writingMode == WritingModeType::Vertical && !allowVerticalPlacement
+                                       ? determineLineVerticals(line)
+                                       : std::vector<bool>{};
+
         for (std::size_t i = 0; i < line.length(); i++) {
             const std::size_t sectionIndex = line.getSectionIndex(i);
             const SectionOptions& section = line.sectionAt(sectionIndex);
@@ -465,15 +538,19 @@ void shapeLines(Shaping& shaping,
             double sectionScale = section.scale;
             assert(sectionScale);
 
-            const bool vertical = !(
-                writingMode == WritingModeType::Horizontal || codePoint.complex.type != GlyphIDType::FontPBF ||
-                // Don't verticalize glyphs that have no upright orientation
-                // if vertical placement is disabled.
-                (!allowVerticalPlacement && !util::i18n::hasUprightVerticalOrientation(codePoint)) ||
-                // If vertical placement is ebabled, don't verticalize glyphs
-                // that are from complex text layout script, or whitespaces.
-                (allowVerticalPlacement &&
-                 (util::i18n::isWhitespace(codePoint) || util::i18n::isCharInComplexShapingScript(codePoint))));
+            const bool vertical = !lineVerticals.empty()
+                                      ? lineVerticals[i]
+                                      : writingMode != WritingModeType::Horizontal &&
+                                            codePoint.complex.type == GlyphIDType::FontPBF &&
+                                            (allowVerticalPlacement
+                                                 ? !util::i18n::isWhitespace(codePoint) &&
+                                                       !util::i18n::isCharInComplexShapingScript(codePoint)
+                                                 : util::i18n::hasUprightVerticalOrientation(codePoint));
+            if (!lineVerticals.empty() && vertical && !util::i18n::hasUprightVerticalOrientation(codePoint)) {
+                if (const char16_t replacement = util::i18n::verticalizePunctuation(codePoint)) {
+                    codePoint = GlyphID(replacement, section.type);
+                }
+            }
 
             if (!section.imageID) {
                 auto glyphPositionMap = glyphPositions.find(section.fontStackHash);
