@@ -431,6 +431,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/lru_cache.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/noncopyable.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/padding.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/vertical_gradient.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/platform.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/premultiply.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/projection.hpp
@@ -967,6 +968,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/mat4.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/math.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/padding.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/vertical_gradient.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/premultiply.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/quaternion.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/rapidjson.cpp
