@@ -70,6 +70,12 @@ public:
         return value.match([](const T&) { return Dependency::None; },
                            [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
+
+    const std::set<std::string>* getGlobalStateRefs() const noexcept {
+        return value.match(
+            [](const T&) -> const std::set<std::string>* { return nullptr; },
+            [](const style::PropertyExpression<T>& expression) { return expression.getGlobalStateRefs(); });
+    }
 };
 
 template <class T>
@@ -123,6 +129,12 @@ public:
     Dependency getDependencies() const noexcept {
         return value.match([](const Faded<T>&) { return Dependency::None; },
                            [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
+    }
+
+    const std::set<std::string>* getGlobalStateRefs() const noexcept {
+        return value.match(
+            [](const Faded<T>&) -> const std::set<std::string>* { return nullptr; },
+            [](const style::PropertyExpression<T>& expression) { return expression.getGlobalStateRefs(); });
     }
 };
 

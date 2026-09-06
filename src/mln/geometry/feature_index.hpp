@@ -125,6 +125,7 @@ public:
                double tileSize,
                double scale,
                const RenderedQueryOptions& options,
+               const GlobalStateMap* globalState,
                const UnwrappedTileID&,
                const std::unordered_map<std::string, const RenderLayer*>&,
                float additionalQueryPadding,
@@ -141,6 +142,7 @@ public:
     std::unordered_map<std::string, std::vector<Feature>> lookupSymbolFeatures(
         const std::vector<IndexedSubfeature>& symbolFeatures,
         const RenderedQueryOptions& options,
+        const GlobalStateMap* globalState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const OverscaledTileID& tileID,
         const FeatureSortOrder& featureSortOrder) const;
@@ -149,6 +151,7 @@ private:
     void addFeature(std::unordered_map<std::string, std::vector<Feature>>& result,
                     const RefIndexedSubfeature&,
                     const RenderedQueryOptions& options,
+                    const GlobalStateMap* globalState,
                     const CanonicalTileID&,
                     const std::unordered_map<std::string, const RenderLayer*>&,
                     const GeometryCoordinates& queryGeometry,

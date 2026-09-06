@@ -89,7 +89,7 @@ TEST(GeoJSONTile, SynchronousUpdate) {
     Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
         staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
-    tile.setLayers(layers);
+    tile.setLayers(layers, tileParameters.globalState);
     ASSERT_TRUE(tile.isComplete());
     ASSERT_TRUE(tile.isRenderable());
 }
@@ -113,7 +113,7 @@ TEST(GeoJSONTile, Issue7648) {
     };
 
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
-    tile.setLayers(layers);
+    tile.setLayers(layers, test.tileParameters.globalState);
     tile.setObserver(&observer);
 
     while (!tile.isComplete()) {
@@ -141,7 +141,7 @@ TEST(GeoJSONTile, Issue9927) {
     Immutable<LayerProperties> layerProperties = makeMutable<CircleLayerProperties>(
         staticImmutableCast<CircleLayer::Impl>(layer.baseImpl));
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
-    tile.setLayers(layers);
+    tile.setLayers(layers, test.tileParameters.globalState);
 
     while (!tile.isComplete()) {
         test.loop.runOnce();

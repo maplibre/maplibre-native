@@ -29,7 +29,9 @@ public:
 
     void setNecessity(TileNecessity) final;
 
-    void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&) override;
+    void querySourceFeatures(std::vector<Feature>& result,
+                             const SourceQueryOptions&,
+                             const GlobalStateMap* globalState) override;
 
 private:
     bool stale = true;

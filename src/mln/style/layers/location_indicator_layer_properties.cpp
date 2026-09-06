@@ -33,6 +33,14 @@ expression::Dependency LocationIndicatorLayerProperties::getDependencies() const
     return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
 }
 
+expression::Dependency LocationIndicatorLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
+void LocationIndicatorLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

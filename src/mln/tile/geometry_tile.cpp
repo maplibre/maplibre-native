@@ -293,7 +293,8 @@ std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
     return std::make_unique<GeometryTileRenderData>(layoutResult, atlasTextures);
 }
 
-void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers) {
+void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers,
+                             std::shared_ptr<const GlobalStateMap> globalState) {
     MLN_TRACE_FUNC();
 
     // Mark the tile as pending again if it was complete before to prevent
@@ -322,8 +323,11 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     }
 
     ++correlationID;
-    worker.self().invoke(
-        &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
+    worker.self().invoke(&GeometryTileWorker::setLayers,
+                         std::move(impls),
+                         std::move(globalState),
+                         imageManager->getAvailableImages(),
+                         correlationID);
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -509,6 +513,7 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                          const TransformState& transformState,
                                          const std::unordered_map<std::string, const RenderLayer*>& layers,
                                          const RenderedQueryOptions& options,
+                                         const GlobalStateMap* globalState,
                                          const mat4& projMatrix,
                                          const SourceFeatureState& featureState) {
     MLN_TRACE_FUNC();
@@ -528,13 +533,16 @@ void GeometryTile::queryRenderedFeatures(std::unordered_map<std::string, std::ve
                                       util::tileSize_D * id.overscaleFactor(),
                                       std::pow(2, transformState.getZoom() - id.overscaledZ),
                                       options,
+                                      globalState,
                                       id.toUnwrapped(),
                                       layers,
                                       queryPadding * transformState.maxPitchScaleFactor(),
                                       featureState);
 }
 
-void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& options) {
+void GeometryTile::querySourceFeatures(std::vector<Feature>& result,
+                                       const SourceQueryOptions& options,
+                                       const GlobalStateMap* globalState) {
     MLN_TRACE_FUNC();
 
     // Data not yet available, or tile is empty
@@ -560,7 +568,8 @@ void GeometryTile::querySourceFeatures(std::vector<Feature>& result, const Sourc
 
                 // Apply filter, if any
                 if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
-                                          static_cast<float>(this->id.overscaledZ), feature.get()})) {
+                                          static_cast<float>(this->id.overscaledZ), feature.get()}
+                                                             .withGlobalState(globalState))) {
                     continue;
                 }
 

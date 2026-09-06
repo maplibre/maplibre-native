@@ -51,6 +51,7 @@ public:
     void setObserver(TileObserver* observer);
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
+                   std::shared_ptr<const GlobalStateMap> globalState_,
                    std::set<std::string> availableImages,
                    uint64_t correlationID);
     void setData(std::unique_ptr<const GeometryTileData>,
@@ -109,6 +110,9 @@ private:
     // Outer std::optional indicates whether we've received it or not.
     std::optional<std::vector<Immutable<style::LayerProperties>>> layers;
     std::optional<std::unique_ptr<const GeometryTileData>> data;
+
+    // The style's global state, used by "global-state" expressions during layout.
+    std::shared_ptr<const GlobalStateMap> globalState;
 
     std::vector<std::unique_ptr<Layout>> layouts;
 

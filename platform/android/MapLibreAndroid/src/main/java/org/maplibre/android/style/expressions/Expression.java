@@ -1419,6 +1419,32 @@ public class Expression {
   }
 
   /**
+   * Gets a property value from the map's global state.
+   * Returns null if the requested property is not present in the global state.
+   * <p>
+   * The global state can be set with {@link org.maplibre.android.maps.Style#setGlobalStateProperty(String,
+   * com.google.gson.JsonElement)} and defaults can be defined with the style's root {@code state} property.
+   * <p>
+   * Example usage:
+   * </p>
+   * <pre>
+   * {@code
+   * CircleLayer circleLayer = new CircleLayer("layer-id", "source-id");
+   * circleLayer.setFilter(
+   *     eq(get("charger-type"), globalState("chargerType"))
+   * );
+   * }
+   * </pre>
+   *
+   * @param property the name of the global state property
+   * @return expression
+   * @see <a href="https://maplibre.org/maplibre-style-spec/expressions/#global-state">Style specification</a>
+   */
+  public static Expression globalState(@NonNull String property) {
+    return new Expression("global-state", literal(property));
+  }
+
+  /**
    * Gets the feature's id, if it has one.
    * <p>
    * Example usage:
