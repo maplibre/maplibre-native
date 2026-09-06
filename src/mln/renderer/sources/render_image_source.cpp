@@ -37,7 +37,8 @@ const style::ImageSource::Impl& RenderImageSource::impl() const {
 }
 
 bool RenderImageSource::isLoaded() const {
-    return !!bucket;
+    const auto image = impl().getImage();
+    return !image || !image->valid() || !!bucket;
 }
 
 std::unique_ptr<RenderItem> RenderImageSource::createRenderItem() {
