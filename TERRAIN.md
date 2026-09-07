@@ -644,6 +644,54 @@ replacement), **#4779** (level of detail at high pitch), **#4988** (overscaledZ 
 Z), **#7932** (grow tile culling bounds near the horizon), and for globe only **#5865**,
 **#4937**, **#8187**.
 
+#### Convergence with the globe PR (#4533), 2026-09-07
+
+John Carmack raised this on #4533 after Andrew pointed him here, and it sharpens the second
+divergence above. **gl-js puts the Mercator cover on the variable-zoom function whenever
+terrain is set, not only at high pitch.** Verified in
+`mercator_covering_tiles_details_provider.ts`:
+
+```js
+const maxConstantZoomPitch = clamp(78.5 - zfov / 2, 0.0, 60.0);
+return (!!options.terrain || transform.pitch > maxConstantZoomPitch);
+```
+
+So with terrain on, gl-js picks a *per-tile* zoom from FOV, that tile's pitch and a tile-count
+budget, on every frame at every pitch. Native's terrain cover uses the single constant desired
+zoom from the old heuristic. That is a deeper difference than "native has no pitch term", and
+it applies to `terrain/default` and to every terrain scene, not just steep ones.
+
+**The function is now available to us.** Globe commit `e3e2043` lifts it out of the globe cover
+into `src/mln/util/tile_lod.hpp`, projection-agnostic:
+
+- `TileZoomFunction(fovDegrees, maxZoomLevelsOnScreen = 9.314, tileCountMaxMinRatio = 3.0)`,
+  called as `(requestedCenterZoom, distanceToTile2D, distanceToTileZ, distanceToCenter3D)` -
+  gl-js `createCalculateTileZoomFunction`, with `test/util/tile_lod.test.cpp` pinning six
+  values against gl-js's own function to 1e-9.
+- `elevationForTileCulling(pitchDegrees, fovDegrees, centerElevation, maxContentElevation)` -
+  gl-js `getElevationForTileCulling` (#7932). **`centerElevation` is exactly what
+  `RenderTerrain::getElevationForLatLng` returns**, so the terrain side of that already exists.
+
+It is still *called* only inside `namespace globe`, so wiring `computeMeshCover` to it touches
+no globe code. That is the next concrete step on this branch, and it supersedes any thought of
+porting #5719 from TypeScript ourselves.
+
+Two things it does **not** cover, which stay terrain-side: the `deltaZoom` gap above, and the
+centre-clamped camera.
+
+**Merge shape** (his dry run of this branch onto the globe head, not independently checked
+here): 170 files touched by both, 93 conflicts, of which 66 are the single position line in
+vertex shaders - terrain wraps it in `apply_drape_transform`, globe in `projectTile` - and one
+is an include in `tile_cover.cpp`. The globe prelude already defines `projectTileWithElevation`
+and `projectTileFor3D` with gl-js's signatures, which is where the terrain mesh shader and the
+elevated layers compose; the drape is orthographic per tile, so it composes after projection.
+Whichever branch lands first owns that seam. He has offered to help adapt the terrain side.
+
+The remaining structural gap is the cover loop itself: gl-js runs one `coveringTiles` with a
+per-projection details provider and terrain plugs into the bounding volume for both
+projections, where globe phase 7 cloned the loop instead. Converging those is a real refactor
+and is being left as a follow-up to the globe PR.
+
 
 ### Convergence with maplibre-gl-js (ask before doing)
 
