@@ -418,6 +418,45 @@ TEST(Map, SetStyleDefaultCamera) {
 // The terrain skirt setting is a per-map render option, not a style property, so it reaches
 // the renderer on UpdateParameters. Assert both ends: the accessor round-trips and the value
 // actually rides along to the frontend.
+// The map centre rides a plane at the centre altitude, not sea level. Driving the free camera
+// (an FPV/flight camera over terrain does this every frame) used to re-derive the centre from
+// the z = 0 intersection, which both zeroed the altitude and teleported the centre.
+TEST(Map, FreeCameraPreservesCentreAltitude) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+
+    const LatLng center{47.2692, 11.4041};
+    test.map.jumpTo(CameraOptions().withCenter(center).withZoom(13.0).withPitch(60.0));
+    test.map.jumpTo(CameraOptions().withCenterAltitude(1500.0));
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+
+    const auto before = test.map.getCameraOptions({});
+    ASSERT_TRUE(before.centerAltitude.has_value());
+    ASSERT_DOUBLE_EQ(*before.centerAltitude, 1500.0);
+
+    // Nudge the camera so setFreeCameraOptions sees a real change and re-derives the state;
+    // an unchanged round trip is a no-op and would prove nothing.
+    auto freeCamera = test.map.getFreeCameraOptions();
+    ASSERT_TRUE(freeCamera.position.has_value());
+    auto position = *freeCamera.position;
+    position[2] *= 1.000001;
+    freeCamera.position = position;
+    test.map.setFreeCameraOptions(freeCamera);
+    test.runLoop.runOnce();
+    test.frontend.render(test.map);
+
+    const auto after = test.map.getCameraOptions({});
+    ASSERT_TRUE(after.centerAltitude.has_value());
+    // The altitude survives rather than collapsing to sea level.
+    EXPECT_NEAR(*after.centerAltitude, 1500.0, 1.0);
+    // And the centre stays put instead of jumping to where the ray met sea level, which for
+    // this camera was some 2.6 km north.
+    EXPECT_NEAR(after.center->latitude(), before.center->latitude(), 1e-4);
+    EXPECT_NEAR(after.center->longitude(), before.center->longitude(), 1e-4);
+    EXPECT_NEAR(*after.zoom, *before.zoom, 1e-3);
+}
+
 TEST(Map, TerrainSkirtLength) {
     class ForwardingHeadlessFrontend : public HeadlessFrontend {
     public:

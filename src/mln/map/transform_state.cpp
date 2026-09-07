@@ -261,13 +261,20 @@ void TransformState::updateStateFromCamera() {
 
     // Compute zoom level from the camera altitude
     const double centerDistance = getCameraToCenterDistance();
+    // The centre sits on the plane at the current centre altitude, not at sea level.
+    // Intersecting the view ray with z = 0 instead would drop the centre to sea level and
+    // zero the altitude, so a get/setFreeCameraOptions round trip moved the map - visible
+    // as a jump the moment anything drove the free camera over raised terrain.
+    const double worldSz = Projection::worldSize(scale);
+    const double planeZ = worldSz > 0.0 ? z / worldSz : 0.0;
+    const double heightAbovePlane = position[2] - planeZ;
     double zoom;
     double newScale;
     double travel;
-    if (dz < -1.0e-9 && position[2] > 1.0e-9 && newPitch <= maxMercatorHorizonAngle) {
-        zoom = util::log2(centerDistance / (position[2] / std::cos(newPitch) * util::tileSize_D));
+    if (dz < -1.0e-9 && heightAbovePlane > 1.0e-9 && newPitch <= maxMercatorHorizonAngle) {
+        zoom = util::log2(centerDistance / (heightAbovePlane / std::cos(newPitch) * util::tileSize_D));
         newScale = util::clamp(std::pow(2.0, zoom), min_scale, max_scale);
-        travel = -position[2] / dz;
+        travel = -heightAbovePlane / dz;
     } else {
         zoom = 14;
         newScale = util::clamp(std::pow(2.0, zoom), min_scale, max_scale);
@@ -278,6 +285,7 @@ void TransformState::updateStateFromCamera() {
     const Point<double> mercatorPoint = {position[0] + dx * travel, position[1] + dy * travel};
     setLatLngZoom(latLngFromMercator(mercatorPoint), scaleZoom(newScale));
 
+    // Lands back on planeZ by construction, so the centre altitude survives the round trip.
     const double mercatorZ = position[2] + dz * travel;
     double alt_m = mercatorZ * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), 0) * util::tileSize_D;
     setCenterAltitude(alt_m);

@@ -1008,6 +1008,30 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
      which may already be what the GPU draws. Measure before building.
 2. **Phase 4 proper** - give `TransformState` a decoupled elevation (centre as a lng/lat
    anchor plus a terrain height) and then the centre-clamped-to-ground behaviour.
+   - **(measured 2026-09-06) The decoupled elevation already exists and works.** `z` *is*
+     the orbit-centre height: `updateCameraState` orbits the camera about `(x, y, z)`, and
+     `CameraOptions::centerAltitude` sets it and is interpolated by `easeTo`/`flyTo`.
+     Probed on a static map at pitch 60: setting `centerAltitude` to 1500 m held the centre
+     lat/lng and zoom bit-stable over ten frames, and survived five pans and three zooms
+     unchanged. **The runaway pan described above does not reproduce through `jumpTo` /
+     gestures**, so the premise that this needs "a real change to `TransformState`'s
+     centre/plane math" is wrong as a blanket claim - whatever the reverted prototype hit,
+     it was not the core model.
+   - **(fixed 2026-09-06)** One path did break it, and only one: `updateStateFromCamera`,
+     reached solely from `setFreeCameraOptions` when the position or orientation actually
+     changes. It re-derived the centre from the ray's **sea-level** intersection, which
+     both zeroed the altitude and moved the centre - measured at 1500 m -> 0 m and a 2.6 km
+     latitude jump from a single nudge. It now intersects the plane at the current centre
+     altitude and derives zoom from the height above that plane, which makes
+     get/setFreeCameraOptions an exact round trip. This is the path an FPV/flight camera
+     drives every frame (`TerrainFlightActivity`), so it matters well before terrain is
+     wired in. Pinned by `Map.FreeCameraPreservesCentreAltitude`, which fails on the old
+     code on altitude, latitude and zoom.
+   - **(remaining)** The actual feature: something must set `centerAltitude` from the
+     terrain at the centre whenever the terrain updates - gl-js's
+     `getCenterClampedToGround`. That needs a renderer -> map elevation channel (the
+     reverted `RendererObserver::onTerrainCameraCollision` prototype is the shape) and the
+     ordering trap below resolved, since the elevation has to come from the render side.
 3. **Elevated line labels** - thread the query through placement, then gl-js #7040's
    coordinate normalisation on top.
 
