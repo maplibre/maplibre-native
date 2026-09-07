@@ -1301,6 +1301,31 @@ terrain during placement sees the previous frame's state - the same first-frame 
     a look on its own: at zoom 13 only **3** terrain drawables are created where the cover
     holds 4, so one mesh tile drops out between the cover and the drawable loop.
 
+  - **2026-09-07 - option A (settle the still render) was written, measured, and NOT landed:
+    it exposes a deeper gap.** In Static mode `Map::Impl::onDidFinishRenderingFrame` delivers
+    the still image as soon as the renderer reports Full, ignoring repaint requests, so the
+    clamp - reported after the frame - never applies. Holding the image back for a bounded few
+    frames while the terrain-clamped centre settles does make it apply, and `terrain/default`
+    then renders real terrain instead of white.
+
+    But it does not render *gl-js's* terrain. Native's `expected.png` for this test is
+    byte-identical to gl-js's own (`md5 460de260...`), gl-js defaults `centerClampedToGround`
+    to true and the render harness does not override it - so that baseline already is a clamped
+    render. Ours, clamped, frames the scene quite differently, and turning the clamp on in still
+    renders moves all six terrain tests (the three that pass today included).
+
+    The elevation is not the problem: sampling reports 5487 m, and decoding the z12
+    `terrain-shading` fixture directly at the test centre gives raw 2743 m, doubled by
+    `exaggeration: 2` to 5486 m. So `getElevationForLatLng` is right and gl-js would read the
+    same number. What differs is how that height is *applied* - native's `centerAltitude` and
+    gl-js's `transform.elevation` do not move the camera to the same place.
+
+    That also walks back the 2026-09-06 claim that "the decoupled elevation already exists and
+    works". It exists and is stable - the probes showing no drift stand - but stable is not the
+    same as correct: it does not reproduce gl-js's camera. Resolving that is the real content of
+    part B (apply the clamp before drawing, the way gl-js does in `_render`), and A should not
+    land before it, or it just replaces a white frame with a differently wrong one and costs
+    three passing tests on the way.
   - **2026-09-05 - `terrain/fill-extrusion`'s baseline was refreshed for the 2px DEM
     border (gl-js #8302).** The wider border changed 45 of 262144 pixels: the buildings
     near a DEM tile seam sit ~1px lower. That is the fix working, not a regression -
