@@ -1109,7 +1109,7 @@ terrain during placement sees the previous frame's state - the same first-frame 
     |---|---|---|---|
     | occlusion-debug | renders correctly | black bands | Metal-only |
     | fill-extrusion | passes | black bands | Metal-only |
-    | default | blank | blank | camera/exaggeration (below) |
+    | default | blank | blank | ~~camera/exaggeration~~ - disproven 2026-09-06, see above: it is a drape-path failure, not the camera |
     | skirts-auto / skirts-none | blank | blank | missing ancestor-pyramid fixtures (they now "pass" vacuously against blank baselines - see 2026-09-05 below) |
     | pitched-world | (unclassified) | over-filled | zoom -2.5, see zoom-0 relief item |
 
@@ -1243,6 +1243,44 @@ terrain during placement sees the previous frame's state - the same first-frame 
     for as long as it was. Re-baseline them only once terrain actually renders in the
     still-render path (the fixture problem below); until then the skirt option is
     covered only by on-device eyeballing (`skirts_toggle` in TerrainTestOptions).
+  - **2026-09-06 - `terrain/default`: measured, and it is NOT the camera or the tile cover.**
+    The 2026-08-02 table below attributes it to "camera/exaggeration"; that is wrong. The
+    terrain-anchored camera work (`Map::setCenterClampedToGround`) was live for these runs and
+    changed nothing, and it could not: the failure is a *fully white* frame - the style's
+    `background-color: white` and nothing else - where the Phase 4 symptom is a partial
+    blackout of the near field under a visible terrain silhouette. A centre-clamp also cannot
+    reach a still render, since the elevation arrives through an observer after the frame.
+
+    What was measured, bisecting the camera zoom (the test uses zoom 13):
+
+    | camera zoom | draped raster tiles | result |
+    |---|---|---|
+    | 12.4 | z11 x1, z12 x1, z13 x5 | renders correctly |
+    | 12.6 | z11 x1, z12 x1, z13 x3, z14 x10 | blank |
+    | 13 | as above | blank |
+
+    Everything upstream of the drape is identical either side of that cliff: the mesh cover is
+    correctly clamped to the DEM's `maxzoom` (`ideal=12, maxZoom=12`, 4 tiles, same tile ids
+    at 12.4 and 12.6), the terrain drawables get their render targets (`rtHit` on all of
+    them), and the drawable tile ids are clean (`overscaledZ == canonicalZ == 12, wrap 0`).
+    The drape targets are not being skipped either - instrumenting the coverage gate in
+    `RenderTarget::render` shows them taking the RENDER path, not SKIP-sig/SKIP-same/
+    SKIP-worse/DEFER. So the drape has content and is being drawn, and the terrain surface
+    still comes out white.
+
+    Ruled out along the way: missing fixtures (`number/{z}.png` is in `cache-style.db` for
+    z0-14, and the run reports no cache misses, warnings or errors at all - it fails
+    silently); the draped tiles being *deeper* than the target (capping the raster at
+    `maxzoom` 13, then 12, so its tiles sit at or above the z12 targets, stays blank); and
+    the z14 tiles specifically (blank with only z13 tiles present).
+
+    Two loose threads for whoever picks this up. At zoom 13 only **3** terrain drawables are
+    created where the cover holds 4, so one mesh tile drops out between the cover and the
+    drawable loop. And the one configuration that renders (zoom 12.4, raster maxzoom 17) is
+    also the only one with raster tiles both shallower *and* deeper than the target, which
+    hints the drape needs a covering tile at or above the target zoom and the ancestor
+    fallback is not supplying one. Neither is confirmed.
+
   - **2026-09-05 - `terrain/fill-extrusion`'s baseline was refreshed for the 2px DEM
     border (gl-js #8302).** The wider border changed 45 of 262144 pixels: the buildings
     near a DEM tile seam sit ~1px lower. That is the fix working, not a regression -
