@@ -85,7 +85,8 @@ struct SourceWrapper {
  to the ``MLNSource`` instance and the unique_ptr reference is valid again. It is
  safe to add the source back to the style after it is removed.
  */
-- (BOOL)removeFromStylable:(id<MLNStylable>)mapView error:(NSError *__nullable *__nullable)outError;
+- (BOOL)removeFromStylable:(id<MLNStylable>)mapView
+                     error:(NSError * __nullable * __nullable)outError;
 
 @end
 

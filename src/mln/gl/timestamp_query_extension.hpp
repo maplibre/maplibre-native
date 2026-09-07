@@ -19,22 +19,22 @@ namespace extension {
 
 using namespace platform;
 
-void glGenQueries(GLsizei n, GLuint *ids);
-void glDeleteQueries(GLsizei n, const GLuint *ids);
+void glGenQueries(GLsizei n, GLuint* ids);
+void glDeleteQueries(GLsizei n, const GLuint* ids);
 GLboolean glIsQuery(GLuint id);
 void glBeginQuery(GLenum target, GLuint id);
 void glEndQuery(GLenum target);
 void glQueryCounter(GLuint id, GLenum target);
-void glGetQueryiv(GLenum target, GLenum pname, GLint *params);
-void glGetQueryObjectiv(GLuint id, GLenum pname, GLint *params);
-void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint *params);
-void glGetQueryObjecti64v(GLuint id, GLenum pname, GLint64 *params);
-void glGetQueryObjectui64v(GLuint id, GLenum pname, GLuint64 *params);
-void glGetInteger64v(GLenum pname, GLint64 *data);
+void glGetQueryiv(GLenum target, GLenum pname, GLint* params);
+void glGetQueryObjectiv(GLuint id, GLenum pname, GLint* params);
+void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint* params);
+void glGetQueryObjecti64v(GLuint id, GLenum pname, GLint64* params);
+void glGetQueryObjectui64v(GLuint id, GLenum pname, GLuint64* params);
+void glGetInteger64v(GLenum pname, GLint64* data);
 
-using GlContexsLoader = std::function<ProcAddress(std::initializer_list<std::pair<const char *, const char *>>)>;
+using GlContexsLoader = std::function<ProcAddress(std::initializer_list<std::pair<const char*, const char*>>)>;
 
-void loadTimeStampQueryExtension(const GlContexsLoader &loadExtension);
+void loadTimeStampQueryExtension(const GlContexsLoader& loadExtension);
 
 } // namespace extension
 } // namespace gl

@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(LocationPrivacyExample)
+/// #-example-code(LocationPrivacyExample)
 enum LocationAccuracyState {
     case unknown
     case reducedAccuracy
@@ -39,7 +39,7 @@ class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
         }
     }
 
-    // when a location is available for the first time, we fly to it
+    /// when a location is available for the first time, we fly to it
     func mapView(_ mapView: MLNMapView, didUpdate _: MLNUserLocation?) {
         guard !pannedToUserLocation else { return }
         guard let userLocation = mapView.userLocation else {

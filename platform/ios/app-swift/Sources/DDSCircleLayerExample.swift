@@ -3,7 +3,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(DDSCircleLayerExample)
+/// #-example-code(DDSCircleLayerExample)
 class DDSCircleLayerExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -23,7 +23,7 @@ class DDSCircleLayerExample: UIViewController, MLNMapViewDelegate {
         view.addSubview(mapView)
     }
 
-    // Wait until the style is loaded before modifying the map style.
+    /// Wait until the style is loaded before modifying the map style.
     func mapView(_: MLNMapView, didFinishLoading style: MLNStyle) {
         let source = MLNVectorTileSource(identifier: "demotiles", configurationURL: URL(string: "https://demotiles.maplibre.org/tiles-omt/tiles.json")!)
 

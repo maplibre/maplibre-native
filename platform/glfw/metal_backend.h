@@ -9,9 +9,9 @@
 
 class MetalBackend final : public mln::mtl::RendererBackend, public mln::gfx::Renderable {
 public:
-    MetalBackend(NSWindow *window);
+    MetalBackend(NSWindow* window);
 
-    mln::gfx::Renderable &getDefaultRenderable() override;
+    mln::gfx::Renderable& getDefaultRenderable() override;
     void activate() override;
     void deactivate() override;
     void setSize(mln::Size size_);

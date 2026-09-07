@@ -70,7 +70,7 @@ vk::Format PipelineInfo::vulkanFormat(const gfx::AttributeDataType& value) {
         case gfx::AttributeDataType::UShort8:
             [[fallthrough]];
         case gfx::AttributeDataType::Invalid:
-            return vk ::Format::eUndefined;
+            return vk::Format::eUndefined;
     }
 }
 
