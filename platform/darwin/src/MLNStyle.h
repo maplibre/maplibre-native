@@ -120,6 +120,8 @@ MLN_EXPORT
  Setting a value of `nil` or `NSNull` resets the property to the default
  defined in the style's root `state` property, or to null if there is none.
 
+ @throws NSInternalInconsistencyException if the style has not finished loading.
+
  @param value The new value of the state property. May be a Foundation
     instance corresponding to a JSON value: `NSString`, `NSNumber`, `NSArray`,
     `NSDictionary`, or `NSNull`.

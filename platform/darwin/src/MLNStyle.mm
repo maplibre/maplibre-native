@@ -547,7 +547,11 @@ const MLNExceptionName MLNRedundantSourceIdentifierException =
 
 - (void)setGlobalStateValue:(id)value forProperty:(NSString *)propertyName {
   MLNLogDebug(@"Setting global state property: %@", propertyName);
-  self.rawStyle->setGlobalStateProperty(propertyName.UTF8String, MLNValueFromJSONObject(value));
+  try {
+    self.rawStyle->setGlobalStateProperty(propertyName.UTF8String, MLNValueFromJSONObject(value));
+  } catch (const std::runtime_error &err) {
+    [NSException raise:NSInternalInconsistencyException format:@"%s", err.what()];
+  }
 }
 
 // MARK: Style transitions
