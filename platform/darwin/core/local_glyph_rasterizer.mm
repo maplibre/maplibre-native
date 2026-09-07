@@ -161,9 +161,9 @@ public:
         kCTFontCascadeListAttribute,
     };
     CFTypeRef values[] = {
-      (__bridge CFNumberRef) @(kLocalGlyphFontSize),
-      mainFontName,
-      *fallbackDescriptors,
+        (__bridge CFNumberRef) @(kLocalGlyphFontSize),
+        mainFontName,
+        *fallbackDescriptors,
     };
 
     CFDictionaryRefHandle attributes(

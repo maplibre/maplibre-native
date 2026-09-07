@@ -20,10 +20,10 @@ public:
     ShapeAnnotationImpl(AnnotationID);
     virtual ~ShapeAnnotationImpl() = default;
 
-    virtual void updateStyle(style::Style::Impl &) const = 0;
-    virtual const ShapeAnnotationGeometry &geometry() const = 0;
+    virtual void updateStyle(style::Style::Impl&) const = 0;
+    virtual const ShapeAnnotationGeometry& geometry() const = 0;
 
-    void updateTileData(const CanonicalTileID &, AnnotationTileData &);
+    void updateTileData(const CanonicalTileID&, AnnotationTileData&);
 
     const AnnotationID id;
     const std::string layerID;
@@ -31,21 +31,21 @@ public:
 };
 
 struct CloseShapeAnnotation {
-    ShapeAnnotationGeometry operator()(const mln::LineString<double> &geom) const { return geom; }
-    ShapeAnnotationGeometry operator()(const mln::MultiLineString<double> &geom) const { return geom; }
-    ShapeAnnotationGeometry operator()(const mln::Polygon<double> &geom) const {
+    ShapeAnnotationGeometry operator()(const mln::LineString<double>& geom) const { return geom; }
+    ShapeAnnotationGeometry operator()(const mln::MultiLineString<double>& geom) const { return geom; }
+    ShapeAnnotationGeometry operator()(const mln::Polygon<double>& geom) const {
         mln::Polygon<double> closed = geom;
-        for (auto &ring : closed) {
+        for (auto& ring : closed) {
             if (!ring.empty() && ring.front() != ring.back()) {
                 ring.emplace_back(ring.front());
             }
         }
         return closed;
     }
-    ShapeAnnotationGeometry operator()(const mln::MultiPolygon<double> &geom) const {
+    ShapeAnnotationGeometry operator()(const mln::MultiPolygon<double>& geom) const {
         mln::MultiPolygon<double> closed = geom;
-        for (auto &polygon : closed) {
-            for (auto &ring : polygon) {
+        for (auto& polygon : closed) {
+            for (auto& ring : polygon) {
                 if (!ring.empty() && ring.front() != ring.back()) {
                     ring.emplace_back(ring.front());
                 }

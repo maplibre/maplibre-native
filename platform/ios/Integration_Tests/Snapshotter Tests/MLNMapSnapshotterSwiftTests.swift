@@ -1,7 +1,7 @@
 import XCTest
 
 class MLNMapSnapshotterSwiftTests: MLNMapViewIntegrationTest {
-    // Create snapshot options
+    /// Create snapshot options
     private class func snapshotterOptions(size: CGSize) -> MLNMapSnapshotOptions {
         let camera = MLNMapCamera()
 

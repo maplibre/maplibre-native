@@ -21,12 +21,12 @@ namespace mtl {
  * Metal subclass of CustomLayerRenderParameters
  */
 struct CustomLayerRenderParameters : mln::style::CustomLayerRenderParameters {
-    const std::unique_ptr<mln::gfx::RenderPass> &renderPass;
+    const std::unique_ptr<mln::gfx::RenderPass>& renderPass;
     mln::mtl::MTLRenderCommandEncoderPtr encoder;
     mln::mtl::MTLCommandBufferPtr commandBuffer;
     mln::mtl::MTLRenderPassDescriptorPtr renderPassDesc;
 
-    CustomLayerRenderParameters(const PaintParameters &);
+    CustomLayerRenderParameters(const PaintParameters&);
 };
 
 } // namespace mtl

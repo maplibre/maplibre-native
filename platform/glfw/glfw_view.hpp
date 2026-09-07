@@ -34,17 +34,17 @@ class GLFWView : public mln::MapObserver {
 public:
     GLFWView(bool fullscreen,
              bool benchmark,
-             const mln::ResourceOptions &resourceOptions,
-             const mln::ClientOptions &clientOptions);
+             const mln::ResourceOptions& resourceOptions,
+             const mln::ClientOptions& clientOptions);
     ~GLFWView() override;
 
     float getPixelRatio() const;
 
-    void setMap(mln::Map *);
+    void setMap(mln::Map*);
 
-    void setRenderFrontend(GLFWRendererFrontend *);
+    void setRenderFrontend(GLFWRendererFrontend*);
 
-    mln::gfx::RendererBackend &getRendererBackend();
+    mln::gfx::RendererBackend& getRendererBackend();
 
     void setTestDirectory(std::string dir) { testDirectory = std::move(dir); };
 
@@ -60,7 +60,7 @@ public:
 
     void setShouldClose();
 
-    void setWindowTitle(const std::string &);
+    void setWindowTitle(const std::string&);
 
     void run();
 
@@ -77,14 +77,14 @@ protected:
 
 private:
     // Window callbacks
-    static void onKey(GLFWwindow *window, int key, int scancode, int action, int mods);
-    static void onScroll(GLFWwindow *window, double xoffset, double yoffset);
-    static void onWindowResize(GLFWwindow *window, int width, int height);
-    static void onFramebufferResize(GLFWwindow *window, int width, int height);
-    static void onMouseClick(GLFWwindow *window, int button, int action, int modifiers);
-    static void onMouseMove(GLFWwindow *window, double x, double y);
-    static void onWindowFocus(GLFWwindow *window, int focused);
-    static void onWindowRefresh(GLFWwindow *window);
+    static void onKey(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void onScroll(GLFWwindow* window, double xoffset, double yoffset);
+    static void onWindowResize(GLFWwindow* window, int width, int height);
+    static void onFramebufferResize(GLFWwindow* window, int width, int height);
+    static void onMouseClick(GLFWwindow* window, int button, int action, int modifiers);
+    static void onMouseMove(GLFWwindow* window, double x, double y);
+    static void onWindowFocus(GLFWwindow* window, int focused);
+    static void onWindowRefresh(GLFWwindow* window);
 
     // Internal
     void report(float duration);
@@ -93,7 +93,7 @@ private:
 
     mln::Color makeRandomColor() const;
     mln::Point<double> makeRandomPoint() const;
-    static std::unique_ptr<mln::style::Image> makeImage(const std::string &id, int width, int height, float pixelRatio);
+    static std::unique_ptr<mln::style::Image> makeImage(const std::string& id, int width, int height, float pixelRatio);
 
     void nextOrientation();
 
@@ -123,8 +123,8 @@ private:
 private:
     void toggle3DExtrusions(bool visible);
 
-    mln::Map *map = nullptr;
-    GLFWRendererFrontend *rendererFrontend = nullptr;
+    mln::Map* map = nullptr;
+    GLFWRendererFrontend* rendererFrontend = nullptr;
     std::unique_ptr<GLFWBackend> backend;
 
     std::string testDirectory = ".";
@@ -155,12 +155,12 @@ private:
     std::function<void()> pauseResumeCallback;
     std::function<void()> onlineStatusCallback;
     std::function<void()> resetDatabaseCallback;
-    std::function<void(mln::Map *)> animateRouteCallback;
+    std::function<void(mln::Map*)> animateRouteCallback;
 
     mln::util::RunLoop runLoop;
     mln::util::Timer frameTick;
 
-    GLFWwindow *window = nullptr;
+    GLFWwindow* window = nullptr;
     bool dirty = false;
     std::optional<std::string> featureID;
     std::unique_ptr<mln::MapSnapshotter> snapshotter;
@@ -170,6 +170,6 @@ private:
 
 #ifdef ENABLE_LOCATION_INDICATOR
     bool puckFollowsCameraCenter = false;
-    mln::style::LocationIndicatorLayer *puck = nullptr;
+    mln::style::LocationIndicatorLayer* puck = nullptr;
 #endif
 };

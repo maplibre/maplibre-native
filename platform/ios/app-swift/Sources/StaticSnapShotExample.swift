@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(StaticSnapshotExample)
+/// #-example-code(StaticSnapshotExample)
 class StaticSnapshotExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
     var button: UIButton!

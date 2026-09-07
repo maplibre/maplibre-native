@@ -122,8 +122,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                 .tile_units_to_pixels = (pixToTile != 0) ? 1.0f / pixToTile : 0.0f,
                 .pad1 = 0,
                 .pad2 = 0,
-                .pad3 = 0
-            };
+                .pad3 = 0};
 #if !MLN_UBO_CONSOLIDATION
             drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
 #endif
@@ -134,8 +133,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
 #else
             const BackgroundDrawableUBO drawableUBO = {
 #endif
-                util::cast<float>(matrix)
-            };
+                util::cast<float>(matrix)};
 #if !MLN_UBO_CONSOLIDATION
             drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
 #endif
