@@ -5,8 +5,6 @@
 #include <mln/math/minmax.hpp>
 #include <mln/text/bidi.hpp>
 
-#include <unicode/uchar.h>
-
 #include <algorithm>
 #include <list>
 #include <cmath>
@@ -417,10 +415,11 @@ bool runIsUpright(const TaggedString& line, std::size_t start, std::size_t end) 
     bool isNumber = true;
     bool isShortUppercaseCode = end - start <= maxUprightLetterRun;
     for (std::size_t i = start; i < end; ++i) {
-        const auto category = U_GET_GC_MASK(line.getCharCodeAt(i));
-        hasDigit |= (category & U_GC_ND_MASK) != 0;
-        isNumber &= (category & (U_GC_ND_MASK | U_GC_P_MASK | U_GC_S_MASK)) != 0;
-        isShortUppercaseCode &= (category & (U_GC_LU_MASK | U_GC_ND_MASK)) != 0;
+        const auto chr = line.getCharCodeAt(i);
+        const bool isDigit = util::i18n::isDigit(chr);
+        hasDigit |= isDigit;
+        isNumber &= isDigit || util::i18n::isPunctuationOrSymbol(chr);
+        isShortUppercaseCode &= isDigit || util::i18n::isUppercase(chr);
     }
     return (hasDigit && isNumber) || isShortUppercaseCode;
 }
@@ -461,7 +460,7 @@ std::vector<bool> determineLineVerticals(const TaggedString& line) {
         if (runIsUpright(line, start, end)) {
             for (std::size_t i = start; i < end; ++i) {
                 const auto chr = line.getCharCodeAt(i);
-                verticals[i] = (U_GET_GC_MASK(chr) & (U_GC_LU_MASK | U_GC_ND_MASK)) != 0 &&
+                verticals[i] = (util::i18n::isUppercase(chr) || util::i18n::isDigit(chr)) &&
                                !util::i18n::isCharInComplexShapingScript(chr);
             }
         }
