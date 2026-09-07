@@ -2,12 +2,6 @@
 #include <mln/util/utf.hpp>
 #include <mln/text/glyph.hpp>
 
-#ifdef __QT__
-#include <QChar>
-#else
-#include <unicode/uchar.h>
-#endif
-
 #include <algorithm>
 #include <map>
 #include <mapbox/eternal.hpp>
@@ -689,30 +683,6 @@ bool isCharInComplexShapingScript(char16_t chr) {
 
 bool isWhitespace(char16_t chr) {
     return chr == u' ' || chr == u'\t' || chr == u'\n' || chr == u'\v' || chr == u'\f' || chr == u'\r';
-}
-
-bool isDigit(char16_t chr) {
-#ifdef __QT__
-    return QChar(chr).isDigit();
-#else
-    return u_charType(chr) == U_DECIMAL_DIGIT_NUMBER;
-#endif
-}
-
-bool isUppercase(char16_t chr) {
-#ifdef __QT__
-    return QChar(chr).isUpper();
-#else
-    return u_charType(chr) == U_UPPERCASE_LETTER;
-#endif
-}
-
-bool isPunctuationOrSymbol(char16_t chr) {
-#ifdef __QT__
-    return QChar(chr).isPunct() || QChar(chr).isSymbol();
-#else
-    return (U_GET_GC_MASK(chr) & (U_GC_P_MASK | U_GC_S_MASK)) != 0;
-#endif
 }
 
 bool isVariationSelector1(char16_t chr) {
