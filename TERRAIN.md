@@ -594,6 +594,57 @@ Backend status:
   later, drape targets will need per-target bind groups or dynamic uniform
   offsets instead.
 
+### Tile cover and LOD divergence from maplibre-gl-js (2026-09-07)
+
+Two independent, confirmed differences in how the two engines choose terrain tiles. Neither
+explains `terrain/default` on its own, but both are systematic and affect every terrain scene.
+
+**1. gl-js covers terrain one zoom level shallower, deliberately.** `TerrainTileManager`:
+
+```js
+this.deltaZoom = 1;
+this.tileSize = tileManager._source.tileSize * 2 ** this.deltaZoom;  // source size x 2
+```
+
+with the comment "raster-dem tiles will load for performance the actualZoom - deltaZoom
+zoom-level". Since `coveringTiles` uses `zoom + log2(transform.tileSize / options.tileSize)`,
+doubling the tile size subtracts one zoom level. Native has no equivalent -
+`computeMeshCover` passes `demSource->getTileSize()` straight through:
+
+| DEM source tileSize | gl-js cover size / zoom | native cover size / zoom |
+|---|---|---|
+| 256 | 512 -> `zoom + 0` | 256 -> `zoom + 1` |
+| 512 (Mapterhorn) | 1024 -> `zoom - 1` | 512 -> `zoom + 0` |
+
+So native meshes terrain one level deeper than gl-js in every case. Measured on
+`terrain/default` at zoom 13: native computes `overscaled = 14` where gl-js gets 13. There it
+is masked, because the DEM's `maxzoom: 12` clamps both to 12 - but wherever maxzoom is not
+binding the extra level stands, and this is the most likely mechanism behind both the
+long-standing "native over-requests ancestors" note above and the zoom-0 relief/hillshade
+intensity bug under Phase 3.
+
+**2. gl-js replaced its LOD algorithm; native still runs the older one by default.** gl-js
+#5719 ("LOD Control") introduced `createCalculateTileZoomFunction`, which picks a per-tile
+zoom from the camera FOV, that tile's pitch relative to the camera, and a total tile-count
+budget - `maxZoomLevelsOnScreen = 9.314`, `tileCountMaxMinRatio = 3.0`, integrating
+`cos^p` across the visible pitch range. Native's default (`TileLodMode::Default`) is still the
+classic quadtree heuristic: split when `longestDim * tileLodScale < radius + 2^(maxZoom - z) - 2`,
+measured from the map *centre*, with no pitch or FOV term at all. Native does have a
+pitch-aware `TileLodMode::Distance`, but it is not the default and uses its own formula
+(`pitchExponent = 0.5`, "constant screen area"), not gl-js's.
+
+Measured on `terrain/default`, both native modes select the same tiles (10 x z14) for the
+test's own - underground - camera, so the LOD mode is not what makes that test differ. The
+spread only appears once the centre is clamped onto the terrain, where the draped set fans out
+across z8-z14. Whether that fan-out is correct for a camera 5.5 km up, or the inverted-LOD
+symptom, is still open.
+
+gl-js commits worth reading before changing any of this: **#5719** (LOD Control, the
+replacement), **#4779** (level of detail at high pitch), **#4988** (overscaledZ at least tile
+Z), **#7932** (grow tile culling bounds near the horizon), and for globe only **#5865**,
+**#4937**, **#8187**.
+
+
 ### Convergence with maplibre-gl-js (ask before doing)
 
 Places where the native implementation reaches gl-js behavior through
