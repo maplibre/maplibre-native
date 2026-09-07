@@ -55,7 +55,10 @@ cc_library(
         "//:webgpu_renderer": ["renderer/wgsl_preprocessor.test.cpp"],
         "//conditions:default": [],
     }),
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    # GoogleTest compares integer literals with container size_type values in
+    # template instantiations throughout the legacy tests. Bazel 9 surfaces
+    # those as sign-compare errors when warnings are promoted to errors.
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + ["-Wno-sign-compare"],
     visibility = [
         "//platform/ios/test/core:__pkg__",
     ],

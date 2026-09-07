@@ -194,7 +194,7 @@ const strip = (source) => {
 };
 
 // Parse command line
-const args = parseArgs({
+const { values: args } = parseArgs({
     options: {
         out: {
             type: 'string',

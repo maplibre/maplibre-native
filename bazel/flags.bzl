@@ -60,22 +60,28 @@ MSVC_FLAGS = [
 ]
 
 WARNING_FLAGS = {
-    "ios": [
+    "ios": GCC_CLANG_COMMON_FLAGS + [
         "-Wno-newline-eof",
         "-Wno-nested-anon-types",
         "-Wno-c++11-narrowing",
+        "-Wno-character-conversion",
+        "-Wno-deprecated-declarations",
+        "-Wno-unused-but-set-variable",
         "-Wno-pointer-to-int-cast",
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
-    ] + GCC_CLANG_COMMON_FLAGS,
-    "macos": [
+    ],
+    "macos": GCC_CLANG_COMMON_FLAGS + [
         "-Wno-newline-eof",
         "-Wno-nested-anon-types",
         "-Wno-c++11-narrowing",
+        "-Wno-character-conversion",
+        "-Wno-deprecated-declarations",
+        "-Wno-unused-but-set-variable",
         "-Wno-pointer-to-int-cast",
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
-    ] + GCC_CLANG_COMMON_FLAGS,
+    ],
     "linux": GCC_CLANG_COMMON_FLAGS,
     "windows": MSVC_FLAGS,
 }

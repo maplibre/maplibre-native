@@ -110,8 +110,8 @@ void TileLoader<T>::loadFromCache() {
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
     request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
         do {
-            if (shared_->requestLock.try_lock_shared()) {
-                std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
+            std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::try_to_lock);
+            if (lock.owns_lock()) {
                 if (shared_->aborted) return;
 
                 request.reset();
@@ -203,8 +203,8 @@ void TileLoader<T>::loadFromNetwork() {
 
     request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
         do {
-            if (shared_->requestLock.try_lock_shared()) {
-                std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
+            std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::try_to_lock);
+            if (lock.owns_lock()) {
                 if (shared_->aborted) return;
 
                 request.reset();
