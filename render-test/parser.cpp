@@ -22,6 +22,7 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/light.hpp>
 #include <mln/style/source.hpp>
+#include <mln/style/sources/image_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/util/compression.hpp>
 #include <mln/util/io.hpp>
@@ -622,6 +623,7 @@ const std::string waitOp("wait");
 const std::string sleepOp("sleep");
 const std::string addImageOp("addImage");
 const std::string updateImageOp("updateImage");
+const std::string updateImageSourceOp("updateImageSource");
 const std::string removeImageOp("removeImage");
 const std::string setStyleOp("setStyle");
 const std::string setCenterOp("setCenter");
@@ -755,6 +757,44 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 return true;
             });
 
+        } else if (operationArray[0].GetString() == updateImageSourceOp) {
+            // updateImageSource
+            assert(operationArray.Size() >= 3u);
+            assert(operationArray[1].IsString());
+            assert(operationArray[2].IsString());
+
+            std::string sourceName{operationArray[1].GetString(), operationArray[1].GetStringLength()};
+            std::string imagePath{operationArray[2].GetString(), operationArray[2].GetStringLength()};
+            result.emplace_back([sourceName, imagePath](TestContext& ctx) {
+                auto* source = ctx.getMap().getStyle().getSource(sourceName);
+                auto* imageSource = source ? source->as<mln::style::ImageSource>() : nullptr;
+                if (!imageSource) {
+                    ctx.getMetadata().errorMessage = std::string("Image source not found: ") + sourceName;
+                    return false;
+                }
+
+                std::optional<std::string> imageData;
+                bool requestCompleted = false;
+                auto req = ctx.getFileSource().request(mln::Resource::image("mapbox://render-tests/" + imagePath),
+                                                       [&](mln::Response response) {
+                                                           if (response.data) {
+                                                               imageData = *response.data;
+                                                           }
+                                                           requestCompleted = true;
+                                                       });
+
+                while (!requestCompleted) {
+                    mln::util::RunLoop::Get()->runOnce();
+                }
+
+                if (!imageData) {
+                    ctx.getMetadata().errorMessage = std::string("Failed to load image source image ") + imagePath;
+                    return false;
+                }
+
+                imageSource->setImage(mln::decodeImage(*imageData));
+                return true;
+            });
         } else if (operationArray[0].GetString() == removeImageOp) {
             // removeImage
             assert(operationArray.Size() >= 2u);

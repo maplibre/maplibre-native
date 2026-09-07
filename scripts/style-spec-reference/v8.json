@@ -722,9 +722,8 @@
       "doc": "The data type of the image source."
     },
     "url": {
-      "required": true,
       "type": "string",
-      "doc": "URL that points to an image."
+      "doc": "URL that points to an image. It can be omitted: a source created without a URL starts empty and renders nothing until content is provided through the `updateImage` API."
     },
     "coordinates": {
       "required": true,

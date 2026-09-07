@@ -3,6 +3,7 @@
 
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/parser.hpp>
+#include <mln/style/sources/image_source.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/enum.hpp>
 #include <mln/util/string.hpp>
@@ -29,6 +30,38 @@ using Message = std::pair<uint32_t, std::string>;
 using Messages = std::vector<Message>;
 
 class StyleParserTest : public ::testing::TestWithParam<std::string> {};
+
+TEST(StyleParser, ImageSourceWithoutURL) {
+    style::Parser parser;
+    const auto error = parser.parse(R"({
+        "version": 8,
+        "sources": {
+            "image": {
+                "type": "image",
+                "coordinates": [
+                    [12.0, 13.0],
+                    [14.0, 13.0],
+                    [14.0, 11.0],
+                    [12.0, 11.0]
+                ]
+            }
+        }
+    })");
+
+    ASSERT_FALSE(error);
+    ASSERT_EQ(1u, parser.sources.size());
+    const auto* imageSource = parser.sources.front()->as<style::ImageSource>();
+    ASSERT_NE(nullptr, imageSource);
+    EXPECT_EQ("image", imageSource->getID());
+    EXPECT_EQ(std::nullopt, imageSource->getURL());
+    EXPECT_EQ((std::array<LatLng, 4>{
+                  LatLng{13.0, 12.0},
+                  LatLng{13.0, 14.0},
+                  LatLng{11.0, 14.0},
+                  LatLng{11.0, 12.0},
+              }),
+              imageSource->getCoordinates());
+}
 
 TEST_P(StyleParserTest, ParseStyle) {
     const std::string base = std::string("test/fixtures/style_parser/") + GetParam();
