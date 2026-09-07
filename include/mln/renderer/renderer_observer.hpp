@@ -63,6 +63,11 @@ public:
     /// Final frame
     virtual void onDidFinishRenderingMap() {}
 
+    /// The rendered terrain height under the map centre changed. Only the render side knows
+    /// it - the DEM lives there - so a map that wants its centre to ride the terrain
+    /// (Map::setCenterClampedToGround) learns of it here, one frame behind.
+    virtual void onTerrainCenterElevationChanged(double /*elevationMeters*/) {}
+
     /// Style is missing an image
     using StyleImageMissingCallback = std::function<void()>;
     virtual void onStyleImageMissing(const std::string&, const StyleImageMissingCallback& done) { done(); }

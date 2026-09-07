@@ -931,6 +931,22 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setCenterClampedToGround(boolean clamped) {
+    if (checkState("setCenterClampedToGround")) {
+      return;
+    }
+    nativeSetCenterClampedToGround(clamped);
+  }
+
+  @Override
+  public boolean getCenterClampedToGround() {
+    if (checkState("getCenterClampedToGround")) {
+      return false;
+    }
+    return nativeGetCenterClampedToGround();
+  }
+
+  @Override
   public void setTileLodPitchThreshold(double threshold) {
     if (checkState("setTileLodPitchThreshold")) {
       return;
@@ -1897,6 +1913,12 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native int nativeGetTerrainSkirtLength();
+
+  @Keep
+  private native void nativeSetCenterClampedToGround(boolean clamped);
+
+  @Keep
+  private native boolean nativeGetCenterClampedToGround();
 
   @Keep
   private native void nativeSetTileLodPitchThreshold(double threshold);

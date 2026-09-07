@@ -36,7 +36,7 @@ import org.maplibre.android.style.terrain.Terrain
  * mode_performance, stats_on|stats_off|stats_toggle, burst_on|burst_off|burst_toggle,
  * abovelog_on|abovelog_off|abovelog_toggle, exag_up|exag_down|exag_reset|
  * exag_sweep_on|exag_sweep_off|exag_sweep_toggle,
- * skirts_auto|skirts_none|skirts_toggle.
+ * skirts_auto|skirts_none|skirts_toggle, clamp_on|clamp_off|clamp_toggle.
  * Initial state can also be set with launch extras: --ez terrain false --es mode performance
  * --ez stats true.
  *
@@ -45,6 +45,10 @@ import org.maplibre.android.style.terrain.Terrain
  * Unlike smooth panning, this actually makes the [TerrainLoadMode] budgets bind, so an A/B run
  * (set a mode, start the burst, read the PERF-HUD worst-frame/jank log) shows their real trade
  * (Quality: one big hitch, instant detail; Performance: smoother, progressive pop-in).
+ *
+ * `clamp_*` switches whether the map centre rides the terrain surface. With it off the
+ * centre sits at sea level, which is what makes the near field go black at high pitch over
+ * tall ground - the Phase 4 symptom. Pitch hard over a ridge and toggle to see it.
  *
  * `skirts_*` switches [TerrainSkirtLength]. `none` shows what a transparent background
  * gets: no vertical curtains hanging off the tile edges, at the cost of hairline stitches
@@ -91,6 +95,8 @@ class TerrainTestOptions(
         private set
     var skirtLength = TerrainSkirtLength.AUTO
         private set
+    var centerClampedToGround = true
+        private set
     var exaggerationValue = exaggeration
         private set
 
@@ -124,6 +130,9 @@ class TerrainTestOptions(
                     if (skirtLength == TerrainSkirtLength.AUTO) TerrainSkirtLength.NONE
                     else TerrainSkirtLength.AUTO
                 )
+                "clamp_on" -> setCenterClamped(true)
+                "clamp_off" -> setCenterClamped(false)
+                "clamp_toggle" -> setCenterClamped(!centerClampedToGround)
                 else -> return
             }
             activity.invalidateOptionsMenu()
@@ -206,6 +215,10 @@ class TerrainTestOptions(
             isCheckable = true
             isChecked = skirtLength == TerrainSkirtLength.AUTO
         }
+        menu.add(0, MENU_TOGGLE_CLAMP, 7, "Centre on ground").apply {
+            isCheckable = true
+            isChecked = centerClampedToGround
+        }
         val sub = menu.addSubMenu("Terrain load mode")
         sub.add(MODE_GROUP, MENU_MODE_QUALITY, 0, "Quality (default)")
         sub.add(MODE_GROUP, MENU_MODE_BALANCED, 1, "Balanced")
@@ -235,6 +248,7 @@ class TerrainTestOptions(
                 if (skirtLength == TerrainSkirtLength.AUTO) TerrainSkirtLength.NONE
                 else TerrainSkirtLength.AUTO
             )
+            MENU_TOGGLE_CLAMP -> setCenterClamped(!centerClampedToGround)
             else -> return false
         }
         item.isChecked = when (item.itemId) {
@@ -243,6 +257,7 @@ class TerrainTestOptions(
             MENU_TOGGLE_ABOVELOG -> aboveGroundLog
             MENU_TOGGLE_EXAG_SWEEP -> exagSweeping
             MENU_TOGGLE_SKIRTS -> skirtLength == TerrainSkirtLength.AUTO
+            MENU_TOGGLE_CLAMP -> centerClampedToGround
             else -> true // exclusive mode group unchecks the others
         }
         return true
@@ -296,6 +311,13 @@ class TerrainTestOptions(
 
     // Debug: the native above-ground clearance log (ABOVE-GROUND ...). Off by default and gated in
     // the renderer, so the per-frame elevation sampling only runs while this is on.
+    private fun setCenterClamped(on: Boolean) {
+        if (centerClampedToGround == on) return
+        centerClampedToGround = on
+        map?.setCenterClampedToGround(on)
+        toast("Centre on ground ${if (on) "on" else "off"}")
+    }
+
     private fun setSkirtLength(length: TerrainSkirtLength) {
         if (skirtLength == length) return
         skirtLength = length
@@ -372,6 +394,7 @@ class TerrainTestOptions(
         private const val MENU_EXAG_DOWN = 8
         private const val MENU_TOGGLE_EXAG_SWEEP = 9
         private const val MENU_TOGGLE_SKIRTS = 10
+        private const val MENU_TOGGLE_CLAMP = 11
 
         // Exaggeration sweep: a range wide enough that a stale surface left behind by one step
         // visibly towers over the next one down.

@@ -219,6 +219,13 @@ public:
     void setTerrainSkirtLength(TerrainSkirtLength length);
     TerrainSkirtLength getTerrainSkirtLength() const;
 
+    /// Whether the map centre rides the terrain surface rather than sea level. With it on
+    /// (the default, as in maplibre-gl-js) the centre altitude follows the rendered terrain
+    /// height under the centre, so pitching over tall ground keeps the camera above it
+    /// instead of sinking in. Inert when terrain is not enabled.
+    void setCenterClampedToGround(bool clamped);
+    bool getCenterClampedToGround() const;
+
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
     /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
     /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.

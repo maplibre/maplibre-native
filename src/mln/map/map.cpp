@@ -612,6 +612,14 @@ TerrainSkirtLength Map::getTerrainSkirtLength() const {
     return impl->terrainSkirtLength;
 }
 
+void Map::setCenterClampedToGround(bool clamped) {
+    impl->centerClampedToGround = clamped;
+}
+
+bool Map::getCenterClampedToGround() const {
+    return impl->centerClampedToGround;
+}
+
 void Map::setDebugAboveGroundLog(bool enabled) {
     impl->debugAboveGroundLog = enabled;
 }

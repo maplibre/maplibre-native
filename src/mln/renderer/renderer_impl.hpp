@@ -105,6 +105,9 @@ private:
     // point the DEM source is resolved) a bounded number of times so a genuinely empty
     // cover cannot spin forever.
     int terrainCoverRetryFrames = 4;
+    /// Last terrain height reported under the map centre, so an unchanged surface does not
+    /// post an observer message every frame.
+    double lastReportedCenterElevation = 0.0;
 
     enum class RenderState {
         Never,

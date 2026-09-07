@@ -320,6 +320,22 @@ void Map::Impl::onDidFinishRenderingMap() {
     }
 };
 
+void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
+    if (!centerClampedToGround) {
+        return;
+    }
+    // Sub-metre differences are the terrain cover shifting under a camera that just moved,
+    // not the ground actually changing height; acting on them would chase itself.
+    constexpr double minimumChangeMeters = 0.5;
+    if (std::abs(transform.getState().getCenterAltitude() - elevationMeters) < minimumChangeMeters) {
+        return;
+    }
+    // Raising the centre onto the terrain moves the orbit plane, not the centre's lng/lat,
+    // so this settles rather than feeding back into the next frame's sample.
+    transform.jumpTo(CameraOptions().withCenterAltitude(elevationMeters));
+    onUpdate();
+}
+
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     transform.jumpTo(camera);

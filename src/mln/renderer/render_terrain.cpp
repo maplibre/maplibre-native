@@ -37,6 +37,7 @@
 #include <mln/shaders/segment.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/image.hpp>
@@ -688,6 +689,42 @@ float RenderTerrain::getElevation(const UnwrappedTileID& tileID_, float x, float
 
 float RenderTerrain::getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const {
     return getElevation(tileID, x, y) * getExaggeration();
+}
+
+double RenderTerrain::getElevationForLatLng(const LatLng& latLng) const {
+    if (!demSource) {
+        return 0.0;
+    }
+
+    // Sample as deep as the finest DEM tile loaded: getElevation walks up to the closest
+    // covering ancestor, but never down, so sampling shallower than the DEM reads nothing.
+    int sampleZoom = -1;
+    const auto renderTiles = demSource->getRawRenderTiles();
+    for (const auto& renderTile : *renderTiles) {
+        if (renderTile.getTile().kind == Tile::Kind::RasterDEM) {
+            sampleZoom = std::max(sampleZoom, static_cast<int>(renderTile.id.canonical.z));
+        }
+    }
+    if (sampleZoom < 0) {
+        return 0.0;
+    }
+
+    const double n = std::pow(2.0, sampleZoom);
+    // The int-zoom overload of project() returns tile units directly (0..2^zoom); the
+    // same-named double-scale overload returns pixels. Do not divide by the tile size.
+    const auto point = Projection::project(latLng, sampleZoom);
+    const double fx = point.x;
+    const double fy = point.y;
+    const auto tx = static_cast<int64_t>(std::floor(fx));
+    const auto ty = static_cast<int64_t>(std::floor(fy));
+    if (ty < 0 || static_cast<double>(ty) >= n) {
+        return 0.0; // past a pole
+    }
+
+    const UnwrappedTileID sampleTile(static_cast<uint8_t>(sampleZoom), tx, ty);
+    const auto localX = static_cast<float>((fx - static_cast<double>(tx)) * util::EXTENT);
+    const auto localY = static_cast<float>((fy - static_cast<double>(ty)) * util::EXTENT);
+    return getElevationWithExaggeration(sampleTile, localX, localY);
 }
 
 std::optional<RenderTerrain::TerrainData> RenderTerrain::getTerrainData(const UnwrappedTileID& tileID) const {

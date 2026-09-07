@@ -344,6 +344,10 @@ public:
 
     jni::jint getTerrainSkirtLength(JNIEnv&);
 
+    void setCenterClampedToGround(JNIEnv&, jni::jboolean);
+
+    jni::jboolean getCenterClampedToGround(JNIEnv&);
+
     void setDebugAboveGroundLog(JNIEnv&, jni::jboolean);
 
     void setTileLodPitchThreshold(JNIEnv&, jni::jdouble);

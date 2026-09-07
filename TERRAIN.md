@@ -1027,11 +1027,24 @@ projection primitives in `collision_index.cpp`. The word "elevation" appears now
      drives every frame (`TerrainFlightActivity`), so it matters well before terrain is
      wired in. Pinned by `Map.FreeCameraPreservesCentreAltitude`, which fails on the old
      code on altitude, latitude and zoom.
-   - **(remaining)** The actual feature: something must set `centerAltitude` from the
-     terrain at the centre whenever the terrain updates - gl-js's
-     `getCenterClampedToGround`. That needs a renderer -> map elevation channel (the
-     reverted `RendererObserver::onTerrainCameraCollision` prototype is the shape) and the
-     ordering trap below resolved, since the elevation has to come from the render side.
+   - **(done 2026-09-06)** The feature: `Map::setCenterClampedToGround` (on by default, as
+     in gl-js). `RenderTerrain::getElevationForLatLng` samples the rendered surface under
+     the centre; `Renderer::Impl` reports it through the new
+     `RendererObserver::onTerrainCenterElevationChanged`, gated so a still map does not
+     post a message per frame; `Map::Impl` applies it as a `centerAltitude` jump, ignoring
+     sub-metre changes. No ordering trap here - the sample is taken after
+     `RenderTerrain::update` in the same frame, unlike placement. Exposed on Android
+     alongside the skirt option, with a "Centre on ground" toggle and `clamp_*` adb
+     commands. Covered by `TerrainCamera.*`, which drive a synthesised flat 1000 m DEM;
+     all three fail if the observer call is removed except the one asserting the feature
+     is off.
+
+     Two traps worth remembering. `RendererObserver` is marshalled onto the map thread by
+     a per-signal forwarding class in `android_renderer_frontend.cpp`, so a new callback
+     that is not added there compiles everywhere and silently never arrives on Android.
+     And `Projection::project` is overloaded on the zoom argument's *type*: the `int32_t`
+     overload returns tile units, the `double scale` one returns pixels. Taking the wrong
+     one puts the sample in tile (0, 0) and reads 0 m with no error.
 3. **Elevated line labels** - thread the query through placement, then gl-js #7040's
    coordinate normalisation on top.
 

@@ -284,6 +284,10 @@ interface NativeMap {
 
   int getTerrainSkirtLength();
 
+  void setCenterClampedToGround(boolean clamped);
+
+  boolean getCenterClampedToGround();
+
   void setTileLodPitchThreshold(double threshold);
 
   double getTileLodPitchThreshold();

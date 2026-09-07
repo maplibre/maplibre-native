@@ -741,6 +741,17 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         terrainCoverRetryFrames = 4;
     }
 
+    // Report the rendered terrain height under the map centre. Only the render side has the
+    // DEM, so this is the channel; whether the camera acts on it is the map's call
+    // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
+    if (auto* terrain = orchestrator.getRenderTerrain()) {
+        const double centerElevation = terrain->getElevationForLatLng(updateParameters->transformState.getLatLng());
+        if (std::abs(centerElevation - lastReportedCenterElevation) > 0.25) {
+            lastReportedCenterElevation = centerElevation;
+            observer->onTerrainCenterElevationChanged(centerElevation);
+        }
+    }
+
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         // Request a follow-up frame if the drape budget deferred any target or the tile-build

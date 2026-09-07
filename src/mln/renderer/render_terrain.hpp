@@ -22,6 +22,7 @@
 
 namespace mln {
 
+class LatLng;
 class TransformState;
 class UpdateParameters;
 class RenderSource;
@@ -147,6 +148,18 @@ public:
      * @return Elevation in meters with exaggeration multiplier applied
      */
     float getElevationWithExaggeration(const UnwrappedTileID& tileID, float x, float y) const;
+
+    /**
+     * @brief Exaggerated terrain height under a geographic position
+     *
+     * Samples at the depth of the finest DEM tile currently loaded. `getElevation` only
+     * matches a DEM tile that is the sample tile or an ancestor of it, so a fixed sample
+     * zoom silently reads 0 wherever the DEM is loaded deeper than that.
+     *
+     * @param latLng the position to sample
+     * @return height in metres of the rendered surface, or 0 when no DEM covers it
+     */
+    double getElevationForLatLng(const LatLng& latLng) const;
 
     /**
      * @brief Get the terrain exaggeration multiplier
