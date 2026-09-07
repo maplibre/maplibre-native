@@ -1109,7 +1109,7 @@ terrain during placement sees the previous frame's state - the same first-frame 
     |---|---|---|---|
     | occlusion-debug | renders correctly | black bands | Metal-only |
     | fill-extrusion | passes | black bands | Metal-only |
-    | default | blank | blank | ~~camera/exaggeration~~ - disproven 2026-09-06, see above: it is a drape-path failure, not the camera |
+    | default | blank | blank | camera inside the terrain - confirmed 2026-09-07, margin -4244 m at the test's camera; see above |
     | skirts-auto / skirts-none | blank | blank | missing ancestor-pyramid fixtures (they now "pass" vacuously against blank baselines - see 2026-09-05 below) |
     | pitched-world | (unclassified) | over-filled | zoom -2.5, see zoom-0 relief item |
 
@@ -1243,13 +1243,33 @@ terrain during placement sees the previous frame's state - the same first-frame 
     for as long as it was. Re-baseline them only once terrain actually renders in the
     still-render path (the fixture problem below); until then the skirt option is
     covered only by on-device eyeballing (`skirts_toggle` in TerrainTestOptions).
-  - **2026-09-06 - `terrain/default`: measured, and it is NOT the camera or the tile cover.**
-    The 2026-08-02 table below attributes it to "camera/exaggeration"; that is wrong. The
-    terrain-anchored camera work (`Map::setCenterClampedToGround`) was live for these runs and
-    changed nothing, and it could not: the failure is a *fully white* frame - the style's
-    `background-color: white` and nothing else - where the Phase 4 symptom is a partial
-    blackout of the near field under a visible terrain silhouette. A centre-clamp also cannot
-    reach a still render, since the elevation arrives through an observer after the frame.
+  - **2026-09-07 - `terrain/default` IS the camera inside the terrain.** (This corrects the
+    2026-09-06 entry that claimed otherwise. That reasoning treated the *white* frame as
+    disqualifying, on the grounds that the Phase 4 symptom is a black near field. Wrong:
+    the near rays clear to **the background**, whatever colour it is, and this style's
+    background is white. Andrew called this from manual testing - from inside terrain you
+    see the background plus the skirts, and the skirts are far less prominent here.)
+
+    Measured at the test's own camera (zoom 13, pitch 60, exaggeration 2):
+
+    | | value |
+    |---|---|
+    | terrain height under the centre | 5487 m (a ~2744 m peak, doubled by `exaggeration: 2`) |
+    | camera altitude | 1243 m |
+    | margin | **-4244 m** - the camera is over four kilometres inside the mountain |
+
+    The margin goes negative from about zoom 11 (-508 m) and deepens as you zoom, because
+    the camera sits a fixed *pixel* distance from the centre while metres-per-pixel shrinks.
+    Only by zoom 13 is the whole view inside the surface, which is why the frame is
+    uniformly background-white rather than partly terrain.
+
+    **The centre-clamp addresses this, but cannot fix the render test.** The run logs
+    `centreAlt=0` on the only frame it draws: `RenderTerrain` reports the height through
+    `onTerrainCenterElevationChanged` *after* the frame, so a single-shot still render never
+    applies it. The same limitation means an interactive map's first frame after terrain
+    loads is uncorrected too - it settles on the next one. To make `terrain/default` pass,
+    either the runner has to draw another frame once the camera settles, or the clamp has
+    to be applied before the first frame rather than reported after it.
 
     What was measured, bisecting the camera zoom (the test uses zoom 13):
 
@@ -1274,12 +1294,12 @@ terrain during placement sees the previous frame's state - the same first-frame 
     `maxzoom` 13, then 12, so its tiles sit at or above the z12 targets, stays blank); and
     the z14 tiles specifically (blank with only z13 tiles present).
 
-    Two loose threads for whoever picks this up. At zoom 13 only **3** terrain drawables are
-    created where the cover holds 4, so one mesh tile drops out between the cover and the
-    drawable loop. And the one configuration that renders (zoom 12.4, raster maxzoom 17) is
-    also the only one with raster tiles both shallower *and* deeper than the target, which
-    hints the drape needs a covering tile at or above the target zoom and the ancestor
-    fallback is not supplying one. Neither is confirmed.
+    The drape measurements above still hold, but read them as "what the pipeline looks like
+    while the camera is underground" rather than as evidence against the camera: cover,
+    drawables, targets and drape renders are all healthy, and the geometry simply is not
+    visible from where the camera is. One loose thread remains genuinely odd and is worth
+    a look on its own: at zoom 13 only **3** terrain drawables are created where the cover
+    holds 4, so one mesh tile drops out between the cover and the drawable loop.
 
   - **2026-09-05 - `terrain/fill-extrusion`'s baseline was refreshed for the 2px DEM
     border (gl-js #8302).** The wider border changed 45 of 262144 pixels: the buildings
