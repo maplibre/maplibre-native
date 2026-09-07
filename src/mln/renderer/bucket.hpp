@@ -65,8 +65,11 @@ public:
     }
     // Places this bucket to the given placement.
     virtual void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) {}
-    virtual void updateVertices(
-        const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {}
+    virtual void updateVertices(const Placement&,
+                                bool /*updateOpacities*/,
+                                const TransformState&,
+                                const BucketPlacementData&,
+                                std::set<uint32_t>&) {}
 
     const util::SimpleIdentity& getID() const { return bucketID; }
 

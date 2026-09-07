@@ -119,7 +119,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState&,
+                             const TransformState& state,
                              const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const PaintParameters& paintParameters,
                              const RenderTree&,
@@ -149,6 +149,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
+
+    updateProjectionVariant(state);
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -350,7 +352,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+                fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
@@ -358,7 +360,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     {"a_color", "a_opacity", "a_width"},
                     {idLineColorVertexAttribute, idLineOpacityVertexAttribute, idLineWidthVertexAttribute}};
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    outlineTriangulatedShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
+                    outlineTriangulatedShaderGroup->getOrCreateShader(
+                        context, outlinePropertiesAsUniforms, projectionVariant));
             }()
                 : nullptr;
 
@@ -375,10 +378,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             };
 #endif
-            const auto outlineShader = doOutline
-                                           ? std::static_pointer_cast<gfx::ShaderProgramBase>(
-                                                 outlineShaderGroup->getOrCreateShader(context, propertiesAsUniforms))
-                                           : nullptr;
+            const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
+                                                       outlineShaderGroup->getOrCreateShader(
+                                                           context, propertiesAsUniforms, projectionVariant))
+                                                 : nullptr;
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
@@ -466,10 +469,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
+                patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
                                                        outlinePatternShaderGroup->getOrCreateShader(
-                                                           context, propertiesAsUniforms))
+                                                           context, propertiesAsUniforms, projectionVariant))
                                                  : nullptr;
 
             if (!patternBuilder) {

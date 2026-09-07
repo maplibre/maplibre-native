@@ -14,6 +14,7 @@ static constexpr uint32_t layerSSBOStartId = globalUBOCount;
 enum {
     idDrawableReservedVertexOnlyUBO = layerSSBOStartId,
     idDrawableReservedFragmentOnlyUBO,
+    idProjectionUBO,
     drawableReservedUBOCount
 };
 
@@ -148,6 +149,16 @@ enum {
     symbolLayerUBOCount
 };
 
+enum {
+    idSkyPropsUBO = getEnumValue(drawableReservedUBOCount, layerUBOStartId),
+    skyLayerUBOCount
+};
+
+enum {
+    idAtmospherePropsUBO = getEnumValue(drawableReservedUBOCount, layerUBOStartId),
+    atmosphereLayerUBOCount
+};
+
 // drawable SSBOs
 
 static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(backgroundLayerUBOCount),
@@ -159,7 +170,9 @@ static constexpr uint32_t drawableSSBOStartId = std::max({static_cast<uint32_t>(
                                                           static_cast<uint32_t>(hillshadeLayerUBOCount),
                                                           static_cast<uint32_t>(lineLayerUBOCount),
                                                           static_cast<uint32_t>(rasterLayerUBOCount),
-                                                          static_cast<uint32_t>(symbolLayerUBOCount)});
+                                                          static_cast<uint32_t>(symbolLayerUBOCount),
+                                                          static_cast<uint32_t>(skyLayerUBOCount),
+                                                          static_cast<uint32_t>(atmosphereLayerUBOCount)});
 
 enum {
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
@@ -195,7 +208,8 @@ enum {
 enum {
     idCollisionDrawableUBO = getEnumValue(idDrawableReservedVertexOnlyUBO, drawableUBOStartId), // UBO
     idCollisionTilePropsUBO = getEnumValue(drawableReservedUBOCount, idCollisionDrawableUBO + 1),
-    collisionUBOCount
+    idCollisionProjectionUBO = getEnumValue(idProjectionUBO, idCollisionTilePropsUBO + 1),
+    collisionUBOCount = getEnumValue(idCollisionTilePropsUBO + 1, idCollisionProjectionUBO + 1)
 };
 
 enum {
@@ -286,6 +300,8 @@ static constexpr uint32_t maxUBOCountPerShader = std::max({static_cast<uint32_t>
                                                            static_cast<uint32_t>(locationIndicatorUBOCount),
                                                            static_cast<uint32_t>(rasterUBOCount),
                                                            static_cast<uint32_t>(symbolUBOCount),
+                                                           static_cast<uint32_t>(skyLayerUBOCount),
+                                                           static_cast<uint32_t>(atmosphereLayerUBOCount),
                                                            static_cast<uint32_t>(wideVectorUBOCount)});
 
 static constexpr uint32_t maxSSBOCountPerLayer = layerUBOStartId - layerSSBOStartId;
@@ -401,6 +417,16 @@ enum {
 };
 
 enum {
+    idSkyPosVertexAttribute,
+    skyVertexAttributeCount
+};
+
+enum {
+    idAtmospherePosVertexAttribute,
+    atmosphereVertexAttributeCount
+};
+
+enum {
     idCirclePosVertexAttribute,
 
     // Data driven
@@ -477,6 +503,11 @@ enum {
     idFillExtrusionPatternToVertexAttribute,
 
     fillExtrusionVertexAttributeCount
+};
+
+enum {
+    idGlobeDepthPosVertexAttribute,
+    globeDepthVertexAttributeCount
 };
 
 enum {
@@ -589,12 +620,15 @@ static constexpr uint32_t maxAttributeCountPerShader = std::max({
     static_cast<uint32_t>(debugVertexAttributeCount),
     static_cast<uint32_t>(fillVertexAttributeCount),
     static_cast<uint32_t>(fillExtrusionVertexAttributeCount),
+    static_cast<uint32_t>(globeDepthVertexAttributeCount),
     static_cast<uint32_t>(heatmapVertexAttributeCount),
     static_cast<uint32_t>(hillshadeVertexAttributeCount),
     static_cast<uint32_t>(colorReliefVertexAttributeCount),
     static_cast<uint32_t>(lineVertexAttributeCount),
     static_cast<uint32_t>(locationIndicatorVertexAttributeCount),
     static_cast<uint32_t>(rasterVertexAttributeCount),
+    static_cast<uint32_t>(skyVertexAttributeCount),
+    static_cast<uint32_t>(atmosphereVertexAttributeCount),
     static_cast<uint32_t>(symbolAttributeCount),
     static_cast<uint32_t>(wideVectorAttributeCount),
     static_cast<uint32_t>(wideVectorInstanceAttributeCount),

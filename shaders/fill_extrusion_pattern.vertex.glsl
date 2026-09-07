@@ -91,7 +91,7 @@ void main() {
     float z = t > 0.0 ? height : base;
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
-    gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
+    gl_Position = projectTileFor3D(a_pos + decimals, z);
 
     // extrusion top or side
     vec2 pos = normal.z == 1.0 ? a_pos : vec2(edgedistance, z * u_height_factor);

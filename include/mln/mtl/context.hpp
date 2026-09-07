@@ -6,15 +6,19 @@
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
 #include <mln/mtl/buffer_resource.hpp>
 #include <mln/mtl/mtl_fwd.hpp>
 #include <mln/mtl/uniform_buffer.hpp>
+#include <mln/shaders/layer_ubo.hpp>
 #include <mln/util/noncopyable.hpp>
 #include <mln/util/containers.hpp>
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <tuple>
 #include <vector>
 
 namespace mln {
@@ -90,7 +94,9 @@ public:
 
     UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
-    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&,
+                                               const std::string& name,
+                                               gfx::ProjectionVariant) override;
 
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
@@ -105,6 +111,8 @@ public:
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
     void setDirtyState() override;
+
+    void releaseGlobeClipMasks() override;
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
@@ -124,6 +132,17 @@ public:
 
     void clearStencilBuffer(int32_t) override;
 
+    /// The depth-stencil state clip masks are drawn with, rebuilt when the renderable changes.
+    const MTLDepthStencilStatePtr& clipMaskDepthStencilStateFor(const gfx::Renderable&);
+    /// A pipeline state for a clip-mask shader over the position-only tile vertex layout.
+    MTLRenderPipelineStatePtr makeClipMaskPipelineState(const ShaderProgram&, const gfx::Renderable&);
+    /// The uniform buffer for one clip-mask pass: `persistent` on the first use in a frame, `temp` after that.
+    std::optional<BufferResource>& clipMaskUniformBuffer(std::optional<BufferResource>& persistent,
+                                                         bool& used,
+                                                         std::optional<BufferResource>& temp,
+                                                         const void* data,
+                                                         std::size_t size);
+
     MTLDepthStencilStatePtr makeDepthStencilState(const gfx::DepthMode&,
                                                   const gfx::StencilMode&,
                                                   const gfx::Renderable&) const;
@@ -141,6 +160,10 @@ public:
 
     /// Get a buffer to be bound to unused vertex buffers
     const UniqueVertexBufferResource& getEmptyVertexBuffer();
+
+    bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<gfx::GlobeClipMask>& masks);
 
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
@@ -173,6 +196,17 @@ private:
     MTLRenderPipelineStatePtr clipMaskPipelineState;
     std::optional<BufferResource> clipMaskUniformsBuffer;
     bool clipMaskUniformsBufferUsed = false;
+
+    struct GlobeClipMesh {
+        BufferResource vertices;
+        BufferResource indices;
+        std::size_t indexCount;
+    };
+    gfx::ShaderProgramBasePtr globeClipMaskShader;
+    MTLRenderPipelineStatePtr globeClipMaskPipelineState;
+    std::optional<BufferResource> globeClipMaskUniformsBuffer;
+    bool globeClipMaskUniformsBufferUsed = false;
+    std::map<std::tuple<uint8_t, bool, bool>, GlobeClipMesh> globeClipMeshes;
     const gfx::Renderable* stencilStateRenderable = nullptr;
 
     UniformBufferArray globalUniformBuffers;

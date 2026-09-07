@@ -19,6 +19,8 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/prelude.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/background.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/background_pattern.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/sky.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/atmosphere.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/circle.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/clipping_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/collision_box.hpp
@@ -35,6 +37,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_instanced.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern_instanced.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/globe_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/hillshade_prepare.hpp

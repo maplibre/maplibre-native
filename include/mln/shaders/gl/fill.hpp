@@ -49,7 +49,7 @@ opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 lowp float opacity = u_opacity;
 #endif
 
-    gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = projectTile(a_pos, a_pos);
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform FillEvaluatedPropsUBO {

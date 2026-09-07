@@ -11,6 +11,7 @@
 
 @class MLNSource;
 @class MLNLight;
+@class MLNSky;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -282,6 +283,16 @@ MLN_EXPORT
  Provides global light source for the style.
  */
 @property (nonatomic, strong) MLNLight *light;
+
+// MARK: Managing the Style's Sky
+
+/**
+ The map's sky configuration, or `nil` when the style has no sky.
+
+ Assign `nil` to remove the sky configuration. Properties on ``MLNSky`` may be
+ constant expressions or zoom expressions.
+ */
+@property (nonatomic, strong, nullable) MLNSky *sky;
 
 // MARK: Localizing Map Content
 

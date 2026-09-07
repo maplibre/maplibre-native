@@ -6,7 +6,9 @@
 #include <mln/map/transform_state.hpp>
 #include <mln/util/math.hpp>
 #include <mln/util/constants.hpp>
+#include <mln/util/subdivision.hpp>
 
+#include <optional>
 #include <variant>
 
 #ifdef _MSC_VER
@@ -86,7 +88,20 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             polyVariant = roundPolygonCorners(polygon, roundedCornerDistance);
         }
 
-        std::size_t totalVertices = 0;
+        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own.
+        const uint32_t granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
+        std::optional<util::SubdivisionResult> roof;
+        if (granularity >= 2 && roundedCornerDistance <= 0) {
+            GeometryCollection subdividedRings;
+            for (const auto& ring : polygon) {
+                subdividedRings.push_back(util::subdivideVertexLine(ring, granularity, /*isRing=*/true));
+            }
+            polyVariant = std::move(subdividedRings);
+            roof = util::subdividePolygonWithinLimit(
+                polygon, canonical, granularity, /*generateOutlineLines=*/false, maxSegmentVertices);
+        }
+
+        std::size_t totalVertices = roof ? roof->vertices.size() / 2 : 0;
 
         std::visit(
             [&totalVertices](const auto& poly) {
@@ -167,7 +182,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         std::vector<uint32_t> indices;
         std::visit(
-            [&indices, processRingPoints](const auto& poly) {
+            [&indices, &roof, processRingPoints](const auto& poly) {
                 for (const auto& ring : poly) {
                     std::size_t nVertices = ring.size();
 
@@ -186,18 +201,41 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     }
                 }
 
-                indices = mapbox::earcut(poly);
+                if (!roof) {
+                    indices = mapbox::earcut(poly);
+                }
             },
             polyVariant);
 
         std::size_t nIndices = indices.size();
         assert(nIndices % 3 == 0);
 
-        for (std::size_t i = 0; i < nIndices; i += 3) {
-            // Counter-Clockwise winding order.
-            triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
-                                   static_cast<uint16_t>(flatIndices[indices[i + 2]]),
-                                   static_cast<uint16_t>(flatIndices[indices[i + 1]]));
+        if (roof) {
+            const auto base = triangleIndex;
+            for (std::size_t i = 0; i + 1 < roof->vertices.size(); i += 2) {
+                const Point<double> p{static_cast<double>(roof->vertices[i]),
+                                      static_cast<double>(roof->vertices[i + 1])};
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+                vertices.emplace_back(layoutVertex(p, 0, true));
+#else
+                vertices.emplace_back(FillExtrusionBucket::layoutVertex(p, 0, 0, 1, 0));
+#endif
+                triangleIndex++;
+            }
+            nIndices = roof->triangleIndices.size();
+            assert(nIndices % 3 == 0);
+            for (std::size_t i = 0; i + 2 < nIndices; i += 3) {
+                triangles.emplace_back(static_cast<uint16_t>(base + roof->triangleIndices[i]),
+                                       static_cast<uint16_t>(base + roof->triangleIndices[i + 1]),
+                                       static_cast<uint16_t>(base + roof->triangleIndices[i + 2]));
+            }
+        } else {
+            for (std::size_t i = 0; i < nIndices; i += 3) {
+                // Counter-Clockwise winding order.
+                triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
+                                       static_cast<uint16_t>(flatIndices[indices[i + 2]]),
+                                       static_cast<uint16_t>(flatIndices[indices[i + 1]]));
+            }
         }
 
         triangleSegment.vertexLength += totalVertices;

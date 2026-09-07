@@ -1,6 +1,8 @@
 #include <mln/vulkan/context.hpp>
 
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_target.hpp>
@@ -29,6 +31,15 @@
 
 namespace mln {
 namespace vulkan {
+
+// The largest push-constant block: the globe clip mask's two matrices, which is all the guaranteed 128 bytes hold.
+constexpr uint32_t globeClipMaskPushConstantSize = 2 * sizeof(matf4);
+// The rest of a globe clip mask's projection block rides as per-instance vertex attributes.
+struct GlobeClipMaskInstance {
+    std::array<float, 4> tileMercatorCoords;
+    std::array<float, 4> clippingPlane;
+    std::array<float, 4> transition;
+};
 
 // Maximum number of vertex attributes, per vertex descriptor
 // 32 on most devices (~30% Android use 16),
@@ -170,6 +181,8 @@ void Context::destroyResources() {
 
     clipping.indexBuffer.reset();
     clipping.vertexBuffer.reset();
+    globeClipping.meshes.clear();
+    globeClipping.shader.reset();
 }
 
 void Context::enqueueDeletion(DeletionTask&& function) {
@@ -446,9 +459,11 @@ UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
         DescriptorSetType::Layer, shaders::globalUBOCount, shaders::maxSSBOCountPerLayer, shaders::maxUBOCountPerLayer);
 }
 
-gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders,
+                                                    const std::string& name,
+                                                    gfx::ProjectionVariant variant) {
     const auto shaderGroup = shaders.getShaderGroup(name);
-    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}, variant) : gfx::ShaderProgramBasePtr{};
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
@@ -550,7 +565,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     if (!clipping.shader) {
         const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
         if (group) {
-            clipping.shader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+            clipping.shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Mercator));
         }
     }
     if (!clipping.shader) {
@@ -645,6 +661,148 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
             &matrixf,
             dispatcher);
         commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0, dispatcher);
+    }
+
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
+    return true;
+}
+
+void Context::releaseGlobeClipMasks() {
+    globeClipping.meshes.clear();
+}
+
+bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                           RenderStaticData& staticData,
+                                           const std::vector<gfx::GlobeClipMask>& masks) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan>;
+
+    if (!globeClipping.shader) {
+        if (const auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
+            globeClipping.shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Globe));
+        }
+    }
+    if (!globeClipping.shader) {
+        assert(!"Failed to create shader for globe clip masking");
+        return false;
+    }
+
+    if (globeClipping.pipelineInfo.inputAttributes.empty()) {
+        globeClipping.pipelineInfo.usePushConstants = true;
+        globeClipping.pipelineInfo.colorBlend = false;
+        globeClipping.pipelineInfo.colorMask = vk::ColorComponentFlags();
+        globeClipping.pipelineInfo.depthTest = false;
+        globeClipping.pipelineInfo.depthWrite = false;
+        globeClipping.pipelineInfo.stencilTest = true;
+        globeClipping.pipelineInfo.stencilFunction = vk::CompareOp::eAlways;
+        globeClipping.pipelineInfo.stencilPass = vk::StencilOp::eReplace;
+        // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
+        globeClipping.pipelineInfo.setCullMode(gfx::CullFaceMode::backCCW());
+        constexpr uint32_t allStencilBits = 0xFF;
+        globeClipping.pipelineInfo.dynamicValues.stencilWriteMask = allStencilBits;
+        globeClipping.pipelineInfo.dynamicValues.stencilCompareMask = allStencilBits;
+        globeClipping.pipelineInfo.inputBindings.push_back(
+            vk::VertexInputBindingDescription()
+                .setBinding(0)
+                .setStride(static_cast<uint32_t>(VertexAttribute::getStrideOf(ShaderClass::attributes[0].dataType)))
+                .setInputRate(vk::VertexInputRate::eVertex));
+        globeClipping.pipelineInfo.inputAttributes.push_back(
+            vk::VertexInputAttributeDescription()
+                .setBinding(0)
+                .setLocation(static_cast<uint32_t>(ShaderClass::attributes[0].index))
+                .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
+        globeClipping.pipelineInfo.inputBindings.push_back(vk::VertexInputBindingDescription()
+                                                               .setBinding(1)
+                                                               .setStride(sizeof(GlobeClipMaskInstance))
+                                                               .setInputRate(vk::VertexInputRate::eInstance));
+        for (uint32_t i = 0; i < 3; i++) {
+            globeClipping.pipelineInfo.inputAttributes.push_back(vk::VertexInputAttributeDescription()
+                                                                     .setBinding(1)
+                                                                     .setLocation(1 + i)
+                                                                     .setFormat(vk::Format::eR32G32B32A32Sfloat)
+                                                                     .setOffset(i * sizeof(std::array<float, 4>)));
+        }
+        globeClipping.pipelineInfo.updateVertexInputHash();
+    }
+
+    const auto& dispatcher = backend.getDispatcher();
+    auto& shaderImpl = static_cast<ShaderProgram&>(*globeClipping.shader);
+    auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
+    auto& commandBuffer = renderPassImpl.getEncoder().getCommandBuffer();
+
+    globeClipping.pipelineInfo.setRenderable(renderPassImpl.getDescriptor().renderable);
+
+    const auto& pipeline = shaderImpl.getPipeline(globeClipping.pipelineInfo);
+
+    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get(), dispatcher);
+    globeClipping.pipelineInfo.setScissorRect(
+        {0, 0, globeClipping.pipelineInfo.viewExtent.width, globeClipping.pipelineInfo.viewExtent.height});
+    globeClipping.pipelineInfo.setDynamicValues(backend, commandBuffer);
+
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    const float rad = renderableResource.getRotation();
+    const mat4 rotationMat = {
+        std::cos(rad), -std::sin(rad), 0, 0, std::sin(rad), std::cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+    struct PushConstants {
+        matf4 matrix;
+        matf4 fallbackMatrix;
+    };
+    static_assert(sizeof(PushConstants) == globeClipMaskPushConstantSize);
+
+    std::vector<GlobeClipMaskInstance> instances;
+    instances.reserve(masks.size());
+    for (const auto& mask : masks) {
+        instances.push_back({.tileMercatorCoords = mask.projection.tile_mercator_coords,
+                             .clippingPlane = mask.projection.clipping_plane,
+                             .transition = {mask.projection.projection_transition, 0, 0, 0}});
+    }
+    const auto instanceBuffer = createBuffer(
+        instances.data(), instances.size() * sizeof(GlobeClipMaskInstance), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false);
+
+    for (std::size_t i = 0; i < masks.size(); ++i) {
+        const auto& mask = masks[i];
+        const auto& tile = mask.tile;
+        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
+        auto it = globeClipping.meshes.find(key);
+        if (it == globeClipping.meshes.end()) {
+            const auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
+            auto vertices = createBuffer(
+                mesh.vertices.data(), mesh.vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false);
+            auto indices = createBuffer(
+                mesh.indices.data(), mesh.indices.size() * sizeof(uint16_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, false);
+            it = globeClipping.meshes
+                     .emplace(key,
+                              GlobeClipMesh{.vertices = std::move(vertices),
+                                            .indices = std::move(indices),
+                                            .indexCount = static_cast<uint32_t>(mesh.indices.size())})
+                     .first;
+        }
+        const auto& mesh = it->second;
+
+        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, mask.stencilRef, dispatcher);
+
+        const std::array<vk::Buffer, 2> vertexBuffers = {mesh.vertices.getVulkanBuffer(),
+                                                         instanceBuffer.getVulkanBuffer()};
+        const std::array<vk::DeviceSize, 2> offsets = {0, i * sizeof(GlobeClipMaskInstance)};
+        commandBuffer->bindVertexBuffers(0, vertexBuffers, offsets, dispatcher);
+        commandBuffer->bindIndexBuffer(mesh.indices.getVulkanBuffer(), 0, vk::IndexType::eUint16, dispatcher);
+
+        mat4 matrix;
+        matrix::multiply(matrix, rotationMat, util::cast<double>(mask.projection.matrix));
+        mat4 fallbackMatrix;
+        matrix::multiply(fallbackMatrix, rotationMat, util::cast<double>(mask.projection.fallback_matrix));
+        const PushConstants constants = {.matrix = util::cast<float>(matrix),
+                                         .fallbackMatrix = util::cast<float>(fallbackMatrix)};
+        commandBuffer->pushConstants(
+            getPushConstantPipelineLayout().get(),
+            vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+            0,
+            sizeof(constants),
+            &constants,
+            dispatcher);
+        commandBuffer->drawIndexed(mesh.indexCount, 1, 0, 0, 0, dispatcher);
     }
 
     stats.numDrawCalls++;
@@ -781,7 +939,7 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     if (pushConstantPipelineLayout) return pushConstantPipelineLayout;
 
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
-    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(matf4)).setStageFlags(stages);
+    const auto pushConstant = vk::PushConstantRange().setSize(globeClipMaskPushConstantSize).setStageFlags(stages);
 
     auto layoutInfo = vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant);
 

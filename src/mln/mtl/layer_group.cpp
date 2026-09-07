@@ -44,6 +44,8 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 #endif
 
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
+    auto& context = static_cast<Context&>(parameters.context);
+    const auto& renderable = renderPass.getDescriptor().renderable;
 
     bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
@@ -58,6 +60,34 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
+        }
+
+        if (drawable.getIs3D()) {
+            const MTLDepthStencilStatePtr* state = nullptr;
+            if (!drawable.getEnableDepth()) {
+                if (!stateNone) {
+                    stateNone = context.makeDepthStencilState(
+                        gfx::DepthMode::disabled(), gfx::StencilMode::disabled(), renderable);
+                }
+                state = &*stateNone;
+            } else if (drawable.getDepthType() == gfx::DepthMaskType::ReadOnly) {
+                if (!stateDepthReadOnly) {
+                    stateDepthReadOnly = context.makeDepthStencilState(
+                        parameters.depthModeFor3D(gfx::DepthMaskType::ReadOnly),
+                        gfx::StencilMode::disabled(),
+                        renderable);
+                }
+                state = &*stateDepthReadOnly;
+            } else {
+                if (!stateDepthReadWrite) {
+                    stateDepthReadWrite = context.makeDepthStencilState(
+                        parameters.depthModeFor3D(gfx::DepthMaskType::ReadWrite),
+                        gfx::StencilMode::disabled(),
+                        renderable);
+                }
+                state = &*stateDepthReadWrite;
+            }
+            renderPass.setDepthStencilState(*state);
         }
 
         drawable.draw(parameters);

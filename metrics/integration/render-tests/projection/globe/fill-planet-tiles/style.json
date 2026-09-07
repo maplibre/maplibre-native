@@ -1,0 +1,33 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 512
+    }
+  },
+  "center": [0.0, 0.0],
+  "zoom": 2,
+  "projection": {"type": "globe"},
+  "sources": {
+    "vector_tiles": {
+      "type": "vector",
+      "maxzoom": 0,
+      "tiles": ["local://tiles/{z}-{x}-{y}.mvt"]
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "white"}
+    },
+    {
+      "id": "land",
+      "type": "fill",
+      "source": "vector_tiles",
+      "source-layer": "water",
+      "paint": {"fill-color": "blue"}
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <mln/map/mode.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/sky.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/layer.hpp>
@@ -11,6 +13,7 @@
 #include <mln/util/immutable.hpp>
 
 #include <numbers>
+#include <optional>
 #include <vector>
 
 #include <mapbox/std/weak.hpp>
@@ -34,6 +37,7 @@ public:
     const bool spriteLoaded;
     const style::TransitionOptions transitionOptions;
     const Immutable<style::Light::Impl> light;
+    const std::optional<Immutable<style::Sky::Impl>> sky;
     const Immutable<std::vector<Immutable<style::Image::Impl>>> images;
     const Immutable<std::vector<Immutable<style::Source::Impl>>> sources;
     const Immutable<std::vector<Immutable<style::Layer::Impl>>> layers;
@@ -55,6 +59,8 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+
+    SubdivisionGranularitySetting subdivisionGranularity = SubdivisionGranularitySetting::none();
 };
 
 } // namespace mln

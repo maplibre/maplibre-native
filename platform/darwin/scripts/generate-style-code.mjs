@@ -889,8 +889,19 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
+const skyProperties = Object.keys(spec['sky']).reduce((memo, name) => {
+  const property = spec['sky'][name];
+  property.name = name;
+  property['sky-property'] = true;
+  memo.push(property);
+  return memo;
+}, []);
+
+const skyDoc = spec['sky-cocoa-doc'];
+const skyType = 'sky';
+
 const root = path.dirname(path.dirname(path.dirname(import.meta.dirname)));
-const outLocation = args.out ? args.out : root;
+const outLocation = args.values.out ? args.values.out : root;
 
 const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
 const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
@@ -906,6 +917,16 @@ writeIfModified(`platform/darwin/src/MLNLight.mm`,
     lightM({ properties: lightProperties, doc: lightDoc, type: lightType }), outLocation);
 writeIfModified(`platform/darwin/test/MLNLightTest.mm`,
     testLight({ properties: lightProperties, doc: lightDoc, type: lightType }), outLocation);
+
+const skyH = readAndCompile('platform/darwin/src/MLNSky.h.ejs', root);
+const skyM = readAndCompile('platform/darwin/src/MLNSky.mm.ejs', root);
+const testSky = readAndCompile('platform/darwin/test/MLNSkyTest.mm.ejs', root);
+writeIfModified(`platform/darwin/src/MLNSky.h`, duplicatePlatformDecls(
+    skyH({ properties: skyProperties, doc: skyDoc, type: skyType })), outLocation);
+writeIfModified(`platform/darwin/src/MLNSky.mm`,
+    skyM({ properties: skyProperties, doc: skyDoc, type: skyType }), outLocation);
+writeIfModified(`platform/darwin/test/MLNSkyTest.mm`,
+    testSky({ properties: skyProperties, doc: skyDoc, type: skyType }), outLocation);
 
 const layers = _(spec.layer.type.values).map((value, layerType) => {
     const layoutProperties = Object.keys(spec[`layout_${layerType}`]).reduce((memo, name) => {

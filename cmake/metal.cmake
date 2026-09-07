@@ -40,6 +40,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/debug.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/fill_extrusion.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/globe_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/hillshade.hpp
@@ -48,6 +49,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/sky.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/shader_group.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/shader_program.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/mtl/symbol.hpp
@@ -83,6 +85,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/globe_depth.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/heatmap.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/hillshade.cpp
@@ -91,6 +94,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/sky.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/symbol.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/widevector.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/style/layers/mtl/custom_layer_render_parameters.cpp

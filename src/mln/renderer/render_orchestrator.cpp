@@ -20,6 +20,7 @@
 #include <mln/renderer/query.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/geometry/line_atlas.hpp>
+#include <mln/style/layers/custom_layer_impl.hpp>
 #include <mln/style/source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
@@ -201,6 +202,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                   .tileLodMode = updateParameters->tileLodMode,
+                                  .subdivisionGranularity = updateParameters->subdivisionGranularity,
                                   .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);
@@ -216,6 +218,26 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     if (lightChanged || zoomChanged || renderLight.hasTransition()) {
         renderLight.evaluate(evaluationParameters);
+    }
+
+    // Update sky while preserving transitions between successive configurations.
+    bool skyChanged = false;
+    if (updateParameters->sky) {
+        if (!renderSky) {
+            renderSky.emplace(*updateParameters->sky);
+            skyChanged = true;
+        } else if (renderSky->impl != *updateParameters->sky) {
+            renderSky->impl = *updateParameters->sky;
+            renderSky->transition(transitionParameters);
+            skyChanged = true;
+        }
+    } else if (renderSky) {
+        renderSky.reset();
+        skyChanged = true;
+    }
+
+    if (renderSky && (skyChanged || zoomChanged || renderSky->hasTransition())) {
+        renderSky->evaluate(evaluationParameters);
     }
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
@@ -346,11 +368,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const bool tiltedView = transformState.getPitch() != 0.0f;
 
     // Create parameters for the render tree.
-    auto renderTreeParameters = std::make_unique<RenderTreeParameters>(updateParameters->transformState,
-                                                                       updateParameters->mode,
-                                                                       updateParameters->debugOptions,
-                                                                       updateParameters->timePoint,
-                                                                       renderLight.getEvaluated());
+    auto renderTreeParameters = std::make_unique<RenderTreeParameters>(
+        updateParameters->transformState,
+        updateParameters->mode,
+        updateParameters->debugOptions,
+        updateParameters->timePoint,
+        renderLight.getEvaluated(),
+        renderSky ? std::optional{renderSky->getEvaluated()} : std::nullopt);
 
     std::set<LayerRenderItem> layerRenderItems;
     layersNeedPlacement.clear();
@@ -401,7 +425,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
             // Handle layers without source.
             if (layerIsVisible && zoomFitsLayer && sourceImpl.get() == sourceImpls->at(0).get()) {
-                if (backgroundLayerAsColor && layer.baseImpl == layerImpls->front()) {
+                // On the globe the background is a sphere mesh, not the backdrop, so it stays a layer.
+                if (backgroundLayerAsColor && !renderTreeParameters->sky &&
+                    !updateParameters->transformState.isGlobeRendering() && layer.baseImpl == layerImpls->front()) {
                     const auto& solidBackground = layer.getSolidBackground();
                     if (solidBackground) {
                         renderTreeParameters->backgroundColor = *solidBackground;
@@ -817,6 +843,10 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
         return true;
     }
 
+    if (renderSky && renderSky->hasTransition()) {
+        return true;
+    }
+
     for (const auto& entry : renderLayers) {
         if (entry.second->hasTransition()) {
             return true;
@@ -970,8 +1000,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    bool has3D = false;
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
+        // A custom layer may draw 3D geometry, and the planet's depth is what hides it behind the horizon.
+        has3D = has3D || renderLayer.is3D() ||
+                renderLayer.baseImpl->getTypeInfo() == style::CustomLayer::Impl::staticTypeInfo();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -986,6 +1020,16 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         }
     }
     addChanges(changes);
+
+    const auto& treeParameters = renderTree.getParameters();
+    skyPass.update(shaders,
+                   context,
+                   state,
+                   paintParameters.staticData.backendSize,
+                   paintParameters.pixelRatio,
+                   treeParameters.sky,
+                   treeParameters.light);
+    globeDepthPass.update(shaders, context, state, *updateParameters, has3D || skyPass.hasAtmosphere());
 }
 
 void RenderOrchestrator::processChanges() {

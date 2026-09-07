@@ -49,13 +49,13 @@ void main() {
         if (u_scale_with_map) {
             corner *= u_extrude_scale;
         } else {
-            vec4 projected_center = u_matrix * vec4(center, 0, 1);
+            vec4 projected_center = projectTile(center);
             corner *= u_extrude_scale * (projected_center.w / u_camera_to_center_distance);
         }
         corner = center + rotateVec2(corner, angle);
-        gl_Position = u_matrix * vec4(corner, 0, 1);
+        gl_Position = projectTile(corner);
     } else {
-        gl_Position = u_matrix * vec4(center, 0, 1);
+        gl_Position = projectTile(center);
         if (u_scale_with_map) {
             gl_Position.xy += ellipseRotateVec2(corner * u_extrude_scale * u_camera_to_center_distance, angle, u_aspect_ratio);
         } else {

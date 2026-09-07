@@ -120,6 +120,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
 
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::SkyShader,
+                  shaders::BuiltIn::AtmosphereShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
@@ -133,6 +135,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadePrepareShader,

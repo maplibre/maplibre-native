@@ -45,6 +45,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/custom_symbol_icon.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/fill_extrusion.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/globe_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/hillshade.hpp
@@ -53,6 +54,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/sky.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/symbol.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/widevector.hpp
 )
@@ -91,6 +93,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/globe_depth.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/heatmap.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/hillshade.cpp
@@ -99,6 +102,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/sky.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/symbol.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/widevector.cpp
 )

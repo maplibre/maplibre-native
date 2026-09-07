@@ -40,10 +40,14 @@ layout(std140, set = LAYER_SET_INDEX, binding = idBackgroundDrawableUBO) readonl
     BackgroundDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 void main() {
     const BackgroundDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
 
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 }
 )";
@@ -101,6 +105,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idBackgroundDrawableUBO) readonl
     BackgroundPatternDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(set = LAYER_SET_INDEX, binding = idBackgroundPropsUBO) uniform BackgroundPatternPropsUBO {
     vec2 pattern_tl_a;
     vec2 pattern_br_a;
@@ -131,7 +139,7 @@ void main() {
                                  drawable.tile_units_to_pixels,
                                  in_position);
 
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 }
 )";

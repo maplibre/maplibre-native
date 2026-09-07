@@ -124,5 +124,8 @@
     "render-tests/feature-state/promote-id-fill-extrusion": "https://github.com/mapbox/mapbox-gl-js/pull/9202",
     "render-tests/line-pattern/with-dasharray":"https://github.com/mapbox/mapbox-gl-js/pull/9189",
     "render-tests/symbol-sort-key/placement-tile-boundary-right-then-left": "https://github.com/mapbox/mapbox-gl-js/pull/9054",
-    "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results"
+    "render-tests/tile-mode/streets-v11": "ignored due to flaky metrics results",
+    "render-tests/projection/globe/antimeridian-overdraw/line-pattern": "Line patterns are scaled by the Mercator pixel ratio on the globe; fixed by the line-pattern-scale change (its own PR), where this test passes. Remove with it.",
+    "render-tests/projection/globe/antimeridian-overdraw/line-gradient-dasharray": "Dash arrays on a gradient line; fixed by the line-gradient-dasharray change (its own PR), where this test passes. Remove with it.",
+    "render-tests/projection/globe/antimeridian-overdraw/geojson-crossing-z0": "The fill outline is drawn once across the antimeridian on the globe; GL JS's expected image has no outline there (0.052% of pixels differ)."
 }

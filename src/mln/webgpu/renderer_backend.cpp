@@ -17,6 +17,7 @@
 #include <mln/shaders/webgpu/debug.hpp>
 #include <mln/shaders/webgpu/fill.hpp>
 #include <mln/shaders/webgpu/fill_extrusion.hpp>
+#include <mln/shaders/webgpu/globe_depth.hpp>
 #include <mln/shaders/webgpu/heatmap.hpp>
 #include <mln/shaders/webgpu/heatmap_texture.hpp>
 #include <mln/shaders/webgpu/hillshade.hpp>
@@ -25,6 +26,7 @@
 #include <mln/shaders/webgpu/line.hpp>
 #include <mln/shaders/webgpu/location_indicator.hpp>
 #include <mln/shaders/webgpu/raster.hpp>
+#include <mln/shaders/webgpu/sky.hpp>
 #include <mln/shaders/webgpu/symbol.hpp>
 #include <mln/shaders/webgpu/widevector.hpp>
 
@@ -93,6 +95,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
     // As WebGPU shader headers are created, they will automatically be picked up
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::SkyShader,
+                  shaders::BuiltIn::AtmosphereShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
@@ -107,6 +111,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& registry, const ProgramPa
                   shaders::BuiltIn::FillOutlineTriangulatedShader,
                   shaders::BuiltIn::FillExtrusionShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,

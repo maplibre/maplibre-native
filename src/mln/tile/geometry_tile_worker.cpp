@@ -162,6 +162,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
                                    std::set<std::string> availableImages_,
+                                   const SubdivisionGranularitySetting& subdivisionGranularity_,
                                    uint64_t correlationID_) {
     MLN_TRACE_FUNC();
 
@@ -169,6 +170,7 @@ void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layer
         layers = std::move(layers_);
         correlationID = correlationID_;
         availableImages = std::move(availableImages_);
+        subdivisionGranularity = subdivisionGranularity_;
 
         switch (state) {
             case Idle:
@@ -456,8 +458,11 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{
-            .tileID = id, .mode = mode, .pixelRatio = pixelRatio, .layerType = leaderImpl.getTypeInfo()};
+        BucketParameters parameters{.tileID = id,
+                                    .mode = mode,
+                                    .pixelRatio = pixelRatio,
+                                    .layerType = leaderImpl.getTypeInfo(),
+                                    .subdivisionGranularity = subdivisionGranularity};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {

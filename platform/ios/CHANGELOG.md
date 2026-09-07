@@ -2,6 +2,11 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## main
+
+- Add nullable `MLNSky` runtime styling with zoom expressions, transitions, and removal.
+- feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#TBD](https://github.com/maplibre/maplibre-native/pull/TBD)).
+
 ## 6.29.0
 
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
