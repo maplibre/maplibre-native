@@ -28,6 +28,7 @@
     "center": {
       "type": "array",
       "value": "number",
+      "length": 2,
       "doc": "Default map center in longitude and latitude.  The style center will be used only if the map has not been positioned by other means (e.g. map options or user interaction).",
       "example": [
         -73.9749,
@@ -94,6 +95,26 @@
           "js": "5.0.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/2941",
           "ios": "https://github.com/maplibre/maplibre-native/issues/2941"
+        }
+      }
+    },
+    "state": {
+      "type": "state",
+      "default": {},
+      "doc": "An object used to define default values when using the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression.",
+      "example": {
+        "chargerType": {
+          "default": ["CCS", "CHAdeMO", "Type2"]
+        },
+        "minPreferredChargingSpeed": {
+          "default": 50
+        }
+      },
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       }
     },
@@ -192,16 +213,15 @@
           "ios": "0.1.0"
         },
         "omit to use local fonts": {
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/3302",
+          "js": "5.11.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/165",
           "ios": "https://github.com/maplibre/maplibre-native/issues/165"
         }
       }
     },
     "font-faces": {
-      "type": "array",
-      "value": "fontFaces",
-      "doc": "The `font-faces` property can be used to specify what font files to use for rendering text. Font faces contain information needed to render complex texts such as [Devanagari](https://en.wikipedia.org/wiki/Devanagari), [Khmer](https://en.wikipedia.org/wiki/Khmer_script) among many others.<h2>Unicode range</h2>The optional `unicode-range` property can be used to only use a particular font file for characters within the specified unicode range(s). Its value should be an array of strings, each indicating a start and end of a unicode range, similar to the [CSS descriptor with the same name](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/unicode-range). This allows specifying multiple non-consecutive unicode ranges. When not specified, the default value is `U+0-10FFFF`, meaning the font file will be used for all unicode characters.\n\nRefer to the [Unicode Character Code Charts](https://www.unicode.org/charts/) to see ranges for scripts supported by Unicode. To see what unicode code-points are available in a font, use a tool like [FontDrop](https://fontdrop.info/).\n\n<h2>Font Resolution</h2>For every name in a symbol layer’s [`text-font`](./layers.md/#text-font) array, characters are matched if they are covered one of the by the font files in the corresponding entry of the `font-faces` map. Any still-unmatched characters then fall back to the [`glyphs`](./glyphs.md) URL if provided.\n\n<h2>Supported Fonts</h2>What type of fonts are supported is implementation-defined. Unsupported fonts are ignored.",
+      "type": "fontFaces",
+      "doc": "The `font-faces` property can be used to specify what font files to use for rendering text. Font faces contain information needed to render complex texts such as [Devanagari](https://en.wikipedia.org/wiki/Devanagari), [Khmer](https://en.wikipedia.org/wiki/Khmer_script) among many others.<h2>Unicode range</h2>The optional `unicode-range` property can be used to only use a particular font file for characters within the specified unicode range(s). Its value should be an array of strings, each indicating a start and end of a unicode range, similar to the [CSS descriptor with the same name](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/unicode-range). This allows specifying multiple non-consecutive unicode ranges. When not specified, the default value is `U+0-10FFFF`, meaning the font file will be used for all unicode characters.\n\nRefer to the [Unicode Character Code Charts](https://www.unicode.org/charts/) to see ranges for scripts supported by Unicode. To see what unicode code-points are available in a font, use a tool like [FontDrop](https://fontdrop.info/).\n\n<h2>Font Resolution</h2>For every name in a symbol layer’s [`text-font`](./layers.md#text-font) array, characters are matched if they are covered one of the by the font files in the corresponding entry of the `font-faces` map. Any still-unmatched characters then fall back to the [`glyphs`](./glyphs.md) URL if provided.\n\n<h2>Supported Fonts</h2>What type of fonts are supported is implementation-defined. Unsupported fonts are ignored.",
       "example": {
         "Noto Sans Regular": [{
           "url": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSansKhmer/hinted/ttf/NotoSansKhmer-Regular.ttf",
@@ -223,7 +243,7 @@
       },
       "sdk-support": {
         "basic functionality": {
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/50",
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/6637",
           "android": "11.13.0",
           "ios": "6.18.0"
         }
@@ -231,7 +251,7 @@
     },
     "transition": {
       "type": "transition",
-      "doc": "A global transition definition to use as a default across properties, to be used for timing transitions between one value and the next when no property-specific transition is set. Collision-based symbol fading is controlled independently of the style's `transition` property.",
+      "doc": "A global transition definition to use as a default across properties, to be used for timing transitions between one value and the next when no property-specific transition is set. Collision-based symbol fading is controlled independently of the style's `transition` property.\n\nIn addition to this global definition via `transition`, if any individual paint or layout property are marked as `Transitionable`, a corresponding `*-transition` property is avaliable to fine-tune the property’s animation between old and new values based on similar `duration` and `delay` values.\n\nFor example, [`fill-color`](layers/#fill-color) is marked as `Transitionable`, so it can transition either independently via `fill-color-transition` or globally via the style's `transition` property:",
       "example": {
         "duration": 300,
         "delay": 0
@@ -363,9 +383,9 @@
           "js": "supported"
         },
         "mlt": {
-          "android": "https://github.com/maplibre/maplibre-native/issues/3721",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3721",
-          "js": "https://github.com/maplibre/maplibre-gl-js/issues/6258"
+          "android": "12.1.0",
+          "ios": "6.20.0",
+          "js": "5.12.0"
         }
       }
     },
@@ -634,7 +654,7 @@
       "doc": "Size of the tile buffer on each side. A value of 0 produces no buffer. A value of 512 produces a buffer as wide as the tile itself. Larger values produce fewer rendering artifacts near tile edges and slower performance."
     },
     "filter": {
-      "type": "*",
+      "type": "filter",
       "doc": "An expression for filtering features prior to processing them for rendering."
     },
     "tolerance": {
@@ -663,7 +683,7 @@
     },
     "clusterProperties": {
       "type": "*",
-      "doc": "An object defining custom properties on the generated clusters if clustering is enabled, aggregating values from clustered points. Has the form `{\"property_name\": [operator, map_expression]}`. `operator` is any expression function that accepts at least 2 operands (e.g. `\"+\"` or `\"max\"`) — it accumulates the property value from clusters/points the cluster contains; `map_expression` produces the value of a single point.\n\nExample: `{\"sum\": [\"+\", [\"get\", \"scalerank\"]]}`.\n\nFor more advanced use cases, in place of `operator`, you can use a custom reduce expression that references a special `[\"accumulated\"]` value, e.g.:\n\n`{\"sum\": [[\"+\", [\"accumulated\"], [\"get\", \"sum\"]], [\"get\", \"scalerank\"]]}`"
+      "doc": "An object defining custom properties on the generated clusters if clustering is enabled, aggregating values from clustered points. Has the form `{\"property_name\": [operator, map_expression]}`. `operator` is any expression function that accepts at least 2 operands (e.g. `\"+\"` or `\"max\"`) - it accumulates the property value from clusters/points the cluster contains; `map_expression` produces the value of a single point.\n\nExample: `{\"sum\": [\"+\", [\"get\", \"scalerank\"]]}`.\n\nFor more advanced use cases, in place of `operator`, you can use a custom reduce expression that references a special `[\"accumulated\"]` value, e.g.:\n\n`{\"sum\": [[\"+\", [\"accumulated\"], [\"get\", \"sum\"]], [\"get\", \"scalerank\"]]}`"
     },
     "lineMetrics": {
       "type": "boolean",
@@ -722,9 +742,8 @@
       "doc": "The data type of the image source."
     },
     "url": {
-      "required": true,
       "type": "string",
-      "doc": "URL that points to an image."
+      "doc": "URL that points to an image. Optional: a source created without a url starts empty and renders nothing until an image is set at runtime."
     },
     "coordinates": {
       "required": true,
@@ -828,8 +847,8 @@
             },
             "additional methods": {
               "js": "5.5.0",
-              "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-              "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+              "android": "13.0.0",
+              "ios": "6.24.0"
             }
           }
         },
@@ -838,8 +857,8 @@
           "sdk-support": {
             "basic functionality": {
               "js": "5.6.0",
-              "android": "https://github.com/maplibre/maplibre-native/issues/3408",
-              "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+              "android": "13.0.0",
+              "ios": "6.24.0"
             }
           }
         },
@@ -927,9 +946,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_fill": {
@@ -946,6 +976,11 @@
           "js": "1.2.0",
           "android": "9.1.0",
           "ios": "5.8.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -974,9 +1009,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_circle": {
@@ -993,6 +1039,11 @@
           "js": "1.2.0",
           "android": "9.2.0",
           "ios": "5.9.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1021,9 +1072,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_heatmap": {
@@ -1044,26 +1106,23 @@
           "js": "0.41.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_fill-extrusion": {
-    "fill-extrusion-rounded-corner-distance": {
-      "type": "number",
-      "default": 0,
-      "minimum": 0,
-      "units": "meters",
-      "doc": "The distance from the corner that will be cut and replaced with rounded corner.",
-      "sdk-support": {
-        "basic functionality": {
-          "android": "13.0.0",
-          "ios": "6.0.0"
-        }
-      },
-      "property-type": "constant"
-    },
     "visibility": {
       "type": "enum",
       "values": {
@@ -1081,6 +1140,32 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "fill-extrusion-rounded-corner-distance": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "units": "meters",
+      "doc": "The distance from each fill extrusion corner, measured along the adjacent edges, that is replaced by a rounded corner. A value of `0` disables rounded corners.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "6.2.0",
+          "android": "13.4.0",
+          "ios": "6.28.0"
         }
       },
       "property-type": "constant"
@@ -1107,15 +1192,26 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "data-driven styling": {
+          "js": "5.22.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4194",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4194"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
         "interpolated": false,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "data-constant"
+      "property-type": "data-driven"
     },
     "line-join": {
       "type": "enum",
@@ -1142,6 +1238,11 @@
           "js": "0.40.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1167,15 +1268,26 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "data-driven styling": {
+          "js": "5.22.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4194",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4194"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
         "interpolated": true,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "data-constant"
+      "property-type": "data-driven"
     },
     "line-round-limit": {
       "type": "number",
@@ -1191,15 +1303,26 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "data-driven styling": {
+          "js": "5.22.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4194",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4194"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
         "interpolated": true,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "data-constant"
+      "property-type": "data-driven"
     },
     "line-sort-key": {
       "type": "number",
@@ -1214,6 +1337,11 @@
           "js": "1.2.0",
           "android": "9.1.0",
           "ios": "5.8.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1242,9 +1370,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_symbol": {
@@ -1273,6 +1412,11 @@
           "js": "0.47.0",
           "android": "6.4.0",
           "ios": "4.3.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1299,6 +1443,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1318,6 +1467,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1341,6 +1495,11 @@
           "js": "0.53.0",
           "android": "7.4.0",
           "ios": "4.11.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1372,6 +1531,11 @@
           "js": "0.49.0",
           "android": "6.6.0",
           "ios": "4.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1397,6 +1561,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1429,6 +1598,11 @@
           "js": "2.1.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/251",
           "ios": "https://github.com/maplibre/maplibre-native/issues/251"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1451,6 +1625,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1474,6 +1653,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1508,19 +1692,30 @@
           "android": "2.0.1",
           "ios": "2.0.0"
         },
+        "data-driven styling": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/3461",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4517",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4517"
+        },
         "`auto` value": {
           "js": "0.25.0",
           "android": "4.2.0",
           "ios": "3.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
         "interpolated": false,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "data-constant"
+      "property-type": "data-driven"
     },
     "icon-size": {
       "type": "number",
@@ -1541,6 +1736,11 @@
           "js": "0.35.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1584,6 +1784,11 @@
           "js": "1.6.0",
           "android": "9.2.0",
           "ios": "5.8.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1622,6 +1827,11 @@
           "js": "0.21.0",
           "android": "4.2.0",
           "ios": "3.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1646,6 +1856,11 @@
           "js": "0.35.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1676,6 +1891,11 @@
           "js": "0.21.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1705,6 +1925,11 @@
           "js": "2.2.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/2754",
           "ios": "https://github.com/maplibre/maplibre-native/issues/2754"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1737,6 +1962,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1769,6 +1999,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1826,6 +2061,11 @@
           "js": "0.40.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1860,6 +2100,11 @@
           "js": "0.39.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1898,6 +2143,11 @@
           "js": "0.25.0",
           "android": "4.2.0",
           "ios": "3.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1944,6 +2194,11 @@
           "js": "2.1.8",
           "android": "https://github.com/maplibre/maplibre-native/issues/250",
           "ios": "https://github.com/maplibre/maplibre-native/issues/250"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -1969,6 +2224,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2006,6 +2266,11 @@
           "js": "https://github.com/maplibre/maplibre-gl-js/issues/3302",
           "android": "https://github.com/maplibre/maplibre-native/issues/165",
           "ios": "https://github.com/maplibre/maplibre-native/issues/165"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2036,6 +2301,11 @@
           "js": "0.35.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2066,6 +2336,11 @@
           "js": "0.40.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2090,6 +2365,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2118,6 +2398,11 @@
           "js": "0.40.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2165,6 +2450,11 @@
           "js": "0.54.0",
           "android": "7.4.0",
           "ios": "4.10.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2191,6 +2481,11 @@
           "js": "0.54.0",
           "android": "7.4.0",
           "ios": "4.10.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "requires": [
@@ -2251,6 +2546,11 @@
           "js": "0.54.0",
           "android": "7.4.0",
           "ios": "4.10.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2259,6 +2559,7 @@
           "zoom"
         ]
       },
+      "example": ["center", "left", "right"],
       "property-type": "data-constant"
     },
     "text-variable-anchor-offset": {
@@ -2282,6 +2583,11 @@
           "js": "3.3.0",
           "ios": "https://github.com/maplibre/maplibre-native/issues/2358",
           "android": "https://github.com/maplibre/maplibre-native/issues/2358"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2291,6 +2597,7 @@
           "feature"
         ]
       },
+      "example": ["top", [0, 4], "left", [3, 0], "bottom", [1, 1]],
       "property-type": "data-driven"
     },
     "text-anchor": {
@@ -2342,6 +2649,11 @@
           "js": "0.39.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2372,6 +2684,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2407,6 +2724,11 @@
           "js": "1.3.0",
           "android": "8.3.0",
           "ios": "5.3.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2436,6 +2758,11 @@
           "js": "0.35.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2461,6 +2788,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2492,6 +2824,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2530,6 +2867,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2567,6 +2909,11 @@
           "js": "0.35.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2593,6 +2940,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2625,6 +2977,11 @@
           "js": "2.1.0",
           "android": "https://github.com/maplibre/maplibre-native/issues/251",
           "ios": "https://github.com/maplibre/maplibre-native/issues/251"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2647,6 +3004,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -2670,6 +3032,74 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.7.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "symbol-height-offset": {
+      "type": "number",
+      "default": 0,
+      "units": "meters",
+      "doc": "The height above the anchor, in meters, at which the symbol is placed. Use `symbol-height-anchor` to control what this height is measured from.",
+      "requires": [
+        {
+          "symbol-placement": [
+            "point"
+          ]
+        }
+      ],
+      "sdk-support": {
+        "basic functionality": {
+          "js": "6.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/1929",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/1929"
+        },
+        "data-driven styling": {
+          "js": "6.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/1929",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/1929"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom",
+          "feature"
+        ]
+      },
+      "property-type": "data-driven"
+    },
+    "symbol-height-anchor": {
+      "type": "enum",
+      "values": {
+        "ground": {
+          "doc": "`symbol-height-offset` is measured from the ground below the symbol, i.e. the terrain elevation at the symbol's location, or zero when terrain is not enabled."
+        },
+        "absolute": {
+          "doc": "`symbol-height-offset` is measured from sea level, ignoring the terrain elevation at the symbol's location."
+        }
+      },
+      "default": "ground",
+      "doc": "Defines what `symbol-height-offset` is measured from.",
+      "requires": [
+        "symbol-height-offset"
+      ],
+      "sdk-support": {
+        "basic functionality": {
+          "js": "https://github.com/maplibre/maplibre-gl-js/issues/644",
+          "android": "https://github.com/maplibre/maplibre-native/issues/1929",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/1929"
         }
       },
       "expression": {
@@ -2697,9 +3127,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_raster": {
@@ -2720,9 +3161,20 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_hillshade": {
@@ -2743,9 +3195,20 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "layout_color-relief": {
@@ -2763,15 +3226,36 @@
       "doc": "Whether this layer is displayed.",
       "sdk-support": {
         "basic functionality": {
+          "js": "5.6.0",
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.16.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
-      "property-type": "constant"
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "filter": {
-    "type": "array",
-    "value": "*",
-    "doc": "A filter selects specific features from a layer."
+    "type": "boolean",
+    "doc": "A filter selects specific features from a layer.",
+    "expression": {
+      "interpolated": false,
+      "parameters": [
+        "zoom",
+        "feature"
+      ]
+    },
+    "property-type": "data-driven"
   },
   "filter_operator": {
     "type": "enum",
@@ -2908,12 +3392,12 @@
   },
   "expression": {
     "type": "array",
-    "value": "*",
+    "value": "expression_name",
     "minimum": 1,
-    "doc": "An expression defines a function that can be used for data-driven style properties or feature filters."
+    "doc": "An expression defines a function that can be used for data-driven style properties or feature filters. The first element of an expression array is a string naming the expression operator, e.g. `\"*\"` or `\"case\"`. Elements that follow (if any) are the _arguments_ to the expression. Each argument is either a literal value (a string, number, boolean, or `null`), or another expression array."
   },
   "expression_name": {
-    "doc": "",
+    "doc": "First element in an expression array. May be followed by a number of arguments.",
     "type": "enum",
     "values": {
       "let": {
@@ -2921,25 +3405,25 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["var_1_name", "var_1_value", "...", "var_n_name", "var_n_value", "expression"],
+              "parameters": ["var_name_1", "var_value_1", "...", "var_name_n", "var_value_n", "expression"],
               "output-type": "any"
             }
           ],
           "parameters": [
             {
-              "name": "var_i_name",
+              "name": "var_name_i",
               "type": "string literal",
-              "description": "The name of the i-th variable."
+              "doc": "The name of the i-th variable."
             },
             {
-              "name": "var_i_value",
+              "name": "var_value_i",
               "type": "any",
-              "description": "The value of the i-th variable."
+              "doc": "The value of the i-th variable."
             },
             {
               "name": "expression",
               "type": "any",
-              "description": "The expression within which the named variables can be referenced."
+              "doc": "The expression within which the named variables can be referenced."
             }
           ]
         },
@@ -2966,7 +3450,7 @@
             {
               "name": "var_name",
               "type": "string literal",
-              "description": "The name of the variable bound using `let`."
+              "doc": "The name of the variable bound using `let`."
             }
           ]
         },
@@ -2981,7 +3465,7 @@
         }
       },
       "literal": {
-        "doc": "Provides a literal array or object value.\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
+        "doc": "Provides a literal array or object value, treating nested values as literals themselves.\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
         "syntax": {
           "overloads": [
             {
@@ -3014,6 +3498,32 @@
           }
         }
       },
+      "semiliteral": {
+        "doc": "Provides an array value, evaluating expressions in the elements of the array.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["json_array"],
+              "output-type": "array"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "json_array",
+              "type": "JSON array"
+            }
+          ]
+        },
+        "example": ["semiliteral", [["get", "label_x"], ["get", "label_y"]]],
+        "group": "Types",
+        "sdk-support": {
+          "basic functionality": {
+            "js": "https://github.com/maplibre/maplibre-gl-js/issues/7933",
+            "android": "https://github.com/maplibre/maplibre-native/issues/4401",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/4401"
+          }
+        }
+      },
       "array": {
         "doc": "Asserts that the input is an array (optionally with a specific item type and length). If, when the input expression is evaluated, it is not of the asserted type or length, then this assertion will cause the whole expression to be aborted.",
         "syntax": {
@@ -3038,13 +3548,13 @@
             },
             {
               "name": "type",
-              "type": "\"string\" | \"number\" | \"boolean\"",
-              "description": "The asserted type of the input array."
+              "type": ["string", "number", "boolean"],
+              "doc": "The asserted type of the input array."
             },
             {
               "name": "length",
               "type": "number literal",
-              "description": "The asserted length of the input array."
+              "doc": "The asserted length of the input array."
             }
           ]
         },
@@ -3071,12 +3581,12 @@
             {
               "name": "index",
               "type": "number",
-              "description": "The index into `array`."
+              "doc": "The index into `array`."
             },
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The array of items to retrieve the specified item from."
+              "doc": "The array of items to retrieve the specified item from."
             }
           ]
         },
@@ -3107,22 +3617,22 @@
             {
               "name": "item",
               "type": "T",
-              "description": "The needle to search for within `array`."
+              "doc": "The needle to search for within `array`."
             },
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The haystack through which to search for `item`."
+              "doc": "The haystack through which to search for `item`."
             },
             {
               "name": "substring",
               "type": "string",
-              "description": "The needle to search for within `string`."
+              "doc": "The needle to search for within `string`."
             },
             {
               "name": "string",
               "type": "string",
-              "description": "The haystack through which to search for `substring`."
+              "doc": "The haystack through which to search for `substring`."
             }
           ]
         },
@@ -3153,27 +3663,27 @@
             {
               "name": "item",
               "type": "T",
-              "description": "The needle to search for within `array`."
+              "doc": "The needle to search for within `array`."
             },
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The haystack through which to search for `item`."
+              "doc": "The haystack through which to search for `item`."
             },
             {
               "name": "substring",
               "type": "string",
-              "description": "The needle to search for within `string`."
+              "doc": "The needle to search for within `string`."
             },
             {
               "name": "string",
               "type": "string",
-              "description": "The haystack through which to search for `substring`."
+              "doc": "The haystack through which to search for `substring`."
             },
             {
               "name": "from_index",
               "type": "number",
-              "description": "The index from where to begin the search."
+              "doc": "The index from where to begin the search."
             }
           ]
         },
@@ -3204,22 +3714,22 @@
             {
               "name": "array",
               "type": "array<T>",
-              "description": "The original array from which to extract the subarray."
+              "doc": "The original array from which to extract the subarray."
             },
             {
               "name": "string",
               "type": "string",
-              "description": "The original string from which to extract the substring."
+              "doc": "The original string from which to extract the substring."
             },
             {
               "name": "start_index",
               "type": "number",
-              "description": "The inclusive index from which `slice` extracts items or characters from the subarray or substring."
+              "doc": "The inclusive index from which `slice` extracts items or characters from the subarray or substring."
             },
             {
               "name": "end_index",
               "type": "number",
-              "description": "The non-inclusive index up to which `slice` extracts items or characters from the subarray or substring."
+              "doc": "The non-inclusive index up to which `slice` extracts items or characters from the subarray or substring."
             }
           ]
         },
@@ -3254,7 +3764,7 @@
             {
               "name": "fallback",
               "type": "any",
-              "description": "The result when no condition evaluates to true."
+              "doc": "The result when no condition evaluates to true."
             }
           ]
         },
@@ -3280,23 +3790,23 @@
           "parameters": [
             {
               "name": "input",
-              "type": "string | number",
-              "description": "Any expression."
+              "type": ["string", "number"],
+              "doc": "Any expression."
             },
             {
               "name": "label_i",
-              "type": "string literal | number literal | array<string literal> | array<number literal>",
-              "description": "The i-th literal value or array of literal values to match the input against."
+              "type": ["string literal", "number literal", "array<string literal>", "array<number literal>"],
+              "doc": "The i-th literal value or array of literal values to match the input against."
             },
             {
               "name": "output_i",
               "type": "any",
-              "description": "The result when the i-th label is the first label to match the input."
+              "doc": "The result when the i-th label is the first label to match the input."
             },
             {
               "name": "fallback",
               "type": "any",
-              "description": "The result when no label matches the input."
+              "doc": "The result when no label matches the input."
             }
           ]
         },
@@ -3341,7 +3851,7 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["input", "output_0", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
+              "parameters": ["input", "output_0", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
               "output-type": "any"
             }
           ],
@@ -3349,22 +3859,22 @@
             {
               "name": "input",
               "type": "number",
-              "description": "Any numeric expression."
+              "doc": "Any numeric expression."
             },
             {
               "name": "output_0",
               "type": "any",
-              "description": "The result when the `input` is less than the first stop."
+              "doc": "The result when the `input` is less than the first stop."
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal",
-              "description": "The value of the i-th stop against which the `input` is compared."
+              "doc": "The value of the i-th stop against which the `input` is compared."
             },
             {
-              "name": "stop_i_output",
+              "name": "stop_output_i",
               "type": "any",
-              "description": "The result when the i-th stop is the last stop less than the `input`."
+              "doc": "The result when the i-th stop is the last stop less than the `input`."
             }
           ]
         },
@@ -3379,34 +3889,34 @@
         }
       },
       "interpolate": {
-        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, `color`, `array<color>`, or `projection`.\n\nInterpolation types:\n\n- `[\"linear\"]`, or an expression returning one of those types: Interpolates linearly between the pair of stops just less than and just greater than the input.\n\n- `[\"exponential\", base]`: Interpolates exponentially between the stops just less than and just greater than the input. `base` controls the rate at which the output increases: higher values make the output increase more towards the high end of the range. With values close to 1 the output increases linearly.\n\n- `[\"cubic-bezier\", x1, y1, x2, y2]`: Interpolates using the cubic bezier curve defined by the given control points.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
+        "doc": "Produces continuous, smooth results by interpolating between pairs of input and output values (\"stops\"). The `input` may be any numeric expression (e.g., `[\"get\", \"population\"]`). Stop inputs must be numeric literals in strictly ascending order. The output type must be `number`, `array<number>`, `color`, `array<color>`, or `projection`.\n\n - [Animate map camera around a point](https://maplibre.org/maplibre-gl-js/docs/examples/animate-camera-around-point/)\n\n - [Change building color based on zoom level](https://maplibre.org/maplibre-gl-js/docs/examples/change-building-color-based-on-zoom-level/)\n\n - [Create a heatmap layer](https://maplibre.org/maplibre-gl-js/docs/examples/heatmap-layer/)\n\n - [Visualize population density](https://maplibre.org/maplibre-gl-js/docs/examples/visualize-population-density/)",
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
-              "output-type": "number | array<number> | color | array<color> | projection"
+              "parameters": ["interpolation_type", "input", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
+              "output-type": ["number", "array<number>", "color", "array<color>", "projection"]
             }
           ],
           "parameters": [
             {
               "name": "interpolation_type",
-              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]",
-              "description": "The interpolation type."
+              "type": "interpolation",
+              "doc": "The interpolation type."
             },
             {
               "name": "input",
               "type": "number",
-              "description": "Any numeric expression."
+              "doc": "Any numeric expression."
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal",
-              "description": "The value of the i-th stop against which the `input` is compared."
+              "doc": "The value of the i-th stop against which the `input` is compared."
             },
             {
-              "name": "stop_i_output",
-              "type": "number | array<number> | color | array<color> | projection",
-              "description": "The output value corresponding to the i-th stop."
+              "name": "stop_output_i",
+              "type": ["number", "array<number>", "color", "array<color>", "projection"],
+              "doc": "The output value corresponding to the i-th stop."
             }
           ]
         },
@@ -3425,26 +3935,27 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
-              "output-type": "color | array<color>"
+              "parameters": ["interpolation_type", "input", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
+              "output-type": ["color", "array<color>"]
             }
           ],
           "parameters": [
             {
               "name": "interpolation_type",
-              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]"
+              "type": "interpolation",
+              "doc": "The interpolation type."
             },
             {
               "name": "input",
               "type": "number"
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal"
             },
             {
-              "name": "stop_i_output",
-              "type": "color | array<color>"
+              "name": "stop_output_i",
+              "type": ["color", "array<color>"]
             }
           ]
         },
@@ -3463,26 +3974,27 @@
         "syntax": {
           "overloads": [
             {
-              "parameters": ["interpolation_type", "input", "stop_1_input", "stop_1_output", "...", "stop_n_input", "stop_n_output"],
-              "output-type": "color | array<color>"
+              "parameters": ["interpolation_type", "input", "stop_input_1", "stop_output_1", "...", "stop_input_n", "stop_output_n"],
+              "output-type": ["color", "array<color>"]
             }
           ],
           "parameters": [
             {
               "name": "interpolation_type",
-              "type": "[\"linear\"] | [\"exponential\", base] | [\"cubic-bezier\", x1, y1, x2, y2]"
+              "type": "interpolation",
+              "doc": "The interpolation type."
             },
             {
               "name": "input",
               "type": "number"
             },
             {
-              "name": "stop_i_input",
+              "name": "stop_input_i",
               "type": "number literal"
             },
             {
-              "name": "stop_i_output",
-              "type": "color | array<color>"
+              "name": "stop_output_i",
+              "type": ["color", "array<color>"]
             }
           ]
         },
@@ -3687,7 +4199,7 @@
         }
       },
       "collator": {
-        "doc": "Returns a `collator` for use in locale-dependent comparison operations. The `case-sensitive` and `diacritic-sensitive` options default to `false`. The `locale` argument specifies the IETF language tag of the locale to use. If none is provided, the default locale is used. If the requested locale is not available, the `collator` will use a system-defined fallback locale. Use `resolved-locale` to test the results of locale fallback behavior.",
+        "doc": "Returns a `collator` for use in locale-dependent comparison operations. Use `resolved-locale` to test the results of locale fallback behavior.",
         "syntax": {
           "overloads": [
             {
@@ -3698,7 +4210,25 @@
           "parameters": [
             {
               "name": "options",
-              "type": "{ \"case-sensitive\"?: boolean, \"diacritic-sensitive\"?: boolean, \"locale\"?: string }"
+              "type": {
+                "case-sensitive": {
+                  "type": "boolean",
+                  "default": false,
+                  "example": true,
+                  "doc": "If characters of different case-ness are considered different"
+                },
+                "diacritic-sensitive": {
+                  "type": "boolean",
+                  "default": false,
+                  "example": true,
+                  "doc": "If characters with different diacritics are considered different"
+                },
+                "locale": {
+                  "type": "string",
+                  "example": "en",
+                  "doc": "IETF language tag of the locale to use. If none is provided, the default locale is used. If the requested locale is not available, the `collator` will use a system-defined fallback locale."
+                }
+              }
             }
           ]
         },
@@ -3713,7 +4243,7 @@
         }
       },
       "format": {
-        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object that supports the following properties:\n\n- `\"text-font\"`: Overrides the font stack specified by the root layout property.\n\n- `\"text-color\"`: Overrides the color specified by the root paint property.\n\n- `\"font-scale\"`: Applies a scaling factor on `text-size` as specified by the root layout property.\n\n- `\"vertical-align\"`: Aligns vertically text section or image in relation to the row it belongs to. Possible values are: \n\t- `\"bottom\"` *default*: align the bottom of this section with the bottom of other sections.\n<img alt=\"Visual representation of bottom alignment\" src=\"https://github.com/user-attachments/assets/0474a2fd-a4b2-417c-9187-7a13a28695bc\"/>\n\t- `\"center\"`: align the center of this section with the center of other sections.\n<img alt=\"Visual representation of center alignment\" src=\"https://github.com/user-attachments/assets/92237455-be6d-4c5d-b8f6-8127effc1950\"/>\n\t- `\"top\"`: align the top of this section with the top of other sections.\n<img alt=\"Visual representation of top alignment\" src=\"https://github.com/user-attachments/assets/45dccb28-d977-4abb-a006-4ea9792b7c53\"/>\n\t- Refer to [the design proposal](https://github.com/maplibre/maplibre-style-spec/issues/832) for more details.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
+        "doc": "Returns a `formatted` string for displaying mixed-format text in the `text-field` property. The input may contain a string literal or expression, including an [`'image'`](#image) expression. Strings may be followed by a style override object.\n\n - [Change the case of labels](https://maplibre.org/maplibre-gl-js/docs/examples/change-case-of-labels/)\n\n - [Display and style rich text labels](https://maplibre.org/maplibre-gl-js/docs/examples/display-and-style-rich-text-labels/)",
         "syntax": {
           "overloads": [
             {
@@ -3724,11 +4254,44 @@
           "parameters": [
             {
               "name": "input_i",
-              "type": "string | image"
+              "type": ["string", "image"]
             },
             {
               "name": "style_overrides_i",
-              "type": "{ \"text-font\"?: string, \"text-color\"?: color, \"font-scale\"?: number, \"vertical-align\"?: \"bottom\" | \"center\" | \"top\" }"
+              "type": {
+                "text-font": {
+                  "type": "string",
+                  "doc": "Overrides the font stack specified by the root layout property.",
+                  "example": "Arial Unicode MS Regular"
+                },
+                "text-color": {
+                  "type": "color",
+                  "doc": "Overrides the color specified by the root paint property.",
+                  "example": "#333"
+                },
+                "font-scale": {
+                  "type": "number",
+                  "doc":"Applies a scaling factor on `text-size` as specified by the root layout property.",
+                  "example": 1.2
+                },
+                "vertical-align": {
+                  "type": "enum",
+                  "doc": "Aligns a vertical text section or image in relation to the row it belongs to. Refer to [the design proposal](https://github.com/maplibre/maplibre-style-spec/issues/832) for more details.",
+                  "default": "bottom",
+                  "example": "bottom",
+                  "values": {
+                    "bottom": {
+                      "doc": "align the bottom of this section with the bottom of other sections.\n![Visual representation of bottom alignment](https://github.com/user-attachments/assets/0474a2fd-a4b2-417c-9187-7a13a28695bc)"
+                    },
+                    "center": {
+                      "doc": "align the center of this section with the center of other sections.\n![Visual representation of center alignment](https://github.com/user-attachments/assets/92237455-be6d-4c5d-b8f6-8127effc1950)"
+                    },
+                    "top": {
+                      "doc": "align the top of this section with the top of other sections.\n![Visual representation of top alignment](https://github.com/user-attachments/assets/45dccb28-d977-4abb-a006-4ea9792b7c53)"
+                    }
+                  }
+                }
+              }
             }
           ]
         },
@@ -3793,8 +4356,35 @@
           }
         }
       },
+      "global-state": {
+        "doc": "Retrieves a property value from global state that can be set with platform-specific APIs. Defaults can be provided using the [`state`](https://maplibre.org/maplibre-style-spec/root/#state) root property. Returns `null` if no value nor default value is set for the retrieved property.",
+        "group": "Lookup",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["property_name"],
+              "output-type": "any"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "property_name",
+              "type": "string literal",
+              "doc": "The name of the global state property to retrieve."
+            }
+          ]
+        },
+        "example": ["global-state", "someProperty"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.6.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+          }
+        }
+      },
       "number-format": {
-        "doc": "Converts the input number into a string representation using the providing formatting rules. If set, the `locale` argument specifies the locale to use, as a BCP 47 language tag. If set, the `currency` argument specifies an ISO 4217 code to use for currency-style formatting. If set, the `min-fraction-digits` and `max-fraction-digits` arguments specify the minimum and maximum number of fractional digits to include.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
+        "doc": "Converts the input number into a string representation using the provided format_options.\n\n - [Display HTML clusters with custom properties](https://maplibre.org/maplibre-gl-js/docs/examples/display-html-clusters-with-custom-properties/)",
         "syntax": {
           "overloads": [
             {
@@ -3805,11 +4395,39 @@
           "parameters": [
             {
               "name": "input",
-              "type": "number"
+              "type": "number",
+              "doc": "number to format"
             },
             {
               "name": "format_options",
-              "type": "{ \"locale\"?: string, \"currency\"?: string, \"min-fraction-digits\"?: number, \"max-fraction-digits\"?: number }"
+              "type": {
+                "locale": {
+                  "type": "string",
+                  "example": "en",
+                  "doc": "Specifies the locale to use, as a BCP 47 language tag"
+                },
+                "currency": {
+                  "type": "string",
+                  "example": "USD",
+                  "doc": "An ISO 4217 code to use for currency-style formatting"
+                },
+                "unit": {
+                  "type": "string",
+                  "example": "meter",
+                  "doc": "A CLDR or ECMA-402 unit to use for quantity-style formatting"
+                },
+                "min-fraction-digits": {
+                  "type": "number",
+                  "example": 1,
+                  "doc": "Minimum number of fractional digits to include"
+                },
+                "max-fraction-digits": {
+                  "type": "number",
+                  "example": 2,
+                  "doc": "Maximum number of fractional digits to include"
+                }
+              },
+              "doc": "Format options for the number"
             }
           ]
         },
@@ -3820,6 +4438,11 @@
             "js": "0.54.0",
             "android": "8.4.0",
             "ios": "supported"
+          },
+          "`unit` property": {
+            "js": "5.20.0",
+            "android": "https://github.com/maplibre/maplibre-native/issues/4071",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/4071"
           }
         }
       },
@@ -3988,7 +4611,7 @@
         }
       },
       "rgba": {
-        "doc": "Creates a color value from red, green, blue components, which must range between 0 and 255, and an alpha component which must range between 0 and 1. If any component is out of range, the expression is an error.",
+        "doc": "Creates a color value from red, green, blue components, which must range between 0 and 255, and an alpha component which must range between zero and one. If any component is out of range, the expression is an error.",
         "syntax": {
           "overloads": [
             {
@@ -4038,12 +4661,12 @@
             {
               "name": "property_name",
               "type": "string",
-              "description": "The name of the property to retrieve the value of."
+              "doc": "The name of the property to retrieve the value of."
             },
             {
               "name": "object",
               "type": "object",
-              "description": "The object to retrieve the value from."
+              "doc": "The object to retrieve the value from."
             }
           ]
         },
@@ -4070,12 +4693,12 @@
             {
               "name": "property_name",
               "type": "string",
-              "description": "The name of the property to test for the presence of."
+              "doc": "The name of the property to test for the presence of."
             },
             {
               "name": "object",
               "type": "object",
-              "description": "The object in which to test for the presence of the `property_name` property."
+              "doc": "The object in which to test for the presence of the `property_name` property."
             }
           ]
         },
@@ -4101,7 +4724,7 @@
           "parameters": [
             {
               "name": "array_or_string",
-              "type": "array | string"
+              "type": ["array", "string"]
             }
           ]
         },
@@ -4116,7 +4739,7 @@
         }
       },
       "properties": {
-        "doc": "Gets the feature properties object.  Note that in some cases, it may be more efficient to use [\"get\", \"property_name\"] directly.",
+        "doc": "Gets the feature properties object.  Note that in some cases, it may be more efficient to use `[\"get\", \"property_name\"]` directly.",
         "syntax": {
           "overloads": [
             {
@@ -4136,7 +4759,7 @@
         }
       },
       "feature-state": {
-        "doc": "Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. When `source.promoteId` is not provided, features are identified by their `id` attribute, which must be an integer or a string that can be cast to an integer. When `source.promoteId` is provided, features are identified by their `promoteId` property, which may be a number, string, or any primitive data type. Note that [\"feature-state\"] can only be used with paint properties that support data-driven styling.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-hover-effect/)",
+        "doc": "Retrieves a property value from the current feature's state. Returns null if the requested property is not present on the feature's state. A feature's state is not part of the GeoJSON or vector tile data, and must be set programmatically on each feature. When `source.promoteId` is not provided, features are identified by their `id` attribute, which must be an integer or a string that can be cast to an integer. When `source.promoteId` is provided, features are identified by their `promoteId` property, which may be a number, string, or any primitive data type. Note that `[\"feature-state\"]` can only be used with paint properties that support data-driven styling.\n\n - [Create a hover effect](https://maplibre.org/maplibre-gl-js/docs/examples/create-a-hover-effect/)",
         "syntax": {
           "overloads": [
             {
@@ -4202,7 +4825,7 @@
         }
       },
       "zoom": {
-        "doc": "Gets the current zoom level.  Note that in style layout and paint properties, [\"zoom\"] may only appear as the input to a top-level \"step\" or \"interpolate\" expression.",
+        "doc": "Gets the current zoom level.  Note that in style layout and paint properties, `[\"zoom\"]` may only appear as the input to a top-level `\"step\"` or `\"interpolate\"` expression.",
         "syntax": {
           "overloads": [
             {
@@ -4256,8 +4879,8 @@
         "sdk-support": {
           "basic functionality": {
             "js": "5.6.0",
-            "android": "https://github.com/maplibre/maplibre-native/issues/3408",
-            "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+            "android": "13.0.0",
+            "ios": "6.24.0"
           }
         }
       },
@@ -4370,17 +4993,17 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The number from which to subtract `input_2`."
+              "doc": "The number from which to subtract `input_2`."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The number to subtract from `input_1`."
+              "doc": "The number to subtract from `input_1`."
             },
             {
               "name": "single_input",
               "type": "number",
-              "description": "The number to subtract from 0."
+              "doc": "The number to subtract from 0."
             }
           ]
         },
@@ -4407,12 +5030,12 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The dividend."
+              "doc": "The dividend."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The divisor."
+              "doc": "The divisor."
             }
           ]
         },
@@ -4439,12 +5062,12 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The dividend."
+              "doc": "The dividend."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The divisor."
+              "doc": "The divisor."
             }
           ]
         },
@@ -4471,12 +5094,12 @@
             {
               "name": "input_1",
               "type": "number",
-              "description": "The base."
+              "doc": "The base."
             },
             {
               "name": "input_2",
               "type": "number",
-              "description": "The exponent."
+              "doc": "The exponent."
             }
           ]
         },
@@ -4503,7 +5126,7 @@
             {
               "name": "input",
               "type": "number",
-              "description": "The radicand."
+              "doc": "The radicand."
             }
           ]
         },
@@ -4954,7 +5577,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -4994,7 +5617,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5038,7 +5661,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5082,7 +5705,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5126,7 +5749,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5170,7 +5793,7 @@
             {
               "name": "collator",
               "type": "collator",
-              "description": "Options for locale-dependent comparison."
+              "doc": "Options for locale-dependent comparison."
             }
           ]
         },
@@ -5425,6 +6048,66 @@
             "ios": "4.2.0"
           }
         }
+      },
+      "split": {
+        "doc": "Returns an array of substrings formed by splitting an input string by a separator string.",
+        "group": "String",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "separator"],
+              "output-type": "array<string>"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            },
+            {
+              "name": "separator",
+              "type": "string"
+            }
+          ]
+        },
+        "example": ["split", ["get", "name"], ";"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.20.0",
+            "android": "13.5.0",
+            "ios": "6.29.0"
+          }
+        }
+      },
+      "join": {
+        "doc": "Returns a string formed by concatenating the elements of the input array, inserting a separator between each element.",
+        "group": "String",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": ["input", "separator"],
+              "output-type": "string"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "input",
+              "type": "array"
+            },
+            {
+              "name": "separator",
+              "type": "string"
+            }
+          ]
+        },
+        "example": ["join", ["split", ["get", "name"], ";"], "\n"],
+        "sdk-support": {
+          "basic functionality": {
+            "js": "5.20.0",
+            "android": "13.5.0",
+            "ios": "6.29.0"
+          }
+        }
       }
     }
   },
@@ -5455,6 +6138,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       }
     },
@@ -5475,7 +6163,7 @@
           "zoom"
         ]
       },
-      "doc": "Position of the light source relative to lit (extruded) geometries, in [r radial coordinate, a azimuthal angle, p polar angle] where r indicates the distance from the center of the base of an object to its light, a indicates the position of the light relative to 0° (0° when `light.anchor` is set to `viewport` corresponds to the top of the viewport, or 0° when `light.anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and p indicates the height of the light (from 0°, directly above, to 180°, directly below).",
+      "doc": "Position of the light source relative to lit (extruded) geometries, in `[r radial coordinate, a azimuthal angle, p polar angle]` where r indicates the distance from the center of the base of an object to its light, a indicates the position of the light relative to 0° (0° when `light.anchor` is set to `viewport` corresponds to the top of the viewport, or 0° when `light.anchor` is set to `map` corresponds to due north, and degrees proceed clockwise), and p indicates the height of the light (from 0°, directly above, to 180°, directly below).",
       "example": [
         1.5,
         90,
@@ -5486,6 +6174,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       }
     },
@@ -5506,6 +6199,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       }
     },
@@ -5528,6 +6226,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       }
     }
@@ -5544,7 +6247,19 @@
         ]
       },
       "transition": true,
-      "doc": "The base color for the sky."
+      "doc": "The base color for the sky.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "horizon-color": {
       "type": "color",
@@ -5557,7 +6272,19 @@
         ]
       },
       "transition": true,
-      "doc": "The base color at the horizon."
+      "doc": "The base color at the horizon.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "fog-color": {
       "type": "color",
@@ -5570,7 +6297,19 @@
         ]
       },
       "transition": true,
-      "doc": "The base color for the fog. Requires 3D terrain."
+      "doc": "The base color for the fog. Requires 3D terrain.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "fog-ground-blend": {
       "type": "number",
@@ -5585,7 +6324,19 @@
         ]
       },
       "transition": true,
-      "doc": "How to blend the fog over the 3D terrain. Where 0 is the map center and 1 is the horizon."
+      "doc": "How to blend the fog over the 3D terrain. Where 0 is the map center and 1 is the horizon.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "horizon-fog-blend": {
       "type": "number",
@@ -5600,7 +6351,19 @@
         ]
       },
       "transition": true,
-      "doc": "How to blend the fog color and the horizon color. Where 0 is using the horizon color only and 1 is using the fog color only."
+      "doc": "How to blend the fog color and the horizon color. Where 0 is using the horizon color only and 1 is using the fog color only.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "sky-horizon-blend": {
       "type": "number",
@@ -5615,7 +6378,19 @@
         ]
       },
       "transition": true,
-      "doc": "How to blend the sky color and the horizon color. Where 1 is blending the color at the middle of the sky and 0 is not blending at all and using the sky color only."
+      "doc": "How to blend the sky color and the horizon color. Where 1 is blending the color at the middle of the sky and 0 is not blending at all and using the sky color only.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     },
     "atmosphere-blend": {
       "type": "number",
@@ -5630,7 +6405,19 @@
         ]
       },
       "transition": true,
-      "doc": "How to blend the atmosphere. Where 1 is visible atmosphere and 0 is hidden. It is best to interpolate this expression when using globe projection."
+      "doc": "How to blend the atmosphere. Where 1 is visible atmosphere and 0 is hidden. It is best to interpolate this expression when using globe projection.",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "4.5.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4414",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4414"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.1.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      }
     }
   },
   "terrain": {
@@ -5697,6 +6484,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5724,6 +6516,11 @@
           "js": "0.21.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5736,16 +6533,39 @@
       },
       "property-type": "data-driven"
     },
+    "fill-layer-opacity": {
+      "type": "number",
+      "default": 1,
+      "minimum": 0,
+      "maximum": 1,
+      "doc": "Opacity applied to the layer as a whole. Unlike `fill-opacity` and alpha values in `fill-color`, which are applied per feature and accumulate where fills overlap, `fill-layer-opacity` is applied once so overlapping fills appear as a single surface at the given opacity. When both `fill-opacity` and `fill-layer-opacity` are set, the per-feature, overlap accumulation is preserved, then `fill-layer-opacity` composites the result. This property affects only the layer it is set on and cannot be used to composite multiple layers together or control how this layer blends with layers above or below it.\n\n![fill-opacity vs. fill-layer-opacity](assets/fill-layer-opacity.svg)",
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "6.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4298",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4298"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom",
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
+    },
     "fill-color": {
       "type": "color",
       "default": "#000000",
-      "doc": "The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used.",
+      "doc": "The color of the filled part of this layer. This color can be specified as `rgba` with an alpha component and the color's opacity will not affect the opacity of the 1px stroke, if it is used. When used with an SDF fill pattern, this serves as the foreground color of the pattern.",
       "transition": true,
-      "requires": [
-        {
-          "!": "fill-pattern"
-        }
-      ],
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
@@ -5756,6 +6576,11 @@
           "js": "0.19.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5790,6 +6615,11 @@
           "js": "0.19.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5812,12 +6642,17 @@
       ],
       "transition": true,
       "units": "pixels",
-      "doc": "The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.",
+      "doc": "The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5848,6 +6683,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5872,6 +6712,11 @@
           "js": "0.49.0",
           "android": "6.5.0",
           "ios": "4.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5897,6 +6742,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5927,6 +6777,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5949,12 +6804,17 @@
       ],
       "transition": true,
       "units": "pixels",
-      "doc": "The geometry's offset. Values are [x, y] where negatives indicate left and up (on the flat plane), respectively.",
+      "doc": "The geometry's offset. Values are `[x, y]` where negatives indicate left and up (on the flat plane), respectively.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -5985,6 +6845,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6009,6 +6874,11 @@
           "js": "0.49.0",
           "android": "6.5.0",
           "ios": "4.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6037,6 +6907,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6069,6 +6944,11 @@
           "js": "0.27.0",
           "android": "5.1.0",
           "ios": "3.6.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6091,6 +6971,11 @@
           "js": "0.50.0",
           "ios": "4.7.0",
           "android": "7.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6120,6 +7005,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6131,6 +7021,34 @@
         ]
       },
       "property-type": "data-driven"
+    },
+    "line-layer-opacity": {
+      "type": "number",
+      "default": 1,
+      "minimum": 0,
+      "maximum": 1,
+      "doc": "Opacity applied to the layer as a whole. Unlike `line-opacity` and alpha values in `line-color`, which are applied per feature and accumulate where lines overlap, `line-layer-opacity` is applied once so overlapping lines appear as a single surface at the given opacity. When both `line-opacity` and `line-layer-opacity` are set, the per-feature, overlap accumulation is preserved, then layer-opacity composites the result. This property affects only the layer it is set on and cannot be used to composite multiple layers together or control how this layer blends with layers above or below it.\n\n![line-opacity vs. line-layer-opacity](assets/line-layer-opacity.svg)",
+      "transition": true,
+      "sdk-support": {
+        "basic functionality": {
+          "js": "6.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4298",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4298"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "6.0.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom",
+          "global-state"
+        ]
+      },
+      "property-type": "data-constant"
     },
     "line-color": {
       "type": "color",
@@ -6152,6 +7070,11 @@
           "js": "0.23.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6174,12 +7097,17 @@
       ],
       "transition": true,
       "units": "pixels",
-      "doc": "The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.",
+      "doc": "The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6210,6 +7138,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6237,6 +7170,11 @@
           "js": "0.39.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6266,6 +7204,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6294,6 +7237,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6323,6 +7271,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6338,7 +7291,7 @@
     "line-dasharray": {
       "type": "array",
       "value": "number",
-      "doc": "Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels.",
+      "doc": "Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to pixels, multiply the length by the current line width. GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Zoom-dependent expressions will be evaluated only at integer zoom levels. The only way to create an array value is using `[\"literal\", [...]]`; arrays cannot be read from or derived from feature properties.",
       "minimum": 0,
       "transition": true,
       "units": "line widths",
@@ -6353,15 +7306,25 @@
           "android": "2.0.1",
           "ios": "2.0.0"
         },
-        "data-driven styling": {}
+        "data-driven styling": {
+          "js": "5.8.0",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/744",
+          "android": "https://github.com/maplibre/maplibre-native/issues/744"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
       },
       "expression": {
         "interpolated": false,
         "parameters": [
-          "zoom"
+          "zoom",
+          "feature"
         ]
       },
-      "property-type": "cross-faded"
+      "property-type": "cross-faded-data-driven"
     },
     "line-pattern": {
       "type": "resolvedImage",
@@ -6377,6 +7340,11 @@
           "js": "0.49.0",
           "android": "6.5.0",
           "ios": "4.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6412,7 +7380,12 @@
           "android": "6.5.0",
           "ios": "4.4.0"
         },
-        "data-driven styling": {}
+        "data-driven styling": {},
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
       },
       "expression": {
         "interpolated": true,
@@ -6441,6 +7414,11 @@
           "js": "0.18.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6468,6 +7446,11 @@
           "js": "0.18.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6495,6 +7478,11 @@
           "js": "0.20.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6524,6 +7512,11 @@
           "js": "0.20.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6546,12 +7539,17 @@
       ],
       "transition": true,
       "units": "pixels",
-      "doc": "The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.",
+      "doc": "The geometry's offset. Values are `[x, y]` where negatives indicate left and up, respectively.",
       "sdk-support": {
         "basic functionality": {
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6582,6 +7580,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6609,6 +7612,11 @@
           "js": "0.21.0",
           "android": "4.2.0",
           "ios": "3.4.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6636,6 +7644,11 @@
           "js": "0.39.0",
           "android": "5.2.0",
           "ios": "3.7.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6663,6 +7676,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6690,6 +7708,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6719,6 +7742,11 @@
           "js": "0.29.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6750,6 +7778,11 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6778,6 +7811,11 @@
           "js": "0.41.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6801,6 +7839,11 @@
           "js": "0.41.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6842,7 +7885,12 @@
           "android": "6.0.0",
           "ios": "4.0.0"
         },
-        "data-driven styling": {}
+        "data-driven styling": {},
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
       },
       "expression": {
         "interpolated": true,
@@ -6864,6 +7912,11 @@
           "js": "0.41.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6896,6 +7949,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6926,6 +7984,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6956,6 +8019,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -6988,6 +8056,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7020,6 +8093,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7051,6 +8129,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7082,6 +8165,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7112,6 +8200,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7143,6 +8236,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7173,6 +8271,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7205,6 +8308,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7237,6 +8345,11 @@
           "js": "0.33.0",
           "android": "5.0.0",
           "ios": "3.5.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7268,6 +8381,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7299,6 +8417,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7323,6 +8446,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7345,6 +8473,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7367,6 +8500,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7389,6 +8527,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7411,6 +8554,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7433,6 +8581,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7443,9 +8596,41 @@
       },
       "property-type": "data-constant"
     },
+    "resampling": {
+      "type": "enum",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter.\n![Visual comparison of linear resampling versus nearest resampling](assets/resampling.png)",
+      "values": {
+        "linear": {
+          "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
+        },
+        "nearest": {
+          "doc": "Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled"
+        }
+      },
+      "default": "linear",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.20.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4117",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4117"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
     "raster-resampling": {
       "type": "enum",
-      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter. It is advised to use the generic `resampling` paint property instead.",
       "values": {
         "linear": {
           "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
@@ -7460,6 +8645,11 @@
           "js": "0.47.0",
           "android": "6.3.0",
           "ios": "4.2.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7482,6 +8672,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7509,8 +8704,13 @@
         },
         "multidirectional": {
           "js": "5.5.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7531,13 +8731,18 @@
       "sdk-support": {
         "basic functionality": {
           "js": "5.5.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+          "android": "13.0.0",
+          "ios": "6.24.0"
         },
         "multidirectional": {
           "js": "5.5.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7565,6 +8770,11 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7587,6 +8797,11 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7610,8 +8825,13 @@
         },
         "multidirectional": {
           "js": "5.5.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7635,8 +8855,13 @@
         },
         "multidirectional": {
           "js": "5.5.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7657,6 +8882,11 @@
           "js": "0.43.0",
           "android": "6.0.0",
           "ios": "4.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7687,12 +8917,49 @@
         }
       },
       "default": "standard",
-      "doc": "The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)",
+      "doc": "The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`.\n![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)",
       "sdk-support": {
         "basic functionality": {
           "js": "5.5.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3396",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3396"
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
+    },
+    "resampling": {
+      "type": "enum",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter.\n![Visual comparison of linear resampling versus nearest resampling](assets/resampling.png)",
+      "values": {
+        "linear": {
+          "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
+        },
+        "nearest": {
+          "doc": "Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled"
+        }
+      },
+      "default": "linear",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.20.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4117",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4117"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7715,8 +8982,13 @@
       "sdk-support": {
         "basic functionality": {
           "js": "5.6.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3408",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+          "android": "13.0.0",
+          "ios": "6.24.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7741,10 +9013,15 @@
       "sdk-support": {
         "basic functionality": {
           "js": "5.6.0",
-          "android": "https://github.com/maplibre/maplibre-native/issues/3408",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/3408"
+          "android": "13.0.0",
+          "ios": "6.24.0"
         },
-        "data-driven styling": {}
+        "data-driven styling": {},
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
       },
       "expression": {
         "interpolated": true,
@@ -7753,6 +9030,38 @@
         ]
       },
       "property-type": "color-ramp"
+    },
+    "resampling": {
+      "type": "enum",
+      "doc": "The resampling/interpolation method to use for overscaling, also known as texture magnification filter.\n![Visual comparison of linear resampling versus nearest resampling](assets/resampling.png)",
+      "values": {
+        "linear": {
+          "doc": "(Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled"
+        },
+        "nearest": {
+          "doc": "Nearest neighbor filtering interpolates pixel values using the nearest original source pixel creating a sharp but pixelated look when overscaled"
+        }
+      },
+      "default": "linear",
+      "sdk-support": {
+        "basic functionality": {
+          "js": "5.20.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/4117",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/4117"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
+      },
+      "expression": {
+        "interpolated": false,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "paint_background": {
@@ -7771,6 +9080,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7791,7 +9105,12 @@
           "android": "2.0.1",
           "ios": "2.0.0"
         },
-        "data-driven styling": {}
+        "data-driven styling": {},
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
+        }
       },
       "expression": {
         "interpolated": false,
@@ -7813,6 +9132,11 @@
           "js": "0.10.0",
           "android": "2.0.1",
           "ios": "2.0.0"
+        },
+        "[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression": {
+          "js": "5.6.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/3302",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/3302"
         }
       },
       "expression": {
@@ -7870,6 +9194,151 @@
     "*": {
       "type": "string",
       "doc": "A name of a feature property to use as ID for feature state."
+    }
+  },
+  "interpolation": {
+    "type": "array",
+    "value": "interpolation_name",
+    "minimum": 1,
+    "doc": "An interpolation defines how to transition between items. The first element of an interpolation array is a string naming the interpolation operator, e.g. `\"linear\"` or `\"exponential\"`. Elements that follow (if any) are the _arguments_ to the interpolation."
+  },
+  "interpolation_name": {
+    "doc": "First element in an interpolation array. May be followed by a number of arguments.",
+    "type": "enum",
+    "values": {
+      "linear": {
+        "doc": "Interpolates linearly between the pair of stops just less than and just greater than the input",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [],
+              "output-type": "interpolation"
+            }
+          ],
+          "parameters": []
+        },
+        "example": ["linear"],
+        "sdk-support": {
+          "interpolate": {
+            "js": "0.42.0",
+            "android": "6.0.0",
+            "ios": "4.0.0"
+          },
+          "interpolate-hcl": {
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          },
+          "interpolate-lab":{
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          }
+        }
+      },
+      "exponential": {
+        "doc": "Interpolates exponentially between the stops just less than and just greater than the input.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [
+                "base"
+              ],
+              "output-type": "interpolation"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "base",
+              "type": "number literal",
+              "doc": "rate at which the output increases in `f(x) = x^r`. Values higher than 1 increase, close to one behaves linearly, and below one decrease."
+            }
+          ]
+        },
+        "example": [
+          "exponential",
+          2
+        ],
+        "sdk-support": {
+          "interpolate": {
+            "js": "0.42.0",
+            "android": "6.0.0",
+            "ios": "4.0.0"
+          },
+          "interpolate-hcl": {
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          },
+          "interpolate-lab":{
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          }
+        }
+      },
+      "cubic-bezier": {
+        "doc": "Interpolates using the cubic bézier curve defined by the given control points.",
+        "syntax": {
+          "overloads": [
+            {
+              "parameters": [
+                "x1",
+                "y1",
+                "x2",
+                "y2"
+              ],
+              "output-type": "interpolation"
+            }
+          ],
+          "parameters": [
+            {
+              "name": "x1",
+              "type": "number literal",
+              "doc": "X-coordinate of the first control point. Must be between zero and one for a valid monotonic easing curve. Controls how quickly the curve speeds up at the beginning."
+            },
+            {
+              "name": "y1",
+              "type": "number literal",
+              "doc": "Y-coordinate of the first control point. Typically between zero and one, but may exceed this range for overshoot effects. Influences the starting slope of the curve."
+            },
+            {
+              "name": "x2",
+              "type": "number literal",
+              "doc": "X-coordinate of the second control point. Must be between zero and one for a valid monotonic easing curve. Controls when the curve begins to decelerate toward the end."
+            },
+            {
+              "name": "y2",
+              "type": "number literal",
+              "doc": "Y-coordinate of the second control point. Typically between zero and one, but may exceed this range for overshoot effects. Influences the ending slope of the curve."
+            }
+          ]
+        },
+        "example": [
+          "cubic-bezier",
+          2,
+          3,
+          2,
+          3
+        ],
+        "sdk-support": {
+          "interpolate": {
+            "js": "0.42.0",
+            "android": "6.0.0",
+            "ios": "4.0.0"
+          },
+          "interpolate-hcl": {
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          },
+          "interpolate-lab":{
+            "js": "0.49.0",
+            "ios": "https://github.com/maplibre/maplibre-native/issues/2784",
+            "android": "https://github.com/maplibre/maplibre-native/issues/2784"
+          }
+        }
+      }
     }
   }
 }
