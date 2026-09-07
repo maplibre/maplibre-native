@@ -400,10 +400,17 @@
                                                      interiorPolygons:@[ innerPolygonSquare ]];
   MLNMultiPolygon *squares =
       [MLNMultiPolygon multiPolygonWithPolygons:@[ outerPolygonSquare, innerPolygonSquare ]];
-  CLLocationCoordinate2D squareCenter = CLLocationCoordinate2DMake(100.5, 0.5);
+  CLLocationCoordinate2D pole = [squares coordinate];
 
-  XCTAssertEqual([squares coordinate].latitude, squareCenter.latitude);
-  XCTAssertEqual([squares coordinate].longitude, squareCenter.longitude);
+  // The first polygon has a central hole, so its pole of inaccessibility must be in one of the
+  // four corner regions rather than at the center of the hole. Measure clearance from the outer
+  // edges so this remains valid whichever equivalent corner the algorithm chooses.
+  const double latitudeClearance = MIN(pole.latitude - 100.0, 101.0 - pole.latitude);
+  const double longitudeClearance = MIN(pole.longitude, 1.0 - pole.longitude);
+  const double expectedClearance = 0.2050252532;
+
+  XCTAssertEqualWithAccuracy(latitudeClearance, expectedClearance, 1e-5);
+  XCTAssertEqualWithAccuracy(longitudeClearance, expectedClearance, 1e-5);
 
   NSUInteger numberOfCoordinates = sizeof(coordinates) / sizeof(CLLocationCoordinate2D);
 
