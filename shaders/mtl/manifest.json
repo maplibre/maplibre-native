@@ -1,0 +1,209 @@
+{
+  "prelude": "_prelude.metal",
+  "shaders": [
+    {
+      "shader": "BackgroundPatternShader",
+      "header": "mln/shaders/mtl/background.hpp",
+      "source": "background_pattern_shader.metal",
+      "prelude": "background.prelude.metal"
+    },
+    {
+      "shader": "BackgroundShader",
+      "header": "mln/shaders/mtl/background.hpp",
+      "source": "background_shader.metal",
+      "prelude": "background.prelude.metal"
+    },
+    {
+      "shader": "CircleShader",
+      "header": "mln/shaders/mtl/circle.hpp",
+      "source": "circle_shader.metal",
+      "prelude": "circle.prelude.metal"
+    },
+    {
+      "shader": "ClippingMaskProgram",
+      "header": "mln/shaders/mtl/clipping_mask.hpp",
+      "source": "clipping_mask_program.metal",
+      "prelude": "clipping_mask.prelude.metal"
+    },
+    {
+      "shader": "CollisionBoxShader",
+      "header": "mln/shaders/mtl/collision.hpp",
+      "source": "collision_box_shader.metal",
+      "prelude": "collision.prelude.metal"
+    },
+    {
+      "shader": "CollisionCircleShader",
+      "header": "mln/shaders/mtl/collision.hpp",
+      "source": "collision_circle_shader.metal",
+      "prelude": "collision.prelude.metal"
+    },
+    {
+      "shader": "ColorReliefShader",
+      "header": "mln/shaders/mtl/color_relief.hpp",
+      "source": "color_relief_shader.metal",
+      "prelude": "color_relief.prelude.metal"
+    },
+    {
+      "shader": "CustomGeometryShader",
+      "header": "mln/shaders/mtl/custom_geometry.hpp",
+      "source": "custom_geometry_shader.metal",
+      "prelude": "custom_geometry.prelude.metal"
+    },
+    {
+      "shader": "CustomSymbolIconShader",
+      "header": "mln/shaders/mtl/custom_symbol_icon.hpp",
+      "source": "custom_symbol_icon_shader.metal",
+      "prelude": "custom_symbol_icon.prelude.metal"
+    },
+    {
+      "shader": "DebugShader",
+      "header": "mln/shaders/mtl/debug.hpp",
+      "source": "debug_shader.metal",
+      "prelude": "debug.prelude.metal"
+    },
+    {
+      "shader": "FillExtrusionInstancedShader",
+      "header": "mln/shaders/mtl/fill_extrusion.hpp",
+      "source": "fill_extrusion_instanced_shader.metal",
+      "prelude": "fill_extrusion.prelude.metal"
+    },
+    {
+      "shader": "FillExtrusionPatternInstancedShader",
+      "header": "mln/shaders/mtl/fill_extrusion.hpp",
+      "source": "fill_extrusion_pattern_instanced_shader.metal",
+      "prelude": "fill_extrusion.prelude.metal"
+    },
+    {
+      "shader": "FillExtrusionPatternShader",
+      "header": "mln/shaders/mtl/fill_extrusion.hpp",
+      "source": "fill_extrusion_pattern_shader.metal",
+      "prelude": "fill_extrusion.prelude.metal"
+    },
+    {
+      "shader": "FillExtrusionShader",
+      "header": "mln/shaders/mtl/fill_extrusion.hpp",
+      "source": "fill_extrusion_shader.metal",
+      "prelude": "fill_extrusion.prelude.metal"
+    },
+    {
+      "shader": "FillOutlinePatternShader",
+      "header": "mln/shaders/mtl/fill.hpp",
+      "source": "fill_outline_pattern_shader.metal",
+      "prelude": "fill.prelude.metal"
+    },
+    {
+      "shader": "FillOutlineShader",
+      "header": "mln/shaders/mtl/fill.hpp",
+      "source": "fill_outline_shader.metal",
+      "prelude": "fill.prelude.metal"
+    },
+    {
+      "shader": "FillOutlineTriangulatedShader",
+      "header": "mln/shaders/mtl/fill.hpp",
+      "source": "fill_outline_triangulated_shader.metal",
+      "prelude": "fill.prelude.metal"
+    },
+    {
+      "shader": "FillPatternShader",
+      "header": "mln/shaders/mtl/fill.hpp",
+      "source": "fill_pattern_shader.metal",
+      "prelude": "fill.prelude.metal"
+    },
+    {
+      "shader": "FillShader",
+      "header": "mln/shaders/mtl/fill.hpp",
+      "source": "fill_shader.metal",
+      "prelude": "fill.prelude.metal"
+    },
+    {
+      "shader": "HeatmapShader",
+      "header": "mln/shaders/mtl/heatmap.hpp",
+      "source": "heatmap_shader.metal",
+      "prelude": "heatmap.prelude.metal"
+    },
+    {
+      "shader": "HeatmapTextureShader",
+      "header": "mln/shaders/mtl/heatmap_texture.hpp",
+      "source": "heatmap_texture_shader.metal",
+      "prelude": "heatmap_texture.prelude.metal"
+    },
+    {
+      "shader": "HillshadePrepareShader",
+      "header": "mln/shaders/mtl/hillshade_prepare.hpp",
+      "source": "hillshade_prepare_shader.metal",
+      "prelude": "hillshade_prepare.prelude.metal"
+    },
+    {
+      "shader": "HillshadeShader",
+      "header": "mln/shaders/mtl/hillshade.hpp",
+      "source": "hillshade_shader.metal",
+      "prelude": "hillshade.prelude.metal"
+    },
+    {
+      "shader": "LineGradientShader",
+      "header": "mln/shaders/mtl/line.hpp",
+      "source": "line_gradient_shader.metal",
+      "prelude": "line.prelude.metal"
+    },
+    {
+      "shader": "LinePatternShader",
+      "header": "mln/shaders/mtl/line.hpp",
+      "source": "line_pattern_shader.metal",
+      "prelude": "line.prelude.metal"
+    },
+    {
+      "shader": "LineSDFShader",
+      "header": "mln/shaders/mtl/line.hpp",
+      "source": "line_s_d_f_shader.metal",
+      "prelude": "line.prelude.metal"
+    },
+    {
+      "shader": "LineShader",
+      "header": "mln/shaders/mtl/line.hpp",
+      "source": "line_shader.metal",
+      "prelude": "line.prelude.metal"
+    },
+    {
+      "shader": "LocationIndicatorShader",
+      "header": "mln/shaders/mtl/location_indicator.hpp",
+      "source": "location_indicator_shader.metal",
+      "prelude": "location_indicator.prelude.metal"
+    },
+    {
+      "shader": "LocationIndicatorTexturedShader",
+      "header": "mln/shaders/mtl/location_indicator.hpp",
+      "source": "location_indicator_textured_shader.metal",
+      "prelude": "location_indicator.prelude.metal"
+    },
+    {
+      "shader": "RasterShader",
+      "header": "mln/shaders/mtl/raster.hpp",
+      "source": "raster_shader.metal",
+      "prelude": "raster.prelude.metal"
+    },
+    {
+      "shader": "SymbolIconShader",
+      "header": "mln/shaders/mtl/symbol.hpp",
+      "source": "symbol_icon_shader.metal",
+      "prelude": "symbol.prelude.metal"
+    },
+    {
+      "shader": "SymbolSDFShader",
+      "header": "mln/shaders/mtl/symbol.hpp",
+      "source": "symbol_s_d_f_shader.metal",
+      "prelude": "symbol.prelude.metal"
+    },
+    {
+      "shader": "SymbolTextAndIconShader",
+      "header": "mln/shaders/mtl/symbol.hpp",
+      "source": "symbol_text_and_icon_shader.metal",
+      "prelude": "symbol.prelude.metal"
+    },
+    {
+      "shader": "WideVectorShader",
+      "header": "mln/shaders/mtl/widevector.hpp",
+      "source": "wide_vector_shader.metal",
+      "prelude": "widevector.prelude.metal"
+    }
+  ]
+}

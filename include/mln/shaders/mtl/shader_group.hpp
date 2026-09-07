@@ -48,8 +48,6 @@ public:
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
         constexpr auto& name = ShaderSource::name;
-        constexpr auto& prelude = ShaderSource::prelude;
-        constexpr auto& source = ShaderSource::source;
         constexpr auto& vertMain = ShaderSource::vertexMainFunction;
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
 
@@ -64,7 +62,9 @@ public:
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
 
             auto& context = static_cast<Context&>(gfxContext);
-            const auto shaderSource = std::string(shaders::prelude) + prelude + source;
+            std::string shaderSource(shaders::prelude());
+            shaderSource.append(ShaderSource::prelude());
+            shaderSource.append(ShaderSource::source());
             shader = context.createProgram(
                 ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
