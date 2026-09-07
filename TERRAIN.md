@@ -1320,12 +1320,25 @@ terrain during placement sees the previous frame's state - the same first-frame 
     same number. What differs is how that height is *applied* - native's `centerAltitude` and
     gl-js's `transform.elevation` do not move the camera to the same place.
 
-    That also walks back the 2026-09-06 claim that "the decoupled elevation already exists and
-    works". It exists and is stable - the probes showing no drift stand - but stable is not the
-    same as correct: it does not reproduce gl-js's camera. Resolving that is the real content of
-    part B (apply the clamp before drawing, the way gl-js does in `_render`), and A should not
-    land before it, or it just replaces a white frame with a differently wrong one and costs
-    three passing tests on the way.
+    **Followed up the same day: the camera is not the culprit either.** With the settle patch in
+    place the clamp converges in one frame and lands exactly where the arithmetic says it
+    should - `centreAlt` 5487.5 m, `cameraAlt` 6733.0 m, i.e. the terrain height plus
+    `cameraToCenterDistance * cos(60)` = 1245 m - and holds there, with zoom and mesh cover
+    unchanged (`ideal=12`). gl-js's model is equivalent: `mercator_transform.ts` translates the
+    world by `-elevation` *after* the z-scale by `pixelPerMeter`, leaving the camera
+    `cameraToCenterDistance` from the elevated centre, exactly as `updateCameraState` does
+    here. Both feed on the same number (gl-js's `getElevation` multiplies by exaggeration too).
+
+    So: the elevation is right, the camera it produces is right, and the white frame is gone -
+    both images are 0% white. What remains is that 93% of pixels still differ from the
+    reference, and the most visible symptom is inverted LOD: our near field draws *low*-zoom
+    number tiles where the reference draws high-zoom ones. That points downstream of the
+    camera, at tile selection / drape content for a raised camera, not at the camera model.
+
+    Part B is therefore not "fix the camera semantics" - that reading is now disproven. It is
+    the ordering change (apply the clamp before drawing, as gl-js does in `_render`) plus
+    whatever is choosing tiles for the raised camera. A still should not land alone: it trades
+    a white frame for a differently wrong one and costs three passing tests.
   - **2026-09-05 - `terrain/fill-extrusion`'s baseline was refreshed for the 2px DEM
     border (gl-js #8302).** The wider border changed 45 of 262144 pixels: the buildings
     near a DEM tile seam sit ~1px lower. That is the fix working, not a regression -
