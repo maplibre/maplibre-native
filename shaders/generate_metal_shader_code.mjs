@@ -70,7 +70,7 @@ std::string_view ShaderSource<BuiltIn::${s.shader}, gfx::Backend::Type::Metal>::
 `;
 }
 
-if (process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && fs.existsSync(process.argv[1]) && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
     const { values } = parseArgs({ options: { out: { type: 'string' } } });
     const root = path.dirname(import.meta.dirname);
     const output = values.out ?? path.join(root, 'src/mln/shaders/mtl/shader_source.cpp');

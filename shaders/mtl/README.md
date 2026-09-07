@@ -17,6 +17,6 @@ node --test shaders/generate_metal_shader_code.test.mjs
 Shader text is preserved byte for byte, including comments, whitespace, and
 preprocessor directives. Offsets are UTF-8 byte offsets. The first shader access
 decompresses the bundle once using a thread-safe function-local static; subsequent
-accesses return views into the immutable buffer. This trades approximately
-198 KiB of retained heap storage for a smaller installed binary. Source assembly
+accesses return views into the immutable buffer. This retains 198 KiB of source data for a smaller installed binary (about
+256 KiB of string capacity with the measured Apple libc++ toolchain). Source assembly
 still produces a null-terminated string before calling Metal.
