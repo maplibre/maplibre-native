@@ -4569,8 +4569,19 @@ static void *windowScreenContext = &windowScreenContext;
 /// Converts a point in the view’s coordinate system to a geographic coordinate.
 - (mln::LatLng)convertPoint:(CGPoint)point toLatLngFromView:(nullable UIView *)view {
   CGPoint convertedPoint = [self convertPoint:point fromView:view];
-  return self.mbglMap.latLngForPixel(mln::ScreenCoordinate(convertedPoint.x, convertedPoint.y))
-      .wrapped();
+  const mln::ScreenCoordinate pixel(convertedPoint.x, convertedPoint.y);
+  // With 3D terrain, the pixel's view ray meets the draped surface before sea level, so the
+  // sea-level unprojection would land well past the spot under the finger. Inverse of
+  // convertLatLng:toPointToView:. The renderer runs on the main thread on iOS, so the terrain
+  // pick is safe here; it returns nullopt without terrain.
+  if (_rendererFrontend) {
+    if (mln::Renderer *renderer = _rendererFrontend->getRenderer()) {
+      if (const auto surface = renderer->queryTerrainPick(pixel)) {
+        return surface->wrapped();
+      }
+    }
+  }
+  return self.mbglMap.latLngForPixel(pixel).wrapped();
 }
 
 - (CGPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate
@@ -4583,7 +4594,17 @@ static void *windowScreenContext = &windowScreenContext;
 
 /// Converts a geographic coordinate to a point in the view’s coordinate system.
 - (CGPoint)convertLatLng:(mln::LatLng)latLng toPointToView:(nullable UIView *)view {
-  mln::ScreenCoordinate pixel = self.mbglMap.pixelForLatLng(latLng);
+  // With 3D terrain, project onto the draped surface so annotation views, the user location
+  // view and callouts sit on the ground they mark instead of at sea level. The renderer runs on
+  // the main thread on iOS, so the terrain query is safe here.
+  std::optional<double> elevation;
+  if (_rendererFrontend) {
+    if (mln::Renderer *renderer = _rendererFrontend->getRenderer()) {
+      elevation = renderer->queryTerrainElevation(latLng);
+    }
+  }
+  mln::ScreenCoordinate pixel = elevation ? self.mbglMap.pixelForLatLng(latLng, *elevation)
+                                          : self.mbglMap.pixelForLatLng(latLng);
   return [self convertPoint:CGPointMake(pixel.x, pixel.y) toView:view];
 }
 

@@ -1,4 +1,5 @@
 #include <mln/text/placement.hpp>
+#include <mln/renderer/render_terrain.hpp>
 
 #include <mln/layout/symbol_layout.hpp>
 #include <mln/renderer/bucket.hpp>
@@ -77,7 +78,8 @@ public:
                      const TransformState& state_,
                      float placementZoom,
                      CollisionGroups::CollisionGroup collisionGroup_,
-                     std::optional<CollisionBoundaries> avoidEdges_ = std::nullopt)
+                     std::optional<CollisionBoundaries> avoidEdges_ = std::nullopt,
+                     const RenderTerrain* terrain = nullptr)
         : bucket(bucket_),
           renderTile(renderTile_),
           state(state_),
@@ -87,9 +89,12 @@ public:
           collisionGroup(std::move(collisionGroup_)),
           partiallyEvaluatedTextSize(bucket_.textSizeBinder->evaluateForZoom(placementZoom)),
           partiallyEvaluatedIconSize(bucket_.iconSizeBinder->evaluateForZoom(placementZoom)),
-          avoidEdges(std::move(avoidEdges_)) {}
+          avoidEdges(std::move(avoidEdges_)),
+          elevation(terrain ? terrain->elevationSampler(renderTile_.id) : std::nullopt) {}
 
     const SymbolBucket& getBucket() const { return bucket.get(); }
+    /// Tile-local point -> terrain elevation for collision projection; null off terrain
+    const SymbolElevationFn* getElevation() const { return elevation ? &*elevation : nullptr; }
     const style::SymbolLayoutProperties::PossiblyEvaluated& getLayout() const { return *getBucket().layout; }
     const RenderTile& getRenderTile() const { return renderTile.get(); }
 
@@ -145,6 +150,7 @@ public:
     bool hasIconTextFit = getLayout().get<IconTextFit>() != IconTextFitType::None;
 
     std::optional<CollisionBoundaries> avoidEdges;
+    std::optional<SymbolElevationFn> elevation;
 };
 
 // PlacementController implementation
@@ -242,7 +248,8 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionIndex.getTransformState(),
                          placementZoom,
                          collisionGroups.get(params.sourceId),
-                         getAvoidEdges(symbolBucket, renderTile.matrix)};
+                         getAvoidEdges(symbolBucket, renderTile.matrix),
+                         placementTerrain};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
         if (!symbol.check(SYM_GUARD_LOC)) continue;
         if (seenCrossTileIDs.contains(symbol.getCrossTileID())) continue;
@@ -341,7 +348,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                  showCollisionBoxes,
                                                                  ctx.avoidEdges,
                                                                  collisionGroup.second,
-                                                                 textBoxes);
+                                                                 textBoxes,
+                                                                 ctx.getElevation());
                 if (placedFeature.first) {
                     placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
                 }
@@ -417,8 +425,13 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                           ctx.pitchTextWithMap,
                                                           static_cast<float>(ctx.getTransformState().getBearing()));
                     textBoxes.clear();
-                    if (!canPlaceAtVariableAnchor(
-                            textBox, anchor, shift, variableTextAnchors, posMatrix, ctx.pixelRatio)) {
+                    if (!canPlaceAtVariableAnchor(textBox,
+                                                  anchor,
+                                                  shift,
+                                                  variableTextAnchors,
+                                                  posMatrix,
+                                                  ctx.pixelRatio,
+                                                  ctx.getElevation())) {
                         continue;
                     }
 
@@ -435,7 +448,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                                 showCollisionBoxes,
                                                                 ctx.avoidEdges,
                                                                 collisionGroup.second,
-                                                                textBoxes);
+                                                                textBoxes,
+                                                                ctx.getElevation());
 
                     if (doVariableIconPlacement) {
                         auto placedIconFeature = collisionIndex.placeFeature(
@@ -452,7 +466,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             showCollisionBoxes,
                             ctx.avoidEdges,
                             collisionGroup.second,
-                            iconBoxes);
+                            iconBoxes,
+                            ctx.getElevation());
                         iconBoxes.clear();
                         if (!placedIconFeature.first) continue;
                     }
@@ -550,7 +565,8 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                showCollisionBoxes,
                                                ctx.avoidEdges,
                                                collisionGroup.second,
-                                               iconBoxes);
+                                               iconBoxes,
+                                               ctx.getElevation());
         };
 
         std::pair<bool, bool> placedIcon;
@@ -749,11 +765,14 @@ void Placement::commit() {
                                      : (getPrevPlacement() ? getPrevPlacement()->fadeStartTime : TimePoint{});
 }
 
-void Placement::updateLayerBuckets(const RenderLayer& layer, const TransformState& state, bool updateOpacities) const {
+void Placement::updateLayerBuckets(const RenderLayer& layer,
+                                   const TransformState& state,
+                                   bool updateOpacities,
+                                   const RenderTerrain* terrain) const {
     std::set<uint32_t> seenCrossTileIDs;
     for (const auto& item : layer.getPlacementData()) {
         if (!item.sortKeyRange || item.sortKeyRange->isFirstRange()) {
-            item.bucket.get().updateVertices(*this, updateOpacities, state, item.tile, seenCrossTileIDs);
+            item.bucket.get().updateVertices(*this, updateOpacities, state, item.tile, seenCrossTileIDs, terrain);
         }
     }
 }
@@ -775,8 +794,16 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
 
 bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                                  const TransformState& state,
-                                                 const RenderTile& tile) const {
+                                                 const RenderTile& tile,
+                                                 const RenderTerrain* terrain) const {
     using namespace style;
+    // With 3D terrain, line-placed labels are projected here on the CPU and must be lifted
+    // onto the surface (the vertex shader elevates point symbols only).
+    std::optional<SymbolElevationFn> elevation;
+    if (terrain) {
+        elevation = terrain->elevationSampler(tile.id);
+    }
+    const SymbolElevationFn* getElevation = elevation ? &*elevation : nullptr;
     const auto& layout = *bucket.layout;
     const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point;
     const bool hasVariableAnchors = bucket.hasVariableTextAnchors() && bucket.hasTextData();
@@ -798,7 +825,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    getElevation);
                 result = true;
             }
             if (bucket.hasIconData()) {
@@ -810,7 +838,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    getElevation);
                 result = true;
             }
         }
@@ -826,7 +855,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 keepUpright,
                                 tile,
                                 *bucket.textSizeBinder,
-                                state);
+                                state,
+                                getElevation);
             result = true;
         }
     } else if (hasVariableAnchors) {
@@ -862,7 +892,10 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicAttributeData());
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
-                const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
+                // On 3D terrain the anchor sits on the surface, so project it with its elevation
+                // (as maplibre-gl-js does for variable anchors); the shader treats the result as final.
+                const auto projectedAnchor = project(
+                    tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix, getElevation);
                 const float perspectiveRatio = 0.5f +
                                                0.5f * (state.getCameraToCenterDistance() / projectedAnchor.second);
                 float renderTextSize = evaluateSizeForFeature(partiallyEvaluatedSize, symbol) * perspectiveRatio /
@@ -886,8 +919,10 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                 // plane.
                 Point<float> shiftedAnchor;
                 if (pitchWithMap) {
-                    shiftedAnchor =
-                        project(Point<float>(tileAnchor.x + shift.x, tileAnchor.y + shift.y), labelPlaneMatrix).first;
+                    shiftedAnchor = project(Point<float>(tileAnchor.x + shift.x, tileAnchor.y + shift.y),
+                                            labelPlaneMatrix,
+                                            getElevation)
+                                        .first;
                 } else if (rotateWithMap) {
                     auto rotated = util::rotate(shift, -state.getPitch());
                     shiftedAnchor = Point<float>(projectedAnchor.first.x + rotated.x,
@@ -1392,7 +1427,8 @@ private:
                                   Point<float> shift,
                                   std::vector<style::TextVariableAnchorType>& anchors,
                                   const mat4& posMatrix,
-                                  float textPixelRatio) override;
+                                  float textPixelRatio,
+                                  const SymbolElevationFn* getElevation) override;
     void newSymbolPlaced(const SymbolInstance&,
                          const PlacementContext&,
                          const JointPlacement&,
@@ -1491,7 +1527,8 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                          collisionIndex.getTransformState(),
                          placementZoom,
                          collisionGroups.get(params.sourceId),
-                         getAvoidEdges(bucket, renderTile.matrix)};
+                         getAvoidEdges(bucket, renderTile.matrix),
+                         placementTerrain};
 
     // In this case we first try to place symbols, which intersects the tile
     // borders, so that those symbols will remain even if each tile is handled
@@ -1529,13 +1566,17 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     auto collisionBoxIntersectsTileEdges = [&](const CollisionBox& collisionBox,
                                                Point<float> shift) noexcept -> IntersectStatus {
         IntersectStatus intersects = collisionIndex.intersectsTileEdges(
-            collisionBox, shift, renderTile.matrix, ctx.pixelRatio, *tileBorders);
+            collisionBox, shift, renderTile.matrix, ctx.pixelRatio, *tileBorders, ctx.getElevation());
         // Check if this symbol intersects the neighbor tile borders. If so, it
         // also shall be placed with priority.
         for (const auto& neighbor : neighbours) {
             if (intersects.flags != IntersectStatus::None) break;
-            intersects = collisionIndex.intersectsTileEdges(
-                collisionBox, shift + neighbor.shift, neighbor.matrix, ctx.pixelRatio, neighbor.borders);
+            intersects = collisionIndex.intersectsTileEdges(collisionBox,
+                                                            shift + neighbor.shift,
+                                                            neighbor.matrix,
+                                                            ctx.pixelRatio,
+                                                            neighbor.borders,
+                                                            ctx.getElevation());
         }
         return intersects;
     };
@@ -1620,7 +1661,8 @@ bool TilePlacement::canPlaceAtVariableAnchor(const CollisionBox& box,
                                              Point<float> shift,
                                              std::vector<style::TextVariableAnchorType>& anchors,
                                              const mat4& posMatrix,
-                                             float textPixelRatio) {
+                                             float textPixelRatio,
+                                             const SymbolElevationFn* getElevation) {
     assert(tileBorders);
     if (populateIntersections) {
         // A variable label is only allowed to intersect tile border with the first anchor.
@@ -1628,7 +1670,8 @@ bool TilePlacement::canPlaceAtVariableAnchor(const CollisionBox& box,
             // Check, that the label would intersect the tile borders even
             // without shift, otherwise intersection is not allowed (preventing
             // cut-offs in case the shift is lager than the buffer size).
-            auto status = collisionIndex.intersectsTileEdges(box, {}, posMatrix, textPixelRatio, *tileBorders);
+            auto status = collisionIndex.intersectsTileEdges(
+                box, {}, posMatrix, textPixelRatio, *tileBorders, getElevation);
             if (status.flags != IntersectStatus::None) return true;
         }
         // The most important labels shall be placed first anyway, so we continue trying
@@ -1637,7 +1680,7 @@ bool TilePlacement::canPlaceAtVariableAnchor(const CollisionBox& box,
         if (currentIntersectionPriority > 0u) return false;
     }
     // Can be placed, if it does not intersect tile borders.
-    auto status = collisionIndex.intersectsTileEdges(box, shift, posMatrix, textPixelRatio, *tileBorders);
+    auto status = collisionIndex.intersectsTileEdges(box, shift, posMatrix, textPixelRatio, *tileBorders, getElevation);
     return (status.flags == IntersectStatus::None);
 }
 

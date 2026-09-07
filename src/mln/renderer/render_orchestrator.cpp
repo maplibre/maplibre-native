@@ -75,6 +75,7 @@ public:
                    RenderLayerReferences layersNeedPlacement_,
                    Immutable<Placement> placement_,
                    bool updateSymbolOpacities_,
+                   const RenderTerrain* terrain_,
                    double startTime_)
         : RenderTree(std::move(parameters_), startTime_),
           layerRenderItems(std::move(layerRenderItems_)),
@@ -83,13 +84,14 @@ public:
           patternAtlas(patternAtlas_),
           layersNeedPlacement(std::move(layersNeedPlacement_)),
           placement(std::move(placement_)),
-          updateSymbolOpacities(updateSymbolOpacities_) {}
+          updateSymbolOpacities(updateSymbolOpacities_),
+          terrain(terrain_) {}
 
     void prepare() override {
         MLN_TRACE_FUNC();
 
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
-            placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
+            placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities, terrain);
         }
     }
 
@@ -111,6 +113,7 @@ public:
     RenderLayerReferences layersNeedPlacement;
     Immutable<Placement> placement;
     bool updateSymbolOpacities;
+    const RenderTerrain* terrain;
 };
 
 } // namespace
@@ -260,6 +263,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         terrainEnabled ? getRenderSource(renderTerrain->getSourceID()) : nullptr,
         terrainEnabled ? renderTerrain->getExaggeration() : 1.0};
     tileParameters.elevationProvider = terrainEnabled ? &elevationProvider : nullptr;
+
+    // The DEM source additionally keeps coarser ancestors of its cover loaded so that every
+    // tile another layer draws from - shallower far-field LOD tiles, overzoomed sources with
+    // a low maxzoom - has a DEM ancestor to bind for elevation (see TileParameters).
+    TileParameters demTileParameters = tileParameters;
+    demTileParameters.retainAncestorLevels = terrainEnabled ? RenderTerrain::demAncestorLevels : 0;
 
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
@@ -463,7 +472,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         }
 
         tileParameters.isUpdateSynchronous = sourceImpl->isUpdateSynchronous();
-        source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
+        const bool isDEMSource = terrainEnabled && sourceImpl->id == renderTerrain->getSourceID();
+        source->update(sourceImpl,
+                       filteredLayersForSource,
+                       sourceNeedsRendering,
+                       sourceNeedsRelayout,
+                       isDEMSource ? demTileParameters : tileParameters);
         filteredLayersForSource.clear();
 
         // Update all layers with their new renderability status, if it changed.
@@ -559,6 +573,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         symbolBucketsChanged |= renderTreeParameters->placementChanged;
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters, placementController.getPlacement());
+            placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
             placementController.setPlacement(std::move(placement));
             crossTileSymbolIndex.pruneUnusedLayers(usedSymbolLayers);
@@ -578,6 +593,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters);
             placement->collectPlacedSymbolData(placedSymbolDataCollected);
+            placement->setTerrain(terrainEnabled ? renderTerrain.get() : nullptr);
             placement->placeLayers(layersNeedPlacement);
             placementController.setPlacement(std::move(placement));
         }
@@ -608,6 +624,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                             std::move(layersNeedPlacement),
                                             placementController.getPlacement(),
                                             symbolBucketsChanged,
+                                            renderTerrain.get(),
                                             startTime);
 }
 
@@ -678,6 +695,13 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
     }
 }
 
+std::optional<LatLng> RenderOrchestrator::pickTerrainLatLng(const ScreenCoordinate& pixel) const {
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        return renderTerrain->pickLatLng(transformState, pixel);
+    }
+    return std::nullopt;
+}
+
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const ScreenLineString& geometry,
     const RenderedQueryOptions& options,
@@ -697,11 +721,27 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     mat4 projMatrix;
     transformState.getProjMatrix(projMatrix);
 
+    // Tile-source and shape-annotation queries unproject the screen geometry at sea level. On
+    // 3D terrain a tapped pixel's ray meets the draped surface first, so substitute, for each
+    // point, the sea-level projection of the surface coordinate under it: the sea-level
+    // unprojection downstream then yields that surface coordinate. Symbols keep the original
+    // screen geometry - their collision boxes already sit at the terrain elevation.
+    ScreenLineString surfaceGeometry = geometry;
+    if (renderTerrain && renderTerrain->isEnabled()) {
+        for (auto& point : surfaceGeometry) {
+            if (const auto surface = renderTerrain->pickLatLng(transformState, point)) {
+                ScreenCoordinate projected = transformState.latLngToScreenCoordinate(*surface);
+                projected.y = transformState.getSize().height - projected.y; // back to y-down
+                point = projected;
+            }
+        }
+    }
+
     std::unordered_map<std::string, std::vector<Feature>> resultsByLayer;
     for (const auto& sourceID : sourceIDs) {
         if (RenderSource* renderSource = getRenderSource(sourceID)) {
             auto sourceResults = renderSource->queryRenderedFeatures(
-                geometry, transformState, filteredLayers, options, projMatrix);
+                surfaceGeometry, transformState, filteredLayers, options, projMatrix);
             std::ranges::move(sourceResults, std::inserter(resultsByLayer, resultsByLayer.begin()));
         }
     }
@@ -713,7 +753,7 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
         const RenderLayer* layer = pair.second;
         layer->populateDynamicRenderFeatureIndex(dynamicIndex);
     }
-    dynamicIndex.query(resultsByLayer, geometry, transformState);
+    dynamicIndex.query(resultsByLayer, surfaceGeometry, transformState);
     std::vector<Feature> result;
 
     if (resultsByLayer.empty()) {

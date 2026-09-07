@@ -197,6 +197,31 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         return tiles.emplace(tileID, std::move(tile)).first->second.get();
     };
 
+    // Keep ancestors of the ideal cover loaded (but not rendered) when asked to - see
+    // TileParameters::retainAncestorLevels.
+    if (parameters.retainAncestorLevels > 0) {
+        std::set<OverscaledTileID> ancestors;
+        for (const auto& id : idealTiles) {
+            const auto& c = id.canonical;
+            for (uint8_t level = 1; level <= parameters.retainAncestorLevels && level <= c.z; ++level) {
+                const auto az = static_cast<uint8_t>(c.z - level);
+                if (az < zoomRange.min) {
+                    break;
+                }
+                ancestors.emplace(az, id.wrap, CanonicalTileID(az, c.x >> level, c.y >> level));
+            }
+        }
+        for (const auto& id : ancestors) {
+            Tile* tile = getTileFn(id);
+            if (!tile) {
+                tile = createTileFn(id);
+            }
+            if (tile) {
+                retainTileFn(*tile, TileNecessity::Required);
+            }
+        }
+    }
+
     auto previouslyRenderedTiles = std::move(renderedTiles);
 
     auto renderTileFn = [&](const UnwrappedTileID& tileID, Tile& tile) {
