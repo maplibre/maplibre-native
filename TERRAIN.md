@@ -646,7 +646,7 @@ Z), **#7932** (grow tile culling bounds near the horizon), and for globe only **
 
 #### Convergence with the globe PR (#4533), 2026-09-07
 
-John Carmack raised this on #4533 after Andrew pointed him here, and it sharpens the second
+Raised on #4533 after this document was referenced there, and it sharpens the second
 divergence above. **gl-js puts the Mercator cover on the variable-zoom function whenever
 terrain is set, not only at high pitch.** Verified in
 `mercator_covering_tiles_details_provider.ts`:
@@ -679,13 +679,13 @@ porting #5719 from TypeScript ourselves.
 Two things it does **not** cover, which stay terrain-side: the `deltaZoom` gap above, and the
 centre-clamped camera.
 
-**Merge shape** (his dry run of this branch onto the globe head, not independently checked
+**Merge shape** (dry run of this branch onto the globe head reported on #4533, not independently checked
 here): 170 files touched by both, 93 conflicts, of which 66 are the single position line in
 vertex shaders - terrain wraps it in `apply_drape_transform`, globe in `projectTile` - and one
 is an include in `tile_cover.cpp`. The globe prelude already defines `projectTileWithElevation`
 and `projectTileFor3D` with gl-js's signatures, which is where the terrain mesh shader and the
 elevated layers compose; the drape is orthographic per tile, so it composes after projection.
-Whichever branch lands first owns that seam. He has offered to help adapt the terrain side.
+Whichever branch lands first owns that seam; the globe PR has offered to adapt on the terrain side.
 
 The remaining structural gap is the cover loop itself: gl-js runs one `coveringTiles` with a
 per-projection details provider and terrain plugs into the bounding volume for both
@@ -1398,7 +1398,7 @@ terrain during placement sees the previous frame's state - the same first-frame 
     2026-09-06 entry that claimed otherwise. That reasoning treated the *white* frame as
     disqualifying, on the grounds that the Phase 4 symptom is a black near field. Wrong:
     the near rays clear to **the background**, whatever colour it is, and this style's
-    background is white. Andrew called this from manual testing - from inside terrain you
+    background is white. Identified from manual testing: from inside terrain you
     see the background plus the skirts, and the skirts are far less prominent here.)
 
     Measured at the test's own camera (zoom 13, pitch 60, exaggeration 2):
