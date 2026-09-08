@@ -692,6 +692,58 @@ per-projection details provider and terrain plugs into the bounding volume for b
 projections, where globe phase 7 cloned the loop instead. Converging those is a real refactor
 and is being left as a follow-up to the globe PR.
 
+#### Working plan agreed 2026-09-07
+
+Both PRs are large and contentious, so neither branch takes a dependency on the other for now.
+Splitting `tile_lod` into its own PR was considered and dropped: with the globe PR under heavy
+review, carving a piece out invites the reading that it is being slipped through ahead of
+scrutiny, and vendoring it here would add someone else's in-flight code to a branch already
+facing its own review. So:
+
+- **Do the terrain-only work first** - `deltaZoom` (below) and the centre-clamped camera. Both
+  are defensible on their own merits and touch no globe code.
+- **Consume `TileZoomFunction` / `elevationForTileCulling` from `main`** once either PR lands,
+  whichever it is. That turns the coordination problem into a plain include.
+- The plan is on record on #4533 so reviewers can see why the extraction is worth keeping.
+
+#### deltaZoom: what the port actually involves
+
+**It is not the one-line change it looks like.** The comment above `terrainCoverTileSize` in
+`computeMeshCover` records the trap the hard way: meshing *shallower* than the DEM leaves the
+DEM tiles as descendants of the mesh tiles, `getElevation` only ever walks up to an ancestor,
+so every lookup misses and the mesh renders flat off the placeholder. Simply doubling the cover
+tile size walks straight into that.
+
+gl-js avoids it by shifting the DEM source too, not just the cover (`TerrainTileManager`):
+
+```js
+this.deltaZoom = 1;
+this.tileSize = tileManager._source.tileSize * 2 ** this.deltaZoom;
+tileManager.usedForTerrain = true;
+tileManager.tileSize = this.tileSize;   // the source itself now covers at the doubled size
+```
+
+so mesh and DEM move together and stay on compatible zooms. (`getSourceTile` then takes the DEM
+a further `deltaZoom` shallower than the terrain tile - a separate performance step, and the
+safe direction for an ancestor lookup, so it can follow later.)
+
+Native has no `usedForTerrain` equivalent, but it has the same single injection point:
+`RenderRasterDEMSource::updateInternal` passes `resolveTileSize(impl().getTileSize())` into
+`tilePyramid.update`, and `TilePyramid::update` derives `coveringZoomLevel` from it. So the
+shape is:
+
+1. A `usedForTerrain` flag on `RenderRasterDEMSource`, set from `RenderTerrain::prepareSource`
+   (which already runs early enough in the frame, having been extracted for exactly that).
+2. `getTileSize()` returns the doubled size when the flag is set, and `updateInternal` uses
+   `getTileSize()` rather than re-deriving it - so the pyramid and `computeMeshCover`, which
+   already calls `demSource->getTileSize()`, cannot disagree.
+
+**Two things to watch when doing it.** It changes terrain tile selection everywhere, so the
+terrain render tests move and need a before/after. And a DEM source shared with a hillshade or
+color-relief layer would have *its* tile selection changed too - which is precisely why gl-js
+warns against sharing a source between hillshade and terrain (see "Sharing a source between
+terrain and hillshade" above). Check the 51 hillshade render tests either side.
+
 
 ### Convergence with maplibre-gl-js (ask before doing)
 
