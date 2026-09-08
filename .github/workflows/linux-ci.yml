@@ -10,6 +10,7 @@ on:
       - linux-*
 
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - '*'
 
@@ -29,6 +30,7 @@ env:
 
 jobs:
   pre_job:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
@@ -52,7 +54,7 @@ jobs:
           echo "Changed file(s): ${{ steps.changed-files.outputs.linux_all_changed_files }}"
 
   linux-build-and-test:
-    if: needs.pre_job.outputs.should_skip != 'true'
+    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true')
     needs: pre_job
     strategy:
       fail-fast: true
@@ -197,6 +199,7 @@ jobs:
         run: build-linux-${{ matrix.variant.renderer }}/expression-test/mbgl-expression-test
 
   linux-coverage:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -242,7 +245,7 @@ jobs:
 
   linux-ci-result:
     name: Linux CI Result
-    if: needs.pre_job.outputs.should_skip != 'true' && always()
+    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true' && always())
     runs-on: ubuntu-24.04
     needs:
       - pre_job

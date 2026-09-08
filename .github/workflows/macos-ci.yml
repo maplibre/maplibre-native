@@ -29,6 +29,7 @@ on:
       - 'cmake/**'
 
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
     paths:
@@ -61,6 +62,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     name: MacOS Metal CI Tests
     runs-on: [macos-15]
     defaults:
@@ -94,6 +96,7 @@ jobs:
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
 
   webgpu-cmake:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     name: macOS WebGPU (${{ matrix.variant.name }})
     runs-on: macos-15
     strategy:
