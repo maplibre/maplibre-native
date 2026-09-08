@@ -144,7 +144,7 @@ jobs:
           cat changelog_for_version.md
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           aws-region: us-west-2
           role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
@@ -155,7 +155,7 @@ jobs:
 
       - name: Release (GitHub) - Create Draft
         id: github_release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           name: ios-v${{ env.version }}
           files: |
@@ -187,7 +187,7 @@ jobs:
          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish release (remove draft)
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ios-v${{ env.version }}
           name: ios-v${{ env.version }}
