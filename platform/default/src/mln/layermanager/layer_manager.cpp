@@ -13,7 +13,6 @@
 #include <mln/layermanager/raster_layer_factory.hpp>
 #include <mln/layermanager/symbol_layer_factory.hpp>
 #include <mln/util/logging.hpp>
-#include <mln/layermanager/custom_drawable_layer_factory.hpp>
 
 #include <map>
 #include <memory>
@@ -88,7 +87,6 @@ LayerManagerDefault::LayerManagerDefault() {
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
 #endif
 #if !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
-    addLayerType(std::make_unique<CustomDrawableLayerFactory>());
 #endif
 }
 

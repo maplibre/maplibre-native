@@ -969,12 +969,6 @@ MLN_DRAWABLES_SOURCE = [
     "src/mln/renderer/layers/collision_layer_tweaker.cpp",
     "src/mln/renderer/layers/collision_layer_tweaker.hpp",
     "src/mln/shaders/shader_program_base.cpp",
-    "src/mln/style/layers/custom_drawable_layer.cpp",
-    "src/mln/layermanager/custom_drawable_layer_factory.cpp",
-    "src/mln/style/layers/custom_drawable_layer_impl.cpp",
-    "src/mln/style/layers/custom_drawable_layer_impl.hpp",
-    "src/mln/renderer/layers/render_custom_drawable_layer.cpp",
-    "src/mln/renderer/layers/render_custom_drawable_layer.hpp",
 ]
 
 MLN_DRAWABLES_HEADERS = [
@@ -1017,8 +1011,6 @@ MLN_DRAWABLES_HEADERS = [
     "include/mln/shaders/symbol_layer_ubo.hpp",
     "include/mln/shaders/widevector_ubo.hpp",
     "include/mln/util/suppress_copies.hpp",
-    "include/mln/style/layers/custom_drawable_layer.hpp",
-    "include/mln/layermanager/custom_drawable_layer_factory.hpp",
 ]
 
 MLN_DRAWABLES_GL_SOURCE = [

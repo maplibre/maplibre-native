@@ -29,10 +29,6 @@
 #include <mln/util/platform.hpp>
 #include <mln/util/string.hpp>
 
-#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-#include "example_custom_drawable_style_layer.hpp"
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)
@@ -363,7 +359,6 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `K` to add a random custom runtime imagery annotation\n");
     printf("- Press `L` to add a random line annotation\n");
     printf("- Press `W` to pop the last-added annotation off\n");
-    printf("- Press `V` to toggle custom drawable layer\n");
     printf("- Press `B` to toggle rendering stats\n");
     printf("- Press `P` to pause tile requests\n");
     printf("\n");
@@ -459,9 +454,6 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_C:
                 view->clearAnnotations();
-                break;
-            case GLFW_KEY_V:
-                view->toggleCustomDrawableStyle();
                 break;
             case GLFW_KEY_B:
                 view->map->enableRenderingStatsView(!view->map->isRenderingStatsViewEnabled());
@@ -925,23 +917,6 @@ void GLFWView::popAnnotation() {
 
     map->removeAnnotation(annotationIDs.back());
     annotationIDs.pop_back();
-}
-
-void GLFWView::toggleCustomDrawableStyle() {
-#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    auto &style = map->getStyle();
-
-    const std::string identifier = "ExampleCustomDrawableStyleLayer";
-    const auto &existingLayer = style.getLayer(identifier);
-
-    if (!existingLayer) {
-        style.addLayer(std::make_unique<mln::style::CustomDrawableLayer>(
-            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH)));
-    } else {
-        style.removeLayer(identifier);
-    }
-
-#endif
 }
 
 void GLFWView::makeSnapshot(bool withOverlay) {
