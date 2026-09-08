@@ -33,8 +33,10 @@ const std::array<AttributeInfo, 1> FillExtrusionShadowMaskInstancedShaderSource:
 const std::array<AttributeInfo, 4> FillExtrusionShadowMaskInstancedShaderSource::instanceAttributes = {
     // The shader also reads this same buffer directly as an OutlineInstance SSBO, so the two
     // entries below must stay adjacent and layout-identical to FillExtrusionLayoutVertex.
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idFillExtrusionShadowOutlinePosAttribute, idFillExtrusionInstanced},
-    AttributeInfo{2, gfx::AttributeDataType::UShort2, idFillExtrusionShadowDecimalsEdAttribute, idFillExtrusionInstanced},
+    AttributeInfo{
+        1, gfx::AttributeDataType::Short2, idFillExtrusionShadowOutlinePosAttribute, idFillExtrusionInstanced},
+    AttributeInfo{
+        2, gfx::AttributeDataType::UShort2, idFillExtrusionShadowDecimalsEdAttribute, idFillExtrusionInstanced},
 
     // Data driven
     AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionShadowBaseVertexAttribute},
