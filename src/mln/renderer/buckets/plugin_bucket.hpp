@@ -124,8 +124,7 @@ public:
     void writeUniforms(float zoom, uint32_t uniformID, uint8_t* output, std::size_t outputSize) const;
     bool synchronize(const style::PluginPropertyMap&);
     bool update(const FeatureStates&, const GeometryTileLayer&);
-    void appendStatistics(float,
-                          std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>>&) const;
+    void appendStatistics(float, std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>>&) const;
 
 private:
     std::vector<PluginPaintPropertyBinder> binders;

@@ -156,7 +156,8 @@ struct LayerTypeIdentity {
           info{name.c_str(),
                registration.sourceKind == MLN_PLUGIN_SOURCE_NONE ? style::LayerTypeInfo::Source::NotRequired
                                                                  : style::LayerTypeInfo::Source::Required,
-               registration.participatesIn3DPass ? style::LayerTypeInfo::Pass3D::Required : style::LayerTypeInfo::Pass3D::NotRequired,
+               registration.participatesIn3DPass ? style::LayerTypeInfo::Pass3D::Required
+                                                 : style::LayerTypeInfo::Pass3D::NotRequired,
                registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY ? style::LayerTypeInfo::Layout::Required
                                                                      : style::LayerTypeInfo::Layout::NotRequired,
                style::LayerTypeInfo::FadingTiles::NotRequired,
@@ -164,7 +165,7 @@ struct LayerTypeIdentity {
                registration.sourceKind == MLN_PLUGIN_SOURCE_GEOMETRY     ? style::LayerTypeInfo::TileKind::Geometry
                : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER_DEM ? style::LayerTypeInfo::TileKind::RasterDEM
                : registration.sourceKind == MLN_PLUGIN_SOURCE_RASTER     ? style::LayerTypeInfo::TileKind::Raster
-                                                                         : style::LayerTypeInfo::TileKind::NotRequired} {}
+                                                                     : style::LayerTypeInfo::TileKind::NotRequired} {}
 
     std::string name;
     style::LayerTypeInfo info;
