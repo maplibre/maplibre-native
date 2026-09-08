@@ -744,6 +744,30 @@ color-relief layer would have *its* tile selection changed too - which is precis
 warns against sharing a source between hillshade and terrain (see "Sharing a source between
 terrain and hillshade" above). Check the 51 hillshade render tests either side.
 
+**Attempted 2026-09-08 exactly as described above, measured, and reverted.** A
+`usedForTerrain` flag on `RenderRasterDEMSource`, `getTileSize()` returning the doubled size,
+and `updateInternal` reading it back so the pyramid and `computeMeshCover` cannot disagree -
+set from `prepareSource`, cleared in `deactivate`. It builds and the coupling works. The
+results did not justify keeping it:
+
+| | before | after |
+|---|---|---|
+| terrain / hillshade / color-relief render tests | 58 pass, 3 fail | 56 pass, **5 fail** |
+| `terrain/default` | blank (850 bytes) | blank (850 bytes), unchanged |
+| 51 hillshade + 8 color-relief | all pass | all pass |
+
+So it fixed nothing measurable and regressed `skirts-auto` and `skirts-none`, which went from
+drawing the draped geojson to drawing **nothing at all** (one unique colour). That is a real
+defect, not the known fixture gap: the run reports no cache misses, so the tiles it wants are
+present. Their DEM source declares `tileSize: 512` and no `maxzoom`, so doubling moves the
+cover from z9 to z8 at the test's zoom 9.64.
+
+Worth noting what was *not* disproven: the hillshade side of the shared-source worry never
+materialised here, because no render test puts terrain and hillshade on one source - the flag
+is never set in those tests. And the actual motivation, the zoom-0 relief intensity bug, has
+no repro in this suite, so the change could not be judged on the thing it was meant to fix.
+Anyone retrying this needs a zoom-0 case first, and an explanation for the skirts blanking.
+
 
 ### Convergence with maplibre-gl-js (ask before doing)
 
