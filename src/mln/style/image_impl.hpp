@@ -65,15 +65,14 @@ inline bool operator<(const Immutable<mln::style::Image::Impl>& a, const Immutab
 
 class ImagePosition {
 public:
-    ImagePosition(const Rect<uint16_t>& rect, const style::Image::Impl& image, uint32_t version_ = 0)
+    ImagePosition(const Rect<uint16_t>& rect, const style::Image::Impl& image)
         : paddedRect(rect),
           pixelRatio(image.pixelRatio),
           stretchX(image.stretchX),
           stretchY(image.stretchY),
           content(image.content),
           textFitWidth(image.textFitWidth),
-          textFitHeight(image.textFitHeight),
-          version(version_) {}
+          textFitHeight(image.textFitHeight) {}
 
     static constexpr const uint16_t padding = 1u;
 
@@ -84,7 +83,6 @@ public:
     std::optional<style::ImageContent> content;
     std::optional<style::TextFit> textFitWidth;
     std::optional<style::TextFit> textFitHeight;
-    uint32_t version;
 
     std::array<uint16_t, 2> tl() const {
         return {{static_cast<uint16_t>(paddedRect.x + padding), static_cast<uint16_t>(paddedRect.y + padding)}};
