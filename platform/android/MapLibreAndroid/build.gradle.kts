@@ -12,6 +12,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":android-plugin-api"))
     lintChecks(project(":MapLibreAndroidLint"))
     api(libs.maplibreJavaGeoJSON)
     api(libs.maplibreGestures)
@@ -229,6 +230,7 @@ val syncPrefabHeaders by tasks.registering(Sync::class) {
         include("mln/style/layers/custom_layer_render_parameters.hpp")
         include("mln/style/layers/vulkan/custom_layer_init_parameters.hpp")
         include("mln/style/layers/vulkan/custom_layer_render_parameters.hpp")
+        include("mln/plugin/plugin_api.h")
     }
     into(project.rootDir.resolve("prefab-headers"))
 }

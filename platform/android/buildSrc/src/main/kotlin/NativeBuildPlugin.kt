@@ -35,6 +35,8 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
             abi = project.property("maplibre.abis") as String
         }
 
+        // The plugin ABI is pure C. MapLibre keeps its C++ runtime private and
+        // plugins are expected to build without an Android STL dependency.
         var stl = "c++_static"
         if (project.hasProperty("mapbox.stl")) {
             stl = project.property("mapbox.stl") as String

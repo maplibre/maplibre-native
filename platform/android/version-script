@@ -1,4 +1,9 @@
 {
-  global: JNI_OnLoad;
+  global:
+    JNI_OnLoad;
+    mln_plugin_register_v1;
+    mln_plugin_is_registered_v1;
+    mln_plugin_count_v1;
+    mln_plugin_id_at_v1;
   local: *;
 };
