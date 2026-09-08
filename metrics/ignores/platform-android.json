@@ -67,6 +67,7 @@
     "render-tests/projection/globe/antimeridian-overdraw/wide-band-pole-view": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/antimeridian-overdraw/wide-band-zoomed-out": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/fill-seams/checkerboard": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
+    "render-tests/projection/globe/source-bounds": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/fill-seams/ocean": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-always-overlap-occluded/line": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
     "render-tests/projection/globe/text-always-overlap-occluded/point": "The globe expected images were rendered on Metal; this platform has no expectation of its own.",
