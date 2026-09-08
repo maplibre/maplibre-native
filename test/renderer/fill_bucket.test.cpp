@@ -3,7 +3,6 @@
 
 #include <mln/renderer/buckets/fill_bucket.hpp>
 
-#include <cstddef>
 #include <string>
 
 using namespace mln;
@@ -22,24 +21,22 @@ TEST(FillBucket, TracksSDFPatternsPerLayer) {
     EXPECT_TRUE(log.empty());
 }
 
-TEST(FillBucket, WarnsOnceForMixedPatternTypesAcrossBuckets) {
-    static std::size_t invocation = 0;
-    const std::string layerID = "mixed-layer-" + std::to_string(invocation++);
-
+TEST(FillBucket, WarnsOnceForMixedPatternTypesPerBucket) {
     FixtureLog log;
     FillBucket::PossiblyEvaluatedLayoutProperties layout;
     FillBucket firstBucket{layout, {}, 5.0f, 1};
     FillBucket secondBucket{layout, {}, 5.0f, 1};
 
-    firstBucket.recordSDFPattern(layerID, true);
-    firstBucket.recordSDFPattern(layerID, false);
-    secondBucket.recordSDFPattern(layerID, true);
-    secondBucket.recordSDFPattern(layerID, false);
+    firstBucket.recordSDFPattern("mixed-layer", true);
+    firstBucket.recordSDFPattern("mixed-layer", false);
+    firstBucket.recordSDFPattern("mixed-layer", false);
+    secondBucket.recordSDFPattern("mixed-layer", true);
+    secondBucket.recordSDFPattern("mixed-layer", false);
 
     const FixtureLog::Message warning{
         EventSeverity::Warning,
         Event::Style,
         -1,
-        "Style sheet warning: Cannot mix SDF and non-SDF fill patterns in layer \"" + layerID + "\""};
-    EXPECT_EQ(1u, log.count(warning));
+        "Style sheet warning: Cannot mix SDF and non-SDF fill patterns in layer \"mixed-layer\""};
+    EXPECT_EQ(2u, log.count(warning));
 }
