@@ -1,5 +1,12 @@
 # Changelog MapLibre Native for Android
 
+## 13.6.0
+
+### ✨ Features and improvements
+
+- core: rename `mbgl` directories to `mln` ([#4511](https://github.com/maplibre/maplibre-native/pull/4511)).
+- Reduce symbol buffers memory by using instancing (Core optimization) ([#4383](https://github.com/maplibre/maplibre-native/pull/4383)).
+
 ## 13.5.1
 
 ### 🐞 Bug fixes

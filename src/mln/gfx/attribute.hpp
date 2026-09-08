@@ -182,6 +182,17 @@ struct MBGL_VERTEX_ALIGN VertexType<A1, A2, A3, A4, A5> {
     typename A5::Value a5;
 };
 
+template <class A1, class A2, class A3, class A4, class A5, class A6>
+struct MBGL_VERTEX_ALIGN VertexType<A1, A2, A3, A4, A5, A6> {
+    using Type = VertexType<A1, A2, A3, A4, A5, A6>;
+    typename A1::Value a1;
+    typename A2::Value a2;
+    typename A3::Value a3;
+    typename A4::Value a4;
+    typename A5::Value a5;
+    typename A6::Value a6;
+};
+
 template <class>
 struct Descriptor;
 

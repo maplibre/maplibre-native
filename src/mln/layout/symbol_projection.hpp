@@ -48,7 +48,7 @@ mat4 getGlCoordMatrix(
 using PointAndCameraDistance = std::pair<Point<float>, float>;
 PointAndCameraDistance project(const Point<float>& point, const mat4& matrix);
 
-void reprojectLineLabels(gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>&,
+void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
                          const std::vector<PlacedSymbol>&,
                          const mat4& posMatrix,
                          bool pitchWithMap,
@@ -68,10 +68,9 @@ std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float 
                                                                           const mat4& labelPlaneMatrix,
                                                                           bool returnTileDistance);
 
-void hideGlyphs(std::size_t numGlyphs,
-                gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray);
+void hideGlyphs(std::size_t numGlyphs, SymbolBucket::DynamicAttributeVector& dynamicVertexArray);
 void addDynamicAttributes(const Point<float>& anchorPoint,
                           float angle,
-                          gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray);
+                          SymbolBucket::DynamicAttributeVector& dynamicAttributeData);
 
 } // end namespace mln

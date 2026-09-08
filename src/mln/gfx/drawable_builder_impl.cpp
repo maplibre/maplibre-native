@@ -204,7 +204,7 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
 
     // segments
     SegmentVector triangleSegments;
-    triangleSegments.emplace_back(0, 0, 12, 18);
+    triangleSegments.emplace_back(0, 0, 12, 18, 0, sharedInstanceData->elements());
 
     // add to builder
     {

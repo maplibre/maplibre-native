@@ -97,7 +97,7 @@ public:
         // Try to create a legacy context.
         glContext = glXCreateNewContext(glxDisplay->xDisplay, glxDisplay->fbConfigs[0], GLX_RGBA_TYPE, None, True);
         if (glContext && !glXIsDirect(glxDisplay->xDisplay, glContext)) {
-            Log::Error(Event::OpenGL, "failed to create direct OpenGL Legacy context");
+            Log::Error(Event::GraphicsBackend, "failed to create direct OpenGL Legacy context");
             glXDestroyContext(glxDisplay->xDisplay, glContext);
             glContext = nullptr;
         }

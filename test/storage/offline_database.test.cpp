@@ -484,7 +484,7 @@ TEST(OfflineDatabase, UpdateMetadata) {
     ASSERT_TRUE(region);
 
     OfflineRegionMetadata newmetadata{{4, 5, 6}};
-    db.updateMetadata(region->getID(), newmetadata);
+    ASSERT_TRUE(db.updateMetadata(region->getID(), newmetadata));
     auto newRegion = db.getRegion(region->getID()).value();
     EXPECT_EQ(newRegion->getMetadata(), newmetadata);
 

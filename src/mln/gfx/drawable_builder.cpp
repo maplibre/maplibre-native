@@ -224,6 +224,8 @@ void DrawableBuilder::setSegments(const gfx::DrawMode mode,
             seg.indexOffset,
             seg.vertexLength,
             seg.indexLength,
+            seg.baseInstance,
+            seg.instanceCount,
             seg.sortKey,
         };
         impl->segments.emplace_back(createSegment(mode, std::move(segCopy)));

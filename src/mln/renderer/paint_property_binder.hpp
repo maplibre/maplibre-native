@@ -175,8 +175,9 @@ public:
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) {
         interleavedVertexBuffer = &buffer;
 
-        if (vertexOffset == 0) {
-            vertexOffset = interleavedVertexBuffer->extendVertexFormat<VertexFormat>();
+        auto newVertexOffset = interleavedVertexBuffer->extendVertexFormat<VertexFormat>();
+        if (vertexOffset == std::numeric_limits<size_t>::max()) {
+            vertexOffset = newVertexOffset;
         }
     }
 
@@ -184,7 +185,7 @@ public:
 
     PaintPropertyStatistics<T> statistics;
     InterleavedVertexBuffer* interleavedVertexBuffer = nullptr;
-    std::size_t vertexOffset = 0;
+    std::size_t vertexOffset = std::numeric_limits<size_t>::max();
 };
 
 namespace detail {
@@ -362,7 +363,7 @@ public:
 
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
-        this->template setInterleavedBuffer<BaseVertex>(buffer);
+        this->template setInterleavedBuffer<ZoomInterpolatedVertexType<A>>(buffer);
     }
 
 private:
@@ -478,7 +479,7 @@ public:
 
     using PaintPropertyBinder<T, T, PossiblyEvaluatedPropertyValue<T>, A>::setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
-        this->template setInterleavedBuffer<Vertex>(buffer);
+        this->template setInterleavedBuffer<ZoomInterpolatedVertexType<A>>(buffer);
     }
 
     std::tuple<ZoomInterpolatedVertexType<A>> getVertexValue(std::size_t index) const override {
@@ -578,7 +579,7 @@ public:
     using PaintPropertyBinder<T, std::array<uint16_t, 4>, PossiblyEvaluatedPropertyValue<Faded<T>>, A1, A2>::
         setInterleavedBuffer;
     void setInterleavedBuffer(InterleavedVertexBuffer& buffer) override {
-        this->template setInterleavedBuffer<Vertex>(buffer);
+        this->template setInterleavedBuffer<ZoomInterpolatedVertexType<A1>>(buffer);
     }
 
 private:
@@ -698,7 +699,7 @@ public:
         interleavedVertexBuffer = std::move(other.interleavedVertexBuffer);
 
         (([&] {
-             binders.template get<Ps>()->setInterleavedBuffer(interleavedVertexBuffer);
+             binders.template get<Ps>()->interleavedVertexBuffer = &interleavedVertexBuffer;
          }()),
          ...);
     }

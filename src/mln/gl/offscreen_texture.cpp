@@ -57,7 +57,7 @@ private:
 };
 
 OffscreenTexture::OffscreenTexture(gl::Context& context, const Size size_, const gfx::TextureChannelDataType type)
-    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type)) {}
+    : gfx::OffscreenTexture(size_, std::make_unique<OffscreenTextureResource>(context, size_, type)) {}
 
 bool OffscreenTexture::isRenderable() {
     try {

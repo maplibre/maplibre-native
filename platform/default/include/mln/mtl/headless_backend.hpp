@@ -15,7 +15,6 @@ public:
                     SwapBehaviour = SwapBehaviour::NoFlush,
                     gfx::ContextMode = gfx::ContextMode::Unique);
     ~HeadlessBackend() override;
-    void updateAssumedState() override;
     gfx::Renderable& getDefaultRenderable() override;
     PremultipliedImage readStillImage() override;
     MTL::Texture* getMetalTexture();

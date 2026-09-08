@@ -57,6 +57,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/jpeg_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/webp_reader.cpp
@@ -182,7 +183,7 @@ target_link_libraries(
 )
 
 if(MLN_CREATE_AMALGAMATION)
-    if ("${ARMERGE}" STREQUAL "MLN_CREATE_AMALGAMATION")
+    if(NOT ARMERGE)
         message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
     endif()
     message(STATUS "Found armerge: ${ARMERGE}")
@@ -218,7 +219,7 @@ if(MLN_CREATE_AMALGAMATION)
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND ${ARMERGE} --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
@@ -227,6 +228,7 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-sqlite>
             $<TARGET_FILE:mbgl-vendor-parsedate>
             $<TARGET_FILE:mlt-cpp>
+            $<TARGET_FILE:fastpfor-lib>
             ${ICUUC_LIBRARY_DIRS}/libicuuc.a
             ${ICUUC_LIBRARY_DIRS}/libicudata.a
             ${ICUI18N_LIBRARY_DIRS}/libicui18n.a

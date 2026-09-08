@@ -180,18 +180,25 @@ bool isVisible(const vec4& anchorPos, const std::array<double, 2>& clippingBuffe
 
 void addDynamicAttributes(const Point<float>& anchorPoint,
                           const float angle,
-                          gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
-    auto dynamicVertex = SymbolBucket::dynamicLayoutVertex(anchorPoint, angle);
-    dynamicVertexArray.emplace_back(dynamicVertex);
-    dynamicVertexArray.emplace_back(dynamicVertex);
-    dynamicVertexArray.emplace_back(dynamicVertex);
-    dynamicVertexArray.emplace_back(dynamicVertex);
+                          SymbolBucket::DynamicAttributeVector& dynamicAttributeData) {
+    auto dynamicAttributes = SymbolBucket::dynamicLayoutAttributes(anchorPoint, angle);
+    dynamicAttributeData.emplace_back(dynamicAttributes);
+#if !MLN_USE_SYMBOL_INSTANCING
+    dynamicAttributeData.emplace_back(dynamicAttributes);
+    dynamicAttributeData.emplace_back(dynamicAttributes);
+    dynamicAttributeData.emplace_back(dynamicAttributes);
+#endif
 }
 
-void hideGlyphs(size_t numGlyphs, gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
+void hideGlyphs(size_t numGlyphs, SymbolBucket::DynamicAttributeVector& dynamicVertexArray) {
+#if MLN_USE_SYMBOL_INSTANCING
+    const size_t count = 1;
+#else
+    const size_t count = 4;
+#endif
     const Point<float> offscreenPoint = {-INFINITY, -INFINITY};
     if (dynamicVertexArray.empty()) {
-        dynamicVertexArray.reserve(4 * numGlyphs);
+        dynamicVertexArray.reserve(count * numGlyphs);
     }
     for (size_t i = 0; i < numGlyphs; i++) {
         addDynamicAttributes(offscreenPoint, 0, dynamicVertexArray);
@@ -378,7 +385,7 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
                                      const mat4& posMatrix,
                                      const mat4& labelPlaneMatrix,
                                      const mat4& glCoordMatrix,
-                                     gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray,
+                                     SymbolBucket::DynamicAttributeVector& dynamicVertexArray,
                                      const Point<float>& projectedAnchorPoint,
                                      const float aspectRatio) {
     const float fontScale = fontSize / util::ONE_EM;
@@ -486,7 +493,7 @@ PlacementResult placeGlyphsAlongLine(const PlacedSymbol& symbol,
     return PlacementResult::OK;
 }
 
-void reprojectLineLabels(gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray,
+void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArray,
                          const std::vector<PlacedSymbol>& placedSymbols,
                          const mat4& posMatrix,
                          bool pitchWithMap,

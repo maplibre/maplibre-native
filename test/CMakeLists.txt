@@ -21,6 +21,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/shader_registry.test.cpp
     $<$<BOOL:${MLN_WITH_WEBGPU}>:${PROJECT_SOURCE_DIR}/test/renderer/wgsl_preprocessor.test.cpp>
     ${PROJECT_SOURCE_DIR}/test/sprite/sprite_loader.test.cpp

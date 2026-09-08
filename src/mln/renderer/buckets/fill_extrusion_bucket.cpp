@@ -2,6 +2,7 @@
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/renderer/layers/render_fill_extrusion_layer.hpp>
+#include <mln/renderer/render_static_data.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/util/math.hpp>
 #include <mln/util/constants.hpp>
@@ -201,6 +202,11 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         triangleSegment.vertexLength += totalVertices;
         triangleSegment.indexLength += nIndices;
+
+        if (instanceSegments.empty()) {
+            instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
+        }
+        instanceSegments.back().instanceCount += totalVertices;
     }
 
     for (auto& pair : paintPropertyBinders) {
