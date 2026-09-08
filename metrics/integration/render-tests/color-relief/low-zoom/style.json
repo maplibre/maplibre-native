@@ -7,16 +7,20 @@
       "description": "This test verifies color-relief rendering at low zoom levels (zoom 1) where exaggeration scaling is applied"
     }
   },
-  "center": [0, 45],
+  "center": [
+    0,
+    45
+  ],
   "zoom": 1,
   "sources": {
     "source": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/jaxa/{z}-{x}-{y}.terrain.png"
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.webp"
       ],
-      "maxzoom": 15,
-      "tileSize": 512
+      "maxzoom": 12,
+      "tileSize": 512,
+      "encoding": "mapbox"
     }
   },
   "layers": [
@@ -35,14 +39,24 @@
         "color-relief-opacity": 1,
         "color-relief-color": [
           "interpolate",
-          ["linear"],
-          ["elevation"],
-          0, "#006600",
-          500, "#00FF00",
-          1000, "#FFFF00",
-          2000, "#FF8800",
-          3000, "#FF0000",
-          5000, "#FFFFFF"
+          [
+            "linear"
+          ],
+          [
+            "elevation"
+          ],
+          0,
+          "#006600",
+          500,
+          "#00FF00",
+          1000,
+          "#FFFF00",
+          2000,
+          "#FF8800",
+          3000,
+          "#FF0000",
+          5000,
+          "#FFFFFF"
         ]
       }
     }
