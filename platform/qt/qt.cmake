@@ -112,6 +112,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_file_source.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/http_request.hpp
+        ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mln/local_glyph_rasterizer.cpp

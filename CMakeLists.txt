@@ -995,6 +995,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_cover.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_cover_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_cover_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/tile_lod.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/tile_lod.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_range.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/default_style.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/tile_server_options.cpp

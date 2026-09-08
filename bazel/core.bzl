@@ -624,6 +624,8 @@ MLN_CORE_SOURCE = [
     "src/mln/util/tile_cover.hpp",
     "src/mln/util/tile_cover_impl.cpp",
     "src/mln/util/tile_cover_impl.hpp",
+    "src/mln/util/tile_lod.cpp",
+    "src/mln/util/tile_lod.hpp",
     "src/mln/util/tile_range.hpp",
     "src/mln/util/default_style.cpp",
     "src/mln/util/tile_server_options.cpp",
