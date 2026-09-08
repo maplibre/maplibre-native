@@ -1298,25 +1298,59 @@ The suite now reads **0 pass / 6 fail**, where it read 3 pass / 3 fail against l
 That is the honest number: of the three that were green, two passed against baselines with no
 terrain in them and the third sat 60% away from gl-js.
 
-#### The clearest repro of the tile-cover divergence
+#### The skirts fixture was decoding as 840 km of terrain
 
-Adopting gl-js's skirts style turned a vague failure into a precise one. Same style, same
-fixture set - both engines ship the *same 16* `terrain/` tiles - and yet:
+Adopting gl-js's skirts style turned a vague failure into a precise one, and then into a
+different finding altogether. The `terrain/` fixture folder holds **two encodings**: eleven
+terrarium tiles and five terrain-RGB. A style declares one encoding for a whole source, and
+these tests declared none, so both engines took the spec default, `mapbox`. The four tiles the
+skirts tests actually use are terrarium ones, and read as terrain-RGB they decode to
+838,947..888,534 m.
 
-- gl-js renders it from **four** z10 tiles: `10-189-401`, `10-189-402`, `10-190-401`, `10-190-402`.
-- native asks for those **plus four more z10** (`189-400`, `189-403`, `190-403`, `191-401`)
-  **plus an ancestor chain** `6-11-25`, `7-23-50`, `8-47-100`, `9-94-200`.
+So the gl-js baselines these tests were graded against are pictures of a Grand Canyon some
+840 km tall - which is why there is no terrain in them, and why a test named for skirt
+artifacts showed no skirts. Declaring `encoding: terrarium` moves native's own render by 16.9%
+and *away* from the gl-js baseline (25.4% differing, against 13.7%), because the baseline bakes
+the wrong encoding in.
 
-None of those eight exist in either engine's fixtures, because gl-js never asks for them. So the
-test fails on cache misses, and the misses *are* the finding: this is the "native over-requests
-ancestors" note above, reduced to a minimal reproducible case on an identical style. The DEM
-source declares no `maxzoom`, so `computeMeshCover` runs `zoomRange{0, getMaxZoom()}` and the
-cover DFS descends from z0.
+Both engines are now on a JAXA AW3D30 set instead: one encoding throughout, z0-z12 global
+coverage, and `encoding`, `tileSize` and `maxzoom` all declared rather than defaulted. Both
+repos hold the same tiles from the same build, verified pixel-identical - native as the WebP
+the source serves, gl-js re-encoded to lossless PNG. Fixture provenance is worth being strict
+about here: a DEM carries elevation in the low bits, so a lossy re-encode does not soften the
+image, it moves the ground.
 
-This is a better repro than `terrain/default` for the cover work: it is small, the expected
-answer is known exactly (four named tiles), and success is unambiguous - the misses disappear.
-Worth fixing the cover against it rather than adding the eight tiles to `cache-style.db`, which
-would hide the divergence rather than close it.
+**The cache misses were not evidence about the DEM.** Native's ancestor chain (`6-11-25`,
+`7-23-50`, `8-47-100`, `9-94-200`) is byte-for-byte identical whether the encoding is declared
+correctly or not, so it is not the absurd elevations driving it. It is the structural thing:
+the source declared no `maxzoom`, so `computeMeshCover` runs `zoomRange{0, getMaxZoom()}` and
+the cover DFS descends from z0. That divergence is still open - it just no longer stops these
+tests from running.
+
+#### What is left is one number
+
+On the JAXA set the tests render, and the two engines render the same scene. The difference is
+a **whole-scene vertical translation of 13 px**: native's terrain sits lower.
+
+| measurement (`skirts-none`) | mean abs error |
+|---|---|
+| native vs gl-js, as rendered | 10.01 |
+| native vs gl-js, after translating dy=+13 | 1.37 |
+| native vs gl-js, `exaggeration: 0` | 1.02 |
+
+With terrain flattened the best alignment is dx=dy=0, and the two engines agree to 1.02 - so
+the camera, the projection, the drape and the geometry rasterisation all match. Correcting the
+13 px brings the terrain case to 1.37, essentially that same floor. The entire remaining gap
+between the engines on this test is therefore **a single scalar elevation**, not a difference
+in shape, tile selection or projection.
+
+The diff image says the same thing: the polygon and line interiors are unchanged and only their
+outlines light up.
+
+Two candidates, both already on the list above: the centre-clamp ordering (gl-js clamps the
+camera centre to the terrain before it draws, native a frame later) and the DEM sampling zoom
+(`deltaZoom`). This is now the sharpest test available for both - it is one number, on an
+identical style, against a DEM both engines decode the same way.
 
 **`occlusion-debug` now actually tests occlusion.** As written it used `exaggeration: 0.45`, and
 the relief was gentle enough that nothing stood in front of the labels - all 25 rendered, and it
