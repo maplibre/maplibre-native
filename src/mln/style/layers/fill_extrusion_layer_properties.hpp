@@ -45,10 +45,6 @@ struct FillExtrusionShadowAzimuth : PaintProperty<float> {
     static float defaultValue() { return 225.f; }
 };
 
-struct FillExtrusionShadowBlur : PaintProperty<float> {
-    static float defaultValue() { return 6.f; }
-};
-
 struct FillExtrusionShadowColor : PaintProperty<Color> {
     static Color defaultValue() { return { 0, 0, 0, 0.35 }; }
 };
@@ -84,7 +80,6 @@ class FillExtrusionPaintProperties : public Properties<
     FillExtrusionOpacity,
     FillExtrusionPattern,
     FillExtrusionShadowAzimuth,
-    FillExtrusionShadowBlur,
     FillExtrusionShadowColor,
     FillExtrusionShadowLength,
     FillExtrusionShadowOpacity,

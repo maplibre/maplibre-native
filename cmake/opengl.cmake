@@ -37,8 +37,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern_instanced.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_shadow_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_shadow_mask_instanced.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_shadow_blur.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_shadow.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/hillshade_prepare.hpp

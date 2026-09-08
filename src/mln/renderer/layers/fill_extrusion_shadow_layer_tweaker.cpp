@@ -41,16 +41,14 @@ void FillExtrusionShadowLayerTweaker::execute(LayerGroupBase& layerGroup, const 
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // The mask stage only reads `base` and `height`; the blur and composite stages own the colour,
-    // opacity and blur fields in their own copy of this struct.
-    const FillExtrusionShadowPropsUBO propsUBO = {.color = {},
-                                                  .texel_step = {0.0f, 0.0f},
-                                                  .blur_scale = 0.0f,
-                                                  .opacity = 0.0f,
+    // Spec `minimum`/`maximum` are documentation only, so clamp here rather than trusting the style.
+    const auto opacity = util::clamp(evaluated.get<FillExtrusionShadowOpacity>(), 0.0f, 1.0f);
+
+    const FillExtrusionShadowPropsUBO propsUBO = {.color = evaluated.get<FillExtrusionShadowColor>(),
+                                                  .opacity = opacity,
                                                   .base = constOrDefault<FillExtrusionBase>(evaluated),
                                                   .height = constOrDefault<FillExtrusionHeight>(evaluated),
-                                                  .pad1 = 0,
-                                                  .pad2 = 0};
+                                                  .pad1 = 0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionShadowPropsUBO, &propsUBO, context);
 

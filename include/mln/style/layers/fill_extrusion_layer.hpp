@@ -63,12 +63,6 @@ public:
     void setFillExtrusionShadowAzimuthTransition(const TransitionOptions&);
     TransitionOptions getFillExtrusionShadowAzimuthTransition() const;
 
-    static PropertyValue<float> getDefaultFillExtrusionShadowBlur();
-    const PropertyValue<float>& getFillExtrusionShadowBlur() const;
-    void setFillExtrusionShadowBlur(const PropertyValue<float>&);
-    void setFillExtrusionShadowBlurTransition(const TransitionOptions&);
-    TransitionOptions getFillExtrusionShadowBlurTransition() const;
-
     static PropertyValue<Color> getDefaultFillExtrusionShadowColor();
     const PropertyValue<Color>& getFillExtrusionShadowColor() const;
     void setFillExtrusionShadowColor(const PropertyValue<Color>&);

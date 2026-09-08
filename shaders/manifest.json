@@ -145,20 +145,6 @@
         "uses_ubos": true
     },
     {
-        "name": "FillExtrusionShadowBlurShader",
-        "header": "fill_extrusion_shadow_blur",
-        "glsl_vert": "_empty.glsl",
-        "glsl_frag": "_empty.glsl",
-        "uses_ubos": true
-    },
-    {
-        "name": "FillExtrusionShadowShader",
-        "header": "fill_extrusion_shadow",
-        "glsl_vert": "_empty.glsl",
-        "glsl_frag": "_empty.glsl",
-        "uses_ubos": true
-    },
-    {
         "name": "HeatmapShader",
         "header": "heatmap",
         "glsl_vert": "heatmap.vertex.glsl",

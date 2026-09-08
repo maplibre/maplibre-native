@@ -543,39 +543,6 @@ public class FillExtrusionLayer extends Layer {
     nativeSetFillExtrusionShadowAzimuthTransition(options.getDuration(), options.getDelay());
   }
 
-  /**
-   * Get the FillExtrusionShadowBlur property
-   *
-   * @return property wrapper value around Float
-   */
-  @NonNull
-  @SuppressWarnings("unchecked")
-  public PropertyValue<Float> getFillExtrusionShadowBlur() {
-    checkThread();
-    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-shadow-blur", nativeGetFillExtrusionShadowBlur());
-  }
-
-  /**
-   * Get the FillExtrusionShadowBlur property transition options
-   *
-   * @return transition options for Float
-   */
-  @NonNull
-  public TransitionOptions getFillExtrusionShadowBlurTransition() {
-    checkThread();
-    return nativeGetFillExtrusionShadowBlurTransition();
-  }
-
-  /**
-   * Set the FillExtrusionShadowBlur property transition options
-   *
-   * @param options transition options for Float
-   */
-  public void setFillExtrusionShadowBlurTransition(@NonNull TransitionOptions options) {
-    checkThread();
-    nativeSetFillExtrusionShadowBlurTransition(options.getDuration(), options.getDelay());
-  }
-
   @NonNull
   @Keep
   private native Object nativeGetFillExtrusionRoundedCornerDistance();
@@ -697,17 +664,6 @@ public class FillExtrusionLayer extends Layer {
 
   @Keep
   private native void nativeSetFillExtrusionShadowAzimuthTransition(long duration, long delay);
-
-  @NonNull
-  @Keep
-  private native Object nativeGetFillExtrusionShadowBlur();
-
-  @NonNull
-  @Keep
-  private native TransitionOptions nativeGetFillExtrusionShadowBlurTransition();
-
-  @Keep
-  private native void nativeSetFillExtrusionShadowBlurTransition(long duration, long delay);
 
   @Override
   @Keep

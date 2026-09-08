@@ -346,11 +346,6 @@ enum {
 };
 
 enum {
-    idFillExtrusionShadowImageTexture,
-    fillExtrusionShadowTextureCount
-};
-
-enum {
     idHeatmapImageTexture,
     idHeatmapColorRampTexture,
     heatmapTextureCount

@@ -1,14 +1,11 @@
 #pragma once
 
 #include <mln/renderer/render_layer.hpp>
-#include <mln/renderer/render_target.hpp>
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
 
 namespace mln {
-
-class FillExtrusionShadowTextureLayerTweaker;
 
 class RenderFillExtrusionLayer final : public RenderLayer {
 public:
@@ -60,51 +57,43 @@ private:
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
     std::shared_ptr<SegmentVector> staticDataSegments;
 
-    // Ground shadows. The mask silhouette is rendered offscreen, blurred, then composited under the
-    // buildings. Only the instanced (Metal/Vulkan) geometry layout is supported, and the shaders are
-    // currently only specialized for Metal -- on other backends the shader lookup simply fails and
-    // the whole feature stays switched off.
+    // Ground shadows. Each building's roof/wall geometry is sheared along the light direction and
+    // redrawn as flat, alpha-blended ground-plane geometry, positioned with the exact same per-tile
+    // camera matrix as the building itself (see getTileMatrix() in the tweaker). Registered ahead
+    // of the building layer group at the same layer index (insertion-order trick, see
+    // markLayerRenderable()) so shadows draw underneath the buildings. Only the instanced
+    // (Metal/Vulkan) geometry layout is supported, and the shaders are currently only specialized
+    // for Metal/Vulkan -- on other backends the shader lookup simply fails and the whole feature
+    // stays switched off.
 
     /// Whether the evaluated properties ask for a shadow at all.
     bool shadowEnabled() const;
 
-    /// Create or resize the render targets and the composite layer group. Returns false if any
-    /// resource could not be obtained, in which case the caller should skip the shadow entirely.
-    bool prepareShadow(gfx::ShaderRegistry&, gfx::Context&, const TransformState&, UniqueChangeRequestVec&);
+    /// Create the shadow's tile layer group and shader groups. Returns false if any resource could
+    /// not be obtained, in which case the caller should skip the shadow entirely.
+    bool prepareShadow(gfx::ShaderRegistry&, gfx::Context&, UniqueChangeRequestVec&);
 
     /// Release every shadow resource and deregister it from the orchestrator.
     void teardownShadow(UniqueChangeRequestVec&);
 
-    /// Rebuild the two full-screen quads. Called once per update, after the per-tile mask drawables.
-    void updateShadowQuads(gfx::Context&);
-
-    RenderTargetPtr shadowMaskTarget;
-    RenderTargetPtr shadowBlurTarget;
-    /// Composite quad. Registered at the same layerIndex as `layerGroup` but *before* it, so it
-    /// draws underneath the buildings.
-    LayerGroupBasePtr shadowCompositeGroup;
+    /// Registered at the same layerIndex as `layerGroup` but *before* it, so it draws underneath
+    /// the buildings.
+    LayerGroupBasePtr shadowGroup;
 
     gfx::ShaderGroupPtr shadowMaskShaderGroup;
     gfx::ShaderGroupPtr shadowMaskInstancedShaderGroup;
-    gfx::ShaderProgramBasePtr shadowBlurShader;
-    gfx::ShaderProgramBasePtr shadowCompositeShader;
 
-    LayerTweakerPtr shadowMaskTweaker;
-    std::shared_ptr<FillExtrusionShadowTextureLayerTweaker> shadowBlurTweaker;
-    std::shared_ptr<FillExtrusionShadowTextureLayerTweaker> shadowCompositeTweaker;
+    LayerTweakerPtr shadowTweaker;
 
     /// Tracks whether the shadow was active last update, so that toggling it forces a full drawable
     /// rebuild. Without this, tiles that already have building drawables get skipped by updateTile
-    /// and would never gain their mask drawables.
+    /// and would never gain their shadow drawables.
     bool shadowWasEnabled = false;
 
-    // Throttled cost reporting, enabled with the MLN_SHADOW_STATS environment variable. Reports the
-    // CPU side of the shadow only; the GPU cost shows up as extra draw calls and one extra offscreen
-    // pass per render target in a frame capture.
-    void reportShadowStats(double setupMs, double quadsMs);
+    // Throttled cost reporting, enabled with the MLN_SHADOW_STATS environment variable.
+    void reportShadowStats(double setupMs);
     std::uint64_t shadowFrameCount = 0;
     double shadowSetupMsAccum = 0.0;
-    double shadowQuadsMsAccum = 0.0;
 #endif
 };
 

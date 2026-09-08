@@ -42,30 +42,5 @@ const std::array<AttributeInfo, 4> FillExtrusionShadowMaskInstancedShaderSource:
 };
 const std::array<TextureInfo, 0> FillExtrusionShadowMaskInstancedShaderSource::textures = {};
 
-//
-// Fill extrusion shadow blur (horizontal)
-
-using FillExtrusionShadowBlurShaderSource =
-    ShaderSource<BuiltIn::FillExtrusionShadowBlurShader, gfx::Backend::Type::Vulkan>;
-
-const std::array<AttributeInfo, 1> FillExtrusionShadowBlurShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionShadowPosVertexAttribute},
-};
-const std::array<TextureInfo, 1> FillExtrusionShadowBlurShaderSource::textures = {
-    TextureInfo{0, idFillExtrusionShadowImageTexture},
-};
-
-//
-// Fill extrusion shadow composite (vertical blur + colourise)
-
-using FillExtrusionShadowShaderSource = ShaderSource<BuiltIn::FillExtrusionShadowShader, gfx::Backend::Type::Vulkan>;
-
-const std::array<AttributeInfo, 1> FillExtrusionShadowShaderSource::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionShadowPosVertexAttribute},
-};
-const std::array<TextureInfo, 1> FillExtrusionShadowShaderSource::textures = {
-    TextureInfo{0, idFillExtrusionShadowImageTexture},
-};
-
 } // namespace shaders
 } // namespace mln

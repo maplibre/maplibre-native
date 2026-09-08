@@ -1378,26 +1378,6 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * The blur radius applied to the edge of the ground shadow.
-   *
-   * @param value a Float value
-   * @return property wrapper around Float
-   */
-  public static PropertyValue<Float> fillExtrusionShadowBlur(Float value) {
-    return new PaintPropertyValue<>("fill-extrusion-shadow-blur", value);
-  }
-
-  /**
-   * The blur radius applied to the edge of the ground shadow.
-   *
-   * @param expression an expression statement
-   * @return property wrapper around an expression statement
-   */
-  public static PropertyValue<Expression> fillExtrusionShadowBlur(Expression expression) {
-    return new PaintPropertyValue<>("fill-extrusion-shadow-blur", expression);
-  }
-
-  /**
    * The opacity at which the image will be drawn.
    *
    * @param value a Float value

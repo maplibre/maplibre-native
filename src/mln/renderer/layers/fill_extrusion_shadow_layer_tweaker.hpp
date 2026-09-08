@@ -6,10 +6,11 @@
 
 namespace mln {
 
-/// Tweaker for the fill-extrusion ground-shadow mask pass.
+/// Tweaker for the fill-extrusion ground-shadow drawables.
 ///
-/// Runs against the mask render target's own tile layer group, so its uniform buffers are separate
-/// from both the building layer's and the composite stage's.
+/// Runs against the shadow's own tile layer group (registered ahead of the building layer group at
+/// the same layer index, so shadows draw underneath the buildings), and owns the drawable-to-drawable
+/// matrix/shear as well as the layer-wide colour/opacity, base and height.
 class FillExtrusionShadowLayerTweaker : public LayerTweaker {
 public:
     FillExtrusionShadowLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)

@@ -268,20 +268,4 @@ modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-shadow-azimuth"] =
     "property-type": "data-constant"
 };
 
-modifiedReferenceSpec["paint_fill-extrusion"]["fill-extrusion-shadow-blur"] = {
-    "type": "number",
-    "default": 6,
-    "minimum": 0,
-    "units": "pixels",
-    "doc": "The blur radius applied to the edge of the ground shadow.",
-    "transition": true,
-    "expression": {
-        "interpolated": true,
-        "parameters": [
-            "zoom"
-        ]
-    },
-    "property-type": "data-constant"
-};
-
 export default modifiedReferenceSpec;

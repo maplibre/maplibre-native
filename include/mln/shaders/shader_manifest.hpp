@@ -24,8 +24,6 @@
 #include <mln/shaders/gl/fill_extrusion_pattern_instanced.hpp>
 #include <mln/shaders/gl/fill_extrusion_shadow_mask.hpp>
 #include <mln/shaders/gl/fill_extrusion_shadow_mask_instanced.hpp>
-#include <mln/shaders/gl/fill_extrusion_shadow_blur.hpp>
-#include <mln/shaders/gl/fill_extrusion_shadow.hpp>
 #include <mln/shaders/gl/heatmap.hpp>
 #include <mln/shaders/gl/heatmap_texture.hpp>
 #include <mln/shaders/gl/hillshade_prepare.hpp>
