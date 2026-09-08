@@ -180,6 +180,7 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-parsedate>
             $<TARGET_FILE:mbgl-vendor-icu>
             $<TARGET_FILE:mlt-cpp>
+            $<TARGET_FILE:fastpfor-lib>
             ${STATIC_LIBS}
         # In Mach-O/Itanium ABI names, ZTI/ZTS/ZTV identify typeinfo,
         # type names, and vtables, while St denotes std::.
