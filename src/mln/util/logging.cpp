@@ -15,10 +15,8 @@ namespace mln {
 
 namespace {
 
-std::unique_ptr<Log::Observer> currentObserver;
 constexpr auto SeverityCount = underlying_type(EventSeverity::SeverityCount);
 std::atomic<bool> useThread[SeverityCount] = {true, true, true, false};
-std::mutex mutex;
 
 } // namespace
 
@@ -43,6 +41,9 @@ public:
 #endif
     }
 
+    std::unique_ptr<Observer> observer;
+    std::mutex mutex;
+
 private:
     const std::shared_ptr<Scheduler> scheduler;
 };
@@ -53,8 +54,17 @@ Log::Log()
 Log::~Log() = default;
 
 Log* Log::get() noexcept {
-    static Log instance;
-    return &instance;
+    // Never destroyed: the worker thread may be attached to a host VM (JNI in
+    // MapLibre Android, Java FFM upcalls elsewhere) that is gone by static
+    // destruction, and joining it then deadlocks. The worker never drained its
+    // queue on termination, so nothing is lost.
+    static auto* const instance = new Log();
+    // Releasing the observer at exit keeps host cleanup that ran from its
+    // destructor; the logger and its thread stay alive.
+    static const struct ObserverRelease {
+        ~ObserverRelease() { removeObserver(); }
+    } observerRelease;
+    return instance;
 }
 
 void Log::useLogThread(bool enable, std::optional<EventSeverity> severity) {
@@ -69,14 +79,16 @@ void Log::useLogThread(bool enable, std::optional<EventSeverity> severity) {
 }
 
 void Log::setObserver(std::unique_ptr<Observer> observer) {
-    std::scoped_lock lock(mutex);
-    currentObserver = std::move(observer);
+    auto& state = *get()->impl;
+    std::scoped_lock lock(state.mutex);
+    state.observer = std::move(observer);
 }
 
 std::unique_ptr<Log::Observer> Log::removeObserver() {
-    std::scoped_lock lock(mutex);
+    auto& state = *get()->impl;
+    std::scoped_lock lock(state.mutex);
     std::unique_ptr<Observer> observer;
-    std::swap(observer, currentObserver);
+    std::swap(observer, state.observer);
     return observer;
 }
 
@@ -93,8 +105,9 @@ void Log::record(EventSeverity severity,
                  int64_t code,
                  const std::string& msg,
                  const std::optional<std::string>& threadName) {
-    std::scoped_lock lock(mutex);
-    if (currentObserver && severity != EventSeverity::Debug && currentObserver->onRecord(severity, event, code, msg)) {
+    auto& state = *get()->impl;
+    std::scoped_lock lock(state.mutex);
+    if (state.observer && severity != EventSeverity::Debug && state.observer->onRecord(severity, event, code, msg)) {
         return;
     }
 
