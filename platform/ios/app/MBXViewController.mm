@@ -18,7 +18,6 @@
 
 #import "CustomStyleLayerExample.h"
 
-
 #import <objc/runtime.h>
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
@@ -1850,7 +1849,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   [self.mapView.style addLayer:baseRouteLayer];
   [self.mapView.style addLayer:routeLayer];
 }
-
 
 - (void)removeSource:(NSString *)ident {
   if (MLNSource *source = [self.mapView.style sourceWithIdentifier:ident]) {
