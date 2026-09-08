@@ -95,7 +95,7 @@ void RenderLayer::checkRenderability(const PaintParameters& parameters, const ui
     }
 
     if (activeBindingCount > parameters.context.maximumVertexBindingCount) {
-        Log::Error(Event::OpenGL,
+        Log::Error(Event::GraphicsBackend,
                    "The layer '" + getID() +
                        "' uses more data-driven properties than the current device "
                        "supports, and will have rendering errors. To ensure "
@@ -105,7 +105,7 @@ void RenderLayer::checkRenderability(const PaintParameters& parameters, const ui
                        " fewer data driven properties in this layer.");
         hasRenderFailures = true;
     } else if (activeBindingCount > gfx::Context::minimumRequiredVertexBindingCount) {
-        Log::Warning(Event::OpenGL,
+        Log::Warning(Event::GraphicsBackend,
                      "The layer '" + getID() +
                          "' uses more data-driven properties than some devices may "
                          "support. "

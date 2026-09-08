@@ -16,6 +16,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - core: rename `mbgl` directories to `mln` ([#4511]((https://github.com/maplibre/maplibre-native/pull/4511))).
 - Fix surface transform ([#4495](https://github.com/maplibre/maplibre-native/pull/4495)).
 - fix(core): Fix nullptr access during custom layer pre-render ([#4496](https://github.com/maplibre/maplibre-native/pull/4496)).
+- fix(ios): use the window scene's interface orientation for heading compensation, replacing the deprecated `-[UIApplication statusBarOrientation]`.
 
 ## 6.28.0
 

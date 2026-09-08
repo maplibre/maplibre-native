@@ -94,8 +94,6 @@ public:
   WGPUTextureView currentTextureView = nullptr;
   bool needsPresent = false;
 
-  mln::Size framebufferSize;
-
   MLNWebGPUView* webGPUView = nil;
   bool presentsWithTransaction = false;
   NSUInteger activationCount = 0;
@@ -316,8 +314,7 @@ void MLNMapViewWebGPUImpl::createView() {
   uint32_t w = static_cast<uint32_t>(drawableSize.width);
   uint32_t h = static_cast<uint32_t>(drawableSize.height);
   if (w > 0 && h > 0) {
-    impl->framebufferSize = {w, h};
-    size = impl->framebufferSize;
+    setRenderableSize({w, h});
     configureSurface(w, h);
   }
 }
@@ -497,7 +494,8 @@ void* MLNMapViewWebGPUImpl::getCurrentTextureView() {
   if (status == WGPUSurfaceGetCurrentTextureStatus_Outdated ||
       status == WGPUSurfaceGetCurrentTextureStatus_Lost) {
     wgpuTextureRelease(surfaceTexture.texture);
-    configureSurface(impl->framebufferSize.width, impl->framebufferSize.height);
+    const auto framebufferSize = getSize();
+    configureSurface(framebufferSize.width, framebufferSize.height);
     return nullptr;
   }
 
@@ -557,7 +555,7 @@ void MLNMapViewWebGPUImpl::presentSurface() {
 
 void* MLNMapViewWebGPUImpl::getDepthStencilView() { return impl->depthStencilView; }
 
-mln::Size MLNMapViewWebGPUImpl::getFramebufferSize() const { return impl->framebufferSize; }
+mln::Size MLNMapViewWebGPUImpl::getFramebufferSize() const { return getSize(); }
 
 UIView* MLNMapViewWebGPUImpl::getView() { return impl->webGPUView; }
 
@@ -624,8 +622,7 @@ void MLNMapViewWebGPUImpl::layoutChanged() {
   uint32_t w = static_cast<uint32_t>(drawableSize.width);
   uint32_t h = static_cast<uint32_t>(drawableSize.height);
 
-  impl->framebufferSize = {w, h};
-  size = impl->framebufferSize;
+  setRenderableSize({w, h});
 
   if (impl->currentTextureView) {
     wgpuTextureViewRelease(impl->currentTextureView);
@@ -642,12 +639,12 @@ void MLNMapViewWebGPUImpl::layoutChanged() {
 }
 
 UIImage* MLNMapViewWebGPUImpl::snapshot() {
-  if (!impl->currentTexture || !impl->device || !impl->queue || impl->framebufferSize.width == 0 ||
-      impl->framebufferSize.height == 0) {
+  const auto framebufferSize = getSize();
+  if (!impl->currentTexture || !impl->device || !impl->queue || framebufferSize.isEmpty()) {
     return nil;
   }
 
-  const auto& fbSize = impl->framebufferSize;
+  const auto& fbSize = framebufferSize;
   constexpr uint32_t bytesPerPixel = 4;
   constexpr uint32_t bytesPerRowAlignment = 256u;
   const uint32_t rowStride = fbSize.width * bytesPerPixel;

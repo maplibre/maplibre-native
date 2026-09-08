@@ -175,7 +175,7 @@ void tileLodZoomShift(mln::Map &map, bool positive) {
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
     shift = map.getTileLodZoomShift() + shift;
     shift = mln::util::clamp(shift, -2.5, 2.5);
-    mln::Log::Info(mln::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
+    mln::Log::Info(mln::Event::GraphicsBackend, "Zoom shift: " + std::to_string(shift));
     map.setTileLodZoomShift(shift);
     map.triggerRepaint();
 }
@@ -216,7 +216,8 @@ void addFillExtrusionLayer(mln::style::Style &style, bool visible) {
 } // namespace
 
 void glfwError(int error, const char *description) {
-    mln::Log::Error(mln::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
+    mln::Log::Error(mln::Event::GraphicsBackend,
+                    std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,
@@ -242,7 +243,7 @@ GLFWView::GLFWView(bool fullscreen_,
 #endif
 
     if (!glfwInit()) {
-        mln::Log::Error(mln::Event::OpenGL, "failed to initialize glfw");
+        mln::Log::Error(mln::Event::GraphicsBackend, "failed to initialize glfw");
         exit(1);
     }
 
@@ -288,7 +289,7 @@ GLFWView::GLFWView(bool fullscreen_,
     window = glfwCreateWindow(width, height, "MapLibre Native", monitor, nullptr);
     if (!window) {
         glfwTerminate();
-        mln::Log::Error(mln::Event::OpenGL, "failed to initialize window");
+        mln::Log::Error(mln::Event::GraphicsBackend, "failed to initialize window");
         exit(1);
     }
 
@@ -312,10 +313,10 @@ GLFWView::GLFWView(bool fullscreen_,
 #if defined(__APPLE__) && !defined(MLN_RENDER_BACKEND_VULKAN)
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
+    backend->setFramebufferSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
 #endif
 
-    pixelRatio = static_cast<float>(backend->getSize().width) / width;
+    pixelRatio = static_cast<float>(backend->getFramebufferSize().width) / width;
 
     glfwMakeContextCurrent(nullptr);
 
@@ -1026,7 +1027,7 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
 #ifdef __APPLE__
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    view->backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
+    view->backend->setFramebufferSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
 #endif
 }
 
@@ -1034,7 +1035,7 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     MLN_TRACE_FUNC();
 
     auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
-    view->backend->setSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+    view->backend->setFramebufferSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
     // This is only triggered when the framebuffer is resized, but not the
     // window. It can happen when you move the window between screens with a

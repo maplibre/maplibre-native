@@ -11,6 +11,6 @@ GLFWMetalBackend::GLFWMetalBackend(GLFWwindow* window_, [[maybe_unused]] const b
 
 mln::gfx::RendererBackend& GLFWMetalBackend::getRendererBackend() { return rendererBackend; }
 
-void GLFWMetalBackend::setSize(mln::Size size) { rendererBackend.setSize(size); }
+void GLFWMetalBackend::setFramebufferSize(mln::Size size) { rendererBackend.setSize(size); }
 
-mln::Size GLFWMetalBackend::getSize() const { return rendererBackend.getSize(); }
+mln::Size GLFWMetalBackend::getFramebufferSize() const { return rendererBackend.getSize(); }
