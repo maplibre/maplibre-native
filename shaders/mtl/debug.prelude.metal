@@ -1,5 +1,3 @@
-
-
 enum {
     idDebugUBO = drawableReservedUBOCount,
     debugUBOCount
@@ -15,4 +13,3 @@ struct alignas(16) DebugUBO {
     /* 96 */
 };
 static_assert(sizeof(DebugUBO) == 6 * 16, "wrong size");
-

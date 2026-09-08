@@ -1,5 +1,3 @@
-
-
 enum {
     idCustomGeometryDrawableUBO = drawableReservedUBOCount,
     customGeometryUBOCount
@@ -11,4 +9,3 @@ struct alignas(16) CustomGeometryDrawableUBO {
     /* 80 */
 };
 static_assert(sizeof(CustomGeometryDrawableUBO) == 5 * 16, "wrong size");
-

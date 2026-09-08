@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     short2 position [[attribute(0)]];
     float4 outline_color [[attribute(1)]];

@@ -1,7 +1,8 @@
 # Metal shader sources
 
 `manifest.json` maps each built-in shader to its Metal source, shared prelude,
-and C++ reflection header. Attribute and texture reflection remains in
+and C++ reflection header. Edit the `.metal` files to change shader code; add a
+manifest entry when adding a shader. Attribute and texture reflection remains in
 `include/mln/shaders/mtl` and `src/mln/shaders/mtl`.
 
 Both Bazel and CMake run `shaders/generate_metal_shader_code.mjs` during a Metal
@@ -14,9 +15,9 @@ node shaders/generate_metal_shader_code.mjs --out /tmp/metal-shader-source.cpp
 node --test shaders/generate_metal_shader_code.test.mjs
 ```
 
-Shader text is preserved byte for byte, including comments, whitespace, and
-preprocessor directives. Offsets are UTF-8 byte offsets. The first shader access
-decompresses the bundle once using a thread-safe function-local static; subsequent
-accesses return views into the immutable buffer. This retains 198 KiB of source data for a smaller installed binary (about
-256 KiB of string capacity with the measured Apple libc++ toolchain). Source assembly
-still produces a null-terminated string before calling Metal.
+The generator records each fragment's UTF-8 byte offset and length in the bundle.
+The first shader access decompresses the bundle once; subsequent accesses return
+views into the same buffer. At runtime, the common prelude, shader prelude, and
+shader source are concatenated before being passed to Metal.
+
+The `validate-scripts` CI workflow runs the generator tests.

@@ -1,5 +1,3 @@
-
-
 enum {
     idHillshadeDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idHillshadeTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
@@ -35,4 +33,3 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
     /* 176 */
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) == 11 * 16, "wrong size");
-

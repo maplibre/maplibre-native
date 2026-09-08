@@ -1,5 +1,3 @@
-
-
 enum {
     idCollisionDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idCollisionTilePropsUBO = drawableReservedUBOCount,
@@ -19,4 +17,3 @@ struct alignas(16) CollisionTilePropsUBO {
     /* 16 */
 };
 static_assert(sizeof(CollisionTilePropsUBO) == 16, "wrong size");
-

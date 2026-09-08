@@ -1,5 +1,3 @@
-
-
 namespace WhirlyKitShader
 {
 
@@ -547,4 +545,3 @@ fragment float4 fragmentTri_wideVecPerf(
 
     return vert.color * float4(1,1,1,edgeAlpha * patternAlpha * roundAlpha);
 }
-

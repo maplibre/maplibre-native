@@ -1,5 +1,3 @@
-
-
 enum {
     idHeatmapDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idHeatmapEvaluatedPropsUBO = drawableReservedUBOCount,
@@ -27,4 +25,3 @@ struct alignas(16) HeatmapEvaluatedPropsUBO {
     /* 16 */
 };
 static_assert(sizeof(HeatmapEvaluatedPropsUBO) == 16, "wrong size");
-

@@ -1,5 +1,3 @@
-
-
 enum {
     idHillshadePrepareDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idHillshadePrepareTilePropsUBO = drawableReservedUBOCount,
@@ -20,4 +18,3 @@ struct alignas(16) HillshadePrepareTilePropsUBO {
     /* 32 */
 };
 static_assert(sizeof(HillshadePrepareTilePropsUBO) == 2 * 16, "wrong size");
-

@@ -1,5 +1,3 @@
-
-
 enum {
     idColorReliefDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idColorReliefTilePropsUBO = drawableReservedUBOCount,
@@ -30,4 +28,3 @@ struct alignas(16) ColorReliefEvaluatedPropsUBO {
     /* 16 */
 };
 static_assert(sizeof(ColorReliefEvaluatedPropsUBO) == 16, "wrong size");
-

@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     float2 a_pos [[attribute(0)]];
     float2 a_tex [[attribute(1)]];

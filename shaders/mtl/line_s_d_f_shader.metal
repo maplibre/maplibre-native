@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];

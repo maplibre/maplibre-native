@@ -1,4 +1,3 @@
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -231,4 +230,3 @@ enum {
     idDrawableReservedFragmentOnlyUBO,
     drawableReservedUBOCount
 };
-

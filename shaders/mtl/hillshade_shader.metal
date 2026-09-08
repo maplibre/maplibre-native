@@ -1,5 +1,3 @@
-
-
 #define PI 3.141592653589793
 #define STANDARD 0
 #define COMBINED 1

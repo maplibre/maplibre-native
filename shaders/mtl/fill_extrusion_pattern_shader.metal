@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     short2 pos [[attribute(0)]];
     ushort2 decimals_ed [[attribute(1)]];

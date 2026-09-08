@@ -1,5 +1,3 @@
-
-
 enum {
     idLocationIndicatorUBO = drawableReservedUBOCount,
     locationIndicatorUBOCount
@@ -11,4 +9,3 @@ struct alignas(16) LocationIndicatorDrawableUBO {
     /* 80 */
 };
 static_assert(sizeof(LocationIndicatorDrawableUBO) == 5 * 16, "wrong size");
-

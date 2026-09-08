@@ -1,5 +1,3 @@
-
-
 enum {
     idSymbolDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idSymbolTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
@@ -63,4 +61,3 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "wrong size");
 
 #define c_offscreen_degenerate_triangle_location -2.0
-

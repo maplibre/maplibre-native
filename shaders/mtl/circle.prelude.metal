@@ -1,5 +1,3 @@
-
-
 enum {
     idCircleDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idCircleEvaluatedPropsUBO = drawableReservedUBOCount,
@@ -40,4 +38,3 @@ struct alignas(16) CircleEvaluatedPropsUBO {
     /* 64 */
 };
 static_assert(sizeof(CircleEvaluatedPropsUBO) == 4 * 16, "wrong size");
-

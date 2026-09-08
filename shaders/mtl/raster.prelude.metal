@@ -1,5 +1,3 @@
-
-
 enum {
     idRasterDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idRasterEvaluatedPropsUBO = drawableReservedUBOCount,
@@ -29,4 +27,3 @@ struct alignas(16) RasterEvaluatedPropsUBO {
     /* 64 */
 };
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 4 * 16, "wrong size");
-

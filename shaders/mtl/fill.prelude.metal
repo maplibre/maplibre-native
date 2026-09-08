@@ -1,5 +1,3 @@
-
-
 enum {
     idFillDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idFillTilePropsUBO = drawableReservedUBOCount,
@@ -128,4 +126,3 @@ union FillTilePropsUnionUBO {
     FillPatternTilePropsUBO fillPatternTilePropsUBO;
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
-

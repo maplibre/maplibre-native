@@ -1,5 +1,3 @@
-
-
 enum {
     idFillExtrusionDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idFillExtrusionTilePropsUBO = drawableReservedUBOCount,
@@ -51,4 +49,3 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "wrong size");
-

@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     short2 pos [[attribute(0)]];
     short2 texture_pos [[attribute(1)]];

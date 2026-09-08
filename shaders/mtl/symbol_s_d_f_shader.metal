@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     float2 pos [[attribute(0)]];
 

@@ -1,5 +1,3 @@
-
-
 #define SDF 1.0
 #define ICON 0.0
 

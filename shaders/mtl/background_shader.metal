@@ -1,5 +1,3 @@
-
-
 struct VertexStage {
     short2 position [[attribute(0)]];
 };

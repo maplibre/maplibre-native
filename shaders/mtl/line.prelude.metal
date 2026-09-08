@@ -1,5 +1,3 @@
-
-
 enum {
     idLineDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idLineTilePropsUBO = idDrawableReservedFragmentOnlyUBO,
@@ -160,4 +158,3 @@ union LineTilePropsUnionUBO {
     LinePatternTilePropsUBO linePatternTilePropsUBO;
     LineSDFTilePropsUBO lineSDFTilePropsUBO;
 };
-

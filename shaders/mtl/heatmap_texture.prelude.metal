@@ -1,5 +1,3 @@
-
-
 enum {
     idHeatmapTexturePropsUBO = drawableReservedUBOCount,
     heatmapTextureUBOCount
@@ -14,4 +12,3 @@ struct alignas(16) HeatmapTexturePropsUBO {
     /* 80 */
 };
 static_assert(sizeof(HeatmapTexturePropsUBO) == 5 * 16, "wrong size");
-
