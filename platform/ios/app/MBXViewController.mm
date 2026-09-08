@@ -24,15 +24,6 @@
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
 
-// Plug In Examples
-#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
-#import "MLNPluginStyleLayer.h"
-#import "PluginLayerExample.h"
-#if MLN_RENDER_BACKEND_METAL
-#import "PluginLayerExampleMetalRendering.h"
-#endif
-#endif
-
 static const CLLocationCoordinate2D WorldTourDestinations[] = {
     {.latitude = 38.8999418, .longitude = -77.033996},
     {.latitude = 37.7884307, .longitude = -122.3998631},
@@ -276,21 +267,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   return self;
 }
 
-// This will add the plug-in layers.  This is a demo of how
-// extensible layers for the style can be added to the map view
-- (void)addPluginLayers {
-#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
-  [self.mapView addPluginLayerType:[PluginLayerExample class]];
-#if MLN_RENDER_BACKEND_METAL
-  [self.mapView addPluginLayerType:[PluginLayerExampleMetalRendering class]];
-#endif
-#endif
-}
-
 - (void)viewDidLoad {
   [super viewDidLoad];
-
-  [self addPluginLayers];
 
   // Keep track of current map state and debug preferences,
   // saving and restoring when the application's state changes.
@@ -2531,16 +2509,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
   [self.styleNames addObject:@"MapLibre Basic"];
   [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
-
-  /// This is hte same style as above but copied locally and the three instances of the metal
-  /// plug-in layer added to the style Look for "type": "plugin-layer-metal-rendering" in the
-  /// PluginLayerTestStyle.json for an example of how the layer is defined
-  NSURL *url = [[NSBundle mainBundle] URLForResource:@"PluginLayerTestStyle.json"
-                                       withExtension:nil];
-  if (url) {
-    [self.styleNames addObject:@"MapLibre Basic - Local With Plugin"];
-    [self.styleURLs addObject:url];
-  }
 
   /// Add MapLibre Styles if an `apiKey` exists
   NSString *apiKey = [MLNSettings apiKey];

@@ -64,7 +64,6 @@ MapLibre iOS is based in part of the work of the [FreeType](https://freetype.org
 
 - <doc:CustomStyleLayerExample>
 - <doc:RenderingStatisticsHud>
-- <doc:PluginLayers>
 
 ### Other Articles
 

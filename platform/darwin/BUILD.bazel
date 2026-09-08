@@ -179,7 +179,6 @@ swift_library(
     testonly = True,
     srcs = glob(["test/*.swift"]),
     data = [
-        "app/PluginLayerTestStyle.json",
         "test/amsterdam.geojson",
         "test/one-liner.json",
     ],
@@ -305,11 +304,6 @@ objc_library(
 
 exports_files(
     [
-        "app/PluginLayerTestStyle.json",
-        "app/PluginLayerExample.h",
-        "app/PluginLayerExample.mm",
-        "app/PluginLayerExampleMetalRendering.h",
-        "app/PluginLayerExampleMetalRendering.mm",
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
         "app/CustomStyleLayerExample.h",
