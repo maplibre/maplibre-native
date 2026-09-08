@@ -205,6 +205,12 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
     return error;
 }
 
+std::optional<conversion::Error> Layer::setProperty(const std::string& name,
+                                                  const conversion::Convertible& value,
+                                                  PropertyScope) {
+    return setProperty(name, value);
+}
+
 std::optional<conversion::Error> Layer::setVisibility(const conversion::Convertible& value) {
     using namespace conversion;
 

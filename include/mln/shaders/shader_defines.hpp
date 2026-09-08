@@ -545,6 +545,9 @@ enum {
 };
 
 static constexpr uint32_t maxAttributeCountPerShader = std::max({
+    // ES 3, Vulkan, and Metal all support at least 16 vertex attributes. Runtime
+    // shaders are not limited to the largest built-in shader compiled today.
+    16u,
     static_cast<uint32_t>(backgroundVertexAttributeCount),
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/gfx/types.hpp>
+#include <mln/util/color.hpp>
 #include <mln/util/size.hpp>
 
 #include <functional>
@@ -33,6 +34,8 @@ public:
 
     /// Get the render target texture
     const gfx::Texture2DPtr& getTexture();
+
+    void setClearColor(Color color_) { clearColor = color_; }
 
     /// @brief Add a layer group to the render target
     /// @param replace Flag to replace if exists
@@ -81,6 +84,7 @@ public:
 protected:
     gfx::Context& context;
     std::unique_ptr<gfx::OffscreenTexture> offscreenTexture;
+    Color clearColor{0.0f, 0.0f, 0.0f, 1.0f};
     using LayerGroupMap = std::map<int32_t, LayerGroupBasePtr>;
     LayerGroupMap layerGroupsByLayerIndex;
 };

@@ -128,6 +128,7 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         DEMData& tileDEM = bucket->getDEMData();
 
         tileDEM.backfillBorder(borderDEM, dx, dy);
+        bucket->markDEMModified();
         // update the bitmask to indicate that this tiles have been backfilled by flipping the relevant bit
         this->neighboringTiles = this->neighboringTiles | mask;
         // mark HillshadeBucket.prepared as false so it runs through the prepare

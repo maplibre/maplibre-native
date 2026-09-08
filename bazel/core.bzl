@@ -1,3 +1,28 @@
+MLN_LAYER_PLUGIN_HEADERS = [
+    "include/mln/plugin/plugin_api.h",
+    "src/mln/plugin/plugin_layer_factory.hpp",
+    "src/mln/plugin/plugin_registry.hpp",
+    "src/mln/plugin/plugin_shader.hpp",
+    "src/mln/layout/plugin_layout.hpp",
+    "src/mln/renderer/buckets/plugin_bucket.hpp",
+    "src/mln/style/layers/plugin_style_layer.hpp",
+    "src/mln/style/plugin_property.hpp",
+    "src/mln/renderer/layers/render_plugin_style_layer.hpp",
+    "src/mln/renderer/layers/plugin_layer_tweaker.hpp",
+]
+
+MLN_LAYER_PLUGIN_SOURCE = [
+    "src/mln/plugin/plugin_layer_factory.cpp",
+    "src/mln/plugin/plugin_registry.cpp",
+    "src/mln/plugin/plugin_shader.cpp",
+    "src/mln/layout/plugin_layout.cpp",
+    "src/mln/renderer/buckets/plugin_bucket.cpp",
+    "src/mln/style/layers/plugin_style_layer.cpp",
+    "src/mln/style/plugin_property.cpp",
+    "src/mln/renderer/layers/render_plugin_style_layer.cpp",
+    "src/mln/renderer/layers/plugin_layer_tweaker.cpp",
+]
+
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
     "include/mln/style/layers/circle_layer.hpp",
     "include/mln/style/layers/fill_layer.hpp",
@@ -972,6 +997,7 @@ MLN_DRAWABLES_SOURCE = [
 MLN_DRAWABLES_HEADERS = [
     "include/mln/gfx/drawable.hpp",
     "include/mln/gfx/drawable_data.hpp",
+    "include/mln/gfx/plugin_render_graph_drawable_data.hpp",
     "include/mln/gfx/drawable_impl.hpp",
     "include/mln/gfx/drawable_builder.hpp",
     "include/mln/gfx/drawable_tweaker.hpp",

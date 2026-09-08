@@ -22,6 +22,7 @@ namespace mln {
 class GeometryTile;
 class GeometryTileData;
 class Layout;
+class FileSource;
 
 namespace style {
 class Layer;
@@ -45,6 +46,7 @@ public:
                        bool showCollisionBoxes_,
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
+                       std::shared_ptr<FileSource> fileSource,
                        TileObserver* observer);
     ~GeometryTileWorker();
 
@@ -126,6 +128,7 @@ private:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
 
     std::shared_ptr<FontFaces> fontFaces;
+    std::shared_ptr<FileSource> fileSource;
 
     TileObserver* observer;
 };
