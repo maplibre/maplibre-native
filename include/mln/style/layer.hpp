@@ -142,8 +142,8 @@ public:
     };
     std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
     virtual std::optional<conversion::Error> setProperty(const std::string& name,
-                                                 const conversion::Convertible& value,
-                                                 PropertyScope scope);
+                                                         const conversion::Convertible& value,
+                                                         PropertyScope scope);
 
     virtual StyleProperty getProperty(const std::string&) const = 0;
     virtual Value serialize() const;
