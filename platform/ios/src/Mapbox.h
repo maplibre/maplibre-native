@@ -21,7 +21,6 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "MLNCompassDirectionFormatter.h"
 #import "MLNComputedShapeSource.h"
 #import "MLNCoordinateFormatter.h"
-#import "MLNCustomDrawableStyleLayer.h"
 #import "MLNCustomStyleLayer.h"
 #import "MLNDistanceFormatter.h"
 #import "MLNFeature.h"

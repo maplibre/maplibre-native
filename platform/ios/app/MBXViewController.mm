@@ -18,7 +18,6 @@
 
 #import "CustomStyleLayerExample.h"
 
-#import "ExampleCustomDrawableStyleLayer.h"
 
 #import <objc/runtime.h>
 #import "MBXFrameTimeGraphView.h"
@@ -106,7 +105,6 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
   MBXSettingsRuntimeStylingDDSPolygon,
   MBXSettingsRuntimeStylingCustomLatLonGrid,
   MBXSettingsRuntimeStylingLineGradient,
-  MBXSettingsRuntimeStylingCustomDrawableLayer,
   MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles,
   MBXSettingsRuntimeStylingHeatmapLayer
 };
@@ -479,7 +477,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         @"Dynamically Style Polygon",
         @"Add Custom Lat/Lon Grid",
         @"Style Route line with gradient",
-        @"Add Custom Drawable Layer",
         @"Add FourSquare POIs PMTiles Layer",
         @"Add Earthquake Heatmap"
       ]];
@@ -705,9 +702,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
           break;
         case MBXSettingsRuntimeStylingLineGradient:
           [self styleLineGradient];
-          break;
-        case MBXSettingsRuntimeStylingCustomDrawableLayer:
-          [self addCustomDrawableLayer];
           break;
         case MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles:
           [self addFoursquarePOIsPMTilesLayer];
@@ -1857,17 +1851,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   [self.mapView.style addLayer:routeLayer];
 }
 
-- (void)addCustomDrawableLayer {
-#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
-  // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
-  ExampleCustomDrawableStyleLayer *layer =
-      [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
-
-  if (layer) {
-    [self.mapView.style addLayer:layer];
-  }
-#endif
-}
 
 - (void)removeSource:(NSString *)ident {
   if (MLNSource *source = [self.mapView.style sourceWithIdentifier:ident]) {
