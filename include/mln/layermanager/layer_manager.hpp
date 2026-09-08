@@ -3,6 +3,8 @@
 #include <mln/style/layer.hpp>
 
 #include <vector>
+#include <map>
+#include <mutex>
 
 namespace mln {
 namespace style {
@@ -33,6 +35,18 @@ public:
      * @return LayerManager*
      */
     static LayerManager* get() noexcept;
+
+    /**
+     * Registers runtime layer factories as one atomic operation. The manager
+     * takes ownership, including on failure. Existing types cannot be replaced.
+     * Factories and their immutable LayerTypeInfo must remain valid for the
+     * manager's lifetime. Call before loading styles that use these types.
+     * Registration and lookups are thread-safe; callbacks run without the lock.
+     * This is a C++ API for code built against the same core, not a DSO ABI.
+     */
+    bool registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>>, std::string& error);
+    bool registerLayerFactory(std::unique_ptr<LayerFactory>, std::string& error);
+    bool hasLayerType(const std::string&) noexcept;
 
     /// Returns a new Layer instance on success call; returns `nullptr` otherwise.
     std::unique_ptr<style::Layer> createLayer(const std::string& type,
@@ -77,9 +91,15 @@ public:
     virtual void addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>);
 
 protected:
-    virtual ~LayerManager() = default;
+    virtual ~LayerManager();
     virtual LayerFactory* getFactory(const std::string& type) noexcept = 0;
     virtual LayerFactory* getFactory(const style::LayerTypeInfo*) noexcept = 0;
+
+private:
+    LayerFactory* findFactory(const std::string&) noexcept;
+    LayerFactory* findFactory(const style::LayerTypeInfo*) noexcept;
+    std::mutex runtimeMutex;
+    std::map<std::string, std::unique_ptr<LayerFactory>> runtimeFactories;
 };
 
 } // namespace mln
