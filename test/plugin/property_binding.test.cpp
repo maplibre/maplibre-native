@@ -31,17 +31,17 @@ plugin::PropertyDefinition numberDefinition() {
     definition.type = MLN_PLUGIN_VALUE_FLOAT;
     definition.defaultValue = 5.0;
     definition.expressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
-        MLN_PLUGIN_EXPRESSION_COMPOSITE | MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
+                                        MLN_PLUGIN_EXPRESSION_COMPOSITE | MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
     return definition;
 }
-}
+} // namespace
 
 TEST(PluginPaintBinder, PackedCompositeEndpointsAndFeatureStateUpdates) {
     auto definition = numberDefinition();
     const auto layer = source();
     plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["interpolate",["linear"],["zoom"],10,["get","small"],11,["get","large"]])");
-    PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, {{0,1,0,4}}, layer);
+    PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, {{0, 1, 0, 4}}, layer);
     ASSERT_TRUE(binder.isDataDriven());
     EXPECT_EQ(gfx::AttributeDataType::Float2, binder.attributeType());
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
@@ -69,9 +69,10 @@ TEST(PluginPaintBinder, EnumOrdinalsAndOwnedStatisticsStrings) {
     definition.defaultValue = std::string("map");
     definition.enumValues = {"map", "viewport"};
     const auto layer = source();
-    plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
+    plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["get","anchor"])");
-    PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, {{0,1,0,4}}, layer);
+    PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, {{0, 1, 0, 4}}, layer);
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
     EXPECT_FLOAT_EQ(1, bytes[0]);
     EXPECT_FLOAT_EQ(1, bytes[1]);
