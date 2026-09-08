@@ -323,5 +323,5 @@ cc_library(
 
 js_binary(
     name = "generate-metal-shader-code-script",
-    entry_point = "shaders/generate_metal_shader_code.mjs",
+    entry_point = "scripts/generate_metal_shader_code.ts",
 )

@@ -4,10 +4,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { inflateSync } from 'node:zlib';
-import { packSources, generateCode } from './generate_metal_shader_code.mjs';
+import { packSources, generateCode } from './generate_metal_shader_code.ts';
 
 test('every Metal source fragment survives compression byte for byte', () => {
-    const directory = path.join(import.meta.dirname, 'mtl');
+    const directory = path.join(import.meta.dirname, '../shaders/mtl');
     const packed = packSources(directory);
     const source = inflateSync(packed.compressed);
     assert.deepEqual(source, packed.source);
@@ -36,9 +36,9 @@ test('shared fragments occupy one range; offsets and lengths count UTF-8 bytes',
         assert.equal(fragments.size, 3);
         const decoded = inflateSync(compressed);
         assert.equal(decoded.toString(), '// café 🌍\na\0b\n');
-        assert.equal(fragments.get('a.metal').offset, Buffer.byteLength('// café 🌍\n'));
-        assert.equal(fragments.get('b.metal').offset, decoded.length);
-        assert.equal(fragments.get('b.metal').length, 0);
+        assert.equal(fragments.get('a.metal')!.offset, Buffer.byteLength('// café 🌍\n'));
+        assert.equal(fragments.get('b.metal')!.offset, decoded.length);
+        assert.equal(fragments.get('b.metal')!.length, 0);
     } finally {
         fs.rmSync(directory, { recursive: true, force: true });
     }

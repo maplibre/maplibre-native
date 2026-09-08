@@ -25,5 +25,6 @@ jobs:
       - name: Run tests
         run: node --test .github/scripts/**.test.ts
 
-      - name: Test Metal shader generator
-        run: node --test shaders/generate_metal_shader_code.test.mjs
+      - name: Test scripts
+        working-directory: scripts
+        run: node --test

@@ -9,11 +9,11 @@ file(GLOB MLN_METAL_SHADER_INPUTS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/shade
 set(MLN_METAL_SHADER_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src/mln/shaders/mtl/shader_source.cpp")
 add_custom_command(
     OUTPUT "${MLN_METAL_SHADER_SOURCE}"
-    COMMAND "${MLN_METAL_NODE_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/shaders/generate_metal_shader_code.mjs"
+    COMMAND "${MLN_METAL_NODE_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/generate_metal_shader_code.ts"
             --out "${MLN_METAL_SHADER_SOURCE}"
     DEPENDS ${MLN_METAL_SHADER_INPUTS}
             "${PROJECT_SOURCE_DIR}/shaders/mtl/manifest.json"
-            "${PROJECT_SOURCE_DIR}/shaders/generate_metal_shader_code.mjs"
+            "${PROJECT_SOURCE_DIR}/scripts/generate_metal_shader_code.ts"
     COMMENT "Compressing Metal shader sources"
     VERBATIM
 )
