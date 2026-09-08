@@ -390,38 +390,6 @@ void FillExtrusionLayer::setFillExtrusionShadowAzimuthTransition(jni::JNIEnv&, j
     toFillExtrusionLayer(*layer).setFillExtrusionShadowAzimuthTransition(options);
 }
 
-jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionShadowBlur(jni::JNIEnv& env) {
-    using namespace mln::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(
-            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionShadowBlur()));
-    }
-    return std::move(
-        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionShadowBlur()));
-}
-
-jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionShadowBlurTransition(jni::JNIEnv& env) {
-    using namespace mln::android::conversion;
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
-    }
-    mln::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionShadowBlurTransition();
-    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
-}
-
-void FillExtrusionLayer::setFillExtrusionShadowBlurTransition(jni::JNIEnv&, jlong duration, jlong delay) {
-    auto layer = layerPtr.get();
-    if (!layer) {
-        return;
-    }
-    mln::style::TransitionOptions options;
-    options.duration.emplace(mln::Milliseconds(duration));
-    options.delay.emplace(mln::Milliseconds(delay));
-    toFillExtrusionLayer(*layer).setFillExtrusionShadowBlurTransition(options);
-}
-
 // FillExtrusionJavaLayerPeerFactory
 
 FillExtrusionJavaLayerPeerFactory::~FillExtrusionJavaLayerPeerFactory() = default;
@@ -503,10 +471,7 @@ void FillExtrusionJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
                "nativeGetFillExtrusionShadowAzimuthTransition"),
         METHOD(&FillExtrusionLayer::setFillExtrusionShadowAzimuthTransition,
                "nativeSetFillExtrusionShadowAzimuthTransition"),
-        METHOD(&FillExtrusionLayer::getFillExtrusionShadowAzimuth, "nativeGetFillExtrusionShadowAzimuth"),
-        METHOD(&FillExtrusionLayer::getFillExtrusionShadowBlurTransition, "nativeGetFillExtrusionShadowBlurTransition"),
-        METHOD(&FillExtrusionLayer::setFillExtrusionShadowBlurTransition, "nativeSetFillExtrusionShadowBlurTransition"),
-        METHOD(&FillExtrusionLayer::getFillExtrusionShadowBlur, "nativeGetFillExtrusionShadowBlur"));
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowAzimuth, "nativeGetFillExtrusionShadowAzimuth"));
 }
 
 } // namespace android

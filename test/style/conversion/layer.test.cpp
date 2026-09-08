@@ -179,7 +179,6 @@ TEST(StyleConversion, FillExtrusionShadowDefaults) {
     EXPECT_TRUE(layer.getFillExtrusionShadowOpacity().isUndefined());
     EXPECT_TRUE(layer.getFillExtrusionShadowLength().isUndefined());
     EXPECT_TRUE(layer.getFillExtrusionShadowAzimuth().isUndefined());
-    EXPECT_TRUE(layer.getFillExtrusionShadowBlur().isUndefined());
 
     // Shadows are off by default: opacity 0 means the renderer allocates nothing at all.
     EXPECT_EQ(PropertyValue<float>(0.0f), FillExtrusionLayer::getDefaultFillExtrusionShadowOpacity());
@@ -187,7 +186,6 @@ TEST(StyleConversion, FillExtrusionShadowDefaults) {
               FillExtrusionLayer::getDefaultFillExtrusionShadowColor());
     EXPECT_EQ(PropertyValue<float>(0.32f), FillExtrusionLayer::getDefaultFillExtrusionShadowLength());
     EXPECT_EQ(PropertyValue<float>(225.0f), FillExtrusionLayer::getDefaultFillExtrusionShadowAzimuth());
-    EXPECT_EQ(PropertyValue<float>(6.0f), FillExtrusionLayer::getDefaultFillExtrusionShadowBlur());
 }
 
 TEST(StyleConversion, FillExtrusionShadowRoundtrip) {
@@ -199,8 +197,7 @@ TEST(StyleConversion, FillExtrusionShadowRoundtrip) {
             "fill-extrusion-shadow-color": "rgba(10, 20, 30, 1)",
             "fill-extrusion-shadow-opacity": 0.5,
             "fill-extrusion-shadow-length": 1.5,
-            "fill-extrusion-shadow-azimuth": 315,
-            "fill-extrusion-shadow-blur": 12
+            "fill-extrusion-shadow-azimuth": 315
         }
     })JSON");
 
@@ -221,13 +218,12 @@ TEST(StyleConversion, FillExtrusionShadowRoundtrip) {
     EXPECT_EQ(PropertyValue<float>(0.5f), fillExtrusion->getFillExtrusionShadowOpacity());
     EXPECT_EQ(PropertyValue<float>(1.5f), fillExtrusion->getFillExtrusionShadowLength());
     EXPECT_EQ(PropertyValue<float>(315.0f), fillExtrusion->getFillExtrusionShadowAzimuth());
-    EXPECT_EQ(PropertyValue<float>(12.0f), fillExtrusion->getFillExtrusionShadowBlur());
 
-    // All five survive a serialize/parse round trip.
+    // All four survive a serialize/parse round trip.
     auto value = layer->serialize();
     ASSERT_NE(nullptr, value.getObject());
     const auto& paint = *value.getObject()->at("paint").getObject();
-    EXPECT_EQ(5u, paint.size());
+    EXPECT_EQ(4u, paint.size());
 
     auto roundTripped = parseLayer(stringifyLayer(value));
     ASSERT_NE(nullptr, roundTripped);

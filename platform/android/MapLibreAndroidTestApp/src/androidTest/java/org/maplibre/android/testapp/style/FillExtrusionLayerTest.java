@@ -542,29 +542,4 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     layer.setProperties(fillExtrusionShadowAzimuth(propertyValue));
     assertEquals(layer.getFillExtrusionShadowAzimuth().getValue(), propertyValue);
   }
-
-  @Test
-  @UiThreadTest
-  public void testFillExtrusionShadowBlurTransition() {
-    Timber.i("fill-extrusion-shadow-blurTransitionOptions");
-    assertNotNull(layer);
-
-    // Set and Get
-    TransitionOptions options = new TransitionOptions(300, 100);
-    layer.setFillExtrusionShadowBlurTransition(options);
-    assertEquals(layer.getFillExtrusionShadowBlurTransition(), options);
-  }
-
-  @Test
-  @UiThreadTest
-  public void testFillExtrusionShadowBlurAsConstant() {
-    Timber.i("fill-extrusion-shadow-blur");
-    assertNotNull(layer);
-    assertNull(layer.getFillExtrusionShadowBlur().getValue());
-
-    // Set and Get
-    Float propertyValue = 0.3f;
-    layer.setProperties(fillExtrusionShadowBlur(propertyValue));
-    assertEquals(layer.getFillExtrusionShadowBlur().getValue(), propertyValue);
-  }
 }

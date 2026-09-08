@@ -72,10 +72,6 @@ public:
     void setFillExtrusionShadowAzimuthTransition(jni::JNIEnv&, jlong duration, jlong delay);
     jni::Local<jni::Object<TransitionOptions>> getFillExtrusionShadowAzimuthTransition(jni::JNIEnv&);
 
-    jni::Local<jni::Object<jni::ObjectTag>> getFillExtrusionShadowBlur(jni::JNIEnv&);
-    void setFillExtrusionShadowBlurTransition(jni::JNIEnv&, jlong duration, jlong delay);
-    jni::Local<jni::Object<TransitionOptions>> getFillExtrusionShadowBlurTransition(jni::JNIEnv&);
-
 }; // class FillExtrusionLayer
 
 class FillExtrusionJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::FillExtrusionLayerFactory {

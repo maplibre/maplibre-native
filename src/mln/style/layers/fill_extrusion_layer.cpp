@@ -244,33 +244,6 @@ TransitionOptions FillExtrusionLayer::getFillExtrusionShadowAzimuthTransition() 
     return impl().paint.template get<FillExtrusionShadowAzimuth>().options;
 }
 
-PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionShadowBlur() {
-    return {6.f};
-}
-
-const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionShadowBlur() const {
-    return impl().paint.template get<FillExtrusionShadowBlur>().value;
-}
-
-void FillExtrusionLayer::setFillExtrusionShadowBlur(const PropertyValue<float>& value) {
-    if (value == getFillExtrusionShadowBlur())
-        return;
-    auto impl_ = mutableImpl();
-    impl_->paint.template get<FillExtrusionShadowBlur>().value = value;
-    baseImpl = std::move(impl_);
-    observer->onLayerChanged(*this);
-}
-
-void FillExtrusionLayer::setFillExtrusionShadowBlurTransition(const TransitionOptions& options) {
-    auto impl_ = mutableImpl();
-    impl_->paint.template get<FillExtrusionShadowBlur>().options = options;
-    baseImpl = std::move(impl_);
-}
-
-TransitionOptions FillExtrusionLayer::getFillExtrusionShadowBlurTransition() const {
-    return impl().paint.template get<FillExtrusionShadowBlur>().options;
-}
-
 PropertyValue<Color> FillExtrusionLayer::getDefaultFillExtrusionShadowColor() {
     return {{ 0, 0, 0, 0.35 }};
 }
@@ -437,7 +410,7 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 26u;
+constexpr uint8_t kPaintPropertyCount = 24u;
 
 enum class Property : uint8_t {
     FillExtrusionBase,
@@ -446,7 +419,6 @@ enum class Property : uint8_t {
     FillExtrusionOpacity,
     FillExtrusionPattern,
     FillExtrusionShadowAzimuth,
-    FillExtrusionShadowBlur,
     FillExtrusionShadowColor,
     FillExtrusionShadowLength,
     FillExtrusionShadowOpacity,
@@ -459,7 +431,6 @@ enum class Property : uint8_t {
     FillExtrusionOpacityTransition,
     FillExtrusionPatternTransition,
     FillExtrusionShadowAzimuthTransition,
-    FillExtrusionShadowBlurTransition,
     FillExtrusionShadowColorTransition,
     FillExtrusionShadowLengthTransition,
     FillExtrusionShadowOpacityTransition,
@@ -481,7 +452,6 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-extrusion-opacity", toUint8(Property::FillExtrusionOpacity)},
      {"fill-extrusion-pattern", toUint8(Property::FillExtrusionPattern)},
      {"fill-extrusion-shadow-azimuth", toUint8(Property::FillExtrusionShadowAzimuth)},
-     {"fill-extrusion-shadow-blur", toUint8(Property::FillExtrusionShadowBlur)},
      {"fill-extrusion-shadow-color", toUint8(Property::FillExtrusionShadowColor)},
      {"fill-extrusion-shadow-length", toUint8(Property::FillExtrusionShadowLength)},
      {"fill-extrusion-shadow-opacity", toUint8(Property::FillExtrusionShadowOpacity)},
@@ -494,7 +464,6 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-extrusion-opacity-transition", toUint8(Property::FillExtrusionOpacityTransition)},
      {"fill-extrusion-pattern-transition", toUint8(Property::FillExtrusionPatternTransition)},
      {"fill-extrusion-shadow-azimuth-transition", toUint8(Property::FillExtrusionShadowAzimuthTransition)},
-     {"fill-extrusion-shadow-blur-transition", toUint8(Property::FillExtrusionShadowBlurTransition)},
      {"fill-extrusion-shadow-color-transition", toUint8(Property::FillExtrusionShadowColorTransition)},
      {"fill-extrusion-shadow-length-transition", toUint8(Property::FillExtrusionShadowLengthTransition)},
      {"fill-extrusion-shadow-opacity-transition", toUint8(Property::FillExtrusionShadowOpacityTransition)},
@@ -517,8 +486,6 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property propert
             return makeStyleProperty(layer.getFillExtrusionPattern());
         case Property::FillExtrusionShadowAzimuth:
             return makeStyleProperty(layer.getFillExtrusionShadowAzimuth());
-        case Property::FillExtrusionShadowBlur:
-            return makeStyleProperty(layer.getFillExtrusionShadowBlur());
         case Property::FillExtrusionShadowColor:
             return makeStyleProperty(layer.getFillExtrusionShadowColor());
         case Property::FillExtrusionShadowLength:
@@ -543,8 +510,6 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property propert
             return makeStyleProperty(layer.getFillExtrusionPatternTransition());
         case Property::FillExtrusionShadowAzimuthTransition:
             return makeStyleProperty(layer.getFillExtrusionShadowAzimuthTransition());
-        case Property::FillExtrusionShadowBlurTransition:
-            return makeStyleProperty(layer.getFillExtrusionShadowBlurTransition());
         case Property::FillExtrusionShadowColorTransition:
             return makeStyleProperty(layer.getFillExtrusionShadowColorTransition());
         case Property::FillExtrusionShadowLengthTransition:
@@ -618,8 +583,8 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         return std::nullopt;
     }
     if (property == Property::FillExtrusionOpacity || property == Property::FillExtrusionShadowAzimuth ||
-        property == Property::FillExtrusionShadowBlur || property == Property::FillExtrusionShadowLength ||
-        property == Property::FillExtrusionShadowOpacity || property == Property::FillExtrusionRoundedCornerDistance) {
+        property == Property::FillExtrusionShadowLength || property == Property::FillExtrusionShadowOpacity ||
+        property == Property::FillExtrusionRoundedCornerDistance) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
@@ -633,11 +598,6 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 
         if (property == Property::FillExtrusionShadowAzimuth) {
             setFillExtrusionShadowAzimuth(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::FillExtrusionShadowBlur) {
-            setFillExtrusionShadowBlur(*typedValue);
             return std::nullopt;
         }
 
@@ -740,11 +700,6 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 
     if (property == Property::FillExtrusionShadowAzimuthTransition) {
         setFillExtrusionShadowAzimuthTransition(*transition);
-        return std::nullopt;
-    }
-
-    if (property == Property::FillExtrusionShadowBlurTransition) {
-        setFillExtrusionShadowBlurTransition(*transition);
         return std::nullopt;
     }
 
