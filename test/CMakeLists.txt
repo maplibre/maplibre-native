@@ -116,6 +116,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/thread.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/thread_local.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_cover.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/tile_lod.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_range.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/timer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tiny_map.test.cpp
