@@ -282,33 +282,9 @@ objc_library(
 )
 
 objc_library(
-    name = "app_custom_drawable_layer_objcpp_srcs",
-    srcs = [
-    ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + [
-        "-fcxx-modules",
-        "-fmodules",
-        "-Wno-c99-extensions",
-        "-Wno-gnu-zero-variadic-macro-arguments",
-        "-Wno-gnu-conditional-omitted-operand",
-        "-Wno-gnu-statement-expression",
-        "-Wno-deprecated-declarations",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":ios-sdk",
-        "//:mbgl-core",
-    ],
-)
-
-objc_library(
     name = "iosapp_objcpp_srcs",
     srcs = [
         "//platform/darwin:app/CustomStyleLayerExample.h",
-        "//platform/darwin:app/PluginLayerExample.h",
-        "//platform/darwin:app/PluginLayerExample.mm",
-        "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
-        "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
         "//platform/ios:ios_app_objcpp_srcs",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],

@@ -103,6 +103,7 @@ public_hdrs = [
     ":mln_defines",
     ":ios_public_hdrs",
     ":ios_sdk_hdrs",
+    "//:plugin_api_public_header",
     "//platform/darwin:darwin_objc_hdrs",
     "//platform/darwin:generated_style_public_hdrs",
 ]
