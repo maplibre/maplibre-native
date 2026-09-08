@@ -18,8 +18,6 @@ load(
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
-    "MLN_LAYER_PLUGIN_HEADERS",
-    "MLN_LAYER_PLUGIN_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
@@ -81,8 +79,7 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_LAYER_PLUGIN_SOURCE +
-           MLN_CORE_SOURCE +
+    srcs = MLN_CORE_SOURCE +
            MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
@@ -93,7 +90,7 @@ cc_library(
         "//:harfbuzz_text_shaping": MLN_SHAPING_HARFBUZZ_SRCS,
         "//conditions:default": [],
     }),
-    hdrs = MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
+    hdrs = MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
         ":webgpu_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_WEBGPU_HEADERS,

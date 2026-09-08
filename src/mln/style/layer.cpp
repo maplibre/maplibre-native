@@ -12,14 +12,6 @@
 namespace mln {
 namespace style {
 
-// Added this to support plugins and that their LayerTypeInfo isn't the same point
-// across the board
-bool layerTypeInfoEquals(const mln::style::LayerTypeInfo* one, const mln::style::LayerTypeInfo* other) {
-    return ((strcmp(one->type, other->type) == 0) && (one->source == other->source) && (one->pass3d == other->pass3d) &&
-            (one->layout == other->layout) && (one->fadingTiles == other->fadingTiles) &&
-            (one->crossTileIndex == other->crossTileIndex) && (one->tileKind == other->tileKind));
-};
-
 static_assert(mln::underlying_type(Tile::Kind::Geometry) == mln::underlying_type(LayerTypeInfo::TileKind::Geometry),
               "tile kind error");
 static_assert(mln::underlying_type(Tile::Kind::Raster) == mln::underlying_type(LayerTypeInfo::TileKind::Raster),

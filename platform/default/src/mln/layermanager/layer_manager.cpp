@@ -107,7 +107,7 @@ void LayerManagerDefault::addLayerType(std::unique_ptr<LayerFactory> factory) {
 LayerFactory* LayerManagerDefault::getFactory(const mln::style::LayerTypeInfo* typeInfo) noexcept {
     assert(typeInfo);
     for (const auto& factory : factories) {
-        if (layerTypeInfoEquals(factory->getTypeInfo(), typeInfo)) {
+        if (factory->getTypeInfo() == typeInfo) {
             return factory.get();
         }
     }

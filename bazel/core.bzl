@@ -1,19 +1,3 @@
-MLN_LAYER_PLUGIN_HEADERS = [
-    "src/mln/plugin/plugin_layer.hpp",
-    "src/mln/plugin/plugin_layer_factory.hpp",
-    "src/mln/plugin/plugin_layer_impl.hpp",
-    "src/mln/plugin/plugin_layer_render.hpp",
-    "src/mln/plugin/plugin_layer_properties.hpp",
-]
-
-MLN_LAYER_PLUGIN_SOURCE = [
-    "src/mln/plugin/plugin_layer.cpp",
-    "src/mln/plugin/plugin_layer_factory.cpp",
-    "src/mln/plugin/plugin_layer_impl.cpp",
-    "src/mln/plugin/plugin_layer_render.cpp",
-    "src/mln/plugin/plugin_layer_properties.cpp",
-]
-
 MLN_PUBLIC_GENERATED_STYLE_HEADERS = [
     "include/mln/style/layers/circle_layer.hpp",
     "include/mln/style/layers/fill_layer.hpp",
