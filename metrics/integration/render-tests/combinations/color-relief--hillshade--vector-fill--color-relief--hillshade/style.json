@@ -17,14 +17,20 @@
     "dem-ocean-color-relief": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.ocean.webp"
-      ]
+        "local://tiles/gebco/{z}-{x}-{y}.terrain.webp"
+      ],
+      "tileSize": 512,
+      "maxzoom": 8,
+      "encoding": "mapbox"
     },
     "dem-ocean-hillshade": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.ocean.webp"
-      ]
+        "local://tiles/gebco/{z}-{x}-{y}.terrain.webp"
+      ],
+      "tileSize": 512,
+      "maxzoom": 8,
+      "encoding": "mapbox"
     },
     "osm-basemap": {
       "type": "vector",

@@ -2,7 +2,7 @@
 
 | File pattern | Format | Description | Source / License |
 |---|---|---|---|
-| `{z}-{x}-{y}.ocean.webp` | WebP raster-DEM (Mapbox terrain-RGB encoding) | Ocean bathymetry DEM tiles, z=0–1 | Derived from [GEBCO](https://www.gebco.net/) gridded bathymetric data. Public domain. |
+| `gebco/{z}-{x}-{y}.terrain.webp` | WebP raster-DEM (Mapbox terrain-RGB encoding), 512px | Ocean bathymetry DEM tiles, z0-z1 | Derived from the [GEBCO](https://www.gebco.net/) gridded bathymetric data grid. Public domain, attribution requested. |
 | `{z}-{x}-{y}.osm_basemap.pbf` | Vector (PBF, raw/uncompressed) | Land, water, and coastline polygons, z=0–1 | © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL](https://opendatacommons.org/licenses/odbl/). Polygons from [osmdata.openstreetmap.de](https://osmdata.openstreetmap.de/). |
 | `jaxa/{z}-{x}-{y}.terrain.webp` | WebP raster-DEM (Mapbox terrain-RGB encoding), 512px | Terrain DEM tiles, z0-z12 | Credit: [AW3D30 (JAXA)](https://www.eorc.jaxa.jp/ALOS/en/dataset/aw3d30/aw3d30_e.htm), [JAXA data policy](https://earth.jaxa.jp/en/data/policy/). One 2025 build of AW3D30 resampled to 512px terrain-RGB. |
 | `{z}-{x}-{y}.terrain.png` (`12-758-*`, `12-759-*`) | PNG raster-DEM (Mapbox terrain-RGB encoding), 256px | Terrain DEM tiles over the Grand Canyon, z12 | Source unknown. |
