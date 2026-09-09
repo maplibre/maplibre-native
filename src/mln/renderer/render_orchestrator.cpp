@@ -189,28 +189,27 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
     evaluationParameters.zoomChanged = zoomChanged;
 
-    TileParameters tileParameters{.pixelRatio = updateParameters->pixelRatio,
-                                  .debugOptions = updateParameters->debugOptions,
-                                  .transformState = updateParameters->transformState,
-                                  .fileSource = updateParameters->fileSource,
-                                  .mode = updateParameters->mode,
-                                  .annotationManager = updateParameters->annotationManager,
-                                  .imageManager = imageManager,
-                                  .glyphManager = glyphManager,
-                                  .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
-                                  .threadPool = threadPool,
-                                  .tileLodMinRadius = updateParameters->tileLodMinRadius,
-                                  .tileLodScale = updateParameters->tileLodScale,
-                                  .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
-                                  .tileLodZoomShift = updateParameters->tileLodZoomShift,
-                                  // GL JS covers every source with the variable-zoom tile
-                                  // function whenever terrain is present, at any pitch, so
-                                  // the DEM a terrain mesh reads is selected the same way
-                                  // the mesh itself is.
-                                  .tileLodMode = updateParameters->terrain
-                                                     ? TileLodMode::Adaptive
-                                                     : updateParameters->tileLodMode,
-                                  .dynamicTextureAtlas = dynamicTextureAtlas};
+    TileParameters tileParameters{
+        .pixelRatio = updateParameters->pixelRatio,
+        .debugOptions = updateParameters->debugOptions,
+        .transformState = updateParameters->transformState,
+        .fileSource = updateParameters->fileSource,
+        .mode = updateParameters->mode,
+        .annotationManager = updateParameters->annotationManager,
+        .imageManager = imageManager,
+        .glyphManager = glyphManager,
+        .prefetchZoomDelta = updateParameters->prefetchZoomDelta,
+        .threadPool = threadPool,
+        .tileLodMinRadius = updateParameters->tileLodMinRadius,
+        .tileLodScale = updateParameters->tileLodScale,
+        .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
+        .tileLodZoomShift = updateParameters->tileLodZoomShift,
+        // GL JS covers every source with the variable-zoom tile
+        // function whenever terrain is present, at any pitch, so
+        // the DEM a terrain mesh reads is selected the same way
+        // the mesh itself is.
+        .tileLodMode = updateParameters->terrain ? TileLodMode::Adaptive : updateParameters->tileLodMode,
+        .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);

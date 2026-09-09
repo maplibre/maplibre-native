@@ -184,8 +184,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         // replaced without a fallback, which reads as the layer blinking to the background.
         const bool variableZoom = parameters.tileLodMode == TileLodMode::Distance ||
                                   parameters.tileLodMode == TileLodMode::Adaptive;
-        int32_t maxZoom = variableZoom ? zoomRange.max
-                                       : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        int32_t maxZoom = variableZoom ? zoomRange.max : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
         tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
