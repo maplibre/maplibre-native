@@ -44,6 +44,37 @@ using namespace std::string_literals;
 
 @implementation MLNExpressionTests
 
+- (void)testSemiliteral {
+  NSArray *json = @[
+    @"semiliteral",
+    @[ @"top", @[ @"semiliteral", @[ @[ @"get", @"x" ], @2 ] ], @[ @"literal", @[ @1, @2 ] ] ]
+  ];
+  NSExpression *expression = [NSExpression expressionWithMLNJSONObject:json];
+  XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, json);
+  NSExpression *built = [NSExpression mgl_expressionForArray:@[
+    [NSExpression expressionForConstantValue:@"top"], [NSExpression mgl_expressionForArray:@[
+      [NSExpression expressionForKeyPath:@"x"], [NSExpression expressionForConstantValue:@2]
+    ]],
+    [NSExpression expressionForConstantValue:@[ @1, @2 ]]
+  ]];
+  XCTAssertEqualObjects(built.mgl_jsonExpressionObject, json);
+  XCTAssertEqualObjects([NSExpression mgl_expressionForArray:@[]].mgl_jsonExpressionObject,
+                        (@[ @"semiliteral", @[] ]));
+  XCTAssertEqualObjects(
+      [NSExpression expressionForAggregate:@[ [NSExpression expressionForConstantValue:@1] ]]
+          .mgl_jsonExpressionObject,
+      (@[ @"literal", @[ @1 ] ]));
+}
+
+- (void)testSemiliteralNonArrays {
+  NSDictionary *object = @{@"x" : @[ @"get", @"x" ]};
+  NSExpression *expression = [NSExpression expressionWithMLNJSONObject:@[ @"semiliteral", object ]];
+  XCTAssertEqualObjects(expression.constantValue, object);
+  XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, (@[ @"literal", object ]));
+  XCTAssertThrowsSpecificNamed([NSExpression expressionWithMLNJSONObject:@[ @"semiliteral" ]],
+                               NSException, NSInvalidArgumentException);
+}
+
 // MARK: - Utility
 
 - (NSComparisonPredicate *)equalityComparisonPredicateWithRightConstantValue:

@@ -737,6 +737,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/match.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/number_format.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/parsing_context.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/expression/semiliteral.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/step.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/utf8_op_helpers.cpp

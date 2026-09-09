@@ -1,0 +1,24 @@
+{
+  "expression": [
+    "semiliteral",
+    "example"
+  ],
+  "inputs": [
+    [
+      {},
+      {}
+    ]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": true,
+      "isZoomConstant": true,
+      "type": "string"
+    },
+    "outputs": [
+      "example"
+    ],
+    "serialized": "example"
+  }
+}

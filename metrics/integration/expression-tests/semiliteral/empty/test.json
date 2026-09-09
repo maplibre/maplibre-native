@@ -1,0 +1,22 @@
+{
+  "expression": ["semiliteral"],
+  "inputs": [
+    [
+      {
+      },
+      {
+      }
+    ]
+  ],
+  "expected": {
+    "compiled": {
+      "result": "error",
+      "errors": [
+        {
+          "key": "",
+          "error": "'semiliteral' expression requires exactly one argument, but found 0 instead."
+        }
+      ]
+    }
+  }
+}
