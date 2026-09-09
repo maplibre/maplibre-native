@@ -20,11 +20,9 @@
     "terrainSource": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/jaxa/{z}-{x}-{y}.terrain.webp"
+        "local://tiles/terrain/{z}-{x}-{y}.terrain.png"
       ],
-      "tileSize": 512,
-      "maxzoom": 12,
-      "encoding": "mapbox"
+      "tileSize": 256
     },
     "features": {
       "type": "geojson",
