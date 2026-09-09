@@ -133,8 +133,8 @@
     {
         "name": "FillExtrusionShadowMaskShader",
         "header": "fill_extrusion_shadow_mask",
-        "glsl_vert": "_empty.glsl",
-        "glsl_frag": "_empty.glsl",
+        "glsl_vert": "fill_extrusion_shadow_mask.vertex.glsl",
+        "glsl_frag": "fill_extrusion_shadow_mask.fragment.glsl",
         "uses_ubos": true
     },
     {

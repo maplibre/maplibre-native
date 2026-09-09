@@ -55,16 +55,18 @@ private:
 
     std::shared_ptr<FillExtrusionVertexVector> staticDataVertices;
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
-    std::shared_ptr<SegmentVector> staticDataSegments;
+#endif
 
     // Ground shadows. Each building's roof/wall geometry is sheared along the light direction and
     // redrawn as flat, alpha-blended ground-plane geometry, positioned with the exact same per-tile
     // camera matrix as the building itself (see getTileMatrix() in the tweaker). Registered ahead
     // of the building layer group at the same layer index (insertion-order trick, see
-    // markLayerRenderable()) so shadows draw underneath the buildings. Only the instanced
-    // (Metal/Vulkan) geometry layout is supported, and the shaders are currently only specialized
-    // for Metal/Vulkan -- on other backends the shader lookup simply fails and the whole feature
-    // stays switched off.
+    // markLayerRenderable()) so shadows draw underneath the buildings.
+    //
+    // shadowMaskShaderGroup draws the roof on instanced (Metal/Vulkan) backends, or the whole
+    // combined roof+wall mesh on non-instanced (OpenGL) backends -- see FillExtrusionBucket's non-
+    // instanced layoutVertex(). shadowMaskInstancedShaderGroup draws walls only where instancing is
+    // available, and is never looked up otherwise.
 
     /// Whether the evaluated properties ask for a shadow at all.
     bool shadowEnabled() const;
@@ -94,7 +96,6 @@ private:
     void reportShadowStats(double setupMs);
     std::uint64_t shadowFrameCount = 0;
     double shadowSetupMsAccum = 0.0;
-#endif
 };
 
 } // namespace mln
