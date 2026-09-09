@@ -8,7 +8,10 @@
       "description": "Same as the fill-sandwich test but without the fill layer, to verify that two color-relief layers with hillshade render correctly on all backends (Metal, Vulkan, WebGPU) when no vector layer is present. Used to isolate whether the fill layer is the cause of the rendering regression. A small allowed difference (0.01) accounts for sub-pixel floating-point variation in hillshade between OpenGL and non-OpenGL backends."
     }
   },
-  "center": [0, 45],
+  "center": [
+    0,
+    45
+  ],
   "zoom": 1,
   "sources": {
     "dem-ocean-color-relief": {
@@ -26,14 +29,20 @@
     "dem-terrain-color-relief": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.terrain.png"
-      ]
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.webp"
+      ],
+      "tileSize": 512,
+      "maxzoom": 12,
+      "encoding": "mapbox"
     },
     "dem-terrain-hillshade": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.terrain.png"
-      ]
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.webp"
+      ],
+      "tileSize": 512,
+      "maxzoom": 12,
+      "encoding": "mapbox"
     }
   },
   "layers": [
@@ -52,13 +61,22 @@
         "color-relief-opacity": 1,
         "color-relief-color": [
           "interpolate",
-          ["linear"],
-          ["elevation"],
-          -9500, "#020d18",
-          -4000, "#041828",
-          -500,  "#082438",
-          -1,    "#0d3050",
-          0,     "rgba(0,0,0,0)"
+          [
+            "linear"
+          ],
+          [
+            "elevation"
+          ],
+          -9500,
+          "#020d18",
+          -4000,
+          "#041828",
+          -500,
+          "#082438",
+          -1,
+          "#0d3050",
+          0,
+          "rgba(0,0,0,0)"
         ]
       }
     },
@@ -83,15 +101,26 @@
         "color-relief-opacity": 1,
         "color-relief-color": [
           "interpolate",
-          ["linear"],
-          ["elevation"],
-          0,    "rgba(0,0,0,0)",
-          0.1,  "#006600",
-          500,  "#00FF00",
-          1000, "#FFFF00",
-          2000, "#FF8800",
-          3000, "#FF0000",
-          5000, "#FFFFFF"
+          [
+            "linear"
+          ],
+          [
+            "elevation"
+          ],
+          0,
+          "rgba(0,0,0,0)",
+          0.1,
+          "#006600",
+          500,
+          "#00FF00",
+          1000,
+          "#FFFF00",
+          2000,
+          "#FF8800",
+          3000,
+          "#FF0000",
+          5000,
+          "#FFFFFF"
         ]
       }
     },

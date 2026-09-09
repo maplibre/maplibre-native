@@ -5,10 +5,13 @@
       "height": 256,
       "width": 256,
       "allowed": 0.01,
-      "description": "Tests that color-relief renders correctly above a vector (fill) layer. Layer order mirrors the reference WDB_COLOR_RELIEF_DARK style: bathymetry-color-relief → bathymetry-hillshade → land-fill (vector, sandwiched) → terrain-color-relief (above vector!) → terrain-hillshade. This specifically targets a Metal rendering regression where color-relief placed above a vector layer failed to render, while OpenGL rendered it correctly."
+      "description": "Tests that color-relief renders correctly above a vector (fill) layer. Layer order mirrors the reference WDB_COLOR_RELIEF_DARK style: bathymetry-color-relief \u00e2\u2020\u2019 bathymetry-hillshade \u00e2\u2020\u2019 land-fill (vector, sandwiched) \u00e2\u2020\u2019 terrain-color-relief (above vector!) \u00e2\u2020\u2019 terrain-hillshade. This specifically targets a Metal rendering regression where color-relief placed above a vector layer failed to render, while OpenGL rendered it correctly."
     }
   },
-  "center": [0, 45],
+  "center": [
+    0,
+    45
+  ],
   "zoom": 1,
   "sources": {
     "dem-ocean-color-relief": {
@@ -32,14 +35,20 @@
     "dem-terrain-color-relief": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.terrain.png"
-      ]
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.webp"
+      ],
+      "tileSize": 512,
+      "maxzoom": 12,
+      "encoding": "mapbox"
     },
     "dem-terrain-hillshade": {
       "type": "raster-dem",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.terrain.png"
-      ]
+        "local://tiles/jaxa/{z}-{x}-{y}.terrain.webp"
+      ],
+      "tileSize": 512,
+      "maxzoom": 12,
+      "encoding": "mapbox"
     }
   },
   "layers": [
@@ -58,13 +67,22 @@
         "color-relief-opacity": 1,
         "color-relief-color": [
           "interpolate",
-          ["linear"],
-          ["elevation"],
-          -9500, "#020d18",
-          -4000, "#041828",
-          -500,  "#082438",
-          -1,    "#0d3050",
-          0,     "rgba(0,0,0,0)"
+          [
+            "linear"
+          ],
+          [
+            "elevation"
+          ],
+          -9500,
+          "#020d18",
+          -4000,
+          "#041828",
+          -500,
+          "#082438",
+          -1,
+          "#0d3050",
+          0,
+          "rgba(0,0,0,0)"
         ]
       }
     },
@@ -99,15 +117,26 @@
         "color-relief-opacity": 1,
         "color-relief-color": [
           "interpolate",
-          ["linear"],
-          ["elevation"],
-          0,    "rgba(0,0,0,0)",
-          0.1,  "#006600",
-          500,  "#00FF00",
-          1000, "#FFFF00",
-          2000, "#FF8800",
-          3000, "#FF0000",
-          5000, "#FFFFFF"
+          [
+            "linear"
+          ],
+          [
+            "elevation"
+          ],
+          0,
+          "rgba(0,0,0,0)",
+          0.1,
+          "#006600",
+          500,
+          "#00FF00",
+          1000,
+          "#FFFF00",
+          2000,
+          "#FF8800",
+          3000,
+          "#FF0000",
+          5000,
+          "#FFFFFF"
         ]
       }
     },
