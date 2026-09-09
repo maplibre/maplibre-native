@@ -671,10 +671,18 @@ into `src/mln/util/tile_lod.hpp`, projection-agnostic:
 - `elevationForTileCulling(pitchDegrees, fovDegrees, centerElevation, maxContentElevation)` -
   gl-js `getElevationForTileCulling` (#7932). **`centerElevation` is exactly what
   `RenderTerrain::getElevationForLatLng` returns**, so the terrain side of that already exists.
+  Confirmed on #4533 and checked here on both sides: the elevation is *exaggerated* in each
+  engine, so the two compose without a unit mismatch - gl-js `Terrain.getElevation` returns
+  `getDEMElevation(...) * exaggeration` and feeds `transform.elevation` into the culling term,
+  and native's `getElevationForLatLng` ends in `getElevationWithExaggeration`. Had one side
+  been raw DEM the culling elevation would be wrong by the exaggeration factor, and only at
+  pitch near the horizon. The call is
+  `elevationForTileCulling(pitch, fov, terrain.getElevationForLatLng(center))`, with
+  `maxContentElevation` left at 0 until something declares one.
 
-It is still *called* only inside `namespace globe`, so wiring `computeMeshCover` to it touches
-no globe code. That is the next concrete step on this branch, and it supersedes any thought of
-porting #5719 from TypeScript ourselves.
+Wiring `computeMeshCover` to it touches no globe code - in the globe PR the functions are
+*called* only inside `namespace globe`. That is the next concrete step on this branch, and it
+supersedes any thought of porting #5719 from TypeScript ourselves.
 
 Two things it does **not** cover, which stay terrain-side: the `deltaZoom` gap above, and the
 centre-clamped camera.
@@ -705,6 +713,45 @@ facing its own review. So:
 - **Consume `TileZoomFunction` / `elevationForTileCulling` from `main`** once either PR lands,
   whichever it is. That turns the coordination problem into a plain include.
 - The plan is on record on #4533 so reviewers can see why the extraction is worth keeping.
+
+#### Superseded 2026-09-08: the extraction is on this branch, temporarily
+
+Both halves of the plan above moved, in opposite directions.
+
+The globe PR's author now *wants* `tile_lod` split into its own PR - header, `.cpp`, test and
+two build lines, pure functions with a gl-js oracle at 1e-9, and the globe caller staying put -
+and would rather it not be vendored into either branch. The reason for not opening it yet is
+queue management, not doubt: one more PR before #4533 has a review is one more "which do I read
+first" for reviewers. Once #4533 has a verdict the split is a cherry-pick away.
+
+Meanwhile this branch needs the functions now, so `e3e2043` is cherry-picked onto a
+`feature/tile-lod` branch off `main` (authorship preserved, and without the `tile_cover.cpp`
+hunk, which only removes the functions from a globe cover this branch does not have) and merged
+here with `--no-ff`. It builds and all three oracle tests pass.
+
+**That merge is temporary and must not reach a submitted branch.** It exists so the cover work
+can proceed before the upstream split lands; when it does, drop the merge and take main's copy.
+The whole point of keeping it on its own branch is that this is one `git revert` of a merge
+commit, not an unpick.
+
+#### An open decision the extraction does not make for us
+
+Native already has pitch-aware LOD in `TileLodMode::Distance` (#4057). Whether gl-js's tile
+zoom function becomes a **third mode** or **replaces `Distance` on Mercator** is a terrain-side
+call, deliberately left out of the prep PR. It has to be answered before the cover is wired,
+because it decides whether the terrain cover opts into a new mode or changes what an existing
+one means for every Mercator source.
+
+**A trap to expect when wiring it.** The tile zoom function asks for the next zoom's tiles
+nearest the camera - the `cos(fov/2)` term puts the center about 0.07 zoom ahead - so just
+below an integer zoom the cover requests tiles finer than the nominal one. `TilePyramid` caps a
+**bounded** source's `TileRange` at the nominal zoom, so those come back out of bounds,
+`updateRenderables` skips a refused ideal tile with no parent fallback, and the parents it
+would have replaced stop being retained: the layer blinks to the background. This was diagnosed
+on the globe side as #4533's zoom-6 flicker and fixed there by sizing the range to the source's
+max zoom, which is what `TileLodMode::Distance` already does on Mercator for the same reason.
+Our DEM sources declare a `maxzoom` (the JAXA set stops at 12), so they are bounded in exactly
+this sense and will hit it.
 
 #### deltaZoom: what the port actually involves
 
@@ -767,6 +814,12 @@ materialised here, because no render test puts terrain and hillshade on one sour
 is never set in those tests. And the actual motivation, the zoom-0 relief intensity bug, has
 no repro in this suite, so the change could not be judged on the thing it was meant to fix.
 Anyone retrying this needs a zoom-0 case first, and an explanation for the skirts blanking.
+
+**It is also not the cause of the ancestor requests.** A second run measured the cache-miss
+list for `skirts-none` with and without the flag: the same eleven tiles either way, the z10
+ring and the `6-11-25 -> 9-95-201` chain alike. `deltaZoom` moves which zoom the cover lands
+on; it does not stop the cover descending from z0. An earlier note here read "8 vs 11" and was
+wrong - a truncated pipe, not a shorter list.
 
 
 ### Convergence with maplibre-gl-js (ask before doing)
