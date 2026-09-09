@@ -1,5 +1,6 @@
 #import <Mapbox.h>
 #import <XCTest/XCTest.h>
+#import "MLNAnnotationContainerView_Private.h"
 #import "MLNTestUtility.h"
 
 static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReuseIdentifer";
@@ -7,6 +8,10 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
 @interface MLNMapView (Tests)
 @property (nonatomic) MLNCameraChangeReason cameraChangeReasonBitmask;
+@property (nonatomic) MLNAnnotationContainerView *annotationContainerView;
+@property (nonatomic) NSMutableDictionary<NSString *, NSMutableArray<MLNAnnotationView *> *>
+    *annotationViewReuseQueueByIdentifier;
+- (void)updateAnnotationViews;
 @end
 
 
@@ -100,6 +105,47 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
     XCTAssert(_mapView.annotations.count == 0, @"number of annotations should be 0");
     XCTAssertNil(_annotationView.annotation, @"annotation property should be nil");
+}
+
+- (void)testRemovingAnnotationsRemovesOffscreenReusableViews {
+  self.mapView.centerCoordinate = CLLocationCoordinate2DMake(0, 0);
+  self.mapView.zoomLevel = 14;
+
+  MLNTestAnnotation *visibleAnnotation = [[MLNTestAnnotation alloc] init];
+  visibleAnnotation.coordinate = CLLocationCoordinate2DMake(0, 0);
+
+  MLNTestAnnotation *offscreenAnnotation = [[MLNTestAnnotation alloc] init];
+  offscreenAnnotation.coordinate = CLLocationCoordinate2DMake(45, 45);
+
+  NSArray<MLNTestAnnotation *> *annotations = @[ visibleAnnotation, offscreenAnnotation ];
+  [self.mapView addAnnotations:annotations];
+  [self.mapView updateAnnotationViews];
+
+  NSArray<MLNAnnotationView *> *reusableViews =
+      self.mapView.annotationViewReuseQueueByIdentifier[MLNTestAnnotationReuseIdentifer];
+  XCTAssertGreaterThan(reusableViews.count, 0UL,
+                       @"The test must enqueue at least one offscreen annotation view");
+
+  [self.mapView removeAnnotations:annotations];
+  [self.mapView updateAnnotationViews];
+
+  XCTAssertEqual(self.mapView.annotationContainerView.annotationViews.count, 0UL);
+  XCTAssertNil(self.mapView.annotationViewReuseQueueByIdentifier[MLNTestAnnotationReuseIdentifer]);
+}
+
+- (void)testAddingAnnotationsReusesAnnotationContainerView {
+  MLNTestAnnotation *firstAnnotation = [[MLNTestAnnotation alloc] init];
+  firstAnnotation.coordinate = CLLocationCoordinate2DMake(0, 0);
+  [self.mapView addAnnotation:firstAnnotation];
+
+  MLNAnnotationContainerView *annotationContainerView = self.mapView.annotationContainerView;
+
+  MLNTestAnnotation *secondAnnotation = [[MLNTestAnnotation alloc] init];
+  secondAnnotation.coordinate = CLLocationCoordinate2DMake(1, 1);
+  [self.mapView addAnnotation:secondAnnotation];
+
+  XCTAssertEqual(self.mapView.annotationContainerView, annotationContainerView);
+  XCTAssertEqual(self.mapView.annotationContainerView.annotationViews.count, 2UL);
 }
 
 - (void)testCustomAnnotationView
