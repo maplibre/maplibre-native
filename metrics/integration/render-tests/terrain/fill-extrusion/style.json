@@ -4,7 +4,7 @@
     "test": {
       "height": 512,
       "width": 512,
-      "description": "Fill-extrusion over 3D terrain: buildings must sit ON the terrain surface (raised by the DEM elevation at their centroid), not at sea level. Rendered at a pitch over sloping ground so a building drawn without elevation sinks into / floats over the hillside instead of resting on it. Buildings are inline GeoJSON so the test needs no extra tile fixtures beyond the terrain DEM."
+      "description": "Fill-extrusion over 3D terrain, viewed at a pitch across sloping ground: each building is raised by the DEM elevation at its centroid, so its base follows the hillside. The buildings are inline GeoJSON, so the terrain DEM is the only tile fixture involved."
     }
   },
   "center": [

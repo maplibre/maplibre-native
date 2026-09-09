@@ -35,7 +35,7 @@
     "osm-basemap": {
       "type": "vector",
       "tiles": [
-        "local://tiles/{z}-{x}-{y}.osm_basemap.pbf"
+        "local://tiles/osm/{z}-{x}-{y}.pbf"
       ]
     },
     "dem-terrain-color-relief": {
