@@ -12,6 +12,7 @@
 #include <mln/util/logging.hpp>
 #include <mln/util/platform.hpp>
 
+#include <algorithm>
 #include <cstdio>
 #include <utility>
 #include <numbers>
@@ -739,7 +740,7 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     // Half of fov is the field of view above perspective center.
     const double tangentOfFovAboveCenterAngle = (0.5 + centerOffsetY / height) * 2.0 * tan(getFieldOfView() / 2.0);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
-    return state.getMaxPitch() + getFieldOfView() / 2.0 - fovAboveCenter;
+    return std::max(state.getMinPitch(), state.getMaxPitch() + getFieldOfView() / 2.0 - fovAboveCenter);
 }
 
 FreeCameraOptions Transform::getFreeCameraOptions() const {
