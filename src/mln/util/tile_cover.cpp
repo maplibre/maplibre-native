@@ -219,8 +219,16 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     // GL JS's tile zoom function takes its distances in Mercator units at zoom 0, so the
     // tile-unit coordinates above are divided back down by numTiles. The terms that depend
     // only on the camera are computed once for the whole cover.
-    const double distanceToCenterZ = std::abs(centerCoord[2] - cameraCoord[2]) / numTiles;
-    const double distanceToCenter3d = vec3Length(vec3Sub(cameraCoord, centerCoord)) / numTiles;
+    // GL JS measures this to the terrain surface under the map center, not to z = 0:
+    // centerCoord is fromLngLat(center, transform.elevation). Metres to normalized Mercator
+    // is 1 / (cos(lat) * 2pi * R), the same factor metersToTileUnits below uses.
+    const double centerAltitudeMercator =
+        state.transformState.getCenterAltitude() /
+        (std::cos(util::deg2rad(transform.getLatLng().latitude())) * util::M2PI * util::EARTH_RADIUS_M);
+    const double distanceToCenterZ = std::abs(centerAltitudeMercator - cameraCoord[2] / numTiles);
+    const double distanceToCenter2d =
+        std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]) / numTiles;
+    const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceToCenterZ);
     const double requestedCenterZoom = transform.getZoom() + (z - std::floor(transform.getZoom()));
     const util::TileZoomFunction tileZoom(util::rad2deg(transform.getFieldOfView()));
 
