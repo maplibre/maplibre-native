@@ -115,6 +115,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                                                      .tileLodScale = parameters.tileLodScale,
                                                      .tileLodPitchThreshold = parameters.tileLodPitchThreshold,
                                                      .tileLodMode = parameters.tileLodMode,
+                                                     .roundZoom = type == SourceType::Raster ||
+                                                                  type == SourceType::Video,
                                                      .elevationProvider = parameters.elevationProvider};
 
     if (std::cmp_greater_equal(overscaledZoom, zoomRange.min)) {

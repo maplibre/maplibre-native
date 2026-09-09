@@ -55,6 +55,11 @@ struct TileCoverParameters {
     double tileLodScale = 1;
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     TileLodMode tileLodMode = TileLodMode::Default;
+    /// Round the per-tile zoom rather than flooring it, as `coveringZoomLevel` does for the
+    /// nominal zoom. GL JS carries the same distinction as `roundZoom`, set by raster and
+    /// video sources. Only `TileLodMode::Adaptive` chooses a zoom per tile, so only it reads
+    /// this.
+    bool roundZoom = false;
     /// Optional; when null the cover is computed against the flat ground plane, as
     /// it was before terrain support.
     const TileElevationProvider* elevationProvider = nullptr;

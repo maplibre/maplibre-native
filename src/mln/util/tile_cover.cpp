@@ -229,7 +229,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double distanceToCenter2d =
         std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]) / numTiles;
     const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceToCenterZ);
-    const double requestedCenterZoom = transform.getZoom() + (z - std::floor(transform.getZoom()));
+    // The zoom the view asks for, before any source max-zoom clamp: GL JS passes
+    // `transform.zoom + log2(transform.tileSize / source.tileSize)` and clamps the function's
+    // *result* to maxZoom. `z` arrives already clamped, so using it here would shift every
+    // tile down by the amount of the clamp.
+    const auto unclampedZ = static_cast<double>(overscaledZ.value_or(z));
+    const double requestedCenterZoom = transform.getZoom() + (unclampedZ - std::floor(transform.getZoom()));
     const util::TileZoomFunction tileZoom(util::rad2deg(transform.getFieldOfView()));
 
     // Elevation has to reach the frustum in the aabb's units (tiles at zoom z).
@@ -317,8 +322,9 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             // below, rather than elevatedAABB.
             const vec3 camToTile = node.aabb.distanceXYZ(cameraCoord);
             const double distanceToTile2d = std::hypot(camToTile[0], camToTile[1]) / numTiles;
-            const double desiredZoom = std::floor(
-                tileZoom(requestedCenterZoom, distanceToTile2d, distanceToCenterZ, distanceToCenter3d));
+            const double rawZoom =
+                tileZoom(requestedCenterZoom, distanceToTile2d, distanceToCenterZ, distanceToCenter3d);
+            const double desiredZoom = state.roundZoom ? std::round(rawZoom) : std::floor(rawZoom);
             shouldSplitTile = node.zoom < std::clamp(desiredZoom, 0.0, static_cast<double>(maxZoom));
         } else if (state.tileLodMode == TileLodMode::Distance) {
             const vec3 camToTileMercator = vec3Scale(node.aabb.distanceXYZ(cameraCoord), 1.0 / worldSize);
