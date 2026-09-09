@@ -226,6 +226,10 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
     for (const auto& dependency : pair.first) {
         if (!images.contains(dependency.first)) {
             missingDependencies.emplace(dependency);
+        } else if (auto it = requestedImages.find(dependency.first); it != requestedImages.end()) {
+            // The missing-image path below never registers images that are
+            // already present.
+            it->second.emplace(&requestor);
         }
     }
 
@@ -277,12 +281,6 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
                                           Scheduler::GetCurrent()->bindOnce(std::move(removePendingRequests)));
         }
     } else {
-        // Associate requestor with an image that was provided by the client.
-        for (const auto& dependency : pair.first) {
-            if (requestedImages.contains(dependency.first)) {
-                requestedImages[dependency.first].emplace(&requestor);
-            }
-        }
         notify(requestor, pair);
     }
 }
