@@ -2,13 +2,16 @@
 
 #include <mln/actor/scheduler.hpp>
 #include <mln/actor/mailbox.hpp>
+#include <mln/util/chrono.hpp>
 #include <mln/util/noncopyable.hpp>
+#include <mln/util/scoped.hpp>
 #include <mln/util/util.hpp>
 #include <mln/util/work_task.hpp>
 #include <mln/util/work_request.hpp>
 
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <queue>
 #include <utility>
 
@@ -45,6 +48,15 @@ public:
 
     void run();
     void runOnce();
+
+    /// Like runOnce(), but stops dequeuing tasks once `budget` has elapsed.
+    /// At least one queued task runs. Tasks left behind stay queued and the
+    /// loop is woken again, so the next runOnce() or run() picks them up.
+    void runOnce(Duration budget) {
+        processDeadline = Clock::now() + budget;
+        const Scoped clearDeadline([this] { processDeadline.reset(); });
+        runOnce();
+    }
     void stop();
 
     void updateTime();
@@ -118,24 +130,33 @@ private:
     void process() {
         std::shared_ptr<WorkTask> task;
         std::unique_lock<std::mutex> lock(mutex);
+        bool ranTask = false;
         while (true) {
+            if (highPriorityQueue.empty() && defaultQueue.empty()) {
+                break;
+            }
+            if (ranTask && processDeadline && Clock::now() >= *processDeadline) {
+                // Re-arm the wake so the remaining tasks run on the next iteration.
+                wake();
+                break;
+            }
             if (!highPriorityQueue.empty()) {
                 task = std::move(highPriorityQueue.front());
                 highPriorityQueue.pop();
-            } else if (!defaultQueue.empty()) {
+            } else {
                 task = std::move(defaultQueue.front());
                 defaultQueue.pop();
-            } else {
-                break;
             }
             lock.unlock();
             (*task)();
             task.reset();
             lock.lock();
+            ranTask = true;
         }
     }
 
     std::function<void()> platformCallback;
+    std::optional<TimePoint> processDeadline;
 
     Queue defaultQueue;
     Queue highPriorityQueue;
