@@ -117,9 +117,10 @@ public:
 
     // Projection
     ScreenCoordinate pixelForLatLng(const LatLng&) const;
-    LatLng latLngForPixel(const ScreenCoordinate&) const;
+    LatLng latLngForPixel(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
-    std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
+    std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&,
+                                         LatLng::WrapMode = LatLng::Wrapped) const;
 
     // Transform
     TransformState getTransfromState() const;
