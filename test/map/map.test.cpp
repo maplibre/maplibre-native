@@ -20,6 +20,7 @@
 #include <mln/storage/online_file_source.hpp>
 #include <mln/storage/resource_options.hpp>
 #include <mln/style/expression/dsl.hpp>
+#include <mln/style/expression/formatted.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/layers/background_layer.hpp>
@@ -39,11 +40,13 @@
 #include <mln/util/color.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/immutable.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/run_loop.hpp>
 
 #include <atomic>
+#include <tuple>
 
 using namespace mln;
 using namespace mln::style;
@@ -2039,3 +2042,84 @@ TEST(Map, SetFrustumOffset) {
 
     test::checkImage("test/fixtures/map/setFrustumOffset/after", test.frontend.render(test.map).image, 0.0006, 0.1);
 }
+
+class GeoJSONSymbolTest : public testing::TestWithParam<std::tuple<bool, bool>> {};
+
+TEST_P(GeoJSONSymbolTest, RetainsIconsAndTextAcrossZoom) {
+    const auto [synchronous, withText] = GetParam();
+    MapTest<> test;
+    test.frontend.setSize({512, 512});
+    test.map.setSize({512, 512});
+
+    unsigned glyphRequests = 0;
+    test.fileSource->glyphsResponse = [&](const Resource&) {
+        ++glyphRequests;
+        Response response;
+        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
+        return response;
+    };
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "glyphs": "https://example.com/{fontstack}/{range}.pbf",
+        "sources": {},
+        "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+    })");
+
+    PremultipliedImage icon({40, 48});
+    for (size_t i = 0; i < icon.bytes(); i += 4) {
+        icon.data[i] = 255;
+        icon.data[i + 1] = 0;
+        icon.data[i + 2] = 0;
+        icon.data[i + 3] = 255;
+    }
+    test.map.getStyle().addImage(std::make_unique<style::Image>("marker", std::move(icon), 1.0f));
+
+    GeoJSONOptions options;
+    options.synchronousUpdate = synchronous;
+    for (int i = 0; i < 3; ++i) {
+        const auto sourceID = "point-" + std::to_string(i);
+        auto source = std::make_unique<GeoJSONSource>(sourceID, makeMutable<GeoJSONOptions>(options));
+        source->setGeoJSON(Geometry<double>{Point<double>{(i - 1) * 0.01, 0.0}});
+        test.map.getStyle().addSource(std::move(source));
+
+        auto layer = std::make_unique<SymbolLayer>("symbol-" + std::to_string(i), sourceID);
+        layer->setIconImage({"marker"s});
+        layer->setIconAnchor(SymbolAnchorType::Bottom);
+        layer->setIconAllowOverlap(true);
+        layer->setIconIgnorePlacement(true);
+        layer->setTextField(expression::Formatted(withText ? "New place" : ""));
+        layer->setTextFont(FontStack{"Open Sans Regular"});
+        layer->setTextAnchor(SymbolAnchorType::Top);
+        layer->setTextAllowOverlap(true);
+        layer->setTextIgnorePlacement(true);
+        test.map.getStyle().addLayer(std::move(layer));
+    }
+
+    for (const double zoom : {14.0, 13.5, 13.0, 12.5, 14.0}) {
+        SCOPED_TRACE(zoom);
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(zoom));
+        const auto image = test.frontend.render(test.map).image;
+        size_t redPixels = 0;
+        size_t blackPixels = 0;
+        for (size_t i = 0; i < image.bytes(); i += 4) {
+            const auto* pixel = image.data.get() + i;
+            redPixels += pixel[0] > 200 && pixel[1] < 50 && pixel[2] < 50;
+            blackPixels += pixel[0] < 100 && pixel[1] < 100 && pixel[2] < 100;
+        }
+        EXPECT_GE(redPixels, 5000u);
+        if (withText) {
+            EXPECT_GT(blackPixels, 100u);
+            EXPECT_EQ(glyphRequests, 1u);
+        }
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(GeoJSON,
+                         GeoJSONSymbolTest,
+                         testing::Combine(testing::Bool(), testing::Bool()),
+                         [](const testing::TestParamInfo<std::tuple<bool, bool>>& paramInfo) {
+                             const bool synchronous = std::get<0>(paramInfo.param);
+                             const bool withText = std::get<1>(paramInfo.param);
+                             return std::string(synchronous ? "Synchronous" : "Asynchronous") +
+                                    (withText ? "WithText" : "IconOnly");
+                         });
