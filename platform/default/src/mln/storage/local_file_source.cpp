@@ -11,9 +11,23 @@
 #include <mln/util/url.hpp>
 #include <mln/storage/resource_options.hpp>
 
+#include <cctype>
+#include <string>
+
 namespace {
 bool acceptsURL(const std::string& url) {
     return url.starts_with(mln::util::FILE_PROTOCOL);
+}
+
+std::string pathFromFileURL(const std::string& url) {
+    auto path = mln::util::percentDecode(url.substr(std::char_traits<char>::length(mln::util::FILE_PROTOCOL)));
+#if defined(_WIN32)
+    // file:///C:/path minus the scheme is /C:/path, which Windows rejects.
+    if (path.size() >= 3 && path[0] == '/' && path[2] == ':' && std::isalpha(static_cast<unsigned char>(path[1]))) {
+        path.erase(0, 1);
+    }
+#endif
+    return path;
 }
 } // namespace
 
@@ -33,9 +47,7 @@ public:
             return;
         }
 
-        // Cut off the protocol and prefix with path.
-        const auto path = mln::util::percentDecode(
-            resource.url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
+        const auto path = pathFromFileURL(resource.url);
         requestLocalFile(path, req, resource.dataRange);
     }
 
