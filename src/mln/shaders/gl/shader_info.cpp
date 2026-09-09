@@ -259,7 +259,8 @@ const std::vector<TextureInfo> FillExtrusionPatternShaderInfo::textures = {
 };
 
 // Fill Extrusion Shadow Mask
-using FillExtrusionShadowMaskShaderInfo = ShaderInfo<BuiltIn::FillExtrusionShadowMaskShader, gfx::Backend::Type::OpenGL>;
+using FillExtrusionShadowMaskShaderInfo =
+    ShaderInfo<BuiltIn::FillExtrusionShadowMaskShader, gfx::Backend::Type::OpenGL>;
 
 const std::vector<UniformBlockInfo> FillExtrusionShadowMaskShaderInfo::uniformBlocks = {
     UniformBlockInfo{"FillExtrusionShadowDrawableUBO", idFillExtrusionShadowDrawableUBO},
