@@ -108,6 +108,10 @@ private:
     /// Last terrain height reported under the map centre, so an unchanged surface does not
     /// post an observer message every frame.
     double lastReportedCenterElevation = 0.0;
+    /// Frames spent waiting for the terrain-clamped centre to settle, and the cap that stops
+    /// a DEM whose sampled height keeps moving from holding a still render open forever.
+    int centerElevationSettleFrames = 0;
+    static constexpr int kMaxCenterElevationSettleFrames = 4;
 
     enum class RenderState {
         Never,

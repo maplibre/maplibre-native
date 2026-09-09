@@ -744,21 +744,31 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
     // Report the rendered terrain height under the map centre. Only the render side has the
     // DEM, so this is the channel; whether the camera acts on it is the map's call
     // (Map::setCenterClampedToGround). Gated so a still map does not post a message a frame.
+    bool centerElevationSettling = false;
     if (auto* terrain = orchestrator.getRenderTerrain()) {
         const double centerElevation = terrain->getElevationForLatLng(updateParameters->transformState.getLatLng());
         if (std::abs(centerElevation - lastReportedCenterElevation) > 0.25) {
             lastReportedCenterElevation = centerElevation;
             observer->onTerrainCenterElevationChanged(centerElevation);
+            // The camera only moves onto the terrain on the *next* frame, so this one was
+            // drawn from a centre that is still at the old height. Report the frame as not
+            // settled: a still render would otherwise capture the pre-clamp image, which for
+            // terrain taller than the camera is empty. Bounded so a DEM that never settles
+            // cannot spin the loop forever.
+            centerElevationSettling = ++centerElevationSettleFrames <= kMaxCenterElevationSettleFrames;
+        } else {
+            centerElevationSettleFrames = 0;
         }
     }
 
     observer->onDidFinishRenderingFrame(
-        renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
+        (renderTreeParameters.loaded && !centerElevationSettling) ? RendererObserver::RenderMode::Full
+                                                                 : RendererObserver::RenderMode::Partial,
         // Request a follow-up frame if the drape budget deferred any target or the tile-build
         // budget deferred any new tile, so deferred drapes/tiles catch up progressively even
         // after the interaction stops.
         renderTreeParameters.needsRepaint || drapeWorkDeferred || context.newTileBuildWasDeferred() ||
-            terrainCoverPending,
+            terrainCoverPending || centerElevationSettling,
         renderTreeParameters.placementChanged,
         context.threadSafeCopyRenderingStats());
 
