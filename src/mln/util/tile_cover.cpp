@@ -6,6 +6,7 @@
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_cover_impl.hpp>
+#include <mln/util/tile_lod.hpp>
 
 #include <functional>
 #include <list>
@@ -191,9 +192,13 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const auto& transform = state.transformState;
     const double numTiles = std::pow(2.0, z);
     const double worldSize = Projection::worldSize(transform.getScale());
-    const bool allowVariableZoom = transform.getPitch() > state.tileLodPitchThreshold;
+    const bool adaptiveLod = state.tileLodMode == TileLodMode::Adaptive;
+    // GL JS puts the Mercator cover on the variable-zoom function whenever terrain is
+    // present, not only past a pitch threshold, so selecting Adaptive is itself the opt-in.
+    const bool allowVariableZoom = adaptiveLod || transform.getPitch() > state.tileLodPitchThreshold;
     const uint8_t minZoom = allowVariableZoom ? zoomRange.min : z;
-    const uint8_t maxZoom = ((state.tileLodMode == TileLodMode::Distance) && allowVariableZoom) ? zoomRange.max : z;
+    const bool variableZoomMode = state.tileLodMode == TileLodMode::Distance || adaptiveLod;
+    const uint8_t maxZoom = (variableZoomMode && allowVariableZoom) ? zoomRange.max : z;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const bool flippedY = transform.getViewportMode() == ViewportMode::FlippedY;
 
@@ -210,6 +215,14 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double cameraToCenterDistanceMercator = vec3Length(vec3Sub(cameraCoord, centerCoord)) / worldSize;
 
     const Frustum frustum = Frustum::fromInvProjMatrix(transform.getInvProjectionMatrix(), worldSize, z, flippedY);
+
+    // GL JS's tile zoom function takes its distances in Mercator units at zoom 0, so the
+    // tile-unit coordinates above are divided back down by numTiles. The terms that depend
+    // only on the camera are computed once for the whole cover.
+    const double distanceToCenterZ = std::abs(centerCoord[2] - cameraCoord[2]) / numTiles;
+    const double distanceToCenter3d = vec3Length(vec3Sub(cameraCoord, centerCoord)) / numTiles;
+    const double requestedCenterZoom = transform.getZoom() + (z - std::floor(transform.getZoom()));
+    const util::TileZoomFunction tileZoom(util::rad2deg(transform.getFieldOfView()));
 
     // Elevation has to reach the frustum in the aabb's units (tiles at zoom z).
     // Renderable heights are in meters and Camera::getWorldToCamera scales them by
@@ -290,7 +303,16 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         }
 
         bool shouldSplitTile;
-        if (state.tileLodMode == TileLodMode::Distance) {
+        if (adaptiveLod) {
+            // gl-js distanceToTile2d takes only x and y - elevation decides what is visible,
+            // not how finely it is subdivided - so this reads the flat box, like the branches
+            // below, rather than elevatedAABB.
+            const vec3 camToTile = node.aabb.distanceXYZ(cameraCoord);
+            const double distanceToTile2d = std::hypot(camToTile[0], camToTile[1]) / numTiles;
+            const double desiredZoom = std::floor(
+                tileZoom(requestedCenterZoom, distanceToTile2d, distanceToCenterZ, distanceToCenter3d));
+            shouldSplitTile = node.zoom < std::clamp(desiredZoom, 0.0, static_cast<double>(maxZoom));
+        } else if (state.tileLodMode == TileLodMode::Distance) {
             const vec3 camToTileMercator = vec3Scale(node.aabb.distanceXYZ(cameraCoord), 1.0 / worldSize);
             const double distanceToTileMercator = vec3Length(camToTileMercator);
             const double cosPitchToTile = std::max(0.0, camToTileMercator[2] / distanceToTileMercator);

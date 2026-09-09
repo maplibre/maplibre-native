@@ -178,9 +178,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // levels. Child tiles are used from the cache, but not created.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
-        int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
-                              ? zoomRange.max
-                              : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        // A variable-zoom cover asks for tiles finer than the nominal zoom near the camera, so
+        // a bounded source has to size its range to its own max zoom. Capping at the nominal
+        // zoom refuses those tiles, and updateRenderables drops the parents they would have
+        // replaced without a fallback, which reads as the layer blinking to the background.
+        const bool variableZoom = parameters.tileLodMode == TileLodMode::Distance ||
+                                  parameters.tileLodMode == TileLodMode::Adaptive;
+        int32_t maxZoom = variableZoom ? zoomRange.max
+                                       : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
         tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {

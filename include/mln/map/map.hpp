@@ -194,6 +194,10 @@ public:
     /// screen. The distance based algorithm observes `TileLodScale` and
     /// `TileLodPitchThreshold` and ignores `TileLodMinRadius` and
     /// `TileLodZoomShift`.
+    /// When "adaptive" is selected, the zoom is chosen per tile from the field of
+    /// view and a tile-count budget - maplibre-gl-js's tile zoom function - at every
+    /// pitch rather than past a threshold. It observes none of the four settings
+    /// above.
     void setTileLodMinRadius(double radius);
     double getTileLodMinRadius() const;
     void setTileLodScale(double scale);

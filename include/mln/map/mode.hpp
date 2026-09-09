@@ -37,8 +37,16 @@ enum class ViewportMode : EnumType {
 };
 
 enum class TileLodMode : uint8_t {
-    Default, ///< Default TileLOD algorithm
-    Distance ///< Distance-based TileLOD algorithm
+    Default,  ///< Default TileLOD algorithm
+    Distance, ///< Distance-based TileLOD algorithm
+    /// Per-tile zoom from the field of view and a tile-count budget, rather than a
+    /// single zoom for the whole cover: finer near the camera, coarser toward the
+    /// horizon. This is maplibre-gl-js `createCalculateTileZoomFunction`, which GL JS
+    /// applies whenever terrain is present or the pitch passes 78.5 - fov/2 degrees, so
+    /// selecting it is how a terrain map matches GL JS's tile selection. Unlike
+    /// `Distance` it varies the zoom at every pitch, and it ignores `TileLodScale`,
+    /// `TileLodMinRadius`, `TileLodZoomShift` and `TileLodPitchThreshold`.
+    Adaptive
 };
 
 /// Controls progressive loading of 3D-terrain content (draped tiles and drape
