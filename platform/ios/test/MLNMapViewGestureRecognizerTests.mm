@@ -67,6 +67,39 @@
   [_styleLoadingExpectation fulfill];
 }
 
+- (void)testSetCameraClearsTransientEdgePaddingWhenCameraIsUnchanged {
+  UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 2, 3, 4);
+  UIEdgeInsets transientPadding = UIEdgeInsetsMake(0, 0, 20, 0);
+  self.mapView.contentInset = contentInset;
+  MLNMapCamera *targetCamera = self.mapView.camera;
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Camera padding cleared"];
+  __weak __typeof__(self) weakSelf = self;
+
+  [self.mapView setCamera:targetCamera
+                 withDuration:0
+      animationTimingFunction:nil
+                  edgePadding:transientPadding
+            completionHandler:^{
+              MLNMapView *mapView = weakSelf.mapView;
+              auto cameraPadding = mapView.mbglMap.getCameraOptions().padding;
+              auto expectedPadding = MLNEdgeInsetsFromNSEdgeInsets(contentInset) +
+                                     MLNEdgeInsetsFromNSEdgeInsets(transientPadding);
+              XCTAssertEqual(cameraPadding, expectedPadding);
+
+              [mapView setCamera:targetCamera
+                             withDuration:0
+                  animationTimingFunction:nil
+                              edgePadding:UIEdgeInsetsZero
+                        completionHandler:^{
+                          [expectation fulfill];
+                        }];
+            }];
+  [self waitForExpectationsWithTimeout:2 handler:nil];
+
+  auto cameraPadding = self.mapView.mbglMap.getCameraOptions().padding;
+  XCTAssertEqual(cameraPadding, MLNEdgeInsetsFromNSEdgeInsets(contentInset));
+}
+
 - (void)testHandlePinchGestureContentInset {
   UIEdgeInsets contentInset = UIEdgeInsetsMake(1, 1, 1, 1);
   self.mapView.contentInset = contentInset;
