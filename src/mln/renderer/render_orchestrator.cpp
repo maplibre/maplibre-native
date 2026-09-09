@@ -203,7 +203,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodScale = updateParameters->tileLodScale,
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
-                                  .tileLodMode = updateParameters->tileLodMode,
+                                  // GL JS covers every source with the variable-zoom tile
+                                  // function whenever terrain is present, at any pitch, so
+                                  // the DEM a terrain mesh reads is selected the same way
+                                  // the mesh itself is.
+                                  .tileLodMode = updateParameters->terrain
+                                                     ? TileLodMode::Adaptive
+                                                     : updateParameters->tileLodMode,
                                   .dynamicTextureAtlas = dynamicTextureAtlas};
 
     glyphManager->setURL(updateParameters->glyphURL);
