@@ -70,3 +70,51 @@ TEST(SourceOptions, MLTEncodingParsed) {
     ASSERT_EQ(converted.value().vectorEncoding, Tileset::VectorEncoding::MLT);
     ASSERT_FALSE(converted.value().rasterEncoding);
 }
+
+TEST(SourceOptions, ZoomRangeParsed) {
+    Error error;
+    auto converted = convertJSON<SourceOptions>(
+        R"JSON({
+        "minzoom": 5,
+        "maxzoom": 14
+    })JSON",
+        error);
+    ASSERT_TRUE(converted);
+    ASSERT_EQ(converted->minzoom, 5);
+    ASSERT_EQ(converted->maxzoom, 14);
+    ASSERT_FALSE(converted->rasterEncoding);
+    ASSERT_FALSE(converted->vectorEncoding);
+}
+
+TEST(SourceOptions, ZoomRangeAlongsideEncoding) {
+    Error error;
+    auto converted = convertJSON<SourceOptions>(
+        R"JSON({
+        "encoding": "terrarium",
+        "maxzoom": 15
+    })JSON",
+        error);
+    ASSERT_TRUE(converted);
+    ASSERT_EQ(converted->rasterEncoding, Tileset::RasterEncoding::Terrarium);
+    ASSERT_FALSE(converted->minzoom);
+    ASSERT_EQ(converted->maxzoom, 15);
+}
+
+TEST(SourceOptions, InvalidMaxzoomType) {
+    Error error;
+    auto converted = convertJSON<SourceOptions>(
+        R"JSON({
+        "maxzoom": "high"
+    })JSON",
+        error);
+    ASSERT_FALSE(converted);
+    ASSERT_EQ(0, error.message.find("invalid maxzoom"));
+}
+
+TEST(SourceOptions, ZoomOutOfRange) {
+    Error error;
+    ASSERT_FALSE(convertJSON<SourceOptions>(R"JSON({ "minzoom": -1 })JSON", error));
+    ASSERT_EQ(0, error.message.find("invalid minzoom"));
+    ASSERT_FALSE(convertJSON<SourceOptions>(R"JSON({ "maxzoom": 300 })JSON", error));
+    ASSERT_EQ(0, error.message.find("invalid maxzoom"));
+}
