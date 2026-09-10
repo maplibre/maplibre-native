@@ -222,12 +222,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     // GL JS measures this to the terrain surface under the map center, not to z = 0:
     // centerCoord is fromLngLat(center, transform.elevation). Metres to normalized Mercator
     // is 1 / (cos(lat) * 2pi * R), the same factor metersToTileUnits below uses.
-    const double centerAltitudeMercator =
-        state.transformState.getCenterAltitude() /
-        (std::cos(util::deg2rad(transform.getLatLng().latitude())) * util::M2PI * util::EARTH_RADIUS_M);
+    const double centerAltitudeMercator = state.transformState.getCenterAltitude() /
+                                          (std::cos(util::deg2rad(transform.getLatLng().latitude())) * util::M2PI *
+                                           util::EARTH_RADIUS_M);
     const double distanceToCenterZ = std::abs(centerAltitudeMercator - cameraCoord[2] / numTiles);
-    const double distanceToCenter2d =
-        std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]) / numTiles;
+    const double distanceToCenter2d = std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]) /
+                                      numTiles;
     const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceToCenterZ);
     // The zoom the view asks for, before any source max-zoom clamp: GL JS passes
     // `transform.zoom + log2(transform.tileSize / source.tileSize)` and clamps the function's
@@ -322,8 +322,8 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             // below, rather than elevatedAABB.
             const vec3 camToTile = node.aabb.distanceXYZ(cameraCoord);
             const double distanceToTile2d = std::hypot(camToTile[0], camToTile[1]) / numTiles;
-            const double rawZoom =
-                tileZoom(requestedCenterZoom, distanceToTile2d, distanceToCenterZ, distanceToCenter3d);
+            const double rawZoom = tileZoom(
+                requestedCenterZoom, distanceToTile2d, distanceToCenterZ, distanceToCenter3d);
             const double desiredZoom = state.roundZoom ? std::round(rawZoom) : std::floor(rawZoom);
             shouldSplitTile = node.zoom < std::clamp(desiredZoom, 0.0, static_cast<double>(maxZoom));
         } else if (state.tileLodMode == TileLodMode::Distance) {

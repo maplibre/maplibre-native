@@ -763,7 +763,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     observer->onDidFinishRenderingFrame(
         (renderTreeParameters.loaded && !centerElevationSettling) ? RendererObserver::RenderMode::Full
-                                                                 : RendererObserver::RenderMode::Partial,
+                                                                  : RendererObserver::RenderMode::Partial,
         // Request a follow-up frame if the drape budget deferred any target or the tile-build
         // budget deferred any new tile, so deferred drapes/tiles catch up progressively even
         // after the interaction stops.
