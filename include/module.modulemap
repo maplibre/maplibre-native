@@ -1,0 +1,4 @@
+module MapLibrePluginApi {
+    header "mln/plugin/plugin_api.h"
+    export *
+}
