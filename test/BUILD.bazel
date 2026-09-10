@@ -90,28 +90,6 @@ filegroup(
 )
 
 cc_test(
-    name = "plugin-api",
-    srcs = PLUGIN_API_TESTS + ["plugin/main.cpp"],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    target_compatible_with = select({
-        "//:plugins_enabled": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
-    deps = [
-        "//:mbgl-core",
-        "@googletest//:gtest",
-    ] + select({
-        "@platforms//os:macos": [
-            "//platform/darwin:darwin-objcpp",
-            "//platform/default:mbgl-default",
-            "//platform/default:standalone-layer-manager",
-        ],
-        "@platforms//os:linux": ["//platform/linux:impl"],
-        "//conditions:default": [],
-    }),
-)
-
-cc_test(
     name = "core",
     args = [
         "--gtest_filter=-Map.StyleNetworkErrorRetry:Map.StyleNotFound:MainResourceLoader.CachedResourceLowPriority",

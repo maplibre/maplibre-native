@@ -8,7 +8,6 @@ cc_library(
     visibility = [
         "//plugins:__pkg__",
         "//render-test:__pkg__",
-        "//test:__pkg__",
     ],
     deps = ["//:mbgl-core"],
 )

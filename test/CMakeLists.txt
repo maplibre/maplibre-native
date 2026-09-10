@@ -212,16 +212,12 @@ include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
 
 if(MLN_WITH_PLUGINS)
-    set(MLN_PLUGIN_API_TESTS
+    target_sources(mbgl-test PRIVATE
         plugin/api.test.cpp
         plugin/layout.test.cpp
         plugin/property_binding.test.cpp
         plugin/registry.test.cpp
     )
-    target_sources(mbgl-test PRIVATE ${MLN_PLUGIN_API_TESTS})
-    add_executable(mln-plugin-host-tests EXCLUDE_FROM_ALL ${MLN_PLUGIN_API_TESTS} plugin/main.cpp)
-    target_link_libraries(mln-plugin-host-tests PRIVATE mbgl-core mbgl-vendor-googletest mbgl-compiler-options)
-    target_include_directories(mln-plugin-host-tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
