@@ -113,13 +113,9 @@ std::set<UnwrappedTileID> RenderTerrain::computeMeshCover(
         coverParams.tileLodMinRadius = updateParameters->tileLodMinRadius;
         coverParams.tileLodScale = updateParameters->tileLodScale;
         coverParams.tileLodPitchThreshold = updateParameters->tileLodPitchThreshold;
+        coverParams.tileLodMode = updateParameters->tileLodMode;
         zoomShift = updateParameters->tileLodZoomShift;
     }
-    // GL JS covers with the variable-zoom tile function whenever terrain is present, at any
-    // pitch, so the terrain cover asks for it rather than inheriting the map's mode. The
-    // single constant desired zoom the other modes use is what makes this cover descend from
-    // z0 and request tiles GL JS never asks for.
-    coverParams.tileLodMode = TileLodMode::Adaptive;
 
     const double zoom = util::clamp<double>(state.getZoom() + zoomShift, state.getMinZoom(), state.getMaxZoom());
     const int32_t overscaledZoom = util::coveringZoomLevel(zoom, style::SourceType::RasterDEM, terrainCoverTileSize);
