@@ -62,8 +62,7 @@ public:
 
         // Note: AssetManager already prepends "assets" to the filename.
         const auto path = androidAssetPathFromUrl(url);
-        AAsset* asset = path ? AAssetManager_open(assetManager, path->c_str(), AASSET_MODE_BUFFER) : nullptr;
-        if (asset) {
+        if (AAsset* asset = path ? AAssetManager_open(assetManager, path->c_str(), AASSET_MODE_BUFFER) : nullptr) {
             response.data = std::make_shared<std::string>(reinterpret_cast<const char*>(AAsset_getBuffer(asset)),
                                                           AAsset_getLength64(asset));
             AAsset_close(asset);
