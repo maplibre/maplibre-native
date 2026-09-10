@@ -72,7 +72,6 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
   addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
-
 }
 
 LayerManagerDarwin::~LayerManagerDarwin() = default;
