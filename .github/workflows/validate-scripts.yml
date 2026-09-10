@@ -24,3 +24,7 @@ jobs:
 
       - name: Run tests
         run: node --test .github/scripts/**.test.ts
+
+      - name: Test scripts
+        working-directory: scripts
+        run: node --test

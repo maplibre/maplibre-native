@@ -14,7 +14,7 @@
   "include": [
     ".github/scripts/*.ts",
     "scripts/**/*.mjs",
-    "scripts/**/*.d.ts"
+    "scripts/**/*.ts"
   ],
   "exclude": [
     "node_modules"

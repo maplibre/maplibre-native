@@ -54,6 +54,13 @@ js_run_binary(
     tool = ":generate-shader-code-script",
 )
 
+js_run_binary(
+    name = "generated_metal_shaders",
+    srcs = glob(["shaders/mtl/*.metal"]) + ["shaders/mtl/manifest.json"],
+    outs = ["src/mln/shaders/mtl/shader_source.cpp"],
+    tool = ":generate-metal-shader-code-script",
+)
+
 # This header only target strips the __generated__ prefix for the compiler
 # search paths, making the location of generated code transparent to the build
 cc_library(
@@ -86,7 +93,7 @@ cc_library(
            MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
         ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
-        ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+        ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE + [":generated_metal_shaders"],
         ":webgpu_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_WEBGPU_SOURCE,
         "//conditions:default": [],
     }) + select({
@@ -312,4 +319,9 @@ cc_library(
         "@platforms//os:macos": ["//platform:macos-objcpp"],
         "//conditions:default": [],
     }),
+)
+
+js_binary(
+    name = "generate-metal-shader-code-script",
+    entry_point = "scripts/generate_metal_shader_code.ts",
 )

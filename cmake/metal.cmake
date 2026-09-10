@@ -3,6 +3,22 @@ if(NOT MLN_WITH_METAL)
 endif()
 
 message(STATUS "Configuring Metal renderer backend")
+
+find_program(MLN_METAL_NODE_EXECUTABLE NAMES node REQUIRED)
+file(GLOB MLN_METAL_SHADER_INPUTS CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/shaders/mtl/*.metal")
+set(MLN_METAL_SHADER_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/src/mln/shaders/mtl/shader_source.cpp")
+add_custom_command(
+    OUTPUT "${MLN_METAL_SHADER_SOURCE}"
+    COMMAND "${MLN_METAL_NODE_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/generate_metal_shader_code.ts"
+            --out "${MLN_METAL_SHADER_SOURCE}"
+    DEPENDS ${MLN_METAL_SHADER_INPUTS}
+            "${PROJECT_SOURCE_DIR}/shaders/mtl/manifest.json"
+            "${PROJECT_SOURCE_DIR}/scripts/generate_metal_shader_code.ts"
+    COMMENT "Compressing Metal shader sources"
+    VERBATIM
+)
+target_sources(mbgl-core PRIVATE "${MLN_METAL_SHADER_SOURCE}")
+
 target_compile_definitions(
         mbgl-core
         PUBLIC
