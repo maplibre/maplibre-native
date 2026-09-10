@@ -112,6 +112,9 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
     // Memory
+    /// Compile shaders off the render thread (Metal); see gfx::Context::setAsyncShaderCompilation.
+    /// Platforms whose render thread is the UI thread (iOS) turn this on.
+    void setAsyncShaderCompilation(bool);
     void setTileCacheEnabled(bool);
     bool getTileCacheEnabled() const;
     void reduceMemoryUse();

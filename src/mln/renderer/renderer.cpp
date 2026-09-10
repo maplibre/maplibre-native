@@ -157,6 +157,10 @@ const std::vector<PlacedSymbolData>& Renderer::getPlacedSymbolsData() const {
     return impl->orchestrator.getPlacedSymbolsData();
 }
 
+void Renderer::setAsyncShaderCompilation(bool enable) {
+    impl->asyncShaderCompilation = enable;
+}
+
 void Renderer::setTileCacheEnabled(bool enable) {
     impl->orchestrator.setTileCacheEnabled(enable);
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <atomic>
+#include <memory>
+#include <mutex>
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/mtl/mtl_fwd.hpp>
 #include <mln/mtl/vertex_attribute.hpp>
@@ -45,14 +48,32 @@ using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
 class ShaderProgram final : public gfx::ShaderProgramBase {
 public:
+    /// Functions of a program whose Metal library is compiling off the render thread
+    /// (gfx::Context::setAsyncShaderCompilation). Filled in by the compile completion handler;
+    /// the program adopts them on the render thread once `ready` is set.
+    struct PendingFunctions {
+        std::mutex mutex;
+        MTLFunctionPtr vertex;
+        MTLFunctionPtr fragment;
+        std::atomic<bool> ready{false};
+        std::atomic<bool> failed{false};
+    };
+
     ShaderProgram(std::string name,
                   RendererBackend& backend,
                   MTLFunctionPtr vertexFunction,
                   MTLFunctionPtr fragmentFunction);
+    /// A program still compiling: `getRenderPipelineState` returns null until the functions land.
+    ShaderProgram(std::string name, RendererBackend& backend, std::shared_ptr<PendingFunctions> pending);
     ~ShaderProgram() noexcept override;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
+
+    /// Whether the compiled functions are available (always true for synchronously compiled
+    /// programs). Drawables skip their draw while this is false; the renderer keeps requesting
+    /// frames until it turns true.
+    bool isReady() const;
 
     MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::Renderable&,
                                                      const MTLVertexDescriptorPtr&,
@@ -72,8 +93,9 @@ public:
 protected:
     std::string shaderName;
     RendererBackend& backend;
-    MTLFunctionPtr vertexFunction;
-    MTLFunctionPtr fragmentFunction;
+    mutable MTLFunctionPtr vertexFunction;
+    mutable MTLFunctionPtr fragmentFunction;
+    mutable std::shared_ptr<PendingFunctions> pending;
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
