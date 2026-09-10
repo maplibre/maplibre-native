@@ -75,7 +75,7 @@ GLint getMaxVertexAttribs() {
 std::string getExtensionList() {
     // Report earlier errors separately so they cannot select the legacy query.
     for (auto error = glGetError(); error != GL_NO_ERROR; error = glGetError()) {
-        Log::Warning(Event::General, "OpenGL error before extension enumeration: " + std::to_string(error));
+        Log::Warning(Event::GraphicsBackend, "OpenGL error before extension enumeration: " + std::to_string(error));
     }
     GLint count = 0;
     glGetIntegerv(GL_NUM_EXTENSIONS, &count);
