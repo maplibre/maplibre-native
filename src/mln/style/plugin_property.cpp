@@ -161,27 +161,16 @@ bool PluginPropertyValue::isDataDriven() const noexcept {
 }
 
 bool PluginPropertyValue::isZoomConstant() const noexcept {
-    return std::visit(
-        [](const auto& typed) {
-            return typed.isZoomConstant();
-        },
-        value);
+    return std::visit([](const auto& typed) { return typed.isZoomConstant(); }, value);
 }
 
 bool PluginPropertyValue::usesFeatureState() const noexcept {
-    return std::visit(
-        [](const auto& typed) {
-            return style::usesFeatureState(typed);
-        },
-        value);
+    return std::visit([](const auto& typed) { return style::usesFeatureState(typed); }, value);
 }
 
 float PluginPropertyValue::interpolationFactor(float bucketZoom, float currentZoom) const noexcept {
-    return std::visit(
-        [&](const auto& typed) {
-            return style::interpolationFactor(typed, bucketZoom, currentZoom);
-        },
-        value);
+    return std::visit([&](const auto& typed) { return style::interpolationFactor(typed, bucketZoom, currentZoom); },
+                      value);
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
