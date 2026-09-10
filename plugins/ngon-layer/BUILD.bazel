@@ -1,0 +1,32 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//bazel:flags.bzl", "CPP_FLAGS")
+
+cc_library(
+    name = "ngon-layer",
+    srcs = ["shared/cpp/ngon_layer.cpp"],
+    hdrs = glob(["shared/include/*.hpp"]),
+    copts = CPP_FLAGS,
+    includes = ["shared/include"],
+    target_compatible_with = select({
+        "//:plugins_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    visibility = ["//visibility:public"],
+    deps = ["//:mbgl-core"],
+)
+
+cc_test(
+    name = "unit-tests",
+    srcs = ["tests/ngon.test.cpp"],
+    copts = CPP_FLAGS,
+    deps = [":ngon-layer"],
+)
+
+filegroup(
+    name = "render-fixtures",
+    srcs = glob(
+        ["render-tests/**"],
+        exclude = ["render-tests/results/**"],
+    ) + ["render-tests/results/.gitkeep"],
+    visibility = ["//plugins:__pkg__"],
+)

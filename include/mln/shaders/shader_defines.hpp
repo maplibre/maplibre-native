@@ -545,6 +545,9 @@ enum {
 };
 
 static constexpr uint32_t maxAttributeCountPerShader = std::max({
+#if MLN_WITH_PLUGINS
+    16u,
+#endif
     static_cast<uint32_t>(backgroundVertexAttributeCount),
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),

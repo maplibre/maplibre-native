@@ -1,0 +1,113 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 384,
+      "height": 256,
+      "description": "translation-anchors"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 10,
+  "bearing": 90,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {
+              "fill": "#94a3b8",
+              "offset": [
+                0,
+                0
+              ],
+              "anchor": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {
+              "fill": "#e11d48",
+              "offset": [
+                60,
+                0
+              ],
+              "anchor": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {
+              "fill": "#2563eb",
+              "offset": [
+                60,
+                0
+              ],
+              "anchor": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f7"
+      }
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": 20,
+        "ngon-corners": 3,
+        "ngon-color": [
+          "get",
+          "fill"
+        ],
+        "ngon-translate": [
+          "get",
+          "offset"
+        ],
+        "ngon-translate-anchor": [
+          "get",
+          "anchor"
+        ]
+      }
+    }
+  ]
+}
