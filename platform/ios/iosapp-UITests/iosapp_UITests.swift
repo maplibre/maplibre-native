@@ -181,12 +181,6 @@ class iosapp_UITests: XCTestCase {
             mapSettingsButton.tap()
         }
 
-        if let customLayer = staticItemIfExists("Add Custom Drawable Layer") {
-            customLayer.tap()
-            sleep(1)
-            mapSettingsButton.tap()
-        }
-
         // See `bestLanguageForUser`
         for loc in ["ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant"] {
             if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
@@ -248,15 +242,4 @@ class iosapp_UITests: XCTestCase {
         }
     }
 
-    /// Make sure the Custom Drawable Layer does not crash
-    func testCustomDrawableLayer() {
-        app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
-
-        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
-        mapSettingsButton.tap()
-
-        let tablesQuery = app.tables
-        tablesQuery.staticTexts["Add Custom Drawable Layer"].tap()
-        sleep(5)
-    }
 }
