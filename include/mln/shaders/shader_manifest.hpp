@@ -10,8 +10,6 @@
 #include <mln/shaders/gl/circle.hpp>
 #include <mln/shaders/gl/collision_box.hpp>
 #include <mln/shaders/gl/collision_circle.hpp>
-#include <mln/shaders/gl/custom_geometry.hpp>
-#include <mln/shaders/gl/custom_symbol_icon.hpp>
 #include <mln/shaders/gl/debug.hpp>
 #include <mln/shaders/gl/fill.hpp>
 #include <mln/shaders/gl/fill_outline.hpp>
