@@ -224,14 +224,16 @@ jobs:
           npm install
           node test/storage/server.js &
 
-      - name: Generate coverage report
+      - name: Run Bazel tests and generate coverage report
         run: |
+          # //plugins/... includes the plugin host, geometry, and render tests.
           xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
+            bazel coverage --combined_report=lcov --instrumentation_filter="//:mbgl-core,//plugins" \
+            --//:plugins=true \
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
+            //test:core //render-test:render-test //expression-test:test //plugins/... --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report

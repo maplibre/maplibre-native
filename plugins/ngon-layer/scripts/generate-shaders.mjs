@@ -1,6 +1,9 @@
-// Generates the checked-in backend sources from one polygon/projection algorithm.
-// Print to stdout, or use --check to verify the checked-in result.
-import {readFileSync} from 'node:fs';
+// Generates backend sources from one polygon/projection algorithm.
+// Print to stdout for Bazel, or use --output for CMake.
+import {writeFileSync} from 'node:fs';
+import {parseArgs} from 'node:util';
+
+const {values} = parseArgs({options: {output: {type: 'string'}}});
 
 const properties = [
   ['radius', 'float', 1, 1], ['corners', 'float', 2, 2], ['rotate', 'float', 3, 3],
@@ -170,7 +173,5 @@ properties.forEach(([name, type, min, max], i) => {
   output += `    {sizeof(mln_plugin_shader_property_binding_v1), str("ngon-${name.replaceAll('_','-')}"), MLN_PLUGIN_PROPERTY_ENCODING_${encoding}, 0, offsetof(DrawableUBO, ${name}), ${min}, ${max}, 0, offsetof(DrawableUBO, interpolation) + ${i} * sizeof(float)},\n`;
 });
 output += '};\n';
-if (process.argv.includes('--check')) {
-  const existing = readFileSync(new URL('../shared/include/ngon_shader_sources.hpp', import.meta.url), 'utf8');
-  if (existing !== output) throw new Error('Regenerate ngon_shader_sources.hpp');
-} else process.stdout.write(output);
+if (values.output) writeFileSync(values.output, output);
+else process.stdout.write(output);

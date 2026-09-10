@@ -1,0 +1,78 @@
+{
+  "version": 8,
+  "name": "N-gon zoom and feature interpolation",
+  "center": [0, 0],
+  "zoom": 10.5,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {"n": 3, "size": 20, "fill": "#ef4444", "angle": 0},
+            "geometry": {"type": "Point", "coordinates": [-0.084, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {"n": 4, "size": 22, "fill": "#f59e0b", "angle": 12},
+            "geometry": {"type": "Point", "coordinates": [-0.042, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {"n": 5, "size": 24, "fill": "#16a34a", "angle": 24},
+            "geometry": {"type": "Point", "coordinates": [0, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 4,
+            "properties": {"n": 6, "size": 26, "fill": "#0284c7", "angle": 36},
+            "geometry": {"type": "Point", "coordinates": [0.042, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 5,
+            "properties": {"n": 8, "size": 28, "fill": "#9333ea", "angle": 48},
+            "geometry": {"type": "Point", "coordinates": [0.084, 0]}
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "#eef2f7"}
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["*", 0.2, ["get", "size"]],
+          10, ["get", "size"],
+          12, ["*", 2, ["get", "size"]]
+        ],
+        "ngon-corners": ["get", "n"],
+        "ngon-rotate": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["-", ["get", "angle"], 90],
+          10, ["get", "angle"],
+          12, ["+", ["get", "angle"], 90]
+        ],
+        "ngon-color": ["get", "fill"],
+        "ngon-stroke-width": [
+          "interpolate", ["linear"], ["zoom"], 8, 0.5, 10, 2, 12, 4
+        ],
+        "ngon-stroke-color": "#172033"
+      }
+    }
+  ]
+}
