@@ -1086,6 +1086,7 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mln/mtl/vertex_attribute.cpp",
     "src/mln/mtl/vertex_buffer_resource.cpp",
     "src/mln/shaders/mtl/shader_program.cpp",
+    "src/mln/shaders/mtl/shader_group.cpp",
     "src/mln/shaders/mtl/background.cpp",
     "src/mln/shaders/mtl/circle.cpp",
     "src/mln/shaders/mtl/collision.cpp",

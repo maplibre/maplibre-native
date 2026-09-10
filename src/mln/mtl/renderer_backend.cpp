@@ -76,7 +76,16 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
         [&]() {
             using namespace std::string_literals;
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
+            auto group = std::make_shared<ShaderGroup>(programParameters,
+                                                       ShaderInfo{ShaderID,
+                                                                  ShaderClass::name,
+                                                                  ShaderClass::prelude,
+                                                                  ShaderClass::source,
+                                                                  ShaderClass::vertexMainFunction,
+                                                                  ShaderClass::fragmentMainFunction,
+                                                                  ShaderClass::attributes,
+                                                                  ShaderClass::instanceAttributes,
+                                                                  ShaderClass::textures});
             if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
                 assert(!"duplicate shader group");
                 throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");

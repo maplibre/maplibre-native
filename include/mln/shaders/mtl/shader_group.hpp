@@ -9,6 +9,7 @@
 #include <mln/util/containers.hpp>
 
 #include <numeric>
+#include <span>
 #include <string>
 #include <type_traits>
 
@@ -36,61 +37,33 @@ private:
     static constexpr auto uniformPrefix = "HAS_UNIFORM_u_";
 };
 
-template <shaders::BuiltIn ShaderID>
+// Views refer to static reflection arrays; accessors lazily load source. Each shader uses
+// the same group implementation; only this metadata varies between built-ins.
+struct ShaderInfo {
+    shaders::BuiltIn id;
+    const char* name;
+    std::string_view (*prelude)();
+    std::string_view (*source)();
+    const char* vertexMain;
+    const char* fragmentMain;
+    std::span<const shaders::AttributeInfo> attributes;
+    std::span<const shaders::AttributeInfo> instanceAttributes;
+    std::span<const shaders::TextureInfo> textures;
+};
+
 class ShaderGroup final : public ShaderGroupBase {
 public:
-    ShaderGroup(const ProgramParameters& programParameters_)
-        : ShaderGroupBase(programParameters_) {}
+    ShaderGroup(const ProgramParameters& programParameters_, const ShaderInfo& info_)
+        : ShaderGroupBase(programParameters_),
+          info(info_) {}
     ~ShaderGroup() noexcept override = default;
 
-    gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
+    gfx::ShaderPtr getOrCreateShader(gfx::Context&,
                                      const StringIDSetsPair& propertiesAsUniforms,
-                                     std::string_view /*firstAttribName*/) override {
-        using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-        constexpr auto& name = ShaderSource::name;
-        constexpr auto& vertMain = ShaderSource::vertexMainFunction;
-        constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
+                                     std::string_view firstAttribName) override;
 
-        std::size_t seed = 0;
-        mln::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
-        mln::util::hash_combine(seed, programParameters.getDefinesHash());
-        const std::string shaderName = getShaderName(name, seed);
-
-        auto shader = get<mtl::ShaderProgram>(shaderName);
-        if (!shader) {
-            DefinesMap additionalDefines;
-            addAdditionalDefines(propertiesAsUniforms, additionalDefines);
-
-            auto& context = static_cast<Context&>(gfxContext);
-            std::string shaderSource(shaders::prelude());
-            shaderSource.append(ShaderSource::prelude());
-            shaderSource.append(ShaderSource::source());
-            shader = context.createProgram(
-                ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
-            assert(shader);
-            if (!shader || !registerShader(shader, shaderName)) {
-                assert(false);
-                Log::Error(Event::Shader, "Failed to register " + shaderName + " with shader group!");
-                return nullptr;
-            }
-
-            using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-            for (const auto& attrib : ShaderClass::attributes) {
-                if (!propertiesAsUniforms.second.count(attrib.id)) {
-                    shader->initVertexAttribute(attrib);
-                }
-            }
-            for (const auto& attrib : ShaderClass::instanceAttributes) {
-                if (!propertiesAsUniforms.second.count(attrib.id)) {
-                    shader->initInstanceAttribute(attrib);
-                }
-            }
-            for (const auto& texture : ShaderClass::textures) {
-                shader->initTexture(texture);
-            }
-        }
-        return shader;
-    }
+private:
+    const ShaderInfo info;
 };
 
 } // namespace mtl

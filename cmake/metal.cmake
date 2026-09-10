@@ -90,6 +90,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/mtl/vertex_attribute.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/mtl/vertex_buffer_resource.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/shader_program.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/shader_group.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/background.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/circle.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/mtl/collision.cpp
