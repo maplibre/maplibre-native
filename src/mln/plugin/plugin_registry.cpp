@@ -40,6 +40,10 @@ bool validString(const mln_plugin_string& value) {
     return value.data && value.size > 0;
 }
 
+bool validOptionalString(const mln_plugin_string& value) {
+    return value.size == 0 || value.data;
+}
+
 bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
                       const std::string& version,
                       const std::vector<PropertyDefinition>& properties,
@@ -186,6 +190,8 @@ bool appendShaders(const std::string& pluginID,
             const auto& source = input.sources[sourceIndex];
             if (source.struct_size < sizeof(mln_plugin_shader_source_v1) || !validBackendMask(source.backend) ||
                 (source.backend & (source.backend - 1u)) != 0 || !validString(source.vertex_source) ||
+                !validOptionalString(source.fragment_source) || !validOptionalString(source.vertex_entry_point) ||
+                !validOptionalString(source.fragment_entry_point) ||
                 (source.backend != MLN_PLUGIN_BACKEND_METAL && !validString(source.fragment_source)) ||
                 (source.backend == MLN_PLUGIN_BACKEND_METAL &&
                  (!validString(source.vertex_entry_point) || !validString(source.fragment_entry_point))) ||
@@ -289,6 +295,10 @@ bool appendShaders(const std::string& pluginID,
         std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>> hostUniformRanges;
         for (size_t bindingIndex = 0; bindingIndex < input.property_binding_count; ++bindingIndex) {
             const auto& binding = input.property_bindings[bindingIndex];
+            if (binding.struct_size < sizeof(binding)) {
+                error = "plugin shader property binding is malformed";
+                return false;
+            }
             const auto propertyName = copyString(binding.property_name);
             const auto encodingSize = propertyEncodingSize(binding.encoding);
             const auto encodingAlignment = propertyEncodingAlignment(binding.encoding);
@@ -312,8 +322,8 @@ bool appendShaders(const std::string& pluginID,
                 shader.attributes.begin(), shader.attributes.end(), [&](const auto& candidate) {
                     return candidate.id == binding.maximum_attribute_id;
                 });
-            if (binding.struct_size < sizeof(mln_plugin_shader_property_binding_v1) || propertyName.empty() ||
-                !encodingSize || !boundProperties.emplace(propertyName).second || (packed && encodingSize > 8) ||
+            if (propertyName.empty() || !encodingSize || !boundProperties.emplace(propertyName).second ||
+                (packed && encodingSize > 8) ||
                 !boundPaintAttributes.emplace(binding.minimum_attribute_id).second ||
                 (!packed && !boundPaintAttributes.emplace(binding.maximum_attribute_id).second) ||
                 uniform == shader.uniformBlocks.end() || interpolationUniform == shader.uniformBlocks.end() ||
@@ -378,6 +388,8 @@ bool appendProperties(const std::string& pluginID,
         if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
             property.default_value.struct_size < sizeof(mln_plugin_value) ||
             property.default_value.type != property.type ||
+            (property.type == MLN_PLUGIN_VALUE_STRING &&
+             !validOptionalString(property.default_value.data.string_value)) ||
             (property.expression_capabilities & ~validExpressionCapabilities) != 0) {
             error = "plugin property descriptor is malformed";
             return false;

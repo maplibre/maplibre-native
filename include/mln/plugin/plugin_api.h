@@ -16,6 +16,28 @@ extern "C" {
 
 #define MLN_PLUGIN_ABI_VERSION_1 1u
 
+/*
+ * Ownership and call contract
+ * ---------------------------
+ * Set struct_size to sizeof the corresponding v1 struct. Receivers must check
+ * it before accessing other fields. Arrays use the declared v1 element stride;
+ * struct_size is not an array stride. Unless explicitly optional, a nonzero
+ * count/byte size requires a non-null pointer to that many accessible elements/
+ * bytes. Validation cannot make arbitrary or dangling pointers safe; callers must
+ * supply valid storage.
+ *
+ * Except for the layout-instance transfer described below, pointers are borrowed:
+ * each side allocates and frees its own storage. No STL objects, C++ exceptions,
+ * or allocator ownership cross this interface. All callbacks, including destroy,
+ * must return normally without throwing. C++ plugins must catch exceptions inside
+ * their callbacks and translate failures to status codes where available.
+ *
+ * Host-provided callback inputs (including nested arrays/strings) and writable
+ * outputs are valid only for the duration of the callback. Do not retain them;
+ * copy anything needed later. Callback functions must remain callable for the
+ * process lifetime: plugin unloading/unregistration is not supported.
+ */
+
 typedef enum mln_plugin_status {
     MLN_PLUGIN_STATUS_OK = 0,
     MLN_PLUGIN_STATUS_ALREADY_REGISTERED = 1,
@@ -55,6 +77,8 @@ typedef enum mln_plugin_geometry_type {
 } mln_plugin_geometry_type;
 
 typedef struct mln_plugin_string {
+    /* UTF-8 bytes, not necessarily NUL-terminated; data may be null only if size
+     * is zero. Optional strings may be empty, identifiers must not be empty. */
     const char* data;
     size_t size;
 } mln_plugin_string;
@@ -221,6 +245,8 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixel_ratio;
 } mln_plugin_uniform_context_v1;
 
+/* output is host-owned writable storage of output_size bytes, borrowed only
+ * during this call. Never free/retain it or write beyond output_size. */
 typedef mln_plugin_status (*mln_plugin_update_uniform_block_fn)(const mln_plugin_uniform_context_v1* context,
                                                                 uint32_t uniform_id,
                                                                 uint8_t* output,
@@ -299,6 +325,11 @@ typedef struct mln_plugin_feature_vertex_range_v1 {
     uint32_t vertex_count;
 } mln_plugin_feature_vertex_range_v1;
 
+/* The bucket struct is host-owned. All views written into it, including nested
+ * drawable strings/arrays, indices, vertex bytes and feature ranges, remain
+ * plugin-owned and valid until destroy_layout. On success the host copies them
+ * before destruction; it neither retains nor frees plugin allocations directly.
+ * On failure the output is ignored and the layout instance is still destroyed. */
 typedef struct mln_plugin_bucket_v1 {
     uint32_t struct_size;
     const mln_plugin_vertex_stream_v1* vertex_streams;
@@ -313,6 +344,17 @@ typedef struct mln_plugin_bucket_v1 {
     size_t feature_vertex_range_count;
 } mln_plugin_bucket_v1;
 
+/*
+ * Layout callbacks run on tile workers, serially for each layout instance.
+ * Different instances may run concurrently; do not assume a single worker.
+ * The host initializes *layout_instance to null before create_layout. Every
+ * non-null returned handle transfers to the host regardless of the status code:
+ * it must be safe to pass to destroy_layout even when creation failed. The host
+ * calls destroy_layout exactly once for such a handle, on the layout worker,
+ * after copying successful output or abandoning the layout on any failure.
+ * A null handle is never destroyed; OK with a null handle is a creation failure.
+ * The plugin must clean up allocations that it does not return through the handle.
+ */
 typedef mln_plugin_status (*mln_plugin_create_layout_fn)(const mln_plugin_layout_context_v1* context,
                                                          void** layout_instance);
 typedef mln_plugin_status (*mln_plugin_layout_feature_fn)(void* layout_instance, const mln_plugin_feature_v1* feature);
@@ -332,6 +374,7 @@ typedef struct mln_plugin_query_context_v1 {
 } mln_plugin_query_context_v1;
 
 /* Optional exact hit test. Query and feature geometry use tile coordinates.
+ * All arguments and nested storage are borrowed for this call only.
  * Use the projection context for pitch, translation, and viewport-aligned marks. */
 typedef uint8_t (*mln_plugin_query_feature_fn)(const mln_plugin_feature_v1* feature,
                                                const mln_plugin_tile_point_v1* query_geometry,
@@ -347,7 +390,10 @@ typedef struct mln_plugin_property_statistics_v1 {
     mln_plugin_value maximum;
 } mln_plugin_property_statistics_v1;
 
-/* Optional conservative screen-pixel radius for broad-phase feature queries. */
+/* Optional conservative screen-pixel radius for broad-phase feature queries.
+ * Statistics/property arrays and their string values are borrowed for this call
+ * only. This callback can run on workers during layout and on the render thread;
+ * it must support concurrent calls for different buckets/maps. */
 typedef float (*mln_plugin_query_radius_fn)(const mln_plugin_property_statistics_v1* statistics,
                                             size_t statistics_count,
                                             const mln_plugin_property_value_v1* camera_properties,
@@ -386,6 +432,15 @@ typedef mln_plugin_status (*mln_plugin_register_function_v1)(const mln_plugin_de
                                                              char* error_message,
                                                              size_t error_message_capacity);
 
+/* Thread-safe, process-wide registration, required before loading dependent
+ * styles. The descriptor and all nested metadata (strings, defaults, arrays and
+ * shader source text) are copied during this call and may be freed afterwards.
+ * Only callback addresses are retained. Identical repeated registration succeeds
+ * with ALREADY_REGISTERED; failed registration publishes no layer/property types.
+ *
+ * error_message is optional caller-owned writable storage. If non-null with
+ * nonzero capacity, it receives a NUL-terminated diagnostic (possibly truncated),
+ * or an empty string on success. The host never retains it. */
 MLN_PLUGIN_EXPORT mln_plugin_status mln_plugin_register_v1(const mln_plugin_descriptor_v1* descriptor,
                                                            char* error_message,
                                                            size_t error_message_capacity);

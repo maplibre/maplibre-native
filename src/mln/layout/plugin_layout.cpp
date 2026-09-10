@@ -80,11 +80,13 @@ void PluginLayout::createBucket(const ImagePositions&,
     context.extent = util::EXTENT;
 
     void* layoutInstance = nullptr;
-    if (registration.createLayout(&context, &layoutInstance) != MLN_PLUGIN_STATUS_OK || !layoutInstance) {
+    const auto createStatus = registration.createLayout(&context, &layoutInstance);
+    // Every returned handle transfers to the host, including on callback failure.
+    const std::unique_ptr<void, mln_plugin_destroy_layout_fn> layoutOwner(layoutInstance, registration.destroyLayout);
+    if (createStatus != MLN_PLUGIN_STATUS_OK || !layoutInstance) {
         Log::Error(Event::Style, "Plugin layer '" + leader.id + "' failed to create a layout instance");
         return;
     }
-    const std::unique_ptr<void, mln_plugin_destroy_layout_fn> layoutOwner(layoutInstance, registration.destroyLayout);
 
     for (std::size_t i = 0; i < sourceLayer->featureCount(); ++i) {
         auto feature = sourceLayer->getFeature(i);
@@ -132,7 +134,8 @@ void PluginLayout::createBucket(const ImagePositions&,
     std::set<uint32_t> streamIDs;
     bool valid = output.struct_size >= sizeof(output) && std::isfinite(output.query_radius) &&
                  output.query_radius >= 0.0f && (output.vertex_stream_count == 0 || output.vertex_streams) &&
-                 (output.index_count == 0 || output.indices) && (output.drawable_count == 0 || output.drawables);
+                 (output.index_count == 0 || output.indices) && (output.drawable_count == 0 || output.drawables) &&
+                 (output.feature_vertex_range_count == 0 || output.feature_vertex_ranges);
     for (size_t i = 0; valid && i < output.vertex_stream_count; ++i) {
         const auto& stream = output.vertex_streams[i];
         valid = stream.struct_size >= sizeof(stream) && stream.stride > 0 && stream.vertex_count > 0 && stream.data &&
@@ -180,13 +183,15 @@ void PluginLayout::createBucket(const ImagePositions&,
         std::optional<std::size_t> drawableVertexCount;
         for (size_t bindingIndex = 0; valid && bindingIndex < input.attribute_count; ++bindingIndex) {
             const auto& binding = input.attributes[bindingIndex];
+            valid = binding.struct_size >= sizeof(binding);
+            if (!valid) break;
             const auto streamIt = bucket->vertexStreams.find(binding.stream_id);
             const auto attributeIt = std::find_if(
                 shaderIt->attributes.begin(), shaderIt->attributes.end(), [&](const auto& attribute) {
                     return attribute.id == binding.attribute_id;
                 });
             const auto size = attributeSize(binding.type);
-            valid = binding.struct_size >= sizeof(binding) && streamIt != bucket->vertexStreams.end() &&
+            valid = streamIt != bucket->vertexStreams.end() &&
                     attributeIt != shaderIt->attributes.end() && attributeIt->type == binding.type && size > 0 &&
                     hostAttributeIDs.find(binding.attribute_id) == hostAttributeIDs.end() &&
                     binding.byte_offset <= streamIt->second->getRawSize() &&
@@ -222,14 +227,14 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (valid) bucket->drawables.push_back(std::move(drawable));
     }
 
-    if (valid && output.feature_vertex_range_count && !output.feature_vertex_ranges) valid = false;
     std::map<uint64_t, std::size_t> drawableVertexCounts;
     for (const auto& drawable : bucket->drawables) drawableVertexCounts.emplace(drawable.key, drawable.vertexCount);
     for (size_t rangeIndex = 0; valid && rangeIndex < output.feature_vertex_range_count; ++rangeIndex) {
         const auto& range = output.feature_vertex_ranges[rangeIndex];
+        valid = range.struct_size >= sizeof(range);
+        if (!valid) break;
         const auto drawable = drawableVertexCounts.find(range.drawable_key);
-        valid = range.struct_size >= sizeof(mln_plugin_feature_vertex_range_v1) &&
-                range.feature_index < sourceLayer->featureCount() && drawable != drawableVertexCounts.end() &&
+        valid = range.feature_index < sourceLayer->featureCount() && drawable != drawableVertexCounts.end() &&
                 range.vertex_count > 0 && validRange(range.first_vertex, range.vertex_count, drawable->second);
         if (valid) {
             bucket->featureVertexRanges.push_back({static_cast<std::size_t>(range.feature_index),
@@ -257,12 +262,11 @@ void PluginLayout::createBucket(const ImagePositions&,
         }
         if (valid && std::find(coverage.begin(), coverage.end(), 0) != coverage.end()) valid = false;
     }
-    bucket->queryRadius = output.query_radius;
-
     if (!valid) {
         Log::Error(Event::Style, "Plugin layer '" + leader.id + "' returned a malformed bucket");
         return;
     }
+    bucket->queryRadius = output.query_radius;
     for (const auto& layer : layers) {
         const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
         auto& layerBinders = bucket->paintPropertyBinders[impl.id];
