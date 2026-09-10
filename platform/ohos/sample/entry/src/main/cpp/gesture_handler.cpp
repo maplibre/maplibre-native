@@ -72,7 +72,7 @@ double flingLimitForExtent(std::uint32_t extent) {
     if (extent <= 2) {
         return MaxFlingDistance;
     }
-    return std::max(0.0, std::min(MaxFlingDistance, static_cast<double>(extent) * 0.5 - FlingViewportMargin));
+    return std::clamp(static_cast<double>(extent) * 0.5 - FlingViewportMargin, 0.0, MaxFlingDistance);
 }
 
 double clampHorizontalFlingOffset(double offset, Size surfaceSize) {

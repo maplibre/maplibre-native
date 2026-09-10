@@ -470,10 +470,8 @@ public:
                 return;
             }
             activeToken = token;
-            requestToDestroy = request;
-            request = nullptr;
-            headersToDestroy = headers;
-            headers = nullptr;
+            requestToDestroy = std::exchange(request, nullptr);
+            headersToDestroy = std::exchange(headers, nullptr);
             options.headers = nullptr;
             if (!activeToken) {
                 finished = true;
@@ -535,10 +533,8 @@ private:
             if (finished || awaitingNativeCallback) {
                 return;
             }
-            requestToDestroy = request;
-            request = nullptr;
-            headersToDestroy = headers;
-            headers = nullptr;
+            requestToDestroy = std::exchange(request, nullptr);
+            headersToDestroy = std::exchange(headers, nullptr);
             options.headers = nullptr;
             if (requestToDestroy) {
                 awaitingNativeCallback = true;
@@ -576,10 +572,8 @@ private:
             }
             finished = true;
             starting = false;
-            requestToDestroy = request;
-            request = nullptr;
-            headersToDestroy = headers;
-            headers = nullptr;
+            requestToDestroy = std::exchange(request, nullptr);
+            headersToDestroy = std::exchange(headers, nullptr);
             options.headers = nullptr;
             awaitingNativeCallback = false;
             shouldCallback = response && !canceled && static_cast<bool>(callback);

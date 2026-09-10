@@ -65,13 +65,13 @@ std::mutex& controllerRegistryMutex() {
 void registerController(ArkUI_NodeHandle node,
                         OH_ArkUI_SurfaceHolder* holder,
                         const std::shared_ptr<SurfaceController>& controller) {
-    std::lock_guard<std::mutex> lock(controllerRegistryMutex());
+    std::scoped_lock lock(controllerRegistryMutex());
     controllersByNode()[node] = controller;
     controllersByHolder()[holder] = controller;
 }
 
 void unregisterController(ArkUI_NodeHandle node, OH_ArkUI_SurfaceHolder* holder, const SurfaceController* controller) {
-    std::lock_guard<std::mutex> lock(controllerRegistryMutex());
+    std::scoped_lock lock(controllerRegistryMutex());
 
     if (auto it = controllersByNode().find(node); it != controllersByNode().end()) {
         const auto existing = it->second.lock();
@@ -89,7 +89,7 @@ void unregisterController(ArkUI_NodeHandle node, OH_ArkUI_SurfaceHolder* holder,
 }
 
 std::shared_ptr<SurfaceController> findController(ArkUI_NodeHandle node) {
-    std::lock_guard<std::mutex> lock(controllerRegistryMutex());
+    std::scoped_lock lock(controllerRegistryMutex());
     const auto it = controllersByNode().find(node);
     if (it == controllersByNode().end()) {
         return nullptr;
@@ -102,7 +102,7 @@ std::shared_ptr<SurfaceController> findController(ArkUI_NodeHandle node) {
 }
 
 std::shared_ptr<SurfaceController> findController(OH_ArkUI_SurfaceHolder* holder) {
-    std::lock_guard<std::mutex> lock(controllerRegistryMutex());
+    std::scoped_lock lock(controllerRegistryMutex());
     const auto it = controllersByHolder().find(holder);
     if (it == controllersByHolder().end()) {
         return nullptr;
