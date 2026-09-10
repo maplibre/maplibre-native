@@ -1,22 +1,10 @@
 {
   "expression": ["semiliteral", [], []],
-  "inputs": [
-    [
-      {
-      },
-      {
-      }
-    ]
-  ],
+  "inputs": [[{}, {}]],
   "expected": {
     "compiled": {
       "result": "error",
-      "errors": [
-        {
-          "key": "",
-          "error": "'semiliteral' expression requires exactly one argument, but found 2 instead."
-        }
-      ]
+      "errors": [{"key": "", "error": "'semiliteral' expression requires exactly one argument, but found 2 instead."}]
     }
   }
 }

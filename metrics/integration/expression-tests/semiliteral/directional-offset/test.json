@@ -2,53 +2,11 @@
   "expression": [
     "semiliteral",
     [
-      [
-        "round",
-        [
-          "*",
-          [
-            "cos",
-            [
-              "get",
-              "direction"
-            ]
-          ],
-          [
-            "get",
-            "magnitude"
-          ]
-        ]
-      ],
-      [
-        "round",
-        [
-          "*",
-          [
-            "sin",
-            [
-              "get",
-              "direction"
-            ]
-          ],
-          [
-            "get",
-            "magnitude"
-          ]
-        ]
-      ]
+      ["round", ["*", ["cos", ["get", "direction"]], ["get", "magnitude"]]],
+      ["round", ["*", ["sin", ["get", "direction"]], ["get", "magnitude"]]]
     ]
   ],
-  "inputs": [
-    [
-      {},
-      {
-        "properties": {
-          "direction": 0,
-          "magnitude": 10
-        }
-      }
-    ]
-  ],
+  "inputs": [[{}, {"properties": {"direction": 0, "magnitude": 10}}]],
   "expected": {
     "compiled": {
       "result": "success",
@@ -56,61 +14,12 @@
       "isZoomConstant": true,
       "type": "array<number, 2>"
     },
-    "outputs": [
-      [
-        10,
-        0
-      ]
-    ],
+    "outputs": [[10, 0]],
     "serialized": [
       "semiliteral",
       [
-        [
-          "round",
-          [
-            "*",
-            [
-              "cos",
-              [
-                "number",
-                [
-                  "get",
-                  "direction"
-                ]
-              ]
-            ],
-            [
-              "number",
-              [
-                "get",
-                "magnitude"
-              ]
-            ]
-          ]
-        ],
-        [
-          "round",
-          [
-            "*",
-            [
-              "sin",
-              [
-                "number",
-                [
-                  "get",
-                  "direction"
-                ]
-              ]
-            ],
-            [
-              "number",
-              [
-                "get",
-                "magnitude"
-              ]
-            ]
-          ]
-        ]
+        ["round", ["*", ["cos", ["number", ["get", "direction"]]], ["number", ["get", "magnitude"]]]],
+        ["round", ["*", ["sin", ["number", ["get", "direction"]]], ["number", ["get", "magnitude"]]]]
       ]
     ]
   }

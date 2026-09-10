@@ -4980,6 +4980,7 @@ public class Expression {
     }
   }
 
+  /** Preserves literal JSON without interpreting nested arrays as expressions. */
   private static class ExpressionJsonValue extends Expression implements ValueExpression {
     private final JsonElement value;
 
@@ -5009,21 +5010,40 @@ public class Expression {
     }
   }
 
+  /** An unquoted array whose elements are expressions. */
   private static class ExpressionArray extends Expression implements ValueExpression {
+    private final Expression[] elements;
+
     ExpressionArray(Expression[] elements) {
-      super("", elements.clone());
+      this.elements = elements.clone();
     }
 
+    @NonNull
     @Override
     public Object toValue() {
-      Object[] serialized = super.toArray();
-      return Arrays.copyOfRange(serialized, 1, serialized.length);
+      Object[] values = new Object[elements.length];
+      for (int i = 0; i < elements.length; i++) {
+        Expression element = elements[i];
+        values[i] = element instanceof ValueExpression
+          ? ((ValueExpression) element).toValue() : element.toArray();
+      }
+      return values;
     }
 
     @NonNull
     @Override
     public String toString() {
       return Converter.gson.toJson(toValue());
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      return other instanceof ExpressionArray && Arrays.equals(elements, ((ExpressionArray) other).elements);
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(elements);
     }
   }
 

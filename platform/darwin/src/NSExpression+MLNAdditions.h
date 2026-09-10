@@ -53,14 +53,6 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
  */
 @interface NSExpression (MLNAdditions)
 
-/**
- Creates an array by evaluating each element expression.
-
- This corresponds to the `semiliteral` operator in the MapLibre Style Spec.
- Use a constant array expression to preserve literal elements.
- */
-+ (instancetype)mgl_expressionForArray:(NSArray<NSExpression *> *)elements;
-
 // MARK: Creating Variable Expressions
 
 /**
@@ -118,6 +110,22 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
 
 @property (class, nonatomic, readonly) NSExpression *featurePropertiesVariableExpression
     __attribute__((deprecated("", "featureAttributesVariableExpression")));
+
+// MARK: Creating Array Expressions
+
+/**
+ Creates an array by evaluating each element expression.
+
+ This corresponds to the
+ <a
+ href="https://maplibre.org/maplibre-style-spec/expressions/#semiliteral"><code>semiliteral</code></a>
+ expression operator in the MapLibre Style Spec.
+ Use a constant array expression to preserve literal elements.
+
+ @param elements The expressions producing the array elements.
+ */
++ (instancetype)mgl_expressionForArray:(NSArray<NSExpression *> *)elements
+    NS_SWIFT_NAME(init(forMLNArray:));
 
 // MARK: Creating Conditional Expressions
 

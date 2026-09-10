@@ -1,36 +1,6 @@
 {
-  "expression": [
-    "let",
-    "dp_per_em",
-    12,
-    [
-      "semiliteral",
-      [
-        [
-          "/",
-          6,
-          [
-            "var",
-            "dp_per_em"
-          ]
-        ],
-        [
-          "/",
-          18,
-          [
-            "var",
-            "dp_per_em"
-          ]
-        ]
-      ]
-    ]
-  ],
-  "inputs": [
-    [
-      {},
-      {}
-    ]
-  ],
+  "expression": ["let", "dp_per_em", 12, ["semiliteral", [["/", 6, ["var", "dp_per_em"]], ["/", 18, ["var", "dp_per_em"]]]]],
+  "inputs": [[{}, {}]],
   "expected": {
     "compiled": {
       "result": "success",
@@ -38,18 +8,7 @@
       "isZoomConstant": true,
       "type": "array<number, 2>"
     },
-    "outputs": [
-      [
-        0.5,
-        1.5
-      ]
-    ],
-    "serialized": [
-      "literal",
-      [
-        0.5,
-        1.5
-      ]
-    ]
+    "outputs": [[0.5, 1.5]],
+    "serialized": ["literal", [0.5, 1.5]]
   }
 }

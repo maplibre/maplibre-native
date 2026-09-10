@@ -1,6 +1,7 @@
 package org.maplibre.android.style.expressions
 
 import android.graphics.Color
+import com.google.gson.JsonParser
 import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 import org.maplibre.android.style.expressions.Expression.FormatOption
@@ -19,69 +20,6 @@ import java.util.*
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpressionTest : BaseTest() {
-    @Test
-    fun testSemiliteralRoundTrip() {
-        val expression = Expression.semiliteral(
-            Expression.literal("top"),
-            Expression.semiliteral(Expression.get("x"), Expression.literal(2)),
-            Expression.literal(arrayOf("get", "literal-key"))
-        )
-        val expected = arrayOf<Any>("semiliteral", arrayOf<Any>(
-            "top",
-            arrayOf<Any>("semiliteral", arrayOf<Any>(arrayOf("get", "x"), 2f)),
-            arrayOf<Any>("literal", arrayOf("get", "literal-key"))
-        ))
-        Assert.assertTrue(Arrays.deepEquals(expected, expression.toArray()))
-        val parsed = Expression.raw(expression.toString())
-        Assert.assertTrue(Arrays.deepEquals(expected, parsed.toArray()))
-        Assert.assertEquals(expression, parsed)
-        Assert.assertEquals(expression.hashCode(), parsed.hashCode())
-    }
-
-    @Test
-    fun testSemiliteralEmptyAndPrimitives() {
-        for (expression in arrayOf(
-            Expression.semiliteral(),
-            Expression.semiliteral(Expression.literal("x"), Expression.literal(1), Expression.literal(true))
-        )) {
-            Assert.assertTrue(Arrays.deepEquals(expression.toArray(), Expression.raw(expression.toString()).toArray()))
-        }
-    }
-
-    @Test
-    fun testSemiliteralNestedLiteral() {
-        val expression = Expression.semiliteral(
-            Expression.get("x"),
-            Expression.literal(arrayOf<Any>("top", arrayOf(1f, 2f)))
-        )
-        val parsed = Expression.raw(expression.toString())
-        Assert.assertTrue(Arrays.deepEquals(expression.toArray(), parsed.toArray()))
-    }
-
-    @Test
-    fun testSemiliteralNullAndObject() {
-        val nullArray = Expression.raw("[\"semiliteral\", [null, 1]]")
-        val expected = arrayOf<Any?>("semiliteral", arrayOf<Any?>(null, 1f))
-        Assert.assertTrue(Arrays.deepEquals(expected, nullArray.toArray()))
-        Assert.assertTrue(Arrays.deepEquals(expected, Expression.raw(nullArray.toString()).toArray()))
-        for (json in arrayOf(
-            "[\"semiliteral\", [[\"literal\", {\"x\": null}], null]]",
-            "[\"semiliteral\", null]",
-            "[\"semiliteral\", {\"x\": [\"get\", \"x\"], \"nested\": {\"y\": null}}]"
-        )) {
-            val expression = Expression.raw(json)
-            Assert.assertEquals(
-                com.google.gson.JsonParser.parseString(json),
-                com.google.gson.JsonParser.parseString(expression.toString())
-            )
-        }
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun testSemiliteralInvalidArity() {
-        Expression.raw("[\"semiliteral\", [], []]")
-    }
-
     @Test
     fun testPropertyValueIsExpression() {
         val property: PropertyValue<*> = PropertyFactory.lineWidth(Expression.get("width"))
@@ -1507,6 +1445,73 @@ class ExpressionTest : BaseTest() {
             Expression.literal(200)
         ).toString()
         org.junit.Assert.assertEquals("toString should match", expected, actual)
+    }
+
+    @Test
+    fun testSemiliteralRoundTrip() {
+        val expression = Expression.semiliteral(
+            Expression.literal("top"),
+            Expression.semiliteral(Expression.get("x"), Expression.literal(2)),
+            Expression.literal(arrayOf("get", "literal-key"))
+        )
+        val expected = arrayOf<Any>(
+            "semiliteral",
+            arrayOf<Any>(
+                "top",
+                arrayOf<Any>("semiliteral", arrayOf<Any>(arrayOf("get", "x"), 2f)),
+                arrayOf<Any>("literal", arrayOf("get", "literal-key"))
+            )
+        )
+        Assert.assertTrue(Arrays.deepEquals(expected, expression.toArray()))
+        val parsed = Expression.raw(expression.toString())
+        Assert.assertTrue(Arrays.deepEquals(expected, parsed.toArray()))
+        Assert.assertEquals(expression, parsed)
+        Assert.assertEquals(expression.hashCode(), parsed.hashCode())
+    }
+
+    @Test
+    fun testSemiliteralEmptyAndPrimitives() {
+        for (expression in arrayOf(
+            Expression.semiliteral(),
+            Expression.semiliteral(Expression.literal("x"), Expression.literal(1), Expression.literal(true))
+        )) {
+            val parsed = Expression.raw(expression.toString())
+            Assert.assertTrue(Arrays.deepEquals(expression.toArray(), parsed.toArray()))
+        }
+    }
+
+    @Test
+    fun testLiteralNestedArrayRoundTrip() {
+        val expression = Expression.literal(arrayOf<Any>("top", arrayOf(1f, 2f)))
+        val parsed = Expression.raw(expression.toString())
+        Assert.assertTrue(Arrays.deepEquals(expression.toArray(), parsed.toArray()))
+        Assert.assertEquals(expression, parsed)
+        Assert.assertEquals(expression.hashCode(), parsed.hashCode())
+    }
+
+    @Test
+    fun testSemiliteralNullAndObject() {
+        val nullArray = Expression.raw("[\"semiliteral\", [null, 1]]")
+        val expected = arrayOf<Any?>("semiliteral", arrayOf<Any?>(null, 1f))
+        Assert.assertTrue(Arrays.deepEquals(expected, nullArray.toArray()))
+        val parsedNullArray = Expression.raw(nullArray.toString())
+        Assert.assertTrue(Arrays.deepEquals(expected, parsedNullArray.toArray()))
+        for (json in arrayOf(
+            "[\"semiliteral\", [[\"literal\", {\"x\": null}], null]]",
+            "[\"semiliteral\", null]",
+            "[\"semiliteral\", {\"x\": [\"get\", \"x\"], \"nested\": {\"y\": null}}]"
+        )) {
+            val expression = Expression.raw(json)
+            Assert.assertEquals(
+                JsonParser.parseString(json),
+                JsonParser.parseString(expression.toString())
+            )
+        }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testSemiliteralInvalidArity() {
+        Expression.raw("[\"semiliteral\", [], []]")
     }
 
     @Test

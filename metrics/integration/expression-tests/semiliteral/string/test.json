@@ -1,14 +1,6 @@
 {
-  "expression": [
-    "semiliteral",
-    "example"
-  ],
-  "inputs": [
-    [
-      {},
-      {}
-    ]
-  ],
+  "expression": ["semiliteral", "example"],
+  "inputs": [[{}, {}]],
   "expected": {
     "compiled": {
       "result": "success",
@@ -16,9 +8,7 @@
       "isZoomConstant": true,
       "type": "string"
     },
-    "outputs": [
-      "example"
-    ],
+    "outputs": ["example"],
     "serialized": "example"
   }
 }

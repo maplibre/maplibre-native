@@ -1,14 +1,6 @@
 {
-  "expression": [
-    "semiliteral",
-    []
-  ],
-  "inputs": [
-    [
-      {},
-      {}
-    ]
-  ],
+  "expression": ["semiliteral", []],
+  "inputs": [[{}, {}]],
   "expected": {
     "compiled": {
       "result": "success",
@@ -16,12 +8,7 @@
       "isZoomConstant": true,
       "type": "array<value, 0>"
     },
-    "outputs": [
-      []
-    ],
-    "serialized": [
-      "literal",
-      []
-    ]
+    "outputs": [[]],
+    "serialized": ["literal", []]
   }
 }
