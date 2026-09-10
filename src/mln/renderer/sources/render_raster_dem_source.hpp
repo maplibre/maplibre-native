@@ -18,6 +18,8 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
 
+    uint16_t getTileSize() const override;
+
 private:
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,

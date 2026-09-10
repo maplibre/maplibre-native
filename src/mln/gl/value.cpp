@@ -621,6 +621,13 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
             static_cast<GLboolean>(false),
             static_cast<GLsizei>(binding->vertexStride),
             reinterpret_cast<GLvoid*>(binding->attribute.offset + (binding->vertexStride * binding->vertexOffset))));
+        // Per-instance attributes advance once per instance instead of per vertex.
+        // Stored in the VAO, so it is set here with the rest of the attribute state.
+        // divisor 0 is the GL default; only touch it when non-zero to avoid a GL call
+        // on every ordinary attribute.
+        if (binding->divisor != 0) {
+            MBGL_CHECK_ERROR(glVertexAttribDivisor(location, binding->divisor));
+        }
     } else {
         MBGL_CHECK_ERROR(glDisableVertexAttribArray(location));
     }

@@ -17,6 +17,7 @@ import org.maplibre.android.style.layers.CannotAddLayerException;
 import org.maplibre.android.style.layers.Layer;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.light.Light;
+import org.maplibre.android.style.terrain.Terrain;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.util.DefaultStyle;
@@ -696,6 +697,29 @@ public class Style {
   public Light getLight() {
     validateState("getLight");
     return nativeMap.getLight();
+  }
+
+  /**
+   * Set the style's 3D terrain configuration, or remove it by passing null.
+   * The terrain drapes the map over the elevation data of the given
+   * raster-dem source.
+   *
+   * @param terrain the terrain configuration, or null to disable terrain
+   */
+  public void setTerrain(@Nullable Terrain terrain) {
+    validateState("setTerrain");
+    nativeMap.setTerrain(terrain);
+  }
+
+  /**
+   * Get the style's 3D terrain configuration.
+   *
+   * @return the terrain configuration, or null when terrain is not enabled
+   */
+  @Nullable
+  public Terrain getTerrain() {
+    validateState("getTerrain");
+    return nativeMap.getTerrain();
   }
 
   //

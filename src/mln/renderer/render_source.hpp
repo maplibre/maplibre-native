@@ -114,6 +114,10 @@ public:
 
     virtual uint8_t getMaxZoom() const;
 
+    /// The tile size the source selects tiles with, which decides the zoom its cover lands on.
+    /// Not necessarily the size its tiles decode to.
+    virtual uint16_t getTileSize() const;
+
     void setObserver(RenderSourceObserver*);
 
     Immutable<style::Source::Impl> baseImpl;

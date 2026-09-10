@@ -99,6 +99,10 @@ uint8_t RenderSource::getMaxZoom() const {
     return util::TERRAIN_RGB_MAXZOOM;
 }
 
+uint16_t RenderSource::getTileSize() const {
+    return util::tileSize_I;
+}
+
 Immutable<std::vector<RenderTile>> RenderSource::getRawRenderTiles() const {
     return makeMutable<std::vector<RenderTile>>();
 }

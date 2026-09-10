@@ -134,6 +134,9 @@ void RasterDEMTile::backfillBorder(const RasterDEMTile& borderTile, const DEMTil
         // render pass with the new texture data we just backfilled
         bucket->setPrepared(false);
         bucket->renderTargetPrepared = false;
+        // The color-relief layer samples the DEM texture directly, so its cached upload is
+        // stale now too.
+        bucket->colorReliefDEMTexture.reset();
     }
 }
 

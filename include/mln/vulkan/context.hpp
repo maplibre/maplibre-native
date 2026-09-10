@@ -87,15 +87,21 @@ public:
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
-    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+    TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex,
+                                           std::size_t initialCapacity,
+                                           std::string name,
+                                           bool renderToTerrain) override;
 
-    LayerGroupPtr createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
+    LayerGroupPtr createLayerGroup(int32_t layerIndex,
+                                   std::size_t initialCapacity,
+                                   std::string name,
+                                   bool renderToTerrain) override;
 
     gfx::Texture2DPtr createTexture2D() override;
 
     gfx::DynamicTexturePtr createDynamicTexture(Size size, gfx::TexturePixelType pixelType) override;
 
-    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
+    RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type, bool stencil) override;
 
     void resetState(gfx::DepthMode, gfx::ColorMode) override {}
 
@@ -106,7 +112,10 @@ public:
 
     void setDirtyState() override {}
 
-    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
+    std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size,
+                                                                  gfx::TextureChannelDataType,
+                                                                  bool,
+                                                                  bool) override;
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType) override;
 
@@ -147,6 +156,15 @@ public:
     DescriptorPoolGrowable& getDescriptorPool(DescriptorSetType type);
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
+
+    // Shared pipeline cache passed to every vkCreateGraphicsPipelines. Without it the
+    // driver recompiles a pipeline's shaders from scratch on every cache miss; the
+    // maplibre-side pipeline cache (ShaderProgram) keys on the VkRenderPass handle, so
+    // each terrain drape target (its own render pass) misses and would otherwise pay a
+    // full ~several-ms shader compile per target per frame. The VkPipelineCache lets the
+    // driver reuse the compiled shaders across compatible render passes, so the repeated
+    // creates become cheap lookups.
+    vk::PipelineCache getPipelineCache();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     vk::UniqueCommandBuffer& getCommandBuffer() { return frameResources[frameResourceIndex].commandBuffer; }
@@ -196,6 +214,7 @@ private:
     vk::UniqueDescriptorSetLayout drawableImageDescriptorSetLayout;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;
+    vk::UniquePipelineCache pipelineCache;
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;

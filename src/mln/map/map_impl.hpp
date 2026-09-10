@@ -63,6 +63,7 @@ public:
     void onDidFinishRenderingFrame(RenderMode, bool, bool, const gfx::RenderingStats&) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
+    void onTerrainCenterElevationChanged(double elevationMeters) final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
@@ -115,6 +116,10 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+    TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
+    TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
+    bool centerClampedToGround = true;
+    bool debugAboveGroundLog = false;
 };
 
 // Forward declaration of this method is required for the MapProjection class

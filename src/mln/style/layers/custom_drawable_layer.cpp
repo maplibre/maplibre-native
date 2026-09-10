@@ -463,7 +463,10 @@ CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
     // ensure we have a default layer group set up
     if (!layerGroup) {
         if (auto aLayerGroup = context.createTileLayerGroup(
-                /*layerIndex*/ layer.getLayerIndex(), /*initialCapacity=*/64, layer.getID())) {
+                /*layerIndex*/ layer.getLayerIndex(),
+                /*initialCapacity=*/64,
+                layer.getID(),
+                true)) { // TODO: make render to terrain optional?
             changes.emplace_back(std::make_unique<AddLayerGroupRequest>(aLayerGroup));
             layerGroup = std::move(aLayerGroup);
         }

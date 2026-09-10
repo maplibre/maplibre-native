@@ -236,7 +236,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -341,6 +341,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
+        // Progressive build budget: new tile (no drawables yet). Defer its construction when
+        // the per-frame tile budget is spent; retried next frame (follow-up frame requested),
+        // with the terrain drape keeping the parent/prior texture meanwhile.
+        if (!context.allowNewTileBuild(std::hash<OverscaledTileID>{}(tileID))) {
             continue;
         }
 

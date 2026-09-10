@@ -115,7 +115,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), false)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -362,6 +362,22 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short2);
         }
 #endif
+        // Centroid on both paths: the non-instanced shaders (GL/WebGPU) and the
+        // instancing-path fill shader (Metal/Vulkan) sample the DEM at the
+        // polygon centroid for terrain elevation. The member differs per path:
+        // the instancing layout vertex is <pos, decimals_ed, centroid>.
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+        constexpr std::size_t centroidOffset = offsetof(FillExtrusionLayoutVertex, a3);
+#else
+        constexpr std::size_t centroidOffset = offsetof(FillExtrusionLayoutVertex, a4);
+#endif
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionCentroidVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   centroidOffset,
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillExtrusionLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
+        }
 
         if (doDepthPass) {
             depthBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
@@ -452,7 +468,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::UShort2);
         }
-
         if (doDepthPass) {
             instancedDepthBuilder->setRawVertices({}, instanceVertexCount, gfx::AttributeDataType::Short2);
             instancedDepthBuilder->setVertexAttributes(instanceVertexAttrs);

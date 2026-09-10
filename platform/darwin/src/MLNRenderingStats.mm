@@ -25,7 +25,7 @@
   _numUniformBuffers = stats.numUniformBuffers;
   _numUniformUpdates = stats.numUniformUpdates;
   _uniformUpdateBytes = stats.uniformUpdateBytes;
-  _memTextures = stats.memTextures;
+  _memTextures = static_cast<int>(stats.memTextures);
   _memBuffers = stats.memBuffers;
   _memIndexBuffers = stats.memIndexBuffers;
   _memVertexBuffers = stats.memVertexBuffers;

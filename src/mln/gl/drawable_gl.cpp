@@ -1,6 +1,7 @@
 #include <mln/gl/drawable_gl.hpp>
 #include <mln/gl/drawable_gl_impl.hpp>
 #include <mln/gl/texture2d.hpp>
+#include <mln/gl/texture_2d_array.hpp>
 #include <mln/gl/upload_pass.hpp>
 #include <mln/gl/vertex_array.hpp>
 #include <mln/gl/vertex_attribute_gl.hpp>
@@ -9,6 +10,12 @@
 #include <mln/shaders/gl/shader_program_gl.hpp>
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
+#include <limits>
+
+#if defined(MLN_VALIDATE_UNIFORM_BLOCK_BINDINGS)
+#include <unordered_set>
+#endif
 
 namespace mln {
 namespace gl {
@@ -65,19 +72,59 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     impl->uniformBuffers.bind();
     bindTextures();
 
+#if defined(MLN_VALIDATE_UNIFORM_BLOCK_BINDINGS)
+    // A draw call issued while any of the shader's uniform blocks has no buffer bound
+    // at its binding point is rejected by validating drivers ("DrawElements:
+    // ValidateState() failed" on the Android emulator), silently dropping geometry.
+    // Name the offender, once per drawable/block pair. glGetIntegeri_v is a host
+    // round-trip per block per draw on the emulator, so this is opt-in.
+    {
+        const auto& shaderGLDebug = static_cast<const ShaderProgramGL&>(*shader);
+        for (const auto& block : shaderGLDebug.getUniformBlocks()) {
+            platform::GLint bound = 0;
+            MBGL_CHECK_ERROR(platform::glGetIntegeri_v(
+                GL_UNIFORM_BUFFER_BINDING, static_cast<platform::GLuint>(block.binding), &bound));
+            if (bound == 0) {
+                static std::unordered_set<std::string> reported;
+                if (reported.emplace(getName() + "/" + std::string(block.name)).second) {
+                    mln::Log::Warning(Event::GraphicsBackend,
+                                      "Drawable '" + getName() + "' drawn with no buffer bound for uniform block '" +
+                                          std::string(block.name) + "' (binding " + util::toString(block.binding) +
+                                          ")");
+                }
+            }
+        }
+    }
+#endif
+
+    // One instance per instance-attribute entry (mirrors the Metal backend); no
+    // instance attributes means a single, ordinary draw (drawInstanced falls back).
+    // getMinCount() returns SIZE_MAX for an empty array, so guard against that.
+    const auto& instanceAttrs = getInstanceAttributes();
+    std::size_t instanceCount = instanceAttrs ? instanceAttrs->getMinCount() : 1;
+    if (instanceCount == std::numeric_limits<std::size_t>::max()) {
+        instanceCount = 1;
+    }
+
     for (const auto& seg : impl->segments) {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
         if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
             context.bindVertexArray = glSeg.getVertexArray().getID();
-            context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
+            context.drawInstanced(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength, instanceCount);
         }
     }
     // Unbind the VAO so that future buffer commands outside Drawable do not change the current VAO state
     context.bindVertexArray = value::BindVertexArray::Default;
 
-    unbindTextures();
-    impl->uniformBuffers.unbind();
+    // Deliberately do NOT unbind textures / uniform buffers here. Unbinding after
+    // every drawable only resets the binding points to 0, which the very next
+    // drawable's bind() immediately overwrites - pure per-draw GL-call churn (a
+    // glBindBufferBase(0) per UBO, a texture unbind per unit, for all ~hundreds of
+    // draws a frame). Leaving the previous bindings in place is correct: each
+    // drawable binds everything it needs before drawing, and a stale binding is only
+    // ever read by a drawable that failed to bind its own (a pre-existing bug that
+    // unbinding would turn into a "no buffer bound" the driver likes even less).
 }
 
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
@@ -178,8 +225,10 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     }
 
     // Build the vertex attributes and bindings, if necessary
+    const auto& instanceAttrs = getInstanceAttributes();
     if (impl->attributeBindings.empty() ||
-        (vertexAttributes && (!attributeUpdateTime || vertexAttributes->isModifiedAfter(*attributeUpdateTime)))) {
+        (vertexAttributes && (!attributeUpdateTime || vertexAttributes->isModifiedAfter(*attributeUpdateTime))) ||
+        (instanceAttrs && (!attributeUpdateTime || instanceAttrs->isModifiedAfter(*attributeUpdateTime)))) {
         MLN_TRACE_ZONE(build attributes);
 
         // Apply drawable values to shader defaults
@@ -201,6 +250,35 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                                     vertexBuffers);
 
         impl->attributeBuffers = std::move(vertexBuffers);
+
+        // Build per-instance attribute bindings and merge them into the same binding
+        // array (mirrors the Metal backend). Instance attributes use shader attribute
+        // locations distinct from the per-vertex ones, so they slot in by index; each
+        // gets divisor 1 so it advances once per instance rather than per vertex.
+        if (instanceAttrs) {
+            std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
+            auto instanceBindings = uploadPass.buildAttributeBindings(instanceAttrs->getMinCount(),
+                                                                      gfx::AttributeDataType::Byte,
+                                                                      static_cast<std::size_t>(-1),
+                                                                      /*vertexData=*/{},
+                                                                      shader->getInstanceAttributes(),
+                                                                      *instanceAttrs,
+                                                                      usage,
+                                                                      attributeUpdateTime,
+                                                                      instanceBuffers);
+            for (std::size_t i = 0; i < instanceBindings.size(); ++i) {
+                if (instanceBindings[i]) {
+                    instanceBindings[i]->divisor = 1;
+                    if (impl->attributeBindings.size() <= i) {
+                        impl->attributeBindings.resize(i + 1);
+                    }
+                    impl->attributeBindings[i] = instanceBindings[i];
+                }
+            }
+            for (auto& b : instanceBuffers) {
+                impl->attributeBuffers.push_back(std::move(b));
+            }
+        }
     }
 
     // Bind a VAO for each group of vertexes described by a segment
@@ -214,7 +292,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         }
 
         for (auto& binding : impl->attributeBindings) {
-            if (binding) {
+            // Per-instance bindings (divisor != 0) are indexed by instance, not by the
+            // segment's vertex offset, so leave their offset untouched.
+            if (binding && binding->divisor == 0) {
                 binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
             }
         }
@@ -270,6 +350,12 @@ void DrawableGL::bindTextures() const {
             if (const auto& location = shader->getSamplerLocation(id)) {
                 static_cast<gl::Texture2D&>(*texture).bind(static_cast<int32_t>(*location), unit++);
             }
+        }
+    }
+    // Extra sampler2DArray (instanced terrain depth DEM), bound with the program active here.
+    if (arrayTexture && arrayTextureSlot >= 0) {
+        if (const auto& location = shader->getSamplerLocation(static_cast<size_t>(arrayTextureSlot))) {
+            arrayTexture->bind(static_cast<int32_t>(*location), unit++);
         }
     }
 }

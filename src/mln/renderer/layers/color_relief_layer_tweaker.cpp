@@ -47,8 +47,13 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
+        // aligned=false to match the projection previously used via matrixForTile(); the
+        // color-relief render test expectations were generated with the unaligned matrix
+        const auto matrix = getTileMatrix(
+            tileID, parameters, {0.f, 0.f}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+
 #if MLN_UBO_CONSOLIDATION
-        drawableUBOVector[i].matrix = util::cast<float>(parameters.matrixForTile(tileID));
+        drawableUBOVector[i].matrix = util::cast<float>(matrix);
 
         // Get tile props from drawable data (set during creation)
         if (const auto& drawableData = drawable.getData()) {
@@ -60,7 +65,7 @@ void ColorReliefLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPar
         drawable.setUBOIndex(i++);
 #else
         ColorReliefDrawableUBO drawableUBO;
-        drawableUBO.matrix = util::cast<float>(parameters.matrixForTile(tileID));
+        drawableUBO.matrix = util::cast<float>(matrix);
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idColorReliefDrawableUBO, &drawableUBO, context);

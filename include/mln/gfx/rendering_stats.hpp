@@ -73,8 +73,8 @@ struct RenderingStats {
     /// Sum of uniform buffers update sizes
     std::size_t uniformUpdateBytes = 0;
 
-    /// Total texture memory
-    int memTextures = 0;
+    /// Total texture memory (int64_t: terrain scenes can track more than 2GB)
+    int64_t memTextures = 0;
     /// Total buffer memory
     int memBuffers = 0;
     /// Total index buffer memory
@@ -88,6 +88,21 @@ struct RenderingStats {
     int stencilClears = 0;
     /// Number of stencil buffer updates
     int stencilUpdates = 0;
+
+    /// Number of terrain drape targets actually re-rendered this frame (cache
+    /// misses); panning a static terrain scene should keep this at 0
+    int numDrapeTargetsRendered = 0;
+
+    /// Number of terrain drape targets that ran the full per-target coverage scan
+    /// this frame (i.e. did not hit the global-signature fast path). Should be ~0
+    /// on a static scene; if it stays high, the short-circuit is not engaging
+    int numDrapeCoverageScans = 0;
+
+    /// Per-phase CPU time of the terrain path this frame (seconds), for profiling
+    /// where the terrain overhead goes when nothing re-renders
+    double terrainUpdateTime = 0.0;  ///< RenderTerrain::update (tile/DEM/drawable management)
+    double terrainTweakerTime = 0.0; ///< terrain layer tweaker (surface + depth groups)
+    double terrainDepthTime = 0.0;   ///< terrain depth pass render
 
     RenderingStats& operator+=(const RenderingStats&);
 
@@ -103,6 +118,11 @@ public:
         bool verbose = false;
         Color textColor = Color::red();
         float textSize = 4.0f;
+        // A rendered frame slower than this counts as "jank". 1/60 s: a frame that missed the
+        // 60 Hz budget is a perceptible hitch even on a faster display. Used for the worst-frame
+        // / jank lines that expose the frame-time spikes an average FPS hides (e.g. the
+        // per-frame loading spikes the terrain load-mode budgets trade against).
+        double jankThreshold = 1.0 / 60.0;
     };
 
     RenderingStatsView() = default;
@@ -127,6 +147,15 @@ protected:
     uint32_t frameCount = 0;
     double encodingTime = 0.0;
     double renderingTime = 0.0;
+
+    // Per-frame wall-clock timing, aggregated over the refresh interval, for the worst-frame /
+    // jank lines. lastFrameTime is the previous frame's timestamp; maxFrameTime is the slowest
+    // frame this interval; jankFrames counts frames over Options::jankThreshold; maxEncodingTime
+    // is the largest single-frame CPU encode cost (the work the load-mode budgets throttle).
+    double lastFrameTime = 0.0;
+    double maxFrameTime = 0.0;
+    uint32_t jankFrames = 0;
+    double maxEncodingTime = 0.0;
 };
 
 } // namespace gfx

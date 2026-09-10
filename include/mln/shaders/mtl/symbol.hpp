@@ -40,9 +40,20 @@ struct alignas(16) SymbolDrawableUBO {
     /* 248 */ float opacity_t;
     /* 252 */ float halo_width_t;
     /* 256 */ float halo_blur_t;
-    /* 260 */
+    /* 260 */ float pad1;
+    /* 264 */ float pad2;
+    /* 268 */ float pad3;
+
+    // 3D terrain elevation
+    /* 272 */ float4 dem_coords;
+    /* 288 */ float4 dem_unpack;
+    /* 304 */ float dem_dim;
+    /* 308 */ float dem_exaggeration;
+    /* 312 */ float dem_enabled;
+    /* 316 */ float depth_enabled;
+    /* 320 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 17 * 16, "wrong size");
+static_assert(sizeof(SymbolDrawableUBO) == 20 * 16, "wrong size");
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
@@ -83,7 +94,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 10> instanceAttributes;
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
@@ -140,7 +151,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
                                 device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
-                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
+                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]],
+                                texture2d<float, access::sample> demTexture [[texture(1)]],
+                                sampler demSampler [[sampler(1)]],
+                                texture2d<float, access::sample> depthTexture [[texture(2)]],
+                                sampler depthSampler [[sampler(2)]]) {
 
 #if defined(HAS_UNIFORM_u_sorted_instance)
     const uint instance = instanceID;
@@ -195,7 +210,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = drawable.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float ele = get_elevation(
+        a_pos, demTexture, demSampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float4 projectedPoint = drawable.matrix * float4(a_pos, ele, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = drawable.pitch_with_map ?
@@ -215,7 +232,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
         // See comments in symbol_sdf.vertex
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), ele, 1);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -226,18 +243,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], ele, 1.0);
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const float2 pos0 = projected_pos.xy / projected_pos.w;
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
-    const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+    const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, z, 1.0);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
 
     return {
         .position     = position,
         .tex          = half2(a_tex / drawable.texsize),
 #if defined(HAS_UNIFORM_u_opacity)
-        .fade_opacity = fo,
+        .fade_opacity = fo * vis,
 #else
-        .opacity      = fo,
+        .opacity      = fo * vis,
 #endif
     };
 }
@@ -273,7 +293,7 @@ struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 14> instanceAttributes;
-    static const std::array<TextureInfo, 1> textures;
+    static const std::array<TextureInfo, 3> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
@@ -355,7 +375,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
                                 device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
-                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
+                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]],
+                                texture2d<float, access::sample> demTexture [[texture(1)]],
+                                sampler demSampler [[sampler(1)]],
+                                texture2d<float, access::sample> depthTexture [[texture(2)]],
+                                sampler depthSampler [[sampler(2)]]) {
 
 #if defined(HAS_UNIFORM_u_sorted_instance)
     const uint instance = instanceID;
@@ -403,7 +427,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = drawable.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float ele = get_elevation(
+        a_pos, demTexture, demSampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float4 projectedPoint = drawable.matrix * float4(a_pos, ele, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -430,7 +456,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), ele, 1);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -441,10 +467,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_sin = sin(segment_angle + symbol_rotation);
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const auto rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
-    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], ele, 1.0);
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
+    const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
 
     return {
         .position     = position,
@@ -466,7 +495,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = half2(a_tex / drawable.texsize),
         .gamma_scale  = half(position.w),
         .fontScale    = half(fontScale),
-        .fade_opacity = fo,
+        .fade_opacity = fo * vis,
     };
 }
 
@@ -540,7 +569,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<AttributeInfo, 14> instanceAttributes;
-    static const std::array<TextureInfo, 2> textures;
+    static const std::array<TextureInfo, 4> textures;
 
     static constexpr auto prelude = symbolShaderPrelude;
     static constexpr auto source = R"(
@@ -627,7 +656,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
                                 device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
                                 device const OpacityInstance* opacityInstances [[buffer(symbolUBOCount + 4)]],
-                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]]) {
+                                device const DataInstance* dataInstances [[buffer(symbolUBOCount + 5)]],
+                                texture2d<float, access::sample> demTexture [[texture(1)]],
+                                sampler demSampler [[sampler(1)]],
+                                texture2d<float, access::sample> depthTexture [[texture(2)]],
+                                sampler depthSampler [[sampler(2)]]) {
 
 #if defined(HAS_UNIFORM_u_sorted_instance)
     const uint instance = instanceID;
@@ -675,7 +708,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = drawable.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float ele = get_elevation(
+        a_pos, demTexture, demSampler, drawable.dem_coords, drawable.dem_unpack, drawable.dem_dim, drawable.dem_exaggeration, drawable.dem_enabled);
+    const float4 projectedPoint = drawable.matrix * float4(a_pos, ele, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -702,7 +737,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), ele, 1);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -714,19 +749,22 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], ele, 1.0);
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
     const float2 pos_rot = a_offset / 32.0 * fontScale;
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
+    const float4 position = drawable.coord_matrix * float4(pos0, z, 1.0);
     const float gamma_scale = position.w;
     const bool is_icon = (is_sdf == ICON);
+    // Fade out symbols hidden behind the terrain (see calculate_visibility)
+    const half vis = half(calculate_visibility(projectedPoint, depthTexture, depthSampler, drawable.depth_enabled));
 
     return {
         .position     = position,
         .tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
         .gamma_scale  = half(gamma_scale),
         .fontScale    = half(fontScale),
-        .fade_opacity = fo,
+        .fade_opacity = fo * vis,
         .is_icon      = is_icon,
 
 #if !defined(HAS_UNIFORM_u_fill_color)

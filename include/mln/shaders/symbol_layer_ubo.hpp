@@ -29,9 +29,24 @@ struct alignas(16) SymbolDrawableUBO {
     /* 248 */ float opacity_t;
     /* 252 */ float halo_width_t;
     /* 256 */ float halo_blur_t;
-    /* 260 */
+    /* 260 */ float pad1;
+    /* 264 */ float pad2;
+    /* 268 */ float pad3;
+
+    // 3D terrain elevation; see RenderTerrain::getTerrainData
+    /* 272 */ std::array<float, 4> dem_coords; // scale, x offset, y offset into the DEM tile, unused
+    /* 288 */ std::array<float, 4> dem_unpack; // DEM unpack vector for the source's encoding
+    /* 304 */ float dem_dim;
+    /* 308 */ float dem_exaggeration;
+    /* 312 */ float dem_enabled;
+    // Terrain enabled globally: gates occlusion (calculate_visibility) even for
+    // tiles with no DEM data of their own (dem_enabled gates only the elevation).
+    // A distant label whose tile is outside the terrain cover must still hide
+    // behind mountains, as in maplibre-gl-js.
+    /* 316 */ float depth_enabled;
+    /* 320 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 17 * 16);
+static_assert(sizeof(SymbolDrawableUBO) == 20 * 16);
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;

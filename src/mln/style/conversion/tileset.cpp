@@ -69,6 +69,16 @@ std::optional<Tileset> Converter<Tileset>::operator()(const Convertible& value, 
         result.zoomRange.max = static_cast<uint8_t>(*maxzoom);
     }
 
+    auto tileSizeValue = objectMember(value, "tileSize");
+    if (tileSizeValue) {
+        std::optional<float> size = toNumber(*tileSizeValue);
+        if (!size || *size <= 0 || *size > std::numeric_limits<uint16_t>::max()) {
+            error.message = "invalid tileSize";
+            return std::nullopt;
+        }
+        result.tileSize = static_cast<uint16_t>(*size);
+    }
+
     auto attributionValue = objectMember(value, "attribution");
     if (attributionValue) {
         std::optional<std::string> attribution = toString(*attributionValue);

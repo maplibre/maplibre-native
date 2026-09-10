@@ -131,7 +131,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     // Set up a layer group for fill
     if (!layerGroup) {
-        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
+        if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID(), true)) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
             return;
@@ -318,6 +318,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            continue;
+        }
+
+        // Progressive build budget: this is a new tile (no drawables yet). If the per-frame
+        // tile budget is spent, defer constructing it - it is retried next frame (a follow-up
+        // frame is requested via Context::newTileBuildWasDeferred), and the terrain drape
+        // keeps the parent/prior texture meanwhile, so tiles fill in over a few frames
+        // instead of stalling one.
+        if (!context.allowNewTileBuild(std::hash<OverscaledTileID>{}(tileID))) {
             continue;
         }
 

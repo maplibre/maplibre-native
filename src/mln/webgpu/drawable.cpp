@@ -609,8 +609,10 @@ void Drawable::draw(PaintParameters& parameters) const {
                             case ShaderProgram::BindingType::Sampler: {
                                 Texture2D* texture = findTextureForBinding(bindingInfo.binding, true);
                                 if (!texture) {
-                                    validBindings = false;
-                                    break;
+                                    // Shader declares this texture but the drawable has none
+                                    // bound (e.g. optional DEM texture with terrain disabled).
+                                    // Bind the shared dummy so the bind group stays valid.
+                                    texture = context.getDummyTexture().get();
                                 }
                                 if (!texture->getSampler()) {
                                     texture->setSamplerConfiguration(texture->getSamplerState());
@@ -622,8 +624,9 @@ void Drawable::draw(PaintParameters& parameters) const {
                             case ShaderProgram::BindingType::UnfilterableTexture: {
                                 Texture2D* texture = findTextureForBinding(bindingInfo.binding, false);
                                 if (!texture) {
-                                    validBindings = false;
-                                    break;
+                                    // See the Sampler case above: fall back to the shared dummy
+                                    // texture for an optional/unbound texture slot.
+                                    texture = context.getDummyTexture().get();
                                 }
                                 if (!texture->getTexture() || !texture->getTextureView()) {
                                     texture->create();

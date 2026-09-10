@@ -30,6 +30,7 @@ layout(location = 0) in ivec2 in_position;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct ColorReliefDrawableUBO {
@@ -58,10 +59,11 @@ void main() {
     const ColorReliefTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
-    applySurfaceTransform();
+    gl_Position = apply_drape_transform(gl_Position, drawable.matrix, constant.drape_tile);
+    applySurfaceTransform(constant.drape_tile);
 
-    highp vec2 epsilon = 1.0 / tileProps.dimension;
-    float scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
+    highp vec2 epsilon = 2.0 / tileProps.dimension;
+    float scale = (tileProps.dimension.x - 4.0) / tileProps.dimension.x;
     frag_position = (vec2(in_position) / 8192.0) * scale + epsilon;
 
     // Handle poles (use in_position to match GLSL a_pos)
@@ -77,6 +79,7 @@ layout(location = 0) out vec4 out_color;
 
 layout(push_constant) uniform Constants {
     int ubo_index;
+    layout(offset = 16) vec4 drape_tile;
 } constant;
 
 struct ColorReliefTilePropsUBO {
@@ -109,14 +112,14 @@ float getElevation(vec2 coord, vec4 unpack) {
 }
 
 float getElevationStop(int stop, int color_ramp_size) {
-    // Elevation stops are plain float values, not terrain-RGB encoded
-    float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return texture(elevation_stops_sampler, vec2(x, 0.5)).r;
+    // Elevation stops are plain float values, not terrain-RGB encoded. One texel per stop
+    // in a single row, and this shader interpolates between stops itself, so fetch the
+    // exact index rather than sampling.
+    return texelFetch(elevation_stops_sampler, ivec2(stop, 0), 0).r;
 }
 
 vec4 getColorStop(int stop, int color_ramp_size) {
-    float x = (float(stop) + 0.5) / float(color_ramp_size);
-    return texture(color_stops_sampler, vec2(x, 0.5));
+    return texelFetch(color_stops_sampler, ivec2(stop, 0), 0);
 }
 
 void main() {

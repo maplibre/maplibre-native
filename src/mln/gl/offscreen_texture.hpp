@@ -12,7 +12,9 @@ class OffscreenTexture final : public gfx::OffscreenTexture {
 public:
     OffscreenTexture(gl::Context&,
                      Size size,
-                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte);
+                     gfx::TextureChannelDataType type = gfx::TextureChannelDataType::UnsignedByte,
+                     bool depth = true,
+                     bool stencil = false);
 
     bool isRenderable() override;
 

@@ -46,9 +46,10 @@ struct alignas(16) GlobalPaintParamsUBO {
     /* 36 */ float pixel_ratio;
     /* 40 */ float map_zoom;
     /* 44 */ float pad1;
-    /* 48 */
+    /* 48 */ std::array<float, 4> drape_tile;
+    /* 64 */
 };
-static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
+static_assert(sizeof(GlobalPaintParamsUBO) == 4 * 16);
 
 #if MLN_RENDER_BACKEND_VULKAN
 struct alignas(16) GlobalPlatformParamsUBO {
