@@ -7,6 +7,8 @@ plugins {
 group = project.extra["mapLibreArtifactGroupId"] as String
 version = project.extra["versionName"] as String
 
+val pluginApiHeadersDirectory = layout.buildDirectory.dir("generated/prefab-plugin-api-headers")
+
 android {
     namespace = "org.maplibre.android.plugins.api"
     compileSdk = 34
@@ -32,7 +34,7 @@ android {
     buildFeatures { prefabPublishing = true }
     prefab {
         create("plugin_api") {
-            headers = "../prefab-plugin-api-headers"
+            headers = pluginApiHeadersDirectory.get().asFile.absolutePath
             libraryName = "libplugin_api"
         }
     }
@@ -53,7 +55,7 @@ val syncPluginApiHeaders by tasks.registering(Sync::class) {
     from(nativeRoot.resolve("include")) {
         include("mln/plugin/plugin_api.h")
     }
-    into(project.rootDir.resolve("prefab-plugin-api-headers"))
+    into(pluginApiHeadersDirectory)
 }
 
 tasks.configureEach {
