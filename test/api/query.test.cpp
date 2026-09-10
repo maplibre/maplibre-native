@@ -155,6 +155,44 @@ TEST(Query, QuerySourceFeatureStates) {
     ASSERT_EQ(newState, states);
 }
 
+TEST(Query, RemoveSourceFeatureState) {
+    QueryTest test;
+    auto* renderer = test.frontend.getRenderer();
+
+    // Set two state values on a feature. Updates are visible immediately,
+    // without waiting for a render pass.
+    FeatureState newState;
+    newState["hover"] = true;
+    newState["radius"].set<uint64_t>(20);
+    renderer->setFeatureState("source1", {}, "feature1", newState);
+
+    // Read back with the out-parameter overload.
+    FeatureState afterSet;
+    renderer->getFeatureState(afterSet, "source1", {}, "feature1");
+    ASSERT_EQ(afterSet, newState);
+
+    // Remove a single key. Unlike updates, removals are only reflected once a
+    // render pass has coalesced the pending changes into the source state, so
+    // render before reading back.
+    renderer->removeFeatureState("source1", {}, "feature1"s, "hover"s);
+    test.frontend.render(test.map);
+
+    // Read back with the return-value overload.
+    const FeatureState afterKeyRemoval = renderer->getFeatureState("source1", {}, "feature1");
+    ASSERT_EQ(afterKeyRemoval.size(), 1u);
+    ASSERT_EQ(afterKeyRemoval.count("hover"), 0u);
+    ASSERT_EQ(afterKeyRemoval.at("radius").get<uint64_t>(), 20u);
+
+    // Removing the whole feature (no state key) clears any remaining state.
+    renderer->removeFeatureState("source1", {}, "feature1"s, {});
+    test.frontend.render(test.map);
+
+    // Read back with the out-parameter overload again.
+    FeatureState afterFeatureRemoval;
+    renderer->getFeatureState(afterFeatureRemoval, "source1", {}, "feature1");
+    ASSERT_TRUE(afterFeatureRemoval.empty());
+}
+
 TEST(Query, QuerySourceFeaturesOptionValidation) {
     QueryTest test;
 
