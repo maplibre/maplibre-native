@@ -9,6 +9,7 @@ import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.action.MapLibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
 import org.maplibre.android.testapp.utils.ResourceUtils.readRawResource
+import org.maplibre.android.testapp.utils.TestingAsyncUtils
 import org.junit.Assert
 import org.junit.Test
 import java.io.IOException
@@ -69,6 +70,21 @@ class StyleLoaderTest : EspressoTest() {
             } catch (exception: IOException) {
                 exception.printStackTrace()
             }
+        }
+    }
+
+    @Test
+    fun testLoadStyleFromAndroidAssetFileUri() {
+        validateTestSetup()
+        MapLibreMapAction.invoke(
+            maplibreMap
+        ) { uiController: UiController, maplibreMap: MapLibreMap ->
+            val expected = rule.activity.assets.open("fill_color_style.json").bufferedReader().use { it.readText() }
+            val uri = "file:///android_asset/fill_color_style.json"
+            maplibreMap.setStyle(Style.Builder().fromUri(uri))
+            TestingAsyncUtils.waitForLayer(uiController, mapView)
+            Assert.assertEquals("Style URI should match", uri, maplibreMap.style!!.uri)
+            Assert.assertEquals("Style json should match", expected, maplibreMap.style!!.json)
         }
     }
 }
