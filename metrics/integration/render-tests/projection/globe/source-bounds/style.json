@@ -1,0 +1,53 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "The checkerboard just below zoom 7, from a source with bounds: the globe cover asks for the zoom 7 tiles nearest the camera before the zoom reaches 7, and a bounded source must still create them; refused, the map is empty.",
+      "width": 256,
+      "height": 256
+    }
+  },
+  "sky": {
+    "atmosphere-blend": 0.0
+  },
+  "center": [
+    -151.855,
+    61.59
+  ],
+  "zoom": 6.95,
+  "projection": {
+    "type": "globe"
+  },
+  "sources": {
+    "vector_tiles": {
+      "type": "vector",
+      "tiles": [
+        "local://tiles/checkerboard.mvt"
+      ],
+      "bounds": [
+        -180,
+        -85.0511,
+        180,
+        85.0511
+      ]
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "ocean",
+      "type": "fill",
+      "source": "vector_tiles",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "black"
+      }
+    }
+  ]
+}

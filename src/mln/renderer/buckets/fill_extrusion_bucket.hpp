@@ -8,6 +8,7 @@
 #include <mln/gfx/index_buffer.hpp>
 #include <mln/shaders/segment.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 
 namespace mln {
 
@@ -25,6 +26,8 @@ using FillExtrusionLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attribut
 
 class FillExtrusionBucket final : public Bucket {
 public:
+    void setSubdivisionGranularity(const SubdivisionGranularitySetting& value) { subdivisionGranularity = value; }
+
     ~FillExtrusionBucket() override;
     using PossiblyEvaluatedPaintProperties = style::FillExtrusionPaintProperties::PossiblyEvaluated;
     using PossiblyEvaluatedLayoutProperties = style::FillExtrusionLayoutProperties::PossiblyEvaluated;
@@ -97,6 +100,7 @@ public:
     TriangleIndexVector& triangles = *sharedTriangles;
 
     SegmentVector triangleSegments;
+    SubdivisionGranularitySetting subdivisionGranularity;
     SegmentVector instanceSegments;
 
     std::unordered_map<std::string, FillExtrusionBinders> paintPropertyBinders;

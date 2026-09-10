@@ -35,6 +35,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_instanced.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern_instanced.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/globe_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/hillshade_prepare.hpp

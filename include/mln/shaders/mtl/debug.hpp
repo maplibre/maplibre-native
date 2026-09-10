@@ -50,9 +50,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const DebugUBO& debug [[buffer(idDebugUBO)]]) {
+                                device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
+                                device const DebugUBO& debug [[buffer(idDebugUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]]) {
 
-    const float4 position = debug.matrix * float4(float2(vertx.pos) * debug.overlay_scale, 0, 1);
+    const float4 position = projectTile(float2(vertx.pos) * debug.overlay_scale, projectionVector[uboIndex]);
 
     // This vertex shader expects a EXTENT x EXTENT quad,
     // The UV coordinates for the overlay texture can be calculated using that knowledge

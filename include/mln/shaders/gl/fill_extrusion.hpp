@@ -88,7 +88,7 @@ highp vec4 color = u_color;
     float z = t > 0.0 ? height : base;
     vec2 decimals = unpack_float(floor(a_decimals_ed.x / 2.0)) / 128.0;
 
-    gl_Position = u_matrix * vec4(a_pos + decimals, z, 1);
+    gl_Position = projectTileFor3D(a_pos + decimals, z);
 
     // Relative luminance (how dark/bright is the surface color?)
     float colorvalue = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;

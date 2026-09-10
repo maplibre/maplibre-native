@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/style/conversion.hpp>
+#include <mln/style/projection_definition.hpp>
 #include <mln/style/types.hpp>
 #include <mln/style/variable_anchor_offset_collection.hpp>
 #include <mln/util/color.hpp>
@@ -54,6 +55,11 @@ struct Converter<std::vector<Color>> {
 template <>
 struct Converter<Padding> {
     std::optional<Padding> operator()(const Convertible& value, Error& error) const;
+};
+
+template <>
+struct Converter<ProjectionDefinition> {
+    std::optional<ProjectionDefinition> operator()(const Convertible& value, Error& error) const;
 };
 
 template <>

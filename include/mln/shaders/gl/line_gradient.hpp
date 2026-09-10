@@ -83,6 +83,10 @@ layout (location = 5) in lowp vec2 a_offset;
 layout (location = 6) in mediump vec2 a_width;
 #endif
 
+#ifdef PROJECTION_GLOBE
+out float v_tile_x;
+#endif
+
 void main() {
     #ifndef HAS_UNIFORM_u_blur
 blur = unpack_mix_vec2(a_blur, u_blur_t);
@@ -149,8 +153,17 @@ mediump float width = u_width;
     mediump float t = 1.0 - abs(u);
     mediump vec2 offset2 = offset * a_extrude * scale * normal.y * mat2(t, -u, u, t);
 
+#ifdef PROJECTION_GLOBE
+    float adjustedThickness = projectLineThickness(pos.y);
+    vec4 projected_no_extrude = projectTile(pos + offset2 / u_ratio * adjustedThickness);
+    vec2 extrudedPos = pos + (offset2 + dist) / u_ratio * adjustedThickness;
+    gl_Position = projectTile(extrudedPos);
+    v_tile_x = antimeridianClipX(extrudedPos);
+    vec4 projected_extrude = gl_Position - projected_no_extrude;
+#else
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
     gl_Position = u_matrix * vec4(pos + offset2 / u_ratio, 0.0, 1.0) + projected_extrude;
+#endif
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -186,7 +199,16 @@ in lowp float blur;
 in lowp float opacity;
 #endif
 
+#ifdef PROJECTION_GLOBE
+in float v_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(v_tile_x)) {
+        discard;
+    }
+#endif
     #ifdef HAS_UNIFORM_u_blur
 lowp float blur = u_blur;
 #endif

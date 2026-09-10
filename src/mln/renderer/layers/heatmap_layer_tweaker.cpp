@@ -1,3 +1,5 @@
+#include <cmath>
+#include <mln/util/constants.hpp>
 #include <mln/renderer/layers/heatmap_layer_tweaker.hpp>
 
 #include <mln/gfx/context.hpp>
@@ -48,8 +50,12 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
     std::vector<HeatmapDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
+    const double latitudeScale = parameters.state.isGlobeRendering()
+                                     ? std::cos(util::deg2rad(parameters.state.getLatLng().latitude()))
+                                     : 1.0;
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -66,8 +72,15 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.fallbackMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {
@@ -79,7 +92,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
             .weight_t = std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
             .radius_t = std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            .pad1 = 0
+            .globe_extrude_scale = globeExtrudeScale(tileID, zoom, latitudeScale)
         };
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);
@@ -99,6 +112,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     }
 
     layerUniforms.set(idHeatmapDrawableUBO, drawableUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

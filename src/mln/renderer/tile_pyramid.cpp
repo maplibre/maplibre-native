@@ -62,8 +62,12 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
                          std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
+    const auto& subdivisionGranularity = parameters.subdivisionGranularity;
+    const bool relayout = needsRelayout || subdivisionGranularity != lastSubdivisionGranularity;
+    lastSubdivisionGranularity = subdivisionGranularity;
+
     // If we need a relayout, abandon any cached tiles; they're now stale.
-    if (needsRelayout) {
+    if (relayout) {
         cache.clear();
     }
 
@@ -71,7 +75,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // the cache (if they're not stale) or abandon them, and return.
     if (!needsRendering) {
         for (auto& entry : tiles) {
-            if (!needsRelayout) {
+            if (!relayout) {
                 // These tiles are invisible, we set optional necessity
                 // for them and thus suppress network requests on
                 // tiles expiration (see `OnlineFileRequest`).
@@ -163,7 +167,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             tile.setNecessity(necessity);
         }
 
-        if (needsRelayout) {
+        if (relayout) {
+            tile.setSubdivisionGranularity(subdivisionGranularity);
             tile.setLayers(layers);
         }
     };
@@ -175,11 +180,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // The min and max zoom for TileRange are based on the updateRenderables
     // algorithm. Tiles are created at the ideal tile zoom or at lower zoom
     // levels. Child tiles are used from the cache, but not created.
+    // A cover that picks each tile's zoom by its distance from the camera asks for tiles finer than the nominal
+    // zoom, up to the source's maximum; the globe cover does, like `TileLodMode::Distance`.
     std::optional<util::TileRange> tileRange = std::nullopt;
     if (bounds) {
-        int32_t maxZoom = (parameters.tileLodMode == TileLodMode::Distance)
-                              ? zoomRange.max
-                              : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
+        const bool variableZoom = parameters.tileLodMode == TileLodMode::Distance ||
+                                  parameters.transformState.isGlobeRendering();
+        const int32_t maxZoom = variableZoom ? zoomRange.max : std::min(tileZoom, static_cast<int32_t>(zoomRange.max));
         tileRange = util::TileRange::fromLatLngBounds(*bounds, zoomRange.min, maxZoom);
     }
     auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
@@ -190,6 +197,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         if (!tile) {
             tile = createTile(tileID, observer);
             if (!tile) return nullptr;
+            tile->setSubdivisionGranularity(subdivisionGranularity);
             tile->setLayers(layers);
         }
 
@@ -260,7 +268,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                 // If it requires re-layout, discard it asynchronously, otherwise keep it in the cache
                 const auto key = tilesIt->first;
                 if (std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped())) {
-                    if (needsRelayout) {
+                    if (relayout) {
                         cache.deferredRelease(std::move(tile));
                     } else {
                         tile->setNecessity(TileNecessity::Optional);

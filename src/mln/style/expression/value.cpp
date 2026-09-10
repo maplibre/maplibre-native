@@ -14,6 +14,7 @@ type::Type typeOf(const Value& value) {
         [&](const std::string&) -> type::Type { return type::String; },
         [&](const Color&) -> type::Type { return type::Color; },
         [&](const Padding&) -> type::Type { return type::Padding; },
+        [&](const ProjectionDefinition&) -> type::Type { return type::ProjectionDefinition; },
         [&](const VariableAnchorOffsetCollection&) -> type::Type { return type::VariableAnchorOffsetCollection; },
         [&](const Collator&) -> type::Type { return type::Collator; },
         [&](const Formatted&) -> type::Type { return type::Formatted; },
@@ -58,6 +59,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
                 [&](const Padding& p) { mln::style::conversion::stringify(writer, p); },
+                [&](const ProjectionDefinition& p) { mln::style::conversion::stringify(writer, p); },
                 [&](const VariableAnchorOffsetCollection& v) { mln::style::conversion::stringify(writer, v); },
                 [&](const Collator&) {
                     // Collators are excluded from constant folding and there's no Literal parser
@@ -130,6 +132,7 @@ mln::Value ValueConverter<mln::Value>::fromExpressionValue(const Value& value) {
     return value.match(
         [&](const Color& color) -> mln::Value { return color.serialize(); },
         [&](const Padding& padding) -> mln::Value { return padding.serialize(); },
+        [&](const ProjectionDefinition& projection) -> mln::Value { return projection.serialize(); },
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> mln::Value { return anchorOffset.serialize(); },
         [&](const Collator&) -> mln::Value {
             // fromExpressionValue can't be used for Collator values,
@@ -319,6 +322,10 @@ type::Type valueTypeToExpressionType<Color>() {
 template <>
 type::Type valueTypeToExpressionType<Padding>() {
     return type::Padding;
+}
+template <>
+type::Type valueTypeToExpressionType<ProjectionDefinition>() {
+    return type::ProjectionDefinition;
 }
 template <>
 type::Type valueTypeToExpressionType<VariableAnchorOffsetCollection>() {

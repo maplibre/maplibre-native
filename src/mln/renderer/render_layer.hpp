@@ -3,10 +3,12 @@
 #include <mln/renderer/render_pass.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/style/layer_properties.hpp>
+#include <mln/style/types.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 #include <mln/util/mat4.hpp>
 
 #include <mln/gfx/drawable.hpp>
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/util/tiny_unordered_map.hpp>
@@ -63,6 +65,12 @@ public:
     size_t end;
 };
 
+/// A symbol layer's `*-translate` in pixels, carried into placement the way GL JS passes `translation`.
+struct SymbolTranslate {
+    std::array<float, 2> offset{0, 0};
+    style::TranslateAnchorType anchor = style::TranslateAnchorType::Map;
+};
+
 class BucketPlacementData {
 public:
     std::reference_wrapper<Bucket> bucket;
@@ -70,6 +78,8 @@ public:
     std::shared_ptr<FeatureIndex> featureIndex;
     std::string sourceId;
     std::optional<SortKeyRange> sortKeyRange;
+    SymbolTranslate textTranslate;
+    SymbolTranslate iconTranslate;
 };
 
 using LayerPlacementData = std::list<BucketPlacementData>;
@@ -298,6 +308,10 @@ protected:
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;
+    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
+
+    /// Picks the shader variant for the state's projection; returns true and drops the drawables when it changed.
+    bool updateProjectionVariant(const TransformState&);
 
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;

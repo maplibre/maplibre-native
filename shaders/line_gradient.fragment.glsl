@@ -20,7 +20,16 @@ in highp float v_lineprogress;
 #pragma mapbox: define lowp float blur
 #pragma mapbox: define lowp float opacity
 
+#ifdef PROJECTION_GLOBE
+in float v_tile_x;
+#endif
+
 void main() {
+#ifdef PROJECTION_GLOBE
+    if (clippedAtAntimeridian(v_tile_x)) {
+        discard;
+    }
+#endif
     #pragma mapbox: initialize lowp float blur
     #pragma mapbox: initialize lowp float opacity
 
