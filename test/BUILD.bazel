@@ -1,6 +1,13 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
+PLUGIN_API_TESTS = [
+    "plugin/api.test.cpp",
+    "plugin/layout.test.cpp",
+    "plugin/property_binding.test.cpp",
+    "plugin/registry.test.cpp",
+]
+
 cc_library(
     name = "testutils",
     hdrs = glob(["include/mln/test/*.hpp"]),
@@ -50,9 +57,12 @@ cc_library(
         [
             "**/*.test.cpp",
         ],
-        exclude = ["renderer/wgsl_preprocessor.test.cpp"],
+        exclude = ["renderer/wgsl_preprocessor.test.cpp"] + PLUGIN_API_TESTS,
     ) + select({
         "//:webgpu_renderer": ["renderer/wgsl_preprocessor.test.cpp"],
+        "//conditions:default": [],
+    }) + select({
+        "//:plugins_enabled": PLUGIN_API_TESTS,
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
@@ -77,6 +87,28 @@ filegroup(
     visibility = [
         "//platform/ios/test/core:__pkg__",
     ],
+)
+
+cc_test(
+    name = "plugin-api",
+    srcs = PLUGIN_API_TESTS + ["plugin/main.cpp"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    target_compatible_with = select({
+        "//:plugins_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//:mbgl-core",
+        "@googletest//:gtest",
+    ] + select({
+        "@platforms//os:macos": [
+            "//platform/darwin:darwin-objcpp",
+            "//platform/default:mbgl-default",
+            "//platform/default:standalone-layer-manager",
+        ],
+        "@platforms//os:linux": ["//platform/linux:impl"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(

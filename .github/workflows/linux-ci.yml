@@ -226,7 +226,7 @@ jobs:
 
       - name: Run Bazel tests and generate coverage report
         run: |
-          # //plugins/... includes the plugin host, geometry, and render tests.
+          # //test:core includes plugin API tests; //plugins/... tests the examples.
           xvfb-run -a \
             bazel coverage --combined_report=lcov --instrumentation_filter="//:mbgl-core,//plugins" \
             --//:plugins=true \

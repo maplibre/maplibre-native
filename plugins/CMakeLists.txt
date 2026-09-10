@@ -20,8 +20,3 @@ target_link_libraries(mln-ngon-tests PRIVATE mln-ngon-layer)
 
 add_executable(mln-plugin-render-tests EXCLUDE_FROM_ALL render_test.cpp)
 target_link_libraries(mln-plugin-render-tests PRIVATE mln-ngon-layer mbgl-render-test)
-
-add_executable(mln-plugin-host-tests EXCLUDE_FROM_ALL
-    tests/registry.test.cpp tests/property_binding.test.cpp tests/api.test.cpp tests/layout.test.cpp)
-target_link_libraries(mln-plugin-host-tests PRIVATE mln-ngon-layer mbgl-vendor-googletest mbgl-compiler-options)
-target_include_directories(mln-plugin-host-tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
