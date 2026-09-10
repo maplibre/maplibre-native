@@ -323,8 +323,7 @@ bool appendShaders(const std::string& pluginID,
                     return candidate.id == binding.maximum_attribute_id;
                 });
             if (propertyName.empty() || !encodingSize || !boundProperties.emplace(propertyName).second ||
-                (packed && encodingSize > 8) ||
-                !boundPaintAttributes.emplace(binding.minimum_attribute_id).second ||
+                (packed && encodingSize > 8) || !boundPaintAttributes.emplace(binding.minimum_attribute_id).second ||
                 (!packed && !boundPaintAttributes.emplace(binding.maximum_attribute_id).second) ||
                 uniform == shader.uniformBlocks.end() || interpolationUniform == shader.uniformBlocks.end() ||
                 binding.uniform_byte_offset % encodingAlignment != 0 ||

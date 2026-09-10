@@ -191,8 +191,8 @@ void PluginLayout::createBucket(const ImagePositions&,
                     return attribute.id == binding.attribute_id;
                 });
             const auto size = attributeSize(binding.type);
-            valid = streamIt != bucket->vertexStreams.end() &&
-                    attributeIt != shaderIt->attributes.end() && attributeIt->type == binding.type && size > 0 &&
+            valid = streamIt != bucket->vertexStreams.end() && attributeIt != shaderIt->attributes.end() &&
+                    attributeIt->type == binding.type && size > 0 &&
                     hostAttributeIDs.find(binding.attribute_id) == hostAttributeIDs.end() &&
                     binding.byte_offset <= streamIt->second->getRawSize() &&
                     size <= streamIt->second->getRawSize() - binding.byte_offset &&
