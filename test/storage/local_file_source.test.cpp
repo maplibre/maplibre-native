@@ -4,20 +4,13 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/platform.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/scoped.hpp>
 
-#include <climits>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <gtest/gtest.h>
-
-#if defined(WIN32)
-#include <Windows.h>
-#ifndef PATH_MAX
-#define PATH_MAX MAX_PATH
-#endif /* PATH_MAX */
-#endif
 
 namespace {
 
@@ -94,13 +87,10 @@ TEST(LocalFileSource, NonEmptyFile) {
 TEST(LocalFileSource, NonASCIIPath) {
     const auto root = std::filesystem::temp_directory_path() / "mln-local-file-source-non-ascii";
 
-    struct Cleanup {
-        std::filesystem::path root;
-        ~Cleanup() {
-            std::error_code error;
-            std::filesystem::remove_all(root, error);
-        }
-    } cleanup{root};
+    const Scoped cleanup([&] {
+        std::error_code error;
+        std::filesystem::remove_all(root, error);
+    });
 
     std::error_code error;
     std::filesystem::remove_all(root, error);
@@ -130,6 +120,19 @@ TEST(LocalFileSource, NonASCIIPath) {
 
     loop.run();
 }
+
+#if defined(_WIN32)
+TEST(LocalFileSource, InvalidUTF8Path) {
+    util::RunLoop loop;
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
+    auto req = fs.request(Resource::style("file:///C:/%FF.json"), [&](Response res) {
+        EXPECT_NE(nullptr, res.error);
+        EXPECT_EQ(nullptr, res.data);
+        loop.stop();
+    });
+    loop.run();
+}
+#endif
 
 TEST(LocalFileSource, PartialFile) {
     util::RunLoop loop;

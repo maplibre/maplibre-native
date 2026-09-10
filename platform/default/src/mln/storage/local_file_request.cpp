@@ -19,7 +19,14 @@ void requestLocalFile(const std::string& path,
     Response response;
 #if defined(_WIN32)
     std::error_code error;
-    const auto status = std::filesystem::status(util::pathFromUTF8(path), error);
+    std::filesystem::file_status status;
+    try {
+        status = std::filesystem::status(util::pathFromUTF8(path), error);
+    } catch (const std::filesystem::filesystem_error& exception) {
+        response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, exception.what());
+        req.invoke(&FileSourceRequest::setResponse, response);
+        return;
+    }
     const bool notFound = status.type() == std::filesystem::file_type::not_found;
     const bool isDirectory = std::filesystem::is_directory(status);
 #else
