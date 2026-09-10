@@ -84,6 +84,34 @@ TEST(RunLoop, RunOnceBudget) {
     EXPECT_EQ((std::vector<int>{2, 1, 3}), order);
 }
 
+TEST(RunLoop, RunOnceMaximumBudget) {
+    RunLoop loop(RunLoop::Type::New);
+    int count = 0;
+    loop.invoke([&] { ++count; });
+    loop.invoke([&] { ++count; });
+
+    loop.runOnce(mln::Duration::max());
+    EXPECT_EQ(count, 2);
+}
+
+TEST(RunLoop, RunOnceBudgetNotifiesPlatform) {
+    RunLoop loop(RunLoop::Type::New);
+    int notifications = 0;
+    int count = 0;
+    loop.setPlatformCallback([&] { ++notifications; });
+    loop.invoke([&] { ++count; });
+    loop.invoke([&] { ++count; });
+    notifications = 0;
+
+    loop.runOnce(mln::Duration::zero());
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(notifications, 1);
+
+    loop.runOnce(mln::Duration::zero());
+    EXPECT_EQ(count, 2);
+    EXPECT_EQ(notifications, 1);
+}
+
 TEST(RunLoop, PlatformIntegration) {
     std::atomic<int> count1(0);
 

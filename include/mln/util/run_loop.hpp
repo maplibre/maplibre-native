@@ -53,7 +53,8 @@ public:
     /// At least one queued task runs. Tasks left behind stay queued and the
     /// loop is woken again, so the next runOnce() or run() picks them up.
     void runOnce(Duration budget) {
-        processDeadline = Clock::now() + budget;
+        const auto now = Clock::now();
+        processDeadline = budget > TimePoint::max() - now ? TimePoint::max() : now + budget;
         const Scoped clearDeadline([this] { processDeadline.reset(); });
         runOnce();
     }
@@ -138,6 +139,9 @@ private:
             if (ranTask && processDeadline && Clock::now() >= *processDeadline) {
                 // Re-arm the wake so the remaining tasks run on the next iteration.
                 wake();
+                if (platformCallback) {
+                    platformCallback();
+                }
                 break;
             }
             if (!highPriorityQueue.empty()) {
