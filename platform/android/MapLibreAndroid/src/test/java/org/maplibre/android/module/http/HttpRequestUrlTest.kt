@@ -1,8 +1,5 @@
 package org.maplibre.android.module.http
 
-import org.maplibre.android.MapLibreInjector
-import org.maplibre.android.http.HttpRequestUrl
-import org.maplibre.android.utils.ConfigUtils
 import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -10,11 +7,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.MapLibreInjector
+import org.maplibre.android.http.HttpRequestUrl
+import org.maplibre.android.utils.ConfigUtils
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class HttpRequestUrlTest : BaseTest() {
-
     @Before
     fun setUp() {
         MapLibreInjector.inject(mockk(relaxed = true), "pk.foobar", ConfigUtils.getMockedOptions())

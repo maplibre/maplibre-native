@@ -7,7 +7,6 @@ open class BaseTest {
         @JvmStatic
         @BeforeClass
         fun setup() {
-
         }
     }
 }

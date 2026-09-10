@@ -27,7 +27,9 @@ import java.net.URISyntaxException
  */
 
 // # --8<-- [start:class_declaration]
-class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.SnapshotReadyCallback {
+class MapSnapshotterHeatMapActivity :
+    AppCompatActivity(),
+    MapSnapshotter.SnapshotReadyCallback {
 // # --8<-- [end:class_declaration]
     private var mapSnapshotter: MapSnapshotter? = null
 
@@ -37,28 +39,36 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
         setContentView(R.layout.activity_map_snapshotter_marker)
         val container = findViewById<View>(R.id.container)
         container.viewTreeObserver
-            .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    Timber.i("Starting snapshot")
-                    val builder = Style.Builder().fromUri(TestStyles.AMERICANA)
-                        .withSource(earthquakeSource!!)
-                        .withLayerAbove(heatmapLayer, "water")
-                    mapSnapshotter = MapSnapshotter(
-                        applicationContext,
-                        MapSnapshotter.Options(container.measuredWidth, container.measuredHeight)
-                            .withStyleBuilder(builder)
-                            .withCameraPosition(
-                                CameraPosition.Builder()
-                                    .target(LatLng(15.0, (-94).toDouble()))
-                                    .zoom(5.0)
-                                    .padding(1.0, 1.0, 1.0, 1.0)
-                                    .build()
+            .addOnGlobalLayoutListener(
+                object : OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        container.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        Timber.i("Starting snapshot")
+                        val builder =
+                            Style
+                                .Builder()
+                                .fromUri(TestStyles.AMERICANA)
+                                .withSource(earthquakeSource!!)
+                                .withLayerAbove(heatmapLayer, "water")
+                        mapSnapshotter =
+                            MapSnapshotter(
+                                applicationContext,
+                                MapSnapshotter
+                                    .Options(container.measuredWidth, container.measuredHeight)
+                                    .withStyleBuilder(builder)
+                                    .withCameraPosition(
+                                        CameraPosition
+                                            .Builder()
+                                            .target(LatLng(15.0, (-94).toDouble()))
+                                            .zoom(5.0)
+                                            .padding(1.0, 1.0, 1.0, 1.0)
+                                            .build(),
+                                    ),
                             )
-                    )
-                    mapSnapshotter!!.start(this@MapSnapshotterHeatMapActivity)
-                }
-            })
+                        mapSnapshotter!!.start(this@MapSnapshotterHeatMapActivity)
+                    }
+                },
+            )
     }
     // # --8<-- [end:onCreate]
 
@@ -71,47 +81,54 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
             layer.setProperties(
                 PropertyFactory.heatmapColor(
                     Expression.interpolate(
-                        Expression.linear(), Expression.heatmapDensity(),
-                        Expression.literal(0), Expression.rgba(33, 102, 172, 0),
-                        Expression.literal(0.2), Expression.rgb(103, 169, 207),
-                        Expression.literal(0.4), Expression.rgb(209, 229, 240),
-                        Expression.literal(0.6), Expression.rgb(253, 219, 199),
-                        Expression.literal(0.8), Expression.rgb(239, 138, 98),
-                        Expression.literal(1), Expression.rgb(178, 24, 43)
-                    )
+                        Expression.linear(),
+                        Expression.heatmapDensity(),
+                        Expression.literal(0),
+                        Expression.rgba(33, 102, 172, 0),
+                        Expression.literal(0.2),
+                        Expression.rgb(103, 169, 207),
+                        Expression.literal(0.4),
+                        Expression.rgb(209, 229, 240),
+                        Expression.literal(0.6),
+                        Expression.rgb(253, 219, 199),
+                        Expression.literal(0.8),
+                        Expression.rgb(239, 138, 98),
+                        Expression.literal(1),
+                        Expression.rgb(178, 24, 43),
+                    ),
                 ),
                 PropertyFactory.heatmapWeight(
                     Expression.interpolate(
                         Expression.linear(),
                         Expression.get("mag"),
                         Expression.stop(0, 0),
-                        Expression.stop(6, 1)
-                    )
+                        Expression.stop(6, 1),
+                    ),
                 ),
                 PropertyFactory.heatmapIntensity(
                     Expression.interpolate(
                         Expression.linear(),
                         Expression.zoom(),
                         Expression.stop(0, 1),
-                        Expression.stop(9, 3)
-                    )
+                        Expression.stop(9, 3),
+                    ),
                 ),
                 PropertyFactory.heatmapRadius(
                     Expression.interpolate(
                         Expression.linear(),
                         Expression.zoom(),
                         Expression.stop(0, 2),
-                        Expression.stop(9, 20)
-                    )
+                        Expression.stop(9, 20),
+                    ),
                 ),
                 PropertyFactory.heatmapOpacity(
                     Expression.interpolate(
                         Expression.linear(),
                         Expression.zoom(),
                         Expression.stop(7, 1),
-                        Expression.stop(9, 0)
-                    )
-                )
+                        Expression.stop(9, 0),
+                    ),
+                ),
             )
             return layer
         }

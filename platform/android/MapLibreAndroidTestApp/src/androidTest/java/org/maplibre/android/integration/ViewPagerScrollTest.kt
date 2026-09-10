@@ -5,12 +5,12 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import org.maplibre.android.testapp.activity.fragment.ViewPagerActivity
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.activity.fragment.ViewPagerActivity
 
 /**
  * Regression test that validates MapFragment integration with a ViewPager
@@ -18,7 +18,6 @@ import org.junit.runner.RunWith
 @Ignore("https://github.com/maplibre/maplibre-native/issues/4254")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class ViewPagerScrollTest : BaseIntegrationTest() {
-
     @get:Rule
     var activityRule: ActivityTestRule<ViewPagerActivity> = ActivityTestRule(ViewPagerActivity::class.java)
 
@@ -51,8 +50,9 @@ class ViewPagerScrollTest : BaseIntegrationTest() {
         if (!found) {
             throw AssertionError("Tab '$text' not found after ${TIMEOUT_UI_SEARCH_WAIT}ms")
         }
-        val tab = device.findObject(By.text(text))
-            ?: throw AssertionError("Tab '$text' was detected but findObject returned null")
+        val tab =
+            device.findObject(By.text(text))
+                ?: throw AssertionError("Tab '$text' was detected but findObject returned null")
         tab.click()
         // Small delay to allow ViewPager to settle after tab click
         device.waitForIdle(500)

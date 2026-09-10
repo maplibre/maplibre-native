@@ -10,8 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.Polyline
 import org.maplibre.android.annotations.PolylineOptions
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import java.util.*
@@ -25,7 +25,7 @@ import java.util.*
  */
 class PolylineActivity : AppCompatActivity() {
     private var polylines: MutableList<Polyline>? = null
-    private var polylineOptions: ArrayList<PolylineOptions?>? = ArrayList()
+    private var polylineOptions: ArrayList<PolylineOptions>? = ArrayList()
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var fullAlpha = true
@@ -47,13 +47,14 @@ class PolylineActivity : AppCompatActivity() {
             maplibreMap = it
             it.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
             it.setOnPolylineClickListener { polyline: Polyline ->
-                Toast.makeText(
-                    this@PolylineActivity,
-                    "You clicked on polyline with id = " + polyline.id,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast
+                    .makeText(
+                        this@PolylineActivity,
+                        "You clicked on polyline with id = " + polyline.id,
+                        Toast.LENGTH_SHORT,
+                    ).show()
             }
-            polylines = it.addPolylines(polylineOptions!!)
+            polylines = it.addPolylines(polylineOptions!!).toMutableList()
         }
         val fab = findViewById<View>(R.id.fab)
         fab?.setOnClickListener {
@@ -69,14 +70,14 @@ class PolylineActivity : AppCompatActivity() {
                 }
                 polylineOptions!!.clear()
                 polylineOptions!!.add(allPolylines.random())
-                polylines = maplibreMap.addPolylines(polylineOptions!!)
+                polylines = maplibreMap.addPolylines(polylineOptions!!).toMutableList()
             }
         }
     }
 
-    private val allPolylines: List<PolylineOptions?>
+    private val allPolylines: List<PolylineOptions>
         get() {
-            val options: MutableList<PolylineOptions?> = ArrayList()
+            val options: MutableList<PolylineOptions> = ArrayList()
             options.add(generatePolyline(ANDORRA, LUXEMBOURG, "#F44336"))
             options.add(generatePolyline(ANDORRA, MONACO, "#FF5722"))
             options.add(generatePolyline(MONACO, VATICAN_CITY, "#673AB7"))
@@ -86,7 +87,11 @@ class PolylineActivity : AppCompatActivity() {
             return options
         }
 
-    private fun generatePolyline(start: LatLng, end: LatLng, color: String): PolylineOptions {
+    private fun generatePolyline(
+        start: LatLng,
+        end: LatLng,
+        color: String,
+    ): PolylineOptions {
         val line = PolylineOptions()
         line.add(start)
         line.add(end)
@@ -148,6 +153,7 @@ class PolylineActivity : AppCompatActivity() {
                 polylines!!.clear()
                 true
             }
+
             R.id.action_id_alpha -> {
                 fullAlpha = !fullAlpha
                 for (p in polylines!!) {
@@ -155,6 +161,7 @@ class PolylineActivity : AppCompatActivity() {
                 }
                 true
             }
+
             R.id.action_id_color -> {
                 color = !color
                 for (p in polylines!!) {
@@ -162,6 +169,7 @@ class PolylineActivity : AppCompatActivity() {
                 }
                 true
             }
+
             R.id.action_id_width -> {
                 width = !width
                 for (p in polylines!!) {
@@ -169,6 +177,7 @@ class PolylineActivity : AppCompatActivity() {
                 }
                 true
             }
+
             R.id.action_id_visible -> {
                 showPolylines = !showPolylines
                 for (p in polylines!!) {
@@ -177,7 +186,10 @@ class PolylineActivity : AppCompatActivity() {
                 }
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
     }
 

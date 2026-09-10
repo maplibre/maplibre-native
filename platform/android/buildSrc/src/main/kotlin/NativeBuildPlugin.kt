@@ -65,8 +65,8 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                         "-DANDROID_TOOLCHAIN=clang",
                                         "-DANDROID_STL=$stl",
                                         "-DANDROID_CPP_FEATURES=exceptions",
-                                        "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-                                    )
+                                        "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+                                    ),
                                 )
 
                                 cFlags.add("-Qunused-arguments")
@@ -79,7 +79,9 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                 if (abi != "all") {
                                     abiFilters.addAll(abi.split(" "))
                                 } else {
-                                    if (project.hasProperty("android.injected.invoked.from.ide") && project.hasProperty("android.injected.build.abi")) {
+                                    if (project.hasProperty("android.injected.invoked.from.ide") &&
+                                        project.hasProperty("android.injected.build.abi")
+                                    ) {
                                         abi = project.property("android.injected.build.abi") as String
                                         abiFilters.add(abi.split(",").first())
                                     } else {
@@ -115,8 +117,8 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                         "-DANDROID_TOOLCHAIN=clang",
                                         "-DANDROID_STL=$stl",
                                         "-DANDROID_CPP_FEATURES=exceptions",
-                                        "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-                                    )
+                                        "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
+                                    ),
                                 )
 
                                 cFlags.add("-Qunused-arguments")
@@ -129,7 +131,9 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
                                 if (abi != "all") {
                                     abiFilters.addAll(abi.split(" "))
                                 } else {
-                                    if (project.hasProperty("android.injected.invoked.from.ide") && project.hasProperty("android.injected.build.abi")) {
+                                    if (project.hasProperty("android.injected.invoked.from.ide") &&
+                                        project.hasProperty("android.injected.build.abi")
+                                    ) {
                                         abi = project.property("android.injected.build.abi") as String
                                         abiFilters.add(abi.split(",").first())
                                     } else {

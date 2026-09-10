@@ -1,9 +1,9 @@
 package org.maplibre.android.geometry
 
-import org.maplibre.android.utils.MockParcel
 import org.junit.Assert
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.utils.MockParcel
 
 class ProjectedMetersTest : BaseTest() {
     @Test
@@ -18,14 +18,14 @@ class ProjectedMetersTest : BaseTest() {
         Assert.assertEquals(
             "projectedMeters is not equal to a LatLng",
             projectedMeters.equals(
-                LAT_LNG_NULL_ISLAND
+                LAT_LNG_NULL_ISLAND,
             ),
-            false
+            false,
         )
         Assert.assertEquals(
             "projectedMeters is equal to itself",
             projectedMeters.equals(projectedMeters),
-            true
+            true,
         )
     }
 
@@ -60,7 +60,7 @@ class ProjectedMetersTest : BaseTest() {
         Assert.assertEquals(
             "toString should match",
             "ProjectedMeters [northing=1.0, easting=1.0]",
-            meters.toString()
+            meters.toString(),
         )
     }
 

@@ -5,17 +5,16 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import androidx.test.uiautomator.UiSelector
 import org.junit.Ignore
-import org.maplibre.android.testapp.activity.fragment.FragmentBackStackActivity
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.activity.fragment.FragmentBackStackActivity
 
 /**
  * Regression test that validates MapFragment integration on the backstack
  */
 @RunWith(AndroidJUnit4ClassRunner::class)
 class FragmentBackStackTest : BaseIntegrationTest() {
-
     @get:Rule
     var activityRule: ActivityTestRule<FragmentBackStackActivity> = ActivityTestRule(FragmentBackStackActivity::class.java)
 

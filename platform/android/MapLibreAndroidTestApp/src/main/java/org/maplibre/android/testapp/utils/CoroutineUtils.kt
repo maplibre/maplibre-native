@@ -22,13 +22,15 @@ suspend fun MapView.setStyleSuspend(styleUrl: String): Boolean =
             }
         }
 
-        listener = MapView.OnDidFinishLoadingStyleListener {
-            resume(true)
-        }
+        listener =
+            MapView.OnDidFinishLoadingStyleListener {
+                resume(true)
+            }
 
-        errorListener = MapView.OnDidFailLoadingMapListener {
-            resume(false)
-        }
+        errorListener =
+            MapView.OnDidFailLoadingMapListener {
+                resume(false)
+            }
 
         addOnDidFinishLoadingStyleListener(listener)
         addOnDidFailLoadingMapListener(errorListener)
@@ -38,23 +40,29 @@ suspend fun MapView.setStyleSuspend(styleUrl: String): Boolean =
             removeOnDidFinishLoadingStyleListener(listener)
             removeOnDidFailLoadingMapListener(errorListener)
         }
-
     }
 
-suspend fun MapLibreMap.animateCameraSuspend(cameraUpdate: CameraUpdate, durationMs: Int): Unit =
+suspend fun MapLibreMap.animateCameraSuspend(
+    cameraUpdate: CameraUpdate,
+    durationMs: Int,
+): Unit =
     suspendCancellableCoroutine { continuation ->
-        animateCamera(cameraUpdate, durationMs, object : CancelableCallback {
-            var resumed = false
+        animateCamera(
+            cameraUpdate,
+            durationMs,
+            object : CancelableCallback {
+                var resumed = false
 
-            override fun onCancel() {
-                continuation.cancel()
-            }
-
-            override fun onFinish() {
-                if (!resumed) {
-                    resumed = true
-                    continuation.resume(Unit)
+                override fun onCancel() {
+                    continuation.cancel()
                 }
-            }
-        })
+
+                override fun onFinish() {
+                    if (!resumed) {
+                        resumed = true
+                        continuation.resume(Unit)
+                    }
+                }
+            },
+        )
     }

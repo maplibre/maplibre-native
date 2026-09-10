@@ -1,10 +1,10 @@
 package org.maplibre.android.annotations
 
-import org.maplibre.android.maps.MapLibreMap
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.maplibre.android.BaseTest
+import org.maplibre.android.maps.MapLibreMap
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 
@@ -12,16 +12,18 @@ class AnnotationTest : BaseTest() {
     @InjectMocks
     private val maplibreMap = Mockito.mock(MapLibreMap::class.java)
     private var annotation: Annotation? = null
-    private val compare: Annotation = object : Annotation() {
-        override fun getId(): Long {
-            return 1
+    private val compare: Annotation =
+        object : Annotation() {
+            init {
+                id = 1
+            }
         }
-    }
 
     @Before
     fun beforeTest() {
-        annotation = object : Annotation() { // empty child
-        }
+        annotation =
+            object : Annotation() { // empty child
+            }
     }
 
     @Test
@@ -35,7 +37,7 @@ class AnnotationTest : BaseTest() {
         annotation!!.setMapLibreMap(maplibreMap)
         annotation!!.remove()
         Mockito.verify(maplibreMap, Mockito.times(1)).removeAnnotation(
-            annotation!!
+            annotation!!,
         )
     }
 
@@ -44,7 +46,7 @@ class AnnotationTest : BaseTest() {
         annotation!!.id = 1
         annotation!!.remove()
         Mockito.verify(maplibreMap, Mockito.times(0)).removeAnnotation(
-            annotation!!
+            annotation!!,
         )
     }
 

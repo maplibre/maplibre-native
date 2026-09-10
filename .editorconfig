@@ -1,0 +1,12 @@
+[*]
+
+[{*.gradle.kts,*.kt,*.kts,*.main.kts}]
+ktlint_standard_kdoc = disabled
+ktlint_standard_no-wildcard-imports = disabled
+
+# PackageInfo.kt are considered empty files since they only declare the package without any content
+ktlint_standard_no-empty-file = disabled
+
+[**/generated/**]
+generated_code = true
+ktlint = disabled

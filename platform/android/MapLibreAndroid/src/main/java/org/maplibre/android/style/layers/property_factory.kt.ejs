@@ -1,0 +1,125 @@
+<%
+  const paintProperties = locals.paintProperties;
+  const layoutProperties = locals.layoutProperties;
+  const locationIndicator = locals.locationIndicator;
+-%>
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
+
+<% if (locationIndicator) { -%>
+package org.maplibre.android.location
+<% } else { -%>
+package org.maplibre.android.style.layers
+<% } -%>
+
+import androidx.annotation.ColorInt
+import org.maplibre.android.style.expressions.Expression
+import org.maplibre.android.style.types.Formatted
+<% if (locationIndicator) { -%>
+import org.maplibre.android.style.layers.LayoutPropertyValue
+import org.maplibre.android.style.layers.PaintPropertyValue
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyValue
+<% } -%>
+import org.maplibre.android.utils.ColorUtils.colorToRgbaString
+
+/**
+ * Constructs paint/layout properties for Layers
+ *
+ * @see [Layer style documentation](https://maplibre.org/maplibre-style-spec/#layers)
+ */
+<% if (locationIndicator) { -%>
+internal object LocationPropertyFactory {
+<% } else { -%>
+object PropertyFactory {
+<% } -%>
+
+    /**
+     * Set the property visibility.
+     *
+     * @param value the visibility value
+     * @return property wrapper around visibility
+     */
+    @JvmStatic
+    fun visibility(@Property.VISIBILITY value: String?): PropertyValue<String> = LayoutPropertyValue("visibility", value)
+
+<% for (const property of paintProperties) { -%>
+<% if (property.type == 'color') { -%>
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param value a int color value
+     * @return property wrapper around String color
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(@ColorInt value: Int): PropertyValue<String> =
+        PaintPropertyValue("<%-  property.name %>", colorToRgbaString(value))
+
+<% } -%>
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param value a <%- propertyKotlinBoxedType(property) %> value
+     * @return property wrapper around <%- propertyKotlinBoxedType(property) %>
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(<%- propertyTypeAnnotation(property) %><%- iff(() => propertyTypeAnnotation(property), " ") %>value: <%- propertyKotlinBoxedType(property) %>?): PropertyValue<<%- propertyKotlinBoxedType(property) %>> =
+        PaintPropertyValue("<%-  property.name %>", value)
+
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param expression an expression statement
+     * @return property wrapper around an expression statement
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(expression: Expression?): PropertyValue<Expression> =
+        PaintPropertyValue("<%-  property.name %>", expression)
+
+<% } -%>
+<% for (const property of layoutProperties) { -%>
+<% if (property.type === 'formatted') { -%>
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param value a String value
+     * @return property wrapper around String
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(value: String?): PropertyValue<String> =
+        LayoutPropertyValue("<%-  property.name %>", value)
+
+<% } -%>
+<% if (property.type === 'padding') { -%>
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param value a Float value
+     * @return property wrapper around Float
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(value: Float?): PropertyValue<Float> =
+        LayoutPropertyValue("<%-  property.name %>", value)
+
+<% } -%>
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param value a <%- propertyKotlinBoxedType(property) %> value
+     * @return property wrapper around <%- propertyKotlinBoxedType(property) %>
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(<%- propertyTypeAnnotation(property) %><%- iff(() => propertyTypeAnnotation(property), " ") %>value: <%- propertyKotlinBoxedType(property) %>?): PropertyValue<<%- propertyKotlinBoxedType(property) %>> =
+        LayoutPropertyValue("<%-  property.name %>", value)
+
+    /**
+     * <%- kotlinDoc(propertyFactoryMethodDoc(property)) %>
+     *
+     * @param value a <%- propertyKotlinBoxedType(property) %> value
+     * @return property wrapper around <%- propertyKotlinBoxedType(property) %>
+     */
+    @JvmStatic
+    fun <%- camelizeWithLeadingLowercase(property.name) %>(value: Expression?): PropertyValue<Expression> =
+        LayoutPropertyValue("<%-  property.name %>", value)
+
+<% } -%>
+}

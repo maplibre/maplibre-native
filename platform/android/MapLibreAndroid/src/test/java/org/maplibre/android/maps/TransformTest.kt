@@ -1,21 +1,20 @@
 package org.maplibre.android.maps
 
 import android.os.Looper.getMainLooper
-import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
 import io.mockk.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLng
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class TransformTest : BaseTest() {
-
     private lateinit var mapView: MapView
     private lateinit var nativeMapView: NativeMap
     private lateinit var transform: Transform
@@ -197,15 +196,14 @@ class TransformTest : BaseTest() {
         val target = LatLng(1.0, 2.0)
         val expected = CameraPosition.Builder().target(target).build()
 
-        val callback = object : MapLibreMap.CancelableCallback {
-            override fun onCancel() {
-                throw IllegalStateException("onCancel shouldn't be called from onFinish")
-            }
+        val callback =
+            object : MapLibreMap.CancelableCallback {
+                override fun onCancel(): Unit = throw IllegalStateException("onCancel shouldn't be called from onFinish")
 
-            override fun onFinish() {
-                transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, null)
+                override fun onFinish() {
+                    transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, null)
+                }
             }
-        }
         transform.animateCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(expected), 500, callback)
     }
 }

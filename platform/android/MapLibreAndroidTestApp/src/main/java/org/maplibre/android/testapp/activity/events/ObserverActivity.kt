@@ -3,23 +3,25 @@ package org.maplibre.android.testapp.activity.events
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import org.maplibre.android.log.Logger
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.RenderingStats
 import org.maplibre.android.maps.Style
-import org.maplibre.android.tile.TileOperation
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.android.tile.TileOperation
 import java.util.*
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
-import org.maplibre.android.log.Logger
-import org.maplibre.android.maps.RenderingStats
-import org.maplibre.android.maps.MapLibreMap
 
 // # --8<-- [start:ObserverActivity]
+
 /**
  * Test activity showcasing logging observer actions from the core
  */
-class ObserverActivity : AppCompatActivity(),
+class ObserverActivity :
+    AppCompatActivity(),
     MapView.OnPreCompileShaderListener,
     MapView.OnPostCompileShaderListener,
     MapView.OnTileActionListener,
@@ -57,24 +59,28 @@ class ObserverActivity : AppCompatActivity(),
         // # --8<-- [end:addListeners]
 
         // # --8<-- [start:renderStatsTracker]
-        renderStatsTracker.setReportFields(listOf(
-            "encodingTime",
-            "renderingTime",
-            "numDrawCalls",
-            "numActiveTextures",
-            "numBuffers",
-            "memTextures",
-            "memBuffers"
-        ))
+        renderStatsTracker.setReportFields(
+            listOf(
+                "encodingTime",
+                "renderingTime",
+                "numDrawCalls",
+                "numActiveTextures",
+                "numBuffers",
+                "memTextures",
+                "memBuffers",
+            ),
+        )
 
         renderStatsTracker.setReportListener { _, _, avg ->
             Logger.i(TAG, "RenderStatsReport - avg - ${avg.nonZeroValuesString()}")
         }
 
-        renderStatsTracker.setThresholds(hashMapOf(
-            "numDrawCalls" to 1000,
-            "totalBuffers" to 1000L
-        ))
+        renderStatsTracker.setThresholds(
+            hashMapOf(
+                "numDrawCalls" to 1000,
+                "totalBuffers" to 1000L,
+            ),
+        )
 
         renderStatsTracker.setThresholdExceededListener { exceededValues, _ ->
             Logger.i(TAG, "Exceeded render values $exceededValues")
@@ -85,7 +91,7 @@ class ObserverActivity : AppCompatActivity(),
 
         mapView.getMapAsync {
             it.setStyle(
-                Style.Builder().fromUri(TestStyles.DEMOTILES)
+                Style.Builder().fromUri(TestStyles.DEMOTILES),
             )
             it.enableRenderingStatsView(true)
         }
@@ -103,8 +109,8 @@ class ObserverActivity : AppCompatActivity(),
     private fun printActionJournal(map: MapLibreMap) {
         // configure using `MapLibreMapOptions.actionJournal*` methods
 
-        Logger.i(TAG,"ActionJournal files: \n${map.actionJournalLogFiles.joinToString("\n")}")
-        Logger.i(TAG,"ActionJournal : \n${map.actionJournalLog.joinToString("\n")}")
+        Logger.i(TAG, "ActionJournal files: \n${map.actionJournalLogFiles.joinToString("\n")}")
+        Logger.i(TAG, "ActionJournal : \n${map.actionJournalLog.joinToString("\n")}")
 
         // print only the newest events on each call
         map.clearActionJournalLog()
@@ -114,50 +120,86 @@ class ObserverActivity : AppCompatActivity(),
     private val shaderTimes: HashMap<String, TimeMark> = HashMap()
 
     // # --8<-- [start:mapEvents]
-    override fun onPreCompileShader(id: Int, type: Int, defines: String) {
-        shaderTimes["${id}-${type}-${defines}"] = TimeSource.Monotonic.markNow()
-        Logger.i(TAG, "A new shader is being compiled, shaderID:${id}, backend type:${type}, program configuration:${defines}")
+    override fun onPreCompileShader(
+        id: Int,
+        type: Int,
+        defines: String,
+    ) {
+        shaderTimes["$id-$type-$defines"] = TimeSource.Monotonic.markNow()
+        Logger.i(TAG, "A new shader is being compiled, shaderID:$id, backend type:$type, program configuration:$defines")
     }
 
-    override fun onPostCompileShader(id: Int, type: Int, defines: String) {
-        val startTime = shaderTimes.get("${id}-${type}-${defines}")
+    override fun onPostCompileShader(
+        id: Int,
+        type: Int,
+        defines: String,
+    ) {
+        val startTime = shaderTimes.get("$id-$type-$defines")
         if (startTime != null) {
-            Logger.i(TAG, "A shader has been compiled in ${startTime.elapsedNow()}, shaderID:${id}, backend type:${type}, program configuration:${defines}")
+            Logger.i(
+                TAG,
+                "A shader has been compiled in ${startTime.elapsedNow()}, shaderID:$id, backend type:$type, program configuration:$defines",
+            )
         }
     }
 
-    override fun onGlyphsRequested(fontStack: Array<String>, rangeStart: Int, rangeEnd: Int) {
+    override fun onGlyphsRequested(
+        fontStack: Array<String>,
+        rangeStart: Int,
+        rangeEnd: Int,
+    ) {
         Logger.i(TAG, "Glyphs are being requested for the font stack $fontStack, ranging from $rangeStart to $rangeEnd")
     }
 
-    override fun onGlyphsLoaded(fontStack: Array<String>, rangeStart: Int, rangeEnd: Int) {
+    override fun onGlyphsLoaded(
+        fontStack: Array<String>,
+        rangeStart: Int,
+        rangeEnd: Int,
+    ) {
         Logger.i(TAG, "Glyphs have been loaded for the font stack $fontStack, ranging from $rangeStart to $rangeEnd")
     }
 
-    override fun onSpriteRequested(id: String, url: String) {
+    override fun onSpriteRequested(
+        id: String,
+        url: String,
+    ) {
         Logger.i(TAG, "The sprite $id has been requested from $url")
     }
 
-    override fun onSpriteLoaded(id: String, url: String) {
+    override fun onSpriteLoaded(
+        id: String,
+        url: String,
+    ) {
         Logger.i(TAG, "The sprite $id has been loaded from $url")
     }
 
-    override fun onTileAction(op: TileOperation, x: Int, y: Int, z: Int, wrap: Int, overscaledZ: Int, sourceID: String) {
-        val tile = "X:${x}, Y:${y}, Z:${z}, Wrap:${wrap}, OverscaledZ:${overscaledZ}, SourceID:${sourceID}"
+    override fun onTileAction(
+        op: TileOperation,
+        x: Int,
+        y: Int,
+        z: Int,
+        wrap: Int,
+        overscaledZ: Int,
+        sourceID: String,
+    ) {
+        val tile = "X:$x, Y:$y, Z:$z, Wrap:$wrap, OverscaledZ:$overscaledZ, SourceID:$sourceID"
         when (op) {
-            TileOperation.RequestedFromCache -> Logger.i(TAG, "Requesting tile ${tile} from the cache")
-            TileOperation.RequestedFromNetwork -> Logger.i(TAG, "Requesting tile ${tile} from the network")
-            TileOperation.LoadFromCache -> Logger.i(TAG, "Loading tile ${tile}, requested from the cache")
-            TileOperation.LoadFromNetwork -> Logger.i(TAG, "Loading tile ${tile}, requested from the network")
-            TileOperation.StartParse -> Logger.i(TAG, "Parsing tile ${tile}")
-            TileOperation.EndParse -> Logger.i(TAG, "Completed parsing tile ${tile}")
-            TileOperation.Error -> Logger.e(TAG, "An error occured during proccessing for tile ${tile}")
-            TileOperation.Cancelled -> Logger.i(TAG, "Pending work on tile ${tile} was cancelled")
-            TileOperation.NullOp -> Logger.e(TAG, "An unknown tile operation was emitted for tile ${tile}")
+            TileOperation.RequestedFromCache -> Logger.i(TAG, "Requesting tile $tile from the cache")
+            TileOperation.RequestedFromNetwork -> Logger.i(TAG, "Requesting tile $tile from the network")
+            TileOperation.LoadFromCache -> Logger.i(TAG, "Loading tile $tile, requested from the cache")
+            TileOperation.LoadFromNetwork -> Logger.i(TAG, "Loading tile $tile, requested from the network")
+            TileOperation.StartParse -> Logger.i(TAG, "Parsing tile $tile")
+            TileOperation.EndParse -> Logger.i(TAG, "Completed parsing tile $tile")
+            TileOperation.Error -> Logger.e(TAG, "An error occured during proccessing for tile $tile")
+            TileOperation.Cancelled -> Logger.i(TAG, "Pending work on tile $tile was cancelled")
+            TileOperation.NullOp -> Logger.e(TAG, "An unknown tile operation was emitted for tile $tile")
         }
     }
 
-    override fun onDidFinishRenderingFrame(fully: Boolean, stats: RenderingStats) {
+    override fun onDidFinishRenderingFrame(
+        fully: Boolean,
+        stats: RenderingStats,
+    ) {
         renderStatsTracker.addFrame(stats)
     }
 

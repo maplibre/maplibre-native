@@ -15,6 +15,7 @@ androidxPrint = "1.1.0"
 leakCanary = "2.14"
 junit = "4.13.2"
 mockito = "5.23.0"
+mockitoKotlin = "6.1.0"
 mockk = "1.14.9"
 robolectric = "4.16.1"
 timber = "5.0.1"
@@ -38,6 +39,7 @@ maplibreNavigation = { group = "com.github.maplibre.maplibre-navigation-android"
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 assertjcore = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }

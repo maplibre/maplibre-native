@@ -4,34 +4,39 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import org.maplibre.android.testapp.R
 
-class ItemClickSupport private constructor(private val recyclerView: RecyclerView) {
+class ItemClickSupport private constructor(
+    private val recyclerView: RecyclerView,
+) {
     private var onItemClickListener: OnItemClickListener? = null
     private var onItemLongClickListener: OnItemLongClickListener? = null
-    private val onClickListener = View.OnClickListener { view ->
-        onItemClickListener?.let {
-            val holder = recyclerView.getChildViewHolder(view)
-            it.onItemClicked(recyclerView, holder.bindingAdapterPosition, view)
-        }
-    }
-    private val onLongClickListener = View.OnLongClickListener { view ->
-        onItemLongClickListener?.let {
-            val holder = recyclerView.getChildViewHolder(view)
-            it.onItemLongClicked(recyclerView, holder.bindingAdapterPosition, view)
-        }
-        false
-    }
-    private val attachListener = object : RecyclerView.OnChildAttachStateChangeListener {
-        override fun onChildViewAttachedToWindow(view: View) {
+    private val onClickListener =
+        View.OnClickListener { view ->
             onItemClickListener?.let {
-                view.setOnClickListener(onClickListener)
-            }
-            onItemLongClickListener?.let {
-                view.setOnLongClickListener(onLongClickListener)
+                val holder = recyclerView.getChildViewHolder(view)
+                it.onItemClicked(recyclerView, holder.bindingAdapterPosition, view)
             }
         }
+    private val onLongClickListener =
+        View.OnLongClickListener { view ->
+            onItemLongClickListener?.let {
+                val holder = recyclerView.getChildViewHolder(view)
+                it.onItemLongClicked(recyclerView, holder.bindingAdapterPosition, view)
+            }
+            false
+        }
+    private val attachListener =
+        object : RecyclerView.OnChildAttachStateChangeListener {
+            override fun onChildViewAttachedToWindow(view: View) {
+                onItemClickListener?.let {
+                    view.setOnClickListener(onClickListener)
+                }
+                onItemLongClickListener?.let {
+                    view.setOnLongClickListener(onLongClickListener)
+                }
+            }
 
-        override fun onChildViewDetachedFromWindow(view: View) {}
-    }
+            override fun onChildViewDetachedFromWindow(view: View) {}
+        }
 
     fun setOnItemClickListener(listener: OnItemClickListener?): ItemClickSupport {
         onItemClickListener = listener
@@ -67,10 +72,18 @@ class ItemClickSupport private constructor(private val recyclerView: RecyclerVie
     }
 
     interface OnItemClickListener {
-        fun onItemClicked(recyclerView: RecyclerView?, position: Int, view: View?)
+        fun onItemClicked(
+            recyclerView: RecyclerView?,
+            position: Int,
+            view: View?,
+        )
     }
 
     interface OnItemLongClickListener {
-        fun onItemLongClicked(recyclerView: RecyclerView?, position: Int, view: View?): Boolean
+        fun onItemLongClicked(
+            recyclerView: RecyclerView?,
+            position: Int,
+            view: View?,
+        ): Boolean
     }
 }

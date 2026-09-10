@@ -8,8 +8,5 @@ import org.maplibre.android.testapp.R
  */
 @SuppressLint("ClickableViewAccessibility")
 class TextureRecyclerViewActivity : SurfaceRecyclerViewActivity() {
-
-    override fun getMapItemLayoutId(): Int {
-        return R.layout.item_map_texture
-    }
+    override fun getMapItemLayoutId(): Int = R.layout.item_map_texture
 }

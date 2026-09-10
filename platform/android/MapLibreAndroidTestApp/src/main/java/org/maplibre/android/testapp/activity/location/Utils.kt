@@ -10,13 +10,14 @@ import java.util.*
  * Useful utilities used throughout the test app.
  */
 object Utils {
-    private val STYLES = arrayOf(
-        TestStyles.getPredefinedStyleWithFallback("Streets"),
-        TestStyles.getPredefinedStyleWithFallback("Outdoor"),
-        TestStyles.getPredefinedStyleWithFallback("Bright"),
-        TestStyles.getPredefinedStyleWithFallback("Pastel"),
-        TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
-    )
+    private val STYLES =
+        arrayOf(
+            TestStyles.getPredefinedStyleWithFallback("Streets"),
+            TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+            TestStyles.getPredefinedStyleWithFallback("Bright"),
+            TestStyles.getPredefinedStyleWithFallback("Pastel"),
+            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+        )
     private var index = 0
 
     /**

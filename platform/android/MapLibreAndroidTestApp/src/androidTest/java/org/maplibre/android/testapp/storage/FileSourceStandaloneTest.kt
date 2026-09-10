@@ -3,18 +3,17 @@ package org.maplibre.android.testapp.storage
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import org.maplibre.android.AppCenter
-import org.maplibre.android.storage.FileSource
-import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.*
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import org.maplibre.android.AppCenter
+import org.maplibre.android.storage.FileSource
+import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class FileSourceStandaloneTest : AppCenter() {
-
     private lateinit var fileSourceTestUtils: FileSourceTestUtils
     private lateinit var fileSource: FileSource
 
@@ -35,31 +34,31 @@ class FileSourceStandaloneTest : AppCenter() {
     @Test
     @UiThreadTest
     fun testDefault() {
-        Assert.assertTrue("FileSource should be active", fileSource.isActivated)
+        Assert.assertTrue("FileSource should be active", fileSource.isActivated())
     }
 
     @Test
     @UiThreadTest
     fun testActivateDeactivate() {
-        Assert.assertTrue("1) FileSource should be active", fileSource.isActivated)
+        Assert.assertTrue("1) FileSource should be active", fileSource.isActivated())
         fileSource.deactivate()
-        Assert.assertFalse("2) FileSource should not be active", fileSource.isActivated)
+        Assert.assertFalse("2) FileSource should not be active", fileSource.isActivated())
         fileSource.activate()
-        Assert.assertTrue("3) FileSource should be active", fileSource.isActivated)
+        Assert.assertTrue("3) FileSource should be active", fileSource.isActivated())
     }
 
     @Test
     fun pathChangeTest() {
-        Assert.assertTrue("FileSource should be active", fileSource.isActivated)
+        Assert.assertTrue("FileSource should be active", fileSource.isActivated())
         Assert.assertEquals(fileSourceTestUtils.originalPath, FileSource.getResourcesCachePath(rule.activity))
 
         fileSourceTestUtils.changePath(fileSourceTestUtils.testPath)
         Assert.assertEquals(fileSourceTestUtils.testPath, FileSource.getResourcesCachePath(rule.activity))
-        Assert.assertTrue("FileSource should be active", fileSource.isActivated)
+        Assert.assertTrue("FileSource should be active", fileSource.isActivated())
 
         fileSourceTestUtils.changePath(fileSourceTestUtils.originalPath)
         Assert.assertEquals(fileSourceTestUtils.originalPath, FileSource.getResourcesCachePath(rule.activity))
-        Assert.assertTrue("FileSource should be active", fileSource.isActivated)
+        Assert.assertTrue("FileSource should be active", fileSource.isActivated())
     }
 
     @Test
@@ -78,7 +77,7 @@ class FileSourceStandaloneTest : AppCenter() {
                     override fun onError(message: String) {
                         Assert.fail("First attempt should succeed.")
                     }
-                }
+                },
             )
 
             FileSource.setResourcesCachePath(
@@ -92,7 +91,7 @@ class FileSourceStandaloneTest : AppCenter() {
                         Assert.assertEquals("Another resources cache path change is in progress", message)
                         secondLatch.countDown()
                     }
-                }
+                },
             )
         }
 

@@ -8,8 +8,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
@@ -30,7 +30,9 @@ import java.net.URISyntaxException
  * Uses bus stop data from Singapore as a source and allows to filter into 1 specific route with a line layer.
  *
  */
-class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
+class CircleLayerActivity :
+    AppCompatActivity(),
+    View.OnClickListener {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var styleFab: FloatingActionButton
@@ -39,6 +41,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     private var source: GeoJsonSource? = null
     private var currentStyleIndex = 0
     private var isLoadingStyle = true
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -58,7 +61,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
 
                     style.addImage(
                         "bus-icon",
-                        AppCompatResources.getDrawable(this, R.drawable.ic_directions_bus_black)!!
+                        AppCompatResources.getDrawable(this, R.drawable.ic_directions_bus_black)!!,
                     )
                 }
             }
@@ -81,11 +84,10 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
         layer = CircleLayer(LAYER_ID, SOURCE_ID)
         layer!!.setProperties(
             PropertyFactory.circleColor(Color.parseColor("#FF9800")),
-            PropertyFactory.circleRadius(2.0f)
+            PropertyFactory.circleRadius(2.0f),
         )
         style.addLayer(layer!!)
         // --8<-- [end:addBusStopCircleLayer]
-
     }
 
     private fun initFloatingActionButtons() {
@@ -129,8 +131,8 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                         GeoJsonOptions()
                             .withCluster(true)
                             .withClusterMaxZoom(14)
-                            .withClusterRadius(50)
-                    )
+                            .withClusterRadius(50),
+                    ),
                 )
                 // --8<-- [end:addClusteredSource]
             } catch (malformedUrlException: URISyntaxException) {
@@ -143,25 +145,28 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                 PropertyFactory.iconImage("bus-icon"),
             )
             unclustered.setFilter(
-                Expression.neq(Expression.get("cluster"), true)
+                Expression.neq(Expression.get("cluster"), true),
             )
             style.addLayer(unclustered)
             // --8<-- [end:unclusteredLayer]
 
             // --8<-- [start:clusteredCircleLayers]
-            val layers = arrayOf(
-                150 to ResourcesCompat.getColor(
-                    resources,
-                    R.color.redAccent,
-                    theme
-                ),
-                20 to ResourcesCompat.getColor(resources, R.color.greenAccent, theme),
-                0 to ResourcesCompat.getColor(
-                    resources,
-                    R.color.blueAccent,
-                    theme
+            val layers =
+                arrayOf(
+                    150 to
+                        ResourcesCompat.getColor(
+                            resources,
+                            R.color.redAccent,
+                            theme,
+                        ),
+                    20 to ResourcesCompat.getColor(resources, R.color.greenAccent, theme),
+                    0 to
+                        ResourcesCompat.getColor(
+                            resources,
+                            R.color.blueAccent,
+                            theme,
+                        ),
                 )
-            )
             // --8<-- [end:clusteredCircleLayers]
 
             // --8<-- [start:clusteredCircleLayersLoop]
@@ -170,7 +175,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                 val circles = CircleLayer("cluster-$i", SOURCE_ID_CLUSTER)
                 circles.setProperties(
                     PropertyFactory.circleColor(layers[i].second),
-                    PropertyFactory.circleRadius(18f)
+                    PropertyFactory.circleRadius(18f),
                 )
 
                 val pointCount = Expression.toNumber(Expression.get("point_count"))
@@ -180,22 +185,22 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                             Expression.has("point_count"),
                             Expression.gte(
                                 pointCount,
-                                Expression.literal(layers[i].first)
-                            )
+                                Expression.literal(layers[i].first),
+                            ),
                         )
                     } else {
                         Expression.all(
                             Expression.has("point_count"),
                             Expression.gt(
                                 pointCount,
-                                Expression.literal(layers[i].first)
+                                Expression.literal(layers[i].first),
                             ),
                             Expression.lt(
                                 pointCount,
-                                Expression.literal(layers[i - 1].first)
-                            )
+                                Expression.literal(layers[i - 1].first),
+                            ),
                         )
-                    }
+                    },
                 )
 
                 style.addLayer(circles)
@@ -210,7 +215,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                 PropertyFactory.textSize(12f),
                 PropertyFactory.textColor(Color.WHITE),
                 PropertyFactory.textIgnorePlacement(true),
-                PropertyFactory.textAllowOverlap(true)
+                PropertyFactory.textAllowOverlap(true),
             )
             style.addLayer(count)
             // --8<-- [end:countLabels]
@@ -282,10 +287,11 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private object Data {
-        val STYLES = arrayOf(
-            TestStyles.PROTOMAPS_WHITE,
-            TestStyles.PROTOMAPS_LIGHT
-        )
+        val STYLES =
+            arrayOf(
+                TestStyles.PROTOMAPS_WHITE,
+                TestStyles.PROTOMAPS_LIGHT,
+            )
     }
 
     companion object {

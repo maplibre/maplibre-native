@@ -14,10 +14,12 @@ import org.maplibre.android.testapp.utils.FontCache
  *
  * Adapts a Feature to a visual representation to be shown in a RecyclerView.
  */
-class FeatureAdapter(private var features: List<Feature>) :
-    RecyclerView.Adapter<FeatureAdapter.ViewHolder>() {
-
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+class FeatureAdapter(
+    private var features: List<Feature>,
+) : RecyclerView.Adapter<FeatureAdapter.ViewHolder>() {
+    class ViewHolder(
+        view: View,
+    ) : RecyclerView.ViewHolder(view) {
         var labelView: TextView
         var descriptionView: TextView
 
@@ -30,26 +32,28 @@ class FeatureAdapter(private var features: List<Feature>) :
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_main_feature, parent, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int,
+    ) {
         holder.labelView.text = features[position].getLabel()
         holder.descriptionView.text = features[position].getDescription()
     }
 
-    override fun getItemCount(): Int {
-        return features.size
-    }
+    override fun getItemCount(): Int = features.size
 
     fun update(newFeatures: List<Feature>) {
         features = newFeatures
         notifyDataSetChanged()
     }
 
-    fun getItem(position: Int): Feature {
-        return features[position]
-    }
+    fun getItem(position: Int): Feature = features[position]
 }

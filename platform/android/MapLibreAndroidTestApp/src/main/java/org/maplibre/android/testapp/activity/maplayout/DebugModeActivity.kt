@@ -24,7 +24,10 @@ import java.util.*
 /**
  * Test activity showcasing the different debug modes and allows to cycle between the default map styles.
  */
-open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsChangedListener {
+open class DebugModeActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback,
+    OnFpsChangedListener {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var cameraMoveListener: OnCameraMoveListener? = null
@@ -33,6 +36,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private var isReportFps = true
     private var isContinuousRendering = false
     private var fpsView: TextView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
@@ -50,12 +54,13 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
             supportActionBar!!.setHomeButtonEnabled(true)
             val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
-            actionBarDrawerToggle = ActionBarDrawerToggle(
-                this,
-                drawerLayout,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close
-            )
+            actionBarDrawerToggle =
+                ActionBarDrawerToggle(
+                    this,
+                    drawerLayout,
+                    R.string.navigation_drawer_open,
+                    R.string.navigation_drawer_close,
+                )
             actionBarDrawerToggle!!.isDrawerIndicatorEnabled = true
             actionBarDrawerToggle!!.syncState()
         }
@@ -76,14 +81,12 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
     }
 
-    protected open fun setupMapLibreMapOptions(): MapLibreMapOptions {
-        return MapLibreMapOptions.createFromAttributes(this, null)
-    }
+    protected open fun setupMapLibreMapOptions(): MapLibreMapOptions = MapLibreMapOptions.createFromAttributes(this, null)
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         maplibreMap.setStyle(
-            Style.Builder().fromUri(STYLES[currentStyleIndex])
+            Style.Builder().fromUri(STYLES[currentStyleIndex]),
         ) { style: Style -> setupNavigationView(style.layers) }
         setupZoomView()
         setFpsView()
@@ -91,7 +94,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     private fun setFpsView() {
         fpsView = findViewById(R.id.fpsView)
-        maplibreMap.setOnFpsChangedListener(this)
+        maplibreMap.onFpsChangedListener = this
     }
 
     override fun onFpsChanged(fps: Double) {
@@ -115,8 +118,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         val isVisible = layer.visibility.getValue() == Property.VISIBLE
         layer.setProperties(
             PropertyFactory.visibility(
-                if (isVisible) Property.NONE else Property.VISIBLE
-            )
+                if (isVisible) Property.NONE else Property.VISIBLE,
+            ),
         )
     }
 
@@ -129,13 +132,14 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         val textView = findViewById<TextView>(R.id.textZoom)
         maplibreMap.addOnCameraMoveListener(
             OnCameraMoveListener {
-                textView.text = String.format(
-                    this@DebugModeActivity.getString(
-                        R.string.debug_zoom
-                    ),
-                    maplibreMap.cameraPosition.zoom
-                )
-            }.also { cameraMoveListener = it }
+                textView.text =
+                    String.format(
+                        this@DebugModeActivity.getString(
+                            R.string.debug_zoom,
+                        ),
+                        maplibreMap.cameraPosition.zoom,
+                    )
+            }.also { cameraMoveListener = it },
         )
     }
 
@@ -167,7 +171,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         if (itemId == R.id.menu_action_toggle_report_fps) {
             isReportFps = !isReportFps
             fpsView!!.visibility = if (isReportFps) View.VISIBLE else View.GONE
-            maplibreMap.setOnFpsChangedListener(if (isReportFps) this else null)
+            maplibreMap.onFpsChangedListener = if (isReportFps) this else null
         } else if (itemId == R.id.menu_action_limit_to_30_fps) {
             mapView.setMaximumFps(30)
         } else if (itemId == R.id.menu_action_limit_to_60_fps) {
@@ -180,9 +184,10 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
                 mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.WHEN_DIRTY)
             }
         }
-        return actionBarDrawerToggle!!.onOptionsItemSelected(item) || super.onOptionsItemSelected(
-            item
-        )
+        return actionBarDrawerToggle!!.onOptionsItemSelected(item) ||
+            super.onOptionsItemSelected(
+                item,
+            )
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -228,31 +233,33 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView.onLowMemory()
     }
 
-    private class LayerListAdapter(context: Context?, layers: List<Layer>) :
-        BaseAdapter() {
+    private class LayerListAdapter(
+        context: Context?,
+        layers: List<Layer>,
+    ) : BaseAdapter() {
         private val layoutInflater: LayoutInflater
         private val layers: List<Layer>
-        override fun getCount(): Int {
-            return layers.size
-        }
 
-        override fun getItem(position: Int): Layer {
-            return layers[position]
-        }
+        override fun getCount(): Int = layers.size
 
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
+        override fun getItem(position: Int): Layer = layers[position]
 
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        override fun getItemId(position: Int): Long = position.toLong()
+
+        override fun getView(
+            position: Int,
+            convertView: View?,
+            parent: ViewGroup,
+        ): View {
             val layer = layers[position]
             var view = convertView
             if (view == null) {
                 view = layoutInflater.inflate(android.R.layout.simple_list_item_2, parent, false)
-                val holder = ViewHolder(
-                    view.findViewById(android.R.id.text1),
-                    view.findViewById(android.R.id.text2)
-                )
+                val holder =
+                    ViewHolder(
+                        view.findViewById(android.R.id.text1),
+                        view.findViewById(android.R.id.text2),
+                    )
                 view.tag = holder
             }
             val holder = view!!.tag as ViewHolder
@@ -261,7 +268,10 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
             return view
         }
 
-        private class ViewHolder(val text: TextView, val subText: TextView)
+        private class ViewHolder(
+            val text: TextView,
+            val subText: TextView,
+        )
 
         init {
             layoutInflater = LayoutInflater.from(context)
@@ -270,13 +280,14 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     }
 
     companion object {
-        private val STYLES = arrayOf(
-            TestStyles.getPredefinedStyleWithFallback("Streets"),
-            TestStyles.getPredefinedStyleWithFallback("Outdoor"),
-            TestStyles.getPredefinedStyleWithFallback("Bright"),
-            TestStyles.getPredefinedStyleWithFallback("Pastel"),
-            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
-            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
-        )
+        private val STYLES =
+            arrayOf(
+                TestStyles.getPredefinedStyleWithFallback("Streets"),
+                TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+                TestStyles.getPredefinedStyleWithFallback("Bright"),
+                TestStyles.getPredefinedStyleWithFallback("Pastel"),
+                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+            )
     }
 }

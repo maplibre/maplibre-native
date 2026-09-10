@@ -6,9 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.geojson.FeatureCollection
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.FillLayer
@@ -17,6 +16,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
+import org.maplibre.geojson.FeatureCollection
 import timber.log.Timber
 
 /**
@@ -40,40 +40,45 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
 
             // Add layer / source
             val source = GeoJsonSource("highlighted-shapes-source")
-            val layer: Layer = FillLayer("highlighted-shapes-layer", "highlighted-shapes-source")
-                .withProperties(PropertyFactory.fillColor(Color.RED))
+            val layer: Layer =
+                FillLayer("highlighted-shapes-layer", "highlighted-shapes-source")
+                    .withProperties(PropertyFactory.fillColor(Color.RED))
             selectionBox.setOnClickListener { view: View? ->
                 // Query
                 val top = selectionBox.top - mapView.top
                 val left = selectionBox.left - mapView.left
-                val box = RectF(
-                    left.toFloat(),
-                    top.toFloat(),
-                    (left + selectionBox.width).toFloat(),
-                    (top + selectionBox.height).toFloat()
-                )
+                val box =
+                    RectF(
+                        left.toFloat(),
+                        top.toFloat(),
+                        (left + selectionBox.width).toFloat(),
+                        (top + selectionBox.height).toFloat(),
+                    )
                 Timber.i("Querying box %s for buildings", box)
-                val filter = Expression.lt(
-                    Expression.toNumber(Expression.get("height")),
-                    Expression.literal(10)
-                )
+                val filter =
+                    Expression.lt(
+                        Expression.toNumber(Expression.get("height")),
+                        Expression.literal(10),
+                    )
                 val features = maplibreMap.queryRenderedFeatures(box, filter, "building")
 
                 // Show count
-                Toast.makeText(
-                    this@QueryRenderedFeaturesBoxHighlightActivity,
-                    String.format("%s features in box", features.size),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast
+                    .makeText(
+                        this@QueryRenderedFeaturesBoxHighlightActivity,
+                        String.format("%s features in box", features.size),
+                        Toast.LENGTH_SHORT,
+                    ).show()
 
                 // Update source data
                 source.setGeoJson(FeatureCollection.fromFeatures(features))
             }
             maplibreMap.setStyle(
-                Style.Builder()
+                Style
+                    .Builder()
                     .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                     .withSource(source)
-                    .withLayer(layer)
+                    .withLayer(layer),
             )
         }
     }

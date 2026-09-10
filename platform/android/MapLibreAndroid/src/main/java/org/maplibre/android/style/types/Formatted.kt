@@ -9,7 +9,9 @@ import java.util.*
  * @see [Style specification](https://maplibre.org/maplibre-style-spec/.types-formatted)
  */
 @Keep
-class Formatted(vararg formattedSections: FormattedSection) {
+class Formatted(
+    vararg formattedSections: FormattedSection,
+) {
     /**
      * Returns sections with separate formatting options that are a part of this formatted text.
      *
@@ -45,11 +47,7 @@ class Formatted(vararg formattedSections: FormattedSection) {
         return Arrays.equals(formattedSections, formatted.formattedSections)
     }
 
-    override fun hashCode(): Int {
-        return Arrays.hashCode(formattedSections)
-    }
+    override fun hashCode(): Int = Arrays.hashCode(formattedSections)
 
-    override fun toString(): String {
-        return ("Formatted{" + "formattedSections=" + Arrays.toString(formattedSections) + '}')
-    }
+    override fun toString(): String = ("Formatted{" + "formattedSections=" + Arrays.toString(formattedSections) + '}')
 }

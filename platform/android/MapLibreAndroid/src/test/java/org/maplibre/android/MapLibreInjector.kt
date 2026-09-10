@@ -6,9 +6,13 @@ import org.maplibre.android.util.TileServerOptions
 
 object MapLibreInjector {
     private const val FIELD_INSTANCE = "INSTANCE"
+
     @JvmStatic
-    fun inject(context: Context, apiKey: String,
-               options: TileServerOptions) {
+    fun inject(
+        context: Context,
+        apiKey: String,
+        options: TileServerOptions,
+    ) {
         val maplibre = MapLibre(context, apiKey, options)
         try {
             val instance = MapLibre::class.java.getDeclaredField(FIELD_INSTANCE)

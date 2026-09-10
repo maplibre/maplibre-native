@@ -5,8 +5,10 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.testapp.R
 
-class IdleZoomListener(private val maplibreMap: MapLibreMap, private val textView: TextView) :
-    OnCameraIdleListener {
+class IdleZoomListener(
+    private val maplibreMap: MapLibreMap,
+    private val textView: TextView,
+) : OnCameraIdleListener {
     override fun onCameraIdle() {
         val context = textView.context
         val position = maplibreMap.cameraPosition

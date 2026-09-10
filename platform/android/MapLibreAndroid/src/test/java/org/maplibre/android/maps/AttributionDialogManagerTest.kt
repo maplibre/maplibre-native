@@ -13,17 +13,19 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AttributionDialogManagerTest : BaseTest() {
     @InjectMocks
-    var context = Mockito.mock(
-        Context::class.java
-    )
+    var context =
+        Mockito.mock(
+            Context::class.java,
+        )
 
     @InjectMocks
     var maplibreMap = Mockito.mock(MapLibreMap::class.java)
 
     @InjectMocks
-    var style = Mockito.mock(
-        Style::class.java
-    )
+    var style =
+        Mockito.mock(
+            Style::class.java,
+        )
     private var attributionDialogManager: AttributionDialogManager? = null
 
     @Before
@@ -35,7 +37,7 @@ class AttributionDialogManagerTest : BaseTest() {
     fun testSanity() {
         Assert.assertNotNull(
             "AttributionDialogManager should not be null",
-            attributionDialogManager
+            attributionDialogManager,
         )
     }
 }

@@ -16,9 +16,8 @@ class FeatureSectionAdapter(
     private val context: Context,
     @param:LayoutRes private val sectionRes: Int,
     @param:IdRes private val textRes: Int,
-    private val adapter: FeatureAdapter
+    private val adapter: FeatureAdapter,
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
     private val sections = SparseArray<Section>()
     private var valid = true
 
@@ -29,17 +28,26 @@ class FeatureSectionAdapter(
                 notifyDataSetChanged()
             }
 
-            override fun onItemRangeChanged(positionStart: Int, itemCount: Int) {
+            override fun onItemRangeChanged(
+                positionStart: Int,
+                itemCount: Int,
+            ) {
                 valid = adapter.itemCount > 0
                 notifyItemRangeChanged(positionStart, itemCount)
             }
 
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            override fun onItemRangeInserted(
+                positionStart: Int,
+                itemCount: Int,
+            ) {
                 valid = adapter.itemCount > 0
                 notifyItemRangeInserted(positionStart, itemCount)
             }
 
-            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            override fun onItemRangeRemoved(
+                positionStart: Int,
+                itemCount: Int,
+            ) {
                 valid = adapter.itemCount > 0
                 notifyItemRangeRemoved(positionStart, itemCount)
             }
@@ -49,43 +57,49 @@ class FeatureSectionAdapter(
         adapter.registerAdapterDataObserver(adapterDataObserver)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, typeView: Int): RecyclerView.ViewHolder {
-        return if (typeView == SECTION_TYPE) {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        typeView: Int,
+    ): RecyclerView.ViewHolder =
+        if (typeView == SECTION_TYPE) {
             val view = LayoutInflater.from(context).inflate(sectionRes, parent, false)
             SectionViewHolder(view, textRes)
         } else {
             adapter.onCreateViewHolder(parent, typeView - 1)
         }
-    }
 
-    override fun onBindViewHolder(sectionViewHolder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        sectionViewHolder: RecyclerView.ViewHolder,
+        position: Int,
+    ) {
         if (isSectionHeaderPosition(position)) {
-            val cleanTitle = sections.get(position).title.toString().replace("_", " ")
+            val cleanTitle =
+                sections
+                    .get(position)
+                    .title
+                    .toString()
+                    .replace("_", " ")
             (sectionViewHolder as SectionViewHolder).title.text = cleanTitle
         } else {
             adapter.onBindViewHolder(sectionViewHolder as FeatureAdapter.ViewHolder, getConvertedPosition(position))
         }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (isSectionHeaderPosition(position)) {
+    override fun getItemViewType(position: Int): Int =
+        if (isSectionHeaderPosition(position)) {
             SECTION_TYPE
         } else {
             adapter.getItemViewType(getConvertedPosition(position)) + 1
         }
-    }
 
-    override fun getItemId(position: Int): Long {
-        return if (isSectionHeaderPosition(position)) {
+    override fun getItemId(position: Int): Long =
+        if (isSectionHeaderPosition(position)) {
             Integer.MAX_VALUE - sections.indexOfKey(position).toLong()
         } else {
             adapter.getItemId(getConvertedPosition(position))
         }
-    }
 
-    override fun getItemCount(): Int {
-        return if (valid) adapter.itemCount + sections.size() else 0
-    }
+    override fun getItemCount(): Int = if (valid) adapter.itemCount + sections.size() else 0
 
     fun setSections(sections: Array<Section>) {
         this.sections.clear()
@@ -119,12 +133,12 @@ class FeatureSectionAdapter(
         return sectionedPosition + offset
     }
 
-    fun isSectionHeaderPosition(position: Int): Boolean {
-        return sections.get(position) != null
-    }
+    fun isSectionHeaderPosition(position: Int): Boolean = sections.get(position) != null
 
-    class SectionViewHolder(view: View, textRes: Int) :
-        RecyclerView.ViewHolder(view) {
+    class SectionViewHolder(
+        view: View,
+        textRes: Int,
+    ) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(textRes)
 
         init {
@@ -132,7 +146,10 @@ class FeatureSectionAdapter(
         }
     }
 
-    class Section(val firstPosition: Int, val title: CharSequence) {
+    class Section(
+        val firstPosition: Int,
+        val title: CharSequence,
+    ) {
         var sectionedPosition = 0
     }
 

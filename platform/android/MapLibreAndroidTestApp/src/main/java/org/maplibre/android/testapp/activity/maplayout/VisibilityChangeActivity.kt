@@ -19,6 +19,7 @@ class VisibilityChangeActivity : AppCompatActivity() {
     private lateinit var maplibreMap: MapLibreMap
     private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map_visibility)
@@ -33,11 +34,11 @@ class VisibilityChangeActivity : AppCompatActivity() {
                 maplibreMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(55.754020, 37.620948),
-                        12.0
+                        12.0,
                     ),
-                    9000
+                    9000,
                 )
-            }
+            },
         )
     }
 
@@ -48,8 +49,8 @@ class VisibilityChangeActivity : AppCompatActivity() {
             VisibilityRunner(
                 mapView,
                 findViewById(R.id.viewParent),
-                handler
-            ).also { runnable = it }
+                handler,
+            ).also { runnable = it },
         )
     }
 
@@ -61,9 +62,10 @@ class VisibilityChangeActivity : AppCompatActivity() {
     private class VisibilityRunner internal constructor(
         private val mapView: MapView?,
         private val viewParent: View?,
-        private val handler: Handler
+        private val handler: Handler,
     ) : Runnable {
         private var currentStep = 0
+
         override fun run() {
             if (isViewHiearchyReady) {
                 if (isEvenStep) {

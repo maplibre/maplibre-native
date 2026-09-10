@@ -21,7 +21,7 @@ class DeviceIndependentTestActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync {
             Timber.i(TAG, "Setting style")
-            it.setStyle(Style.getPredefinedStyles()[0].url)
+            it.setStyle(Style.getPredefinedStyles()!![0].url!!)
         }
     }
 

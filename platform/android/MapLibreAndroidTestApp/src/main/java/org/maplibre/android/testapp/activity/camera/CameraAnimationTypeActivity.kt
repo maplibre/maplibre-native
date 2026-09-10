@@ -7,10 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -23,28 +23,30 @@ import timber.log.Timber
  *
  * Shows how to use animate, ease and move camera update factory methods.
  */
-class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
+class CameraAnimationTypeActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     // # --8<-- [start:callback]
     private val callback: CancelableCallback =
         object : CancelableCallback {
             override fun onCancel() {
                 Timber.i("Duration onCancel Callback called.")
-                Toast.makeText(
-                    applicationContext,
-                    "Ease onCancel Callback called.",
-                    Toast.LENGTH_LONG
-                )
-                    .show()
+                Toast
+                    .makeText(
+                        applicationContext,
+                        "Ease onCancel Callback called.",
+                        Toast.LENGTH_LONG,
+                    ).show()
             }
 
             override fun onFinish() {
                 Timber.i("Duration onFinish Callback called.")
-                Toast.makeText(
-                    applicationContext,
-                    "Ease onFinish Callback called.",
-                    Toast.LENGTH_LONG
-                )
-                    .show()
+                Toast
+                    .makeText(
+                        applicationContext,
+                        "Ease onFinish Callback called.",
+                        Toast.LENGTH_LONG,
+                    ).show()
             }
         }
     // # --8<-- [end:callback]
@@ -52,11 +54,12 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var maplibreMap: MapLibreMap
     private lateinit var mapView: MapView
     private var cameraState = false
-    private val cameraIdleListener = OnCameraIdleListener {
-        if (this::maplibreMap.isInitialized) {
-            Timber.w(maplibreMap.cameraPosition.toString())
+    private val cameraIdleListener =
+        OnCameraIdleListener {
+            if (this::maplibreMap.isInitialized) {
+                Timber.w(maplibreMap.cameraPosition.toString())
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +81,8 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         moveButton?.setOnClickListener { view: View? ->
             // # --8<-- [start:moveCamera]
             val cameraPosition =
-                CameraPosition.Builder()
+                CameraPosition
+                    .Builder()
                     .target(nextLatLng)
                     .zoom(14.0)
                     .tilt(30.0)
@@ -93,7 +97,8 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         easeButton?.setOnClickListener { view: View? ->
             // # --8<-- [start:easeCamera]
             val cameraPosition =
-                CameraPosition.Builder()
+                CameraPosition
+                    .Builder()
                     .target(nextLatLng)
                     .zoom(15.0)
                     .bearing(180.0)
@@ -102,7 +107,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
             maplibreMap.easeCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 7500,
-                callback
+                callback,
             )
             // # --8<-- [end:easeCamera]
         }
@@ -112,11 +117,16 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
         animateButton?.setOnClickListener { view: View? ->
             // # --8<-- [start:animateCamera]
             val cameraPosition =
-                CameraPosition.Builder().target(nextLatLng).bearing(270.0).tilt(20.0).build()
+                CameraPosition
+                    .Builder()
+                    .target(nextLatLng)
+                    .bearing(270.0)
+                    .tilt(20.0)
+                    .build()
             maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(cameraPosition),
                 7500,
-                callback
+                callback,
             )
             // # --8<-- [end:animateCamera]
         }

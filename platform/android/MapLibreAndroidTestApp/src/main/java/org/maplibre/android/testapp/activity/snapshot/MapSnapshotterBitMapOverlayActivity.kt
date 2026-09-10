@@ -39,27 +39,32 @@ class MapSnapshotterBitMapOverlayActivity :
         setContentView(R.layout.activity_map_snapshotter_marker)
         val container = findViewById<View>(R.id.container)
         container.viewTreeObserver
-            .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    Timber.i("Starting snapshot")
-                    mapSnapshotter = MapSnapshotter(
-                        applicationContext,
-                        MapSnapshotter.Options(
-                            Math.min(container.measuredWidth, 1024),
-                            Math.min(container.measuredHeight, 1024)
-                        )
-                            .withStyleBuilder(
-                                Style.Builder().fromUri(TestStyles.AMERICANA)
+            .addOnGlobalLayoutListener(
+                object : OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        container.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        Timber.i("Starting snapshot")
+                        mapSnapshotter =
+                            MapSnapshotter(
+                                applicationContext,
+                                MapSnapshotter
+                                    .Options(
+                                        Math.min(container.measuredWidth, 1024),
+                                        Math.min(container.measuredHeight, 1024),
+                                    ).withStyleBuilder(
+                                        Style.Builder().fromUri(TestStyles.AMERICANA),
+                                    ).withCameraPosition(
+                                        CameraPosition
+                                            .Builder()
+                                            .target(LatLng(52.090737, 5.121420))
+                                            .zoom(15.0)
+                                            .build(),
+                                    ),
                             )
-                            .withCameraPosition(
-                                CameraPosition.Builder().target(LatLng(52.090737, 5.121420))
-                                    .zoom(15.0).build()
-                            )
-                    )
-                    mapSnapshotter!!.start(this@MapSnapshotterBitMapOverlayActivity)
-                }
-            })
+                        mapSnapshotter!!.start(this@MapSnapshotterBitMapOverlayActivity)
+                    }
+                },
+            )
     }
 
     override fun onStop() {
@@ -91,10 +96,10 @@ class MapSnapshotterBitMapOverlayActivity :
         // Dom toren
         val markerLocation = snapshot.pixelForLatLng(LatLng(52.090649433011315, 5.121310651302338))
         canvas.drawBitmap(
-            marker, /* Subtract half of the width so we center the bitmap correctly */
-            markerLocation.x - marker.width / 2, /* Subtract half of the height so we align the bitmap bottom correctly */
+            marker, // Subtract half of the width so we center the bitmap correctly
+            markerLocation.x - marker.width / 2, // Subtract half of the height so we align the bitmap bottom correctly
             markerLocation.y - marker.height / 2,
-            null
+            null,
         )
         return snapshot.bitmap
     }

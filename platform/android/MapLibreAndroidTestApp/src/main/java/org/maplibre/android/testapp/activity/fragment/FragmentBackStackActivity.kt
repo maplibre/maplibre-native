@@ -14,7 +14,6 @@ import org.maplibre.android.testapp.utils.NavUtils
  * Test activity showcasing using the MapFragment API as part of a backstacked fragment.
  */
 class FragmentBackStackActivity : AppCompatActivity() {
-
     companion object {
         private const val FRAGMENT_TAG = "map_fragment"
     }
@@ -27,25 +26,30 @@ class FragmentBackStackActivity : AppCompatActivity() {
         binding = ActivityBackstackFragmentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (supportFragmentManager.backStackEntryCount == 0) {
-                    // activity uses singleInstance for testing purposes
-                    // code below provides a default navigation when using the app
-                    NavUtils.navigateHome(this@FragmentBackStackActivity)
-                } else {
-                    finish()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (supportFragmentManager.backStackEntryCount == 0) {
+                        // activity uses singleInstance for testing purposes
+                        // code below provides a default navigation when using the app
+                        NavUtils.navigateHome(this@FragmentBackStackActivity)
+                    } else {
+                        finish()
+                    }
                 }
-            }
-        })
+            },
+        )
 
         if (savedInstanceState == null) {
             mapFragment = SupportMapFragment.newInstance()
             mapFragment.getMapAsync { initMap(it) }
 
-            supportFragmentManager.beginTransaction().apply {
-                add(R.id.container, mapFragment, FRAGMENT_TAG)
-            }.commit()
+            supportFragmentManager
+                .beginTransaction()
+                .apply {
+                    add(R.id.container, mapFragment, FRAGMENT_TAG)
+                }.commit()
         } else {
             supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)?.also { fragment ->
                 if (fragment is SupportMapFragment) {
@@ -69,9 +73,11 @@ class FragmentBackStackActivity : AppCompatActivity() {
     }
 
     private fun handleClick() {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.container, NestedViewPagerActivity.ItemAdapter.EmptyFragment())
-            addToBackStack("map_empty_fragment")
-        }.commit()
+        supportFragmentManager
+            .beginTransaction()
+            .apply {
+                replace(R.id.container, NestedViewPagerActivity.ItemAdapter.EmptyFragment())
+                addToBackStack("map_empty_fragment")
+            }.commit()
     }
 }

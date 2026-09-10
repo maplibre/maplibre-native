@@ -2,13 +2,13 @@ package org.maplibre.android.maps
 
 import android.graphics.Color
 import android.view.Gravity
-import org.maplibre.android.camera.CameraPosition
-import org.maplibre.android.constants.MapLibreConstants
-import org.maplibre.android.geometry.LatLng
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.maplibre.android.BaseTest
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.constants.MapLibreConstants
+import org.maplibre.android.geometry.LatLng
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import java.util.*
@@ -17,8 +17,9 @@ import java.util.*
 class MapLibreMapOptionsTest : BaseTest() {
     @Test
     fun testSanity() {
-        Assert.assertNotNull("should not be null",
-            MapLibreMapOptions()
+        Assert.assertNotNull(
+            "should not be null",
+            MapLibreMapOptions(),
         )
     }
 
@@ -39,15 +40,15 @@ class MapLibreMapOptionsTest : BaseTest() {
     fun testCompassGravity() {
         Assert.assertEquals(
             Gravity.TOP or Gravity.END,
-            MapLibreMapOptions().compassGravity
+            MapLibreMapOptions().compassGravity,
         )
         Assert.assertEquals(
             Gravity.BOTTOM,
-            MapLibreMapOptions().compassGravity(Gravity.BOTTOM).compassGravity
+            MapLibreMapOptions().compassGravity(Gravity.BOTTOM).compassGravity,
         )
         Assert.assertNotEquals(
             Gravity.START.toLong(),
-            MapLibreMapOptions().compassGravity(Gravity.BOTTOM).compassGravity.toLong()
+            MapLibreMapOptions().compassGravity(Gravity.BOTTOM).compassGravity.toLong(),
         )
     }
 
@@ -57,15 +58,17 @@ class MapLibreMapOptionsTest : BaseTest() {
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapLibreMapOptions()
-                    .compassMargins(intArrayOf(0, 1, 2, 3)).compassMargins
-            )
+                    .compassMargins(intArrayOf(0, 1, 2, 3))
+                    .compassMargins,
+            ),
         )
         Assert.assertFalse(
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapLibreMapOptions()
-                    .compassMargins(intArrayOf(0, 0, 0, 0)).compassMargins
-            )
+                    .compassMargins(intArrayOf(0, 0, 0, 0))
+                    .compassMargins,
+            ),
         )
     }
 
@@ -79,15 +82,15 @@ class MapLibreMapOptionsTest : BaseTest() {
     fun testLogoGravity() {
         Assert.assertEquals(
             Gravity.BOTTOM or Gravity.START,
-            MapLibreMapOptions().logoGravity
+            MapLibreMapOptions().logoGravity,
         )
         Assert.assertEquals(
             Gravity.BOTTOM,
-            MapLibreMapOptions().logoGravity(Gravity.BOTTOM).logoGravity
+            MapLibreMapOptions().logoGravity(Gravity.BOTTOM).logoGravity,
         )
         Assert.assertNotEquals(
             Gravity.START.toLong(),
-            MapLibreMapOptions().logoGravity(Gravity.BOTTOM).logoGravity.toLong()
+            MapLibreMapOptions().logoGravity(Gravity.BOTTOM).logoGravity.toLong(),
         )
     }
 
@@ -97,15 +100,17 @@ class MapLibreMapOptionsTest : BaseTest() {
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapLibreMapOptions()
-                    .logoMargins(intArrayOf(0, 1, 2, 3)).logoMargins
-            )
+                    .logoMargins(intArrayOf(0, 1, 2, 3))
+                    .logoMargins,
+            ),
         )
         Assert.assertFalse(
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapLibreMapOptions()
-                    .logoMargins(intArrayOf(0, 0, 0, 0)).logoMargins
-            )
+                    .logoMargins(intArrayOf(0, 0, 0, 0))
+                    .logoMargins,
+            ),
         )
     }
 
@@ -114,7 +119,7 @@ class MapLibreMapOptionsTest : BaseTest() {
         Assert.assertEquals(-1, MapLibreMapOptions().attributionTintColor)
         Assert.assertEquals(
             Color.RED,
-            MapLibreMapOptions().attributionTintColor(Color.RED).attributionTintColor
+            MapLibreMapOptions().attributionTintColor(Color.RED).attributionTintColor,
         )
     }
 
@@ -128,15 +133,15 @@ class MapLibreMapOptionsTest : BaseTest() {
     fun testAttributionGravity() {
         Assert.assertEquals(
             Gravity.BOTTOM or Gravity.START,
-            MapLibreMapOptions().attributionGravity
+            MapLibreMapOptions().attributionGravity,
         )
         Assert.assertEquals(
             Gravity.BOTTOM,
-            MapLibreMapOptions().attributionGravity(Gravity.BOTTOM).attributionGravity
+            MapLibreMapOptions().attributionGravity(Gravity.BOTTOM).attributionGravity,
         )
         Assert.assertNotEquals(
             Gravity.START.toLong(),
-            MapLibreMapOptions().attributionGravity(Gravity.BOTTOM).attributionGravity.toLong()
+            MapLibreMapOptions().attributionGravity(Gravity.BOTTOM).attributionGravity.toLong(),
         )
     }
 
@@ -146,15 +151,17 @@ class MapLibreMapOptionsTest : BaseTest() {
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapLibreMapOptions()
-                    .attributionMargins(intArrayOf(0, 1, 2, 3)).attributionMargins
-            )
+                    .attributionMargins(intArrayOf(0, 1, 2, 3))
+                    .attributionMargins,
+            ),
         )
         Assert.assertFalse(
             Arrays.equals(
                 intArrayOf(0, 1, 2, 3),
                 MapLibreMapOptions()
-                    .attributionMargins(intArrayOf(0, 0, 0, 0)).attributionMargins
-            )
+                    .attributionMargins(intArrayOf(0, 0, 0, 0))
+                    .attributionMargins,
+            ),
         )
     }
 
@@ -163,17 +170,17 @@ class MapLibreMapOptionsTest : BaseTest() {
         Assert.assertEquals(
             MapLibreConstants.MINIMUM_ZOOM.toDouble(),
             MapLibreMapOptions().minZoomPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertEquals(
             5.0,
             MapLibreMapOptions().minZoomPreference(5.0).minZoomPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertNotEquals(
             2.0,
             MapLibreMapOptions().minZoomPreference(5.0).minZoomPreference,
-            DELTA
+            DELTA,
         )
     }
 
@@ -182,17 +189,17 @@ class MapLibreMapOptionsTest : BaseTest() {
         Assert.assertEquals(
             MapLibreConstants.MAXIMUM_ZOOM.toDouble(),
             MapLibreMapOptions().maxZoomPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertEquals(
             5.0,
             MapLibreMapOptions().maxZoomPreference(5.0).maxZoomPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertNotEquals(
             2.0,
             MapLibreMapOptions().maxZoomPreference(5.0).maxZoomPreference,
-            DELTA
+            DELTA,
         )
     }
 
@@ -201,17 +208,17 @@ class MapLibreMapOptionsTest : BaseTest() {
         Assert.assertEquals(
             MapLibreConstants.MINIMUM_PITCH.toDouble(),
             MapLibreMapOptions().minPitchPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertEquals(
             5.0,
             MapLibreMapOptions().minPitchPreference(5.0).minPitchPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertNotEquals(
             2.0,
             MapLibreMapOptions().minPitchPreference(5.0).minPitchPreference,
-            DELTA
+            DELTA,
         )
     }
 
@@ -220,17 +227,17 @@ class MapLibreMapOptionsTest : BaseTest() {
         Assert.assertEquals(
             MapLibreConstants.MAXIMUM_PITCH.toDouble(),
             MapLibreMapOptions().maxPitchPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertEquals(
             5.0,
             MapLibreMapOptions().maxPitchPreference(5.0).maxPitchPreference,
-            DELTA
+            DELTA,
         )
         Assert.assertNotEquals(
             2.0,
             MapLibreMapOptions().maxPitchPreference(5.0).maxPitchPreference,
-            DELTA
+            DELTA,
         )
     }
 
@@ -274,11 +281,11 @@ class MapLibreMapOptionsTest : BaseTest() {
         val position = CameraPosition.Builder().build()
         Assert.assertEquals(
             CameraPosition.Builder(position).build(),
-            MapLibreMapOptions().camera(position).camera
+            MapLibreMapOptions().camera(position).camera,
         )
         Assert.assertNotEquals(
             CameraPosition.Builder().target(LatLng(1.0, 1.0)),
-            MapLibreMapOptions().camera(position)
+            MapLibreMapOptions().camera(position),
         )
         Assert.assertNull(MapLibreMapOptions().camera)
     }
@@ -301,7 +308,7 @@ class MapLibreMapOptionsTest : BaseTest() {
         // Check mutations
         Assert.assertEquals(
             5,
-            MapLibreMapOptions().setPrefetchZoomDelta(5).prefetchZoomDelta
+            MapLibreMapOptions().setPrefetchZoomDelta(5).prefetchZoomDelta,
         )
     }
 
@@ -320,7 +327,7 @@ class MapLibreMapOptionsTest : BaseTest() {
         val options = MapLibreMapOptions.createFromAttributes(RuntimeEnvironment.application, null)
         Assert.assertEquals(
             MapLibreConstants.DEFAULT_FONT,
-            options.localIdeographFontFamily
+            options.localIdeographFontFamily,
         )
     }
 

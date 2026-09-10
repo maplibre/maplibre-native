@@ -6,9 +6,12 @@ import androidx.annotation.RawRes
 import java.io.*
 
 object ResourceUtils {
-    @JvmStatic
     // # --8<-- [start:readRawResource]
-    fun readRawResource(context: Context?, @RawRes rawResource: Int): String {
+    @JvmStatic
+    fun readRawResource(
+        context: Context?,
+        @RawRes rawResource: Int,
+    ): String {
         var json = ""
         if (context != null) {
             val writer: Writer = StringWriter()
@@ -26,11 +29,13 @@ object ResourceUtils {
     }
     // # --8<-- [end:readRawResource]
 
-    fun convertDpToPx(context: Context, dp: Float): Float {
-        return TypedValue.applyDimension(
+    fun convertDpToPx(
+        context: Context,
+        dp: Float,
+    ): Float =
+        TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
             dp,
-            context.resources.displayMetrics
+            context.resources.displayMetrics,
         )
-    }
 }

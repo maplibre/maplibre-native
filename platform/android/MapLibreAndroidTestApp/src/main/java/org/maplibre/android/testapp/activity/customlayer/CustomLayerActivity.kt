@@ -9,8 +9,8 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CustomLayer
 import org.maplibre.android.testapp.BuildConfig
@@ -44,8 +44,8 @@ class CustomLayerActivity : AppCompatActivity() {
             maplibreMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(39.91448, -243.60947),
-                    10.0
-                )
+                    10.0,
+                ),
             )
             maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { _: Style? -> initFab() }
         }
@@ -68,10 +68,11 @@ class CustomLayerActivity : AppCompatActivity() {
             customLayer = null
             fab.setImageResource(R.drawable.ic_layers)
         } else {
-            customLayer = CustomLayer(
-                "custom",
-                if (!isVulkan) ExampleCustomLayer.createContext() else ExampleVulkanCustomLayer.createContext()
-            )
+            customLayer =
+                CustomLayer(
+                    "custom",
+                    if (!isVulkan) ExampleCustomLayer.createContext() else ExampleVulkanCustomLayer.createContext(),
+                )
             style!!.addLayerBelow(customLayer!!, "building")
             fab.setImageResource(R.drawable.ic_layers_clear)
         }
@@ -123,8 +124,8 @@ class CustomLayerActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.action_update_layer -> {
                 updateLayer()
                 true
@@ -157,7 +158,8 @@ class CustomLayerActivity : AppCompatActivity() {
                 true
             }
 
-            else -> super.onOptionsItemSelected(item)
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
-    }
 }

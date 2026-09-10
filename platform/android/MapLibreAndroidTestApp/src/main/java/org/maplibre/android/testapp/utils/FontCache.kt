@@ -10,7 +10,10 @@ object FontCache {
     private val fontCache = Hashtable<String, Typeface?>()
 
     @JvmStatic
-    operator fun get(name: String, context: Context): Typeface? {
+    operator fun get(
+        name: String,
+        context: Context,
+    ): Typeface? {
         var tf = fontCache[name]
         if (tf == null) {
             try {

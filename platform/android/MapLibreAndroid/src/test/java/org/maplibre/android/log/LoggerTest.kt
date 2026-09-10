@@ -10,7 +10,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LoggerTest : BaseTest() {
-
     private val logger: LoggerDefinition = mockk(relaxed = true)
 
     @Before

@@ -10,6 +10,7 @@ import org.maplibre.android.geometry.LatLng
 class CountryMarkerOptions : BaseMarkerOptions<CountryMarker?, CountryMarkerOptions?> {
     private var abbrevName: String? = null
     private var flagRes = 0
+
     fun abbrevName(name: String?): CountryMarkerOptions {
         abbrevName = name
         return getThis()
@@ -31,23 +32,21 @@ class CountryMarkerOptions : BaseMarkerOptions<CountryMarker?, CountryMarkerOpti
         title(`in`.readString())
     }
 
-    override fun getThis(): CountryMarkerOptions {
-        return this
-    }
+    override fun getThis(): CountryMarkerOptions = this
 
-    override fun getMarker(): CountryMarker {
-        return CountryMarker(this, abbrevName!!, flagRes)
-    }
+    override val marker: CountryMarker
+        get() = CountryMarker(this, abbrevName!!, flagRes)
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
-    override fun writeToParcel(out: Parcel, flags: Int) {
+    override fun writeToParcel(
+        out: Parcel,
+        flags: Int,
+    ) {
         out.writeParcelable(position, flags)
         out.writeString(snippet)
-        out.writeString(icon.id)
-        out.writeParcelable(icon.bitmap, flags)
+        out.writeString(icon!!.id)
+        out.writeParcelable(icon!!.bitmap, flags)
         out.writeString(title)
     }
 
@@ -55,13 +54,9 @@ class CountryMarkerOptions : BaseMarkerOptions<CountryMarker?, CountryMarkerOpti
         @JvmField
         val CREATOR: Parcelable.Creator<CountryMarkerOptions?> =
             object : Parcelable.Creator<CountryMarkerOptions?> {
-                override fun createFromParcel(`in`: Parcel): CountryMarkerOptions {
-                    return CountryMarkerOptions(`in`)
-                }
+                override fun createFromParcel(`in`: Parcel): CountryMarkerOptions = CountryMarkerOptions(`in`)
 
-                override fun newArray(size: Int): Array<CountryMarkerOptions?> {
-                    return arrayOfNulls(size)
-                }
+                override fun newArray(size: Int): Array<CountryMarkerOptions?> = arrayOfNulls(size)
             }
     }
 }

@@ -26,6 +26,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito)
+    testImplementation(libs.mockitoKotlin)
     testImplementation(libs.mockk)
     testImplementation(libs.robolectric)
     testImplementation(libs.commonsIO)
@@ -121,20 +122,30 @@ android {
     }
 
     sourceSets {
+        // The sharedRenderer directories hold Kotlin sources, so they have to be registered with
+        // the Kotlin source set as well: java.srcDirs() alone is not picked up by the Kotlin compiler.
         getByName("opengl") {
             java.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
+            kotlin.srcDirs("src/opengl/java/", "src/sharedRenderer/opengl/java/")
         }
         getByName("vulkan") {
             java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
+            kotlin.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
         }
         listOf("webgpuDawn", "webgpuWgpu").forEach {
             getByName(it) {
                 java.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
+                kotlin.srcDirs("src/vulkan/java/", "src/sharedRenderer/vulkan/java/")
                 manifest.srcFile("src/vulkan/AndroidManifest.xml")
             }
         }
         getByName("multiBackend") {
             java.srcDirs(
+                "src/multiBackend/java/",
+                "src/sharedRenderer/opengl/java/",
+                "src/sharedRenderer/vulkan/java/"
+            )
+            kotlin.srcDirs(
                 "src/multiBackend/java/",
                 "src/sharedRenderer/opengl/java/",
                 "src/sharedRenderer/vulkan/java/"

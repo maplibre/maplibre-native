@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.BackgroundLayer
@@ -38,30 +38,29 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@QueryRenderedFeaturesBoxSymbolCountActivity.maplibreMap = maplibreMap
             try {
-                val testPoints = ResourceUtils.readRawResource(
-                    mapView.context,
-                    R.raw.test_points_utrecht
-                )
+                val testPoints =
+                    ResourceUtils.readRawResource(
+                        mapView.context,
+                        R.raw.test_points_utrecht,
+                    )
                 val markerImage =
                     BitmapFactory.decodeResource(resources, R.drawable.maplibre_marker_icon_default)
                 maplibreMap.setStyle(
-                    Style.Builder()
+                    Style
+                        .Builder()
                         .withLayer(
                             BackgroundLayer("bg")
                                 .withProperties(
-                                    PropertyFactory.backgroundColor(Expression.rgb(120, 161, 226))
-                                )
-                        )
-                        .withLayer(
+                                    PropertyFactory.backgroundColor(Expression.rgb(120, 161, 226)),
+                                ),
+                        ).withLayer(
                             SymbolLayer("symbols-layer", "symbols-source")
                                 .withProperties(
-                                    PropertyFactory.iconImage("test-icon")
-                                )
-                        )
-                        .withSource(
-                            GeoJsonSource("symbols-source", testPoints)
-                        )
-                        .withImage("test-icon", markerImage)
+                                    PropertyFactory.iconImage("test-icon"),
+                                ),
+                        ).withSource(
+                            GeoJsonSource("symbols-source", testPoints),
+                        ).withImage("test-icon", markerImage),
                 )
             } catch (exception: IOException) {
                 exception.printStackTrace()
@@ -70,21 +69,23 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
                 // Query
                 val top = selectionBox.top - mapView.top
                 val left = selectionBox.left - mapView.left
-                val box = RectF(
-                    left.toFloat(),
-                    top.toFloat(),
-                    (left + selectionBox.width).toFloat(),
-                    (top + selectionBox.height).toFloat()
-                )
+                val box =
+                    RectF(
+                        left.toFloat(),
+                        top.toFloat(),
+                        (left + selectionBox.width).toFloat(),
+                        (top + selectionBox.height).toFloat(),
+                    )
                 Timber.i("Querying box %s", box)
                 val features = maplibreMap.queryRenderedFeatures(box, "symbols-layer")
 
                 // Show count
-                 Toast.makeText(
-                    this@QueryRenderedFeaturesBoxSymbolCountActivity,
-                    "${features.size} feature${if (features.size == 1) "" else "s"} in box",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast
+                    .makeText(
+                        this@QueryRenderedFeaturesBoxSymbolCountActivity,
+                        "${features.size} feature${if (features.size == 1) "" else "s"} in box",
+                        Toast.LENGTH_SHORT,
+                    ).show()
             }
         }
     }

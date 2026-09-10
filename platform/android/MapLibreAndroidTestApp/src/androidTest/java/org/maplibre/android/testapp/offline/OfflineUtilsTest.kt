@@ -1,12 +1,12 @@
 package org.maplibre.android.testapp.offline
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import org.maplibre.android.AppCenter
-import org.maplibre.android.testapp.activity.offline.OfflineActivity
-import org.maplibre.android.testapp.utils.OfflineUtils.convertRegionName
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.AppCenter
+import org.maplibre.android.testapp.activity.offline.OfflineActivity
+import org.maplibre.android.testapp.utils.OfflineUtils.convertRegionName
 import java.io.UnsupportedEncodingException
 import java.util.*
 

@@ -11,9 +11,8 @@ object TestStyles {
 
     const val OPENFREEMAP_BRIGHT = "https://tiles.openfreemap.org/styles/bright"
 
-    private fun protomaps(style: String): String {
-        return "https://api.protomaps.com/styles/v2/${style}.json?key=e761cc7daedf832a"
-    }
+    private fun protomaps(style: String): String = "https://api.protomaps.com/styles/v2/$style.json?key=e761cc7daedf832a"
+
     val PROTOMAPS_LIGHT = protomaps("light")
 
     val PROTOMAPS_DARK = protomaps("dark")

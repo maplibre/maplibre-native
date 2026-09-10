@@ -37,7 +37,10 @@ import org.maplibre.android.utils.ThreadUtils
  * the UI thread (for access to the main looper)
  */
 @UiThread
-open class MapSnapshotter(context: Context, options: Options) {
+open class MapSnapshotter(
+    context: Context,
+    options: Options,
+) {
     // Holds the pointer to JNI NativeMapView
     @Keep
     private val nativePtr: Long = 0
@@ -103,7 +106,10 @@ open class MapSnapshotter(context: Context, options: Options) {
     /**
      * MapSnapshotter options
      */
-    class Options(width: Int, height: Int) {
+    class Options(
+        width: Int,
+        height: Int,
+    ) {
         /**
          * @return the pixel ratio
          */
@@ -144,7 +150,7 @@ open class MapSnapshotter(context: Context, options: Options) {
          * @return the font family used for locally generating ideographs,
          * Default font for local ideograph font family is [MapLibreConstants.DEFAULT_FONT].
          */
-        var localIdeographFontFamily = MapLibreConstants.DEFAULT_FONT
+        var localIdeographFontFamily: String? = MapLibreConstants.DEFAULT_FONT
             private set
 
         /**
@@ -213,7 +219,12 @@ open class MapSnapshotter(context: Context, options: Options) {
          * This is applied before the region, if region is null, it will not work
          * @return the mutated [Options]
          */
-        fun withPadding(left:Int, top:Int, right:Int, bottom:Int): Options {
+        fun withPadding(
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+        ): Options {
             this.regionPadding = intArrayOf(left, top, right, bottom)
             return this
         }
@@ -367,7 +378,7 @@ open class MapSnapshotter(context: Context, options: Options) {
             options.regionPadding[0] / options.pixelRatio,
             options.regionPadding[1] / options.pixelRatio,
             options.regionPadding[2] / options.pixelRatio,
-            options.regionPadding[3] / options.pixelRatio
+            options.regionPadding[3] / options.pixelRatio,
         )
     }
 
@@ -379,7 +390,10 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param errorHandler the error handler to use on snapshot errors
      */
     @JvmOverloads
-    fun start(callback: SnapshotReadyCallback, errorHandler: ErrorHandler? = null) {
+    fun start(
+        callback: SnapshotReadyCallback,
+        errorHandler: ErrorHandler? = null,
+    ) {
         check(this.callback == null) { "Snapshotter was already started" }
         checkThread()
         this.callback = callback
@@ -394,7 +408,10 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param height the height
      */
     @Keep
-    external fun setSize(width: Int, height: Int)
+    external fun setSize(
+        width: Int,
+        height: Int,
+    )
 
     /**
      * Updates the snapshotter with a new [CameraPosition]
@@ -418,7 +435,12 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param left, top, right, bottom
      */
     @Keep
-    external fun setPadding(left:Int, top:Int, right:Int, bottom:Int)
+    external fun setPadding(
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+    )
 
     /**
      * Updates the snapshotter with a new style url
@@ -442,7 +464,10 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param layer the layer to add
      * @param below the layer id to add this layer before
      */
-    private fun addLayerBelow(layer: Layer, below: String) {
+    private fun addLayerBelow(
+        layer: Layer,
+        below: String,
+    ) {
         nativeAddLayerBelow(layer.nativePtr, below)
     }
 
@@ -452,7 +477,10 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param layer the layer to add
      * @param above the layer id to add this layer above
      */
-    private fun addLayerAbove(layer: Layer, above: String) {
+    private fun addLayerAbove(
+        layer: Layer,
+        above: String,
+    ) {
         nativeAddLayerAbove(layer.nativePtr, above)
     }
 
@@ -463,7 +491,10 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param layer the layer to add
      * @param index the index to insert the layer at
      */
-    private fun addLayerAt(layer: Layer, index: Int) {
+    private fun addLayerAt(
+        layer: Layer,
+        index: Int,
+    ) {
         nativeAddLayerAt(layer.nativePtr, index)
     }
 
@@ -483,7 +514,11 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param bitmap the pre-multiplied Bitmap
      * @param sdf    the flag indicating image is an SDF or template image
      */
-    fun addImage(name: String, bitmap: Bitmap, sdf: Boolean) {
+    fun addImage(
+        name: String,
+        bitmap: Bitmap,
+        sdf: Boolean,
+    ) {
         nativeAddImages(arrayOf(Style.toImage(ImageWrapper(name, bitmap, sdf))))
     }
 
@@ -515,39 +550,73 @@ open class MapSnapshotter(context: Context, options: Options) {
     protected open fun addOverlay(mapSnapshot: MapSnapshot) {
         val snapshot = mapSnapshot.bitmap
         val canvas = Canvas(snapshot)
-        val margin = context.resources.displayMetrics.density.toInt() * LOGO_MARGIN_DP
+        val margin =
+            context.resources.displayMetrics.density
+                .toInt() * LOGO_MARGIN_DP
         drawOverlay(mapSnapshot, snapshot, canvas, margin)
     }
 
-    private fun drawOverlay(mapSnapshot: MapSnapshot, snapshot: Bitmap, canvas: Canvas, margin: Int) {
+    private fun drawOverlay(
+        mapSnapshot: MapSnapshot,
+        snapshot: Bitmap,
+        canvas: Canvas,
+        margin: Int,
+    ) {
         val measure = getAttributionMeasure(mapSnapshot, snapshot, margin)
         val layout = measure.measure()
         drawLogo(mapSnapshot, canvas, margin, layout!!)
         drawAttribution(mapSnapshot, canvas, measure, layout)
     }
 
-    private fun getAttributionMeasure(mapSnapshot: MapSnapshot, snapshot: Bitmap, margin: Int): AttributionMeasure {
+    private fun getAttributionMeasure(
+        mapSnapshot: MapSnapshot,
+        snapshot: Bitmap,
+        margin: Int,
+    ): AttributionMeasure {
         val logo = createScaledLogo(snapshot)
         val longText = createTextView(mapSnapshot, false, logo.scale)
         val shortText = createTextView(mapSnapshot, true, logo.scale)
-        return AttributionMeasure.Builder().setSnapshot(snapshot).setLogo(logo.large).setLogoSmall(logo.small).setTextView(longText).setTextViewShort(shortText)
-            .setMarginPadding(margin.toFloat()).build()
+        return AttributionMeasure
+            .Builder()
+            .setSnapshot(
+                snapshot,
+            ).setLogo(logo.large)
+            .setLogoSmall(logo.small)
+            .setTextView(longText)
+            .setTextViewShort(shortText)
+            .setMarginPadding(margin.toFloat())
+            .build()
     }
 
-    private fun drawLogo(mapSnapshot: MapSnapshot, canvas: Canvas, margin: Int, layout: AttributionLayout) {
+    private fun drawLogo(
+        mapSnapshot: MapSnapshot,
+        canvas: Canvas,
+        margin: Int,
+        layout: AttributionLayout,
+    ) {
         if (mapSnapshot.isShowLogo) {
             drawLogo(mapSnapshot.bitmap, canvas, margin, layout)
         }
     }
 
-    private fun drawLogo(snapshot: Bitmap, canvas: Canvas, margin: Int, placement: AttributionLayout) {
+    private fun drawLogo(
+        snapshot: Bitmap,
+        canvas: Canvas,
+        margin: Int,
+        placement: AttributionLayout,
+    ) {
         val selectedLogo = placement.logo
         if (selectedLogo != null) {
             canvas.drawBitmap(selectedLogo, margin.toFloat(), (snapshot.height - selectedLogo.height - margin).toFloat(), null)
         }
     }
 
-    private fun drawAttribution(mapSnapshot: MapSnapshot, canvas: Canvas, measure: AttributionMeasure, layout: AttributionLayout?) {
+    private fun drawAttribution(
+        mapSnapshot: MapSnapshot,
+        canvas: Canvas,
+        measure: AttributionMeasure,
+        layout: AttributionLayout?,
+    ) {
         // draw attribution
         if (!mapSnapshot.isShowAttribution) return
         val anchorPoint = layout!!.anchorPoint
@@ -555,18 +624,29 @@ open class MapSnapshotter(context: Context, options: Options) {
             drawAttribution(canvas, measure, anchorPoint)
         } else {
             val snapshot = mapSnapshot.bitmap
-            Logger.e(TAG, "Could not generate attribution for snapshot size: ${snapshot.width} x ${snapshot.height}. You are required to provide your own attribution for the used sources: ${mapSnapshot.attributions.joinToString()}")
+            Logger.e(
+                TAG,
+                "Could not generate attribution for snapshot size: ${snapshot.width} x ${snapshot.height}. You are required to provide your own attribution for the used sources: ${mapSnapshot.attributions.joinToString()}",
+            )
         }
     }
 
-    private fun drawAttribution(canvas: Canvas, measure: AttributionMeasure, anchorPoint: PointF) {
+    private fun drawAttribution(
+        canvas: Canvas,
+        measure: AttributionMeasure,
+        anchorPoint: PointF,
+    ) {
         canvas.save()
         canvas.translate(anchorPoint.x, anchorPoint.y)
         measure.textView.draw(canvas)
         canvas.restore()
     }
 
-    private fun createTextView(mapSnapshot: MapSnapshot, shortText: Boolean, scale: Float): TextView {
+    private fun createTextView(
+        mapSnapshot: MapSnapshot,
+        shortText: Boolean,
+        scale: Float,
+    ): TextView {
         val textColor = ResourcesCompat.getColor(context.resources, R.color.maplibre_gray_dark, context.theme)
         val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         val heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
@@ -582,7 +662,7 @@ open class MapSnapshotter(context: Context, options: Options) {
                 TAG,
                 String.format(
                     "Attribution string is empty. Make sure you provide your own attribution for the used sources if needed.",
-                )
+                ),
             )
             return TextView(context)
         }
@@ -599,8 +679,18 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param shortText   indicates if the short variant of the string should be parsed
      * @return the parsed attribution string
      */
-    private fun createAttributionString(mapSnapshot: MapSnapshot, shortText: Boolean): String {
-        val attributionParser = AttributionParser.Options(context).withAttributionData(*mapSnapshot.attributions).withCopyrightSign(false).withImproveMap(false).build()
+    private fun createAttributionString(
+        mapSnapshot: MapSnapshot,
+        shortText: Boolean,
+    ): String {
+        val attributionParser =
+            AttributionParser
+                .Options(
+                    context,
+                ).withAttributionData(*mapSnapshot.attributions)
+                .withCopyrightSign(false)
+                .withImproveMap(false)
+                .build()
         return attributionParser.createAttributionString(shortText)
     }
 
@@ -628,7 +718,10 @@ open class MapSnapshotter(context: Context, options: Options) {
      * @param logo     the large of the mapbox logo
      * @return the scale value
      */
-    private fun calculateLogoScale(snapshot: Bitmap, logo: Bitmap): Float {
+    private fun calculateLogoScale(
+        snapshot: Bitmap,
+        logo: Bitmap,
+    ): Float {
         val displayMetrics = context.resources.displayMetrics
         val widthRatio = (displayMetrics.widthPixels / snapshot.width).toFloat()
         val heightRatio = (displayMetrics.heightPixels / snapshot.height).toFloat()
@@ -699,17 +792,17 @@ open class MapSnapshotter(context: Context, options: Options) {
                 }
                 for (layerWrapper in builder.layers) {
                     if (layerWrapper is LayerAtWrapper) {
-                        addLayerAt(layerWrapper.getLayer(), layerWrapper.index)
+                        addLayerAt(layerWrapper.layer, layerWrapper.index)
                     } else if (layerWrapper is LayerAboveWrapper) {
-                        addLayerAbove(layerWrapper.getLayer(), layerWrapper.aboveLayer)
+                        addLayerAbove(layerWrapper.layer, layerWrapper.aboveLayer)
                     } else if (layerWrapper is LayerBelowWrapper) {
-                        addLayerBelow(layerWrapper.getLayer(), layerWrapper.belowLayer)
+                        addLayerBelow(layerWrapper.layer, layerWrapper.belowLayer)
                     } else {
                         addLayerBelow(layerWrapper.layer, MapLibreConstants.LAYER_ID_ANNOTATIONS)
                     }
                 }
                 for (image in builder.images) {
-                    addImage(image.id, image.bitmap, image.isSdf)
+                    addImage(image.id, image.bitmap, image.sdf)
                 }
             }
         }
@@ -776,7 +869,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         paddingLeft: Float,
         paddingTop: Float,
         paddingRight: Float,
-        paddingBottom: Float
+        paddingBottom: Float,
     )
 
     @Keep
@@ -786,16 +879,28 @@ open class MapSnapshotter(context: Context, options: Options) {
     protected external fun nativeCancel()
 
     @Keep
-    private external fun nativeAddLayerBelow(layerPtr: Long, below: String)
+    private external fun nativeAddLayerBelow(
+        layerPtr: Long,
+        below: String,
+    )
 
     @Keep
-    private external fun nativeAddLayerAbove(layerPtr: Long, above: String)
+    private external fun nativeAddLayerAbove(
+        layerPtr: Long,
+        above: String,
+    )
 
     @Keep
-    private external fun nativeAddLayerAt(layerPtr: Long, index: Int)
+    private external fun nativeAddLayerAt(
+        layerPtr: Long,
+        index: Int,
+    )
 
     @Keep
-    private external fun nativeAddSource(source: Source, sourcePtr: Long)
+    private external fun nativeAddSource(
+        source: Source,
+        sourcePtr: Long,
+    )
 
     @Keep
     private external fun nativeAddImages(images: Array<Image>)
@@ -810,7 +915,11 @@ open class MapSnapshotter(context: Context, options: Options) {
     @Throws(Throwable::class)
     protected open external fun finalize()
 
-    private inner class Logo internal constructor(val large: Bitmap, val small: Bitmap, val scale: Float)
+    private inner class Logo internal constructor(
+        val large: Bitmap,
+        val small: Bitmap,
+        val scale: Float,
+    )
 
     companion object {
         private const val TAG = "Mbgl-MapSnapshotter"
@@ -818,8 +927,9 @@ open class MapSnapshotter(context: Context, options: Options) {
     }
 }
 
-fun fromHTML(source: String) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-    Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
-} else {
-    Html.fromHtml(source)
-}
+fun fromHTML(source: String) =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
+    } else {
+        Html.fromHtml(source)
+    }

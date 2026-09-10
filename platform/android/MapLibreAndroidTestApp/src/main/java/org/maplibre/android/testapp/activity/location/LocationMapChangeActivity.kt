@@ -10,16 +10,19 @@ import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 
-class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
+class LocationMapChangeActivity :
+    AppCompatActivity(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var permissionsManager: PermissionsManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_map_change)
@@ -34,23 +37,27 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapView.getMapAsync(this)
         } else {
-            permissionsManager = PermissionsManager(object : PermissionsListener {
-                override fun onExplanationNeeded(permissionsToExplain: List<String>) {
-                    Toast.makeText(
-                        this@LocationMapChangeActivity,
-                        "You need to accept location permissions.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            permissionsManager =
+                PermissionsManager(
+                    object : PermissionsListener {
+                        override fun onExplanationNeeded(permissionsToExplain: List<String>) {
+                            Toast
+                                .makeText(
+                                    this@LocationMapChangeActivity,
+                                    "You need to accept location permissions.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                override fun onPermissionResult(granted: Boolean) {
-                    if (granted) {
-                        mapView.getMapAsync(this@LocationMapChangeActivity)
-                    } else {
-                        finish()
-                    }
-                }
-            })
+                        override fun onPermissionResult(granted: Boolean) {
+                            if (granted) {
+                                mapView.getMapAsync(this@LocationMapChangeActivity)
+                            } else {
+                                finish()
+                            }
+                        }
+                    },
+                )
             permissionsManager!!.requestLocationPermissions(this)
         }
     }
@@ -58,7 +65,7 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         permissionsManager!!.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -67,7 +74,7 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(
-            Style.Builder().fromUri(Utils.nextStyle())
+            Style.Builder().fromUri(Utils.nextStyle()),
         ) { style: Style -> activateLocationComponent(style) }
     }
 
@@ -78,23 +85,25 @@ class LocationMapChangeActivity : AppCompatActivity(), OnMapReadyCallback {
             LocationComponentActivationOptions
                 .builder(this, style)
                 .useDefaultLocationEngine(true)
-                .build()
+                .build(),
         )
         locationComponent.isLocationComponentEnabled = true
         locationComponent.renderMode = RenderMode.COMPASS
         locationComponent.addOnLocationClickListener {
-            Toast.makeText(
-                this,
-                "Location clicked",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    this,
+                    "Location clicked",
+                    Toast.LENGTH_SHORT,
+                ).show()
         }
         locationComponent.addOnLocationLongClickListener {
-            Toast.makeText(
-                this,
-                "Location long clicked",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast
+                .makeText(
+                    this,
+                    "Location long clicked",
+                    Toast.LENGTH_SHORT,
+                ).show()
         }
     }
 

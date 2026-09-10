@@ -22,19 +22,23 @@ import kotlin.math.min
  */
 class BottomSheetActivity : AppCompatActivity() {
     private var bottomSheetFragmentAdded = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bottom_sheet)
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                val fragmentManager = supportFragmentManager
-                if (fragmentManager.backStackEntryCount > 0) {
-                    fragmentManager.popBackStack()
-                } else {
-                    finish()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val fragmentManager = supportFragmentManager
+                    if (fragmentManager.backStackEntryCount > 0) {
+                        fragmentManager.popBackStack()
+                    } else {
+                        finish()
+                    }
                 }
-            }
-        })
+            },
+        )
         val actionBar = supportActionBar
         actionBar?.setDisplayHomeAsUpEnabled(true)
         findViewById<View>(R.id.fabFragment).setOnClickListener { v: View? -> addMapFragment() }
@@ -65,11 +69,12 @@ class BottomSheetActivity : AppCompatActivity() {
         }
         fragmentTransaction.addToBackStack(mainMapFragment.hashCode().toString())
         fragmentTransaction.commit()
-        Toast.makeText(
-            applicationContext,
-            String.format(AMOUNT_OF_MAIN_MAP_FRAGMENTS, fragmentCount + 1),
-            Toast.LENGTH_SHORT
-        ).show()
+        Toast
+            .makeText(
+                applicationContext,
+                String.format(AMOUNT_OF_MAIN_MAP_FRAGMENTS, fragmentCount + 1),
+                Toast.LENGTH_SHORT,
+            ).show()
     }
 
     private fun toggleBottomSheetMapFragment() {
@@ -86,7 +91,7 @@ class BottomSheetActivity : AppCompatActivity() {
         fragmentTransaction.add(
             R.id.fragment_container_bottom,
             BottomSheetFragment.newInstance(this),
-            TAG_BOTTOM_FRAGMENT
+            TAG_BOTTOM_FRAGMENT,
         )
         fragmentTransaction.commit()
     }
@@ -98,12 +103,15 @@ class BottomSheetActivity : AppCompatActivity() {
         }
     }
 
-    class MainMapFragment : Fragment(), OnMapReadyCallback {
+    class MainMapFragment :
+        Fragment(),
+        OnMapReadyCallback {
         private var map: MapView? = null
+
         override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?
+            savedInstanceState: Bundle?,
         ): View? {
             super.onCreateView(inflater, container, savedInstanceState)
             val context = inflater.context
@@ -112,7 +120,10 @@ class BottomSheetActivity : AppCompatActivity() {
             }
         }
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        override fun onViewCreated(
+            view: View,
+            savedInstanceState: Bundle?,
+        ) {
             super.onViewCreated(view, savedInstanceState)
             map!!.onCreate(savedInstanceState)
             map!!.getMapAsync(this)
@@ -122,18 +133,18 @@ class BottomSheetActivity : AppCompatActivity() {
             maplibreMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(37.760545, -122.436055),
-                    15.0
-                )
+                    15.0,
+                ),
             )
             maplibreMap.setStyle(
                 Style.Builder().fromUri(
                     STYLES[
                         min(
                             max(requireArguments().getInt("mapcounter"), 0),
-                            STYLES.size - 1
-                        )
-                    ]
-                )
+                            STYLES.size - 1,
+                        ),
+                    ],
+                ),
             )
         }
 
@@ -173,16 +184,20 @@ class BottomSheetActivity : AppCompatActivity() {
         }
 
         companion object {
-            private val STYLES = arrayOf(
-                TestStyles.getPredefinedStyleWithFallback("Streets"),
-                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
-                TestStyles.getPredefinedStyleWithFallback("Bright"),
-                TestStyles.getPredefinedStyleWithFallback("Pastel"),
-                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
-                TestStyles.getPredefinedStyleWithFallback("Outdoor")
-            )
+            private val STYLES =
+                arrayOf(
+                    TestStyles.getPredefinedStyleWithFallback("Streets"),
+                    TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+                    TestStyles.getPredefinedStyleWithFallback("Bright"),
+                    TestStyles.getPredefinedStyleWithFallback("Pastel"),
+                    TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+                    TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+                )
 
-            fun newInstance(context: Context?, mapCounter: Int): MainMapFragment {
+            fun newInstance(
+                context: Context?,
+                mapCounter: Int,
+            ): MainMapFragment {
                 val mapFragment = MainMapFragment()
                 val bundle = Bundle()
                 bundle.putInt("mapcounter", mapCounter)
@@ -194,12 +209,15 @@ class BottomSheetActivity : AppCompatActivity() {
         }
     }
 
-    class BottomSheetFragment : Fragment(), OnMapReadyCallback {
+    class BottomSheetFragment :
+        Fragment(),
+        OnMapReadyCallback {
         private var map: MapView? = null
+
         override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?
+            savedInstanceState: Bundle?,
         ): View? {
             super.onCreateView(inflater, container, savedInstanceState)
             val context = inflater.context
@@ -208,7 +226,10 @@ class BottomSheetActivity : AppCompatActivity() {
             }
         }
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        override fun onViewCreated(
+            view: View,
+            savedInstanceState: Bundle?,
+        ) {
             super.onViewCreated(view, savedInstanceState)
             map!!.onCreate(savedInstanceState)
             map!!.getMapAsync(this)
@@ -218,8 +239,8 @@ class BottomSheetActivity : AppCompatActivity() {
             maplibreMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(37.760545, -122.436055),
-                    15.0
-                )
+                    15.0,
+                ),
             )
             maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Bright"))
         }

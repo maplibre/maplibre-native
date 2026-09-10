@@ -28,21 +28,23 @@ class MapInDialogActivity : AppCompatActivity() {
 
     class MapDialogFragment : DialogFragment() {
         private lateinit var mapView: MapView
+
         override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            return inflater.inflate(R.layout.fragment_dialog_map, container)
-        }
+            savedInstanceState: Bundle?,
+        ): View? = inflater.inflate(R.layout.fragment_dialog_map, container)
 
-        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        override fun onViewCreated(
+            view: View,
+            savedInstanceState: Bundle?,
+        ) {
             super.onViewCreated(view, savedInstanceState)
             mapView = view.findViewById(R.id.mapView)
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync {
                 it.setStyle(
-                    TestStyles.getPredefinedStyleWithFallback("Outdoor")
+                    TestStyles.getPredefinedStyleWithFallback("Outdoor"),
                 )
             }
         }

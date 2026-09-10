@@ -1,10 +1,10 @@
 package org.maplibre.android.utils
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import org.maplibre.android.constants.MapLibreConstants
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.constants.MapLibreConstants
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class FontUtilsTest {

@@ -23,20 +23,21 @@ class OfflineDownloadRegionDialog : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(
-            requireActivity()
-        )
+        val builder =
+            AlertDialog.Builder(
+                requireActivity(),
+            )
 
         // Let the user choose a name for the region
         val regionNameEdit = EditText(activity)
-        builder.setTitle("Choose a name for the region")
+        builder
+            .setTitle("Choose a name for the region")
             .setIcon(R.drawable.ic_airplanemode_active_black)
             .setView(regionNameEdit)
             .setPositiveButton("Start") { dialog: DialogInterface?, which: Int ->
                 val regionName = regionNameEdit.text.toString()
                 listener?.onDownloadRegionDialogPositiveClick(regionName)
-            }
-            .setNegativeButton("Cancel") { dialog: DialogInterface?, which: Int -> Timber.d("Download cancelled.") }
+            }.setNegativeButton("Cancel") { dialog: DialogInterface?, which: Int -> Timber.d("Download cancelled.") }
         return builder.create()
     }
 }

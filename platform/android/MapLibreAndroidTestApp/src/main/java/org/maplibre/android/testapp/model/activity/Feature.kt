@@ -31,19 +31,16 @@ class Feature : Parcelable {
             return split[split.size - 1]
         }
 
-    fun getLabel(): String {
-        return if (label != null) label!! else simpleName
-    }
+    fun getLabel(): String = if (label != null) label!! else simpleName
 
-    fun getDescription(): String {
-        return if (description != null) description!! else "-"
-    }
+    fun getDescription(): String = if (description != null) description!! else "-"
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
-    override fun writeToParcel(out: Parcel, flags: Int) {
+    override fun writeToParcel(
+        out: Parcel,
+        flags: Int,
+    ) {
         out.writeString(name)
         out.writeString(label)
         out.writeString(description)
@@ -52,14 +49,11 @@ class Feature : Parcelable {
 
     companion object {
         @JvmField
-        val CREATOR: Parcelable.Creator<Feature?> = object : Parcelable.Creator<Feature?> {
-            override fun createFromParcel(`in`: Parcel): Feature {
-                return Feature(`in`)
-            }
+        val CREATOR: Parcelable.Creator<Feature?> =
+            object : Parcelable.Creator<Feature?> {
+                override fun createFromParcel(`in`: Parcel): Feature = Feature(`in`)
 
-            override fun newArray(size: Int): Array<Feature?> {
-                return arrayOfNulls(size)
+                override fun newArray(size: Int): Array<Feature?> = arrayOfNulls(size)
             }
-        }
     }
 }

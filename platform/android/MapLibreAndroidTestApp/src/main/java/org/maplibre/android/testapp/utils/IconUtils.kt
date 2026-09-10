@@ -15,13 +15,18 @@ object IconUtils {
      * Demonstrates converting any Drawable to an Icon, for use as a marker icon.
      */
     @JvmStatic
-    fun drawableToIcon(context: Context, @DrawableRes id: Int, @ColorInt colorRes: Int): Icon {
+    fun drawableToIcon(
+        context: Context,
+        @DrawableRes id: Int,
+        @ColorInt colorRes: Int,
+    ): Icon {
         val vectorDrawable = ResourcesCompat.getDrawable(context.resources, id, context.theme)
-        val bitmap = Bitmap.createBitmap(
-            vectorDrawable!!.intrinsicWidth,
-            vectorDrawable.intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )
+        val bitmap =
+            Bitmap.createBitmap(
+                vectorDrawable!!.intrinsicWidth,
+                vectorDrawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888,
+            )
         val canvas = Canvas(bitmap)
         vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
         DrawableCompat.setTint(vectorDrawable, colorRes)
