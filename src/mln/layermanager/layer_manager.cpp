@@ -9,15 +9,32 @@
 #include <mln/style/layer_impl.hpp>
 #include <mln/style/conversion_impl.hpp>
 
+#if MLN_WITH_PLUGINS
+#include <map>
+#include <mutex>
 #include <set>
+#endif
 
 namespace mln {
+
+#if MLN_WITH_PLUGINS
+class LayerManager::Impl {
+public:
+    std::mutex runtimeMutex;
+    std::map<std::string, std::unique_ptr<LayerFactory>> runtimeFactories;
+};
+
+LayerManager::LayerManager()
+    : impl(std::make_unique<Impl>()) {}
+#else
+LayerManager::LayerManager() = default;
+#endif
 
 LayerManager::~LayerManager() = default;
 
 #if MLN_WITH_PLUGINS
 bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>> factories, std::string& error) {
-    std::lock_guard lock(runtimeMutex);
+    std::lock_guard lock(impl->runtimeMutex);
     error.clear();
     std::set<std::string> names;
     for (const auto& factory : factories) {
@@ -26,7 +43,8 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
             error = "Layer factory must have a non-empty, immutable type name";
             return false;
         }
-        if (getFactory(info->type) || runtimeFactories.contains(info->type) || !names.emplace(info->type).second) {
+        if (getFactory(info->type) || impl->runtimeFactories.contains(info->type) ||
+            !names.emplace(info->type).second) {
             error = "Layer type is already registered: " + std::string(info->type);
             return false;
         }
@@ -38,7 +56,7 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
         const std::string name = factory->getTypeInfo()->type;
         pending.emplace(name, std::move(factory));
     }
-    runtimeFactories.merge(pending);
+    impl->runtimeFactories.merge(pending);
     return true;
 }
 
@@ -50,9 +68,9 @@ bool LayerManager::registerLayerFactory(std::unique_ptr<LayerFactory> factory, s
 
 LayerFactory* LayerManager::findFactory(const std::string& type) noexcept {
     if (auto* factory = getFactory(type)) return factory;
-    std::lock_guard lock(runtimeMutex);
-    const auto found = runtimeFactories.find(type);
-    return found == runtimeFactories.end() ? nullptr : found->second.get();
+    std::lock_guard lock(impl->runtimeMutex);
+    const auto found = impl->runtimeFactories.find(type);
+    return found == impl->runtimeFactories.end() ? nullptr : found->second.get();
 }
 
 LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexcept {

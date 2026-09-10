@@ -2,9 +2,8 @@
 
 #include <mln/style/layer.hpp>
 
+#include <memory>
 #include <vector>
-#include <map>
-#include <mutex>
 
 namespace mln {
 namespace style {
@@ -93,6 +92,7 @@ public:
     virtual void addLayerTypeCoreOnly(std::unique_ptr<mln::LayerFactory>);
 
 protected:
+    LayerManager();
     virtual ~LayerManager();
     virtual LayerFactory* getFactory(const std::string& type) noexcept = 0;
     virtual LayerFactory* getFactory(const style::LayerTypeInfo*) noexcept = 0;
@@ -101,8 +101,8 @@ private:
     LayerFactory* findFactory(const std::string&) noexcept;
     LayerFactory* findFactory(const style::LayerTypeInfo*) noexcept;
 #if MLN_WITH_PLUGINS
-    std::mutex runtimeMutex;
-    std::map<std::string, std::unique_ptr<LayerFactory>> runtimeFactories;
+    class Impl;
+    std::unique_ptr<Impl> impl;
 #endif
 };
 
