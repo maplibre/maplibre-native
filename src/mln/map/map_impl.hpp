@@ -118,7 +118,11 @@ public:
     TileLodMode tileLodMode = TileLodMode::Default;
     TerrainLoadMode terrainLoadMode = TerrainLoadMode::Quality;
     TerrainSkirtLength terrainSkirtLength = TerrainSkirtLength::Auto;
-    bool centerClampedToGround = true;
+    /// Off by default: the clamp jumps the camera asynchronously, including part-way
+    /// through a gesture, and browsing a terrain map with it on runs away rather than
+    /// pans. Opt in with Map::setCenterClampedToGround until it is applied during render
+    /// setup instead, the way GL JS's recalculateZoomAndCenter is.
+    bool centerClampedToGround = false;
     bool debugAboveGroundLog = false;
 };
 
