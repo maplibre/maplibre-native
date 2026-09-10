@@ -206,8 +206,8 @@ std::optional<conversion::Error> Layer::setProperty(const std::string& name, con
 }
 
 std::optional<conversion::Error> Layer::setProperty(const std::string& name,
-                                                  const conversion::Convertible& value,
-                                                  PropertyScope) {
+                                                    const conversion::Convertible& value,
+                                                    PropertyScope) {
     return setProperty(name, value);
 }
 

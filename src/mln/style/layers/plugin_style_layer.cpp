@@ -18,8 +18,7 @@ std::optional<std::string> pluginTransitionPropertyName(const char* layerType, c
     return definition && definition->supportsTransitions ? std::optional<std::string>{std::move(propertyName)}
                                                          : std::nullopt;
 }
-}
-
+} // namespace
 
 PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, plugin::LayerType registration_)
     : Layer::Impl(id, source),
@@ -90,10 +89,9 @@ StyleProperty PluginStyleLayer::getProperty(const std::string& name) const {
     return definition ? defaultPluginPropertyValue(*definition).toStyleProperty() : StyleProperty{};
 }
 
-
 std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::string& name,
-                                                          const conversion::Convertible& value,
-                                                          std::optional<PropertyScope> scope) {
+                                                                     const conversion::Convertible& value,
+                                                                     std::optional<PropertyScope> scope) {
     using namespace conversion;
     const auto definition = plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name);
     if (!definition) return Error{"layer doesn't support this property"};
@@ -126,8 +124,8 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPluginTransition(const std::string& name,
-                                                            const conversion::Convertible& value,
-                                                            std::optional<PropertyScope> scope) {
+                                                                       const conversion::Convertible& value,
+                                                                       std::optional<PropertyScope> scope) {
     using namespace conversion;
     const auto propertyName = pluginTransitionPropertyName(getTypeInfo()->type, name);
     if (!propertyName) return Error{"layer doesn't support this transition"};
@@ -148,8 +146,7 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginTransition(const std
     auto transition = convert<TransitionOptions>(value, error);
     if (!transition) return error;
     const auto existing = impl_->pluginPropertyTransitions.find(*propertyName);
-    if (existing != impl_->pluginPropertyTransitions.end() &&
-        existing->second.serialize() == transition->serialize()) {
+    if (existing != impl_->pluginPropertyTransitions.end() && existing->second.serialize() == transition->serialize()) {
         return std::nullopt;
     }
     impl_->pluginPropertyTransitions.insert_or_assign(*propertyName, std::move(*transition));
@@ -157,7 +154,6 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginTransition(const std
     observer->onLayerChanged(*this);
     return std::nullopt;
 }
-
 
 Value PluginStyleLayer::serialize() const {
     Value serialized = Layer::serialize();
@@ -182,14 +178,18 @@ Value PluginStyleLayer::serialize() const {
     return serialized;
 }
 
-std::optional<conversion::Error> PluginStyleLayer::setPropertyInternal(const std::string& name, const conversion::Convertible& value) {
+std::optional<conversion::Error> PluginStyleLayer::setPropertyInternal(const std::string& name,
+                                                                       const conversion::Convertible& value) {
     if (pluginTransitionPropertyName(getTypeInfo()->type, name)) return setPluginTransition(name, value);
     return setPluginProperty(name, value);
 }
 
-std::optional<conversion::Error> PluginStyleLayer::setProperty(const std::string& name, const conversion::Convertible& value, PropertyScope scope) {
+std::optional<conversion::Error> PluginStyleLayer::setProperty(const std::string& name,
+                                                               const conversion::Convertible& value,
+                                                               PropertyScope scope) {
     if (pluginTransitionPropertyName(getTypeInfo()->type, name)) return setPluginTransition(name, value, scope);
-    if (plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name)) return setPluginProperty(name, value, scope);
+    if (plugin::PluginRegistry::get().findProperty(getTypeInfo()->type, name))
+        return setPluginProperty(name, value, scope);
     return Layer::setProperty(name, value);
 }
 

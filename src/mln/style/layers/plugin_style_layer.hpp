@@ -16,7 +16,9 @@ public:
     ~PluginStyleLayer() final;
 
     using Layer::setProperty;
-    std::optional<conversion::Error> setProperty(const std::string&, const conversion::Convertible&, PropertyScope) final;
+    std::optional<conversion::Error> setProperty(const std::string&,
+                                                 const conversion::Convertible&,
+                                                 PropertyScope) final;
     Value serialize() const final;
     StyleProperty getProperty(const std::string&) const final;
 
@@ -26,8 +28,12 @@ public:
 
 private:
     explicit PluginStyleLayer(Immutable<Impl>);
-    std::optional<conversion::Error> setPluginProperty(const std::string&, const conversion::Convertible&, std::optional<PropertyScope> = std::nullopt);
-    std::optional<conversion::Error> setPluginTransition(const std::string&, const conversion::Convertible&, std::optional<PropertyScope> = std::nullopt);
+    std::optional<conversion::Error> setPluginProperty(const std::string&,
+                                                       const conversion::Convertible&,
+                                                       std::optional<PropertyScope> = std::nullopt);
+    std::optional<conversion::Error> setPluginTransition(const std::string&,
+                                                         const conversion::Convertible&,
+                                                         std::optional<PropertyScope> = std::nullopt);
 
     std::optional<conversion::Error> setPropertyInternal(const std::string&, const conversion::Convertible&) final;
     std::unique_ptr<Layer> cloneRef(const std::string& id) const final;
