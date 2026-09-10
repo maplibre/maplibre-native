@@ -10,6 +10,7 @@
 #include <exception>
 #include <sstream>
 #include <mutex>
+#include <utility>
 
 namespace mln {
 
@@ -22,12 +23,11 @@ std::atomic<bool> useThread[SeverityCount] = {true, true, true, false};
 
 class Log::Impl {
 public:
-    Impl()
-        : scheduler(Scheduler::GetSequenced()) {}
-
     void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) try {
         if (useThread[underlying_type(severity)]) {
             auto threadName = platform::getCurrentThreadName();
+            // Construct the worker only when an asynchronous record needs it.
+            std::call_once(schedulerOnce, [this] { scheduler = Scheduler::GetSequenced(); });
             scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
         } else {
             Log::record(severity, event, code, msg, {});
@@ -45,7 +45,8 @@ public:
     std::mutex mutex;
 
 private:
-    const std::shared_ptr<Scheduler> scheduler;
+    std::once_flag schedulerOnce;
+    std::shared_ptr<Scheduler> scheduler;
 };
 
 Log::Log()
@@ -87,9 +88,7 @@ void Log::setObserver(std::unique_ptr<Observer> observer) {
 std::unique_ptr<Log::Observer> Log::removeObserver() {
     auto& state = *get()->impl;
     std::scoped_lock lock(state.mutex);
-    std::unique_ptr<Observer> observer;
-    std::swap(observer, state.observer);
-    return observer;
+    return std::exchange(state.observer, nullptr);
 }
 
 void Log::record(EventSeverity severity, Event event, const std::string& msg) noexcept {
