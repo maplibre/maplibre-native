@@ -226,10 +226,10 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
     for (const auto& dependency : pair.first) {
         if (!images.contains(dependency.first)) {
             missingDependencies.emplace(dependency);
-        } else if (auto it = requestedImages.find(dependency.first); it != requestedImages.end()) {
+        } else if (requestedImages.contains(dependency.first)) {
             // The missing-image path below never registers images that are
             // already present.
-            it->second.emplace(&requestor);
+            requestedImages.at(dependency.first).emplace(&requestor);
         }
     }
 
