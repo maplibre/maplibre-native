@@ -2118,8 +2118,7 @@ INSTANTIATE_TEST_SUITE_P(GeoJSON,
                          GeoJSONSymbolTest,
                          testing::Combine(testing::Bool(), testing::Bool()),
                          [](const testing::TestParamInfo<std::tuple<bool, bool>>& paramInfo) {
-                             const bool synchronous = std::get<0>(paramInfo.param);
-                             const bool withText = std::get<1>(paramInfo.param);
+                             const auto [synchronous, withText] = paramInfo.param;
                              return std::string(synchronous ? "Synchronous" : "Asynchronous") +
                                     (withText ? "WithText" : "IconOnly");
                          });
