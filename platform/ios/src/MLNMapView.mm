@@ -2,20 +2,11 @@
 #import "MLNMapView_Private.h"
 
 #include <mln/annotation/annotation.hpp>
-#include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/mode.hpp>
 #include <mln/math/wrap.hpp>
-#if MLN_RENDER_BACKEND_METAL
-#include <mln/mtl/mtl_fwd.hpp>
-#include <mln/mtl/render_pass.hpp>
-#endif
-#include <mln/plugin/plugin_layer.hpp>
-#include <mln/plugin/plugin_layer_factory.hpp>
-#include <mln/plugin/plugin_layer_impl.hpp>
-#include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/storage/network_status.hpp>
 #include <mln/storage/resource_options.hpp>
@@ -71,8 +62,6 @@
 #import "MLNMapAccessibilityElement.h"
 #import "MLNMapProjection.h"
 #import "MLNNetworkConfiguration_Private.h"
-#import "MLNPluginLayer.h"
-#include "MLNPluginStyleLayer_Private.h"
 #import "MLNReachability.h"
 #import "MLNRenderingStats_Private.h"
 #import "MLNScaleBar.h"
@@ -449,9 +438,6 @@ public:
 @property (nonatomic) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
-// Plugin Layers
-@property NSMutableArray *pluginLayers;
-
 @end
 
 @implementation MLNMapView {
@@ -555,12 +541,6 @@ public:
     [self commonInitWithOptions:options];
 
     if (options) {
-      if (options.pluginLayers) {
-        for (Class c in options.pluginLayers) {
-          [self addPluginLayerType:c];
-        }
-      }
-
       if (options.styleURL) {
         self.styleURL = options.styleURL;
       } else if (options.styleJSON) {
@@ -7553,141 +7533,6 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (void)triggerRepaint {
   _mbglMap->triggerRepaint();
-}
-
-/**
- Adds a plug-in layer that is external to this library
- */
-- (void)addPluginLayerType:(Class)pluginLayerClass {
-  auto layerManager = mln::LayerManager::get();
-  auto darwinLayerManager = (mln::LayerManagerDarwin *)layerManager;
-
-  MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
-
-  std::string layerType = [capabilities.layerID UTF8String];
-
-  // Default values
-  mln::style::LayerTypeInfo::Source source = mln::style::LayerTypeInfo::Source::NotRequired;
-  mln::style::LayerTypeInfo::TileKind tileKind = mln::style::LayerTypeInfo::TileKind::NotRequired;
-  mln::style::LayerTypeInfo::FadingTiles fadingTiles =
-      mln::style::LayerTypeInfo::FadingTiles::NotRequired;
-  mln::style::LayerTypeInfo::Layout layout = mln::style::LayerTypeInfo::Layout::NotRequired;
-  mln::style::LayerTypeInfo::CrossTileIndex crossTileIndex =
-      mln::style::LayerTypeInfo::CrossTileIndex::NotRequired;
-
-  mln::style::LayerTypeInfo::Pass3D pass3D = mln::style::LayerTypeInfo::Pass3D::NotRequired;
-  if (capabilities.requiresPass3D) {
-    pass3D = mln::style::LayerTypeInfo::Pass3D::Required;
-  }
-
-  auto factory = std::make_unique<mln::PluginLayerPeerFactory>(
-      layerType, source, pass3D, layout, fadingTiles, crossTileIndex, tileKind);
-
-  __weak MLNMapView *weakMapView = self;
-
-  Class layerClass = pluginLayerClass;
-  factory->setOnLayerCreatedEvent([layerClass, weakMapView,
-                                   pluginLayerClass](mln::style::PluginLayer *pluginLayer) {
-    // NSLog(@"Creating Plugin Layer: %@", layerClass);
-    MLNPluginLayer *layer = [[layerClass alloc] init];
-    if (!weakMapView.pluginLayers) {
-      weakMapView.pluginLayers = [NSMutableArray array];
-    }
-    [weakMapView.pluginLayers addObject:layer];
-
-    // Use weak here so there isn't a retain cycle
-    MLNPluginLayer *weakPlugInLayer = layer;
-
-    pluginLayer->_platformReference = (__bridge void *)layer;
-
-    MLNPluginLayerCapabilities *capabilities = [pluginLayerClass layerCapabilities];
-    auto pluginLayerImpl = (mln::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
-    auto &pm = pluginLayerImpl->_propertyManager;
-    for (MLNPluginLayerProperty *property in capabilities.layerProperties) {
-      mln::style::PluginLayerProperty *p = new mln::style::PluginLayerProperty();
-      switch (property.propertyType) {
-        case MLNPluginLayerPropertyTypeSingleFloat:
-          p->_propertyType = mln::style::PluginLayerProperty::PropertyType::SingleFloat;
-          p->_defaultSingleFloatValue = property.singleFloatDefaultValue;
-          break;
-        case MLNPluginLayerPropertyTypeColor: {
-          p->_propertyType = mln::style::PluginLayerProperty::PropertyType::Color;
-          if (property.colorDefaultValue) {
-            CGFloat r, g, b, a;
-            [property.colorDefaultValue getRed:&r green:&g blue:&b alpha:&a];
-            p->_defaultColorValue = mln::Color(r, g, b, a);
-          }
-        } break;
-        default:
-          p->_propertyType = mln::style::PluginLayerProperty::PropertyType::Unknown;
-          break;
-      }
-      p->_propertyName = [property.propertyName UTF8String];
-      pm.addProperty(p);
-    }
-
-    // Set the render function
-    auto renderFunction = [weakPlugInLayer, weakMapView](mln::PaintParameters &paintParameters) {
-#if MLN_RENDER_BACKEND_METAL
-      const mln::mtl::RenderPass &renderPass =
-          static_cast<mln::mtl::RenderPass &>(*paintParameters.renderPass);
-      id encoder = (__bridge id)renderPass.getMetalEncoder().get();
-#else
-      id encoder = nil;
-#endif
-
-      MLNMapView *strongMapView = weakMapView;
-
-      const mln::TransformState &state = paintParameters.state;
-
-      MLNPluginLayerDrawingContext drawingContext;
-      drawingContext.size = CGSizeMake(state.getSize().width, state.getSize().height);
-      drawingContext.centerCoordinate =
-          CLLocationCoordinate2DMake(state.getLatLng().latitude(), state.getLatLng().longitude());
-      drawingContext.zoomLevel = state.getZoom();
-      drawingContext.direction = mln::util::rad2deg(-state.getBearing());
-      drawingContext.pitch = state.getPitch();
-      drawingContext.fieldOfView = state.getFieldOfView();
-      drawingContext.projectionMatrix = MLNMatrix4Make(paintParameters.transformParams.projMatrix);
-      drawingContext.nearClippedProjMatrix =
-          MLNMatrix4Make(paintParameters.transformParams.nearClippedProjMatrix);
-
-      // Call update with the scene state variables
-      [weakPlugInLayer onUpdateLayer:drawingContext];
-
-      // Call render
-      [weakPlugInLayer onRenderLayer:strongMapView renderEncoder:encoder];
-    };
-
-    // Set the lambdas
-    // auto pluginLayerImpl = (mln::style::PluginLayer::Impl *)pluginLayer->baseImpl.get();
-    pluginLayerImpl->setRenderFunction(renderFunction);
-
-    // Set the update properties function
-    pluginLayerImpl->setUpdatePropertiesFunction(
-        [weakPlugInLayer](const std::string &jsonProperties) {
-          // Use autorelease pools in lambdas
-          @autoreleasepool {
-            // Just wrap the string with NSData so it can be run through properties
-            NSData *d = [NSData dataWithBytesNoCopy:(void *)jsonProperties.data()
-                                             length:jsonProperties.length()
-                                       freeWhenDone:NO];
-            NSError *error = nil;
-            NSDictionary *properties = [NSJSONSerialization JSONObjectWithData:d
-                                                                       options:0
-                                                                         error:&error];
-            if (error) {
-              // TODO: What should we do here?
-            }
-            [weakPlugInLayer onUpdateLayerProperties:properties];
-          }
-        });
-  });
-
-  // TODO: Same question as above.  Do we ever want to have a core only layer type?
-  //       This could actually be something that we could set in the layer capabilities class
-  darwinLayerManager->addLayerType(std::move(factory));
-  // darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 }
 
 - (NSArray<NSString *> *)getActionJournalLogFiles {

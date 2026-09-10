@@ -1,6 +1,7 @@
 #include <mln/renderer/render_layer.hpp>
 
 #include <mln/gfx/context.hpp>
+#include <mln/plugin/plugin_layer_host.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -20,10 +21,20 @@ using namespace style;
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
       baseImpl(evaluatedProperties->baseImpl),
-      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
+      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {
+    auto host = std::make_unique<plugin::PluginLayerHost>(baseImpl->id, baseImpl->getTypeInfo()->type, baseImpl);
+    if (!host->empty()) {
+        pluginHost = std::move(host);
+    }
+}
+
+RenderLayer::~RenderLayer() = default;
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
+    if (pluginHost) {
+        pluginHost->updateLayer(baseImpl);
+    }
     transition(parameters);
 }
 
@@ -85,7 +96,35 @@ void RenderLayer::layerRemoved(UniqueChangeRequestVec& changes) {
 }
 
 void RenderLayer::markContextDestroyed() {
-    // no-op
+    if (pluginHost) {
+        pluginHost->contextLost();
+    }
+}
+
+void RenderLayer::preparePlugins(PaintParameters& parameters) {
+    if (pluginHost && needsRendering()) {
+        pluginDrawPackets.clear();
+        if (layerGroup) {
+            visitLayerGroupDrawables(*layerGroup, [&](const gfx::Drawable& drawable) {
+                if (drawable.getEnabled()) {
+                    drawable.collectPluginDrawPackets(pluginDrawPackets);
+                }
+            });
+        }
+        pluginHost->prepareFrame(parameters, pluginDrawPackets);
+    }
+}
+
+void RenderLayer::renderPluginsBefore(PaintParameters& parameters) {
+    if (pluginHost && needsRendering() && hasRenderPass(parameters.pass)) {
+        pluginHost->renderBeforeLayer(parameters, pluginDrawPackets);
+    }
+}
+
+void RenderLayer::updatePluginEnvironment(std::shared_ptr<FileSource> fileSource, RendererObserver* observer) {
+    if (pluginHost) {
+        pluginHost->updateEnvironment(std::move(fileSource), observer);
+    }
 }
 
 void RenderLayer::checkRenderability(const PaintParameters& parameters, const uint32_t activeBindingCount) {

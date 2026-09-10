@@ -28,6 +28,7 @@ public:
 
     void upload(gfx::UploadPass&);
     void draw(PaintParameters&) const override;
+    void collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>&) const override;
 
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
     void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;

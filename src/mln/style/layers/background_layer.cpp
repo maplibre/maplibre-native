@@ -276,7 +276,8 @@ std::optional<Error> BackgroundLayer::setPropertyInternal(const std::string& nam
 }
 
 StyleProperty BackgroundLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> BackgroundLayer::mutableBaseImpl() const {

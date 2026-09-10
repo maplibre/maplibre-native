@@ -33,11 +33,6 @@ MLN_EXPORT
 @property (nonatomic, nonnull) MLNActionJournalOptions *actionJournalOptions;
 
 /**
- List of plugin classes
- */
-@property NSArray *pluginLayers;
-
-/**
     Enable FastPFOR decoding for vector tiles. Defaults to `NO`.
  */
 @property bool fastPFOREnabled;

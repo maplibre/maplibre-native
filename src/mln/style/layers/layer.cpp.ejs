@@ -353,7 +353,8 @@ std::optional<Error> <%- camelize(type) %>Layer::setPropertyInternal(const std::
 }
 
 StyleProperty <%- camelize(type) %>Layer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> <%- camelize(type) %>Layer::mutableBaseImpl() const {

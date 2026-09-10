@@ -9,10 +9,7 @@ cc_library(
     includes = [
         "include",
     ],
-    visibility = [
-        "//platform/default:__pkg__",
-        "//render-test/ios:__pkg__",
-    ],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -29,15 +26,17 @@ cc_library(
     includes = [
         "include",
     ],
-    visibility = [
-        "//render-test/ios:__pkg__",
-    ],
+    visibility = ["//visibility:public"],
     deps = [
         "//expression-test:test_runner_common",
         "//vendor:args",
     ] + select({
         "@platforms//os:ios": ["//platform:ios-sdk"],
         "@platforms//os:linux": ["//platform/linux:impl"],
+        "@platforms//os:macos": [
+            "//platform/darwin:darwin-objcpp",
+            "//platform/default:mbgl-default",
+        ],
         "//conditions:default": [],
     }),
 )

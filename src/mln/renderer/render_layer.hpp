@@ -16,6 +16,9 @@
 #include <string>
 
 namespace mln {
+namespace plugin {
+class PluginLayerHost;
+}
 class Bucket;
 class DynamicFeatureIndex;
 class LineAtlas;
@@ -29,6 +32,8 @@ class TransformState;
 class TransitionParameters;
 class UpdateParameters;
 class UploadParameters;
+class FileSource;
+class RendererObserver;
 
 class ChangeRequest;
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
@@ -88,7 +93,7 @@ protected:
     RenderLayer(Immutable<style::LayerProperties>);
 
 public:
-    virtual ~RenderLayer() = default;
+    virtual ~RenderLayer();
 
     // Begin transitions for any properties that have changed since the last frame.
     virtual void transition(const TransitionParameters&) = 0;
@@ -151,6 +156,15 @@ public:
     Immutable<style::Layer::Impl> baseImpl;
 
     virtual void markContextDestroyed();
+
+    /// Invoke registered, existing-layer extensions after drawable upload.
+    void preparePlugins(PaintParameters&);
+
+    /// Invoke registered extensions immediately before this layer's group.
+    void renderPluginsBefore(PaintParameters&);
+
+    /// Supply runtime services used by plugin callbacks.
+    void updatePluginEnvironment(std::shared_ptr<FileSource>, RendererObserver*);
 
     // TODO: Only for background layers.
     virtual std::optional<Color> getSolidBackground() const;
@@ -325,6 +339,9 @@ protected:
     } stats;
 
 private:
+    std::unique_ptr<plugin::PluginLayerHost> pluginHost;
+    std::vector<mln_plugin_draw_packet_v1> pluginDrawPackets;
+
     // Some layers may not render correctly on some hardware when the vertex
     // attribute limit of that GPU is exceeded. More attributes are used when
     // adding many data driven paint properties to a layer.

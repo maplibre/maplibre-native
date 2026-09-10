@@ -3,6 +3,7 @@
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/mtl/context.hpp>
+#include <mln/plugin/plugin_shader.hpp>
 #include <mln/shaders/background_layer_ubo.hpp>
 
 #include <mln/shaders/mtl/shader_group.hpp>
@@ -16,8 +17,6 @@
 #include <mln/shaders/mtl/clipping_mask.hpp>
 #include <mln/shaders/mtl/collision.hpp>
 #include <mln/shaders/mtl/color_relief.hpp>
-#include <mln/shaders/mtl/custom_geometry.hpp>
-#include <mln/shaders/mtl/custom_symbol_icon.hpp>
 #include <mln/shaders/mtl/debug.hpp>
 #include <mln/shaders/mtl/fill.hpp>
 #include <mln/shaders/mtl/fill_extrusion.hpp>
@@ -92,8 +91,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
-                  shaders::BuiltIn::CustomGeometryShader,
-                  shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
@@ -120,6 +117,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+    plugin::registerPluginShaderGroups(shaders, programParameters);
 }
 
 } // namespace mtl

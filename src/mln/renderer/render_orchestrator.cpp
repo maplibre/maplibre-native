@@ -305,6 +305,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
         MLN_TRACE_ZONE(update layer);
+        layer.updatePluginEnvironment(updateParameters->fileSource, observer);
         const std::string& id = layer.getID();
         const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
@@ -805,6 +806,18 @@ RenderLayer* RenderOrchestrator::getRenderLayer(const std::string& id) {
 const RenderLayer* RenderOrchestrator::getRenderLayer(const std::string& id) const {
     auto it = renderLayers.find(id);
     return it != renderLayers.end() ? it->second.get() : nullptr;
+}
+
+void RenderOrchestrator::preparePlugins(PaintParameters& parameters) {
+    for (RenderLayer& layer : orderedLayers) {
+        layer.preparePlugins(parameters);
+    }
+}
+
+void RenderOrchestrator::renderPluginsBefore(const LayerGroupBase& group, PaintParameters& parameters) {
+    if (auto* layer = getRenderLayer(group.getName())) {
+        layer->renderPluginsBefore(parameters);
+    }
 }
 
 RenderSource* RenderOrchestrator::getRenderSource(const std::string& id) const {

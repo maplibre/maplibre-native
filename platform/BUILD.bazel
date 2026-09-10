@@ -5,7 +5,6 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 objc_library(
     name = "macos-objcpp",
     srcs = [
-        "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         "//platform/darwin:darwin_objcpp_srcs",
         "//platform/darwin:darwin_private_hdrs",
         "//platform/darwin:generated_style_srcs",
@@ -88,11 +87,7 @@ objc_library(
         "//platform/ios:ios_private_hdrs",
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
-    ] + select({
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
-        ],
-    }),
+    ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
         "-fmodules",
@@ -287,36 +282,9 @@ objc_library(
 )
 
 objc_library(
-    name = "app_custom_drawable_layer_objcpp_srcs",
-    srcs = [
-        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
-        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.mm",
-    ],
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + [
-        "-fcxx-modules",
-        "-fmodules",
-        "-Wno-c99-extensions",
-        "-Wno-gnu-zero-variadic-macro-arguments",
-        "-Wno-gnu-conditional-omitted-operand",
-        "-Wno-gnu-statement-expression",
-        "-Wno-deprecated-declarations",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":ios-sdk",
-        "//:mbgl-core",
-    ],
-)
-
-objc_library(
     name = "iosapp_objcpp_srcs",
     srcs = [
         "//platform/darwin:app/CustomStyleLayerExample.h",
-        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
-        "//platform/darwin:app/PluginLayerExample.h",
-        "//platform/darwin:app/PluginLayerExample.mm",
-        "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
-        "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
         "//platform/ios:ios_app_objcpp_srcs",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
@@ -356,11 +324,7 @@ objc_library(
     deps = [
         ":ios-sdk",
         ":iosapp_objcpp_srcs",
-    ] + select({
-        "//conditions:default": [
-            ":app_custom_drawable_layer_objcpp_srcs",
-        ],
-    }),
+    ],
 )
 
 objc_library(

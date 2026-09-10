@@ -12,8 +12,6 @@
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
 
-#import "MLNCustomDrawableStyleLayer_Private.h"
-
 #include <vector>
 
 namespace mln {
@@ -74,12 +72,6 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
   addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
-
-#if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
-  addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
-#elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
-  addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
-#endif
 }
 
 LayerManagerDarwin::~LayerManagerDarwin() = default;
@@ -88,7 +80,10 @@ MLNStyleLayer* LayerManagerDarwin::createPeer(style::Layer* layer) {
   if (auto* factory = getPeerFactory(layer->getTypeInfo())) {
     return factory->createPeer(layer);
   }
-  return nullptr;
+  // Plugin-defined layer types do not have generated Objective-C subclasses.
+  // Still provide the common layer API so MLNStyle.layers and
+  // -layerWithIdentifier: remain safe and preserve object identity.
+  return [[MLNStyleLayer alloc] initWithRawLayer:layer];
 }
 
 void LayerManagerDarwin::addLayerType(std::unique_ptr<LayerPeerFactory> factory) {

@@ -29,6 +29,9 @@ public:
 
     void clear();
     void setMask(TileMask&&);
+    void markDEMModified() { ++demRevision; }
+    uint64_t getDEMRevision() const { return demRevision; }
+    uint64_t getMaskRevision() const { return maskRevision; }
 
     RenderTargetPtr renderTarget;
     bool renderTargetPrepared = false;
@@ -60,6 +63,8 @@ public:
 private:
     DEMData demdata;
     bool prepared = false;
+    uint64_t demRevision = 1;
+    uint64_t maskRevision = 1;
 };
 
 } // namespace mln

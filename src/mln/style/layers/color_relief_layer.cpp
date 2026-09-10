@@ -226,7 +226,8 @@ std::optional<Error> ColorReliefLayer::setPropertyInternal(const std::string& na
 }
 
 StyleProperty ColorReliefLayer::getProperty(const std::string& name) const {
-    return getLayerProperty(*this, name);
+    auto property = getLayerProperty(*this, name);
+    return property.getKind() == StyleProperty::Kind::Undefined ? getPluginProperty(name) : property;
 }
 
 Mutable<Layer::Impl> ColorReliefLayer::mutableBaseImpl() const {

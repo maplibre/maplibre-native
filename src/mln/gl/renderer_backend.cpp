@@ -3,6 +3,7 @@
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/gl/context.hpp>
 #include <mln/gl/extension.hpp>
+#include <mln/plugin/plugin_shader.hpp>
 #include <mln/shaders/shader_manifest.hpp>
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/logging.hpp>
@@ -123,8 +124,6 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
-                  shaders::BuiltIn::CustomGeometryShader,
-                  shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
                   shaders::BuiltIn::FillOutlineShader,
@@ -152,6 +151,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
     // Initialize legacy shader programs
     Programs programs(programParameters);
     programs.registerWith(shaders);
+    plugin::registerPluginShaderGroups(shaders, programParameters);
 }
 
 } // namespace gl

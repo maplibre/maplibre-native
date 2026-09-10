@@ -14,6 +14,7 @@
 #include <mln/mtl/uniform_buffer.hpp>
 #include <mln/mtl/vertex_buffer_resource.hpp>
 #include <mln/mtl/vertex_attribute.hpp>
+#include <mln/plugin/plugin_drawable_data.hpp>
 #include <mln/shaders/segment.hpp>
 #include <mln/shaders/mtl/shader_program.hpp>
 #include <mln/util/logging.hpp>
@@ -47,6 +48,37 @@ Drawable::Drawable(std::string name_)
 Drawable::~Drawable() {}
 
 namespace {
+mln_plugin_attribute_type pluginAttributeType(gfx::AttributeDataType type) {
+    switch (type) {
+        case gfx::AttributeDataType::Short2:
+            return MLN_PLUGIN_ATTRIBUTE_INT16_X2;
+        case gfx::AttributeDataType::UShort2:
+            return MLN_PLUGIN_ATTRIBUTE_UINT16_X2;
+        case gfx::AttributeDataType::Float:
+            return MLN_PLUGIN_ATTRIBUTE_FLOAT;
+        case gfx::AttributeDataType::Float2:
+            return MLN_PLUGIN_ATTRIBUTE_FLOAT_X2;
+        default:
+            return MLN_PLUGIN_ATTRIBUTE_NONE;
+    }
+}
+
+mln_plugin_buffer_binding_v1 pluginBinding(const gfx::AttributeBindingArray& bindings, int8_t location) {
+    mln_plugin_buffer_binding_v1 result{};
+    result.struct_size = sizeof(result);
+    if (location < 0 || static_cast<std::size_t>(location) >= bindings.size()) return result;
+    const auto& binding = bindings[location];
+    if (!binding || !binding->vertexBufferResource) return result;
+    const auto& resource = static_cast<const VertexBufferResource&>(*binding->vertexBufferResource).get();
+    const auto* metalBuffer = resource.materializeMetalBuffer();
+    if (!metalBuffer) return result;
+    result.buffer = reinterpret_cast<uint64_t>(metalBuffer);
+    result.offset = binding->attribute.offset + static_cast<uint64_t>(binding->vertexOffset) * binding->vertexStride;
+    result.stride = binding->vertexStride;
+    result.type = pluginAttributeType(binding->attribute.dataType);
+    return result;
+}
+
 #if !defined(NDEBUG)
 std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
@@ -129,6 +161,33 @@ MTL::ScissorRect getMetalScissorRect(gfx::ScissorRect rect) noexcept {
 }
 
 } // namespace
+
+void Drawable::collectPluginDrawPackets(std::vector<mln_plugin_draw_packet_v1>& packets) const {
+    const auto* metadata = drawableData ? drawableData->getPluginData() : nullptr;
+    if (!metadata || !impl->indexes || !impl->indexes->getBuffer()) return;
+    const auto* indexBuffer = getMetalBuffer(impl->indexes);
+    if (!indexBuffer) return;
+    const auto& semanticBindings = metadata->instanced ? impl->instanceBindings : impl->attributeBindings;
+    const auto instances = metadata->instanced && instanceAttributes ? instanceAttributes->getMinCount() : 1;
+
+    for (const auto& drawSegment : impl->segments) {
+        const auto& segment = drawSegment->getSegment();
+        if (!segment.indexLength) continue;
+        auto packet = metadata->packet;
+        packet.index_buffer = reinterpret_cast<uint64_t>(indexBuffer);
+        packet.index_offset = segment.indexOffset * sizeof(std::uint16_t);
+        packet.index_count = static_cast<uint32_t>(segment.indexLength);
+        packet.instance_count = static_cast<uint32_t>(instances);
+        packet.base_vertex = static_cast<int32_t>(segment.vertexOffset);
+        packet.wall_vertex = pluginBinding(impl->attributeBindings, metadata->wallVertexLocation);
+        packet.position = pluginBinding(semanticBindings, metadata->positionLocation);
+        packet.decimals_edge = pluginBinding(semanticBindings, metadata->decimalsLocation);
+        packet.normal = pluginBinding(semanticBindings, metadata->normalLocation);
+        packet.base = pluginBinding(semanticBindings, metadata->baseLocation);
+        packet.height = pluginBinding(semanticBindings, metadata->heightLocation);
+        packets.push_back(packet);
+    }
+}
 
 void Drawable::setColorMode(const gfx::ColorMode& value) {
     impl->pipelineState.reset();
