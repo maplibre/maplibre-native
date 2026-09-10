@@ -3,8 +3,7 @@
 #include <mln/util/filesystem.hpp>
 #include <mln/util/io.hpp>
 
-#if defined(_WIN32)
-#include <filesystem>
+#if MLN_HAS_STD_FILESYSTEM
 #include <system_error>
 #else
 #include <sys/types.h>
@@ -17,7 +16,7 @@ void requestLocalFile(const std::string& path,
                       const ActorRef<FileSourceRequest>& req,
                       const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
     Response response;
-#if defined(_WIN32)
+#if MLN_HAS_STD_FILESYSTEM
     std::error_code error;
     std::filesystem::file_status status;
     try {
