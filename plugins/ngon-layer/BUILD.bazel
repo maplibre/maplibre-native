@@ -30,7 +30,7 @@ cc_library(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
-    deps = ["//:mbgl-core"],
+    deps = ["//:mln-plugin-api"],
 )
 
 cc_test(

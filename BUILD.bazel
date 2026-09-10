@@ -41,6 +41,14 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Plugins use the C ABI through callbacks and do not link the renderer.
+cc_library(
+    name = "mln-plugin-api",
+    hdrs = ["include/mln/plugin/plugin_api.h"],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
+
 # Generate code required by the core
 
 js_run_binary(
