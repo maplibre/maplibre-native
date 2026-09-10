@@ -35,6 +35,8 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_instanced.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_pattern_instanced.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_shadow_mask.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_extrusion_shadow_mask_instanced.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/hillshade_prepare.hpp
@@ -113,6 +115,7 @@ list(APPEND INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/debug_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/fill_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/fill_extrusion_layer_ubo.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/fill_extrusion_shadow_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/heatmap_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/heatmap_texture_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/hillshade_layer_ubo.hpp

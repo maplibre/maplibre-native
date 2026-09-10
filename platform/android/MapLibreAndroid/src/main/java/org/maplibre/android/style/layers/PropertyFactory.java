@@ -1270,6 +1270,96 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while {@link PropertyFactory#fillExtrusionShadowOpacity} is 0.
+   *
+   * @param value a int color value
+   * @return property wrapper around String color
+   */
+  public static PropertyValue<String> fillExtrusionShadowColor(@ColorInt int value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-color", colorToRgbaString(value));
+  }
+
+  /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while {@link PropertyFactory#fillExtrusionShadowOpacity} is 0.
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> fillExtrusionShadowColor(String value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-color", value);
+  }
+
+  /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while {@link PropertyFactory#fillExtrusionShadowOpacity} is 0.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowColor(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-color", expression);
+  }
+
+  /**
+   * The opacity of the ground shadow cast by the extruded geometry. A value of 0 disables the shadow entirely. This is rendered on a per-layer, not per-feature, basis.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionShadowOpacity(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-opacity", value);
+  }
+
+  /**
+   * The opacity of the ground shadow cast by the extruded geometry. A value of 0 disables the shadow entirely. This is rendered on a per-layer, not per-feature, basis.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowOpacity(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-opacity", expression);
+  }
+
+  /**
+   * The length of the ground shadow, as a multiple of the extrusion height. This is the cotangent of the light source's elevation angle, so 1 corresponds to an elevation of 45 degrees and 0.32 to roughly 72 degrees. Larger values cast longer, shallower shadows.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionShadowLength(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-length", value);
+  }
+
+  /**
+   * The length of the ground shadow, as a multiple of the extrusion height. This is the cotangent of the light source's elevation angle, so 1 corresponds to an elevation of 45 degrees and 0.32 to roughly 72 degrees. Larger values cast longer, shallower shadows.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowLength(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-length", expression);
+  }
+
+  /**
+   * The compass direction the ground shadow is cast towards, measured clockwise from due north. The shadow is anchored to the map, so it keeps a fixed compass direction as the map rotates.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionShadowAzimuth(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-azimuth", value);
+  }
+
+  /**
+   * The compass direction the ground shadow is cast towards, measured clockwise from due north. The shadow is anchored to the map, so it keeps a fixed compass direction as the map rotates.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowAzimuth(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-azimuth", expression);
+  }
+
+  /**
    * The opacity at which the image will be drawn.
    *
    * @param value a Float value

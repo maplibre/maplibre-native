@@ -131,6 +131,20 @@
         "uses_ubos": true
     },
     {
+        "name": "FillExtrusionShadowMaskShader",
+        "header": "fill_extrusion_shadow_mask",
+        "glsl_vert": "fill_extrusion_shadow_mask.vertex.glsl",
+        "glsl_frag": "fill_extrusion_shadow_mask.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "FillExtrusionShadowMaskInstancedShader",
+        "header": "fill_extrusion_shadow_mask_instanced",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "HeatmapShader",
         "header": "heatmap",
         "glsl_vert": "heatmap.vertex.glsl",

@@ -64,7 +64,11 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
             PropertyFactory.fillExtrusionColor(Color.LTGRAY),
             PropertyFactory.fillExtrusionHeight(Expression.get("render_height")),
             PropertyFactory.fillExtrusionBase(Expression.get("render_min_height")),
-            PropertyFactory.fillExtrusionOpacity(0.9f)
+            PropertyFactory.fillExtrusionOpacity(0.9f),
+            PropertyFactory.fillExtrusionShadowColor(Color.BLACK),
+            PropertyFactory.fillExtrusionShadowOpacity(0.10f),
+            PropertyFactory.fillExtrusionShadowLength(0.5f),
+            PropertyFactory.fillExtrusionShadowAzimuth(225f)
         )
         style.addLayer(fillExtrusionLayer)
         // --8<-- [end:setupBuildings]
