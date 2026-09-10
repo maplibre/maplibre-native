@@ -35,7 +35,6 @@ on:
       - "package-lock.json"
 
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - "*"
     paths:
@@ -70,7 +69,6 @@ concurrency:
 
 jobs:
   test:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false

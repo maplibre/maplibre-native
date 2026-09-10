@@ -4,7 +4,6 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     branches: [ main ]
   workflow_dispatch:
 
@@ -18,7 +17,6 @@ defaults:
 
 jobs:
   test:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     name: Rust tests
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,7 +35,6 @@ jobs:
       - run: just -v ci-test
 
   msrv:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     name: Rust tests MSRV (Minimal Supported Rust Version)
     runs-on: ubuntu-latest
     steps:

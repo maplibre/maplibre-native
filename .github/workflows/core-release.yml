@@ -7,13 +7,11 @@ permissions:
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - .github/workflows/core-release.yml
 
 jobs:
   create-release:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,7 +43,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: [create-release]
     runs-on: macos-latest
     steps:
@@ -87,7 +84,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   build-linux:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: [create-release]
     runs-on: ${{ matrix.runner.os }}
     env:
@@ -151,7 +147,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   build-windows:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     needs: [create-release]
     runs-on: windows-2022
     strategy:

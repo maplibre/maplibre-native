@@ -10,7 +10,6 @@ on:
       - 'ios-*'
 
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - '*'
 
@@ -19,7 +18,6 @@ permissions:
 
 jobs:
   pre_job:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
@@ -44,7 +42,7 @@ jobs:
 
   ios-build:
     needs: pre_job
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true')
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: macos-26
     concurrency:
       # cancel jobs on PRs only
@@ -236,7 +234,7 @@ jobs:
   ios-build-cmake:
     needs: pre_job
     runs-on: macos-14
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true')
+    if: needs.pre_job.outputs.should_skip != 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -268,7 +266,7 @@ jobs:
 
   ios-build-webgpu-dawn:
     needs: pre_job
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true')
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: macos-26
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -303,7 +301,7 @@ jobs:
 
   ios-build-webgpu-wgpu:
     needs: pre_job
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true')
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: macos-26
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -354,7 +352,7 @@ jobs:
     permissions:
       actions: write
       contents: read
-    if: (github.event_name != 'pull_request' || github.event.pull_request.draft == false) && (needs.pre_job.outputs.should_skip != 'true' && always())
+    if: needs.pre_job.outputs.should_skip != 'true' && always()
     needs:
       - pre_job
       - ios-build
