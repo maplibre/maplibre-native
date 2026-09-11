@@ -70,6 +70,30 @@ GLint getMaxVertexAttribs() {
     return value;
 }
 
+/// Space separated extension names, the format glGetString(GL_EXTENSIONS)
+/// returns on contexts that still support that query.
+std::string getExtensionList() {
+    // Report earlier errors separately so they cannot select the legacy query.
+    for (auto error = glGetError(); error != GL_NO_ERROR; error = glGetError()) {
+        Log::Warning(Event::GraphicsBackend, "OpenGL error before extension enumeration: " + std::to_string(error));
+    }
+    GLint count = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &count);
+    if (glGetError() != GL_NO_ERROR) {
+        // Older contexts do not know GL_NUM_EXTENSIONS; glGetString still works there.
+        const auto* list = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)));
+        return list ? list : "";
+    }
+    std::string extensions;
+    for (GLint index = 0; index < count; ++index) {
+        if (const auto* name = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetStringi(GL_EXTENSIONS, index)))) {
+            extensions += name;
+            extensions += ' ';
+        }
+    }
+    return extensions;
+}
+
 // Currently renderBufferByteSize is only used when Tracy profiling is enabled
 #ifdef MLN_TRACY_ENABLE
 constexpr size_t renderBufferByteSize(const gfx::RenderbufferPixelType type, const Size size) noexcept {
@@ -151,10 +175,12 @@ void Context::endFrame() {
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
     MLN_TRACE_FUNC();
 
-    if (const auto* extensions = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)))) {
+    const std::string extensions = getExtensionList();
+
+    if (!extensions.empty()) {
         auto fn = [&](std::initializer_list<std::pair<const char*, const char*>> probes) -> ProcAddress {
             for (auto probe : probes) {
-                if (strstr(extensions, probe.first) != nullptr) {
+                if (extensions.find(probe.first) != std::string::npos) {
                     if (ProcAddress ptr = getProcAddress(probe.second)) {
                         return ptr;
                     }

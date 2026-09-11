@@ -202,6 +202,101 @@ MLN_EXPORT
                                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(features(sourceLayerIdentifiers:predicate:));
 
+// MARK: Managing Feature State
+
+/**
+ Sets the state of a feature in this source.
+
+ A feature's state is a set of user-defined key-value pairs that are assigned
+ to a feature at runtime. The state object is merged with any existing
+ key-value pairs in the feature's state. Feature state can be read in style
+ expressions through the `feature-state` expression operator.
+
+ The target feature must have an `id` in the underlying vector tile data.
+
+ This method can only be used while the source is attached to a map.
+
+ @param sourceLayerID The identifier of the source layer containing the
+    feature.
+ @param featureID The identifier of the feature whose state to set.
+ @param state A set of key-value pairs to merge into the feature's state. The
+    values should be valid JSON types.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)setFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                              featureID:(NSString *)featureID
+                                  state:(NSDictionary<NSString *, id> *)state
+    NS_SWIFT_NAME(setFeatureState(sourceLayerID:featureID:state:));
+
+/**
+ Gets the current state of a feature in this source.
+
+ This method can only be used while the source is attached to a map.
+
+ @param sourceLayerID The identifier of the source layer containing the
+    feature.
+ @param featureID The identifier of the feature whose state to get.
+ @return A dictionary containing the current state of the feature, or `nil` if
+    the feature has no state or the source is not attached to a map.
+ */
+- (nullable NSDictionary<NSString *, id> *)featureStateForSourceLayerID:(NSString *)sourceLayerID
+                                                              featureID:(NSString *)featureID
+    NS_SWIFT_NAME(featureState(sourceLayerID:featureID:));
+
+/**
+ Removes state from a feature in this source, or from all features in the
+ source layer when `featureID` is `nil`.
+
+ This method can only be used while the source is attached to a map.
+ Removals are applied on the next rendering frame: reading the state
+ back immediately afterwards may still return the removed entries.
+
+ @param sourceLayerID The identifier of the source layer containing the
+    feature.
+ @param featureID The identifier of the feature, or `nil` to target all
+    features in the source layer.
+ @param stateKey The key of the state entry to remove, or `nil` to remove all
+    keys.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)removeFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                                 featureID:(nullable NSString *)featureID
+                                  stateKey:(nullable NSString *)stateKey
+    NS_SWIFT_NAME(removeFeatureState(sourceLayerID:featureID:stateKey:));
+
+/**
+ Removes all state from a single feature in this source.
+
+ This method can only be used while the source is attached to a map.
+ Removals are applied on the next rendering frame: reading the state
+ back immediately afterwards may still return the removed entries.
+
+ @param sourceLayerID The identifier of the source layer containing the
+    feature.
+ @param featureID The identifier of the feature.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)removeFeatureStateForSourceLayerID:(NSString *)sourceLayerID
+                                 featureID:(NSString *)featureID
+    NS_SWIFT_NAME(removeFeatureState(sourceLayerID:featureID:));
+
+/**
+ Removes all feature state entries from the given source layer.
+
+ This method can only be used while the source is attached to a map.
+ Removals are applied on the next rendering frame: reading the state
+ back immediately afterwards may still return the removed entries.
+
+ @param sourceLayerID The identifier of the source layer.
+ @return `YES` if the source is attached to a map and the update was
+    dispatched.
+ */
+- (BOOL)resetFeatureStatesForSourceLayerID:(NSString *)sourceLayerID
+    NS_SWIFT_NAME(resetFeatureStates(sourceLayerID:));
+
 @end
 
 NS_ASSUME_NONNULL_END

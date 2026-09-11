@@ -584,6 +584,14 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return [NSExpression expressionForFunction:name arguments:parameters];
 }
 
++ (instancetype)mgl_expressionForArray:(NSArray<NSExpression *> *)elements {
+  return [NSExpression expressionForFunctionHelper:@"MLN_FUNCTION"
+                                         arguments:@[
+                                           [NSExpression expressionForConstantValue:@"semiliteral"],
+                                           [NSExpression expressionForAggregate:elements]
+                                         ]];
+}
+
 + (NSExpression *)zoomLevelVariableExpression {
   return [NSExpression expressionForVariable:@"zoomLevel"];
 }
@@ -779,6 +787,16 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
     } else if ([op isEqualToString:@"collator"]) {
       // Avoid wrapping collator options object in literal expression.
       return [NSExpression expressionForFunctionHelper:@"MLN_FUNCTION" arguments:array];
+    } else if ([op isEqualToString:@"semiliteral"]) {
+      if (argumentObjects.count != 1) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"'semiliteral' expression requires exactly one argument."];
+      }
+      id value = argumentObjects.firstObject;
+      if ([value isKindOfClass:[NSArray class]]) {
+        return [NSExpression mgl_expressionForArray:MLNSubexpressionsWithJSONObjects(value)];
+      }
+      return [NSExpression expressionForConstantValue:value];
     } else if ([op isEqualToString:@"literal"]) {
       if ([argumentObjects.firstObject isKindOfClass:[NSArray class]]) {
         return [NSExpression
@@ -1355,6 +1373,13 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       } else if ([function isEqualToString:@"MLN_FUNCTION"] ||
                  [function isEqualToString:@"MLN_FUNCTION:"]) {
         NSExpression *firstOp = self.arguments.firstObject;
+        if (firstOp.expressionType == NSConstantValueExpressionType &&
+            [firstOp.constantValue isEqualToString:@"semiliteral"]) {
+          NSExpression *elements = self.arguments[1];
+          return @[
+            @"semiliteral", [elements.collection valueForKeyPath:@"mgl_jsonExpressionObject"]
+          ];
+        }
         if (firstOp.expressionType == NSConstantValueExpressionType &&
             [firstOp.constantValue isEqualToString:@"collator"]) {
           // Avoid wrapping collator options object in literal expression.
