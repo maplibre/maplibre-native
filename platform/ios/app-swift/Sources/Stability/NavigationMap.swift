@@ -99,8 +99,6 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     func stop() {
         guard !stopped else { return }
 
-        print("NavigationMap: stop")
-
         stopped = true
         task?.cancel()
         task = nil
@@ -116,7 +114,6 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
 
     deinit {
         task?.cancel()
-        print("NavigationMap: deinit")
     }
 
     func startNewRoute() {
