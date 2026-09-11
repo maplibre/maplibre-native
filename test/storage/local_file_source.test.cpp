@@ -6,11 +6,19 @@
 #include <mln/util/run_loop.hpp>
 #include <mln/util/scoped.hpp>
 
+#include <climits>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <gtest/gtest.h>
+
+#if defined(WIN32)
+#include <Windows.h>
+#ifndef PATH_MAX
+#define PATH_MAX MAX_PATH
+#endif
+#endif
 
 namespace {
 
