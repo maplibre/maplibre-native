@@ -6,7 +6,7 @@
 @implementation MLNTerrain
 
 - (instancetype)initWithSourceIdentifier:(NSString *)sourceIdentifier
-                             exaggeration:(CGFloat)exaggeration {
+                            exaggeration:(CGFloat)exaggeration {
   if (self = [super init]) {
     _sourceIdentifier = [sourceIdentifier copy];
     _exaggeration = exaggeration;
@@ -20,16 +20,17 @@
 
 - (instancetype)initWithMBGLTerrain:(const mln::style::Terrain &)mbglTerrain {
   return [self initWithSourceIdentifier:@(mbglTerrain.getSource().c_str())
-                            exaggeration:mbglTerrain.getExaggeration()];
+                           exaggeration:mbglTerrain.getExaggeration()];
 }
 
 - (mln::style::Terrain)mbglTerrain {
-  return mln::style::Terrain(self.sourceIdentifier.UTF8String, static_cast<float>(self.exaggeration));
+  return mln::style::Terrain(self.sourceIdentifier.UTF8String,
+                             static_cast<float>(self.exaggeration));
 }
 
 - (id)copyWithZone:(nullable NSZone *)zone {
   return [[MLNTerrain allocWithZone:zone] initWithSourceIdentifier:self.sourceIdentifier
-                                                       exaggeration:self.exaggeration];
+                                                      exaggeration:self.exaggeration];
 }
 
 - (BOOL)isEqual:(id)other {

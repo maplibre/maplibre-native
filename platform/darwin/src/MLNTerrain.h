@@ -44,7 +44,7 @@ MLN_EXPORT
     data.
  */
 - (instancetype)initWithSourceIdentifier:(NSString *)sourceIdentifier
-                             exaggeration:(CGFloat)exaggeration NS_DESIGNATED_INITIALIZER;
+                            exaggeration:(CGFloat)exaggeration NS_DESIGNATED_INITIALIZER;
 
 /**
  Returns a terrain object with the given source identifier and the default

@@ -548,7 +548,7 @@ MLN_EXPORT
     data. A value of `1.0` renders true-scale elevation.
  */
 - (void)setTerrainWithSourceIdentifier:(nullable NSString *)sourceIdentifier
-                           exaggeration:(CGFloat)exaggeration
+                          exaggeration:(CGFloat)exaggeration
     NS_SWIFT_NAME(setTerrain(sourceIdentifier:exaggeration:));
 
 /**
