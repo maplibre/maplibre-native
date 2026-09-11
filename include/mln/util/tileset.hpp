@@ -4,7 +4,6 @@
 #include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
 
-#include <tuple>
 #include <vector>
 #include <string>
 #include <cstdint>

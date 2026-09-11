@@ -3,6 +3,7 @@
 #include <mln/util/ignore.hpp>
 #include <mln/util/monotonic_timer.hpp>
 
+#include <cassert>
 #include <memory>
 #include <vector>
 

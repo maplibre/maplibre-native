@@ -134,6 +134,23 @@ public:
     float pixelRatio() const;
 
     /**
+     * @brief Sets whether to retain rendered feature information for the current frame.
+     *  When enabled, feature information will appear in the RenderingStats passed to
+     * `MapObserver::onDidFinishRenderingFrame`.
+     *
+     * @return true if rendered feature info should be retained, false otherwise.
+     * @return reference to MapOptions for chaining options together.
+     */
+    MapOptions& withRenderedFeatureInfo(bool capture);
+
+    /**
+     * @brief Gets the previously set (or default) renderedFeatureInfo value.
+     *
+     * @return true if rendered feature info should be retained, false otherwise.
+     */
+    bool renderedFeatureInfo() const;
+
+    /**
      * @brief Sets whether to enable decoding of MapLibre Tile (MLT) tiles with FastPFOR integer encodings.
      * By default, it is set to false. Such tiles will fail if not explicitly enabled.
      *

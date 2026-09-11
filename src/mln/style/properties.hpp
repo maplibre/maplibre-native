@@ -11,7 +11,6 @@
 #include <mln/util/ignore.hpp>
 #include <mln/util/logging.hpp>
 
-#include <bitset>
 #include <tuple>
 
 namespace mln {

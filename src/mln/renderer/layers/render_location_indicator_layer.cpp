@@ -1,61 +1,58 @@
-#include <array>
+#include <algorithm>
+#include <mln/style/layers/location_indicator_layer.hpp>
+
+#include <mln/geometry/feature_index.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/gfx/context.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/map/transform_state.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/renderer/bucket.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_tree.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
+#include <mln/util/mat4.hpp>
+#include <mln/util/tile_cover.hpp>
+
+#if MLN_RENDER_BACKEND_OPENGL
+#include <mln/gl/context.hpp>
+#include <mln/gl/defines.hpp>
+#include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/types.hpp>
+#include <mln/gl/uniform.hpp>
+#include <mln/platform/gl_functions.hpp>
+#endif // MLN_RENDER_BACKEND_OPENGL
+
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+#include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/drawable_impl.hpp>
+#include <mln/gfx/drawable_tweaker.hpp>
+#include <mln/gfx/drawable.hpp>
+#include <mln/gfx/texture2d.hpp>
+#include <mln/gfx/vertex_attribute.hpp>
+#include <mln/renderer/layers/location_indicator_layer_tweaker.hpp>
+#include <mln/renderer/render_static_data.hpp>
+#include <mln/shaders/location_indicator_ubo.hpp>
+#include <mln/shaders/shader_defines.hpp>
+#endif // MLN_DRAWABLE_LOCATION_INDICATOR
 
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4267)
 #endif
-
 #include <mapbox/cheap_ruler.hpp>
-
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
 
-#include <mln/geometry/feature_index.hpp>
-#include <mln/gfx/backend_scope.hpp>
-#include <mln/gfx/renderer_backend.hpp>
-#include <mln/map/transform_state.hpp>
-#include <mln/math/angles.hpp>
-#include <mln/renderer/bucket.hpp>
-#include <mln/renderer/layers/render_location_indicator_layer.hpp>
-#include <mln/renderer/paint_parameters.hpp>
-#include <mln/style/layers/location_indicator_layer.hpp>
-#include <mln/style/layers/location_indicator_layer_impl.hpp>
-#include <mln/style/layers/location_indicator_layer_properties.hpp>
-#include <mln/util/mat4.hpp>
-#include <mln/util/tile_cover.hpp>
-#include <mln/gfx/context.hpp>
-
 #include <mapbox/eternal.hpp>
-#include <mln/renderer/image_manager.hpp>
 
-#if MLN_RENDER_BACKEND_OPENGL
-
-#include <mln/platform/gl_functions.hpp>
-#include <mln/gl/context.hpp>
-#include <mln/gl/renderable_resource.hpp>
-#include <mln/gl/defines.hpp>
-#include <mln/gl/uniform.hpp>
-#include <mln/gl/types.hpp>
-
-#endif
-
-#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
-
-#include <mln/gfx/vertex_attribute.hpp>
-#include <mln/renderer/render_static_data.hpp>
-#include <mln/shaders/location_indicator_ubo.hpp>
-#include <mln/gfx/drawable.hpp>
-#include <mln/gfx/drawable_builder.hpp>
-#include <mln/gfx/drawable_impl.hpp>
-#include <mln/gfx/drawable_tweaker.hpp>
-#include <mln/gfx/texture2d.hpp>
-#include <mln/shaders/shader_defines.hpp>
-#include <mln/renderer/layers/location_indicator_layer_tweaker.hpp>
-
-#endif
-
+#include <array>
 #include <numbers>
 
 using namespace mln::platform;
@@ -570,6 +567,17 @@ public:
         featureEnvelope->push_back(border);
     }
 
+    const auto& getProjectionCircle() const { return projectionCircle; }
+    const auto& getProjectionPuck() const { return projectionPuck; }
+
+    auto getPuckGeometry() const {
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+        return puckDrawableInfo.geometry;
+#else
+        return puckGeometry;
+#endif // MLN_DRAWABLE_LOCATION_INDICATOR
+    }
+
 protected:
     static ScreenCoordinate latLngToScreenCoordinate(const LatLng& p, const TransformState& s) {
         LatLng unwrappedLatLng = p.wrapped();
@@ -822,8 +830,8 @@ protected:
                                std::shared_ptr<Texture>& texture,
                                const mln::LocationIndicatorRenderParameters& params) {
         bool updated = false;
-        if (textures.find(imagePath) == textures.end()) {
-            std::shared_ptr<Texture> tx = std::make_shared<Texture>();
+        if (!textures.contains(imagePath)) {
+            auto tx = std::make_shared<Texture>();
             if (!imagePath.empty() && params.imageManager) {
                 tx->assign(params.imageManager->getSharedImage(imagePath));
                 updated = true;
@@ -834,7 +842,7 @@ protected:
             texture = tx;
         } else {
             const Immutable<style::Image::Impl>* sharedImage = params.imageManager->getSharedImage(imagePath);
-            const mln::PremultipliedImage* img = (sharedImage) ? &sharedImage->get()->image : nullptr;
+            const mln::PremultipliedImage* img = sharedImage ? &sharedImage->get()->image : nullptr;
             std::shared_ptr<Texture>& tex = textures.at(imagePath);
             if (tex->image != img) { // image for the ID might have changed.
                 tex->assign(sharedImage);
@@ -906,9 +914,6 @@ public:
     QuadDrawableInfo shadowDrawableInfo;
     QuadDrawableInfo puckDrawableInfo;
     QuadDrawableInfo hatDrawableInfo;
-
-    const auto& getProjectionCircle() const { return projectionCircle; }
-    const auto& getProjectionPuck() const { return projectionPuck; }
 
 #endif
 
@@ -1019,6 +1024,10 @@ void RenderLocationIndicatorLayer::populateDynamicRenderFeatureIndex(DynamicFeat
 void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
+    if (paintParameters.captureRenderedFeatures) {
+        captureRenderedFeatures();
+    }
+
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
     glContext.bindVertexArray = 0;
     glContext.setDepthMode(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly));
@@ -1035,16 +1044,35 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
+void RenderLocationIndicatorLayer::captureRenderedFeatures() {
+    using namespace vector;
+
+    // Only considering the puck for now, not the accuracy circle
+    const auto& proj = renderImpl->getProjectionPuck();
+    const auto& geom = renderImpl->getPuckGeometry();
+
+    const auto getVertex = [&](std::size_t i) {
+        return vec3{geom[i].x, geom[i].y, 0};
+    };
+
+    if (const auto bound = computeFeatureNDCBound(geom.size(), proj, getVertex)) {
+        constexpr auto locationID = "maplibre:LocationIndicator";
+        stats.addRenderedFeature(locationID, *bound, {/* no tile */});
+    }
+}
+
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,
                                           const TransformState&,
-                                          const std::shared_ptr<UpdateParameters>&,
+                                          const std::shared_ptr<UpdateParameters>& updateParameters,
                                           [[maybe_unused]] const PaintParameters& paintParameters,
                                           const RenderTree&,
                                           UniqueChangeRequestVec& changes) {
-    const auto drawPasses = RenderPass::Translucent;
+    constexpr auto drawPasses = RenderPass::Translucent;
+
+    stats.renderedFeatures.clear();
 
     // If the result is transparent or missing, just remove any existing drawables and stop
     if (drawPasses == RenderPass::None) {
@@ -1082,6 +1110,10 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
             getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
         layerGroup->addLayerTweaker(layerTweaker);
+    }
+
+    if (updateParameters->captureRenderedFeatures) {
+        captureRenderedFeatures();
     }
 
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());

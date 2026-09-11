@@ -1,13 +1,13 @@
 #pragma once
 
+#include <mln/layout/pattern_layout.hpp>
+#include <mln/renderer/paint_property_binder.hpp>
 #include <mln/renderer/render_layer.hpp>
-#include <mln/style/layers/line_layer_impl.hpp>
-#include <mln/style/layers/line_layer_properties.hpp>
 #include <mln/shaders/uniforms.hpp>
 #include <mln/style/image_impl.hpp>
-#include <mln/layout/pattern_layout.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
+#include <mln/style/layers/line_layer_properties.hpp>
 
-#include <optional>
 #include <memory>
 
 namespace mln {
@@ -19,7 +19,9 @@ using ShaderGroupPtr = std::shared_ptr<ShaderGroup>;
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 } // namespace gfx
 
+class LineBucket;
 class LineLayerTweaker;
+using LineBinders = PaintPropertyBinders<style::LinePaintProperties::DataDrivenProperties>;
 using LineLayerTweakerPtr = std::shared_ptr<LineLayerTweaker>;
 
 class RenderLineLayer final : public RenderLayer {
@@ -50,6 +52,13 @@ private:
                                 float,
                                 const mat4 &,
                                 const FeatureState &) const override;
+
+    void captureRenderedFeatures(const LineBucket &,
+                                 const RenderTile &,
+                                 const LineBinders &,
+                                 const style::LinePaintProperties::PossiblyEvaluated &,
+                                 const TransformState &,
+                                 const TransformParameters &);
 
     // Paint properties
     style::LinePaintProperties::Unevaluated unevaluated;

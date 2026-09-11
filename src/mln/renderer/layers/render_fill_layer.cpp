@@ -1,33 +1,35 @@
+#include <mln/renderer/layers/render_fill_layer.hpp>
+
 #include <mln/geometry/feature_index.hpp>
 #include <mln/gfx/context.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_atlases_tweaker.hpp>
+#include <mln/gfx/drawable_builder.hpp>
 #include <mln/gfx/renderable.hpp>
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/renderer/buckets/fill_bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
-#include <mln/renderer/layers/render_fill_layer.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/layers/fill_layer_tweaker.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/tile_render_data.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/fill_layer_ubo.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/expression/image.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
 #include <mln/tile/geometry_tile.hpp>
 #include <mln/tile/tile.hpp>
+#include <mln/util/containers.hpp>
 #include <mln/util/convert.hpp>
 #include <mln/util/intersection_tests.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
 #include <mln/util/std.hpp>
-
-#include <mln/gfx/drawable_atlases_tweaker.hpp>
-#include <mln/gfx/drawable_builder.hpp>
-#include <mln/renderer/layers/fill_layer_tweaker.hpp>
-#include <mln/renderer/layer_group.hpp>
-#include <mln/renderer/update_parameters.hpp>
-#include <mln/shaders/fill_layer_ubo.hpp>
-#include <mln/shaders/shader_program_base.hpp>
 
 namespace mln {
 
@@ -117,13 +119,98 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
                                                feature.getGeometries());
 }
 
+void RenderFillLayer::captureRenderedFeatures(const FillBucket& bucket,
+                                              const RenderTile& tile,
+                                              const FillBinders& binders,
+                                              const style::FillPaintProperties::PossiblyEvaluated& evaluated,
+                                              const TransformState& state,
+                                              const TransformParameters& transformParams) {
+    const auto& tileID = tile.getOverscaledTileID();
+
+    const bool alphaIsConstant = evaluated.template get<FillOpacity>().isConstant();
+    const auto& alphaBinder = binders.template get<FillOpacity>();
+    if (alphaIsConstant && std::get<0>(alphaBinder->uniformValue(evaluated.get<FillOpacity>())) == 0) {
+        return;
+    }
+
+    const bool colorIsConstant = evaluated.template get<FillColor>().isConstant();
+    const auto& colorBinder = binders.template get<FillColor>();
+    if (colorIsConstant && std::get<0>(colorBinder->uniformValue(evaluated.get<FillColor>())).a == 0) {
+        return;
+    }
+
+    constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
+    constexpr bool nearClipped = false;
+    constexpr bool aligned = false;
+    constexpr bool is3d = false;
+    constexpr bool enableDepth = true;
+    constexpr std::int32_t subLayerIndex = 1;
+    const auto translation = evaluated.get<FillTranslate>();
+    const auto translationAnchor = evaluated.get<FillTranslateAnchor>();
+    const std::optional<mln::Point<double>> origin = std::nullopt;
+    const auto zoomFraction = state.getZoomFraction();
+    std::optional<mat4> tileMatrix;
+
+    const auto& features = bucket.getRetainedFeatures();
+    stats.renderedFeatures.reserve(features.size());
+
+    for (std::size_t i = 0; i < features.size(); ++i) {
+        const auto& featureEntry = features[i];
+        const auto& featureID = featureEntry.featureId;
+        assert(!featureID.empty());
+
+        // Consider only the value for the first vertex of this feature, for now.
+        const auto vertexOffset = featureEntry.vertexOffset;
+
+        if (!alphaIsConstant) {
+            const auto& [vertex] = alphaBinder->getVertexValue(vertexOffset);
+            if (mln::util::interpolate(vertex.a1[0], vertex.a1[1], zoomFraction) == 0) {
+                continue;
+            }
+        }
+        if (!colorIsConstant) {
+            const auto& [vertex] = colorBinder->getVertexValue(vertexOffset);
+            if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
+                continue;
+            }
+        }
+
+        // Compute the tile matrix once
+        if (!tileMatrix.has_value()) {
+            tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
+                                                     state,
+                                                     transformParams,
+                                                     layerIndex,
+                                                     translation,
+                                                     translationAnchor,
+                                                     origin,
+                                                     is3d,
+                                                     enableDepth,
+                                                     subLayerIndex,
+                                                     nearClipped,
+                                                     inViewportPixelUnits,
+                                                     aligned);
+        }
+
+        const auto getVertex = [&bucket, vertexOffset](std::size_t vi) {
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
+            return vec3{vertex[0] + 0.0, vertex[1] + 0.0, 0};
+        };
+        if (const auto bound = computeFeatureNDCBound(featureEntry.vertexCount, *tileMatrix, getVertex)) {
+            stats.addRenderedFeature(featureID, *bound, {tileID});
+        }
+    }
+}
+
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState&,
-                             const std::shared_ptr<UpdateParameters>&,
+                             const TransformState& state,
+                             const std::shared_ptr<UpdateParameters>& updateParameters,
                              [[maybe_unused]] const PaintParameters& paintParameters,
-                             const RenderTree&,
+                             const RenderTree& renderTree,
                              UniqueChangeRequestVec& changes) {
+    stats.renderedFeatures.clear();
+
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -239,7 +326,22 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
+        // Outline always occurs in translucent pass, defaults to fill color
+        // Outline does not default to fill in the pattern case
+        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
+                                                                  unevaluated.get<FillOutlineColor>().isUndefined());
+#if MLN_TRIANGULATE_FILL_OUTLINES
+        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
+                                       !evaluated.get<FillOpacity>().isConstant();
+#endif
+
+        if (updateParameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(bucket, tile, binders, evaluated, state, params);
+        }
+
         const auto fillVertexCount = bucket.vertices.elements();
+
         if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
@@ -334,15 +436,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 ++stats.drawablesAdded;
             }
         };
-
-        // Outline always occurs in translucent pass, defaults to fill color
-        // Outline does not default to fill in the pattern case
-        const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
-                                                                  unevaluated.get<FillOutlineColor>().isUndefined());
-#if MLN_TRIANGULATE_FILL_OUTLINES
-        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
-                                       !evaluated.get<FillOpacity>().isConstant();
-#endif
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Simple fill

@@ -284,21 +284,21 @@ void ActionJournal::Impl::onDidFailLoadingMap(MapLoadError error, const std::str
 
 void ActionJournal::Impl::onDidFinishRenderingFrame(const RenderFrameStatus& frame) {
     // update report time
-    double currentFrameTime = util::MonotonicTimer::now().count();
-    double elapsedTime = currentFrameTime - previousFrameTime;
+    const double currentFrameTime = util::MonotonicTimer::now().count();
+    const double elapsedTime = currentFrameTime - previousFrameTime;
     previousFrameTime = currentFrameTime;
 
     // update rendering stats
-    renderingStats.encodingMin = std::min(renderingStats.encodingMin, frame.renderingStats.encodingTime);
+    renderingStats.encodingMin = std::min(renderingStats.encodingMin, frame.renderingStats->encodingTime);
 
-    renderingStats.encodingMax = std::max(renderingStats.encodingMax, frame.renderingStats.encodingTime);
+    renderingStats.encodingMax = std::max(renderingStats.encodingMax, frame.renderingStats->encodingTime);
 
-    renderingStats.renderingMin = std::min(renderingStats.renderingMin, frame.renderingStats.renderingTime);
+    renderingStats.renderingMin = std::min(renderingStats.renderingMin, frame.renderingStats->renderingTime);
 
-    renderingStats.renderingMax = std::max(renderingStats.renderingMax, frame.renderingStats.renderingTime);
+    renderingStats.renderingMax = std::max(renderingStats.renderingMax, frame.renderingStats->renderingTime);
 
-    renderingStats.encodingTotal += frame.renderingStats.encodingTime;
-    renderingStats.renderingTotal += frame.renderingStats.renderingTime;
+    renderingStats.encodingTotal += frame.renderingStats->encodingTime;
+    renderingStats.renderingTotal += frame.renderingStats->renderingTime;
     ++renderingStats.frameCount;
 
     renderingInfoReportTime -= elapsedTime;

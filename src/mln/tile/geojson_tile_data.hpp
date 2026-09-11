@@ -1,5 +1,6 @@
 #pragma once
 #include <mln/tile/geometry_tile_data.hpp>
+#include <memory>
 
 namespace mln {
 

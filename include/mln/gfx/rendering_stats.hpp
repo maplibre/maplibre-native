@@ -1,9 +1,12 @@
 #pragma once
 
+#include <mln/tile/tile_id.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/containers.hpp>
+#include <mln/util/hash.hpp>
+
 #include <cstddef>
 #include <string>
-#include <memory>
-#include <mln/util/color.hpp>
 
 namespace mln {
 
@@ -88,6 +91,56 @@ struct RenderingStats {
     int stencilClears = 0;
     /// Number of stencil buffer updates
     int stencilUpdates = 0;
+
+    struct NDCBound {
+        // NDC positive is up/right
+        double minX = std::numeric_limits<double>::max();
+        double maxX = std::numeric_limits<double>::lowest();
+        double minY = std::numeric_limits<double>::max();
+        double maxY = std::numeric_limits<double>::lowest();
+
+        /// Expand to include the other bounds
+        void include(const NDCBound& other) {
+            minX = std::min(minX, other.minX);
+            maxX = std::max(maxX, other.maxX);
+            minY = std::min(minY, other.minY);
+            maxY = std::max(maxY, other.maxY);
+        }
+    };
+
+    struct FeatureInfo {
+        // The bounding box for this feature
+        NDCBound ndcBound;
+
+        // The tiles in which this item was rendered (including overdraw)
+        mln::unordered_set<OverscaledTileID> tileIDs;
+
+        void mergeFrom(const NDCBound& bound, const mln::unordered_set<OverscaledTileID>& ids) {
+            ndcBound.include(bound);
+            tileIDs.insert(ids.begin(), ids.end());
+        }
+        void mergeFrom(const FeatureInfo& other) { mergeFrom(other.ndcBound, other.tileIDs); }
+    };
+
+    struct SourceLayerID {
+        std::string sourceID;
+        std::string layerID;
+
+        bool operator<(const SourceLayerID& other) const {
+            return std::tie(sourceID, layerID) < std::tie(other.sourceID, other.layerID);
+        }
+        bool operator==(const SourceLayerID& other) const = default;
+    };
+    struct SourceLayerIDHash {
+        std::size_t operator()(const SourceLayerID& id) const noexcept {
+            return mln::util::hash(id.sourceID, id.layerID);
+        }
+    };
+
+    /// Collected feature information by layer, if enabled via `MapOptions::withRenderedFeatureInfo()`
+    using LayerFeaturesMap = mln::unordered_map<std::string, FeatureInfo>;
+    using FrameRenderedFeaturesMap = mln::unordered_map<SourceLayerID, LayerFeaturesMap, SourceLayerIDHash>;
+    FrameRenderedFeaturesMap frameRenderedFeatures{};
 
     RenderingStats& operator+=(const RenderingStats&);
 

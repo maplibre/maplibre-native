@@ -1,13 +1,13 @@
 #pragma once
 
+#include <mln/gfx/index_buffer.hpp>
+#include <mln/gfx/vertex_buffer.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/renderer/render_light.hpp>
-#include <mln/tile/geometry_tile_data.hpp>
-#include <mln/gfx/vertex_buffer.hpp>
-#include <mln/gfx/index_buffer.hpp>
 #include <mln/shaders/segment.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
 
 namespace mln {
 
@@ -31,14 +31,14 @@ public:
 
     FillExtrusionBucket(const PossiblyEvaluatedLayoutProperties& layout,
                         const std::map<std::string, Immutable<style::LayerProperties>>&,
-                        float,
-                        uint32_t);
+                        float zoom,
+                        uint32_t overscaling);
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
                     const mln::ImagePositions&,
                     const PatternLayerMap&,
-                    std::size_t,
+                    std::size_t featureIndex,
                     const CanonicalTileID&) override;
 
     bool hasData() const override;
@@ -56,8 +56,8 @@ public:
         auto fracPart = convertPoint<uint8_t>((p - intPart) * 128.0);
 
         return FillExtrusionLayoutVertex{
-            {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
-            { // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
+            .a1 = {static_cast<int16_t>(intPart.x), static_cast<int16_t>(intPart.y)},
+            .a2 = { // We pack a bool (`isDiscarded`) indicating whether this instance is discarded
                 static_cast<uint16_t>((fracPart.x * 256 + fracPart.y) * 2 + (isDiscarded ? 1 : 0)),
                 // The edgeDistance attribute is used for wrapping fill_extrusion patterns
                 edgeDistance

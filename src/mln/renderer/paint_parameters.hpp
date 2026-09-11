@@ -12,11 +12,7 @@
 #include <mln/util/mat4.hpp>
 
 #include <array>
-#include <functional>
-#include <iterator>
 #include <map>
-#include <set>
-#include <vector>
 
 namespace mln {
 
@@ -64,7 +60,8 @@ public:
                     double tileLodPitchThreshold,
                     TileLodMode tileLodMode,
                     Size renderableSize,
-                    const gfx::ScissorRect&);
+                    const gfx::ScissorRect&,
+                    bool captureRenderedFeatures);
     ~PaintParameters();
 
     gfx::Context& context;
@@ -158,6 +155,8 @@ public:
     TileLodMode tileLodMode;
 
     gfx::ScissorRect scissorRect;
+
+    bool captureRenderedFeatures = false;
 };
 
 } // namespace mln

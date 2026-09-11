@@ -196,6 +196,11 @@ interface NativeMap {
                        @NonNull String featureId,
                        @NonNull JsonObject state);
 
+  int getRenderedFeatureCount(@Nullable String featureId,
+                              @Nullable String layerId,
+                              @Nullable String sourceId);
+
+  // Feature State
   @Nullable
   JsonObject getFeatureState(@NonNull String sourceId,
                              @Nullable String sourceLayerId,

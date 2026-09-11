@@ -1,11 +1,13 @@
 #pragma once
 
+#include <mln/renderer/buckets/circle_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/circle_layer_impl.hpp>
 #include <mln/style/layers/circle_layer_properties.hpp>
 
 namespace mln {
 
+class CircleBucket;
 class CircleLayerTweaker;
 using CircleLayerTweakerPtr = std::shared_ptr<CircleLayerTweaker>;
 
@@ -36,6 +38,13 @@ private:
                                 float,
                                 const mat4 &,
                                 const FeatureState &) const override;
+
+    void captureRenderedFeatures(const CircleBucket &,
+                                 const RenderTile &,
+                                 const CircleBinders &,
+                                 const style::CirclePaintProperties::PossiblyEvaluated &,
+                                 const TransformState &,
+                                 const TransformParameters &);
 
 private:
     // Paint properties
