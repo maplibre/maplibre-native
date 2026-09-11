@@ -36,6 +36,10 @@ app.get('/test', function (req, res) {
     res.send(content);
 });
 
+app.get('/test-accept', function(req, res) {
+    res.send(req.headers['accept'] || '');
+});
+
 app.get('/stale/*path', function() {
     // Never respond.
 });

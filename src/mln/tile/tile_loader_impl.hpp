@@ -18,7 +18,8 @@ template <typename T>
 TileLoader<T>::TileLoader(T& tile_,
                           const OverscaledTileID& id,
                           const TileParameters& parameters,
-                          const Tileset& tileset)
+                          const Tileset& tileset,
+                          std::string_view acceptHeader)
     : tile(tile_),
       necessity(TileNecessity::Optional),
       resource(Resource::tile(tileset.tiles.at(0),
@@ -27,7 +28,8 @@ TileLoader<T>::TileLoader(T& tile_,
                               id.canonical.y,
                               id.canonical.z,
                               tileset.scheme,
-                              Resource::LoadingMethod::CacheOnly)),
+                              Resource::LoadingMethod::CacheOnly,
+                              acceptHeader)),
       fileSource(parameters.fileSource) {
     assert(!request);
 

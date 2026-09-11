@@ -1,5 +1,6 @@
 #include <mln/util/image.hpp>
 #include <mln/util/string.hpp>
+#include <mln/util/constants.hpp>
 
 #include <string>
 
@@ -15,6 +16,10 @@ PremultipliedImage decodeImage(const std::string& string) {
     jni::SetArrayRegion(*env, *array, 0, string.size(), reinterpret_cast<const signed char*>(string.data()));
 
     return android::Bitmap::GetImage(*env, android::BitmapFactory::DecodeByteArray(*env, array, 0, string.size()));
+}
+
+std::string_view rasterAcceptHeader() {
+    return util::MIME_TYPE_RASTER;
 }
 
 } // namespace mln

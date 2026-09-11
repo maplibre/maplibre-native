@@ -5,6 +5,7 @@
 #include <mln/util/size.hpp>
 
 #include <string>
+#include <string_view>
 #include <cstring>
 #include <memory>
 #include <algorithm>
@@ -178,5 +179,7 @@ using AlphaImage = Image<ImageAlphaMode::Exclusive>;
 // TODO: don't use std::string for binary data.
 PremultipliedImage decodeImage(const std::string&);
 std::string encodePNG(const PremultipliedImage&);
+
+std::string_view rasterAcceptHeader();
 
 } // namespace mln
