@@ -385,13 +385,162 @@ public class FillExtrusionLayer extends Layer {
   /**
    * Get the FillExtrusionVerticalGradient property
    *
-   * @return property wrapper value around Boolean
+   * @return property wrapper value around Object[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getFillExtrusionVerticalGradient() {
+  public PropertyValue<Object[]> getFillExtrusionVerticalGradient() {
     checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
+    return (PropertyValue<Object[]>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
+  }
+
+  /**
+   * Get the FillExtrusionShadowColor property
+   *
+   * @return property wrapper value around String
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<String> getFillExtrusionShadowColor() {
+    checkThread();
+    return (PropertyValue<String>) new PropertyValue("fill-extrusion-shadow-color", nativeGetFillExtrusionShadowColor());
+  }
+
+  /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while `fill-extrusion-shadow-opacity` is 0.
+   *
+   * @return int representation of a rgba string color
+   * @throws RuntimeException thrown if property isn't a value
+   */
+  @ColorInt
+  public int getFillExtrusionShadowColorAsInt() {
+    checkThread();
+    PropertyValue<String> value = getFillExtrusionShadowColor();
+    if (value.isValue()) {
+      return rgbaToColor(value.getValue());
+    } else {
+      throw new RuntimeException("fill-extrusion-shadow-color was set as a Function");
+    }
+  }
+
+  /**
+   * Get the FillExtrusionShadowColor property transition options
+   *
+   * @return transition options for String
+   */
+  @NonNull
+  public TransitionOptions getFillExtrusionShadowColorTransition() {
+    checkThread();
+    return nativeGetFillExtrusionShadowColorTransition();
+  }
+
+  /**
+   * Set the FillExtrusionShadowColor property transition options
+   *
+   * @param options transition options for String
+   */
+  public void setFillExtrusionShadowColorTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillExtrusionShadowColorTransition(options.getDuration(), options.getDelay());
+  }
+
+  /**
+   * Get the FillExtrusionShadowOpacity property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillExtrusionShadowOpacity() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-shadow-opacity", nativeGetFillExtrusionShadowOpacity());
+  }
+
+  /**
+   * Get the FillExtrusionShadowOpacity property transition options
+   *
+   * @return transition options for Float
+   */
+  @NonNull
+  public TransitionOptions getFillExtrusionShadowOpacityTransition() {
+    checkThread();
+    return nativeGetFillExtrusionShadowOpacityTransition();
+  }
+
+  /**
+   * Set the FillExtrusionShadowOpacity property transition options
+   *
+   * @param options transition options for Float
+   */
+  public void setFillExtrusionShadowOpacityTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillExtrusionShadowOpacityTransition(options.getDuration(), options.getDelay());
+  }
+
+  /**
+   * Get the FillExtrusionShadowLength property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillExtrusionShadowLength() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-shadow-length", nativeGetFillExtrusionShadowLength());
+  }
+
+  /**
+   * Get the FillExtrusionShadowLength property transition options
+   *
+   * @return transition options for Float
+   */
+  @NonNull
+  public TransitionOptions getFillExtrusionShadowLengthTransition() {
+    checkThread();
+    return nativeGetFillExtrusionShadowLengthTransition();
+  }
+
+  /**
+   * Set the FillExtrusionShadowLength property transition options
+   *
+   * @param options transition options for Float
+   */
+  public void setFillExtrusionShadowLengthTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillExtrusionShadowLengthTransition(options.getDuration(), options.getDelay());
+  }
+
+  /**
+   * Get the FillExtrusionShadowAzimuth property
+   *
+   * @return property wrapper value around Float
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Float> getFillExtrusionShadowAzimuth() {
+    checkThread();
+    return (PropertyValue<Float>) new PropertyValue("fill-extrusion-shadow-azimuth", nativeGetFillExtrusionShadowAzimuth());
+  }
+
+  /**
+   * Get the FillExtrusionShadowAzimuth property transition options
+   *
+   * @return transition options for Float
+   */
+  @NonNull
+  public TransitionOptions getFillExtrusionShadowAzimuthTransition() {
+    checkThread();
+    return nativeGetFillExtrusionShadowAzimuthTransition();
+  }
+
+  /**
+   * Set the FillExtrusionShadowAzimuth property transition options
+   *
+   * @param options transition options for Float
+   */
+  public void setFillExtrusionShadowAzimuthTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetFillExtrusionShadowAzimuthTransition(options.getDuration(), options.getDelay());
   }
 
   /**

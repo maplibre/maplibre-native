@@ -175,7 +175,7 @@ void tileLodZoomShift(mln::Map &map, bool positive) {
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
     shift = map.getTileLodZoomShift() + shift;
     shift = mln::util::clamp(shift, -2.5, 2.5);
-    mln::Log::Info(mln::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
+    mln::Log::Info(mln::Event::GraphicsBackend, "Zoom shift: " + std::to_string(shift));
     map.setTileLodZoomShift(shift);
     map.triggerRepaint();
 }
@@ -216,7 +216,8 @@ void addFillExtrusionLayer(mln::style::Style &style, bool visible) {
 } // namespace
 
 void glfwError(int error, const char *description) {
-    mln::Log::Error(mln::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
+    mln::Log::Error(mln::Event::GraphicsBackend,
+                    std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,
@@ -242,7 +243,7 @@ GLFWView::GLFWView(bool fullscreen_,
 #endif
 
     if (!glfwInit()) {
-        mln::Log::Error(mln::Event::OpenGL, "failed to initialize glfw");
+        mln::Log::Error(mln::Event::GraphicsBackend, "failed to initialize glfw");
         exit(1);
     }
 
@@ -288,7 +289,7 @@ GLFWView::GLFWView(bool fullscreen_,
     window = glfwCreateWindow(width, height, "MapLibre Native", monitor, nullptr);
     if (!window) {
         glfwTerminate();
-        mln::Log::Error(mln::Event::OpenGL, "failed to initialize window");
+        mln::Log::Error(mln::Event::GraphicsBackend, "failed to initialize window");
         exit(1);
     }
 

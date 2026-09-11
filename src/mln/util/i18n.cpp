@@ -352,7 +352,6 @@ bool allowsWordBreaking(char16_t chr) {
     return (chr == 0x0a      /* newline */
             || chr == 0x20   /* space */
             || chr == 0x26   /* ampersand */
-            || chr == 0x28   /* open parenthesis */
             || chr == 0x29   /* close parenthesis */
             || chr == 0x2b   /* plus sign */
             || chr == 0x2d   /* hyphen-minus */
@@ -363,6 +362,10 @@ bool allowsWordBreaking(char16_t chr) {
             || chr == 0x2010 /* hyphen */
             || chr == 0x2013 /* en dash */
     );
+}
+
+bool allowsWordBreakingBefore(char16_t chr) {
+    return chr == 0x28; /* open parenthesis */
 }
 
 bool charAllowsLetterSpacing(char16_t chr) {

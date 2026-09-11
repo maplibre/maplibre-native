@@ -29,6 +29,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
 - [core] Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/issues/4508)).
 - [core] Repaint data-driven symbol paint properties after feature-state updates.
 - [core] Accept alpha values in legacy comma-separated `hsl()` colors ([#4434](https://github.com/maplibre/maplibre-native/issues/4434)).
