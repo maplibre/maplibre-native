@@ -1945,6 +1945,61 @@ TEST(Map, ObserveTileLifecycle) {
     }
 }
 
+TEST(BackgroundLayer, ImmediateStyleReplacementRetainsColor) {
+    MapTest<> test;
+    for (int iteration = 0; iteration < 2; ++iteration) {
+        SCOPED_TRACE(iteration);
+        // The underlay keeps the tested background out of the clear-color optimization.
+        test.map.getStyle().loadJSON(R"({
+            "version": 8,
+            "sources": {},
+            "layers": [{"id": "underlay", "type": "background", "paint": {"background-color": "white"}}]
+        })");
+        auto layer = std::make_unique<BackgroundLayer>("background");
+        layer->setBackgroundColor(Color::red());
+        test.map.getStyle().addLayer(std::move(layer));
+
+        const auto image = test.frontend.render(test.map).image;
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_EQ(pixel[0], 255);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], 0);
+        EXPECT_EQ(pixel[3], 255);
+    }
+}
+
+TEST(BackgroundLayer, SwitchesBetweenSolidAndPatternedDrawables) {
+    MapTest<> test;
+    // The underlay forces shader selection through the drawable path.
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "sources": {},
+        "layers": [
+            {"id": "underlay", "type": "background", "paint": {"background-color": "white"}},
+            {"id": "background", "type": "background", "paint": {"background-color": "red"}}
+        ]
+    })");
+    const uint8_t blue[] = {0, 0, 255, 255};
+    test.map.getStyle().addImage(
+        std::make_unique<style::Image>("blue", PremultipliedImage({1, 1}, blue, sizeof(blue)), 1.0f));
+    auto* layer = static_cast<BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    const auto expectColor = [&](uint8_t red, uint8_t blueChannel) {
+        const auto image = test.frontend.render(test.map).image;
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_EQ(pixel[0], red);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], blueChannel);
+        EXPECT_EQ(pixel[3], 255);
+    };
+    expectColor(255, 0);
+    layer->setBackgroundPattern({"blue"s});
+    expectColor(0, 255);
+    layer->setBackgroundPattern({});
+    expectColor(255, 0);
+}
+
 TEST(BackgroundLayer, StyleUpdateZoomDependency) {
     using namespace mln::style::expression::dsl;
 
