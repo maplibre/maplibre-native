@@ -1302,7 +1302,6 @@ terrain during placement sees the previous frame's state - the same first-frame 
   has no per-frame logging.
 - Extend the draped-flag gamma handling to the line gradient/pattern/SDF variants
 - Decide whether heatmap should be draped (gl-js does not drape it)
-- Runtime styling API for terrain (`setTerrain`) on iOS/macOS (Android has it)
 
 ## Testing
 
@@ -1766,6 +1765,24 @@ style.setTerrain(Terrain("terrain-source", exaggeration = 1.0f))
 
 val terrain = style.getTerrain() // null when terrain is not enabled
 style.setTerrain(null)           // disable terrain
+```
+
+### iOS / macOS API
+
+```swift
+// Requires a raster-dem source in the style (its TileJSON may carry the encoding)
+mapView.style?.terrain = MLNTerrain(sourceIdentifier: "terrain-source", exaggeration: 1.0)
+
+let terrain = mapView.style?.terrain // nil when terrain is not enabled
+mapView.style?.terrain = nil         // disable terrain
+
+// Or the convenience on the map view, which is a no-op before the style has loaded
+mapView.setTerrain(sourceIdentifier: "terrain-source", exaggeration: 1.0)
+
+// The two map-level knobs, the counterparts of MapLibreMap.setTerrainLoadMode and
+// setTerrainSkirtLength on Android
+mapView.terrainLoadMode = .balanced
+mapView.terrainSkirtLength = .none
 ```
 
 ### Style JSON API

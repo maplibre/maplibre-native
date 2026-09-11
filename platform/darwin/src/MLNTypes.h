@@ -138,4 +138,53 @@ typedef NS_ENUM(NSInteger, MLNOrnamentVisibility) {
   MLNOrnamentVisibilityVisible
 };
 
+/**
+ Controls progressive loading of 3D-terrain content (draped tiles and drape re-renders).
+
+ It trades initial-load sharpness for smoother interaction on weaker GPUs, so it is a
+ per-map, hardware-driven choice set via ``MLNMapView/terrainLoadMode``.
+
+ This is a rendering/performance option, not a style property, so it does not affect the
+ final rendered image, only how the loading work is spread across frames. The ordinals
+ must stay in sync with the native `mln::TerrainLoadMode`.
+ */
+typedef NS_ENUM(NSUInteger, MLNTerrainLoadMode) {
+  /**
+   No budget: all revealed tiles and drapes build immediately. Sharpest initial view; may
+   stall a frame on large bursts (e.g. zooming in over new coverage). Default.
+   */
+  MLNTerrainLoadModeQuality,
+  /**
+   Cap 32 new-tile builds and 16 drape re-renders per frame, a middle ground that keeps a
+   near-instant initial view while smoothing the worst interaction stalls.
+   */
+  MLNTerrainLoadModeBalanced,
+  /**
+   Cap 8 new-tile builds and 4 drape re-renders per frame, smoothest interaction on weak
+   GPUs, with the most visible progressive fill-in.
+   */
+  MLNTerrainLoadModePerformance,
+};
+
+/**
+ Controls the vertical skirts extruded from every 3D-terrain tile edge, set via
+ ``MLNMapView/terrainSkirtLength``.
+
+ Skirts hide the hairline gaps (stitches) between neighbouring tiles at different zoom
+ levels, but show as vertical artifacts where the map has a transparent background, so
+ which one you want is a per-map tradeoff. The ordinals must stay in sync with the native
+ `mln::TerrainSkirtLength`.
+ */
+typedef NS_ENUM(NSUInteger, MLNTerrainSkirtLength) {
+  /**
+   Skirt every tile edge by ~1/5 of the tile's width at the current zoom. Default.
+   */
+  MLNTerrainSkirtLengthAuto,
+  /**
+   Build no skirts at all: no vertical artifacts over a transparent background, at the
+   cost of visible stitches between tiles at different zoom levels.
+   */
+  MLNTerrainSkirtLengthNone,
+};
+
 NS_ASSUME_NONNULL_END
