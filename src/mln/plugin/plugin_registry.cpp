@@ -216,9 +216,9 @@ bool appendShaders(const std::string& pluginID,
         for (size_t attrIndex = 0; attrIndex < input.attribute_count; ++attrIndex) {
             const auto& attr = input.attributes[attrIndex];
             if (attr.struct_size < sizeof(mln_plugin_shader_attribute_v1) || !validString(attr.name) ||
-                attr.attribute_id >= shaders::maxAttributeCountPerShader || attr.location >= 16 ||
-                !validVertexType(attr.type) || !attributeIDs.emplace(attr.attribute_id).second ||
-                !locations.emplace(attr.location).second) {
+                attr.attribute_id >= MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES ||
+                attr.location >= MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES || !validVertexType(attr.type) ||
+                !attributeIDs.emplace(attr.attribute_id).second || !locations.emplace(attr.location).second) {
                 error = "plugin shader attribute is malformed or duplicated";
                 return false;
             }

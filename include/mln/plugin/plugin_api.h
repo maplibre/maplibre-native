@@ -16,6 +16,12 @@ extern "C" {
 
 #define MLN_PLUGIN_ABI_VERSION_1 1u
 
+/* Maximum vertex attributes per plugin shader. Attribute IDs and locations
+ * must be below this limit, matching the portable OpenGL/Vulkan minimum. */
+enum {
+    MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES = 16
+};
+
 /*
  * Ownership and call contract
  * ---------------------------

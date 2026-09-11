@@ -75,11 +75,16 @@ LayerFactory* LayerManager::findFactory(const std::string& type) noexcept {
 
 LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexcept {
     if (!info || !info->type) return nullptr;
-    // Factory-owned type identity prevents an unrelated C++ layer from being
-    // dispatched merely by using the same name. Resolve by name first: some
-    // platform implementations assert when their built-in-only pointer lookup
-    // encounters a runtime type.
-    auto* factory = findFactory(info->type);
+    // Preserve platform lookup semantics for built-in and legacy C++ plugin
+    // layers, which can carry separate but equivalent LayerTypeInfo instances.
+    // Check the name first because some platform pointer lookups assert when
+    // they encounter a runtime type.
+    if (getFactory(info->type)) return getFactory(info);
+
+    // Runtime factories require factory-owned type identity, not just a name.
+    std::lock_guard lock(impl->runtimeMutex);
+    const auto found = impl->runtimeFactories.find(info->type);
+    auto* factory = found == impl->runtimeFactories.end() ? nullptr : found->second.get();
     return factory && factory->getTypeInfo() == info ? factory : nullptr;
 }
 
@@ -135,10 +140,10 @@ std::unique_ptr<Layout> LayerManager::createLayout(const LayoutParameters& param
     return factory->createLayout(parameters, std::move(tileLayer), layers);
 }
 
-std::unique_ptr<RenderLayer> LayerManager::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
-    LayerFactory* factory = findFactory(impl->getTypeInfo());
+std::unique_ptr<RenderLayer> LayerManager::createRenderLayer(Immutable<style::Layer::Impl> layerImpl) noexcept {
+    LayerFactory* factory = findFactory(layerImpl->getTypeInfo());
     assert(factory);
-    return factory->createRenderLayer(std::move(impl));
+    return factory->createRenderLayer(std::move(layerImpl));
 }
 
 } // namespace mln

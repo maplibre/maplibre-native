@@ -176,6 +176,18 @@ TEST(PluginApi, RejectsMissingArraysAndStringData) {
     input.expectRejected();
 }
 
+TEST(PluginApi, ValidatesVertexAttributeLimits) {
+    Descriptor input("test.attribute-limits");
+    auto& position = input.attributes.front();
+    position.attribute_id = MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES;
+    input.expectRejected();
+    position.attribute_id = MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES - 1;
+    position.location = MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES;
+    input.expectRejected();
+    position.location = 0;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
 TEST(PluginApi, RejectsShortPropertyBindingWithoutDereferencingItsName) {
     Descriptor input("test.short-binding");
     input.binding.struct_size = sizeof(uint32_t);
