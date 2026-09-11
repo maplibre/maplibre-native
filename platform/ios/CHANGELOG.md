@@ -2,6 +2,20 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
+## 6.30.0
+
+- Update expected-lite to restore C++23 consumer compatibility for `database_file_source.hpp` ([#4474](https://github.com/maplibre/maplibre-native/pull/4474)).
+- Reduce symbol buffers memory by using instancing (Core optimization) ([#4383](https://github.com/maplibre/maplibre-native/pull/4383)).
+- Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/pull/4508)).
+- core: refactor renderable size ownership ([#4512](https://github.com/maplibre/maplibre-native/pull/4512)).
+- fix(core): Fix missing symbols/glyphs ([#4554](https://github.com/maplibre/maplibre-native/pull/4554)).
+- fix(core): break a label before a left parenthesis, not after it ([#4553](https://github.com/maplibre/maplibre-native/pull/4553)).
+- fix(ios): use window scene interface orientation for heading compensation ([#4548](https://github.com/maplibre/maplibre-native/pull/4548)).
+- Rename OpenGL event to GraphicsBackend ([#4515](https://github.com/maplibre/maplibre-native/pull/4515)).
+- keep digits and short codes upright in CJK line labels ([#4566](https://github.com/maplibre/maplibre-native/pull/4566)).
+- fix(core): keep the padding-dependent pitch limit at or above the minimum pitch ([#4576](https://github.com/maplibre/maplibre-native/pull/4576)).
+- feat(ios): add feature state api ([#4420](https://github.com/maplibre/maplibre-native/pull/4420)).
+
 ## 6.29.0
 
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).
@@ -16,7 +30,6 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - core: rename `mbgl` directories to `mln` ([#4511]((https://github.com/maplibre/maplibre-native/pull/4511))).
 - Fix surface transform ([#4495](https://github.com/maplibre/maplibre-native/pull/4495)).
 - fix(core): Fix nullptr access during custom layer pre-render ([#4496](https://github.com/maplibre/maplibre-native/pull/4496)).
-- fix(ios): use the window scene's interface orientation for heading compensation, replacing the deprecated `-[UIApplication statusBarOrientation]`.
 
 ## 6.28.0
 
