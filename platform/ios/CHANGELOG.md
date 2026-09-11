@@ -2,7 +2,7 @@
 
 MapLibre welcomes participation and contributions from everyone. Please read [`MapLibre iOS Developer Guide`](https://maplibre.org/maplibre-native/docs/book/ios/index.html) to get started.
 
-## 7.0.0
+## 6.31.0
 
 - Remove CustomDrawableLayer API ([#4611](https://github.com/maplibre/maplibre-native/pull/4611)).
 - Add semiliteral expression to core and mobile SDKs ([#4604](https://github.com/maplibre/maplibre-native/pull/4604)).
