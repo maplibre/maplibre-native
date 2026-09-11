@@ -76,14 +76,6 @@ http_archive(
     urls = ["https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"],
 )
 
-new_git_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
-
-new_git_repository(
-    name = "tinyobjloader",
-    commit = "3bb554cf74428d7db13418b4aca1b9752a1d2be8",
-    remote = "https://github.com/tinyobjloader/tinyobjloader.git",
-)
-
 swift_deps = use_extension("@rules_swift_package_manager//:extensions.bzl", "swift_deps")
 swift_deps.from_package(
     resolved = "platform/ios/app-swift/Package.resolved",

@@ -2039,3 +2039,76 @@ TEST(Map, SetFrustumOffset) {
 
     test::checkImage("test/fixtures/map/setFrustumOffset/after", test.frontend.render(test.map).image, 0.0006, 0.1);
 }
+
+// End-to-end: a feature-state change must alter the *rendered* output, not just
+// the value read back through the API. A fill covering the viewport is colored
+// by a data-driven expression on feature-state "active" (blue by default, red
+// when set), and we sample the centre pixel of the rendered frame after each
+// change. This exercises the full path: setFeatureState -> coalesce during
+// prepare -> data-driven paint re-evaluation -> pixels.
+TEST(Map, FeatureStateChangesRenderedStyle) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "fs": {
+          "type": "geojson",
+          "data": {
+            "type": "Feature",
+            "id": 1,
+            "properties": {},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]]]
+            }
+          }
+        }
+      },
+      "layers": [{
+        "id": "fill",
+        "type": "fill",
+        "source": "fs",
+        "paint": {
+          "fill-color": ["case", ["boolean", ["feature-state", "active"], false], "#ff0000", "#0000ff"]
+        }
+      }]
+    })STYLE");
+
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(0.0));
+
+    auto* renderer = test.frontend.getRenderer();
+
+    // Reads one channel (0=R, 1=G, 2=B) of the centre pixel
+    const auto centerChannel = [](const PremultipliedImage& image, size_t channel) -> int {
+        const size_t x = image.size.width / 2;
+        const size_t y = image.size.height / 2;
+        return image.data.get()[y * image.stride() + x * image.channels + channel];
+    };
+
+    // Default state: the fill renders blue
+    {
+        const auto result = test.frontend.render(test.map);
+        EXPECT_LT(centerChannel(result.image, 0), 40) << "red channel (default)";
+        EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (default)";
+    }
+
+    // Setting feature-state "active" flips the rendered fill to red on the next
+    // frame, with no style edit
+    FeatureState active;
+    active["active"] = true;
+    renderer->setFeatureState("fs", {}, "1", active);
+    {
+        const auto result = test.frontend.render(test.map);
+        EXPECT_GT(centerChannel(result.image, 0), 200) << "red channel (active)";
+        EXPECT_LT(centerChannel(result.image, 2), 40) << "blue channel (active)";
+    }
+
+    // Removing the state reverts the rendered fill to blue.
+    renderer->removeFeatureState("fs", {}, std::optional<std::string>("1"), {});
+    {
+        const auto result = test.frontend.render(test.map);
+        EXPECT_LT(centerChannel(result.image, 0), 40) << "red channel (removed)";
+        EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (removed)";
+    }
+}
