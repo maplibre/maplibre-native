@@ -532,6 +532,47 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) double tileLodZoomShift;
 
+// MARK: Terrain
+
+/**
+ Enables or disables 3D terrain on the style, draping the map over the elevation data
+ of a raster-dem source.
+
+ This is a convenience method that sets ``MLNStyle/terrain`` on ``style``. If the style
+ has not yet finished loading, this method does nothing and logs a warning; wait for
+ ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` first.
+
+ @param sourceIdentifier The identifier of a raster-dem source that exists in the style.
+    Pass `nil` to remove terrain from the style.
+ @param exaggeration The vertical exaggeration multiplier to apply to the elevation
+    data. A value of `1.0` renders true-scale elevation.
+ */
+- (void)setTerrainWithSourceIdentifier:(nullable NSString *)sourceIdentifier
+                           exaggeration:(CGFloat)exaggeration
+    NS_SWIFT_NAME(setTerrain(sourceIdentifier:exaggeration:));
+
+/**
+ Selects the 3D-terrain progressive-loading budget.
+
+ This is a rendering/performance option, not a style property, so it does not affect
+ the final rendered image, only how the loading work of draped tiles and drape
+ re-renders is spread across frames. It trades initial-load sharpness for smoother
+ interaction on weaker GPUs. The default is ``MLNTerrainLoadModeQuality``. Has no effect
+ when terrain is not enabled.
+ */
+@property (nonatomic, assign) MLNTerrainLoadMode terrainLoadMode;
+
+/**
+ Selects whether 3D-terrain tiles are skirted.
+
+ Skirts hide the hairline gaps (stitches) between neighbouring terrain tiles at
+ different zoom levels. ``MLNTerrainSkirtLengthNone`` suits a map drawn over a
+ transparent background, where the skirts would otherwise show as vertical artifacts.
+ The default is ``MLNTerrainSkirtLengthAuto``. Changing this property rebuilds the
+ terrain mesh and every tile drawable. Has no effect when terrain is not enabled.
+ */
+@property (nonatomic, assign) MLNTerrainSkirtLength terrainSkirtLength;
+
 /**
  Frustum offset used to disable rendering of elements at the edge of the screen
 

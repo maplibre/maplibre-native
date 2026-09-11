@@ -11,6 +11,7 @@
 
 @class MLNSource;
 @class MLNLight;
+@class MLNTerrain;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -282,6 +283,25 @@ MLN_EXPORT
  Provides global light source for the style.
  */
 @property (nonatomic, strong) MLNLight *light;
+
+// MARK: Managing the Style's Terrain
+
+/**
+ The style's 3D terrain configuration, or `nil` if the style does not have terrain
+ enabled.
+
+ Setting this property to an ``MLNTerrain`` object drapes the map over the elevation
+ data of the raster-dem source named by ``MLNTerrain/sourceIdentifier``. Setting it to
+ `nil` removes terrain from the style.
+
+ > Note: Wait until the style has finished loading before setting this property. The
+    named source must be a raster-dem source that exists in the style; see
+    ``MLNRasterDEMSource``. You can use the
+    ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
+    ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` methods as indicators that it's
+    safe to modify the map's style.
+ */
+@property (nonatomic, nullable, strong) MLNTerrain *terrain;
 
 // MARK: Localizing Map Content
 

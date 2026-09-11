@@ -5,6 +5,7 @@
 #import "MLNRendererConfiguration.h"
 #import "MLNRendererFrontend.h"
 #import "MLNStyle.h"
+#import "MLNTerrain.h"
 
 #import "MLNAnnotationImage_Private.h"
 #import "MLNAttributionInfo_Private.h"
@@ -165,6 +166,24 @@ public:
 @property (nonatomic, readwrite, getter=isDormant) BOOL dormant;
 
 @end
+
+// The ordinals of MLNTerrainLoadMode and MLNTerrainSkirtLength are pinned to their mln::
+// counterparts (see MLNTypes.h); catch drift here rather than at runtime.
+static_assert(static_cast<uint8_t>(MLNTerrainLoadModeQuality) ==
+                  static_cast<uint8_t>(mln::TerrainLoadMode::Quality),
+              "MLNTerrainLoadModeQuality must mirror mln::TerrainLoadMode::Quality");
+static_assert(static_cast<uint8_t>(MLNTerrainLoadModeBalanced) ==
+                  static_cast<uint8_t>(mln::TerrainLoadMode::Balanced),
+              "MLNTerrainLoadModeBalanced must mirror mln::TerrainLoadMode::Balanced");
+static_assert(static_cast<uint8_t>(MLNTerrainLoadModePerformance) ==
+                  static_cast<uint8_t>(mln::TerrainLoadMode::Performance),
+              "MLNTerrainLoadModePerformance must mirror mln::TerrainLoadMode::Performance");
+static_assert(static_cast<uint8_t>(MLNTerrainSkirtLengthAuto) ==
+                  static_cast<uint8_t>(mln::TerrainSkirtLength::Auto),
+              "MLNTerrainSkirtLengthAuto must mirror mln::TerrainSkirtLength::Auto");
+static_assert(static_cast<uint8_t>(MLNTerrainSkirtLengthNone) ==
+                  static_cast<uint8_t>(mln::TerrainSkirtLength::None),
+              "MLNTerrainSkirtLengthNone must mirror mln::TerrainSkirtLength::None");
 
 @implementation MLNMapView {
   /// Cross-platform map view controller.
@@ -783,6 +802,40 @@ public:
 
 - (double)tileLodZoomShift {
   return _mbglMap->getTileLodZoomShift();
+}
+
+// MARK: Terrain
+
+- (void)setTerrainWithSourceIdentifier:(nullable NSString *)sourceIdentifier
+                           exaggeration:(CGFloat)exaggeration {
+  if (!self.style) {
+    MLNLogWarning(@"Ignoring attempt to set terrain before the style has finished loading.");
+    return;
+  }
+
+  if (!sourceIdentifier) {
+    self.style.terrain = nil;
+    return;
+  }
+
+  self.style.terrain = [[MLNTerrain alloc] initWithSourceIdentifier:sourceIdentifier
+                                                         exaggeration:exaggeration];
+}
+
+- (void)setTerrainLoadMode:(MLNTerrainLoadMode)terrainLoadMode {
+  _mbglMap->setTerrainLoadMode(static_cast<mln::TerrainLoadMode>(terrainLoadMode));
+}
+
+- (MLNTerrainLoadMode)terrainLoadMode {
+  return static_cast<MLNTerrainLoadMode>(_mbglMap->getTerrainLoadMode());
+}
+
+- (void)setTerrainSkirtLength:(MLNTerrainSkirtLength)terrainSkirtLength {
+  _mbglMap->setTerrainSkirtLength(static_cast<mln::TerrainSkirtLength>(terrainSkirtLength));
+}
+
+- (MLNTerrainSkirtLength)terrainSkirtLength {
+  return static_cast<MLNTerrainSkirtLength>(_mbglMap->getTerrainSkirtLength());
 }
 
 - (mln::Renderer *)renderer {
