@@ -41,4 +41,4 @@ For files on device storage, use `file://` with an absolute path. The example be
 --8<-- "MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/sources/PMTilesActivity.kt:loadFromFile"
 ```
 
-> Note: `pmtiles://asset://` (files in `src/main/assets/`) is not currently supported. `AssetManagerFileSource` does not implement byte-range reads, which PMTiles requires to read its header and metadata. Use `file://` from device storage instead. See the [open issue](https://github.com/maplibre/maplibre-native/issues/4360) for status.
+Files in `src/main/assets/` load the same way with `pmtiles://asset://<name>.pmtiles`.
