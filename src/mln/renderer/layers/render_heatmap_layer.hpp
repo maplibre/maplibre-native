@@ -60,6 +60,7 @@ private:
     // Paint properties
     style::HeatmapPaintProperties::Unevaluated unevaluated;
     std::shared_ptr<PremultipliedImage> colorRamp;
+    // The global-state snapshot used to generate the cached color ramp and detect when it needs to be rebuilt.
     std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
     std::unique_ptr<gfx::OffscreenTexture> renderTexture;
     SegmentVector segments;

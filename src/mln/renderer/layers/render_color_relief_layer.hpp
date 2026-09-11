@@ -52,6 +52,7 @@ private:
     // Color ramp data
     uint32_t colorRampSize = 256;
     bool colorRampChanged = true;
+    // The global-state snapshot used to generate the cached color ramp and detect when it needs to be rebuilt.
     std::shared_ptr<const GlobalStateMap> colorRampGlobalState;
 
     // FIX 1: Changed type and name to correctly hold float elevation data
