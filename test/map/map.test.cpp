@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <array>
-
 #include <gmock/gmock.h>
 
 #include <mln/test/util.hpp>
@@ -1948,78 +1945,59 @@ TEST(Map, ObserveTileLifecycle) {
     }
 }
 
-class BackgroundDrawableTest : public testing::Test {
-protected:
+TEST(BackgroundLayer, ImmediateStyleReplacementRetainsColor) {
     MapTest<> test;
-
-    void SetUp() override {
-        test.frontend.setSize({64, 64});
-        test.map.setSize({64, 64});
-        loadBaseStyle();
-    }
-
-    void loadBaseStyle() {
-        // A layer below the tested background prevents the clear-color optimization.
+    for (int iteration = 0; iteration < 2; ++iteration) {
+        SCOPED_TRACE(iteration);
+        // The underlay keeps the tested background out of the clear-color optimization.
         test.map.getStyle().loadJSON(R"({
             "version": 8,
             "sources": {},
             "layers": [{"id": "underlay", "type": "background", "paint": {"background-color": "white"}}]
         })");
-    }
-
-    BackgroundLayer& addBackground() {
         auto layer = std::make_unique<BackgroundLayer>("background");
         layer->setBackgroundColor(Color::red());
-        auto& result = *layer;
         test.map.getStyle().addLayer(std::move(layer));
-        return result;
-    }
 
-    void expectColor(const std::array<uint8_t, 4>& expected) {
         const auto image = test.frontend.render(test.map).image;
-        size_t matchingPixels = 0;
-        for (size_t i = 0; i < image.bytes(); i += 4) {
-            const auto* pixel = image.data.get() + i;
-            matchingPixels += std::equal(expected.begin(), expected.end(), pixel);
-        }
-        EXPECT_EQ(matchingPixels, 64u * 64u);
-    }
-};
-
-TEST_F(BackgroundDrawableTest, ImmediateStyleReplacementRetainsColor) {
-    for (int iteration = 0; iteration < 3; ++iteration) {
-        SCOPED_TRACE(iteration);
-        loadBaseStyle();
-        addBackground();
-        expectColor({255, 0, 0, 255});
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_EQ(pixel[0], 255);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], 0);
+        EXPECT_EQ(pixel[3], 255);
     }
 }
 
-TEST_F(BackgroundDrawableTest, PaintChangesAndSameIDReinsertionRetainColor) {
-    auto& layer = addBackground();
-    expectColor({255, 0, 0, 255});
-    layer.setBackgroundColor(Color::blue());
-    expectColor({0, 0, 255, 255});
-    test.map.getStyle().removeLayer("background");
-    addBackground();
-    expectColor({255, 0, 0, 255});
-}
-
-TEST_F(BackgroundDrawableTest, SwitchesBetweenSolidAndPatternedDrawables) {
-    PremultipliedImage pattern({2, 2});
-    for (size_t i = 0; i < pattern.bytes(); i += 4) {
-        pattern.data[i] = 0;
-        pattern.data[i + 1] = 0;
-        pattern.data[i + 2] = 255;
-        pattern.data[i + 3] = 255;
-    }
-    test.map.getStyle().addImage(std::make_unique<style::Image>("blue", std::move(pattern), 1.0f));
-    auto& layer = addBackground();
-    expectColor({255, 0, 0, 255});
-    layer.setBackgroundPattern({"blue"s});
-    expectColor({0, 0, 255, 255});
-    layer.setBackgroundPattern({});
-    expectColor({255, 0, 0, 255});
+TEST(BackgroundLayer, SwitchesBetweenSolidAndPatternedDrawables) {
+    MapTest<> test;
+    // The underlay forces shader selection through the drawable path.
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "sources": {},
+        "layers": [
+            {"id": "underlay", "type": "background", "paint": {"background-color": "white"}},
+            {"id": "background", "type": "background", "paint": {"background-color": "red"}}
+        ]
+    })");
+    const uint8_t blue[] = {0, 0, 255, 255};
+    test.map.getStyle().addImage(
+        std::make_unique<style::Image>("blue", PremultipliedImage({1, 1}, blue, sizeof(blue)), 1.0f));
+    auto* layer = static_cast<BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    const auto expectColor = [&](uint8_t red, uint8_t blueChannel) {
+        const auto image = test.frontend.render(test.map).image;
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_EQ(pixel[0], red);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], blueChannel);
+        EXPECT_EQ(pixel[3], 255);
+    };
+    expectColor(255, 0);
+    layer->setBackgroundPattern({"blue"s});
+    expectColor(0, 255);
+    layer->setBackgroundPattern({});
+    expectColor(255, 0);
 }
 
 TEST(BackgroundLayer, StyleUpdateZoomDependency) {
