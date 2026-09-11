@@ -6,7 +6,12 @@
 #include <mln/gl/context.hpp>
 #include <mln/style/layers/custom_layer.hpp>
 #include <mln/gl/defines.hpp>
+#include <mln/gl/headless_backend.hpp>
 #include <mln/gl/renderable_resource.hpp>
+#include <mln/gl/uniform_buffer_gl.hpp>
+#include <mln/gfx/types.hpp>
+#include <mln/gfx/upload_pass.hpp>
+#include <mln/gl/upload_pass.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/platform/gl_functions.hpp>
@@ -18,6 +23,10 @@
 #include <mln/util/io.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/run_loop.hpp>
+
+#include <array>
+#include <cstring>
+#include <vector>
 
 using namespace mln;
 using namespace mln::style;
@@ -122,6 +131,58 @@ TEST(GLContextMode, Shared) {
     }
 
     test::checkImage("test/fixtures/shared_context", frontend.render(map).image, 0.5, 0.1);
+}
+
+TEST(GLContext, BufferAllocationIgnoresEarlierErrors) {
+    gl::HeadlessBackend backend{{32, 32}};
+    gfx::BackendScope scope{backend};
+
+    gl::Context context{backend};
+    auto commandEncoder = context.createCommandEncoder();
+    auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
+    auto& glUploadPass = static_cast<gl::UploadPass&>(*uploadPass);
+
+    const std::array<float, 6> vertices = {{0.0f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f}};
+    const std::array<uint16_t, 3> indices = {{0, 1, 2}};
+
+    glBindBuffer(0, 0);
+    EXPECT_NO_THROW(glUploadPass.createVertexBufferResource(
+        vertices.data(), vertices.size() * sizeof(float), gfx::BufferUsageType::StaticDraw, false));
+    EXPECT_EQ(glGetError(), GL_NO_ERROR);
+
+    glBindBuffer(0, 0);
+    EXPECT_NO_THROW(glUploadPass.createIndexBufferResource(
+        indices.data(), indices.size() * sizeof(uint16_t), gfx::BufferUsageType::StaticDraw, false));
+    EXPECT_EQ(glGetError(), GL_NO_ERROR);
+}
+
+TEST(GLContext, UniformBufferCloneCopiesLargeBuffer) {
+    gl::HeadlessBackend backend{{32, 32}};
+    gfx::BackendScope scope{backend};
+
+    gl::Context context{backend};
+
+    constexpr std::size_t size = 16384;
+    std::vector<uint8_t> data(size);
+    for (std::size_t i = 0; i < size; ++i) {
+        data[i] = static_cast<uint8_t>(i % 251);
+    }
+
+    auto buffer = context.createUniformBuffer(data.data(), size, /*persistent=*/false, /*ssbo=*/false);
+    ASSERT_TRUE(buffer);
+    auto& glBuffer = static_cast<gl::UniformBufferGL&>(*buffer);
+    ASSERT_EQ(glGetError(), GL_NO_ERROR);
+
+    auto clone = glBuffer.clone();
+    EXPECT_EQ(glGetError(), GL_NO_ERROR);
+
+    MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_READ_BUFFER, clone.getID()));
+    const auto* contents = static_cast<const uint8_t*>(
+        MBGL_CHECK_ERROR(glMapBufferRange(GL_COPY_READ_BUFFER, 0, size, GL_MAP_READ_BIT)));
+    ASSERT_NE(contents, nullptr);
+    EXPECT_EQ(0, std::memcmp(contents, data.data(), size));
+    MBGL_CHECK_ERROR(glUnmapBuffer(GL_COPY_READ_BUFFER));
+    MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_READ_BUFFER, 0));
 }
 
 #endif
