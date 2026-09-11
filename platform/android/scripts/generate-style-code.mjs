@@ -127,8 +127,6 @@ global.propertyType = function propertyType(property) {
         return 'Float[]';
       case 'variableAnchorOffsetCollection':
         return 'Object[]';
-      case 'verticalGradient':
-        return 'Object[]';
       case 'array':
         return `${propertyType({type:property.value, name: property.name})}[]`;
       default:
@@ -155,8 +153,6 @@ global.propertyJavaType = function propertyType(property) {
          return 'float[]';
        case 'colorArray':
          return 'String[]';
-       case 'verticalGradient':
-         return 'Object[]';
        case 'array':
          return `${propertyJavaType({type:property.value})}[]`;
        default:
@@ -221,8 +217,6 @@ global.propertyNativeType = function (property) {
     return 'Padding';
   case 'variableAnchorOffsetCollection':
     return 'VariableAnchorOffsetCollection';
-  case 'verticalGradient':
-    return 'VerticalGradient';
   case 'array':
     if (property.length) {
       return `std::array<${propertyType({type: property.value})}, ${property.length}>`;
@@ -305,8 +299,6 @@ global.defaultValueJava = function(property) {
         return '{2.0f, 2.0f, 2.0f, 2.0f}';
       case 'variableAnchorOffsetCollection':
         return 'new Object[] {"top", new Float[]{1f, 2f}}';
-      case 'verticalGradient':
-        return 'new Object[] {0.5f, 0f}';
       case 'array':
              switch (property.value) {
               case 'string':
@@ -445,8 +437,6 @@ global.evaluatedType = function (property) {
     return 'std::vector<float>';
   case 'colorArray':
     return 'std::vector<Color>';
-  case 'verticalGradient':
-    return 'VerticalGradient';
   case 'array':
     if (property.length) {
       return `std::array<${evaluatedType({type: property.value})}, ${property.length}>`;

@@ -65,8 +65,8 @@ struct FillExtrusionTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
 };
 
-struct FillExtrusionVerticalGradient : PaintProperty<VerticalGradient> {
-    static VerticalGradient defaultValue() { return {}; }
+struct FillExtrusionVerticalGradient : PaintProperty<bool> {
+    static bool defaultValue() { return true; }
 };
 
 class FillExtrusionLayoutProperties : public Properties<

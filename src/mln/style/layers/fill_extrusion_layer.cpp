@@ -379,15 +379,15 @@ TransitionOptions FillExtrusionLayer::getFillExtrusionTranslateAnchorTransition(
     return impl().paint.template get<FillExtrusionTranslateAnchor>().options;
 }
 
-PropertyValue<VerticalGradient> FillExtrusionLayer::getDefaultFillExtrusionVerticalGradient() {
-    return {{}};
+PropertyValue<bool> FillExtrusionLayer::getDefaultFillExtrusionVerticalGradient() {
+    return {true};
 }
 
-const PropertyValue<VerticalGradient>& FillExtrusionLayer::getFillExtrusionVerticalGradient() const {
+const PropertyValue<bool>& FillExtrusionLayer::getFillExtrusionVerticalGradient() const {
     return impl().paint.template get<FillExtrusionVerticalGradient>().value;
 }
 
-void FillExtrusionLayer::setFillExtrusionVerticalGradient(const PropertyValue<VerticalGradient>& value) {
+void FillExtrusionLayer::setFillExtrusionVerticalGradient(const PropertyValue<bool>& value) {
     if (value == getFillExtrusionVerticalGradient())
         return;
     auto impl_ = mutableImpl();
@@ -658,7 +658,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
     }
     if (property == Property::FillExtrusionVerticalGradient) {
         Error error;
-        const auto& typedValue = convert<PropertyValue<VerticalGradient>>(value, error, false, false);
+        const auto& typedValue = convert<PropertyValue<bool>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }

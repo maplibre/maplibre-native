@@ -321,11 +321,6 @@ struct ValueFactory<Padding> {
 };
 
 template <>
-struct ValueFactory<VerticalGradient> {
-    static Value make(const VerticalGradient& gradient) { return gradient.serialize(); }
-};
-
-template <>
 struct ValueFactory<VariableAnchorOffsetCollection> {
     static Value make(const VariableAnchorOffsetCollection& variableAnchorOffset) {
         return variableAnchorOffset.serialize();
@@ -382,7 +377,6 @@ StyleProperty makeStyleProperty(const PropertyValue<T>& value) {
         [](const Undefined&) -> StyleProperty { return {}; },
         [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
         [](const Padding& p) -> StyleProperty { return {makeValue(p), StyleProperty::Kind::Expression}; },
-        [](const VerticalGradient& g) -> StyleProperty { return {makeValue(g), StyleProperty::Kind::Expression}; },
         [](const VariableAnchorOffsetCollection& v) -> StyleProperty {
             return {makeValue(v), StyleProperty::Kind::Expression};
         },

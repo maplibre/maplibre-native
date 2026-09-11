@@ -107,11 +107,6 @@ void stringify(Writer& writer, const Padding& v) {
 }
 
 template <class Writer>
-void stringify(Writer& writer, const VerticalGradient& v) {
-    stringify(writer, v.toArray());
-}
-
-template <class Writer>
 void stringify(Writer&, const Value&);
 
 template <class Writer, class T>

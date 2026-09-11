@@ -27,15 +27,14 @@ generator imports instead of the raw JSON:
 
 ## Known existing violations
 
-Two fork-local changes predate this note and still live in `v8.json`. Both would be destroyed by
+One fork-local change predates this note and still lives in `v8.json`. It would be destroyed by
 `copy-style-spec`:
 
 | Location in `v8.json` | Divergence from npm |
 | --- | --- |
 | `layout_fill-extrusion` → `fill-extrusion-rounded-corner-distance` | Only exists here; absent from the npm package. |
-| `paint_fill-extrusion` → `fill-extrusion-vertical-gradient` | `"type"` is `"verticalGradient"` here, `"boolean"` upstream. |
 
-Migrating these into `style-spec.mjs` would let us add a CI check asserting `v8.json` matches the
+Migrating this into `style-spec.mjs` would let us add a CI check asserting `v8.json` matches the
 npm package exactly, which would close this hole for good. Until then, treat `copy-style-spec` as a
 command that needs a careful `git diff` afterwards.
 
