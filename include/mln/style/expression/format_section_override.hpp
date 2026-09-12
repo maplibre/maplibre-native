@@ -28,8 +28,8 @@ public:
 
         return defaultValue.match(
             [&context](const style::PropertyExpression<T>& e) {
-                // Evaluating the raw inner expression would bypass the
-                // captured-global-state fallback of the property expression.
+                // Binder contexts do not carry global state, so the captured state is used as a
+                // fallback. If the caller explicitly provides context state, it takes precedence.
                 if (context.globalState == nullptr && e.getCapturedGlobalState() != nullptr) {
                     EvaluationContext contextWithState = context;
                     contextWithState.globalState = e.getCapturedGlobalState().get();
