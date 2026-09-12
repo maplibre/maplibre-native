@@ -148,6 +148,7 @@ const std::vector<UniformBlockInfo> FillPatternShaderInfo::uniformBlocks = {
 };
 const std::vector<AttributeInfo> FillPatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
@@ -167,6 +168,7 @@ const std::vector<UniformBlockInfo> FillOutlinePatternShaderInfo::uniformBlocks 
 };
 const std::vector<AttributeInfo> FillOutlinePatternShaderInfo::attributes = {
     AttributeInfo{"a_pos", idFillPosVertexAttribute},
+    AttributeInfo{"a_color", idFillColorVertexAttribute},
     AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
     AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
     AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},

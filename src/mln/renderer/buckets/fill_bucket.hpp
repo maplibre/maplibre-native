@@ -52,6 +52,9 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
+    void recordSDFPattern(const std::string&, bool) override;
+    bool isSDFPattern(const std::string&) const override;
+
     static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{{p.x, p.y}}}; }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
@@ -83,6 +86,10 @@ public:
     SegmentVector triangleSegments;
 
     std::map<std::string, FillBinders> paintPropertyBinders;
+
+private:
+    mln::unordered_map<std::string, bool> sdfPatterns;
+    mln::unordered_set<std::string> mixedSDFPatternLayers;
 };
 
 } // namespace mln

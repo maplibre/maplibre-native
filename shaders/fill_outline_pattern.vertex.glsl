@@ -19,13 +19,17 @@ layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     highp float u_opacity_t;
+    highp float u_color_t;
+    lowp float drawable_pad1;
+    lowp float drawable_pad2;
+    lowp float drawable_pad3;
 };
 
 layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
     highp vec2 u_texsize;
-    lowp float tileprops_pad1;
+    lowp float u_sdf;
     lowp float tileprops_pad2;
 };
 
@@ -44,11 +48,13 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec2 v_pos;
 
+#pragma mapbox: define highp vec4 color
 #pragma mapbox: define lowp float opacity
 #pragma mapbox: define lowp vec4 pattern_from
 #pragma mapbox: define lowp vec4 pattern_to
 
 void main() {
+    #pragma mapbox: initialize highp vec4 color
     #pragma mapbox: initialize lowp float opacity
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
