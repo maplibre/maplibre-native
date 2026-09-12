@@ -212,6 +212,15 @@ target_include_directories(
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
 
+if(MLN_WITH_PLUGINS)
+    target_sources(mbgl-test PRIVATE
+        plugin/api.test.cpp
+        plugin/layout.test.cpp
+        plugin/property_binding.test.cpp
+        plugin/registry.test.cpp
+    )
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
     set_target_properties(mbgl-test mbgl-vendor-googletest

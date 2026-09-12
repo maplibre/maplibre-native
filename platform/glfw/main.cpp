@@ -15,6 +15,10 @@
 
 #include <args.hxx>
 
+#if MLN_GLFW_PLUGINS
+#include <ngon_layer.hpp>
+#endif
+
 #include <csignal>
 #include <fstream>
 #include <iostream>
@@ -77,6 +81,15 @@ int main(int argc, char* argv[]) {
         std::cerr << argumentParser;
         exit(2);
     }
+
+#if MLN_GLFW_PLUGINS
+    char pluginError[512]{};
+    const auto pluginStatus = mln_ngon_layer_register(mln_plugin_register_v1, pluginError, sizeof(pluginError));
+    if (pluginStatus != MLN_PLUGIN_STATUS_OK && pluginStatus != MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
+        std::cerr << "Unable to register n-gon layer: " << pluginError << '\n';
+        return 1;
+    }
+#endif
 
     // Load settings
     mln::Settings_JSON settings;

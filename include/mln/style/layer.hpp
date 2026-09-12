@@ -140,6 +140,15 @@ public:
     void setMaxZoom(float);
 
     // Dynamic properties
+#if MLN_WITH_PLUGINS
+    enum class PropertyScope {
+        Paint,
+        Layout
+    };
+    virtual std::optional<conversion::Error> setProperty(const std::string& name,
+                                                         const conversion::Convertible& value,
+                                                         PropertyScope scope);
+#endif
     std::optional<conversion::Error> setProperty(const std::string& name, const conversion::Convertible& value);
 
     virtual StyleProperty getProperty(const std::string&) const = 0;

@@ -27,6 +27,27 @@ load(
     "MLN_SHAPING_HARFBUZZ_SRCS",
 )
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("//bazel:plugins.bzl", "MLN_PLUGIN_HEADERS", "MLN_PLUGIN_SOURCE")
+
+bool_flag(
+    name = "plugins",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "plugins_enabled",
+    flag_values = {":plugins": "true"},
+    visibility = ["//visibility:public"],
+)
+
+# Plugins use the C ABI through callbacks and do not link the renderer.
+cc_library(
+    name = "mln-plugin-api",
+    hdrs = ["include/mln/plugin/plugin_api.h"],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
 
 # Generate code required by the core
 
@@ -81,7 +102,10 @@ cc_library(
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_LAYER_PLUGIN_SOURCE +
+    srcs = select({
+               ":plugins_enabled": MLN_PLUGIN_SOURCE,
+               "//conditions:default": [],
+           }) + MLN_LAYER_PLUGIN_SOURCE +
            MLN_CORE_SOURCE +
            MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_STYLE_SOURCE + select({
@@ -93,7 +117,10 @@ cc_library(
         "//:harfbuzz_text_shaping": MLN_SHAPING_HARFBUZZ_SRCS,
         "//conditions:default": [],
     }),
-    hdrs = MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
+    hdrs = select({
+        ":plugins_enabled": MLN_PLUGIN_HEADERS,
+        "//conditions:default": [],
+    }) + MLN_LAYER_PLUGIN_HEADERS + MLN_CORE_HEADERS + select({
         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
         ":webgpu_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_WEBGPU_HEADERS,
@@ -101,6 +128,9 @@ cc_library(
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
+        ":plugins_enabled": ["MLN_WITH_PLUGINS=1"],
+        "//conditions:default": [],
+    }) + select({
         ":drawable_renderer": [
             "MLN_RENDER_BACKEND_OPENGL=1",
         ],

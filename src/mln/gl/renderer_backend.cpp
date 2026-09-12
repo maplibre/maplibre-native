@@ -1,6 +1,9 @@
 #include <mln/gl/renderer_backend.hpp>
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#if MLN_WITH_PLUGINS
+#include <mln/plugin/plugin_shader.hpp>
+#endif
 #include <mln/gl/context.hpp>
 #include <mln/gl/extension.hpp>
 #include <mln/shaders/shader_manifest.hpp>
@@ -146,6 +149,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+#if MLN_WITH_PLUGINS
+    plugin::registerPluginShaderGroups(shaders, programParameters);
+#endif
 
     // Initialize legacy shader programs
     Programs programs(programParameters);

@@ -2,6 +2,9 @@
 
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#if MLN_WITH_PLUGINS
+#include <mln/plugin/plugin_shader.hpp>
+#endif
 #include <mln/mtl/context.hpp>
 #include <mln/shaders/background_layer_ubo.hpp>
 
@@ -116,6 +119,9 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolSDFShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
                   shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
+#if MLN_WITH_PLUGINS
+    plugin::registerPluginShaderGroups(shaders, programParameters);
+#endif
 }
 
 } // namespace mtl

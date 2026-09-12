@@ -1,6 +1,13 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
+PLUGIN_API_TESTS = [
+    "plugin/api.test.cpp",
+    "plugin/layout.test.cpp",
+    "plugin/property_binding.test.cpp",
+    "plugin/registry.test.cpp",
+]
+
 cc_library(
     name = "testutils",
     hdrs = glob(["include/mln/test/*.hpp"]),
@@ -50,9 +57,12 @@ cc_library(
         [
             "**/*.test.cpp",
         ],
-        exclude = ["renderer/wgsl_preprocessor.test.cpp"],
+        exclude = ["renderer/wgsl_preprocessor.test.cpp"] + PLUGIN_API_TESTS,
     ) + select({
         "//:webgpu_renderer": ["renderer/wgsl_preprocessor.test.cpp"],
+        "//conditions:default": [],
+    }) + select({
+        "//:plugins_enabled": PLUGIN_API_TESTS,
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
