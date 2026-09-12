@@ -5,6 +5,7 @@
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/quaternion.hpp>
 
 #include <numbers>
@@ -348,6 +349,50 @@ TEST(Transform, Padding) {
     });
     ASSERT_NEAR(upperHalfCenter.latitude(), paddedScreenCenter.latitude(), 1e-10);
     ASSERT_NEAR(upperHalfCenter.longitude(), paddedScreenCenter.longitude(), 1e-10);
+}
+
+TEST(Transform, AsymmetricPaddingKeepsViewportCenterPathStraight) {
+    const ScreenCoordinate viewportCenter{500.0, 500.0};
+    const EdgeInsets padding{0.0, 0.0, 400.0, 0.0};
+    const CameraOptions target =
+        CameraOptions().withCenter(LatLng{-10.0, -80.0}).withCenterAltitude(1000.0).withZoom(12.0).withPadding(padding);
+
+    for (const bool fly : {false, true}) {
+        SCOPED_TRACE(fly ? "flyTo" : "easeTo");
+
+        Transform transform;
+        transform.resize({1000, 1000});
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10.0, -100.0}).withCenterAltitude(1000.0).withZoom(12.0));
+
+        const double scale = transform.getState().getScale();
+        const Point<double> start = Projection::project(transform.screenCoordinateToLatLng(viewportCenter), scale);
+        Transform finalTransform(transform.getState());
+        finalTransform.jumpTo(target);
+        const Point<double> end = Projection::project(finalTransform.screenCoordinateToLatLng(viewportCenter), scale);
+        const double dx = end.x - start.x;
+        const double dy = end.y - start.y;
+        const double length = std::hypot(dx, dy);
+
+        if (fly) {
+            transform.flyTo(target, AnimationOptions(Seconds(2)));
+        } else {
+            transform.easeTo(target, AnimationOptions(Seconds(2)));
+        }
+
+        for (int i = 1; i < 20; ++i) {
+            transform.updateTransitions(transform.getTransitionStart() + Milliseconds(100 * i));
+            const Point<double> point = Projection::project(transform.screenCoordinateToLatLng(viewportCenter), scale);
+            // Perpendicular distance from the start-end line.
+            EXPECT_LT(std::abs((point.x - start.x) * dy - (point.y - start.y) * dx) / length, 0.1);
+            EXPECT_NEAR(1000.0, transform.getState().getCenterAltitude(), 1e-8);
+        }
+
+        transform.updateTransitions(transform.getTransitionStart() + transform.getTransitionDuration());
+        EXPECT_NEAR(-10.0, transform.getLatLng().latitude(), 1e-10);
+        EXPECT_NEAR(-80.0, transform.getLatLng().longitude(), 1e-10);
+        EXPECT_NEAR(12.0, transform.getZoom(), 1e-6);
+        EXPECT_TRUE(transform.getState().getEdgeInsets() == padding);
+    }
 }
 
 TEST(Transform, MoveBy) {
