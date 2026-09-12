@@ -8,7 +8,8 @@
 #include <mln/style/layer_properties.hpp>
 #include <mln/util/containers.hpp>
 
-#include <list>
+#include <algorithm>
+#include <type_traits>
 
 namespace mln {
 
@@ -76,6 +77,13 @@ struct PatternFeatureInserter {
                        const PropertiesType& properties,
                        const CanonicalTileID& canonical) {
         const auto& sortKeyProperty = properties.template get<SortKeyPropertyType>();
+        if (sortKeyProperty.isConstant()) {
+            features.emplace_back(index,
+                                  std::move(feature),
+                                  std::move(patternDependencyMap),
+                                  sortKeyProperty.constantOr(SortKeyPropertyType::defaultValue()));
+            return;
+        }
         float sortKey = sortKeyProperty.evaluate(*feature, zoom, canonical, SortKeyPropertyType::defaultValue());
         PatternFeature patternFeature{index, std::move(feature), std::move(patternDependencyMap), sortKey};
         // NOLINTNEXTLINE(modernize-use-ranges) C++26
@@ -176,6 +184,13 @@ public:
                                                                 zoom,
                                                                 layout,
                                                                 parameters.tileID.canonical);
+        }
+
+        if constexpr (!std::is_void_v<SortKeyPropertyType>) {
+            if (layout.template get<SortKeyPropertyType>().isConstant()) {
+                // lower_bound insertion reverses equal keys. Preserve that order without sorting.
+                std::ranges::reverse(features);
+            }
         }
     };
 
