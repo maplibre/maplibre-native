@@ -1,5 +1,16 @@
 # Changelog MapLibre Native for Android
 
+## 13.7.0
+
+### ✨ Features and improvements
+
+- Add semiliteral expression to core and mobile SDKs ([#4604](https://github.com/maplibre/maplibre-native/pull/4604)).
+
+### 🐞 Bug fixes
+
+- Keep the padding-dependent pitch limit at or above the minimum pitch ([#4576](https://github.com/maplibre/maplibre-native/pull/4576)).
+- Enumerate OpenGL extensions with glGetStringi when available ([#4579](https://github.com/maplibre/maplibre-native/pull/4579)).
+
 ## 13.6.1
 
 ### 🐞 Bug fixes
