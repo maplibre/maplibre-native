@@ -319,6 +319,25 @@ jni::Local<jni::Object<Source>> MapSnapshotter::getSource(JNIEnv& env, const jni
     return jni::NewLocal(env, Source::peerForCoreSource(env, *coreSource));
 }
 
+jni::jboolean MapSnapshotter::isStyleLoaded(JNIEnv&) {
+    return snapshotter->getStyle().isLoaded();
+}
+
+void MapSnapshotter::setGlobalStateProperty(JNIEnv& env,
+                                            const jni::String& name,
+                                            const jni::Object<gson::JsonElement>& value) {
+    if (!name) {
+        return;
+    }
+
+    snapshotter->getStyle().setGlobalStateProperty(jni::Make<std::string>(env, name),
+                                                   value ? gson::JsonElement::convert(env, value) : mln::Value());
+}
+
+jni::Local<jni::Object<gson::JsonObject>> MapSnapshotter::getGlobalState(JNIEnv& env) {
+    return gson::JsonObject::New(env, snapshotter->getStyle().getGlobalState());
+}
+
 // Static methods //
 
 void MapSnapshotter::registerNative(jni::JNIEnv& env) {
@@ -328,43 +347,47 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
 #define METHOD(MethodPtr, name) jni::MakeNativePeerMethod<decltype(MethodPtr), (MethodPtr)>(name)
 
     // Register the peer
-    jni::RegisterNativePeer<MapSnapshotter>(env,
-                                            javaClass,
-                                            "nativePtr",
-                                            jni::MakePeer<MapSnapshotter,
-                                                          const jni::Object<MapSnapshotter>&,
-                                                          const jni::Object<FileSource>&,
-                                                          jni::jfloat,
-                                                          jni::jint,
-                                                          jni::jint,
-                                                          const jni::String&,
-                                                          const jni::String&,
-                                                          const jni::Object<LatLngBounds>&,
-                                                          const jni::Object<CameraPosition>&,
-                                                          jni::jboolean,
-                                                          jni::jboolean,
-                                                          const jni::String&,
-                                                          jni::jfloat,
-                                                          jni::jfloat,
-                                                          jni::jfloat,
-                                                          jni::jfloat>,
-                                            "nativeInitialize",
-                                            "finalize",
-                                            METHOD(&MapSnapshotter::setStyleUrl, "setStyleUrl"),
-                                            METHOD(&MapSnapshotter::addLayerAt, "nativeAddLayerAt"),
-                                            METHOD(&MapSnapshotter::addLayerBelow, "nativeAddLayerBelow"),
-                                            METHOD(&MapSnapshotter::addLayerAbove, "nativeAddLayerAbove"),
-                                            METHOD(&MapSnapshotter::addSource, "nativeAddSource"),
-                                            METHOD(&MapSnapshotter::addImages, "nativeAddImages"),
-                                            METHOD(&MapSnapshotter::getLayer, "nativeGetLayer"),
-                                            METHOD(&MapSnapshotter::getSource, "nativeGetSource"),
-                                            METHOD(&MapSnapshotter::setStyleJson, "setStyleJson"),
-                                            METHOD(&MapSnapshotter::setSize, "setSize"),
-                                            METHOD(&MapSnapshotter::setCameraPosition, "setCameraPosition"),
-                                            METHOD(&MapSnapshotter::setRegion, "setRegion"),
-                                            METHOD(&MapSnapshotter::setPadding, "setPadding"),
-                                            METHOD(&MapSnapshotter::start, "nativeStart"),
-                                            METHOD(&MapSnapshotter::cancel, "nativeCancel"));
+    jni::RegisterNativePeer<MapSnapshotter>(
+        env,
+        javaClass,
+        "nativePtr",
+        jni::MakePeer<MapSnapshotter,
+                      const jni::Object<MapSnapshotter>&,
+                      const jni::Object<FileSource>&,
+                      jni::jfloat,
+                      jni::jint,
+                      jni::jint,
+                      const jni::String&,
+                      const jni::String&,
+                      const jni::Object<LatLngBounds>&,
+                      const jni::Object<CameraPosition>&,
+                      jni::jboolean,
+                      jni::jboolean,
+                      const jni::String&,
+                      jni::jfloat,
+                      jni::jfloat,
+                      jni::jfloat,
+                      jni::jfloat>,
+        "nativeInitialize",
+        "finalize",
+        METHOD(&MapSnapshotter::setStyleUrl, "setStyleUrl"),
+        METHOD(&MapSnapshotter::addLayerAt, "nativeAddLayerAt"),
+        METHOD(&MapSnapshotter::addLayerBelow, "nativeAddLayerBelow"),
+        METHOD(&MapSnapshotter::addLayerAbove, "nativeAddLayerAbove"),
+        METHOD(&MapSnapshotter::addSource, "nativeAddSource"),
+        METHOD(&MapSnapshotter::addImages, "nativeAddImages"),
+        METHOD(&MapSnapshotter::getLayer, "nativeGetLayer"),
+        METHOD(&MapSnapshotter::getSource, "nativeGetSource"),
+        METHOD(&MapSnapshotter::isStyleLoaded, "nativeIsStyleLoaded"),
+        METHOD(&MapSnapshotter::setGlobalStateProperty, "nativeSetGlobalStateProperty"),
+        METHOD(&MapSnapshotter::getGlobalState, "nativeGetGlobalState"),
+        METHOD(&MapSnapshotter::setStyleJson, "setStyleJson"),
+        METHOD(&MapSnapshotter::setSize, "setSize"),
+        METHOD(&MapSnapshotter::setCameraPosition, "setCameraPosition"),
+        METHOD(&MapSnapshotter::setRegion, "setRegion"),
+        METHOD(&MapSnapshotter::setPadding, "setPadding"),
+        METHOD(&MapSnapshotter::start, "nativeStart"),
+        METHOD(&MapSnapshotter::cancel, "nativeCancel"));
 }
 
 } // namespace android

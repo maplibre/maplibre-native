@@ -1,6 +1,9 @@
 #pragma once
 #include <mln/style/layer_impl.hpp>
 
+#include <set>
+#include <string>
+
 namespace mln {
 
 namespace style {
@@ -22,6 +25,15 @@ public:
     uint8_t renderPasses = 0u;
 
     virtual expression::Dependency getDependencies() const noexcept = 0;
+
+    /// Returns the combined dependencies of the expressions retained in the
+    /// evaluated properties (i.e. those that still require per-feature
+    /// evaluation, such as data-driven paint properties).
+    virtual expression::Dependency getEvaluatedDependencies() const noexcept { return expression::Dependency::None; }
+
+    /// Collect the global-state properties referenced by the expressions
+    /// retained in the evaluated properties, mirroring getEvaluatedDependencies().
+    virtual void collectEvaluatedGlobalStateRefs(std::set<std::string>&) const {}
 
 protected:
     LayerProperties(Immutable<Layer::Impl> impl) noexcept

@@ -23,6 +23,8 @@
 #include <mln/util/exception.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/string.hpp>
+
+#include <algorithm>
 #include <sstream>
 
 namespace mln {
@@ -105,6 +107,9 @@ void Style::Impl::parse(const std::string& json_) {
 
     transitionOptions = parser.transition;
 
+    globalStateDefaults = parser.globalStateDefaults;
+    globalState = std::make_shared<const GlobalStateMap>(globalStateDefaults);
+
     for (auto& source : parser.sources) {
         addSource(std::move(source));
     }
@@ -156,6 +161,82 @@ std::string Style::Impl::getURL() const {
 
 void Style::Impl::setTransitionOptions(const TransitionOptions& options) {
     transitionOptions = options;
+}
+
+namespace {
+
+// Equality on state values that, unlike the exact-type variant equality,
+// treats numerically equal numbers of different arithmetic types as equal
+// (e.g. a style default parsed as an integer vs. a runtime-set double).
+bool stateValuesEqual(const Value& a, const Value& b) {
+    if (a.is<uint64_t>() || a.is<int64_t>() || a.is<double>()) {
+        if (!(b.is<uint64_t>() || b.is<int64_t>() || b.is<double>())) {
+            return false;
+        }
+        const auto toDouble = [](const Value& v) {
+            if (v.is<uint64_t>()) return static_cast<double>(v.get<uint64_t>());
+            if (v.is<int64_t>()) return static_cast<double>(v.get<int64_t>());
+            return v.get<double>();
+        };
+        return toDouble(a) == toDouble(b);
+    }
+    if (a.is<mapbox::base::ValueArray>() && b.is<mapbox::base::ValueArray>()) {
+        const auto& arrayA = a.get<mapbox::base::ValueArray>();
+        const auto& arrayB = b.get<mapbox::base::ValueArray>();
+        return std::equal(arrayA.begin(), arrayA.end(), arrayB.begin(), arrayB.end(), stateValuesEqual);
+    }
+    if (a.is<mapbox::base::ValueObject>() && b.is<mapbox::base::ValueObject>()) {
+        const auto& objectA = a.get<mapbox::base::ValueObject>();
+        const auto& objectB = b.get<mapbox::base::ValueObject>();
+        if (objectA.size() != objectB.size()) {
+            return false;
+        }
+        return std::all_of(objectA.begin(), objectA.end(), [&](const auto& entry) {
+            const auto it = objectB.find(entry.first);
+            return it != objectB.end() && stateValuesEqual(entry.second, it->second);
+        });
+    }
+    return a == b;
+}
+
+} // namespace
+
+void Style::Impl::setGlobalStateProperty(const std::string& property, const Value& value) {
+    // A null value resets the property to the default defined in the style's
+    // root "state" property, if any.
+    const Value* newValue = &value;
+    if (value.is<NullValue>()) {
+        const auto def = globalStateDefaults.find(property);
+        if (def != globalStateDefaults.end()) {
+            newValue = &def->second;
+        }
+    }
+
+    const auto current = globalState->find(property);
+    const bool unchanged = current != globalState->end() && stateValuesEqual(current->second, *newValue);
+    if (unchanged) {
+        return;
+    }
+
+    auto newState = std::make_shared<GlobalStateMap>(*globalState);
+    (*newState)[property] = *newValue;
+    globalState = std::move(newState);
+    reevaluateLayerVisibilities();
+    observer->onUpdate();
+}
+
+void Style::Impl::reevaluateLayerVisibilities() {
+    for (const auto& layer : layers) {
+        layer->reevaluateVisibility(*globalState);
+    }
+}
+
+GlobalStateMap Style::Impl::getGlobalState() const {
+    return *globalState;
+}
+
+std::shared_ptr<const GlobalStateMap> Style::Impl::getGlobalStateShared() const {
+    return globalState;
 }
 
 TransitionOptions Style::Impl::getTransitionOptions() const {
@@ -224,6 +305,8 @@ Layer* Style::Impl::addLayer(std::unique_ptr<Layer> layer, const std::optional<s
 
     layer->setObserver(this);
     Layer* result = layers.add(std::move(layer), before);
+    // The global state is not available while the layer itself is parsed.
+    result->reevaluateVisibility(*globalState);
     observer->onUpdate();
 
     return result;
@@ -415,6 +498,7 @@ void Style::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) 
 }
 
 void Style::Impl::onLayerChanged(Layer& layer) {
+    layer.reevaluateVisibility(*globalState);
     layers.update(layer);
     observer->onUpdate();
 }

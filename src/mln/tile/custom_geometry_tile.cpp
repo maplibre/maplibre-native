@@ -69,7 +69,9 @@ void CustomGeometryTile::setNecessity(TileNecessity newNecessity) {
     }
 }
 
-void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions& queryOptions) {
+void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result,
+                                             const SourceQueryOptions& queryOptions,
+                                             const GlobalStateMap* globalState) {
     // Ignore the sourceLayer, there is only one
     auto layer = getData()->getLayer({});
 
@@ -80,7 +82,8 @@ void CustomGeometryTile::querySourceFeatures(std::vector<Feature>& result, const
 
             // Apply filter, if any
             if (queryOptions.filter && !(*queryOptions.filter)(style::expression::EvaluationContext{
-                                           static_cast<float>(id.overscaledZ), feature.get()})) {
+                                           static_cast<float>(id.overscaledZ), feature.get()}
+                                                                   .withGlobalState(globalState))) {
                 continue;
             }
 

@@ -13,6 +13,7 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
@@ -1158,6 +1159,23 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setGlobalStateProperty(@NonNull String name, @Nullable JsonElement value) {
+    if (checkState("setGlobalStateProperty")) {
+      return;
+    }
+    nativeSetGlobalStateProperty(name, value);
+  }
+
+  @Override
+  @NonNull
+  public JsonObject getGlobalState() {
+    if (checkState("getGlobalState")) {
+      return new JsonObject();
+    }
+    return nativeGetGlobalState();
+  }
+
+  @Override
   public void setApiBaseUrl(String baseUrl) {
     if (checkState("setApiBaseUrl")) {
       return;
@@ -1769,6 +1787,13 @@ final class NativeMapView implements NativeMap {
                                                String sourceLayerId,
                                                String featureId,
                                                String stateKey);
+
+  @Keep
+  private native void nativeSetGlobalStateProperty(String name, JsonElement value);
+
+  @NonNull
+  @Keep
+  private native JsonObject nativeGetGlobalState();
 
   @NonNull
   @Keep

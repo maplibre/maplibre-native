@@ -1,12 +1,15 @@
 #include <mln/style/conversion/constant.hpp>
 #include <mln/style/conversion/filter.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/style/expression/parsing_context.hpp>
+#include <mln/style/expression/value.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/layer_impl.hpp>
 #include <mln/style/layer_observer.hpp>
 #include <mln/tile/tile.hpp>
 
 #include <mln/renderer/render_layer.hpp>
+#include <mln/util/enum.hpp>
 #include <mln/util/logging.hpp>
 
 namespace mln {
@@ -82,7 +85,43 @@ VisibilityType Layer::getVisibility() const {
 }
 
 void Layer::setVisibility(VisibilityType value) {
-    if (value == getVisibility()) return;
+    if (value == getVisibility() && !baseImpl->visibilityExpression) return;
+    auto impl_ = mutableBaseImpl();
+    impl_->visibility = value;
+    // Setting a constant visibility replaces any visibility expression.
+    impl_->visibilityExpression = nullptr;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+namespace {
+
+VisibilityType evaluateVisibilityExpression(const expression::Expression& expression,
+                                            const GlobalStateMap& globalState) {
+    const expression::EvaluationResult result = expression.evaluate(
+        expression::EvaluationContext().withGlobalState(&globalState));
+    if (result) {
+        if (const auto string = expression::fromExpressionValue<std::string>(*result)) {
+            if (const auto visibility = Enum<VisibilityType>::toEnum(*string)) {
+                return *visibility;
+            }
+        }
+    }
+    Log::Warning(Event::ParseStyle,
+                 R"(visibility expression did not evaluate to "visible" or "none"; defaulting to "visible")");
+    return VisibilityType::Visible;
+}
+
+} // namespace
+
+Value Layer::getVisibilityExpression() const {
+    return baseImpl->visibilityExpression ? baseImpl->visibilityExpression->serialize() : Value();
+}
+
+void Layer::reevaluateVisibility(const GlobalStateMap& globalState) {
+    if (!baseImpl->visibilityExpression) return;
+    const VisibilityType value = evaluateVisibilityExpression(*baseImpl->visibilityExpression, globalState);
+    if (value == baseImpl->visibility) return;
     auto impl_ = mutableBaseImpl();
     impl_->visibility = value;
     baseImpl = std::move(impl_);
@@ -140,7 +179,10 @@ Value Layer::serialize() const {
         result.emplace(std::make_pair("maxzoom", getMaxZoom()));
     }
 
-    if (getVisibility() == VisibilityType::None) {
+    if (baseImpl->visibilityExpression) {
+        result["layout"] = mapbox::base::ValueObject{
+            std::make_pair("visibility", baseImpl->visibilityExpression->serialize())};
+    } else if (getVisibility() == VisibilityType::None) {
         result["layout"] = mapbox::base::ValueObject{std::make_pair("visibility", "none")};
     }
 
@@ -218,6 +260,29 @@ std::optional<conversion::Error> Layer::setVisibility(const conversion::Converti
 
     if (isUndefined(value)) {
         setVisibility(VisibilityType::Visible);
+        return std::nullopt;
+    }
+
+    if (isArray(value)) {
+        // Per the style specification, visibility expressions may only use "global-state".
+        expression::ParsingContext ctx(expression::type::String);
+        expression::ParseResult parsed = ctx.parseExpression(value);
+        if (!parsed) {
+            return Error{ctx.getCombinedErrors()};
+        }
+        constexpr auto allowed = expression::Dependency::GlobalState | expression::Dependency::Bind |
+                                 expression::Dependency::Var;
+        if (((*parsed)->dependencies | allowed) != allowed) {
+            return Error{"visibility expressions may only use the \"global-state\" expression"};
+        }
+
+        auto impl_ = mutableBaseImpl();
+        // The layer may not belong to a style yet, so its global state is not
+        // available here. The style reevaluates the expression when the layer
+        // is added or when this change reaches its observer.
+        impl_->visibilityExpression = std::move(*parsed);
+        baseImpl = std::move(impl_);
+        observer->onLayerChanged(*this);
         return std::nullopt;
     }
 

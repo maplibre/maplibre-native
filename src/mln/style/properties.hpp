@@ -279,6 +279,28 @@ public:
             return result;
         }
 
+        void collectGlobalStateRefs(std::set<std::string>& refs) const {
+            util::ignore({(collectGlobalStateRefs(this->template get<Ps>(), refs), 0)...});
+        }
+
+    private:
+        template <class P>
+        void collectGlobalStateRefs(const P&, std::set<std::string>&) const noexcept {}
+        template <class P>
+        void collectGlobalStateRefs(const PossiblyEvaluatedPropertyValue<P>& v, std::set<std::string>& refs) const {
+            if (const auto* propertyRefs = v.getGlobalStateRefs()) {
+                refs.insert(propertyRefs->begin(), propertyRefs->end());
+            }
+        }
+        template <class P>
+        void collectGlobalStateRefs(const PossiblyEvaluatedPropertyValue<Faded<P>>& v,
+                                    std::set<std::string>& refs) const {
+            if (const auto* propertyRefs = v.getGlobalStateRefs()) {
+                refs.insert(propertyRefs->begin(), propertyRefs->end());
+            }
+        }
+
+    public:
         unsigned long constantsMask() const noexcept { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
     };
 
@@ -311,7 +333,11 @@ public:
             using Evaluator = typename P::EvaluatorType;
             const auto& property = this->template get<P>();
             const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
-                                      (parameters.zoomChanged && (getDependencies(property) & Dependency::Zoom));
+                                      (parameters.zoomChanged && (getDependencies(property) & Dependency::Zoom)) ||
+                                      (parameters.globalStateChanged &&
+                                       (getDependencies(property) & Dependency::GlobalState) &&
+                                       expression::globalStateRefsIntersect(getGlobalStateRefs(property),
+                                                                            parameters.changedGlobalStateKeys.get()));
             return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
                                 : oldResult;
         }
@@ -360,6 +386,31 @@ public:
             return v.getValue().getDependencies();
         }
 
+        // gather referenced global-state property names, mirroring getDependencies
+
+        template <class P>
+        const std::set<std::string>* getGlobalStateRefs(const PropertyValue<P>& v) const noexcept {
+            return v.getGlobalStateRefs();
+        }
+
+        template <class P>
+        const std::set<std::string>* getGlobalStateRefs(const Transitioning<P>& v) const noexcept {
+            return v.getValue().getGlobalStateRefs();
+        }
+
+        template <class P>
+        void collectGlobalStateRefs(const P& v, std::set<std::string>& refs) const {
+            if (const auto* propertyRefs = getGlobalStateRefs(v)) {
+                refs.insert(propertyRefs->begin(), propertyRefs->end());
+            }
+        }
+
+    public:
+        void collectGlobalStateRefs(std::set<std::string>& refs) const {
+            util::ignore({(collectGlobalStateRefs(this->template get<Ps>(), refs), 0)...});
+        }
+
+    protected:
         template <typename P>
         bool updateGPUExpression(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
             constexpr auto index = TypeIndex<P, Ps...>::value;

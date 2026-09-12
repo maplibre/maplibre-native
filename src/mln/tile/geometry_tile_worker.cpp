@@ -161,12 +161,14 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 }
 
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
+                                   std::shared_ptr<const GlobalStateMap> globalState_,
                                    std::set<std::string> availableImages_,
                                    uint64_t correlationID_) {
     MLN_TRACE_FUNC();
 
     try {
         layers = std::move(layers_);
+        globalState = std::move(globalState_);
         correlationID = correlationID_;
         availableImages = std::move(availableImages_);
 
@@ -456,8 +458,11 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{
-            .tileID = id, .mode = mode, .pixelRatio = pixelRatio, .layerType = leaderImpl.getTypeInfo()};
+        BucketParameters parameters{.tileID = id,
+                                    .mode = mode,
+                                    .pixelRatio = pixelRatio,
+                                    .layerType = leaderImpl.getTypeInfo(),
+                                    .globalState = globalState};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {
@@ -500,7 +505,8 @@ void GeometryTileWorker::parse() {
                 std::unique_ptr<GeometryTileFeature> feature = geometryLayer->getFeature(i);
 
                 if (!filter(expression::EvaluationContext(static_cast<float>(this->id.overscaledZ), feature.get())
-                                .withCanonicalTileID(&id.canonical)))
+                                .withCanonicalTileID(&id.canonical)
+                                .withGlobalState(globalState.get())))
                     continue;
 
                 const GeometryCollection& geometries = feature->getGeometries();

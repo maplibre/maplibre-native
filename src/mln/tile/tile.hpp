@@ -80,7 +80,8 @@ public:
     // tile (and i.e. it was successfully updated); returns `false` otherwise.
     virtual bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) = 0;
     virtual void setShowCollisionBoxes(const bool) {}
-    virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}
+    virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&,
+                           std::shared_ptr<const GlobalStateMap>) {}
     virtual void setMask(TileMask&&) {}
 
     virtual void queryRenderedFeatures(std::unordered_map<std::string, std::vector<Feature>>& result,
@@ -88,10 +89,13 @@ public:
                                        const TransformState&,
                                        const std::unordered_map<std::string, const RenderLayer*>&,
                                        const RenderedQueryOptions& options,
+                                       const GlobalStateMap* globalState,
                                        const mat4& projMatrix,
                                        const SourceFeatureState& featureState);
 
-    virtual void querySourceFeatures(std::vector<Feature>& result, const SourceQueryOptions&);
+    virtual void querySourceFeatures(std::vector<Feature>& result,
+                                     const SourceQueryOptions&,
+                                     const GlobalStateMap* globalState);
 
     virtual float getQueryPadding(const std::unordered_map<std::string, const RenderLayer*>&);
 

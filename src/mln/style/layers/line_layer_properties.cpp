@@ -35,6 +35,14 @@ expression::Dependency LineLayerProperties::getDependencies() const noexcept {
     return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
 }
 
+expression::Dependency LineLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
+void LineLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

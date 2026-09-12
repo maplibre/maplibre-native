@@ -67,6 +67,17 @@ void RenderLineLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    if (colorRampGlobalState != parameters.globalState) {
+        const auto& rampValue = unevaluated.get<LineGradient>().getValue();
+        const bool rampAffected = (rampValue.getDependencies() & style::expression::Dependency::GlobalState) &&
+                                  style::expression::globalStateRefsIntersect(rampValue.getGlobalStateRefs(),
+                                                                              parameters.changedGlobalStateKeys.get());
+        colorRampGlobalState = parameters.globalState;
+        if (rampAffected) {
+            updateColorRamp();
+        }
+    }
+
     const auto previousProperties = staticImmutableCast<LineLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
@@ -184,7 +195,7 @@ bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderLineLayer::updateColorRamp() {
     const style::ColorRampPropertyValue colorValue = unevaluated.get<LineGradient>().getValue();
-    if (!colorRamp || !applyColorRamp(colorValue, *colorRamp)) {
+    if (!colorRamp || !applyColorRamp(colorValue, *colorRamp, colorRampGlobalState.get())) {
         return;
     }
 

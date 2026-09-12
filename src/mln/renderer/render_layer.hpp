@@ -281,7 +281,9 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
-    static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
+    static bool applyColorRamp(const style::ColorRampPropertyValue&,
+                               PremultipliedImage&,
+                               const GlobalStateMap* globalState = nullptr);
 
 protected:
     // Stores current set of tiles to be rendered for this layer.

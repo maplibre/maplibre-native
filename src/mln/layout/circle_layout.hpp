@@ -21,7 +21,9 @@ public:
         auto leaderLayerProperties = staticImmutableCast<style::CircleLayerProperties>(group.front());
         const auto& unevaluatedLayout = leaderLayerProperties->layerImpl().layout;
         const bool sortFeaturesByKey = !unevaluatedLayout.get<style::CircleSortKey>().isUndefined();
-        const auto& layout = unevaluatedLayout.evaluate(PropertyEvaluationParameters(zoom));
+        PropertyEvaluationParameters evaluationParameters(zoom);
+        evaluationParameters.globalState = parameters.globalState;
+        const auto& layout = unevaluatedLayout.evaluate(evaluationParameters);
         sourceLayerID = leaderLayerProperties->layerImpl().sourceLayer;
         bucketLeaderID = leaderLayerProperties->layerImpl().id;
 
@@ -34,7 +36,8 @@ public:
         for (size_t i = 0; i < featureCount; ++i) {
             auto feature = sourceLayer->getFeature(i);
             if (!leaderLayerProperties->layerImpl().filter(style::expression::EvaluationContext(zoom, feature.get())
-                                                               .withCanonicalTileID(&parameters.tileID.canonical))) {
+                                                               .withCanonicalTileID(&parameters.tileID.canonical)
+                                                               .withGlobalState(parameters.globalState.get()))) {
                 continue;
             }
 

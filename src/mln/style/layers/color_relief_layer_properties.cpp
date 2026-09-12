@@ -33,6 +33,14 @@ expression::Dependency ColorReliefLayerProperties::getDependencies() const noexc
     return layerImpl().paint.getDependencies();
 }
 
+expression::Dependency ColorReliefLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
+void ColorReliefLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 
