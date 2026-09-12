@@ -9,7 +9,13 @@ namespace style {
 
 /**
  * Special-case implementation of (a subset of) the PropertyValue<T> interface
- * used for building the HeatmapColor paint property traits class.
+ * used for building the paint property traits classes for HeatmapColor,
+ * ColorReliefColor, and LineGradient.
+ *
+ * Generic paint-property evaluation uses a placeholder Color, while the render
+ * layers evaluate the expression separately to build their color-ramp textures.
+ * Referenced global-state keys are retained so those textures are rebuilt only
+ * when one of those keys changes.
  */
 class ColorRampPropertyValue {
 private:
