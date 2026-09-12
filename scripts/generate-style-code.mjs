@@ -65,6 +65,8 @@ function expressionType(property) {
             return `ColorType`;
         case 'padding':
             return `PaddingType`;
+        case 'verticalGradient':
+            return `VerticalGradientType`;
         case 'variableAnchorOffsetCollection':
             return `VariableAnchorOffsetCollectionType`;
         case 'formatted':
@@ -124,6 +126,8 @@ function evaluatedType(property) {
     return `Color`;
   case 'padding':
     return `Padding`;
+  case 'verticalGradient':
+    return `VerticalGradient`;
   case 'array':
     if (property.length) {
       return `std::array<${evaluatedType({type: property.value, name: property.name})}, ${property.length}>`;
@@ -285,6 +289,8 @@ function defaultValue(property) {
     default:
       return `{ ${color} }`;
     }
+  case 'verticalGradient':
+    return property.default ? '{}' : 'VerticalGradient(false)';
   case 'array':
   case 'padding':
     const defaults = (property.default || []).map((/** @type {any} **/ e) => defaultValue({ type: property.value, default: e }));
