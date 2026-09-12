@@ -51,15 +51,13 @@ public:
     /// plumbing.  Only retained if the expression actually depends on it.
     void captureGlobalState(std::shared_ptr<const GlobalStateMap> globalState) {
         if (expression && expression->has(Dependency::GlobalState)) {
-            capturedGlobalState_ = std::move(globalState);
+            capturedGlobalState = std::move(globalState);
         }
     }
-    const std::shared_ptr<const GlobalStateMap>& getCapturedGlobalState() const noexcept {
-        return capturedGlobalState_;
-    }
+    const std::shared_ptr<const GlobalStateMap>& getCapturedGlobalState() const noexcept { return capturedGlobalState; }
 
     /// Null if the expression does not reference the global state.
-    const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs_.get(); }
+    const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs.get(); }
 
     /// Can be used for aggregating property expressions from multiple properties(layers) into single match / case
     /// expression. May be removed if a better way of aggregation is found.
@@ -75,9 +73,9 @@ public:
 protected:
     std::shared_ptr<const Expression> expression;
 
-    std::shared_ptr<const GlobalStateMap> capturedGlobalState_;
+    std::shared_ptr<const GlobalStateMap> capturedGlobalState;
 
-    std::shared_ptr<const std::set<std::string>> globalStateRefs_;
+    std::shared_ptr<const std::set<std::string>> globalStateRefs;
 
     ZoomCurvePtr zoomCurve;
 
@@ -102,9 +100,9 @@ public:
           defaultValue(std::move(defaultValue_)) {}
 
     T evaluate(const expression::EvaluationContext& context, T finalDefaultValue = T()) const {
-        if (context.globalState == nullptr && capturedGlobalState_ != nullptr) {
+        if (context.globalState == nullptr && capturedGlobalState != nullptr) {
             expression::EvaluationContext contextWithState = context;
-            contextWithState.globalState = capturedGlobalState_.get();
+            contextWithState.globalState = capturedGlobalState.get();
             return evaluateContext(contextWithState, std::move(finalDefaultValue));
         }
         return evaluateContext(context, std::move(finalDefaultValue));

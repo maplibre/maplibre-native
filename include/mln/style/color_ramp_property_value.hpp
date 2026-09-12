@@ -14,7 +14,7 @@ namespace style {
 class ColorRampPropertyValue {
 private:
     std::shared_ptr<expression::Expression> value;
-    std::shared_ptr<const std::set<std::string>> globalStateRefs_;
+    std::shared_ptr<const std::set<std::string>> globalStateRefs;
 
     friend bool operator==(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) noexcept {
         return (lhs.isUndefined() && rhs.isUndefined()) || (lhs.value && rhs.value && *(lhs.value) == *(rhs.value));
@@ -31,7 +31,7 @@ public:
         if (value && value->has(expression::Dependency::GlobalState)) {
             auto refs = std::make_shared<std::set<std::string>>();
             expression::collectGlobalStateRefs(*value, *refs);
-            globalStateRefs_ = std::move(refs);
+            globalStateRefs = std::move(refs);
         }
     }
 
@@ -61,7 +61,7 @@ public:
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept { return value ? value->dependencies : Dependency::None; }
 
-    const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs_.get(); }
+    const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs.get(); }
 };
 
 } // namespace style

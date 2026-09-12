@@ -28,7 +28,7 @@ std::shared_ptr<const std::set<std::string>> collectGlobalStateRefsShared(const 
 
 PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_)
     : expression(std::move(expression_)),
-      globalStateRefs_(collectGlobalStateRefsShared(*expression)),
+      globalStateRefs(collectGlobalStateRefsShared(*expression)),
       zoomCurve(expression->has(Dependency::Zoom) ? expression::findZoomCurveChecked(*expression) : nullptr),
       useIntegerZoom_(false),
       isZoomConstant_(!expression->has(Dependency::Zoom)),
@@ -42,8 +42,8 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
 
 PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
     : expression(std::move(other.expression)),
-      capturedGlobalState_(std::move(other.capturedGlobalState_)),
-      globalStateRefs_(std::move(other.globalStateRefs_)),
+      capturedGlobalState(std::move(other.capturedGlobalState)),
+      globalStateRefs(std::move(other.globalStateRefs)),
       zoomCurve(std::move(other.zoomCurve)),
       useIntegerZoom_(other.useIntegerZoom_),
       isZoomConstant_(other.isZoomConstant_),
@@ -53,8 +53,8 @@ PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
 
 PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& other)
     : expression(other.expression),
-      capturedGlobalState_(other.capturedGlobalState_),
-      globalStateRefs_(other.globalStateRefs_),
+      capturedGlobalState(other.capturedGlobalState),
+      globalStateRefs(other.globalStateRefs),
       zoomCurve(other.zoomCurve),
       useIntegerZoom_(other.useIntegerZoom_),
       isZoomConstant_(other.isZoomConstant_),
@@ -64,8 +64,8 @@ PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& oth
 
 PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase&& other) {
     expression = std::move(other.expression);
-    capturedGlobalState_ = std::move(other.capturedGlobalState_);
-    globalStateRefs_ = std::move(other.globalStateRefs_);
+    capturedGlobalState = std::move(other.capturedGlobalState);
+    globalStateRefs = std::move(other.globalStateRefs);
     zoomCurve = other.zoomCurve;
     useIntegerZoom_ = other.useIntegerZoom_;
     isZoomConstant_ = other.isZoomConstant_;
@@ -77,8 +77,8 @@ PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase
 
 PropertyExpressionBase& PropertyExpressionBase::operator=(const PropertyExpressionBase& other) {
     expression = other.expression;
-    capturedGlobalState_ = other.capturedGlobalState_;
-    globalStateRefs_ = other.globalStateRefs_;
+    capturedGlobalState = other.capturedGlobalState;
+    globalStateRefs = other.globalStateRefs;
     zoomCurve = other.zoomCurve;
     useIntegerZoom_ = other.useIntegerZoom_;
     isZoomConstant_ = other.isZoomConstant_;
