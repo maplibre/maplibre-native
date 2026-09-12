@@ -28,7 +28,6 @@
 
 ### 🐞 Bug fixes
 
-- [core] Fix invisible symbols, dashed lines, and patterned backgrounds on OpenGL ES SwiftShader.
 - *...Add new stuff here...*
 - [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
 - [core] Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/issues/4508)).
