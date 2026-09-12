@@ -57,6 +57,30 @@ public:
     void setFillExtrusionPatternTransition(const TransitionOptions&);
     TransitionOptions getFillExtrusionPatternTransition() const;
 
+    static PropertyValue<float> getDefaultFillExtrusionShadowAzimuth();
+    const PropertyValue<float>& getFillExtrusionShadowAzimuth() const;
+    void setFillExtrusionShadowAzimuth(const PropertyValue<float>&);
+    void setFillExtrusionShadowAzimuthTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionShadowAzimuthTransition() const;
+
+    static PropertyValue<Color> getDefaultFillExtrusionShadowColor();
+    const PropertyValue<Color>& getFillExtrusionShadowColor() const;
+    void setFillExtrusionShadowColor(const PropertyValue<Color>&);
+    void setFillExtrusionShadowColorTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionShadowColorTransition() const;
+
+    static PropertyValue<float> getDefaultFillExtrusionShadowLength();
+    const PropertyValue<float>& getFillExtrusionShadowLength() const;
+    void setFillExtrusionShadowLength(const PropertyValue<float>&);
+    void setFillExtrusionShadowLengthTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionShadowLengthTransition() const;
+
+    static PropertyValue<float> getDefaultFillExtrusionShadowOpacity();
+    const PropertyValue<float>& getFillExtrusionShadowOpacity() const;
+    void setFillExtrusionShadowOpacity(const PropertyValue<float>&);
+    void setFillExtrusionShadowOpacityTransition(const TransitionOptions&);
+    TransitionOptions getFillExtrusionShadowOpacityTransition() const;
+
     static PropertyValue<std::array<float, 2>> getDefaultFillExtrusionTranslate();
     const PropertyValue<std::array<float, 2>>& getFillExtrusionTranslate() const;
     void setFillExtrusionTranslate(const PropertyValue<std::array<float, 2>>&);
