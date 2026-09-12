@@ -7,11 +7,11 @@ import Polyline
 }
 
 class NavigationLocationManager: NSObject, MLNLocationManager {
-    var delegate: (any MLNLocationManagerDelegate)?
+    weak var delegate: (any MLNLocationManagerDelegate)?
     var authorizationStatus: CLAuthorizationStatus = .authorizedAlways
     var headingOrientation: CLDeviceOrientation = .portrait
 
-    var navigationDelegate: (any NavigationLocationManagerDelegate)?
+    weak var navigationDelegate: (any NavigationLocationManagerDelegate)?
     var updateInterval = 0.2
     var speed = 20.0
     var speedMultiplier = 1.0
@@ -134,7 +134,7 @@ class NavigationRoute {
         22: 42,
     ]
 
-    var mapView: MLNMapView?
+    weak var mapView: MLNMapView?
     var distance = 0.0
     var duration = 0.0
     var destination: CLLocationCoordinate2D?
@@ -153,7 +153,13 @@ class NavigationRoute {
 
     deinit {
         mapView?.showsUserLocation = false
+
+        // the simulated manager reschedules itself with perform(_:afterDelay:),
+        // which retains it, so stop it before dropping the reference
+        (mapView?.locationManager as? NavigationLocationManager)?.stopUpdatingLocation()
         mapView?.locationManager = nil
+
+        mapView?.removeAnnotations(mapView?.annotations ?? [])
     }
 
     private func load(json: [String: Any]) throws {
