@@ -366,6 +366,11 @@ void updateTileDrawable(gfx::Drawable& drawable,
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
+    drawable.setEnabled(buffer.hasVisibleVertices(drawData.opacityVertexOffset, drawData.opacityVertexCount));
+    if (!drawable.getEnabled()) {
+        return;
+    }
+
 #if MLN_USE_SYMBOL_INSTANCING
     if (auto& instanceAttribs = drawable.getInstanceAttributes()) {
         updateTileAttributes(buffer, isText, paintProps, evaluated, *instanceAttribs, nullptr);
@@ -754,6 +759,17 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto& bucket = static_cast<SymbolBucket&>(*renderable.renderData.bucket);
         const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
+        // A sorted drawable references one segment; an unsorted drawable can
+        // contain the entire buffer, including segments split at the index limit.
+        const auto& segment = renderable.segment.get();
+#if MLN_USE_SYMBOL_INSTANCING
+        const auto opacityVertexOffset = segments.empty() ? segment.baseInstance : 0;
+        const auto opacityVertexCount = segments.empty() ? segment.instanceCount : buffer.attributeData().elements();
+#else
+        const auto opacityVertexOffset = segments.empty() ? segment.vertexOffset : 0;
+        const auto opacityVertexCount = segments.empty() ? segment.vertexLength : buffer.attributeData().elements();
+#endif
+
 #if MLN_USE_SYMBOL_INSTANCING
         if (!buffer.attributeData().elements()) {
             continue;
@@ -903,7 +919,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     /*.rotationAlignment=*/values.rotationAlignment,
                     /*.placement=*/bucketLayout.get<SymbolPlacement>(),
                     /*.textFit=*/bucketLayout.get<IconTextFit>(),
-                    /*.isOffset=*/isOffset));
+                    /*.isOffset=*/isOffset,
+                    /*.opacityVertexOffset=*/opacityVertexOffset,
+                    /*.opacityVertexCount=*/opacityVertexCount));
+                drawable->setEnabled(buffer.hasVisibleVertices(opacityVertexOffset, opacityVertexCount));
 
                 tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

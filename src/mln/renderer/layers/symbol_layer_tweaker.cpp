@@ -90,9 +90,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
 #if MLN_UBO_CONSOLIDATION
-    int i = 0;
-    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
-    std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolDrawableUBO> drawableUBOVector;
+    std::vector<SymbolTilePropsUBO> tilePropsUBOVector;
+    drawableUBOVector.reserve(layerGroup.getDrawableCount());
+    tilePropsUBOVector.reserve(layerGroup.getDrawableCount());
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
@@ -101,7 +102,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                             : SymbolScreenSpace::defaultValue();
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID() || !drawable.getData()) {
+        if (!drawable.getEnabled() || !drawable.getTileID() || !drawable.getData()) {
             return;
         }
 
@@ -165,11 +166,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
-#if MLN_UBO_CONSOLIDATION
-        drawableUBOVector[i] = {
-#else
         const SymbolDrawableUBO drawableUBO = {
-#endif
             .matrix = util::cast<float>(matrix),
             .label_plane_matrix = util::cast<float>(labelPlaneMatrix),
             .coord_matrix = util::cast<float>(glCoordMatrix),
@@ -194,11 +191,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
         };
 
-#if MLN_UBO_CONSOLIDATION
-        tilePropsUBOVector[i] = {
-#else
         const SymbolTilePropsUBO tilePropsUBO = {
-#endif
             .is_text = isText,
             .is_halo = symbolData.isHalo,
             .gamma_scale = gammaScale,
@@ -206,7 +199,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         };
 
 #if MLN_UBO_CONSOLIDATION
-        drawable.setUBOIndex(i++);
+        drawableUBOVector.push_back(drawableUBO);
+        tilePropsUBOVector.push_back(tilePropsUBO);
+        drawable.setUBOIndex(static_cast<uint32_t>(drawableUBOVector.size() - 1));
 #else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
@@ -215,6 +210,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     });
 
 #if MLN_UBO_CONSOLIDATION
+    if (drawableUBOVector.empty()) {
+        return;
+    }
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
         drawableUniformBuffer = context.createUniformBuffer(
