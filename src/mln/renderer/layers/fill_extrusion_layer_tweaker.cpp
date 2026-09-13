@@ -131,6 +131,9 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             drawable.setTexture(
                 terrainData ? terrainData->demTexture : parameters.terrain->getPlaceholderDEMTexture(context),
                 idFillExtrusionDEMTexture);
+        } else {
+            // Keep the declared DEM sampler bound for Metal API validation (never sampled).
+            drawable.setTexture(context.getPlaceholderTexture2D(), idFillExtrusionDEMTexture);
         }
 
 #if MLN_UBO_CONSOLIDATION

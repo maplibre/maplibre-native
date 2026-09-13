@@ -180,6 +180,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 idSymbolDEMTexture);
             // Packed terrain depth for occlusion (calculate_visibility)
             drawable.setTexture(parameters.terrain->getDepthTexture(context), idSymbolDepthTexture);
+        } else {
+            // The shader declares both samplers regardless; leaving them unbound trips Metal's
+            // API validation (missing sampler binding) even though dem_enabled / depth_enabled
+            // are 0 and nothing is sampled.
+            drawable.setTexture(context.getPlaceholderTexture2D(), idSymbolDEMTexture);
+            drawable.setTexture(context.getPlaceholderTexture2D(), idSymbolDepthTexture);
         }
 
         // The terrain surface writes depth so its skirts get occluded; symbols
