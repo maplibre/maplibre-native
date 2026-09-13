@@ -91,8 +91,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
-    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
-    std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolDrawableUBO> drawableUBOVector;
+    std::vector<SymbolTilePropsUBO> tilePropsUBOVector;
+    drawableUBOVector.reserve(layerGroup.getDrawableCount());
+    tilePropsUBOVector.reserve(layerGroup.getDrawableCount());
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
@@ -101,7 +103,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                             : SymbolScreenSpace::defaultValue();
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID() || !drawable.getData()) {
+        if (!drawable.getEnabled() || !drawable.getTileID() || !drawable.getData()) {
             return;
         }
 
@@ -166,7 +168,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
 #if MLN_UBO_CONSOLIDATION
-        drawableUBOVector[i] = {
+        drawableUBOVector.emplace_back() = {
 #else
         const SymbolDrawableUBO drawableUBO = {
 #endif
@@ -195,7 +197,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         };
 
 #if MLN_UBO_CONSOLIDATION
-        tilePropsUBOVector[i] = {
+        tilePropsUBOVector.emplace_back() = {
 #else
         const SymbolTilePropsUBO tilePropsUBO = {
 #endif
@@ -215,6 +217,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     });
 
 #if MLN_UBO_CONSOLIDATION
+    if (drawableUBOVector.empty()) {
+        return;
+    }
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableUniformBuffer || drawableUniformBuffer->getSize() < drawableUBOVectorSize) {
         drawableUniformBuffer = context.createUniformBuffer(
