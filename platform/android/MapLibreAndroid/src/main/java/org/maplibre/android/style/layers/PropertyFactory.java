@@ -1250,9 +1250,11 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides will be shaded slightly darker farther down.
+   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides are shaded
+   * slightly darker farther down, scaled by building height; false disables shading.
+   * For per-building control, use the {@code Object[]} overload with {@code [depth, referenceHeight]}.
    *
-   * @param value a Boolean value
+   * @param value a Boolean value (legacy on/off form)
    * @return property wrapper around Boolean
    */
   public static PropertyValue<Boolean> fillExtrusionVerticalGradient(Boolean value) {
@@ -1260,13 +1262,119 @@ The unit is in density-independent pixels only for SDF sprites that were created
   }
 
   /**
-   * Whether to apply a vertical gradient to the sides of a fill-extrusion layer. If true, sides will be shaded slightly darker farther down.
+   * Vertical shading applied to the sides of a fill-extrusion layer, as an array of one or two numbers,
+   * {@code [depth, referenceHeight]}. depth (0-1) is how dark the foot of a wall gets, as a multiple of
+   * the shading {@code true} applies: 0 disables shading, 0.5 matches {@code true}, 1 doubles it.
+   * referenceHeight selects whether the shading is scaled by building height: 0 (the default) shades
+   * every building equally, and a positive value in meters restores the height-scaled behaviour above
+   * that height, which is what {@code true} does at 150. For the legacy on/off form, use the
+   * {@code Boolean} overload.
+   *
+   * @param value a Object[] value
+   * @return property wrapper around Object[]
+   */
+  public static PropertyValue<Object[]> fillExtrusionVerticalGradient(Object[] value) {
+    return new PaintPropertyValue<>("fill-extrusion-vertical-gradient", value);
+  }
+
+  /**
+   * Vertical shading applied to the sides of a fill-extrusion layer. `true` shades the sides slightly darker farther down, scaled by building height so that the effect is only really visible above 150 meters. `false` disables shading. Alternatively, an array of one or two numbers, `[depth, referenceHeight]`. `depth` (0-1) is how dark the foot of a wall gets, as a multiple of the shading `true` applies: 0 disables shading, 0.5 matches `true`, 1 doubles it. `referenceHeight` selects whether the shading is scaled by building height: 0 (the default) shades every building equally, and a positive value in meters restores the height-scaled behaviour above that height, which is what `true` does at 150.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
    */
   public static PropertyValue<Expression> fillExtrusionVerticalGradient(Expression expression) {
     return new PaintPropertyValue<>("fill-extrusion-vertical-gradient", expression);
+  }
+
+  /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while {@link PropertyFactory#fillExtrusionShadowOpacity} is 0.
+   *
+   * @param value a int color value
+   * @return property wrapper around String color
+   */
+  public static PropertyValue<String> fillExtrusionShadowColor(@ColorInt int value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-color", colorToRgbaString(value));
+  }
+
+  /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while {@link PropertyFactory#fillExtrusionShadowOpacity} is 0.
+   *
+   * @param value a String value
+   * @return property wrapper around String
+   */
+  public static PropertyValue<String> fillExtrusionShadowColor(String value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-color", value);
+  }
+
+  /**
+   * The color of the ground shadow cast by the extruded geometry. Has no effect while {@link PropertyFactory#fillExtrusionShadowOpacity} is 0.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowColor(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-color", expression);
+  }
+
+  /**
+   * The opacity of the ground shadow cast by the extruded geometry. A value of 0 disables the shadow entirely. This is rendered on a per-layer, not per-feature, basis.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionShadowOpacity(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-opacity", value);
+  }
+
+  /**
+   * The opacity of the ground shadow cast by the extruded geometry. A value of 0 disables the shadow entirely. This is rendered on a per-layer, not per-feature, basis.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowOpacity(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-opacity", expression);
+  }
+
+  /**
+   * The length of the ground shadow, as a multiple of the extrusion height. This is the cotangent of the light source's elevation angle, so 1 corresponds to an elevation of 45 degrees and 0.32 to roughly 72 degrees. Larger values cast longer, shallower shadows.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionShadowLength(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-length", value);
+  }
+
+  /**
+   * The length of the ground shadow, as a multiple of the extrusion height. This is the cotangent of the light source's elevation angle, so 1 corresponds to an elevation of 45 degrees and 0.32 to roughly 72 degrees. Larger values cast longer, shallower shadows.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowLength(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-length", expression);
+  }
+
+  /**
+   * The compass direction the ground shadow is cast towards, measured clockwise from due north. The shadow is anchored to the map, so it keeps a fixed compass direction as the map rotates.
+   *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> fillExtrusionShadowAzimuth(Float value) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-azimuth", value);
+  }
+
+  /**
+   * The compass direction the ground shadow is cast towards, measured clockwise from due north. The shadow is anchored to the map, so it keeps a fixed compass direction as the map rotates.
+   *
+   * @param expression an expression statement
+   * @return property wrapper around an expression statement
+   */
+  public static PropertyValue<Expression> fillExtrusionShadowAzimuth(Expression expression) {
+    return new PaintPropertyValue<>("fill-extrusion-shadow-azimuth", expression);
   }
 
   /**

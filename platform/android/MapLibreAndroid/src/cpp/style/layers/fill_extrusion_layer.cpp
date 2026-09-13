@@ -259,6 +259,137 @@ jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionVerticalGradient(j
         *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionVerticalGradient()));
 }
 
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionShadowColor(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionShadowColor()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionShadowColor()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionShadowColorTransition(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionShadowColorTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowColorTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionShadowColorTransition(options);
+}
+
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionShadowOpacity(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionShadowOpacity()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionShadowOpacity()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionShadowOpacityTransition(
+    jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionShadowOpacityTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowOpacityTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionShadowOpacityTransition(options);
+}
+
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionShadowLength(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(
+            *convert<jni::Local<jni::Object<>>>(env, style::FillExtrusionLayer::getDefaultFillExtrusionShadowLength()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionShadowLength()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionShadowLengthTransition(
+    jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionShadowLengthTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowLengthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionShadowLengthTransition(options);
+}
+
+jni::Local<jni::Object<>> FillExtrusionLayer::getFillExtrusionShadowAzimuth(jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<>>>(
+            env, style::FillExtrusionLayer::getDefaultFillExtrusionShadowAzimuth()));
+    }
+    return std::move(
+        *convert<jni::Local<jni::Object<>>>(env, toFillExtrusionLayer(*layer).getFillExtrusionShadowAzimuth()));
+}
+
+jni::Local<jni::Object<TransitionOptions>> FillExtrusionLayer::getFillExtrusionShadowAzimuthTransition(
+    jni::JNIEnv& env) {
+    using namespace mln::android::conversion;
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
+    }
+    mln::style::TransitionOptions options = toFillExtrusionLayer(*layer).getFillExtrusionShadowAzimuthTransition();
+    return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowAzimuthTransition(jni::JNIEnv&, jlong duration, jlong delay) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return;
+    }
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
+    toFillExtrusionLayer(*layer).setFillExtrusionShadowAzimuthTransition(options);
+}
+
 // FillExtrusionJavaLayerPeerFactory
 
 FillExtrusionJavaLayerPeerFactory::~FillExtrusionJavaLayerPeerFactory() = default;
@@ -320,7 +451,27 @@ void FillExtrusionJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
         METHOD(&FillExtrusionLayer::getFillExtrusionBaseTransition, "nativeGetFillExtrusionBaseTransition"),
         METHOD(&FillExtrusionLayer::setFillExtrusionBaseTransition, "nativeSetFillExtrusionBaseTransition"),
         METHOD(&FillExtrusionLayer::getFillExtrusionBase, "nativeGetFillExtrusionBase"),
-        METHOD(&FillExtrusionLayer::getFillExtrusionVerticalGradient, "nativeGetFillExtrusionVerticalGradient"));
+        METHOD(&FillExtrusionLayer::getFillExtrusionVerticalGradient, "nativeGetFillExtrusionVerticalGradient"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowColorTransition,
+               "nativeGetFillExtrusionShadowColorTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionShadowColorTransition,
+               "nativeSetFillExtrusionShadowColorTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowColor, "nativeGetFillExtrusionShadowColor"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowOpacityTransition,
+               "nativeGetFillExtrusionShadowOpacityTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionShadowOpacityTransition,
+               "nativeSetFillExtrusionShadowOpacityTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowOpacity, "nativeGetFillExtrusionShadowOpacity"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowLengthTransition,
+               "nativeGetFillExtrusionShadowLengthTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionShadowLengthTransition,
+               "nativeSetFillExtrusionShadowLengthTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowLength, "nativeGetFillExtrusionShadowLength"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowAzimuthTransition,
+               "nativeGetFillExtrusionShadowAzimuthTransition"),
+        METHOD(&FillExtrusionLayer::setFillExtrusionShadowAzimuthTransition,
+               "nativeSetFillExtrusionShadowAzimuthTransition"),
+        METHOD(&FillExtrusionLayer::getFillExtrusionShadowAzimuth, "nativeGetFillExtrusionShadowAzimuth"));
 }
 
 } // namespace android

@@ -16,7 +16,11 @@
 #include <mln/tile/geometry_tile.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/util/intersection_tests.hpp>
+#include <mln/util/logging.hpp>
 #include <mln/util/math.hpp>
+
+#include <chrono>
+#include <cstdlib>
 
 #include <mln/gfx/drawable_atlases_tweaker.hpp>
 #include <mln/gfx/drawable_builder.hpp>
@@ -25,6 +29,9 @@
 #include <mln/renderer/update_parameters.hpp>
 #include <mln/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mln/shaders/shader_program_base.hpp>
+
+#include <mln/renderer/layers/fill_extrusion_shadow_layer_tweaker.hpp>
+#include <mln/shaders/fill_extrusion_shadow_layer_ubo.hpp>
 
 namespace mln {
 
@@ -68,6 +75,12 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
+    // The shadow has its own tweaker, on its own layer group. Without this it keeps whatever
+    // properties it was constructed with, and changing the shadow colour, length, azimuth or
+    // opacity on a layer that already has a shadow would have no effect.
+    if (shadowTweaker) {
+        shadowTweaker->updateProperties(evaluatedProperties);
+    }
 }
 
 bool RenderFillExtrusionLayer::hasTransition() const {
@@ -80,6 +93,121 @@ bool RenderFillExtrusionLayer::hasCrossfade() const {
 
 bool RenderFillExtrusionLayer::is3D() const {
     return true;
+}
+
+void RenderFillExtrusionLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
+    // The shadow group has to be registered before `layerGroup`. Layer groups live in a
+    // std::multimap keyed by layer index, and insert() places equivalent keys at the upper bound of
+    // their range, so insertion order decides draw order within one index. That is what puts the
+    // shadow underneath the buildings.
+    isRenderable = willRender;
+    activateLayerGroup(shadowGroup, willRender, changes);
+    activateLayerGroup(layerGroup, willRender, changes);
+}
+
+void RenderFillExtrusionLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes) {
+    // Same ordering rule as above: the re-insert must keep the shadow ahead of the buildings.
+    layerIndex = newLayerIndex;
+    changeLayerIndex(shadowGroup, newLayerIndex, changes);
+    changeLayerIndex(layerGroup, newLayerIndex, changes);
+}
+
+std::size_t RenderFillExtrusionLayer::removeAllDrawables() {
+    auto removed = RenderLayer::removeAllDrawables();
+
+    if (shadowGroup) {
+        const auto count = shadowGroup->getDrawableCount();
+        removed += count;
+        stats.drawablesRemoved += count;
+        shadowGroup->clearDrawables();
+    }
+
+    return removed;
+}
+
+bool RenderFillExtrusionLayer::shadowEnabled() const {
+    const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
+    return evaluated.get<FillExtrusionShadowOpacity>() > 0.0f && evaluated.get<FillExtrusionShadowLength>() > 0.0f;
+}
+
+void RenderFillExtrusionLayer::teardownShadow(UniqueChangeRequestVec& changes) {
+    if (shadowGroup) {
+        activateLayerGroup(shadowGroup, false, changes);
+        shadowGroup.reset();
+    }
+    shadowTweaker.reset();
+}
+
+bool RenderFillExtrusionLayer::prepareShadow(gfx::ShaderRegistry& shaders,
+                                             gfx::Context& context,
+                                             UniqueChangeRequestVec& changes) {
+    if (!shadowMaskShaderGroup) {
+        shadowMaskShaderGroup = shaders.getShaderGroup("FillExtrusionShadowMaskShader");
+    }
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+    if (!shadowMaskInstancedShaderGroup) {
+        shadowMaskInstancedShaderGroup = shaders.getShaderGroup("FillExtrusionShadowMaskInstancedShader");
+    }
+    // Backends without shadow shader specializations land here and quietly stay disabled.
+    if (!shadowMaskShaderGroup || !shadowMaskInstancedShaderGroup) {
+        return false;
+    }
+#else
+    // Non-instanced backends (OpenGL) have no separate instanced-wall shader to look up.
+    if (!shadowMaskShaderGroup) {
+        return false;
+    }
+#endif
+
+    // Created first, so it sorts ahead of the buildings at the same layer index.
+    if (!shadowGroup) {
+        auto group = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID() + "-shadow");
+        if (!group) {
+            return false;
+        }
+        shadowGroup = std::move(group);
+        activateLayerGroup(shadowGroup, isRenderable, changes);
+
+        // If the buildings were already registered -- which is the case whenever the shadow is
+        // switched on at runtime rather than at style load -- re-insert them so they land after the
+        // shadow group again. Without this the shadow would draw over the buildings.
+        if (layerGroup && isRenderable) {
+            activateLayerGroup(layerGroup, false, changes);
+            activateLayerGroup(layerGroup, true, changes);
+        }
+    }
+
+    if (!shadowTweaker) {
+        shadowTweaker = std::make_shared<FillExtrusionShadowLayerTweaker>(getID(), evaluatedProperties);
+        shadowGroup->addLayerTweaker(shadowTweaker);
+    }
+
+    return true;
+}
+
+/// Averages the shadow's CPU cost over a window of frames and logs it, so a one-off hitch does not
+/// look like a steady regression. Off unless MLN_SHADOW_STATS is set in the environment.
+void RenderFillExtrusionLayer::reportShadowStats(double setupMs) {
+    static const bool enabled = (::getenv("MLN_SHADOW_STATS") != nullptr);
+    if (!enabled) {
+        return;
+    }
+
+    constexpr std::uint64_t window = 60;
+    shadowSetupMsAccum += setupMs;
+    if (++shadowFrameCount < window) {
+        return;
+    }
+
+    const auto drawables = shadowGroup ? shadowGroup->getDrawableCount() : 0;
+
+    Log::Info(Event::Render,
+              "fill-extrusion shadow: " + std::to_string(drawables) + " drawables, cpu setup " +
+                  std::to_string(shadowSetupMsAccum / static_cast<double>(window)) + " ms/frame (avg over " +
+                  std::to_string(window) + " frames)");
+
+    shadowFrameCount = 0;
+    shadowSetupMsAccum = 0.0;
 }
 
 bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
@@ -103,14 +231,34 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
-                                      const TransformState&,
+                                      [[maybe_unused]] const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>&,
                                       [[maybe_unused]] const PaintParameters& paintParameters,
                                       const RenderTree&,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
+        teardownShadow(changes);
         return;
+    }
+
+    // Establish the shadow resources before the buildings' layer group, so the shadow group is
+    // registered first and therefore draws underneath. Costs nothing when the shadow is off.
+    bool drawShadow = false;
+    double shadowSetupMs = 0.0;
+    if (shadowEnabled()) {
+        const auto t0 = std::chrono::steady_clock::now();
+        drawShadow = prepareShadow(shaders, context, changes);
+        shadowSetupMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+    }
+    if (!drawShadow) {
+        teardownShadow(changes);
+    }
+    if (drawShadow != shadowWasEnabled) {
+        // Toggling forces a full rebuild: otherwise tiles that already have building drawables are
+        // short-circuited by updateTile() below and never get their shadow drawables.
+        removeAllDrawables();
+        shadowWasEnabled = drawShadow;
     }
 
     // Set up a layer group
@@ -140,14 +288,21 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     constexpr auto drawPass = RenderPass::Translucent;
 
-    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
+    const auto dropStaleDrawables = [&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
         if (!(drawable.getRenderPass() & drawPass) || (tileID && !hasRenderTile(*tileID))) {
             return true;
         }
         return false;
-    });
+    };
+    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf(dropStaleDrawables);
+
+    if (drawShadow) {
+        if (auto* shadowTileGroup = static_cast<TileLayerGroup*>(shadowGroup.get())) {
+            stats.drawablesRemoved += shadowTileGroup->removeDrawablesIf(dropStaleDrawables);
+        }
+    }
 
     const auto layerPrefix = getID() + "/";
     const auto hasPattern = !unevaluated.get<FillExtrusionPattern>().isUndefined();
@@ -163,6 +318,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     tileLayerGroup->setStencilTiles(renderTiles);
+
+    if (drawShadow) {
+        // Shadow geometry can legitimately overlap (a building's own roof/wall footprint at a
+        // concave corner, or two adjacent buildings' shadows), so each is3D+stencil-enabled
+        // drawable in this group shares one stencil ref for the pass: the first triangle to cover
+        // a pixel wins and later overlapping triangles are stencil-rejected instead of blending.
+        static_cast<TileLayerGroup*>(shadowGroup.get())->setStencilTiles(renderTiles);
+    }
 
 #if MLN_USE_FILL_EXTRUSION_INSTANCING
     if (!fillExtrusionInstancedGroup) {
@@ -191,13 +354,24 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     StringIDSetsPair instancePropertiesAsUniforms;
 #endif
 
+    // Drop a tile's drawables from the shadow group alongside the layer's own, so a tile whose
+    // bucket was replaced does not leave a shadow drawable pointing at stale binders.
+    const auto removeTileEverywhere = [&](RenderPass pass, const OverscaledTileID& id) {
+        removeTile(pass, id);
+        if (drawShadow) {
+            if (auto* shadowTileGroup = static_cast<TileLayerGroup*>(shadowGroup.get())) {
+                stats.drawablesRemoved += shadowTileGroup->removeDrawables(pass, id).size();
+            }
+        }
+    };
+
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, drawPass);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
-            removeTile(drawPass, tileID);
+            removeTileEverywhere(drawPass, tileID);
             continue;
         }
 
@@ -207,7 +381,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
             // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(drawPass, tileID);
+            removeTileEverywhere(drawPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
 
@@ -488,7 +662,135 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             finishInstance(*instancedDepthBuilder);
         }
         finishInstance(*instancedColorBuilder);
-#endif
+#endif // MLN_USE_FILL_EXTRUSION_INSTANCING
+
+        if (drawShadow) {
+            auto* shadowTileGroup = static_cast<TileLayerGroup*>(shadowGroup.get());
+
+            // The shadow reads only base and height. Its own attribute id space keeps it independent
+            // of the building shaders' permutations.
+            StringIDSetsPair shadowPropertiesAsUniforms;
+            auto shadowRoofAttrs = context.createVertexAttributeArray();
+            shadowRoofAttrs->readDataDrivenPaintProperties<FillExtrusionBase, FillExtrusionHeight>(
+                binders, evaluated, shadowPropertiesAsUniforms, idFillExtrusionShadowBaseVertexAttribute);
+
+            const auto maskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                shadowMaskShaderGroup->getOrCreateShader(context, shadowPropertiesAsUniforms));
+
+            // Culling must be off: flattening the walls onto the ground makes them degenerate or
+            // reverses their winding, which would punch holes in the shadow. No depth test:
+            // occlusion by the buildings comes entirely from this group being registered ahead
+            // of `layerGroup` (see markLayerRenderable()), not from a depth comparison. is3D +
+            // stencil is enabled to get the overlap dedup (see the setStencilTiles() call
+            // above); setEnableDepth(false) means it has no effect on 3D depth sorting.
+            const auto configureShadow = [](gfx::DrawableBuilder& builder) {
+                builder.setIs3D(true);
+                builder.setEnableDepth(false);
+                builder.setEnableStencil(true);
+                builder.setEnableColor(true);
+                builder.setColorMode(gfx::ColorMode::alphaBlended());
+                builder.setCullFaceMode(gfx::CullFaceMode::disabled());
+                builder.setRenderPass(RenderPass::Translucent);
+                builder.setDrawPriority(0);
+            };
+
+            const auto finishShadow = [&](gfx::DrawableBuilder& builder) {
+                builder.flush(context);
+                for (auto& drawable : builder.clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(shadowTweaker);
+                    drawable->setBinders(renderData.bucket, &binders);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
+                    shadowTileGroup->addDrawable(drawPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
+            };
+
+            if (maskShader && bucket.sharedTriangles->elements()) {
+                if (auto builder = context.createDrawableBuilder(layerPrefix + "shadowRoof")) {
+                    builder->setShader(maskShader);
+                    configureShadow(*builder);
+                    if (const auto& attr = shadowRoofAttrs->set(idFillExtrusionShadowPosVertexAttribute)) {
+                        attr->setSharedRawData(bucket.sharedVertices,
+                                               offsetof(FillExtrusionLayoutVertex, a1),
+                                               /*vertexOffset=*/0,
+                                               sizeof(FillExtrusionLayoutVertex),
+                                               gfx::AttributeDataType::Short2);
+                    }
+                    if (const auto& attr = shadowRoofAttrs->set(idFillExtrusionShadowDecimalsEdAttribute)) {
+                        attr->setSharedRawData(bucket.sharedVertices,
+                                               offsetof(FillExtrusionLayoutVertex, a2),
+                                               /*vertexOffset=*/0,
+                                               sizeof(FillExtrusionLayoutVertex),
+                                               gfx::AttributeDataType::UShort2);
+                    }
+                    builder->setVertexAttributes(std::move(shadowRoofAttrs));
+                    builder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
+                    builder->setSegments(gfx::Triangles(),
+                                         bucket.sharedTriangles,
+                                         bucket.triangleSegments.data(),
+                                         bucket.triangleSegments.size());
+                    finishShadow(*builder);
+                }
+            }
+
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+            if (maskShader && shadowMaskInstancedShaderGroup) {
+                StringIDSetsPair shadowInstancePropertiesAsUniforms;
+                auto shadowInstanceAttrs = context.createVertexAttributeArray();
+                shadowInstanceAttrs->readDataDrivenPaintProperties<FillExtrusionBase, FillExtrusionHeight>(
+                    binders, evaluated, shadowInstancePropertiesAsUniforms, idFillExtrusionShadowBaseVertexAttribute);
+
+                const auto maskInstancedShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                    shadowMaskInstancedShaderGroup->getOrCreateShader(context, shadowInstancePropertiesAsUniforms));
+
+                if (maskInstancedShader && staticDataIndices->elements()) {
+                    auto shadowQuadAttrs = context.createVertexAttributeArray();
+                    if (const auto& attr = shadowQuadAttrs->set(idFillExtrusionShadowPosVertexAttribute)) {
+                        attr->setSharedRawData(staticDataVertices,
+                                               offsetof(FillExtrusionStaticVertex, a1),
+                                               /*vertexOffset=*/0,
+                                               sizeof(FillExtrusionStaticVertex),
+                                               gfx::AttributeDataType::Short2);
+                    }
+                    if (const auto& attr = shadowInstanceAttrs->set(idFillExtrusionShadowOutlinePosAttribute)) {
+                        attr->setSharedRawData(bucket.sharedVertices,
+                                               offsetof(FillExtrusionLayoutVertex, a1),
+                                               /*vertexOffset=*/0,
+                                               sizeof(FillExtrusionLayoutVertex),
+                                               gfx::AttributeDataType::Short2);
+                    }
+                    if (const auto& attr = shadowInstanceAttrs->set(idFillExtrusionShadowDecimalsEdAttribute)) {
+                        attr->setSharedRawData(bucket.sharedVertices,
+                                               offsetof(FillExtrusionLayoutVertex, a2),
+                                               /*vertexOffset=*/0,
+                                               sizeof(FillExtrusionLayoutVertex),
+                                               gfx::AttributeDataType::UShort2);
+                    }
+
+                    if (auto builder = context.createDrawableBuilder(layerPrefix + "shadowWall")) {
+                        builder->setShader(maskInstancedShader);
+                        configureShadow(*builder);
+                        builder->setVertexAttributes(std::move(shadowQuadAttrs));
+                        builder->setInstanceAttributes(std::move(shadowInstanceAttrs));
+                        builder->setRawVertices({}, instanceVertexCount, gfx::AttributeDataType::Short2);
+                        // Must use bucket.instanceSegments, not a fixed segment: its instanceCount is
+                        // accumulated per bucket (see FillExtrusionBucket::addFeature()) to match the
+                        // real outline vertex count, same as the non-shadow instanced wall above.
+                        builder->setSegments(gfx::Triangles(),
+                                             staticDataIndices,
+                                             bucket.instanceSegments.data(),
+                                             bucket.instanceSegments.size());
+                        finishShadow(*builder);
+                    }
+                }
+            }
+#endif // MLN_USE_FILL_EXTRUSION_INSTANCING
+        }
+    }
+
+    if (drawShadow) {
+        reportShadowStats(shadowSetupMs);
     }
 }
 

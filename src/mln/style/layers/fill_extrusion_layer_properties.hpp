@@ -41,6 +41,22 @@ struct FillExtrusionPattern : CrossFadedDataDrivenPaintProperty<expression::Imag
     static expression::Image defaultValue() { return {}; }
 };
 
+struct FillExtrusionShadowAzimuth : PaintProperty<float> {
+    static float defaultValue() { return 225.f; }
+};
+
+struct FillExtrusionShadowColor : PaintProperty<Color> {
+    static Color defaultValue() { return { 0, 0, 0, 0.35 }; }
+};
+
+struct FillExtrusionShadowLength : PaintProperty<float> {
+    static float defaultValue() { return 0.32f; }
+};
+
+struct FillExtrusionShadowOpacity : PaintProperty<float> {
+    static float defaultValue() { return 0.f; }
+};
+
 struct FillExtrusionTranslate : PaintProperty<std::array<float, 2>> {
     static std::array<float, 2> defaultValue() { return {{0.f, 0.f}}; }
 };
@@ -49,8 +65,8 @@ struct FillExtrusionTranslateAnchor : PaintProperty<TranslateAnchorType> {
     static TranslateAnchorType defaultValue() { return TranslateAnchorType::Map; }
 };
 
-struct FillExtrusionVerticalGradient : PaintProperty<bool> {
-    static bool defaultValue() { return true; }
+struct FillExtrusionVerticalGradient : PaintProperty<VerticalGradient> {
+    static VerticalGradient defaultValue() { return {}; }
 };
 
 class FillExtrusionLayoutProperties : public Properties<
@@ -63,6 +79,10 @@ class FillExtrusionPaintProperties : public Properties<
     FillExtrusionHeight,
     FillExtrusionOpacity,
     FillExtrusionPattern,
+    FillExtrusionShadowAzimuth,
+    FillExtrusionShadowColor,
+    FillExtrusionShadowLength,
+    FillExtrusionShadowOpacity,
     FillExtrusionTranslate,
     FillExtrusionTranslateAnchor,
     FillExtrusionVerticalGradient

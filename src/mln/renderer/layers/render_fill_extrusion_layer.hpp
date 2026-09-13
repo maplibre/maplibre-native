@@ -13,28 +13,32 @@ public:
     ~RenderFillExtrusionLayer() override;
 
 private:
-    void transition(const TransitionParameters &) override;
-    void evaluate(const PropertyEvaluationParameters &) override;
+    void transition(const TransitionParameters&) override;
+    void evaluate(const PropertyEvaluationParameters&) override;
     bool hasTransition() const override;
     bool hasCrossfade() const override;
     bool is3D() const override;
 
-    /// Generate any changes needed by the layer
-    void update(gfx::ShaderRegistry &,
-                gfx::Context &,
-                const TransformState &,
-                const std::shared_ptr<UpdateParameters> &,
-                const PaintParameters &,
-                const RenderTree &,
-                UniqueChangeRequestVec &) override;
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
+    std::size_t removeAllDrawables() override;
 
-    bool queryIntersectsFeature(const GeometryCoordinates &,
-                                const GeometryTileFeature &,
+    /// Generate any changes needed by the layer
+    void update(gfx::ShaderRegistry&,
+                gfx::Context&,
+                const TransformState&,
+                const std::shared_ptr<UpdateParameters>&,
+                const PaintParameters&,
+                const RenderTree&,
+                UniqueChangeRequestVec&) override;
+
+    bool queryIntersectsFeature(const GeometryCoordinates&,
+                                const GeometryTileFeature&,
                                 float,
-                                const TransformState &,
+                                const TransformState&,
                                 float,
-                                const mat4 &,
-                                const FeatureState &) const override;
+                                const mat4&,
+                                const FeatureState&) const override;
 
     // Paint properties
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
@@ -52,6 +56,46 @@ private:
     std::shared_ptr<FillExtrusionVertexVector> staticDataVertices;
     std::shared_ptr<TriangleIndexVector> staticDataIndices;
 #endif
+
+    // Ground shadows. Each building's roof/wall geometry is sheared along the light direction and
+    // redrawn as flat, alpha-blended ground-plane geometry, positioned with the exact same per-tile
+    // camera matrix as the building itself (see getTileMatrix() in the tweaker). Registered ahead
+    // of the building layer group at the same layer index (insertion-order trick, see
+    // markLayerRenderable()) so shadows draw underneath the buildings.
+    //
+    // shadowMaskShaderGroup draws the roof on instanced (Metal/Vulkan) backends, or the whole
+    // combined roof+wall mesh on non-instanced (OpenGL) backends -- see FillExtrusionBucket's non-
+    // instanced layoutVertex(). shadowMaskInstancedShaderGroup draws walls only where instancing is
+    // available, and is never looked up otherwise.
+
+    /// Whether the evaluated properties ask for a shadow at all.
+    bool shadowEnabled() const;
+
+    /// Create the shadow's tile layer group and shader groups. Returns false if any resource could
+    /// not be obtained, in which case the caller should skip the shadow entirely.
+    bool prepareShadow(gfx::ShaderRegistry&, gfx::Context&, UniqueChangeRequestVec&);
+
+    /// Release every shadow resource and deregister it from the orchestrator.
+    void teardownShadow(UniqueChangeRequestVec&);
+
+    /// Registered at the same layerIndex as `layerGroup` but *before* it, so it draws underneath
+    /// the buildings.
+    LayerGroupBasePtr shadowGroup;
+
+    gfx::ShaderGroupPtr shadowMaskShaderGroup;
+    gfx::ShaderGroupPtr shadowMaskInstancedShaderGroup;
+
+    LayerTweakerPtr shadowTweaker;
+
+    /// Tracks whether the shadow was active last update, so that toggling it forces a full drawable
+    /// rebuild. Without this, tiles that already have building drawables get skipped by updateTile
+    /// and would never gain their shadow drawables.
+    bool shadowWasEnabled = false;
+
+    // Throttled cost reporting, enabled with the MLN_SHADOW_STATS environment variable.
+    void reportShadowStats(double setupMs);
+    std::uint64_t shadowFrameCount = 0;
+    double shadowSetupMsAccum = 0.0;
 };
 
 } // namespace mln

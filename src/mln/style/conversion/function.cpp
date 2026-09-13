@@ -135,6 +135,8 @@ template std::optional<PropertyExpression<Color>> convertFunctionToExpression<Co
 template std::optional<PropertyExpression<Padding>> convertFunctionToExpression<Padding>(const Convertible&,
                                                                                          Error&,
                                                                                          bool);
+template std::optional<PropertyExpression<VerticalGradient>> convertFunctionToExpression<VerticalGradient>(
+    const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<VariableAnchorOffsetCollection>>
 convertFunctionToExpression<VariableAnchorOffsetCollection>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Position>> convertFunctionToExpression<Position>(const Convertible&,
@@ -272,6 +274,13 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
         },
         [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
             auto result = convert<Padding>(value, error);
+            if (!result) {
+                return std::nullopt;
+            }
+            return literal(*result);
+        },
+        [&](const type::VerticalGradientType&) -> std::optional<std::unique_ptr<Expression>> {
+            auto result = convert<VerticalGradient>(value, error);
             if (!result) {
                 return std::nullopt;
             }
@@ -872,6 +881,9 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             },
             [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toPadding(get(literal(*property)), defaultExpr());
+            },
+            [&](const type::VerticalGradientType&) -> std::optional<std::unique_ptr<Expression>> {
+                return toVerticalGradient(get(literal(*property)), defaultExpr());
             },
             [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toVariableAnchorOffset(get(literal(*property)), defaultExpr());
