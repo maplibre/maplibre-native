@@ -1,5 +1,6 @@
 #include <mln/test/map_adapter.hpp>
 #include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_map_observer.hpp>
 #include <mln/test/util.hpp>
 
 #include <mln/gfx/headless_frontend.hpp>
@@ -10,6 +11,10 @@
 #include <mln/style/style.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/run_loop.hpp>
+
+#if MLN_RENDER_BACKEND_METAL
+#include <Foundation/Foundation.hpp>
+#endif
 
 #include <algorithm>
 #include <sstream>
@@ -47,7 +52,12 @@ std::string collidingSymbolsStyle(std::size_t count, double spacing, SymbolKind 
 
 class SymbolRenderingTest {
 public:
-    explicit SymbolRenderingTest(std::size_t count, double spacing = 0, SymbolKind kind = SymbolKind::Icon) {
+    explicit SymbolRenderingTest(std::size_t count,
+                                 double spacing = 0,
+                                 SymbolKind kind = SymbolKind::Icon,
+                                 MapMode mode = MapMode::Static,
+                                 MapObserver& observer = MapObserver::nullObserver())
+        : map{frontend, observer, fileSource, MapOptions().withMapMode(mode).withSize(frontend.getSize())} {
         fileSource->glyphsResponse = [](const Resource&) {
             Response response;
             response.data = std::make_shared<const std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
@@ -63,11 +73,8 @@ public:
 
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
-    HeadlessFrontend frontend{Size{256, 256}, 1.0f};
-    MapAdapter map{frontend,
-                   MapObserver::nullObserver(),
-                   fileSource,
-                   MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+    HeadlessFrontend frontend{mln::Size{256, 256}, 1.0f};
+    MapAdapter map;
 };
 
 } // namespace
@@ -106,6 +113,67 @@ TEST(SymbolRendering, CollisionVisibilityUpdatesExistingDrawables) {
     const auto overlappingAgain = test.frontend.render(test.map);
     EXPECT_EQ(overlappingAgain.stats.numDrawCalls, 1);
     EXPECT_EQ(overlapping.image, overlappingAgain.image);
+}
+
+TEST(SymbolRendering, ContinuousCollisionVisibilityFadesAndReappears) {
+    StubMapObserver observer;
+    SymbolRenderingTest test(2, 0.5, SymbolKind::Icon, MapMode::Continuous, observer);
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{5, 5.25}).withZoom(4.9));
+
+    enum class Phase {
+        Initial,
+        Colliding,
+        Reappearing,
+        Complete
+    };
+    auto phase = Phase::Initial;
+    bool sawFadeOut = false;
+    PremultipliedImage initialImage;
+
+    observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+        if (status.mode != MapObserver::RenderMode::Full) return;
+
+        const auto drawCalls = status.renderingStats.numDrawCalls;
+        switch (phase) {
+            case Phase::Initial:
+                if (status.needsRepaint) return;
+                EXPECT_EQ(drawCalls, 2);
+                initialImage = test.frontend.readStillImage();
+                phase = Phase::Colliding;
+                test.map.jumpTo(CameraOptions().withZoom(4.1));
+                break;
+            case Phase::Colliding:
+                // A committed collision must keep the fading symbol drawable enabled.
+                if (status.placementChanged && status.needsRepaint && drawCalls == 2) {
+                    sawFadeOut = true;
+                }
+                if (drawCalls != 1) return;
+                EXPECT_TRUE(sawFadeOut);
+                phase = Phase::Reappearing;
+                test.map.jumpTo(CameraOptions().withZoom(4.9));
+                break;
+            case Phase::Reappearing:
+                if (status.needsRepaint) return;
+                EXPECT_EQ(drawCalls, 2);
+                EXPECT_EQ(test.frontend.readStillImage(), initialImage);
+                phase = Phase::Complete;
+                break;
+            case Phase::Complete:
+                break;
+        }
+    };
+
+    // Exercise the real repaint/placement scheduling, but fail rather than hang
+    // if hidden drawables never stop drawing or never become visible again.
+    const auto deadline = Clock::now() + Seconds{10};
+    while (phase != Phase::Complete && Clock::now() < deadline) {
+#if MLN_RENDER_BACKEND_METAL
+        // Headless continuous rendering has no application autorelease pool.
+        const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
+#endif
+        test.loop.runOnce();
+    }
+    EXPECT_EQ(phase, Phase::Complete);
 }
 
 TEST(SymbolRendering, KeepFadingSymbolsVisible) {
