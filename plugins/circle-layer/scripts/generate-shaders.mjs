@@ -138,6 +138,9 @@ for (const backend of ['opengl', 'vulkan', 'metal']) {
     }).join('\n');
     const positionBody = evaluate(backend) + projection.slice(0, projection.indexOf('    OUT_local'))
       .replace('POSITION', 'in.a_position');
+    // Match native circle's device-address-space buffer interface. The focused
+    // Metal benchmark covers this choice; constant declarations cost more in
+    // the measured dense workload despite identical fragment arithmetic.
     const source = `struct alignas(16) CircleDrawableUBO {${metal(drawableFields)}};
 struct alignas(16) CirclePaintUBO {${metal(paintFields)}};
 struct CircleVertex {\n${attributes(backend)}};
@@ -148,10 +151,10 @@ struct CircleVaryings {
 ${fields}
 };
 vertex CircleVaryings circleVertex(CircleVertex in [[stage_in]],
-    constant CircleDrawableUBO* drawables [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]],
-    constant uint& drawableIndex [[buffer(MLN_PLUGIN_DRAWABLE_INDEX_BINDING)]],
-    constant CirclePaintUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]]) {
-    constant auto& u = drawables[drawableIndex];
+    device const CircleDrawableUBO* drawables [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]],
+    device const uint& drawableIndex [[buffer(MLN_PLUGIN_DRAWABLE_INDEX_BINDING)]],
+    device const CirclePaintUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]]) {
+    device const auto& u = drawables[drawableIndex];
     CircleVaryings out;
 ${metal(positionBody)}    out.position = position;
     out.extrude = corner;
@@ -160,7 +163,7 @@ ${assignments}
     return out;
 }
 fragment half4 circleFragment(CircleVaryings in [[stage_in]],
-    constant CirclePaintUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]]) {
+    device const CirclePaintUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]]) {
 #ifdef OVERDRAW_INSPECTOR
     return half4(1.0);
 #endif
