@@ -126,6 +126,8 @@ private:
     std::shared_ptr<PluginPaintVertexVector> vertexVector;
     std::array<float, 4> minimumValues{};
     std::array<float, 4> maximumValues{};
+    mutable std::optional<float> uniformZoom;
+    mutable std::array<float, 4> uniformValue{};
 };
 
 class PluginPaintPropertyBinders final : public PaintPropertyBindersBase {
