@@ -64,6 +64,7 @@ public:
                               plugin::ShaderPropertyBindingDefinition,
                               style::PluginPropertyValue,
                               float bucketZoom,
+                              CanonicalTileID,
                               uint64_t drawableKey,
                               std::size_t vertexCount,
                               const std::vector<PluginFeatureVertexRange>&,
@@ -88,6 +89,7 @@ private:
         FeatureType featureType = FeatureType::Unknown;
         FeatureIdentifier featureIdentifier;
         PropertyMap properties;
+        std::shared_ptr<const GeometryCollection> geometry;
         std::size_t firstVertex = 0;
         std::size_t vertexCount = 0;
     };
@@ -100,6 +102,7 @@ private:
     plugin::ShaderPropertyBindingDefinition binding;
     style::PluginPropertyValue value;
     float bucketZoom;
+    const CanonicalTileID canonical;
     std::size_t vertexCount;
     bool dataDriven = false;
     std::vector<Range> ranges;
@@ -116,6 +119,7 @@ public:
                                uint64_t drawableKey,
                                std::size_t vertexCount,
                                float bucketZoom,
+                               const CanonicalTileID&,
                                const style::PluginPropertyMap&,
                                const std::vector<PluginFeatureVertexRange>&,
                                const GeometryTileLayer&);

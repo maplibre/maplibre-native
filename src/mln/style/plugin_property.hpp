@@ -15,6 +15,7 @@
 
 namespace mln {
 class GeometryTileFeature;
+class CanonicalTileID;
 namespace plugin {
 struct PropertyDefinition;
 }
@@ -47,6 +48,7 @@ public:
     float interpolationFactor(float bucketZoom, float currentZoom) const noexcept;
 
     mln_plugin_value evaluate(float zoom,
+                              const CanonicalTileID&,
                               const GeometryTileFeature&,
                               const FeatureState&,
                               const plugin::PropertyDefinition&,

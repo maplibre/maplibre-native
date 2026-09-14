@@ -282,6 +282,7 @@ void PluginLayout::createBucket(const ImagePositions&,
                                                        drawable.key,
                                                        drawable.vertexCount,
                                                        zoom,
+                                                       tileID.canonical,
                                                        impl.pluginProperties,
                                                        bucket->featureVertexRanges,
                                                        *sourceLayer));

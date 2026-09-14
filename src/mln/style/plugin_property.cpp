@@ -84,6 +84,7 @@ std::string defaultValue<std::string>(const plugin::PropertyDefinition& definiti
 template <class T>
 T evaluateTyped(const PropertyValue<T>& value,
                 float zoom,
+                const CanonicalTileID& canonical,
                 const GeometryTileFeature& feature,
                 const FeatureState& state,
                 const plugin::PropertyDefinition& definition) {
@@ -91,7 +92,9 @@ T evaluateTyped(const PropertyValue<T>& value,
     return value.match([&](const Undefined&) { return fallback; },
                        [&](const T& constant) { return constant; },
                        [&](const PropertyExpression<T>& expression) {
-                           return expression.evaluate(expression::EvaluationContext(zoom, &feature, &state), fallback);
+                           return expression.evaluate(
+                               expression::EvaluationContext(zoom, &feature, &state).withCanonicalTileID(&canonical),
+                               fallback);
                        });
 }
 
@@ -174,6 +177,7 @@ float PluginPropertyValue::interpolationFactor(float bucketZoom, float currentZo
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
+                                               const CanonicalTileID& canonical,
                                                const GeometryTileFeature& feature,
                                                const FeatureState& state,
                                                const plugin::PropertyDefinition& definition,
@@ -184,23 +188,23 @@ mln_plugin_value PluginPropertyValue::evaluate(float zoom,
     switch (definition.type) {
         case MLN_PLUGIN_VALUE_FLOAT:
             result.data.float_value = evaluateTyped(
-                std::get<PropertyValue<float>>(value), zoom, feature, state, definition);
+                std::get<PropertyValue<float>>(value), zoom, canonical, feature, state, definition);
             break;
         case MLN_PLUGIN_VALUE_FLOAT2: {
             const auto evaluated = evaluateTyped(
-                std::get<PropertyValue<std::array<float, 2>>>(value), zoom, feature, state, definition);
+                std::get<PropertyValue<std::array<float, 2>>>(value), zoom, canonical, feature, state, definition);
             result.data.float2_value = {evaluated[0], evaluated[1]};
             break;
         }
         case MLN_PLUGIN_VALUE_COLOR: {
             const auto evaluated = evaluateTyped(
-                std::get<PropertyValue<Color>>(value), zoom, feature, state, definition);
+                std::get<PropertyValue<Color>>(value), zoom, canonical, feature, state, definition);
             result.data.color_value = {evaluated.r, evaluated.g, evaluated.b, evaluated.a};
             break;
         }
         case MLN_PLUGIN_VALUE_STRING:
             storage.string = evaluateTyped(
-                std::get<PropertyValue<std::string>>(value), zoom, feature, state, definition);
+                std::get<PropertyValue<std::string>>(value), zoom, canonical, feature, state, definition);
             result.data.string_value = {storage.string.data(), storage.string.size()};
             break;
     }

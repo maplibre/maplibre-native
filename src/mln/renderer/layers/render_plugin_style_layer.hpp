@@ -20,9 +20,9 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 
-    bool queryIntersectsFeature(const GeometryCoordinates&,
+    bool queryIntersectsFeatureInTile(const GeometryCoordinates&,
                                 const GeometryTileFeature&,
-                                float,
+                                const CanonicalTileID&,
                                 const TransformState&,
                                 float,
                                 const mat4&,

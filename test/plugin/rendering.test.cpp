@@ -2,6 +2,9 @@
 #include <mln/map/map_options.hpp>
 #include <mln/plugin/plugin_api.h>
 #include <mln/plugin/plugin_shader.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/rapidjson_conversion.hpp>
+#include <mln/style/layer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/test/map_adapter.hpp>
 #include <mln/test/stub_file_source.hpp>
@@ -9,6 +12,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cmath>
 
 using namespace mln;
 
@@ -21,7 +25,7 @@ mln_plugin_string view(const std::string& text) {
 // Minimal geometry plugin for exercising the host, independent of example plugins.
 // Two layer types deliberately share a shader ID, but draw in different colors
 // and viewport halves. No network requests or image-baseline updates are needed.
-void registerTriangles(const std::string& pluginID, bool packedColor = false) {
+void registerTriangles(const std::string& pluginID, bool packedColor = false, bool queries = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -32,6 +36,13 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false) {
         sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
+    const mln_plugin_shader_attribute_v1 queryAttributes[] = {
+        attribute, {sizeof(attribute), 2, 1, {"a_radius", 8}, MLN_PLUGIN_VERTEX_FLOAT_X2}};
+    const mln_plugin_uniform_block_descriptor_v1 uniform = {
+        sizeof(uniform), 0, {"QueryUBO", 8}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX};
+    const mln_plugin_shader_property_binding_v1 paintBinding = {
+        sizeof(paintBinding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 2, 2, 0, 4};
+    static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     static const uint8_t colors[] = {128, 64, 0, 255, 128, 64, 0, 255, 128, 64, 0, 255};
     static const mln_plugin_vertex_stream_v1 colorStreams[] = {stream,
                                                                {sizeof(stream), 1, colors, sizeof(colors), 3, 4}};
@@ -46,6 +57,13 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false) {
     std::array<std::array<mln_plugin_shader_source_v1, 3>, 2> sources;
     std::array<mln_plugin_shader_descriptor_v1, 2> shaders{};
     std::array<mln_plugin_layer_type_v1, 2> layers{};
+    mln_plugin_property_descriptor_v1 radius{};
+    radius.struct_size = sizeof(radius);
+    radius.name = {"test-radius", 11};
+    radius.type = MLN_PLUGIN_VALUE_FLOAT;
+    radius.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_FLOAT, {.float_value = 1}};
+    radius.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
+                                     MLN_PLUGIN_EXPRESSION_COMPOSITE;
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
         const std::string color = i == 0 ? "1,0,0,1" : "0,1,0,1";
@@ -73,6 +91,23 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false) {
                            ")*0.5,in.a_pos.y,0,1),in.a_color};}"
                            "fragment half4 triangleFragment(Output in [[stage_in]]){return half4(in.color);}"};
         }
+        if (queries) {
+            // Keep the declared GL block active in both uniform and attribute variants.
+            const std::string attributes =
+                "\n#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\nin vec2 a_radius;\n#endif\n";
+            const std::string evaluateRadius =
+                "float radius=u_radius;\n#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\n"
+                "radius=mix(a_radius.x,a_radius.y,u_t);\n#endif\ngl_Position.z=radius*0.00001;}";
+            code[i][0] = "in vec2 a_pos;layout(std140) uniform QueryUBO{float u_radius;float u_t;};" + attributes +
+                         body + evaluateRadius;
+            code[i][2] =
+                "layout(location=0) in vec2 a_pos;"
+                         "layout(set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_0_BINDING,std140) uniform QueryUBO"
+                "{float u_radius;float u_t;};\n"
+                "#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\n"
+                "layout(location=1) in vec2 a_radius;\n#endif\n" +
+                body + "applySurfaceTransform();" + evaluateRadius;
+        }
         sources[i] = {{{sizeof(mln_plugin_shader_source_v1),
                         MLN_PLUGIN_BACKEND_OPENGL,
                         view(code[i][0]),
@@ -95,12 +130,12 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false) {
                       {"main", 4},
                       sources[i].data(),
                       3,
-                      packedColor ? colorAttributes : &attribute,
-                      packedColor ? 2u : 1u,
-                      nullptr,
-                      0,
-                      nullptr,
-                      0};
+                      queries ? queryAttributes : (packedColor ? colorAttributes : &attribute),
+                      queries || packedColor ? 2u : 1u,
+                      queries ? &uniform : nullptr,
+                      queries ? 1u : 0u,
+                      queries ? &paintBinding : nullptr,
+                      queries ? 1u : 0u};
         auto& layer = layers[i];
         layer.struct_size = sizeof(layer);
         layer.layer_type = view(types[i]);
@@ -108,6 +143,26 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false) {
         layer.geometry_type_mask = MLN_PLUGIN_GEOMETRY_POINT;
         layer.shaders = &shaders[i];
         layer.shader_count = 1;
+        layer.properties = queries ? &radius : nullptr;
+        layer.property_count = queries ? 1u : 0u;
+        layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
+            return MLN_PLUGIN_STATUS_OK;
+        };
+        layer.get_query_radius =
+            [](const mln_plugin_property_statistics_v1*, size_t, const mln_plugin_property_value_v1*, size_t) {
+                return 128.0f;
+            };
+        layer.query_feature = [](const mln_plugin_feature_v1* feature,
+                                 const mln_plugin_tile_point_v1* query,
+                                 size_t count,
+                                 const mln_plugin_query_context_v1* context,
+                                 const mln_plugin_property_value_v1* properties,
+                                 size_t propertyCount) -> uint8_t {
+            if (!count || !feature->point_count || !propertyCount) return 0;
+            const auto& point = feature->points[0];
+            return std::hypot(double(query[0].x - point.x), double(query[0].y - point.y)) <=
+                   properties[0].value.data.float_value * context->pixels_to_tile_units;
+        };
         layer.create_layout = [](const mln_plugin_layout_context_v1*, void** instance) {
             *instance = new (std::nothrow) int(0);
             return *instance ? MLN_PLUGIN_STATUS_OK : MLN_PLUGIN_STATUS_CALLBACK_ERROR;
@@ -116,7 +171,7 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false) {
             return MLN_PLUGIN_STATUS_OK;
         };
         layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
-            *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, nullptr, 0};
+            *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, &range, 1};
             return MLN_PLUGIN_STATUS_OK;
         };
         if (packedColor) {
@@ -153,6 +208,21 @@ struct RenderTest {
                    MapObserver::nullObserver(),
                    fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
+
+    void setRadius(const char* json) {
+        JSDocument document;
+        document.Parse(json);
+        const JSValue* value = &document;
+        for (const auto* id : {"left", "right"}) {
+            ASSERT_FALSE(
+                map.getStyle().getLayer(id)->setProperty("test-radius", style::conversion::Convertible(value)));
+        }
+        frontend.render(map);
+    }
+
+    std::size_t hits(double distance) {
+        return frontend.getRenderer()->queryRenderedFeatures(ScreenCoordinate{32 + distance, 32}).size();
+    }
 
     void expectTriangles(const std::string& pluginID) {
         map.getStyle().loadJSON(triangleStyle(pluginID));
@@ -206,6 +276,19 @@ TEST(PluginRendering, NormalizedByteColorAttributes) {
         EXPECT_EQ(0, pixel[2]);
         EXPECT_EQ(255, pixel[3]);
     }
+}
+
+TEST(PluginRendering, GeometryExpressionsInRenderedFeatureQueries) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.geometry-query", false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.geometry-query"));
+    test.setRadius(R"(["case",["within",{"type":"Polygon","coordinates":[
+        [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1]]]}],20,1])");
+    EXPECT_EQ(2u, test.hits(15));
+    EXPECT_EQ(0u, test.hits(25));
+    test.setRadius(R"(["case",["<",["distance",{"type":"Point","coordinates":[0,0]}],1],20,1])");
+    EXPECT_EQ(2u, test.hits(15));
+    EXPECT_EQ(0u, test.hits(25));
 }
 
 } // namespace

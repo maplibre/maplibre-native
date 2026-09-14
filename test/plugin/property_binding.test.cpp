@@ -41,7 +41,7 @@ TEST(PluginPaintBinder, PackedCompositeEndpointsAndFeatureStateUpdates) {
     const auto layer = source();
     plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["interpolate",["linear"],["zoom"],10,["get","small"],11,["get","large"]])");
-    PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, {{0, 1, 0, 4}}, layer);
+    PluginPaintPropertyBinder binder(definition, binding, value, 10, {10, 0, 0}, 1, 4, {{0, 1, 0, 4}}, layer);
     ASSERT_TRUE(binder.isDataDriven());
     EXPECT_EQ(gfx::AttributeDataType::Float2, binder.attributeType());
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
@@ -72,7 +72,7 @@ TEST(PluginPaintBinder, EnumOrdinalsAndOwnedStatisticsStrings) {
     plugin::ShaderPropertyBindingDefinition binding{
         "test-size", MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["get","anchor"])");
-    PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, {{0, 1, 0, 4}}, layer);
+    PluginPaintPropertyBinder binder(definition, binding, value, 10, {10, 0, 0}, 1, 4, {{0, 1, 0, 4}}, layer);
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
     EXPECT_FLOAT_EQ(1, bytes[0]);
     EXPECT_FLOAT_EQ(1, bytes[1]);
@@ -86,4 +86,43 @@ TEST(PluginPaintBinder, EnumOrdinalsAndOwnedStatisticsStrings) {
     float uniform[2]{};
     binder.writeUniform(10, 0, reinterpret_cast<uint8_t*>(uniform), sizeof(uniform));
     EXPECT_FLOAT_EQ(1, uniform[0]);
+}
+
+TEST(PluginPaintBinder, GeometryExpressionsSurvivePaintAndStateUpdates) {
+    auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
+    for (const auto coordinate : {0, 2048}) {
+        mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>(coordinate, coordinate)};
+        feature.id = uint64_t(features->size() + 1);
+        features->push_back(std::move(feature));
+    }
+    // In canonical tile 1/1/1, tile coordinate 0,0 is longitude/latitude 0,0.
+    const GeoJSONTileLayer layer(features);
+    const auto definition = numberDefinition();
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
+    const auto within = expression(definition, R"(["case",["within",{"type":"Polygon","coordinates":[
+        [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1]]]}],40,4])");
+    PluginPaintPropertyBinder binder(
+        definition, binding, within, 1, {1, 1, 1}, 1, 2, {{0, 1, 0, 1}, {1, 1, 1, 1}}, layer);
+    auto expectValues = [&](float inside, float outside) {
+        const auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
+        EXPECT_FLOAT_EQ(inside, values[0]);
+        EXPECT_FLOAT_EQ(inside, values[1]);
+        EXPECT_FLOAT_EQ(outside, values[2]);
+        EXPECT_FLOAT_EQ(outside, values[3]);
+    };
+    expectValues(40, 4);
+    const auto distance = expression(definition, R"(["distance",{"type":"Point","coordinates":[0,0]}])");
+    EXPECT_TRUE(binder.synchronize(distance));
+    const auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
+    EXPECT_NEAR(0, values[0], 0.01);
+    EXPECT_GT(values[2], 1000000);
+    EXPECT_TRUE(binder.synchronize(expression(definition, R"(5)")));
+    EXPECT_TRUE(binder.synchronize(within));
+    expectValues(40, 4);
+    EXPECT_TRUE(binder.synchronize(expression(definition, R"(["case",["within",{"type":"Polygon",
+        "coordinates":[[[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1]]]}],
+        ["number",["feature-state","size"],40],4])")));
+    EXPECT_TRUE(binder.update({{"1", {{"size", 80.0}}}, {"2", {{"size", 80.0}}}}, layer));
+    expectValues(80, 4);
 }

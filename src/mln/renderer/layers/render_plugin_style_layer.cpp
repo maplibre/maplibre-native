@@ -263,9 +263,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
     }
 }
 
-bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
+bool RenderPluginStyleLayer::queryIntersectsFeatureInTile(const GeometryCoordinates& queryGeometry,
                                                     const GeometryTileFeature& feature,
-                                                    float zoom,
+                                                    const CanonicalTileID& canonical,
                                                     const TransformState& transformState,
                                                     float pixelsToTileUnits,
                                                     const mat4& tileMatrix,
@@ -304,7 +304,7 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};
-        property.value = value.evaluate(zoom, feature, featureState, definition, storage[i]);
+        property.value = value.evaluate(canonical.z, canonical, feature, featureState, definition, storage[i]);
         property.explicitly_set = impl.pluginProperties.find(definition.name) != impl.pluginProperties.end();
         properties.push_back(property);
     }

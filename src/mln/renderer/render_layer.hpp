@@ -141,6 +141,18 @@ public:
 
     virtual void populateDynamicRenderFeatureIndex(DynamicFeatureIndex&) const {}
 
+    // Tile-aware dispatch for layers whose paint evaluation needs geographic context.
+    // Existing layers continue to receive their canonical zoom through the original hook.
+    virtual bool queryIntersectsFeatureInTile(const GeometryCoordinates& geometry,
+                                              const GeometryTileFeature& feature,
+                                              const CanonicalTileID& tileID,
+                                              const TransformState& state,
+                                              float pixelsToTileUnits,
+                                              const mat4& matrix,
+                                              const FeatureState& featureState) const {
+        return queryIntersectsFeature(geometry, feature, tileID.z, state, pixelsToTileUnits, matrix, featureState);
+    }
+
     virtual void prepare(const LayerPrepareParameters&);
 
     const LayerPlacementData& getPlacementData() const { return placementData; }

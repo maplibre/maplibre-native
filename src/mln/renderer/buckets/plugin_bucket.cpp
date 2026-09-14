@@ -17,10 +17,12 @@ namespace {
 
 class PluginFeatureSnapshot final : public GeometryTileFeature {
 public:
-    PluginFeatureSnapshot(FeatureType type_, FeatureIdentifier id_, PropertyMap properties_)
+    PluginFeatureSnapshot(FeatureType type_, FeatureIdentifier id_, PropertyMap properties_,
+                          const GeometryCollection& geometry_)
         : type(type_),
           id(std::move(id_)),
-          properties(std::move(properties_)) {}
+          properties(std::move(properties_)),
+          geometry(geometry_) {}
 
     FeatureType getType() const override { return type; }
     std::optional<Value> getValue(const std::string& key) const override {
@@ -29,11 +31,13 @@ public:
     }
     const PropertyMap& getProperties() const override { return properties; }
     FeatureIdentifier getID() const override { return id; }
+    const GeometryCollection& getGeometries() const override { return geometry; }
 
 private:
     FeatureType type;
     FeatureIdentifier id;
     PropertyMap properties;
+    const GeometryCollection& geometry;
 };
 
 style::PluginPropertyValue propertyValue(const plugin::PropertyDefinition& definition,
@@ -147,6 +151,7 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
                                                      plugin::ShaderPropertyBindingDefinition binding_,
                                                      style::PluginPropertyValue value_,
                                                      float bucketZoom_,
+                                                     CanonicalTileID canonical_,
                                                      uint64_t drawableKey,
                                                      std::size_t vertexCount_,
                                                      const std::vector<PluginFeatureVertexRange>& featureRanges,
@@ -155,6 +160,7 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
       binding(std::move(binding_)),
       value(std::move(value_)),
       bucketZoom(bucketZoom_),
+      canonical(std::move(canonical_)),
       vertexCount(vertexCount_),
       dataDriven(value.isDataDriven()) {
     for (const auto& input : featureRanges) {
@@ -166,6 +172,7 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
                           feature->getType(),
                           feature->getID(),
                           feature->getProperties(),
+                          std::make_shared<const GeometryCollection>(feature->getGeometries().clone()),
                           input.firstVertex,
                           input.vertexCount});
     }
@@ -271,7 +278,7 @@ void PluginPaintPropertyBinder::refill(const GeometryTileLayer* layer) {
     for (const auto& range : ranges) {
         std::unique_ptr<GeometryTileFeature> feature;
         if (layer) feature = layer->getFeature(range.featureIndex);
-        PluginFeatureSnapshot snapshot(range.featureType, range.featureIdentifier, range.properties);
+        PluginFeatureSnapshot snapshot(range.featureType, range.featureIdentifier, range.properties, *range.geometry);
         const GeometryTileFeature& sourceFeature = feature ? *feature
                                                            : static_cast<const GeometryTileFeature&>(snapshot);
         const auto state = featureStates.find(range.featureID);
@@ -286,9 +293,9 @@ void PluginPaintPropertyBinder::fillRange(const Range& range,
                                           const FeatureState& state) {
     style::PluginPropertyValue::EvaluationStorage minimumStorage;
     style::PluginPropertyValue::EvaluationStorage maximumStorage;
-    const auto minimumValue = value.evaluate(bucketZoom, feature, state, definition, minimumStorage);
+    const auto minimumValue = value.evaluate(bucketZoom, canonical, feature, state, definition, minimumStorage);
     const auto maximumValue = value.evaluate(
-        value.isZoomConstant() ? bucketZoom : bucketZoom + 1.0f, feature, state, definition, maximumStorage);
+        value.isZoomConstant() ? bucketZoom : bucketZoom + 1.0f, canonical, feature, state, definition, maximumStorage);
     std::array<float, 4> minimum{};
     std::array<float, 4> maximum{};
     encodedValue(minimumValue, binding.encoding, definition, minimum);
@@ -305,6 +312,7 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& 
                                                        uint64_t drawableKey,
                                                        std::size_t vertexCount,
                                                        float bucketZoom,
+                                                       const CanonicalTileID& canonical,
                                                        const style::PluginPropertyMap& properties,
                                                        const std::vector<PluginFeatureVertexRange>& ranges,
                                                        const GeometryTileLayer& layer) {
@@ -318,6 +326,7 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& 
                              binding,
                              propertyValue(*definition, properties),
                              bucketZoom,
+                             canonical,
                              drawableKey,
                              vertexCount,
                              ranges,

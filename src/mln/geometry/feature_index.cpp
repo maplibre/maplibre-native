@@ -285,8 +285,8 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
         bool needsCrossTileIndex = renderLayer->baseImpl->getTypeInfo()->crossTileIndex ==
                                    style::LayerTypeInfo::CrossTileIndex::Required;
         if (!needsCrossTileIndex &&
-            !renderLayer->queryIntersectsFeature(
-                queryGeometry, *geometryTileFeature, tileID.z, transformState, pixelsToTileUnits, posMatrix, state)) {
+            !renderLayer->queryIntersectsFeatureInTile(
+                queryGeometry, *geometryTileFeature, tileID, transformState, pixelsToTileUnits, posMatrix, state)) {
             continue;
         }
 
