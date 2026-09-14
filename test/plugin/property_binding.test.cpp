@@ -233,7 +233,7 @@ TEST(PluginPaintBinder, FeatureViewsRetainTheirSourceWithoutCopyingProperties) {
     const plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     {
         PluginPaintPropertyBinder binder(definition, binding, style::defaultPluginPropertyValue(definition),
-                                        0, {0, 0, 0}, 1, 4, data);
+                                        0, 1, 4, data);
         data.reset();
         EXPECT_FALSE(lifetime.expired());
         EXPECT_TRUE(binder.synchronize(expression(definition, R"(["get","small"])")));
