@@ -271,6 +271,7 @@ void PluginLayout::createBucket(const ImagePositions&,
         return;
     }
     bucket->queryRadius = output.query_radius;
+    const auto features = std::make_shared<const PluginFeatureData>(bucket->featureVertexRanges, *sourceLayer);
     for (const auto& layer : layers) {
         const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
         auto& layerBinders = bucket->paintPropertyBinders[impl.id];
@@ -288,8 +289,7 @@ void PluginLayout::createBucket(const ImagePositions&,
                                                        zoom,
                                                        tileID.canonical,
                                                        impl.pluginProperties,
-                                                       bucket->featureVertexRanges,
-                                                       *sourceLayer));
+                                                       features));
         }
         bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
     }

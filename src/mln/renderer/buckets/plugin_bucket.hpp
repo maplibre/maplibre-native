@@ -11,6 +11,7 @@
 
 #include <map>
 #include <set>
+#include <unordered_map>
 
 namespace mln {
 
@@ -58,6 +59,31 @@ struct PluginFeatureVertexRange {
     std::size_t vertexCount = 0;
 };
 
+// One immutable snapshot per source feature, shared by all properties and layers
+// using this bucket. Vertex ranges are shared per drawable too.
+class PluginFeatureData {
+public:
+    struct Feature {
+        std::string id;
+        std::unique_ptr<const GeometryTileFeature> snapshot;
+    };
+    struct Range {
+        std::size_t featureIndex;
+        std::size_t firstVertex;
+        std::size_t vertexCount;
+    };
+    struct Drawable {
+        std::vector<Range> ranges;
+    };
+    PluginFeatureData(const std::vector<PluginFeatureVertexRange>&, const GeometryTileLayer&);
+    ~PluginFeatureData();
+    const Drawable& drawable(uint64_t) const;
+    std::vector<Feature> features;
+
+private:
+    std::map<uint64_t, Drawable> drawables;
+};
+
 class PluginPaintPropertyBinder {
 public:
     PluginPaintPropertyBinder(plugin::PropertyDefinition,
@@ -67,8 +93,8 @@ public:
                               CanonicalTileID,
                               uint64_t drawableKey,
                               std::size_t vertexCount,
-                              const std::vector<PluginFeatureVertexRange>&,
-                              const GeometryTileLayer&);
+                              std::shared_ptr<const PluginFeatureData>,
+                              std::shared_ptr<FeatureStates> = std::make_shared<FeatureStates>());
 
     bool isDataDriven() const noexcept { return dataDriven; }
     const plugin::ShaderPropertyBindingDefinition& getBinding() const noexcept { return binding; }
@@ -83,19 +109,10 @@ public:
     void statistics(float zoom, mln_plugin_value& minimum, mln_plugin_value& maximum) const;
 
 private:
-    struct Range {
-        std::size_t featureIndex = 0;
-        std::string featureID;
-        FeatureType featureType = FeatureType::Unknown;
-        FeatureIdentifier featureIdentifier;
-        PropertyMap properties;
-        std::shared_ptr<const GeometryCollection> geometry;
-        std::size_t firstVertex = 0;
-        std::size_t vertexCount = 0;
-    };
-
-    void refill(const GeometryTileLayer* = nullptr);
-    void fillRange(const Range&, const GeometryTileFeature&, const FeatureState&);
+    friend class PluginPaintPropertyBinders;
+    bool updateRanges(const FeatureStates&);
+    void refill();
+    void fillRange(const PluginFeatureData::Range&, const GeometryTileFeature&, const FeatureState&);
     void updateStatistics();
 
     plugin::PropertyDefinition definition;
@@ -105,8 +122,9 @@ private:
     const CanonicalTileID canonical;
     std::size_t vertexCount;
     bool dataDriven = false;
-    std::vector<Range> ranges;
-    std::map<std::string, FeatureState> featureStates;
+    const uint64_t drawableKey;
+    std::shared_ptr<const PluginFeatureData> features;
+    std::shared_ptr<FeatureStates> featureStates;
     std::shared_ptr<PluginPaintVertexVector> vertexVector;
     std::array<float, 4> minimumValues{};
     std::array<float, 4> maximumValues{};
@@ -121,8 +139,7 @@ public:
                                float bucketZoom,
                                const CanonicalTileID&,
                                const style::PluginPropertyMap&,
-                               const std::vector<PluginFeatureVertexRange>&,
-                               const GeometryTileLayer&);
+                               std::shared_ptr<const PluginFeatureData>);
 
     void populateVertexAttributes(gfx::VertexAttributeArray&, gfx::StringIDSetsPair&) const;
     void writeUniforms(float zoom, uint32_t uniformID, uint8_t* output, std::size_t outputSize) const;
@@ -132,6 +149,7 @@ public:
 
 private:
     std::vector<PluginPaintPropertyBinder> binders;
+    std::shared_ptr<FeatureStates> featureStates = std::make_shared<FeatureStates>();
 };
 
 struct PluginAttributeBinding {

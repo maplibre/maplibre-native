@@ -41,7 +41,9 @@ TEST(PluginPaintBinder, PackedCompositeEndpointsAndFeatureStateUpdates) {
     const auto layer = source();
     plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["interpolate",["linear"],["zoom"],10,["get","small"],11,["get","large"]])");
-    PluginPaintPropertyBinder binder(definition, binding, value, 10, {10, 0, 0}, 1, 4, {{0, 1, 0, 4}}, layer);
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                               layer);
+    PluginPaintPropertyBinder binder(definition, binding, value, 10, {10, 0, 0}, 1, 4, snapshots);
     ASSERT_TRUE(binder.isDataDriven());
     EXPECT_EQ(gfx::AttributeDataType::Float2, binder.attributeType());
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
@@ -72,7 +74,9 @@ TEST(PluginPaintBinder, EnumOrdinalsAndOwnedStatisticsStrings) {
     plugin::ShaderPropertyBindingDefinition binding{
         "test-size", MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["get","anchor"])");
-    PluginPaintPropertyBinder binder(definition, binding, value, 10, {10, 0, 0}, 1, 4, {{0, 1, 0, 4}}, layer);
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                               layer);
+    PluginPaintPropertyBinder binder(definition, binding, value, 10, {10, 0, 0}, 1, 4, snapshots);
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
     EXPECT_FLOAT_EQ(1, bytes[0]);
     EXPECT_FLOAT_EQ(1, bytes[1]);
@@ -102,8 +106,15 @@ TEST(PluginPaintBinder, GeometryExpressionsSurvivePaintAndStateUpdates) {
         "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     const auto within = expression(definition, R"(["case",["within",{"type":"Polygon","coordinates":[
         [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1]]]}],40,4])");
-    PluginPaintPropertyBinder binder(
-        definition, binding, within, 1, {1, 1, 1}, 1, 2, {{0, 1, 0, 1}, {1, 1, 1, 1}}, layer);
+    PluginPaintPropertyBinder binder(definition,
+                                     binding,
+                                     within,
+                                     1,
+                                     {1, 1, 1},
+                                     1,
+                                     2,
+                                     std::make_shared<const PluginFeatureData>(
+                                         std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}, {1, 1, 1, 1}}, layer));
     auto expectValues = [&](float inside, float outside) {
         const auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
         EXPECT_FLOAT_EQ(inside, values[0]);
@@ -125,4 +136,47 @@ TEST(PluginPaintBinder, GeometryExpressionsSurvivePaintAndStateUpdates) {
         ["number",["feature-state","size"],40],4])")));
     EXPECT_TRUE(binder.update({{"1", {{"size", 80.0}}}, {"2", {{"size", 80.0}}}}, layer));
     expectValues(80, 4);
+}
+
+TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLifetime) {
+    struct CountingLayer final : GeometryTileLayer {
+        GeoJSONTileLayer layer = source();
+        mutable size_t reads = 0;
+        size_t featureCount() const override { return layer.featureCount(); }
+        std::string getName() const override { return "counting"; }
+        std::unique_ptr<GeometryTileFeature> getFeature(size_t i) const override {
+            ++reads;
+            return layer.getFeature(i);
+        }
+    };
+    std::shared_ptr<const PluginFeatureData> snapshots;
+    {
+        CountingLayer layer;
+        snapshots = std::make_shared<const PluginFeatureData>(
+            std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}, {0, 1, 1, 1}, {0, 2, 0, 1}}, layer);
+        EXPECT_EQ(1u, layer.reads);
+        EXPECT_EQ(1u, snapshots->features.size());
+        EXPECT_EQ(2u, snapshots->drawable(1).ranges.size());
+    }
+    const auto definition = numberDefinition();
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
+    auto makeBinder = [&](uint64_t drawable, size_t vertices) {
+        return PluginPaintPropertyBinder(
+            definition, binding, expression(definition, "5"), 1, {1, 0, 0}, drawable, vertices, snapshots);
+    };
+    auto a = makeBinder(1, 2), b = makeBinder(2, 1);
+    EXPECT_EQ(3, snapshots.use_count());
+    // A state change while uniform must survive a later switch to an expression.
+    const auto unusedSource = source();
+    EXPECT_FALSE(a.update({{"1", {{"size", 90.0}}}}, unusedSource));
+    EXPECT_TRUE(a.synchronize(expression(definition, R"(["number",["feature-state","size"],12])")));
+    EXPECT_TRUE(b.synchronize(expression(definition, R"(["get","small"])")));
+    auto values = static_cast<const float*>(a.getVertexVector()->getRawData());
+    EXPECT_FLOAT_EQ(90, values[0]);
+    EXPECT_FLOAT_EQ(90, values[2]);
+    EXPECT_FLOAT_EQ(10, static_cast<const float*>(b.getVertexVector()->getRawData())[0]);
+    EXPECT_FALSE(a.update({{"missing", {{"size", 1.0}}}}, unusedSource));
+    EXPECT_TRUE(a.update({{"1", {}}}, unusedSource)); // Removing state restores fallback.
+    EXPECT_FLOAT_EQ(12, static_cast<const float*>(a.getVertexVector()->getRawData())[0]);
 }

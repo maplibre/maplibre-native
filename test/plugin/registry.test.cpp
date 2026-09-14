@@ -239,8 +239,14 @@ TEST(PluginRegistry, QueryBoundsIncludeEveryDrawable) {
             const std::vector<PluginFeatureVertexRange> ranges = {{reverse ? 1 - i : i, i + 1, 0, 1}};
             bucket.paintPropertyBinders["bounds"].emplace(
                 i + 1,
-                PluginPaintPropertyBinders(
-                    *registration, registration->shaders[0], i + 1, 1, 0, {0, 0, 0}, paint, ranges, source));
+                PluginPaintPropertyBinders(*registration,
+                                           registration->shaders[0],
+                                           i + 1,
+                                           1,
+                                           0,
+                                           {0, 0, 0},
+                                           paint,
+                                           std::make_shared<const PluginFeatureData>(ranges, source)));
         }
         bucket.updateQueryRadius("bounds", paint, 0);
         EXPECT_FLOAT_EQ(130, bucket.queryRadii.at("bounds"));
