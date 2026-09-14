@@ -16,16 +16,26 @@
 
 #include <algorithm>
 #include <cstring>
+#include <limits>
 
 namespace mln {
 
 void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) return;
 
+    const auto drawableCount = layerGroup.getDrawableCount();
+    if (drawableCount > std::numeric_limits<uint32_t>::max()) return;
+    for (auto& [key, uniform] : sharedUniforms) {
+        uniform.drawables.clear();
+        uniform.failed = false;
+    }
+    uint32_t drawableIndex = 0;
     {
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getData() || !checkTweakDrawable(drawable)) return;
             auto& data = static_cast<plugin::DrawableData&>(*drawable.getData());
+            if (data.uniformFailed) drawable.setEnabled(true);
+            data.uniformFailed = false;
             const auto* shader = [&]() -> const plugin::ShaderDefinition* {
                 const auto it = std::find_if(registration.shaders.begin(),
                                              registration.shaders.end(),
@@ -33,6 +43,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 return it == registration.shaders.end() ? nullptr : &*it;
             }();
             if (!shader) return;
+            const auto index = drawableIndex++;
+            drawable.setUBOIndex(index);
 
             const bool hasTile = drawable.getTileID().has_value();
             const std::optional<UnwrappedTileID> tileID =
@@ -66,33 +78,98 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
             for (const auto& uniform : shader->uniformBlocks) {
                 if (!registration.updateUniformBlock) continue;
-                auto& cached = data.uniforms[uniform.id];
-                auto& bytes = cached.scratch;
-                bytes.resize(uniform.byteSize);
-                std::fill(bytes.begin(), bytes.end(), uint8_t{0});
+                const bool layerScope = uniform.scope == MLN_PLUGIN_UNIFORM_LAYER;
+                bool arrayScope = false;
+#if MLN_RENDER_BACKEND_METAL
+                arrayScope = uniform.scope == MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY;
+#endif
+                SharedUniform* shared = nullptr;
+                plugin::DrawableData::UniformData* individual = nullptr;
+                uint8_t* output = nullptr;
+                auto context = callbackContext;
+                if (layerScope || arrayScope) {
+                    shared = &sharedUniforms[{shader->id, uniform.id}];
+                    const bool first = shared->drawables.empty();
+                    shared->drawables.push_back(&drawable);
+                    shared->bindingID = uniform.bindingID;
+                    if (layerScope && !first) continue;
+                    if (first) {
+                        const auto count = arrayScope ? drawableCount : 1;
+                        if (count > shared->scratch.max_size() / uniform.byteSize) {
+                            shared->failed = true;
+                            continue;
+                        }
+                        shared->scratch.assign(count * uniform.byteSize, 0);
+                    }
+                    if (shared->failed) continue;
+                    output = shared->scratch.data() + (arrayScope ? std::size_t(index) * uniform.byteSize : 0);
+                    if (layerScope) {
+                        const auto identity = util::cast<float>(matrix::identity4());
+                        std::copy(identity.begin(), identity.end(), context.tile_matrix);
+                        context.pixels_to_tile_units = 0;
+                    }
+                } else {
+                    individual = &data.uniforms[uniform.id];
+                    individual->scratch.assign(uniform.byteSize, 0);
+                    output = individual->scratch.data();
+                }
                 const auto status = registration.updateUniformBlock(
-                    &callbackContext, uniform.id, bytes.data(), bytes.size());
+                    &context, uniform.id, output, uniform.byteSize);
                 if (status != MLN_PLUGIN_STATUS_OK) {
                     Log::Error(Event::General,
                                "Plugin '" + registration.pluginID + "' failed to update uniform " +
                                    std::to_string(uniform.id) + " (status " + std::to_string(static_cast<int>(status)) +
                                    ")");
+                    if (shared) shared->failed = true;
+                    drawable.setEnabled(false);
+                    data.uniformFailed = true;
                     continue;
                 }
                 if (const auto* baseBinders = drawable.getBinders()) {
                     const auto* binders = static_cast<const PluginPaintPropertyBinders*>(baseBinders);
                     binders->writeUniforms(
-                        static_cast<float>(parameters.state.getZoom()), uniform.id, bytes.data(), bytes.size());
+                        static_cast<float>(parameters.state.getZoom()), uniform.id, output, uniform.byteSize);
                 }
                 // Callbacks still execute on every frame, including stateful
                 // callbacks. Only identical GPU uploads can be elided safely.
-                auto& buffers = drawable.mutableUniformBuffers();
-                if (!buffers.get(uniform.bindingID) || bytes != cached.uploaded) {
-                    buffers.createOrUpdate(uniform.bindingID, bytes.data(), bytes.size(), parameters.context);
-                    cached.uploaded = bytes;
+                if (individual) {
+                    auto& buffers = drawable.mutableUniformBuffers();
+                    if (!buffers.get(uniform.bindingID) || individual->scratch != individual->uploaded) {
+                        buffers.createOrUpdate(uniform.bindingID, output, uniform.byteSize, parameters.context);
+                        individual->uploaded = individual->scratch;
+                    }
                 }
             }
         });
+        for (auto& [key, uniform] : sharedUniforms) {
+            if (!uniform.drawables.empty() && !uniform.failed) {
+                const auto& bytes = uniform.scratch;
+                if (!uniform.buffer || uniform.buffer->getSize() != bytes.size()) {
+                    uniform.buffer = parameters.context.createUniformBuffer(bytes.data(), bytes.size());
+                    uniform.uploaded = bytes;
+                } else if (bytes != uniform.uploaded) {
+                    uniform.buffer->update(bytes.data(), bytes.size());
+                    uniform.uploaded = bytes;
+                }
+                // Keep shader-local binding slots local to each drawable. The
+                // backend deduplicates binding the shared resource, even when
+                // different shader variants are interleaved in a layer group.
+                for (auto* drawable : uniform.drawables) {
+                    auto& buffers = drawable->mutableUniformBuffers();
+                    if (buffers.get(uniform.bindingID) != uniform.buffer) {
+                        buffers.set(uniform.bindingID, uniform.buffer);
+                    }
+                }
+            } else if (uniform.failed) {
+                // Never draw with an incomplete array or an old, smaller one
+                // after tile churn. Retry callbacks on the next frame.
+                for (auto* drawable : uniform.drawables) {
+                    drawable->setEnabled(false);
+                    static_cast<plugin::DrawableData&>(*drawable->getData()).uniformFailed = true;
+                }
+            }
+            uniform.drawables.clear();
+        }
         propertiesUpdated = false;
         return;
     }

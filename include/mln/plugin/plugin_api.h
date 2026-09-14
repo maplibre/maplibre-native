@@ -169,12 +169,31 @@ typedef enum mln_plugin_shader_stage {
     MLN_PLUGIN_SHADER_STAGE_FRAGMENT = 1u << 1u
 } mln_plugin_shader_stage;
 
+typedef enum mln_plugin_uniform_scope_v1 {
+    /* Callback and storage per drawable, on every frame. */
+    MLN_PLUGIN_UNIFORM_DRAWABLE = 0,
+    /*
+     * Callback once per layer/shader per frame. All drawables share the result.
+     * The context has an identity tile_matrix and zero pixels_to_tile_units.
+     * Only layer-wide values belong here, never tile-dependent interpolation.
+     */
+    MLN_PLUGIN_UNIFORM_LAYER = 1,
+    /*
+     * Callback per drawable per frame. Metal batches the results in one array,
+     * indexed by MLN_PLUGIN_DRAWABLE_INDEX_BINDING. OpenGL/Vulkan currently
+     * supply an individual block, like DRAWABLE. Shader sources can inspect
+     * MLN_PLUGIN_UNIFORM_<uniform_id>_IS_ARRAY (1 on Metal, 0 otherwise).
+     */
+    MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY = 2
+} mln_plugin_uniform_scope_v1;
+
 typedef struct mln_plugin_uniform_block_descriptor_v1 {
     uint32_t struct_size;
     uint32_t uniform_id;
     mln_plugin_string name;
     uint32_t byte_size;
     uint32_t stage_mask;
+    mln_plugin_uniform_scope_v1 scope;
 } mln_plugin_uniform_block_descriptor_v1;
 
 typedef struct mln_plugin_shader_source_v1 {

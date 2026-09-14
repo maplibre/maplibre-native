@@ -11,6 +11,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstring>
 
 using namespace mln;
 
@@ -23,7 +24,12 @@ mln_plugin_string view(const std::string& text) {
 // Minimal geometry plugin for exercising the host, independent of example plugins.
 // Two layer types deliberately share a shader ID, but draw in different colors
 // and viewport halves. No network requests or image-baseline updates are needed.
-void registerTriangles(const std::string& pluginID, bool packedColor = false, bool withUniforms = false) {
+std::array<unsigned, 2> uniformCalls{};
+float sharedAlpha = 1;
+bool failSharedUniform = false;
+
+void registerTriangles(const std::string& pluginID, bool packedColor = false, bool withUniforms = false,
+                       bool scopedUniforms = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -38,7 +44,10 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
     const mln_plugin_shader_attribute_v1 uniformAttributes[] = {
         attribute, {sizeof(attribute), 2, 1, {"a_radius", 8}, MLN_PLUGIN_VERTEX_FLOAT_X2}};
     const mln_plugin_uniform_block_descriptor_v1 uniform = {
-        sizeof(uniform), 0, {"QueryUBO", 8}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX};
+        sizeof(uniform), 0, {"QueryUBO", 8}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
+    const mln_plugin_uniform_block_descriptor_v1 scopedBlocks[] = {
+        {sizeof(uniform), 0, {"TileUBO", 7}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY},
+        {sizeof(uniform), 1, {"PaintUBO", 8}, 16, MLN_PLUGIN_SHADER_STAGE_FRAGMENT, MLN_PLUGIN_UNIFORM_LAYER}};
     const mln_plugin_shader_property_binding_v1 paintBinding = {
         sizeof(paintBinding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 2, 2, 0, 4};
     static const uint8_t colors[] = {128, 64, 0, 255, 128, 64, 0, 255, 128, 64, 0, 255};
@@ -110,6 +119,25 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
                 offset + ")*0.5,in.a_pos.y,paint.radius*0.00001,1);}fragment half4 triangleFragment(){return half4(" +
                 color + ");}";
         }
+        if (scopedUniforms) {
+            const auto block = [](const char* name, unsigned id, bool vulkan) {
+                return std::string("layout(std140") + (vulkan ? ",set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_" +
+                    std::to_string(id) + "_BINDING" : "") + ") uniform " + name + "{vec4 value;};";
+            };
+            code[i][0] = "in vec2 a_pos;" + block("TileUBO", 0, false) + body + "gl_Position.z=value.x;}";
+            code[i][1] = block("PaintUBO", 1, false) + "void main(){fragColor=vec4(" + color + ")*value.x;}";
+            code[i][2] = "layout(location=0) in vec2 a_pos;" + block("TileUBO", 0, true) + body +
+                         "gl_Position.z=value.x;applySurfaceTransform();}";
+            code[i][3] = "layout(location=0) out vec4 fragColor;" + block("PaintUBO", 1, true) +
+                         "void main(){fragColor=vec4(" + color + ")*value.x;}";
+            code[i][4] = "struct Input{float2 a_pos [[attribute(0)]];};struct UBO{float4 value;};"
+                "vertex float4 triangleVertex(Input in [[stage_in]],"
+                "constant UBO* tiles [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]],"
+                "constant uint& index [[buffer(MLN_PLUGIN_DRAWABLE_INDEX_BINDING)]])"
+                "{return float4((in.a_pos.x" + offset + ")*0.5,in.a_pos.y,tiles[index].value.x,1);}"
+                "fragment half4 triangleFragment(constant UBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]])"
+                "{return half4(" + color + ")*half(paint.value.x);}";
+        }
         sources[i] = {{{sizeof(mln_plugin_shader_source_v1),
                         MLN_PLUGIN_BACKEND_OPENGL,
                         view(code[i][0]),
@@ -134,8 +162,8 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
                       3,
                       withUniforms ? uniformAttributes : (packedColor ? colorAttributes : &attribute),
                       withUniforms || packedColor ? 2u : 1u,
-                      withUniforms ? &uniform : nullptr,
-                      withUniforms ? 1u : 0u,
+                      scopedUniforms ? scopedBlocks : (withUniforms ? &uniform : nullptr),
+                      scopedUniforms ? 2u : (withUniforms ? 1u : 0u),
                       withUniforms ? &paintBinding : nullptr,
                       withUniforms ? 1u : 0u};
         auto& layer = layers[i];
@@ -150,6 +178,20 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
         layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
             return MLN_PLUGIN_STATUS_OK;
         };
+        if (scopedUniforms) {
+            layer.update_uniform_block = [](const mln_plugin_uniform_context_v1* context, uint32_t id,
+                                             uint8_t* bytes, size_t size) {
+                EXPECT_EQ(16u, size);
+                ++uniformCalls.at(id);
+                if (failSharedUniform) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+                if (id == 1) {
+                    EXPECT_EQ(0, context->pixels_to_tile_units);
+                    for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(i % 5 == 0 ? 1 : 0, context->tile_matrix[i]);
+                    std::memcpy(bytes, &sharedAlpha, sizeof(sharedAlpha));
+                }
+                return MLN_PLUGIN_STATUS_OK;
+            };
+        }
         layer.create_layout = [](const mln_plugin_layout_context_v1*, void** instance) {
             *instance = new (std::nothrow) int(0);
             return *instance ? MLN_PLUGIN_STATUS_OK : MLN_PLUGIN_STATUS_CALLBACK_ERROR;
@@ -246,6 +288,48 @@ TEST(PluginRendering, ShaderIdentityHasUnambiguousComponents) {
     EXPECT_NE(plugin::shaderGroupName("a/b", "c", "d"), plugin::shaderGroupName("a", "b/c", "d"));
     EXPECT_NE(plugin::shaderGroupName("a", "b/c", "d"), plugin::shaderGroupName("a", "b", "c/d"));
     EXPECT_NE(plugin::shaderGroupName("a", "b", "main"), plugin::shaderGroupName("a", "c", "main"));
+}
+
+TEST(PluginRendering, SharedUniformsRunAtDeclaredScopeAndUpdateWithoutGeometryChurn) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.shared-uniforms", false, false, true));
+    RenderTest test;
+    test.map.jumpTo(CameraOptions().withZoom(2)); // The point lies on four tile boundaries.
+    test.expectTriangles("test.shared-uniforms");
+    const auto first = test.frontend.render(test.map);
+    uniformCalls = {};
+    const auto warm = test.frontend.render(test.map);
+    EXPECT_EQ(2u, uniformCalls[1]); // One callback for each layer, not each tile.
+    EXPECT_GT(uniformCalls[0], uniformCalls[1]);
+    EXPECT_EQ(8u, uniformCalls[0]); // Two layers, four tile drawables each.
+    EXPECT_EQ(first.stats.totalBuffers, warm.stats.totalBuffers);
+    EXPECT_EQ(first.stats.vertexUpdateBytes, warm.stats.vertexUpdateBytes);
+    EXPECT_EQ(first.stats.indexUpdateBytes, warm.stats.indexUpdateBytes);
+    sharedAlpha = 0.25f; // A stateful layer callback must still execute every frame.
+    const auto changed = test.frontend.render(test.map);
+    EXPECT_NE(0, std::memcmp(warm.image.data.get(), changed.image.data.get(), warm.image.bytes()));
+    EXPECT_EQ(warm.stats.totalBuffers, changed.stats.totalBuffers);
+    EXPECT_GT(changed.stats.uniformUpdateBytes - warm.stats.uniformUpdateBytes,
+              warm.stats.uniformUpdateBytes - first.stats.uniformUpdateBytes);
+    sharedAlpha = 1;
+    test.map.jumpTo(CameraOptions().withZoom(0)); // Shrink the batch, then grow it again.
+    test.frontend.render(test.map);
+    uniformCalls = {};
+    test.frontend.render(test.map);
+    EXPECT_EQ(2u, uniformCalls[0]);
+    EXPECT_EQ(2u, uniformCalls[1]);
+    test.map.jumpTo(CameraOptions().withZoom(2));
+    test.frontend.render(test.map);
+    uniformCalls = {};
+    const auto restored = test.frontend.render(test.map);
+    EXPECT_EQ(8u, uniformCalls[0]);
+    EXPECT_EQ(2u, uniformCalls[1]);
+    EXPECT_EQ(warm.image, restored.image);
+    failSharedUniform = true;
+    const auto failed = test.frontend.render(test.map);
+    EXPECT_NE(warm.image, failed.image);
+    failSharedUniform = false;
+    const auto recovered = test.frontend.render(test.map);
+    EXPECT_EQ(warm.image, recovered.image);
 }
 
 TEST(PluginRendering, RegistrationAfterRendererInitialization) {

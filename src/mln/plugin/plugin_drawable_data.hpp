@@ -11,6 +11,7 @@ struct DrawableData final : gfx::DrawableData {
     explicit DrawableData(std::string shaderID_)
         : shaderID(std::move(shaderID_)) {}
     std::string shaderID;
+    bool uniformFailed = false;
     struct UniformData {
         std::vector<uint8_t> scratch;
         std::vector<uint8_t> uploaded;

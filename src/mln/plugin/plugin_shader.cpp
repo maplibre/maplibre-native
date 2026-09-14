@@ -67,6 +67,9 @@ const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backen
 
 std::string resourcePrelude(const ShaderDefinition& shader) {
     std::ostringstream output;
+#if MLN_RENDER_BACKEND_METAL
+    output << "#define MLN_PLUGIN_DRAWABLE_INDEX_BINDING " << shaders::idGlobalUBOIndex << '\n';
+#endif
     for (const auto& uniform : shader.uniformBlocks) {
         auto bindingID = uniform.bindingID;
 #if MLN_RENDER_BACKEND_VULKAN
@@ -76,6 +79,11 @@ std::string resourcePrelude(const ShaderDefinition& shader) {
         bindingID -= shaders::drawableSSBOStartId;
 #endif
         output << "#define MLN_PLUGIN_UNIFORM_" << uniform.id << "_BINDING " << bindingID << '\n';
+        bool array = false;
+#if MLN_RENDER_BACKEND_METAL
+        array = uniform.scope == MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY;
+#endif
+        output << "#define MLN_PLUGIN_UNIFORM_" << uniform.id << "_IS_ARRAY " << array << '\n';
     }
     return output.str();
 }
