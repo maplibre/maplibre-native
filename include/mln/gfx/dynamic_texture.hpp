@@ -52,6 +52,8 @@ public:
     TexturePixelType getPixelFormat() const;
     bool isEmpty() const;
 
+    int32_t getVersion(int32_t uniqueId) const;
+
     std::optional<TextureHandle> reserveSize(const Size& size, int32_t uniqueId);
 
     template <typename Image>
@@ -64,10 +66,13 @@ public:
     virtual void uploadDeferredImages(UploadPass&) {};
     virtual bool removeTexture(const TextureHandle& texHandle);
 
+    using VersionMap = std::unordered_map<int32_t, int32_t>;
+
 protected:
     DynamicTexture(Size size, TexturePixelType pixelType);
 
     mapbox::ShelfPack shelfPack;
+    VersionMap versionMap;
     Texture2DPtr texture;
     TexturePixelType pixelFormat;
     int numTextures = 0;
