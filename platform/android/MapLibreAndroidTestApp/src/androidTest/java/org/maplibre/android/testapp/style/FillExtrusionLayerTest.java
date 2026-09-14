@@ -426,4 +426,115 @@ public class FillExtrusionLayerTest extends BaseLayerTest {
     layer.setProperties(fillExtrusionVerticalGradient(propertyValue));
     assertEquals(layer.getFillExtrusionVerticalGradient().getValue(), propertyValue);
   }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowColorTransition() {
+    Timber.i("fill-extrusion-shadow-colorTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionShadowColorTransition(options);
+    assertEquals(layer.getFillExtrusionShadowColorTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowColorAsConstant() {
+    Timber.i("fill-extrusion-shadow-color");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionShadowColor().getValue());
+
+    // Set and Get
+    String propertyValue = "rgba(255,128,0,0.7)";
+    layer.setProperties(fillExtrusionShadowColor(propertyValue));
+    assertEquals(layer.getFillExtrusionShadowColor().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowColorAsIntConstant() {
+    Timber.i("fill-extrusion-shadow-color");
+    assertNotNull(layer);
+
+    // Set and Get
+    layer.setProperties(fillExtrusionShadowColor(Color.argb(127, 255, 127, 0)));
+    assertEquals(layer.getFillExtrusionShadowColorAsInt(), Color.argb(127, 255, 127, 0));
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowOpacityTransition() {
+    Timber.i("fill-extrusion-shadow-opacityTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionShadowOpacityTransition(options);
+    assertEquals(layer.getFillExtrusionShadowOpacityTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowOpacityAsConstant() {
+    Timber.i("fill-extrusion-shadow-opacity");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionShadowOpacity().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionShadowOpacity(propertyValue));
+    assertEquals(layer.getFillExtrusionShadowOpacity().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowLengthTransition() {
+    Timber.i("fill-extrusion-shadow-lengthTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionShadowLengthTransition(options);
+    assertEquals(layer.getFillExtrusionShadowLengthTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowLengthAsConstant() {
+    Timber.i("fill-extrusion-shadow-length");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionShadowLength().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionShadowLength(propertyValue));
+    assertEquals(layer.getFillExtrusionShadowLength().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowAzimuthTransition() {
+    Timber.i("fill-extrusion-shadow-azimuthTransitionOptions");
+    assertNotNull(layer);
+
+    // Set and Get
+    TransitionOptions options = new TransitionOptions(300, 100);
+    layer.setFillExtrusionShadowAzimuthTransition(options);
+    assertEquals(layer.getFillExtrusionShadowAzimuthTransition(), options);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testFillExtrusionShadowAzimuthAsConstant() {
+    Timber.i("fill-extrusion-shadow-azimuth");
+    assertNotNull(layer);
+    assertNull(layer.getFillExtrusionShadowAzimuth().getValue());
+
+    // Set and Get
+    Float propertyValue = 0.3f;
+    layer.setProperties(fillExtrusionShadowAzimuth(propertyValue));
+    assertEquals(layer.getFillExtrusionShadowAzimuth().getValue(), propertyValue);
+  }
 }

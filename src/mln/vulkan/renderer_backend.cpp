@@ -16,6 +16,7 @@
 #include <mln/shaders/vulkan/debug.hpp>
 #include <mln/shaders/vulkan/fill.hpp>
 #include <mln/shaders/vulkan/fill_extrusion.hpp>
+#include <mln/shaders/vulkan/fill_extrusion_shadow.hpp>
 #include <mln/shaders/vulkan/heatmap.hpp>
 #include <mln/shaders/vulkan/heatmap_texture.hpp>
 #include <mln/shaders/vulkan/hillshade.hpp>
@@ -707,6 +708,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillExtrusionInstancedShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::FillExtrusionPatternInstancedShader,
+                  shaders::BuiltIn::FillExtrusionShadowMaskShader,
+                  shaders::BuiltIn::FillExtrusionShadowMaskInstancedShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,
