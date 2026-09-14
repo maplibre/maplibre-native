@@ -38,13 +38,47 @@ extension Int {
     }
 }
 
-extension MLNMapView {
-    @MainActor func animate(camera: MLNMapCamera, withDuration duration: TimeInterval) async {
+/// A one-shot awaitable gate. `wait()` suspends until `open()` is called, in either
+/// order, and repeated `open()` calls are ignored.
+///
+/// Map callbacks are not guaranteed to run: a style load can fail, and an in-flight
+/// camera animation stops advancing as soon as the map view leaves the window (its
+/// display link is destroyed), so its completion handler is never invoked. A bare
+/// `CheckedContinuation` in that situation is never resumed, which strands the
+/// awaiting task and — because the task holds the map view — leaks the whole map,
+/// renderer and tile cache. The gate lets teardown release the waiter explicitly.
+class Gate {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var isOpen = false
+
+    func wait() async {
+        if isOpen { return }
+
         await withCheckedContinuation { continuation in
-            self.setCamera(camera, withDuration: duration, animationTimingFunction: nil) {
+            if isOpen {
                 continuation.resume()
+            } else {
+                self.continuation = continuation
             }
         }
+    }
+
+    func open() {
+        if isOpen { return }
+
+        isOpen = true
+        continuation?.resume()
+        continuation = nil
+    }
+}
+
+extension MLNMapView {
+    @MainActor func animate(camera: MLNMapCamera, withDuration duration: TimeInterval, gate: Gate) async {
+        setCamera(camera, withDuration: duration, animationTimingFunction: nil) {
+            gate.open()
+        }
+
+        await gate.wait()
     }
 }
 
