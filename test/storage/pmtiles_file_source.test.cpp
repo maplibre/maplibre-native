@@ -5,13 +5,14 @@
 #include <mln/util/run_loop.hpp>
 
 #include <filesystem>
+#include <vector>
 
 #include <climits>
 #include <gtest/gtest.h>
 
 namespace {
 
-std::string toAbsoluteURL(const std::string &fileName) {
+std::string toAbsoluteURL(const std::string& fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/pmtiles" / fileName;
     return std::string(mln::util::PMTILES_PROTOCOL) + std::string(mln::util::FILE_PROTOCOL) + path.string();
 }
@@ -198,4 +199,36 @@ TEST(PMTilesFileSource, UncompressedTile) {
         });
 
     loop.run();
+}
+
+// Concurrent requests for one directory each fetch and store it - nothing coalesces them.
+// Storing used to append the directory's key to the LRU list every time, so N concurrent
+// misses left N copies of one key; once the list passed MAX_DIRECTORY_CACHE_ENTRIES (100),
+// evicting a duplicate at the front dropped the directory the storing request was about to
+// read, and that tile failed with "Error parsing PMTiles directory: map::at" (#4421). Every
+// request here names the root directory, so they all miss until the first store lands.
+TEST(PMTilesFileSource, ConcurrentRequestsShareOneDirectoryEntry) {
+    util::RunLoop loop;
+
+    PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
+
+    constexpr int count = 130; // more than MAX_DIRECTORY_CACHE_ENTRIES
+    std::vector<std::unique_ptr<AsyncRequest>> reqs;
+    reqs.reserve(count);
+    int done = 0;
+
+    for (int i = 0; i < count; i++) {
+        reqs.push_back(pmtiles.request(
+            Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+            [&](Response res) {
+                EXPECT_EQ(nullptr, res.error) << (res.error ? res.error->message : "");
+                EXPECT_TRUE(res.data.get());
+                if (++done == count) {
+                    loop.stop();
+                }
+            }));
+    }
+
+    loop.run();
+    reqs.clear();
 }

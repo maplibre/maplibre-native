@@ -481,13 +481,46 @@ private:
 
         std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
                                           std::to_string(directoryLength);
-        directory_cache.at(url).emplace(directory_cache_key, pmtiles::deserialize_directory(directoryData));
-        directory_cache_control.at(url).emplace_back(directory_cache_key);
+        auto& cache = directory_cache.at(url);
+        auto& control = directory_cache_control.at(url);
 
-        if (directory_cache_control.at(url).size() > MAX_DIRECTORY_CACHE_ENTRIES) {
-            directory_cache.at(url).erase(directory_cache_control.at(url).front());
-            directory_cache_control.at(url).erase(directory_cache_control.at(url).begin());
+        // Concurrent requests for one directory each fetch it (nothing coalesces
+        // them), so the same key can be stored several times in a row. Pushing
+        // it onto the LRU list again on every store left duplicate keys there;
+        // once the list passed MAX_DIRECTORY_CACHE_ENTRIES, evicting a duplicate
+        // at the front removed a directory that later entries - including the
+        // one just stored - still named, and the caller's lookup of the key it
+        // had just stored threw. Keep one list entry per key: an already
+        // resident directory is only moved to the back.
+        if (cache.contains(directory_cache_key)) {
+            touchDirectory(control, directory_cache_key);
+            return;
         }
+
+        cache.emplace(directory_cache_key, pmtiles::deserialize_directory(directoryData));
+        control.emplace_back(directory_cache_key);
+
+        if (control.size() > MAX_DIRECTORY_CACHE_ENTRIES) {
+            cache.erase(control.front());
+            control.erase(control.begin());
+        }
+    }
+
+    // Mark a resident directory as most recently used: move its key to the
+    // back of the LRU list.
+    static void touchDirectory(std::vector<std::string>& control, const std::string& directory_cache_key) {
+        if (control.back() == directory_cache_key) {
+            return;
+        }
+
+        for (auto it = control.begin(); it != control.end(); ++it) {
+            if (*it == directory_cache_key) {
+                control.erase(it);
+                break;
+            }
+        }
+
+        control.emplace_back(directory_cache_key);
     }
 
     void getDirectory(const std::string& url,
@@ -499,17 +532,7 @@ private:
                                           std::to_string(directoryLength);
 
         if (directory_cache.contains(url) && directory_cache.at(url).contains(directory_cache_key)) {
-            if (directory_cache_control.at(url).back() != directory_cache_key) {
-                directory_cache_control.at(url).emplace_back(directory_cache_key);
-
-                for (auto it = directory_cache_control.at(url).begin(); it != directory_cache_control.at(url).end();
-                     ++it) {
-                    if (*it == directory_cache_key) {
-                        directory_cache_control.at(url).erase(it);
-                        break;
-                    }
-                }
-            }
+            touchDirectory(directory_cache_control.at(url), directory_cache_key);
 
             callback(std::unique_ptr<Response::Error>());
             return;

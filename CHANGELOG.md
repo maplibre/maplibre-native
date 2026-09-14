@@ -29,6 +29,7 @@
 ### 🐞 Bug fixes
 
 - *...Add new stuff here...*
+- [core] Fix PMTiles tiles failing with `Error parsing PMTiles directory: map::at` (or `invalid map<K, T> key`): concurrent requests for one directory pushed duplicate keys onto the directory cache's LRU list, and evicting a duplicate dropped a directory still in use ([#4421](https://github.com/maplibre/maplibre-native/issues/4421)).
 - [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
 - [core] Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/issues/4508)).
 - [core] Repaint data-driven symbol paint properties after feature-state updates.
