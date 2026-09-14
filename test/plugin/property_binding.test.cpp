@@ -5,6 +5,39 @@
 
 using namespace mln;
 
+TEST(PluginPaintBinder, BucketRetainsImmutablePaintSnapshotAndRefreshesZoom) {
+    static unsigned radiusCalls;
+    radiusCalls = 0;
+    plugin::LayerType registration;
+    registration.queryRadius = [](const mln_plugin_property_statistics_v1*, size_t,
+                                  const mln_plugin_property_value_v1*, size_t) -> float {
+        ++radiusCalls;
+        return 12;
+    };
+    PluginBucket first(registration), second(registration);
+    auto snapshot = std::make_shared<const style::PluginPropertyMap>();
+    EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10));
+    EXPECT_FALSE(second.synchronizePaint("layer", snapshot, 10));
+    EXPECT_EQ(2u, radiusCalls);
+    EXPECT_EQ(snapshot, first.latestPaintProperties.at("layer"));
+    EXPECT_EQ(snapshot, second.latestPaintProperties.at("layer"));
+    for (unsigned frame = 0; frame < 100; ++frame) {
+        EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10));
+    }
+    EXPECT_EQ(2u, radiusCalls);
+    EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10.5));
+    EXPECT_EQ(3u, radiusCalls);
+    EXPECT_EQ(snapshot, first.latestPaintProperties.at("layer"));
+    auto next = std::make_shared<const style::PluginPropertyMap>();
+    EXPECT_FALSE(first.synchronizePaint("layer", next, 10.5));
+    EXPECT_EQ(4u, radiusCalls);
+    std::weak_ptr<const style::PluginPropertyMap> retained = snapshot;
+    snapshot.reset();
+    EXPECT_FALSE(retained.expired()); // The other tile still owns the old snapshot.
+    second.synchronizePaint("layer", next, 10.5);
+    EXPECT_TRUE(retained.expired());
+}
+
 namespace {
 GeoJSONTileLayer source() {
     auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
