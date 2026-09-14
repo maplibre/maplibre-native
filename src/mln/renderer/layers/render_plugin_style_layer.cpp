@@ -171,8 +171,17 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
     // Registration may happen after this renderer initialized its shader registry.
-    // Resolve this layer's immutable shader definitions on the render thread.
-    plugin::registerPluginShaderGroups(shaders, ProgramParameters{parameters.pixelRatio, false}, registration);
+    // Resolve this layer's immutable shader definitions once on the render
+    // thread. As with built-in render layers, the retained groups have the
+    // renderer's lifetime; paint updates do not invalidate shader definitions.
+    if (shaderGroups.empty()) {
+        plugin::registerPluginShaderGroups(shaders, ProgramParameters{parameters.pixelRatio, false}, registration);
+        for (const auto& definition : registration.shaders) {
+            shaderGroups.emplace(definition.id,
+                                 shaders.getShaderGroup(plugin::shaderGroupName(
+                                     registration.pluginID, registration.type, definition.id)));
+        }
+    }
     if (!layerGroup) {
         if (auto group = context.createTileLayerGroup(layerIndex, 64, getID())) {
             setLayerGroup(std::move(group), changes);
@@ -214,9 +223,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         for (const auto& definition : bucket.drawables) {
-            const auto groupName = plugin::shaderGroupName(
-                registration.pluginID, registration.type, definition.shaderID);
-            const auto shaderGroup = shaders.getShaderGroup(groupName);
+            const auto shaderGroup = shaderGroups.at(definition.shaderID);
             StringIDSetsPair propertiesAsUniforms;
             auto* paintBinders = bucket.paintBinders(getID(), definition.key);
             auto attributes = context.createVertexAttributeArray();
