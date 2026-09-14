@@ -267,6 +267,7 @@ void PluginLayout::createBucket(const ImagePositions&,
         return;
     }
     bucket->queryRadius = output.query_radius;
+    const auto features = std::make_shared<const PluginFeatureData>(bucket->featureVertexRanges, *sourceLayer);
     for (const auto& layer : layers) {
         const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
         auto& layerBinders = bucket->paintPropertyBinders[impl.id];
@@ -275,16 +276,11 @@ void PluginLayout::createBucket(const ImagePositions&,
                                              registration.shaders.end(),
                                              [&](const auto& candidate) { return candidate.id == drawable.shaderID; });
             if (shader == registration.shaders.end() || shader->propertyBindings.empty()) continue;
-            layerBinders.emplace(std::piecewise_construct,
-                                 std::forward_as_tuple(drawable.key),
-                                 std::forward_as_tuple(registration,
-                                                       *shader,
-                                                       drawable.key,
-                                                       drawable.vertexCount,
-                                                       zoom,
-                                                       impl.pluginProperties,
-                                                       bucket->featureVertexRanges,
-                                                       *sourceLayer));
+            layerBinders.emplace(
+                std::piecewise_construct,
+                std::forward_as_tuple(drawable.key),
+                std::forward_as_tuple(
+                    registration, *shader, drawable.key, drawable.vertexCount, zoom, impl.pluginProperties, features));
         }
         bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
     }

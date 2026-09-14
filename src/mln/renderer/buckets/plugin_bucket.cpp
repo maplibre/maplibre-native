@@ -17,10 +17,14 @@ namespace {
 
 class PluginFeatureSnapshot final : public GeometryTileFeature {
 public:
-    PluginFeatureSnapshot(FeatureType type_, FeatureIdentifier id_, PropertyMap properties_)
+    PluginFeatureSnapshot(FeatureType type_,
+                          FeatureIdentifier id_,
+                          PropertyMap properties_,
+                          const GeometryCollection& geometry_)
         : type(type_),
           id(std::move(id_)),
-          properties(std::move(properties_)) {}
+          properties(std::move(properties_)),
+          geometry(geometry_.clone()) {}
 
     FeatureType getType() const override { return type; }
     std::optional<Value> getValue(const std::string& key) const override {
@@ -29,11 +33,13 @@ public:
     }
     const PropertyMap& getProperties() const override { return properties; }
     FeatureIdentifier getID() const override { return id; }
+    const GeometryCollection& getGeometries() const override { return geometry; }
 
 private:
     FeatureType type;
     FeatureIdentifier id;
     PropertyMap properties;
+    const GeometryCollection geometry;
 };
 
 style::PluginPropertyValue propertyValue(const plugin::PropertyDefinition& definition,
@@ -117,6 +123,33 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
 
 } // namespace
 
+PluginFeatureData::PluginFeatureData(const std::vector<PluginFeatureVertexRange>& ranges,
+                                     const GeometryTileLayer& layer) {
+    std::unordered_map<std::size_t, std::size_t> indexes;
+    for (const auto& range : ranges) {
+        auto index = indexes.find(range.featureIndex);
+        if (index == indexes.end()) {
+            const auto feature = layer.getFeature(range.featureIndex);
+            if (!feature) continue;
+            index = indexes.emplace(range.featureIndex, features.size()).first;
+            features.push_back(
+                {featureIDtoString(feature->getID()).value_or(std::string{}),
+                 std::make_unique<PluginFeatureSnapshot>(
+                     feature->getType(), feature->getID(), feature->getProperties(), feature->getGeometries())});
+        }
+        auto& drawable = drawables[range.drawableKey];
+        drawable.ranges.push_back({index->second, range.firstVertex, range.vertexCount});
+    }
+}
+
+PluginFeatureData::~PluginFeatureData() = default;
+
+const PluginFeatureData::Drawable& PluginFeatureData::drawable(uint64_t key) const {
+    static const Drawable empty;
+    const auto it = drawables.find(key);
+    return it == drawables.end() ? empty : it->second;
+}
+
 void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const float* minimum, const float* maximum) {
     if (first > count || length > count - first) return;
     for (std::size_t vertex = first; vertex < first + length; ++vertex) {
@@ -147,31 +180,22 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
                                                      plugin::ShaderPropertyBindingDefinition binding_,
                                                      style::PluginPropertyValue value_,
                                                      float bucketZoom_,
-                                                     uint64_t drawableKey,
+                                                     uint64_t drawableKey_,
                                                      std::size_t vertexCount_,
-                                                     const std::vector<PluginFeatureVertexRange>& featureRanges,
-                                                     const GeometryTileLayer& layer)
+                                                     std::shared_ptr<const PluginFeatureData> features_,
+                                                     std::shared_ptr<FeatureStates> states_)
     : definition(std::move(definition_)),
       binding(std::move(binding_)),
       value(std::move(value_)),
       bucketZoom(bucketZoom_),
       vertexCount(vertexCount_),
-      dataDriven(value.isDataDriven()) {
-    for (const auto& input : featureRanges) {
-        if (input.drawableKey != drawableKey) continue;
-        auto feature = layer.getFeature(input.featureIndex);
-        if (!feature) continue;
-        ranges.push_back({input.featureIndex,
-                          featureIDtoString(feature->getID()).value_or(std::string{}),
-                          feature->getType(),
-                          feature->getID(),
-                          feature->getProperties(),
-                          input.firstVertex,
-                          input.vertexCount});
-    }
+      dataDriven(value.isDataDriven()),
+      drawableKey(drawableKey_),
+      features(std::move(features_)),
+      featureStates(std::move(states_)) {
     if (dataDriven) {
         vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());
-        refill(&layer);
+        refill();
     }
 }
 
@@ -234,16 +258,20 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     return wasDataDriven != dataDriven || dataDriven;
 }
 
-bool PluginPaintPropertyBinder::update(const FeatureStates& states, const GeometryTileLayer& layer) {
+bool PluginPaintPropertyBinder::update(const FeatureStates& states, const GeometryTileLayer&) {
+    for (const auto& [id, state] : states) (*featureStates)[id] = state;
+    return updateRanges(states);
+}
+
+bool PluginPaintPropertyBinder::updateRanges(const FeatureStates& states) {
     if (!dataDriven || states.empty()) return false;
     bool changed = false;
-    for (const auto& range : ranges) {
-        const auto state = states.find(range.featureID);
+    const auto& drawable = features->drawable(drawableKey);
+    for (const auto& range : drawable.ranges) {
+        const auto& feature = features->features[range.featureIndex];
+        const auto state = states.find(feature.id);
         if (state == states.end()) continue;
-        featureStates[range.featureID] = state->second;
-        auto feature = layer.getFeature(range.featureIndex);
-        if (!feature) continue;
-        fillRange(range, *feature, state->second);
+        fillRange(range, *feature.snapshot, state->second);
         changed = true;
     }
     if (changed) updateStatistics();
@@ -266,22 +294,18 @@ void PluginPaintPropertyBinder::statistics(float zoom, mln_plugin_value& minimum
     maximum = decodedValue(maximumValues, definition);
 }
 
-void PluginPaintPropertyBinder::refill(const GeometryTileLayer* layer) {
+void PluginPaintPropertyBinder::refill() {
     if (!vertexVector) return;
-    for (const auto& range : ranges) {
-        std::unique_ptr<GeometryTileFeature> feature;
-        if (layer) feature = layer->getFeature(range.featureIndex);
-        PluginFeatureSnapshot snapshot(range.featureType, range.featureIdentifier, range.properties);
-        const GeometryTileFeature& sourceFeature = feature ? *feature
-                                                           : static_cast<const GeometryTileFeature&>(snapshot);
-        const auto state = featureStates.find(range.featureID);
+    for (const auto& range : features->drawable(drawableKey).ranges) {
+        const auto& feature = features->features[range.featureIndex];
+        const auto state = featureStates->find(feature.id);
         const FeatureState empty;
-        fillRange(range, sourceFeature, state == featureStates.end() ? empty : state->second);
+        fillRange(range, *feature.snapshot, state == featureStates->end() ? empty : state->second);
     }
     updateStatistics();
 }
 
-void PluginPaintPropertyBinder::fillRange(const Range& range,
+void PluginPaintPropertyBinder::fillRange(const PluginFeatureData::Range& range,
                                           const GeometryTileFeature& feature,
                                           const FeatureState& state) {
     style::PluginPropertyValue::EvaluationStorage minimumStorage;
@@ -306,8 +330,7 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& 
                                                        std::size_t vertexCount,
                                                        float bucketZoom,
                                                        const style::PluginPropertyMap& properties,
-                                                       const std::vector<PluginFeatureVertexRange>& ranges,
-                                                       const GeometryTileLayer& layer) {
+                                                       std::shared_ptr<const PluginFeatureData> features) {
     const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
     for (const auto& binding : shader.propertyBindings) {
         const auto definition = std::find_if(definitions.begin(), definitions.end(), [&](const auto& candidate) {
@@ -320,8 +343,8 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& 
                              bucketZoom,
                              drawableKey,
                              vertexCount,
-                             ranges,
-                             layer);
+                             features,
+                             featureStates);
     }
 }
 
@@ -368,9 +391,10 @@ bool PluginPaintPropertyBinders::synchronize(const style::PluginPropertyMap& pro
     return rebuildDrawable;
 }
 
-bool PluginPaintPropertyBinders::update(const FeatureStates& states, const GeometryTileLayer& layer) {
+bool PluginPaintPropertyBinders::update(const FeatureStates& states, const GeometryTileLayer&) {
+    for (const auto& [id, state] : states) (*featureStates)[id] = state;
     bool changed = false;
-    for (auto& binder : binders) changed = binder.update(states, layer) || changed;
+    for (auto& binder : binders) changed = binder.updateRanges(states) || changed;
     return changed;
 }
 
