@@ -1,0 +1,123 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "height": 64,
+      "width": 64,
+      "description": "With a constant symbol-sort-key, text in the right tile must draw over text in the left tile. Only the left tile has icons, so per-tile serial keys would incorrectly reverse the text order."
+    }
+  },
+  "center": [
+    0,
+    32
+  ],
+  "zoom": 1,
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "color": "red",
+              "image": "interstate_2",
+              "label": "A"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -1,
+                33
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "color": "green",
+              "image": "interstate_2",
+              "label": "B"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -1,
+                31
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "color": "red",
+              "image": "",
+              "label": "A"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                1,
+                33
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "color": "green",
+              "image": "",
+              "label": "B"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                1,
+                31
+              ]
+            }
+          }
+        ]
+      },
+      "buffer": 0
+    }
+  },
+  "sprite": "local://sprites/emerald",
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "icon",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "symbol-sort-key": 5,
+        "icon-image": [
+          "get",
+          "image"
+        ],
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-field": [
+          "get",
+          "label"
+        ],
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 22
+      },
+      "paint": {
+        "text-color": "rgb(255,255,255)",
+        "text-halo-width": 1,
+        "text-halo-color": [
+          "get",
+          "color"
+        ]
+      }
+    }
+  ]
+}

@@ -220,6 +220,12 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                                                   .featureIndex = featureIndex,
                                                   .sourceId = baseImpl->source,
                                                   .sortKeyRange = sortKeyRange};
+                    if (placementData.empty() || (placementData.back().sortKeyRange &&
+                                                  placementData.back().sortKeyRange->sortKey <= sortKeyRange.sortKey)) {
+                        // Already ordered, including ranges with a constant sort key.
+                        placementData.push_back(std::move(layerData));
+                        continue;
+                    }
                     auto sortPosition = std::upper_bound( // NOLINT(modernize-use-ranges)
                         placementData.cbegin(),
                         placementData.cend(),
@@ -559,7 +565,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     const auto& layout = impl_cast(baseImpl).layout;
-    const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
+    const auto& symbolSortKey = layout.get<SymbolSortKey>();
+    const bool sortFeaturesByKey = symbolSortKey.isExpression();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     const bool isOffset = !layout.get<IconOffset>().isUndefined();
@@ -690,7 +697,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         float serialKey = 1.0f;
         auto addRenderables = [&](const SymbolBucket::Buffer& buffer, const SymbolType type) mutable {
-            if (sortFeaturesByKey) {
+            // A layout change can leave buckets with the previous sort-key expression until they are rebuilt.
+            if (sortFeaturesByKey ||
+                (symbolSortKey.isConstant() && !bucket.layout->get<SymbolSortKey>().isConstant())) {
                 // Features need to be rendered in a specific order, so we add each segment individually
                 for (const auto& segment : buffer.segments) {
 #if MLN_USE_SYMBOL_INSTANCING
@@ -705,8 +714,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             } else if (!buffer.segments.empty()) {
                 // Features can be rendered in the order produced, and as grouped by the bucket
                 const auto& firstSeg = buffer.segments.front();
+                // Keep text above icons across tiles when an explicit constant key is set.
+                const float sortKey = symbolSortKey.isConstant() ? firstSeg.sortKey : serialKey;
                 renderableSegments.emplace(
-                    SegmentGroup{.renderable = {firstSeg, tile, renderData, bucketPaintProperties, serialKey, type},
+                    SegmentGroup{.renderable = {firstSeg, tile, renderData, bucketPaintProperties, sortKey, type},
                                  .segments = buffer.segments});
                 serialKey += 1.0;
             }

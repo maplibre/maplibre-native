@@ -16,6 +16,7 @@
 ### ✨ Technical Improvements
 
 - *...Add new stuff here...*
+- [core] Avoid sorting features with constant sort keys while preserving their existing draw order ([#57](https://github.com/maplibre/maplibre-native/issues/57)).
 - Bump [maplibre-native-base](https://github.com/maplibre/maplibre-native-base) from 2.0.0 to 2.1.1 ([#397](https://github.com/maplibre/maplibre-native/pull/397), [#406](https://github.com/maplibre/maplibre-native/pull/406))
 - Bump [wagyu](https://github.com/mapbox/wagyu) from 0.4.3 to 0.5.0 [#398](https://github.com/maplibre/maplibre-native/pull/398)
 - Bump [eternal](https://github.com/mapbox/eternal.git) from 1.0.0 to 1.0.1

@@ -22,6 +22,7 @@ public:
         const auto& unevaluatedLayout = leaderLayerProperties->layerImpl().layout;
         const bool sortFeaturesByKey = !unevaluatedLayout.get<style::CircleSortKey>().isUndefined();
         const auto& layout = unevaluatedLayout.evaluate(PropertyEvaluationParameters(zoom));
+        const auto& sortKeyProperty = layout.get<style::CircleSortKey>();
         sourceLayerID = leaderLayerProperties->layerImpl().sourceLayer;
         bucketLeaderID = leaderLayerProperties->layerImpl().id;
 
@@ -43,7 +44,13 @@ public:
                 continue;
             }
 
-            const auto& sortKeyProperty = layout.template get<style::CircleSortKey>();
+            if (sortKeyProperty.isConstant()) {
+                // Equal keys are inserted at the front by lower_bound, without needing a search.
+                features.push_front(
+                    {i, std::move(feature), sortKeyProperty.constantOr(style::CircleSortKey::defaultValue())});
+                continue;
+            }
+
             float sortKey = sortKeyProperty.evaluate(*feature, zoom, style::CircleSortKey::defaultValue());
             CircleFeature circleFeature{.i = i, .feature = std::move(feature), .sortKey = sortKey};
             const auto sortPosition = std::lower_bound(

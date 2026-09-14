@@ -150,6 +150,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                                    (symbolZOrder == SymbolZOrderType::Auto && !sortFeaturesByKey);
     sortFeaturesByY = zOrderByViewportY && (layout->get<TextAllowOverlap>() || layout->get<IconAllowOverlap>() ||
                                             layout->get<TextIgnorePlacement>() || layout->get<IconIgnorePlacement>());
+    const bool sortFeatures = sortFeaturesByKey && !layout->get<SymbolSortKey>().isConstant();
     if (layout->get<SymbolPlacement>() == SymbolPlacementType::Point) {
         auto modes = layout->get<TextWritingMode>();
         // Remove duplicates and preserve order.
@@ -301,6 +302,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
         if (ft.formattedText || ft.icon) {
             if (sortFeaturesByKey) {
                 ft.sortKey = layout->evaluate<SymbolSortKey>(zoom, ft, canonicalID);
+            }
+            if (sortFeatures) {
                 const auto lowerBound = std::lower_bound( // NOLINT(modernize-use-ranges)
                     features.begin(),
                     features.end(),
@@ -310,6 +313,11 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                 features.push_back(std::move(ft));
             }
         }
+    }
+
+    if (sortFeaturesByKey && !sortFeatures) {
+        // Preserve the tie order of lower_bound insertion for explicit constant keys.
+        std::ranges::reverse(features);
     }
 
     if (layout->get<SymbolPlacement>() == SymbolPlacementType::Line) {
