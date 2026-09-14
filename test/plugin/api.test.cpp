@@ -215,10 +215,12 @@ TEST(PluginApi, RegistrationIsAtomicAndCopiesAllMetadata) {
         input.descriptor.layer_type_count = 2;
         input.expectRejected();
         EXPECT_FALSE(LayerManager::get()->hasLayerType(secondType));
-        // Factory publication must also be atomic when a later type conflicts
-        // with a built-in layer rather than failing descriptor validation.
+        // Built-in overrides are allowed, but conflicting runtime factories
+        // must still reject the entire batch atomically.
+        Descriptor existing("test.atomic-existing");
+        ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&existing.descriptor, nullptr, 0));
         layers[1] = input.layer;
-        layers[1].layer_type = {"circle", 6};
+        layers[1].layer_type = view(existing.type);
         input.expectRejected(MLN_PLUGIN_STATUS_CONFLICT);
         input.descriptor.layer_types = &input.layer;
         input.descriptor.layer_type_count = 1;

@@ -275,11 +275,18 @@ typedef struct mln_plugin_feature_v1 {
     size_t path_count;
 } mln_plugin_feature_v1;
 
+typedef enum mln_plugin_map_mode {
+    MLN_PLUGIN_MAP_CONTINUOUS = 0,
+    MLN_PLUGIN_MAP_STATIC = 1,
+    MLN_PLUGIN_MAP_TILE = 2
+} mln_plugin_map_mode;
+
 /* Worker-thread input. Paint evaluation is owned by the host binders. */
 typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    mln_plugin_map_mode map_mode;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after
@@ -441,6 +448,9 @@ typedef mln_plugin_status (*mln_plugin_register_function_v1)(const mln_plugin_de
 /* Thread-safe, process-wide registration, required before loading dependent
  * styles. The descriptor and all nested metadata (strings, defaults, arrays and
  * shader source text) are copied during this call and may be freed afterwards.
+ * A registered layer type takes precedence over a built-in type of the same
+ * name for subsequently parsed layers. Existing layers retain their original
+ * implementation. A second runtime implementation of a type is a conflict.
  * Only callback addresses are retained. Identical repeated registration succeeds
  * with ALREADY_REGISTERED; failed registration publishes no layer/property types.
  *

@@ -38,7 +38,8 @@ public:
 #if MLN_WITH_PLUGINS
     /**
      * Registers runtime layer factories as one atomic operation. The manager
-     * takes ownership, including on failure. Existing types cannot be replaced.
+     * takes ownership, including on failure. Runtime types override built-in
+     * names for new layers; existing runtime registrations cannot be replaced.
      * Factories and their immutable LayerTypeInfo must remain valid for the
      * manager's lifetime. Call before loading styles that use these types.
      * Registration and lookups are thread-safe; callbacks run without the lock.

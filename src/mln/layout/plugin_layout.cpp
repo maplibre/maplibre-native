@@ -61,6 +61,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters,
                            plugin::LayerType registration_)
     : tileID(parameters.tileID),
       zoom(parameters.tileID.overscaledZ),
+      mode(parameters.mode),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
       registration(std::move(registration_)) {}
@@ -78,6 +79,9 @@ void PluginLayout::createBucket(const ImagePositions&,
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
+    context.map_mode = mode == MapMode::Continuous ? MLN_PLUGIN_MAP_CONTINUOUS
+                       : mode == MapMode::Tile     ? MLN_PLUGIN_MAP_TILE
+                                                   : MLN_PLUGIN_MAP_STATIC;
 
     void* layoutInstance = nullptr;
     const auto createStatus = registration.createLayout(&context, &layoutInstance);

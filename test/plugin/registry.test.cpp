@@ -6,6 +6,8 @@
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
+#include <mln/renderer/render_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <gtest/gtest.h>
 
 using namespace mln;
@@ -111,6 +113,44 @@ TEST(PluginRegistry, ValidatesAndCopiesDescriptors) {
     input = *descriptor;
     input.plugin_id = {"another-plugin", 14};
     EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&input, error, sizeof(error)));
+}
+
+TEST(PluginRegistry, BuiltinOverridePreservesExistingLayerIdentity) {
+    GTEST_FLAG_SET(death_test_style, "threadsafe");
+    // Registration is process-wide and permanent; do not replace circle for
+    // unrelated core tests in this process.
+    ASSERT_EXIT(
+        ([] {
+            auto parseCircle = [] {
+                style::conversion::Error error;
+                return style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+                    R"({"id":"circle","type":"circle","source":"points"})", error);
+            };
+            auto before = parseCircle();
+            if (!before) std::exit(1);
+            const auto* builtinIdentity = (*before)->getTypeInfo();
+            auto descriptor = *testDescriptor();
+            auto type = descriptor.layer_types[0];
+            type.layer_type = {"circle", 6};
+            descriptor.layer_types = &type;
+            descriptor.plugin_id = {"test.override", 13};
+            char error[256]{};
+            if (mln_plugin_register_v1(&descriptor, error, sizeof(error)) != MLN_PLUGIN_STATUS_OK) std::exit(2);
+            if (mln_plugin_register_v1(&descriptor, error, sizeof(error)) != MLN_PLUGIN_STATUS_ALREADY_REGISTERED)
+                std::exit(3);
+            auto after = parseCircle();
+            if (!after || (*after)->getTypeInfo() == builtinIdentity) std::exit(4);
+            auto* manager = LayerManager::get();
+            if (!manager->createRenderLayer((*before)->baseImpl) || !manager->createRenderLayer((*after)->baseImpl))
+                std::exit(5);
+            style::CircleLayer direct("direct", "points");
+            if (direct.getTypeInfo() != builtinIdentity || !manager->createRenderLayer(direct.baseImpl)) std::exit(6);
+            descriptor.plugin_id = {"test.conflict", 13};
+            if (mln_plugin_register_v1(&descriptor, error, sizeof(error)) != MLN_PLUGIN_STATUS_CONFLICT) std::exit(7);
+            std::exit(0);
+        }()),
+        ::testing::ExitedWithCode(0),
+        "");
 }
 
 TEST(PluginRegistry, QueryBoundsIncludeEveryDrawable) {
