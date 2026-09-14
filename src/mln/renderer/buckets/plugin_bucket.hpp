@@ -74,6 +74,7 @@ public:
     };
     struct Drawable {
         std::vector<Range> ranges;
+        std::unordered_map<std::string, std::vector<std::size_t>> byID;
     };
     PluginFeatureData(const std::vector<PluginFeatureVertexRange>&, const GeometryTileLayer&);
     ~PluginFeatureData();
