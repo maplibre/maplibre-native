@@ -129,6 +129,8 @@ WGPUVertexFormat wgpuVertexFormatOf(gfx::AttributeDataType type) {
             return WGPUVertexFormat_Uint8x2;
         case gfx::AttributeDataType::UByte4:
             return WGPUVertexFormat_Uint8x4;
+        case gfx::AttributeDataType::UByte4Normalized:
+            return WGPUVertexFormat_Unorm8x4;
         case gfx::AttributeDataType::Short:
             return WGPUVertexFormat_Sint16;
         case gfx::AttributeDataType::Short2:

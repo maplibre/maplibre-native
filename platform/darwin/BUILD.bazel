@@ -257,6 +257,7 @@ objc_library(
         "src",
     ],
     sdk_frameworks = [
+        "CoreGraphics",
         "CoreText",
         "ImageIO",
     ],

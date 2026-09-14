@@ -530,6 +530,7 @@ GLenum vertexType(const gfx::AttributeDataType type) {
         case gfx::AttributeDataType::UByte2:
         case gfx::AttributeDataType::UByte3:
         case gfx::AttributeDataType::UByte4:
+        case gfx::AttributeDataType::UByte4Normalized:
             return GL_UNSIGNED_BYTE;
         case gfx::AttributeDataType::Short:
         case gfx::AttributeDataType::Short2:
@@ -589,6 +590,7 @@ GLint components(const gfx::AttributeDataType type) {
             return 3;
         case gfx::AttributeDataType::Byte4:
         case gfx::AttributeDataType::UByte4:
+        case gfx::AttributeDataType::UByte4Normalized:
         case gfx::AttributeDataType::Short4:
         case gfx::AttributeDataType::UShort4:
         case gfx::AttributeDataType::Int4:
@@ -618,7 +620,7 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
             location,
             components(binding->attribute.dataType),
             vertexType(binding->attribute.dataType),
-            static_cast<GLboolean>(false),
+            static_cast<GLboolean>(binding->attribute.dataType == gfx::AttributeDataType::UByte4Normalized),
             static_cast<GLsizei>(binding->vertexStride),
             reinterpret_cast<GLvoid*>(binding->attribute.offset + (binding->vertexStride * binding->vertexOffset))));
     } else {
