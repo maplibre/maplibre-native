@@ -32,6 +32,7 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
     static const mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3, 0};
     static const mln_plugin_drawable_descriptor_v1 drawable = {
         sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1};
+    static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
     const mln_plugin_shader_attribute_v1 uniformAttributes[] = {
@@ -157,7 +158,7 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
             return MLN_PLUGIN_STATUS_OK;
         };
         layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
-            *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, nullptr, 0};
+            *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, &range, 1};
             return MLN_PLUGIN_STATUS_OK;
         };
         if (packedColor) {
@@ -228,6 +229,7 @@ TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {
     RenderTest test;
     test.map.getStyle().loadJSON(triangleStyle("test.cached-uniforms"));
     const auto first = test.frontend.render(test.map).stats;
+    ASSERT_GT(first.numDrawCalls, 0u);
     const auto warm = test.frontend.render(test.map).stats;
     const auto unchangedBytes = warm.uniformUpdateBytes - first.uniformUpdateBytes;
     JSDocument value;
