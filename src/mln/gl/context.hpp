@@ -9,6 +9,7 @@
 #include <mln/gl/object.hpp>
 #include <mln/gl/state.hpp>
 #include <mln/gl/value.hpp>
+#include <mln/gl/defines.hpp>
 #include <mln/gl/framebuffer.hpp>
 #include <mln/gl/resource_pool.hpp>
 #include <mln/gl/vertex_array.hpp>
@@ -35,6 +36,17 @@ namespace extension {
 class VertexArray;
 class Debugging;
 } // namespace extension
+
+/// Reads and clears every pending GL error; true if one was GL_OUT_OF_MEMORY.
+/// The call being checked must not be wrapped in MBGL_CHECK_ERROR, which
+/// consumes the error in debug builds.
+inline bool hadOutOfMemoryError() {
+    bool outOfMemory = false;
+    for (auto error = platform::glGetError(); error != GL_NO_ERROR; error = platform::glGetError()) {
+        outOfMemory |= error == GL_OUT_OF_MEMORY;
+    }
+    return outOfMemory;
+}
 
 class Context final : public gfx::Context {
 public:
