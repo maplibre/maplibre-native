@@ -41,8 +41,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/clipping_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/collision.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/common.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/custom_geometry.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/custom_symbol_icon.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/fill_extrusion.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/vulkan/heatmap.hpp
@@ -86,8 +84,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/circle.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/clipping_mask.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/collision.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/custom_geometry.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/custom_symbol_icon.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/vulkan/fill_extrusion.cpp

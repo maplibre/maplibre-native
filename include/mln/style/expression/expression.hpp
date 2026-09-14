@@ -208,7 +208,8 @@ enum class Kind : int32_t {
     Within,
     Distance,
     IndexOf,
-    Slice
+    Slice,
+    Semiliteral
 };
 
 enum class Dependency : uint32_t {

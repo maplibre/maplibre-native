@@ -23,8 +23,6 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/clipping_mask.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/collision_box.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/collision_circle.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/custom_geometry.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/custom_symbol_icon.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/debug.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/fill_outline.hpp
@@ -109,7 +107,6 @@ list(APPEND INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/background_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/circle_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/collision_layer_ubo.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/shaders/custom_drawable_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/debug_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/fill_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/fill_extrusion_layer_ubo.hpp
@@ -125,8 +122,6 @@ list(APPEND INCLUDE_FILES
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/shader_defines.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/symbol_layer_ubo.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/widevector_ubo.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/style/layers/custom_drawable_layer.hpp
-        ${PROJECT_SOURCE_DIR}/include/mln/layermanager/custom_drawable_layer_factory.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/gl/shader_program_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/gl/buffer_allocator.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/gl/drawable_gl.hpp
