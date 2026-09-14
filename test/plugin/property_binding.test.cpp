@@ -75,7 +75,7 @@ TEST(PluginPaintBinder, PackedCompositeEndpointsAndFeatureStateUpdates) {
     plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["interpolate",["linear"],["zoom"],10,["get","small"],11,["get","large"]])");
     auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
-                                                               layer);
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
     PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, snapshots);
     ASSERT_TRUE(binder.isDataDriven());
     EXPECT_EQ(gfx::AttributeDataType::Float2, binder.attributeType());
@@ -108,7 +108,7 @@ TEST(PluginPaintBinder, EnumOrdinalsAndOwnedStatisticsStrings) {
         "test-size", MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
     auto value = expression(definition, R"(["get","anchor"])");
     auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
-                                                               layer);
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
     PluginPaintPropertyBinder binder(definition, binding, value, 10, 1, 4, snapshots);
     const auto* bytes = static_cast<const float*>(binder.getVertexVector()->getRawData());
     EXPECT_FLOAT_EQ(1, bytes[0]);
@@ -128,20 +128,21 @@ TEST(PluginPaintBinder, EnumOrdinalsAndOwnedStatisticsStrings) {
 TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLifetime) {
     struct CountingLayer final : GeometryTileLayer {
         GeoJSONTileLayer layer = source();
-        mutable size_t reads = 0;
+        std::shared_ptr<size_t> reads = std::make_shared<size_t>(0);
         size_t featureCount() const override { return layer.featureCount(); }
         std::string getName() const override { return "counting"; }
         std::unique_ptr<GeometryTileFeature> getFeature(size_t i) const override {
-            ++reads;
+            ++*reads;
             return layer.getFeature(i);
         }
     };
     std::shared_ptr<const PluginFeatureData> snapshots;
     {
-        CountingLayer layer;
+        auto layer = std::make_unique<CountingLayer>();
+        const auto reads = layer->reads;
         snapshots = std::make_shared<const PluginFeatureData>(
-            std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}, {0, 1, 1, 1}, {0, 2, 0, 1}}, layer);
-        EXPECT_EQ(1u, layer.reads);
+            std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}, {0, 1, 1, 1}, {0, 2, 0, 1}}, std::move(layer));
+        EXPECT_EQ(1u, *reads);
         EXPECT_EQ(1u, snapshots->features.size());
         EXPECT_EQ(2u, snapshots->drawable(1).ranges.size());
         EXPECT_EQ((std::vector<size_t>{0, 1}), snapshots->drawable(1).byID.at("1"));
@@ -175,6 +176,34 @@ TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLife
     EXPECT_FLOAT_EQ(12, static_cast<const float*>(a.getVertexVector()->getRawData())[0]);
 }
 
+TEST(PluginPaintBinder, FeatureViewsRetainTheirSourceWithoutCopyingProperties) {
+    auto collection = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
+    mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>(10, 20)};
+    feature.id = uint64_t(1);
+    feature.properties = {{"small", 7.0}};
+    collection->push_back(std::move(feature));
+    std::weak_ptr<const mapbox::feature::feature_collection<int16_t>> lifetime = collection;
+    auto owner = std::make_unique<GeoJSONTileLayer>(collection);
+    const auto* properties = &collection->front().properties;
+    collection.reset();
+    auto data = std::make_shared<const PluginFeatureData>(
+        std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}}, std::move(owner));
+    ASSERT_FALSE(lifetime.expired());
+    EXPECT_EQ(properties, &data->features[0].snapshot->getProperties());
+    // Switching away from a constant still has the original feature/geometry.
+    const auto definition = numberDefinition();
+    const plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
+    {
+        PluginPaintPropertyBinder binder(definition, binding, style::defaultPluginPropertyValue(definition),
+                                        0, {0, 0, 0}, 1, 4, data);
+        data.reset();
+        EXPECT_FALSE(lifetime.expired());
+        EXPECT_TRUE(binder.synchronize(expression(definition, R"(["get","small"])")));
+        EXPECT_FLOAT_EQ(7, static_cast<const float*>(binder.getVertexVector()->getRawData())[0]);
+    }
+    EXPECT_TRUE(lifetime.expired());
+}
+
 TEST(PluginPaintBinder, CachedUniformsInvalidateOnZoomAndPropertyChanges) {
     const auto layer = source();
     const auto definition = numberDefinition();
@@ -187,7 +216,8 @@ TEST(PluginPaintBinder, CachedUniformsInvalidateOnZoomAndPropertyChanges) {
         1,
         1,
         1,
-        std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}}, layer));
+        std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}},
+                                                 std::make_unique<GeoJSONTileLayer>(layer)));
     float bytes[2]{};
     auto read = [&](float zoom) {
         binder.writeUniform(zoom, 0, reinterpret_cast<uint8_t*>(bytes), sizeof(bytes));
