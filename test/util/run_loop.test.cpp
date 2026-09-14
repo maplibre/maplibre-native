@@ -6,6 +6,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <thread>
+#include <vector>
 
 using namespace mln::util;
 
@@ -63,6 +64,52 @@ TEST(RunLoop, Priorities) {
     loop.run();
 
     EXPECT_EQ((std::vector<int>{2, 4, 1, 3}), order);
+}
+
+TEST(RunLoop, RunOnceBudget) {
+    std::vector<int> order;
+
+    RunLoop loop(RunLoop::Type::New);
+    loop.invoke([&] { order.push_back(1); });
+    loop.invoke(RunLoop::Priority::High, [&] { order.push_back(2); });
+    loop.invoke([&] { order.push_back(3); });
+
+    loop.runOnce(mln::Duration::zero());
+    EXPECT_EQ((std::vector<int>{2}), order);
+
+    loop.runOnce(mln::Duration::zero());
+    EXPECT_EQ((std::vector<int>{2, 1}), order);
+
+    loop.runOnce();
+    EXPECT_EQ((std::vector<int>{2, 1, 3}), order);
+}
+
+TEST(RunLoop, RunOnceMaximumBudget) {
+    RunLoop loop(RunLoop::Type::New);
+    int count = 0;
+    loop.invoke([&] { ++count; });
+    loop.invoke([&] { ++count; });
+
+    loop.runOnce(mln::Duration::max());
+    EXPECT_EQ(count, 2);
+}
+
+TEST(RunLoop, RunOnceBudgetNotifiesPlatform) {
+    RunLoop loop(RunLoop::Type::New);
+    int notifications = 0;
+    int count = 0;
+    loop.setPlatformCallback([&] { ++notifications; });
+    loop.invoke([&] { ++count; });
+    loop.invoke([&] { ++count; });
+    notifications = 0;
+
+    loop.runOnce(mln::Duration::zero());
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(notifications, 1);
+
+    loop.runOnce(mln::Duration::zero());
+    EXPECT_EQ(count, 2);
+    EXPECT_EQ(notifications, 1);
 }
 
 TEST(RunLoop, PlatformIntegration) {
