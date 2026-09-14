@@ -1,0 +1,30 @@
+{
+  "revision": "5842416c75ebeb41a0842d787081d892bdebfddc",
+  "diff_sha256": "4681a058a4620806d550cd22558ca7db1e1bc471183044e625eb9c2045a016d8",
+  "timestamp": "2026-09-14T16:24:10.717Z",
+  "cpu": "Apple M3 Max",
+  "os": "26.6.2",
+  "gpu": [
+    "Apple M3 Max"
+  ],
+  "builds": [
+    "/Users/bart/src/maplibre-native/build-circle-metal-off",
+    "/Users/bart/src/maplibre-native/build-circle-metal-on"
+  ],
+  "frames": 3,
+  "warmups": 2,
+  "repeats": 1,
+  "profiling": true,
+  "artifact_sha256": {
+    "/Users/bart/src/maplibre-native/build-circle-metal-off/benchmark/mln-circle-benchmark": "21f01bdce4ce3ebf8039bbc6ddac47ea1c67958b976f016a0801bc44de60164f",
+    "/Users/bart/src/maplibre-native/build-circle-metal-on/benchmark/mln-circle-benchmark": "36f136913e52685be2fefa4bde73768a3cb3dde7e80188a6b7febaf9df6862bd",
+    "/Users/bart/src/maplibre-native/build-circle-metal-on/plugins/libmln-circle-layer.dylib": "fc52ae84617290be677ecdba74f07de2ab79c0504617e47aba9e418a4d638d8f"
+  },
+  "background_workers": 4,
+  "size": [
+    1024,
+    768
+  ],
+  "pixel_ratio": 1,
+  "timing": "steady-clock wall time including Metal headless GPU wait; encoding_ms is the host CPU encoding counter"
+}

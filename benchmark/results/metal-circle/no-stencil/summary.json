@@ -1,0 +1,3810 @@
+[
+  {
+    "workload_phase": "1000-1-constant-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.000083
+        ],
+        "mean_ms": 0.000083,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.407333
+        ],
+        "mean_ms": 0.407333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      4907.626506024097,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.9761904761904763,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          29.333417
+        ],
+        "mean_ms": 29.333417,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          46.526833
+        ],
+        "mean_ms": 46.526833,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          31.99175
+        ],
+        "mean_ms": 31.99175,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.687597842733031,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.5861375099941477,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.542042
+        ],
+        "mean_ms": 0.542042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.555861
+        ],
+        "mean_ms": 0.555861,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.7602083333333333
+        ],
+        "mean_ms": 0.7602083333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.3676230808301593,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0254943343873721,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.03219433468333333
+        ],
+        "mean_ms": 0.03219433468333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.036958664473333326
+        ],
+        "mean_ms": 0.036958664473333326,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.03105533324
+        ],
+        "mean_ms": 0.03105533324,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8402720629260633,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.147986589468688,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.1415136666666668
+        ],
+        "mean_ms": 1.1415136666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.3454166666666667
+        ],
+        "mean_ms": 1.3454166666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.1207223333333334
+        ],
+        "mean_ms": 1.1207223333333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8329927531743574,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1786251062551156,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.02249966686
+        ],
+        "mean_ms": 0.02249966686,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.026847667566666667
+        ],
+        "mean_ms": 0.026847667566666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.034333000563333334
+        ],
+        "mean_ms": 0.034333000563333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.2788075715731915,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.193247337114869,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.8234583333333334
+        ],
+        "mean_ms": 0.8234583333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.846639
+        ],
+        "mean_ms": 0.846639,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.4947223333333333
+        ],
+        "mean_ms": 0.4947223333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.5843368110060289,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0281503820270201,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.027527331743333338
+        ],
+        "mean_ms": 0.027527331743333338,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03881900071666666
+        ],
+        "mean_ms": 0.03881900071666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.03290266492333333
+        ],
+        "mean_ms": 0.03290266492333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8475917544473731,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.4101984557972271,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.8585416666666666
+        ],
+        "mean_ms": 0.8585416666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.6640556666666666
+        ],
+        "mean_ms": 0.6640556666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.8382223333333334
+        ],
+        "mean_ms": 0.8382223333333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.262277208687826,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.773469352099005,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.05644433258333333
+        ],
+        "mean_ms": 0.05644433258333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.05705533233666666
+        ],
+        "mean_ms": 0.05705533233666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.05137500071666667
+        ],
+        "mean_ms": 0.05137500071666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9004417047913763,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0108248202320624,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          2.438222
+        ],
+        "mean_ms": 2.438222,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.992097
+        ],
+        "mean_ms": 2.992097,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          2.4644996666666663
+        ],
+        "mean_ms": 2.4644996666666663,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8236697094601767,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.227163482242388,
+      null
+    ]
+  },
+  {
+    "workload_phase": "1000-1-constant-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.14923600126666667
+        ],
+        "mean_ms": 0.14923600126666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.1723886671
+        ],
+        "mean_ms": 0.1723886671,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.2732643309666667
+        ],
+        "mean_ms": 0.2732643309666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.5851641268747108,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1551412905520184,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0
+        ],
+        "mean_ms": 0,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0
+        ],
+        "mean_ms": 0,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.327542
+        ],
+        "mean_ms": 0.327542,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      null,
+      null
+    ],
+    "enabled_to_disabled": [
+      null,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          38.877709
+        ],
+        "mean_ms": 38.877709,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          38.56875
+        ],
+        "mean_ms": 38.56875,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          45.582084
+        ],
+        "mean_ms": 45.582084,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1818398055420516,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9920530553896578,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.854889
+        ],
+        "mean_ms": 0.854889,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.6431383333333334
+        ],
+        "mean_ms": 0.6431383333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.7127916666666666
+        ],
+        "mean_ms": 0.7127916666666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.108302257419995,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.7523062448263265,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.03648600007333333
+        ],
+        "mean_ms": 0.03648600007333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.032958001003333334
+        ],
+        "mean_ms": 0.032958001003333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.03930566769333333
+        ],
+        "mean_ms": 0.03930566769333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1925986557667136,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9033054030886077,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.9417779999999999
+        ],
+        "mean_ms": 0.9417779999999999,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.0414446666666668
+        ],
+        "mean_ms": 1.0414446666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.171722
+        ],
+        "mean_ms": 1.171722,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.125092899798805,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1058281958876368,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.01806933384333333
+        ],
+        "mean_ms": 0.01806933384333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.020485995873333333
+        ],
+        "mean_ms": 0.020485995873333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.022208666146666667
+        ],
+        "mean_ms": 0.022208666146666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0840901406006695,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.133743836433219,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.9029026666666667
+        ],
+        "mean_ms": 0.9029026666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.9425553333333334
+        ],
+        "mean_ms": 0.9425553333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.9415140000000001
+        ],
+        "mean_ms": 0.9415140000000001,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9988952019085705,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.043916878452753,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.033944331030000004
+        ],
+        "mean_ms": 0.033944331030000004,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03438933466333333
+        ],
+        "mean_ms": 0.03438933466333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.040194332539999995
+        ],
+        "mean_ms": 0.040194332539999995,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1688022735390713,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0131098071409932,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.9641946666666668
+        ],
+        "mean_ms": 0.9641946666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.9659443333333334
+        ],
+        "mean_ms": 0.9659443333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.9684863333333333
+        ],
+        "mean_ms": 0.9684863333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0026316216289897,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0018146404737078,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.05934733417000001
+        ],
+        "mean_ms": 0.05934733417000001,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.06401399999333333
+        ],
+        "mean_ms": 0.06401399999333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.061944335659999995
+        ],
+        "mean_ms": 0.061944335659999995,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9676685672892043,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0786331161896117,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          13.478986
+        ],
+        "mean_ms": 13.478986,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          13.421069333333335
+        ],
+        "mean_ms": 13.421069333333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          15.927
+        ],
+        "mean_ms": 15.927,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1867161702564781,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9957031881577245,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.6803603331
+        ],
+        "mean_ms": 0.6803603331,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.7289866662333333
+        ],
+        "mean_ms": 0.7289866662333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.8078056686666664
+        ],
+        "mean_ms": 1.8078056686666664,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      2.4798885252697143,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0714714405993833,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0
+        ],
+        "mean_ms": 0,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.288042
+        ],
+        "mean_ms": 0.288042,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      null,
+      null
+    ],
+    "enabled_to_disabled": [
+      0,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          176.260834
+        ],
+        "mean_ms": 176.260834,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          172.327875
+        ],
+        "mean_ms": 172.327875,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          192.3125
+        ],
+        "mean_ms": 192.3125,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1159686150600998,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9776867105939145,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          2.248777333333333
+        ],
+        "mean_ms": 2.248777333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.4004726666666665
+        ],
+        "mean_ms": 2.4004726666666665,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          2.3151663333333334
+        ],
+        "mean_ms": 2.3151663333333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9644626933195658,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0674568046754889,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.04288833224666666
+        ],
+        "mean_ms": 0.04288833224666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.043332998756666664
+        ],
+        "mean_ms": 0.043332998756666664,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.04765333263333333
+        ],
+        "mean_ms": 0.04765333263333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.099700782328202,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0103680065581138,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          2.4093746666666664
+        ],
+        "mean_ms": 2.4093746666666664,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.691111333333333
+        ],
+        "mean_ms": 2.691111333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          2.7080976666666667
+        ],
+        "mean_ms": 2.7080976666666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0063120143425257,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1169335224464882,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.022763666493333334
+        ],
+        "mean_ms": 0.022763666493333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.031152666150000004
+        ],
+        "mean_ms": 0.031152666150000004,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.029458666783333334
+        ],
+        "mean_ms": 0.029458666783333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9456226520545603,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.3685258549682016,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.0042363333333333
+        ],
+        "mean_ms": 1.0042363333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.0496250000000003
+        ],
+        "mean_ms": 2.0496250000000003,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.8207916666666668
+        ],
+        "mean_ms": 1.8207916666666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8883535606106808,
+      null
+    ],
+    "enabled_to_disabled": [
+      2.0409787337575587,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.026499667000000005
+        ],
+        "mean_ms": 0.026499667000000005,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.025485670143333333
+        ],
+        "mean_ms": 0.025485670143333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.038777664786666666
+        ],
+        "mean_ms": 0.038777664786666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.5215477783624347,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9617354868396395,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.1123193333333334
+        ],
+        "mean_ms": 1.1123193333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.1670693333333333
+        ],
+        "mean_ms": 1.1670693333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.324347333333333
+        ],
+        "mean_ms": 1.324347333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1347632017292315,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0492214765663817,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.12274966623333335
+        ],
+        "mean_ms": 0.12274966623333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.11347199931333334
+        ],
+        "mean_ms": 0.11347199931333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.06194400096666666
+        ],
+        "mean_ms": 0.06194400096666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.5458967969324221,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9244179865844669,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          137.98568066666667
+        ],
+        "mean_ms": 137.98568066666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          143.50109733333332
+        ],
+        "mean_ms": 143.50109733333332,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          165.97870833333334
+        ],
+        "mean_ms": 165.97870833333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1566372063886565,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0399709349551298,
+      null
+    ]
+  },
+  {
+    "workload_phase": "100000-1-constant-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          5.089444333666666
+        ],
+        "mean_ms": 5.089444333666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          5.891583335
+        ],
+        "mean_ms": 5.891583335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          16.363764
+        ],
+        "mean_ms": 16.363764,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      2.777481547751034,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1576083652250966,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000041
+        ],
+        "mean_ms": 0.000041,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.000083
+        ],
+        "mean_ms": 0.000083,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.323375
+        ],
+        "mean_ms": 0.323375,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      3896.084337349398,
+      null
+    ],
+    "enabled_to_disabled": [
+      2.024390243902439,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          38.679917
+        ],
+        "mean_ms": 38.679917,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          39.163459
+        ],
+        "mean_ms": 39.163459,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          40.377792
+        ],
+        "mean_ms": 40.377792,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0310067861983283,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0125011126575065,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.991736
+        ],
+        "mean_ms": 0.991736,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.965875
+        ],
+        "mean_ms": 0.965875,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.6732913333333334
+        ],
+        "mean_ms": 0.6732913333333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6970791596566154,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9739235038356983,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.03781933143333333
+        ],
+        "mean_ms": 0.03781933143333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.04031900122333334
+        ],
+        "mean_ms": 0.04031900122333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.03676399865
+        ],
+        "mean_ms": 0.03676399865,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9118281091924471,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0660950285281046,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.3576666666666668
+        ],
+        "mean_ms": 1.3576666666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.0942356666666668
+        ],
+        "mean_ms": 1.0942356666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.0945976666666668
+        ],
+        "mean_ms": 1.0945976666666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0003308245298772,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.8059678369752026,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.027180667529999997
+        ],
+        "mean_ms": 0.027180667529999997,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.020541665433333335
+        ],
+        "mean_ms": 0.020541665433333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.021652667783333333
+        ],
+        "mean_ms": 0.021652667783333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.054085310346704,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.755745436003769,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.91918
+        ],
+        "mean_ms": 0.91918,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.9334723333333333
+        ],
+        "mean_ms": 0.9334723333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.007014
+        ],
+        "mean_ms": 1.007014,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0787829098309287,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0155490038222474,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.022208332666666664
+        ],
+        "mean_ms": 0.022208332666666664,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03336100053
+        ],
+        "mean_ms": 0.03336100053,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.055721665073333336
+        ],
+        "mean_ms": 0.055721665073333336,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.6702636068491241,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.5021839338741894,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.8190969999999999
+        ],
+        "mean_ms": 0.8190969999999999,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.8729723333333332
+        ],
+        "mean_ms": 0.8729723333333332,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.8887913333333333
+        ],
+        "mean_ms": 0.8887913333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0181208491907152,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.065774057691987,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.050347668246666664
+        ],
+        "mean_ms": 0.050347668246666664,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.06090300060666667
+        ],
+        "mean_ms": 0.06090300060666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.05734766697666666
+        ],
+        "mean_ms": 0.05734766697666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9416230137335659,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.2096488820154812,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          13.735611
+        ],
+        "mean_ms": 13.735611,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          14.330999666666665
+        ],
+        "mean_ms": 14.330999666666665,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          15.988208666666665
+        ],
+        "mean_ms": 15.988208666666665,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1156380600478697,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0433463547174322,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-camera-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.6925276659999998
+        ],
+        "mean_ms": 0.6925276659999998,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.7245553339666667
+        ],
+        "mean_ms": 0.7245553339666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.8039029986666666
+        ],
+        "mean_ms": 1.8039029986666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      2.489669061976232,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.046247492395007,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.000208
+        ],
+        "mean_ms": 0.000208,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.319583
+        ],
+        "mean_ms": 0.319583,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1536.456730769231,
+      null
+    ],
+    "enabled_to_disabled": [
+      4.9523809523809526,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          45.027917
+        ],
+        "mean_ms": 45.027917,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          45.770083
+        ],
+        "mean_ms": 45.770083,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          41.578291
+        ],
+        "mean_ms": 41.578291,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.908416333874684,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.016482352492566,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.7906943333333333
+        ],
+        "mean_ms": 0.7906943333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.7109306666666666
+        ],
+        "mean_ms": 0.7109306666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.6765416666666667
+        ],
+        "mean_ms": 0.6765416666666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9516281944043302,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.8991219953096076,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.029666665793333335
+        ],
+        "mean_ms": 0.029666665793333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.02799966508
+        ],
+        "mean_ms": 0.02799966508,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.035055330956666665
+        ],
+        "mean_ms": 0.035055330956666665,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.2519910811971278,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.943808963064938,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.2896806666666667
+        ],
+        "mean_ms": 1.2896806666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.0821250000000002
+        ],
+        "mean_ms": 1.0821250000000002,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.1284029999999998
+        ],
+        "mean_ms": 1.1284029999999998,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0427658542220164,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.8390642955026077,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.024694664413333334
+        ],
+        "mean_ms": 0.024694664413333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.018542000666666666
+        ],
+        "mean_ms": 0.018542000666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.029791333266666664
+        ],
+        "mean_ms": 0.029791333266666664,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.6066946497431183,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.7508504815580861,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.8317086666666667
+        ],
+        "mean_ms": 0.8317086666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.929153
+        ],
+        "mean_ms": 0.929153,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.97675
+        ],
+        "mean_ms": 0.97675,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.051226224313972,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1171616182910202,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.029499999073333335
+        ],
+        "mean_ms": 0.029499999073333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.029958999223333335
+        ],
+        "mean_ms": 0.029958999223333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.04761133095666666
+        ],
+        "mean_ms": 0.04761133095666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.5892163353569215,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0155593276074004,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.0278886666666667
+        ],
+        "mean_ms": 1.0278886666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.024375
+        ],
+        "mean_ms": 1.024375,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.980903
+        ],
+        "mean_ms": 0.980903,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9575624161073825,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9965816661078081,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.08938866450333334
+        ],
+        "mean_ms": 0.08938866450333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.07298633257333333
+        ],
+        "mean_ms": 0.07298633257333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.049458334009999994
+        ],
+        "mean_ms": 0.049458334009999994,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6776382956398929,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.8165054593763579,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          16.452291666666667
+        ],
+        "mean_ms": 16.452291666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          15.678902666666666
+        ],
+        "mean_ms": 15.678902666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          17.00033333333333
+        ],
+        "mean_ms": 17.00033333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0842808131895623,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9529920198553898,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-feature-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.2978889996666665
+        ],
+        "mean_ms": 1.2978889996666665,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.283624999
+        ],
+        "mean_ms": 1.283624999,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.9009586676666668
+        ],
+        "mean_ms": 1.9009586676666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.4809299204577635,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9890098454718933,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000041
+        ],
+        "mean_ms": 0.000041,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.285458
+        ],
+        "mean_ms": 0.285458,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      6796.619047619048,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.024390243902439,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          46.623625
+        ],
+        "mean_ms": 46.623625,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          47.700792
+        ],
+        "mean_ms": 47.700792,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          47.072458
+        ],
+        "mean_ms": 47.072458,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9868275981665042,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0231034588151393,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.9248473333333335
+        ],
+        "mean_ms": 0.9248473333333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.0679446666666668
+        ],
+        "mean_ms": 1.0679446666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.0132916666666667
+        ],
+        "mean_ms": 1.0132916666666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9488241275921286,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1547253564732485,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.03820833080666667
+        ],
+        "mean_ms": 0.03820833080666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03552766672
+        ],
+        "mean_ms": 0.03552766672,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.041958335109999995
+        ],
+        "mean_ms": 0.041958335109999995,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.181004523620458,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9298408480540337,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.4259026666666668
+        ],
+        "mean_ms": 1.4259026666666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.4014446666666664
+        ],
+        "mean_ms": 1.4014446666666664,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.437556
+        ],
+        "mean_ms": 1.437556,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0257672202065775,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9828473565750628,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.026027667143333336
+        ],
+        "mean_ms": 0.026027667143333336,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.02808333253333334
+        ],
+        "mean_ms": 0.02808333253333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.029999666973333335
+        ],
+        "mean_ms": 0.029999666973333335,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0682374300744193,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0789800091832868,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.0199999999999998
+        ],
+        "mean_ms": 1.0199999999999998,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.9374026666666667
+        ],
+        "mean_ms": 0.9374026666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.8865836666666667
+        ],
+        "mean_ms": 0.8865836666666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.945787438198028,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9190222222222224,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.026111334589999997
+        ],
+        "mean_ms": 0.026111334589999997,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.028569334973333332
+        ],
+        "mean_ms": 0.028569334973333332,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.050888999489999996
+        ],
+        "mean_ms": 0.050888999489999996,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.7812455045768436,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.094135379210938,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.7905973333333334
+        ],
+        "mean_ms": 0.7905973333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.6940833333333334
+        ],
+        "mean_ms": 0.6940833333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.707528
+        ],
+        "mean_ms": 0.707528,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0193703926041542,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.8779226846198992,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.07323600099333333
+        ],
+        "mean_ms": 0.07323600099333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.08101366742
+        ],
+        "mean_ms": 0.08101366742,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.053583667370000004
+        ],
+        "mean_ms": 0.053583667370000004,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6614151547072377,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.106200042618038,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          16.58945866666667
+        ],
+        "mean_ms": 16.58945866666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          17.020861333333333
+        ],
+        "mean_ms": 17.020861333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          18.116277333333333
+        ],
+        "mean_ms": 18.116277333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0643572601026223,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0260046259094326,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-composite-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.257125667666667
+        ],
+        "mean_ms": 1.257125667666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.3349583326666667
+        ],
+        "mean_ms": 1.3349583326666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.9524726656666669
+        ],
+        "mean_ms": 1.9524726656666669,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.462571990368025,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.061913193725862,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0
+        ],
+        "mean_ms": 0,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.339334
+        ],
+        "mean_ms": 0.339334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      null,
+      null
+    ],
+    "enabled_to_disabled": [
+      0,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          41.465583
+        ],
+        "mean_ms": 41.465583,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          46.1505
+        ],
+        "mean_ms": 46.1505,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          47.205958
+        ],
+        "mean_ms": 47.205958,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.022869914735485,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1129832661462882,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.6959446666666667
+        ],
+        "mean_ms": 0.6959446666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.8462223333333333
+        ],
+        "mean_ms": 0.8462223333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.9841253333333334
+        ],
+        "mean_ms": 0.9841253333333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1629630825941333,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.2159333548548399,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.03204200281
+        ],
+        "mean_ms": 0.03204200281,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.034999667453333334
+        ],
+        "mean_ms": 0.034999667453333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.04806933430000001
+        ],
+        "mean_ms": 0.04806933430000001,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.3734226007745092,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0923058605565779,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.3669719999999999
+        ],
+        "mean_ms": 1.3669719999999999,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.393028
+        ],
+        "mean_ms": 1.393028,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.3340416666666666
+        ],
+        "mean_ms": 1.3340416666666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.95765603180027,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0190611073233395,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.027777667126666666
+        ],
+        "mean_ms": 0.027777667126666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.018319332106666666
+        ],
+        "mean_ms": 0.018319332106666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.03783333401333333
+        ],
+        "mean_ms": 0.03783333401333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      2.0652136111209667,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.6594985829130351,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.980028
+        ],
+        "mean_ms": 0.980028,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.771208
+        ],
+        "mean_ms": 0.771208,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.0013056666666666
+        ],
+        "mean_ms": 1.0013056666666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.298360061963396,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.7869244552196468,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.037930668136666665
+        ],
+        "mean_ms": 0.037930668136666665,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.018972669446666666
+        ],
+        "mean_ms": 0.018972669446666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.046750332936666666
+        ],
+        "mean_ms": 0.046750332936666666,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      2.464088307029473,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.5001933891147634,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.0160416666666667
+        ],
+        "mean_ms": 1.0160416666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.0134863333333335
+        ],
+        "mean_ms": 1.0134863333333335,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.6127086666666667
+        ],
+        "mean_ms": 0.6127086666666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6045554306109702,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9974850112774247,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.07950033129
+        ],
+        "mean_ms": 0.07950033129,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.07920833498666667
+        ],
+        "mean_ms": 0.07920833498666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.05224966541
+        ],
+        "mean_ms": 0.05224966541,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6596485763625168,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9963271058296828,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/state_1pct/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.8810140000000001
+        ],
+        "mean_ms": 0.8810140000000001,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.0591943333333333
+        ],
+        "mean_ms": 1.0591943333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.4298056666666668
+        ],
+        "mean_ms": 1.4298056666666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.3498992787914588,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.2022446105661582,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/state_1pct/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.2575979985333333
+        ],
+        "mean_ms": 0.2575979985333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.28841666670000005
+        ],
+        "mean_ms": 0.28841666670000005,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.5481673312333334
+        ],
+        "mean_ms": 0.5481673312333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.9006090650215994,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1196386165348204,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/state_100pct/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          11.277319333333333
+        ],
+        "mean_ms": 11.277319333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          11.094791666666666
+        ],
+        "mean_ms": 11.094791666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          9.365666666666668
+        ],
+        "mean_ms": 9.365666666666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8441498450849687,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9838146228486095,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/state_100pct/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          9.110597666999999
+        ],
+        "mean_ms": 9.110597666999999,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          8.957361335666667
+        ],
+        "mean_ms": 8.957361335666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          7.243457998333334
+        ],
+        "mean_ms": 7.243457998333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8086597968858457,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9831804304246275,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          23.754069666666666
+        ],
+        "mean_ms": 23.754069666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          24.860361
+        ],
+        "mean_ms": 24.860361,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          26.743347333333332
+        ],
+        "mean_ms": 26.743347333333332,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0757425177105566,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0465727072816393,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-state-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          8.857430669666668
+        ],
+        "mean_ms": 8.857430669666668,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          8.818875
+        ],
+        "mean_ms": 8.818875,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          10.701013666666668
+        ],
+        "mean_ms": 10.701013666666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.21342162879808,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9956470819694129,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.325833
+        ],
+        "mean_ms": 0.325833,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      7757.928571428572,
+      null
+    ],
+    "enabled_to_disabled": [
+      1,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          55.872625
+        ],
+        "mean_ms": 55.872625,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          48.709083
+        ],
+        "mean_ms": 48.709083,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          49.568625
+        ],
+        "mean_ms": 49.568625,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0176464418350886,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.871787982039505,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          3.425972
+        ],
+        "mean_ms": 3.425972,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          3.7110833333333333
+        ],
+        "mean_ms": 3.7110833333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          5.106389
+        ],
+        "mean_ms": 5.106389,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.375983383109155,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0832205672823167,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.043416999690000006
+        ],
+        "mean_ms": 0.043416999690000006,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03247233204666667
+        ],
+        "mean_ms": 0.03247233204666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.047860998163333335
+        ],
+        "mean_ms": 0.047860998163333335,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.473900861033057,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.747917458104454,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          3.5060420000000003
+        ],
+        "mean_ms": 3.5060420000000003,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          4.145986
+        ],
+        "mean_ms": 4.145986,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          4.6443753333333335
+        ],
+        "mean_ms": 4.6443753333333335,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.120210085932112,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1825260507432596,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.024361666870000003
+        ],
+        "mean_ms": 0.024361666870000003,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.019347332760000002
+        ],
+        "mean_ms": 0.019347332760000002,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.027334001063333335
+        ],
+        "mean_ms": 0.027334001063333335,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.4128046176910503,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.794171140392086,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          3.023139
+        ],
+        "mean_ms": 3.023139,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          3.8728750000000005
+        ],
+        "mean_ms": 3.8728750000000005,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          3.837514
+        ],
+        "mean_ms": 3.837514,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9908695736371558,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.2810773834745939,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.029569666369999997
+        ],
+        "mean_ms": 0.029569666369999997,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03141666578
+        ],
+        "mean_ms": 0.03141666578,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.04155566663333333
+        ],
+        "mean_ms": 0.04155566663333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.3227268267209904,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.062462639479554,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          3.1195973333333336
+        ],
+        "mean_ms": 3.1195973333333336,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          3.7116523333333333
+        ],
+        "mean_ms": 3.7116523333333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          4.103389333333333
+        ],
+        "mean_ms": 4.103389333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.1055424821128632,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1897857116602226,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.06154133371
+        ],
+        "mean_ms": 0.06154133371,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.07612466773666667
+        ],
+        "mean_ms": 0.07612466773666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.06169399906333334
+        ],
+        "mean_ms": 0.06169399906333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8104337384663215,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.236968117970719,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          18.62281966666667
+        ],
+        "mean_ms": 18.62281966666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          20.478361
+        ],
+        "mean_ms": 20.478361,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          26.419652666666668
+        ],
+        "mean_ms": 26.419652666666668,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.2901253506892796,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0996380444286102,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-1-constant-dense/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.088402667
+        ],
+        "mean_ms": 1.088402667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.222513667
+        ],
+        "mean_ms": 1.222513667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          3.5765279996666663
+        ],
+        "mean_ms": 3.5765279996666663,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      2.925552569439427,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.1232181839186912,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/registration/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.000042
+        ],
+        "mean_ms": 0.000042,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.000041
+        ],
+        "mean_ms": 0.000041,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.320167
+        ],
+        "mean_ms": 0.320167,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      7808.951219512194,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9761904761904763,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/startup_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          57.300375
+        ],
+        "mean_ms": 57.300375,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          54.423459
+        ],
+        "mean_ms": 54.423459,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          50.299458
+        ],
+        "mean_ms": 50.299458,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9242238351663756,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.9497923704687796,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/warm_no_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.4698053333333334
+        ],
+        "mean_ms": 1.4698053333333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.224041666666667
+        ],
+        "mean_ms": 2.224041666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          2.320180666666667
+        ],
+        "mean_ms": 2.320180666666667,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      1.0432271577645802,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.5131538961168556,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/warm_no_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.050846999026666666
+        ],
+        "mean_ms": 0.050846999026666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.09626399819333332
+        ],
+        "mean_ms": 0.09626399819333332,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.08602799910999999
+        ],
+        "mean_ms": 0.08602799910999999,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8936674221366153,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.8932090395904733,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/warm_readback/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.9459166666666665
+        ],
+        "mean_ms": 1.9459166666666665,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.4638329999999997
+        ],
+        "mean_ms": 2.4638329999999997,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          2.0214303333333334
+        ],
+        "mean_ms": 2.0214303333333334,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.8204412934372312,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.2661554537278916,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/warm_readback/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.04015233329
+        ],
+        "mean_ms": 0.04015233329,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.07512566662333334
+        ],
+        "mean_ms": 0.07512566662333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.06829133417333333
+        ],
+        "mean_ms": 0.06829133417333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.9090279959275952,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.8710162141945434,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/zoom/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          1.5886806666666666
+        ],
+        "mean_ms": 1.5886806666666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          2.049805666666667
+        ],
+        "mean_ms": 2.049805666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.9333473333333333
+        ],
+        "mean_ms": 0.9333473333333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.45533454634805215,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.290256569287472,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/zoom/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.03834766539666667
+        ],
+        "mean_ms": 0.03834766539666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.03956966732666667
+        ],
+        "mean_ms": 0.03956966732666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.13141599990333333
+        ],
+        "mean_ms": 0.13141599990333333,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      3.3211297638271997,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0318663970116475,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/paint_update/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          2.006069666666667
+        ],
+        "mean_ms": 2.006069666666667,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          1.9939999999999998
+        ],
+        "mean_ms": 1.9939999999999998,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          1.3637496666666664
+        ],
+        "mean_ms": 1.3637496666666664,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6839266131728519,
+      null
+    ],
+    "enabled_to_disabled": [
+      0.993983425966097,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/paint_update/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          0.2877776666333333
+        ],
+        "mean_ms": 0.2877776666333333,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          0.3318330006333334
+        ],
+        "mean_ms": 0.3318330006333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          0.198778335
+        ],
+        "mean_ms": 0.198778335,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.5990312434887836,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.153088092329737,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/style_reload/wall_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          33.225528
+        ],
+        "mean_ms": 33.225528,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          33.70234766666666
+        ],
+        "mean_ms": 33.70234766666666,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          23.486569333333335
+        ],
+        "mean_ms": 23.486569333333335,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.6968822933531942,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0143510034412897,
+      null
+    ]
+  },
+  {
+    "workload_phase": "10000-8-feature-spread/style_reload/encoding_ms",
+    "modes": {
+      "disabled-native": {
+        "process_means_ms": [
+          7.511889334
+        ],
+        "mean_ms": 7.511889334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-native": {
+        "process_means_ms": [
+          7.808207666333334
+        ],
+        "mean_ms": 7.808207666333334,
+        "ci95_half_width_ms": null
+      },
+      "enabled-plugin": {
+        "process_means_ms": [
+          2.8510279999999995
+        ],
+        "mean_ms": 2.8510279999999995,
+        "ci95_half_width_ms": null
+      }
+    },
+    "plugin_to_native": [
+      0.3651321944590156,
+      null
+    ],
+    "enabled_to_disabled": [
+      1.0394465785048443,
+      null
+    ]
+  }
+]

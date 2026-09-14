@@ -1,2 +1,4 @@
 *
 !.gitignore
+!metal-circle/
+!metal-circle/**
