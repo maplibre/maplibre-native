@@ -459,7 +459,7 @@ void PluginBucket::update(const FeatureStates& states,
         const auto properties = latestPaintProperties.find(layerID);
         const auto zoom = latestZoom.find(layerID);
         if (properties != latestPaintProperties.end() && zoom != latestZoom.end()) {
-            updateQueryRadius(layerID, properties->second, zoom->second);
+            updateQueryRadius(layerID, *properties->second, zoom->second);
         }
     }
 }
@@ -470,29 +470,30 @@ float PluginBucket::getQueryRadius(const RenderLayer& layer) const {
 }
 
 bool PluginBucket::synchronizePaint(const std::string& layerID,
-                                    const style::PluginPropertyMap& properties,
+                                    const std::shared_ptr<const style::PluginPropertyMap>& properties,
                                     float zoom) {
+    assert(properties);
     const auto priorProperties = latestPaintProperties.find(layerID);
     const auto priorZoom = latestZoom.find(layerID);
     const bool propertiesChanged = priorProperties == latestPaintProperties.end() ||
                                    priorProperties->second != properties;
     const bool queryRadiusChanged = propertiesChanged || priorZoom == latestZoom.end() || priorZoom->second != zoom;
-    latestPaintProperties.insert_or_assign(layerID, properties);
-    latestZoom.insert_or_assign(layerID, zoom);
+    if (propertiesChanged) latestPaintProperties.insert_or_assign(layerID, properties);
+    if (queryRadiusChanged) latestZoom.insert_or_assign(layerID, zoom);
     const auto it = paintPropertyBinders.find(layerID);
     if (it == paintPropertyBinders.end()) {
-        if (queryRadiusChanged) updateQueryRadius(layerID, properties, zoom);
+        if (queryRadiusChanged) updateQueryRadius(layerID, *properties, zoom);
         return false;
     }
     bool rebuildDrawable = false;
     if (propertiesChanged) {
         for (auto& [key, binders] : it->second) {
             (void)key;
-            rebuildDrawable = binders.synchronize(properties) || rebuildDrawable;
+            rebuildDrawable = binders.synchronize(*properties) || rebuildDrawable;
         }
     }
     if (rebuildDrawable) uploaded = false;
-    if (queryRadiusChanged) updateQueryRadius(layerID, properties, zoom);
+    if (queryRadiusChanged) updateQueryRadius(layerID, *properties, zoom);
     return rebuildDrawable;
 }
 

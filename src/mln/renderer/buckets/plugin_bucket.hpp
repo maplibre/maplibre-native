@@ -181,7 +181,9 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    bool synchronizePaint(const std::string& layerID, const style::PluginPropertyMap&, float zoom);
+    // The render layer retains one immutable snapshot until its evaluated paint
+    // changes. Tiles compare identity instead of copying/comparing every property.
+    bool synchronizePaint(const std::string& layerID, const std::shared_ptr<const style::PluginPropertyMap>&, float zoom);
     void updateQueryRadius(const std::string& layerID, const style::PluginPropertyMap&, float zoom);
     PluginPaintPropertyBinders* paintBinders(const std::string& layerID, uint64_t drawableKey);
 
@@ -191,7 +193,7 @@ public:
     std::vector<PluginDrawableDefinition> drawables;
     std::vector<PluginFeatureVertexRange> featureVertexRanges;
     std::map<std::string, std::map<uint64_t, PluginPaintPropertyBinders>> paintPropertyBinders;
-    std::map<std::string, style::PluginPropertyMap> latestPaintProperties;
+    std::map<std::string, std::shared_ptr<const style::PluginPropertyMap>> latestPaintProperties;
     std::map<std::string, float> latestZoom;
     float queryRadius = 0.0f;
     std::map<std::string, float> queryRadii;

@@ -87,6 +87,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
         transitioningPaintProperties.emplace(definition.name, style::PluginTransitioningPropertyValue{value});
         evaluatedPluginProperties.emplace(definition.name, std::move(value));
     }
+    evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
     passes = RenderPass::Translucent;
 }
 
@@ -131,6 +132,9 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
                                                   ? style::defaultPluginPropertyValue(definition)
                                                   : property->second);
         }
+    }
+    if (*evaluatedPaintSnapshot != evaluatedPluginProperties) {
+        evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
     }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
         staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
@@ -195,7 +199,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
         auto& bucket = static_cast<PluginBucket&>(*renderData->bucket);
-        if (bucket.synchronizePaint(getID(), evaluatedPluginProperties, static_cast<float>(state.getZoom()))) {
+        if (bucket.synchronizePaint(getID(), evaluatedPaintSnapshot, static_cast<float>(state.getZoom()))) {
             removeTile(renderPass, tileID);
         }
         const auto previousBucket = getRenderTileBucketID(tileID);

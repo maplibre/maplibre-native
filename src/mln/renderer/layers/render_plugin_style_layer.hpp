@@ -39,6 +39,7 @@ private:
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
     style::PluginPropertyMap evaluatedPluginProperties;
+    std::shared_ptr<const style::PluginPropertyMap> evaluatedPaintSnapshot;
 };
 
 } // namespace mln
