@@ -5,6 +5,41 @@
 
 using namespace mln;
 
+TEST(PluginPaintBinder, SparseVertexBoundsGrowAndShrinkAcrossBlocks) {
+    PluginPaintVertexVector vertices(1025, 4);
+    const float low[] = {1, 2, 3, 4}, high[] = {5, 6, 7, 8};
+    vertices.set(0, 1025, low, high);
+    std::array<float, 4> minimum{}, maximum{};
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ((std::array<float, 4>{1, 2, 3, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 6, 7, 8}), maximum);
+    vertices.bounds(minimum, maximum); // Reuse unchanged block bounds.
+    EXPECT_EQ((std::array<float, 4>{1, 2, 3, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 6, 7, 8}), maximum);
+    const float extremes[] = {-10, 20, -30, 40};
+    vertices.set(127, 2, extremes, extremes); // Cross a block boundary.
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ((std::array<float, 4>{-10, 2, -30, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 20, 7, 40}), maximum);
+    vertices.set(127, 2, low, high); // Removing old extrema must shrink bounds.
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ((std::array<float, 4>{1, 2, 3, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 6, 7, 8}), maximum);
+    vertices.set(1024, 1, extremes, extremes); // Partial tail block.
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ((std::array<float, 4>{-10, 2, -30, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 20, 7, 40}), maximum);
+    vertices.set(1025, 0, low, high); // Empty and invalid writes do not affect bounds.
+    vertices.set(1025, 1, low, high);
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ((std::array<float, 4>{-10, 2, -30, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 20, 7, 40}), maximum);
+    PluginPaintVertexVector empty(0, 4);
+    empty.bounds(minimum, maximum);
+    EXPECT_EQ((std::array<float, 4>{}), minimum);
+    EXPECT_EQ((std::array<float, 4>{}), maximum);
+}
+
 TEST(PluginPaintBinder, BucketRetainsImmutablePaintSnapshotAndRefreshesZoom) {
     static unsigned radiusCalls;
     radiusCalls = 0;

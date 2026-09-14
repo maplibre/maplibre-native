@@ -124,11 +124,14 @@ const PluginFeatureData::Drawable& PluginFeatureData::drawable(uint64_t key) con
 }
 
 void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const float* minimum, const float* maximum) {
-    if (first > count || length > count - first) return;
+    if (!length || first > count || length > count - first) return;
     for (std::size_t vertex = first; vertex < first + length; ++vertex) {
         auto* destination = data.data() + vertex * components * 2;
         std::copy_n(minimum, components, destination);
         std::copy_n(maximum, components, destination + components);
+    }
+    for (auto block = first / boundsBlockSize; block <= (first + length - 1) / boundsBlockSize; ++block) {
+        blocks[block].dirty = true;
     }
     updateModified(true);
 }
@@ -136,11 +139,25 @@ void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const f
 void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum, std::array<float, 4>& maximum) const {
     minimum.fill(std::numeric_limits<float>::infinity());
     maximum.fill(-std::numeric_limits<float>::infinity());
-    for (std::size_t vertex = 0; vertex < count; ++vertex) {
-        const auto* values = data.data() + vertex * components * 2;
+    for (std::size_t index = 0; index < blocks.size(); ++index) {
+        auto& block = blocks[index];
+        if (block.dirty) {
+            block.minimum.fill(std::numeric_limits<float>::infinity());
+            block.maximum.fill(-std::numeric_limits<float>::infinity());
+            const auto first = index * boundsBlockSize;
+            const auto length = std::min(boundsBlockSize, count - first);
+            for (std::size_t vertex = first; vertex < first + length; ++vertex) {
+                const auto* values = data.data() + vertex * components * 2;
+                for (std::size_t component = 0; component < components; ++component) {
+                    block.minimum[component] = std::min({block.minimum[component], values[component], values[components + component]});
+                    block.maximum[component] = std::max({block.maximum[component], values[component], values[components + component]});
+                }
+            }
+            block.dirty = false;
+        }
         for (std::size_t component = 0; component < components; ++component) {
-            minimum[component] = std::min({minimum[component], values[component], values[components + component]});
-            maximum[component] = std::max({maximum[component], values[component], values[components + component]});
+            minimum[component] = std::min(minimum[component], block.minimum[component]);
+            maximum[component] = std::max(maximum[component], block.maximum[component]);
         }
     }
     if (count == 0) {
