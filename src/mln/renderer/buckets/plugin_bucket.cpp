@@ -386,11 +386,26 @@ bool PluginPaintPropertyBinders::update(const FeatureStates& states, const Geome
 void PluginPaintPropertyBinders::appendStatistics(
     float zoom, std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>>& output) const {
     for (const auto& binder : binders) {
-        if (output.find(binder.getDefinition().name) != output.end()) continue;
+        const auto& definition = binder.getDefinition();
         mln_plugin_value minimum{};
         mln_plugin_value maximum{};
         binder.statistics(zoom, minimum, maximum);
-        output.emplace(binder.getDefinition().name, std::make_pair(minimum, maximum));
+        const auto [it, inserted] = output.emplace(definition.name, std::make_pair(minimum, maximum));
+        if (inserted) continue;
+
+        // Every drawable contributes to the layer's broad-phase bounds. Merge
+        // all components; enum strings use their declared ordinal encoding.
+        const auto encoding = binder.getBinding().encoding;
+        std::array<float, 4> accumulatedMinimum{}, accumulatedMaximum{}, nextMinimum{}, nextMaximum{};
+        encodedValue(it->second.first, encoding, definition, accumulatedMinimum);
+        encodedValue(it->second.second, encoding, definition, accumulatedMaximum);
+        encodedValue(minimum, encoding, definition, nextMinimum);
+        encodedValue(maximum, encoding, definition, nextMaximum);
+        for (std::size_t i = 0; i < binder.componentCount(); ++i) {
+            accumulatedMinimum[i] = std::min(accumulatedMinimum[i], nextMinimum[i]);
+            accumulatedMaximum[i] = std::max(accumulatedMaximum[i], nextMaximum[i]);
+        }
+        it->second = {decodedValue(accumulatedMinimum, definition), decodedValue(accumulatedMaximum, definition)};
     }
 }
 

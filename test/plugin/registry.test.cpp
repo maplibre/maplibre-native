@@ -4,6 +4,8 @@
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/renderer/buckets/plugin_bucket.hpp>
+#include <mln/tile/geojson_tile_data.hpp>
 #include <gtest/gtest.h>
 
 using namespace mln;
@@ -109,6 +111,100 @@ TEST(PluginRegistry, ValidatesAndCopiesDescriptors) {
     input = *descriptor;
     input.plugin_id = {"another-plugin", 14};
     EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&input, error, sizeof(error)));
+}
+
+TEST(PluginRegistry, QueryBoundsIncludeEveryDrawable) {
+    auto descriptor = *testDescriptor();
+    auto layer = descriptor.layer_types[0];
+    auto shader = layer.shaders[0];
+    auto uniform = shader.uniform_blocks[0];
+    uniform.byte_size = 32;
+    mln_plugin_property_descriptor_v1 properties[] = {layer.properties[0], layer.properties[0]};
+    properties[1].name = {"test-translate", 14};
+    properties[1].type = MLN_PLUGIN_VALUE_FLOAT2;
+    properties[1].default_value.type = MLN_PLUGIN_VALUE_FLOAT2;
+    properties[1].default_value.data.float2_value = {0, 0};
+    const mln_plugin_shader_attribute_v1 attributes[] = {
+        shader.attributes[0],
+        shader.attributes[1],
+        {sizeof(mln_plugin_shader_attribute_v1), 2, 2, {"a_translate", 11}, MLN_PLUGIN_VERTEX_FLOAT_X4}};
+    const mln_plugin_shader_property_binding_v1 bindings[] = {shader.property_bindings[0],
+                                                              {sizeof(mln_plugin_shader_property_binding_v1),
+                                                               {"test-translate", 14},
+                                                               MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2,
+                                                               0,
+                                                               8,
+                                                               2,
+                                                               2,
+                                                               0,
+                                                               16}};
+    shader.attributes = attributes;
+    shader.attribute_count = 3;
+    shader.uniform_blocks = &uniform;
+    shader.property_bindings = bindings;
+    shader.property_binding_count = 2;
+    layer.layer_type = {"test.query-bounds", 17};
+    layer.properties = properties;
+    layer.shaders = &shader;
+    layer.get_query_radius = [](const mln_plugin_property_statistics_v1* statistics,
+                                size_t count,
+                                const mln_plugin_property_value_v1*,
+                                size_t) {
+        EXPECT_EQ(2u, count);
+        float radius = 0;
+        for (size_t i = 0; i < count; ++i) {
+            const auto& stat = statistics[i];
+            if (stat.maximum.type == MLN_PLUGIN_VALUE_FLOAT) {
+                EXPECT_FLOAT_EQ(5, stat.minimum.data.float_value);
+                EXPECT_FLOAT_EQ(100, stat.maximum.data.float_value);
+                radius += stat.maximum.data.float_value;
+            } else {
+                EXPECT_FLOAT_EQ(-2, stat.minimum.data.float2_value.x);
+                EXPECT_FLOAT_EQ(-30, stat.minimum.data.float2_value.y);
+                EXPECT_FLOAT_EQ(20, stat.maximum.data.float2_value.x);
+                EXPECT_FLOAT_EQ(10, stat.maximum.data.float2_value.y);
+                radius += std::max({std::abs(stat.minimum.data.float2_value.x),
+                                    std::abs(stat.minimum.data.float2_value.y),
+                                    std::abs(stat.maximum.data.float2_value.x),
+                                    std::abs(stat.maximum.data.float2_value.y)});
+            }
+        }
+        return radius;
+    };
+    descriptor.plugin_id = layer.layer_type;
+    descriptor.layer_types = &layer;
+    char error[256]{};
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
+    const auto registration = plugin::PluginRegistry::get().findLayerType("test.query-bounds");
+    ASSERT_TRUE(registration);
+    style::conversion::Error conversionError;
+    const auto parsed = style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+        R"({"id":"bounds","type":"test.query-bounds","source":"points","paint":{
+        "test-radius":["get","radius"],"test-translate":["get","offset"]}})",
+        conversionError);
+    ASSERT_TRUE(parsed) << conversionError.message;
+    const auto& paint = static_cast<const style::PluginStyleLayer::Impl&>(*(*parsed)->baseImpl).pluginProperties;
+    auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
+    for (const bool large : {false, true}) {
+        mapbox::feature::feature<int16_t> feature{mapbox::geometry::point<int16_t>(100, 100)};
+        feature.properties = {{"radius", large ? 100.0 : 5.0},
+                              {"offset", Value{std::vector<Value>{large ? 20.0 : -2.0, large ? -30.0 : 10.0}}}};
+        features->push_back(std::move(feature));
+    }
+    const GeoJSONTileLayer source(features);
+    for (const bool reverse : {false, true}) {
+        SCOPED_TRACE(reverse ? "large first" : "small first");
+        PluginBucket bucket(*registration);
+        for (std::size_t i = 0; i < 2; ++i) {
+            const std::vector<PluginFeatureVertexRange> ranges = {{reverse ? 1 - i : i, i + 1, 0, 1}};
+            bucket.paintPropertyBinders["bounds"].emplace(
+                i + 1,
+                PluginPaintPropertyBinders(
+                    *registration, registration->shaders[0], i + 1, 1, 0, {0, 0, 0}, paint, ranges, source));
+        }
+        bucket.updateQueryRadius("bounds", paint, 0);
+        EXPECT_FLOAT_EQ(130, bucket.queryRadii.at("bounds"));
+    }
 }
 
 TEST(PluginStyle, ParsingDefaultsExpressionsAndClone) {
