@@ -111,6 +111,8 @@ TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLife
         EXPECT_EQ(1u, layer.reads);
         EXPECT_EQ(1u, snapshots->features.size());
         EXPECT_EQ(2u, snapshots->drawable(1).ranges.size());
+        EXPECT_EQ((std::vector<size_t>{0, 1}), snapshots->drawable(1).byID.at("1"));
+        EXPECT_EQ((std::vector<size_t>{0}), snapshots->drawable(2).byID.at("1"));
     }
     const auto& geometry = snapshots->features[0].snapshot->getGeometries();
     ASSERT_EQ(1u, geometry.size());

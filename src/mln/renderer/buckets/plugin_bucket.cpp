@@ -138,6 +138,7 @@ PluginFeatureData::PluginFeatureData(const std::vector<PluginFeatureVertexRange>
                      feature->getType(), feature->getID(), feature->getProperties(), feature->getGeometries())});
         }
         auto& drawable = drawables[range.drawableKey];
+        drawable.byID[features[index->second].id].push_back(drawable.ranges.size());
         drawable.ranges.push_back({index->second, range.firstVertex, range.vertexCount});
     }
 }
@@ -270,12 +271,14 @@ bool PluginPaintPropertyBinder::updateRanges(const FeatureStates& states) {
     if (!dataDriven || states.empty()) return false;
     bool changed = false;
     const auto& drawable = features->drawable(drawableKey);
-    for (const auto& range : drawable.ranges) {
-        const auto& feature = features->features[range.featureIndex];
-        const auto state = states.find(feature.id);
-        if (state == states.end()) continue;
-        fillRange(range, *feature.snapshot, state->second);
-        changed = true;
+    for (const auto& [id, state] : states) {
+        const auto found = drawable.byID.find(id);
+        if (found == drawable.byID.end()) continue;
+        for (const auto index : found->second) {
+            const auto& range = drawable.ranges[index];
+            fillRange(range, *features->features[range.featureIndex].snapshot, state);
+            changed = true;
+        }
     }
     if (changed) updateStatistics();
     return changed;
