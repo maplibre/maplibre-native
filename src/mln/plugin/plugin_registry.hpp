@@ -48,6 +48,7 @@ struct UniformBlockDefinition {
     uint32_t byteSize = 0;
     uint32_t stageMask = 0;
     uint32_t bindingID = 0;
+    mln_plugin_uniform_scope_v1 scope = MLN_PLUGIN_UNIFORM_DRAWABLE;
 };
 
 struct ShaderPropertyBindingDefinition {

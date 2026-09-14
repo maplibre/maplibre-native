@@ -101,7 +101,7 @@ bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
                 const auto& lu = lhsShader.uniformBlocks[uniformIndex];
                 const auto& ru = rhsShader.uniformBlocks[uniformIndex];
                 if (lu.id != ru.id || lu.name != ru.name || lu.byteSize != ru.byteSize ||
-                    lu.stageMask != ru.stageMask || lu.bindingID != ru.bindingID) {
+                    lu.stageMask != ru.stageMask || lu.bindingID != ru.bindingID || lu.scope != ru.scope) {
                     return false;
                 }
             }
@@ -251,6 +251,8 @@ bool appendShaders(const std::string& pluginID,
             const auto validStages = MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT;
             if (uniform.struct_size < sizeof(mln_plugin_uniform_block_descriptor_v1) || !validString(uniform.name) ||
                 uniform.byte_size == 0 || uniform.byte_size % 16 != 0 || uniform.stage_mask == 0 ||
+                (uniform.scope != MLN_PLUGIN_UNIFORM_DRAWABLE && uniform.scope != MLN_PLUGIN_UNIFORM_LAYER &&
+                 uniform.scope != MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY) ||
                 (uniform.stage_mask & ~validStages) != 0 || !uniformIDs.emplace(uniform.uniform_id).second ||
                 !uniformNames.emplace(copyString(uniform.name)).second) {
                 error = "plugin shader uniform block is malformed or duplicated";
@@ -283,7 +285,7 @@ bool appendShaders(const std::string& pluginID,
             }
 #endif
             shader.uniformBlocks.push_back(
-                {uniform.uniform_id, copyString(uniform.name), uniform.byte_size, uniform.stage_mask, bindingID});
+                {uniform.uniform_id, copyString(uniform.name), uniform.byte_size, uniform.stage_mask, bindingID, uniform.scope});
         }
 
         if (input.property_binding_count && !input.property_bindings) {
@@ -326,6 +328,7 @@ bool appendShaders(const std::string& pluginID,
                 (packed && encodingSize > 8) || !boundPaintAttributes.emplace(binding.minimum_attribute_id).second ||
                 (!packed && !boundPaintAttributes.emplace(binding.maximum_attribute_id).second) ||
                 uniform == shader.uniformBlocks.end() || interpolationUniform == shader.uniformBlocks.end() ||
+                interpolationUniform->scope == MLN_PLUGIN_UNIFORM_LAYER ||
                 binding.uniform_byte_offset % encodingAlignment != 0 ||
                 binding.interpolation_uniform_byte_offset % alignof(float) != 0 ||
                 binding.uniform_byte_offset > uniform->byteSize ||

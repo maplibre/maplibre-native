@@ -40,7 +40,7 @@ const mln_plugin_descriptor_v1* testDescriptor() {
         {sizeof(mln_plugin_shader_attribute_v1), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_INT16_X2},
         {sizeof(mln_plugin_shader_attribute_v1), 1, 1, {"a_radius", 8}, MLN_PLUGIN_VERTEX_FLOAT_X2}};
     static const mln_plugin_uniform_block_descriptor_v1 uniform = {
-        sizeof(uniform), 0, {"TestUBO", 7}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX};
+        sizeof(uniform), 0, {"TestUBO", 7}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
     static const mln_plugin_shader_property_binding_v1 binding = {
         sizeof(binding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     static const mln_plugin_shader_descriptor_v1 shader = {
@@ -74,6 +74,29 @@ const mln_plugin_descriptor_v1* testDescriptor() {
     static const mln_plugin_descriptor_v1 descriptor = {
         sizeof(descriptor), MLN_PLUGIN_ABI_VERSION_1, {"test.registry", 13}, {"1", 1}, 1, 1, &layer, 1};
     return &descriptor;
+}
+
+TEST(PluginRegistry, ValidatesUniformScopes) {
+    auto descriptor = *testDescriptor();
+    descriptor.plugin_id = {"test.uniform-scopes", 19};
+    auto layer = descriptor.layer_types[0];
+    layer.layer_type = {"test-uniform-scopes", 19};
+    descriptor.layer_types = &layer;
+    auto shader = layer.shaders[0];
+    layer.shaders = &shader;
+    auto uniform = shader.uniform_blocks[0];
+    shader.uniform_blocks = &uniform;
+    char message[256]{};
+    uniform.scope = static_cast<mln_plugin_uniform_scope_v1>(99);
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    uniform.scope = MLN_PLUGIN_UNIFORM_LAYER;
+    // Interpolation factors vary with bucket zoom; they cannot be layer-wide.
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    uniform.scope = MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, message, sizeof(message))) << message;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_ALREADY_REGISTERED, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
+    uniform.scope = MLN_PLUGIN_UNIFORM_DRAWABLE;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&descriptor, message, sizeof(message)));
 }
 
 TEST(PluginRegistry, ValidatesAndCopiesDescriptors) {
