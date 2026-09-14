@@ -1,5 +1,9 @@
 # Circle plugin submission investigation
 
+**Latest:** the [dense-shader, feature-ownership and bounds follow-up](circle-followup-results.md)
+implements the priorities identified below and records isolated and interleaved
+before/after results. This document preserves the earlier investigation.
+
 Investigated `perf/circle-plugin-metal` at `c5f90bafc72d`, using the Metal
 benchmark on Apple M3 Max. The initial findings were committed separately as
 `e5db20e05af0`, before applying fixes. Temporary probes and diagnostic switches

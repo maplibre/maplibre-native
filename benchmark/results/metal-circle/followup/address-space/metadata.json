@@ -1,0 +1,31 @@
+{
+  "revision": "f2b662b8841d630e5ab7c722bc762783a9448191",
+  "timestamp": "2026-09-14T20:03:41.921Z",
+  "diff_sha256": "c584f3c87aede121e358b19477ca55cd659da2cbf6dbe8bb9e2f701ad14f3e3e",
+  "cpu": "Apple M3 Max",
+  "os": "26.6.2",
+  "repeats": 7,
+  "frames": 300,
+  "warmups": 100,
+  "cases": [
+    "dense"
+  ],
+  "artifacts": {
+    "before-bin": {
+      "path": "/tmp/circle-metal-followup.Dgy0XT/benchmark-before",
+      "sha256": "f16ecd63cf75f9adb97b9978ffda03893f9f38a945684c3e9e75b2afb6b961f1"
+    },
+    "before-plugin": {
+      "path": "/tmp/circle-metal-followup.Dgy0XT/libcircle-before.dylib",
+      "sha256": "09a47d162c6198c9b3d139f96ed4a2e5144c18eaf367028c9ec335177de3b103"
+    },
+    "after-bin": {
+      "path": "/Users/bart/src/maplibre-native/build-circle-metal-on/benchmark/mln-circle-benchmark",
+      "sha256": "f16ecd63cf75f9adb97b9978ffda03893f9f38a945684c3e9e75b2afb6b961f1"
+    },
+    "after-plugin": {
+      "path": "/Users/bart/src/maplibre-native/build-circle-metal-on/plugins/libmln-circle-layer.dylib",
+      "sha256": "a9134f6e5fbb8101bafe77ea63de520c52599f015a9e929de45073d7675da5ff"
+    }
+  }
+}

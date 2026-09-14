@@ -1,6 +1,17 @@
 # Metal circle plugin benchmark — 2026-09-14
 
-## Latest update: submission-path fixes
+## Latest update: dense Metal and retained-feature follow-up
+
+The [follow-up report](circle-followup-results.md) records an isolated shader
+experiment and another 112-process comparison. Matching native Metal buffer
+address spaces reduces isolated dense plugin time **3.839 → 3.196 ms**, with
+native at **3.194 ms**. The full comparison also reduces 100k reloads
+**172.28 → 157.97 ms** and plugin peak RSS **972.0 → 884.0 MiB**. Sparse bounds
+scan less data, but sparse-update wall-time improvement remains inconclusive.
+All **48 plugin/query tests, 58 circle fixtures and 13 ngon fixtures** pass.
+See that report for committed evidence, confidence intervals and limitations.
+
+## Previous update: submission-path fixes
 
 The [submission investigation and follow-up report](circle-submission-investigation.md#full-benchmark-rerun-after-the-fixes)
 now includes another complete **189-process** comparison at `659f20016033`,

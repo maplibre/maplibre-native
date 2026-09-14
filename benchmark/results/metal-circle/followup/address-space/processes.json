@@ -1,0 +1,4146 @@
+[
+  {
+    "case": "dense",
+    "repeat": 0,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000166,
+          "encoding_ms": 45.725459,
+          "submit_wait_ms": 17.576083,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 111.233709,
+          "encoding_ms": 45.725459,
+          "submit_wait_ms": 17.576083,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.2218077800000002,
+          "encoding_ms": 0.07008390323946669,
+          "submit_wait_ms": 3.1344272101066672,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.151921273333334,
+          "encoding_ms": 0.07222649018043338,
+          "submit_wait_ms": 4.255701126636667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.355755976666667,
+          "encoding_ms": 0.06893385352096663,
+          "submit_wait_ms": 3.26604764998333,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1120068066666673,
+          "encoding_ms": 0.1386532670568,
+          "submit_wait_ms": 2.9536175963199995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 19.4880669,
+          "encoding_ms": 1.1334790986999999,
+          "submit_wait_ms": 3.8312251018,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 126910464
+  },
+  {
+    "case": "dense",
+    "repeat": 0,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 283.055417,
+          "encoding_ms": 41.781375,
+          "submit_wait_ms": 19.903209,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 118.401416,
+          "encoding_ms": 41.781375,
+          "submit_wait_ms": 19.903209,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.858948323333337,
+          "encoding_ms": 0.07119401348296667,
+          "submit_wait_ms": 3.770334176393335,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 6.00530558,
+          "encoding_ms": 0.09903052341579996,
+          "submit_wait_ms": 5.056756823216666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.043597870000003,
+          "encoding_ms": 0.11323661974943332,
+          "submit_wait_ms": 3.9066344835766675,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8268356366666643,
+          "encoding_ms": 0.14044397673280015,
+          "submit_wait_ms": 3.656577083283334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 29.6857958,
+          "encoding_ms": 4.747645800700001,
+          "submit_wait_ms": 5.143033299700001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 181698560
+  },
+  {
+    "case": "dense",
+    "repeat": 0,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000042,
+          "encoding_ms": 2.003333,
+          "submit_wait_ms": 17.022292,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 54.711375,
+          "encoding_ms": 2.003333,
+          "submit_wait_ms": 17.022292,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.2181333633333313,
+          "encoding_ms": 0.06937720017326666,
+          "submit_wait_ms": 3.1308618166700035,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.248687106666666,
+          "encoding_ms": 0.07425430638243334,
+          "submit_wait_ms": 4.351683626696668,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.5508544600000005,
+          "encoding_ms": 0.0792464798240667,
+          "submit_wait_ms": 3.4475173836299997,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.108711823333334,
+          "encoding_ms": 0.13610792966956664,
+          "submit_wait_ms": 2.952356376786666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 21.788654100000002,
+          "encoding_ms": 1.2349289005,
+          "submit_wait_ms": 4.060996000599999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 128794624
+  },
+  {
+    "case": "dense",
+    "repeat": 0,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 302.108042,
+          "encoding_ms": 67.71745901,
+          "submit_wait_ms": 17.52045799,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 140.654667,
+          "encoding_ms": 67.71745901,
+          "submit_wait_ms": 17.52045799,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.222558323333334,
+          "encoding_ms": 0.07379908628850003,
+          "submit_wait_ms": 3.1315972602599995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.759865136666667,
+          "encoding_ms": 0.07761057315983338,
+          "submit_wait_ms": 3.91360235999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.613030413333334,
+          "encoding_ms": 0.11940148996249998,
+          "submit_wait_ms": 3.46497264682,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.241250213333336,
+          "encoding_ms": 0.15980575330493327,
+          "submit_wait_ms": 3.0520887133466656,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 29.750841700000002,
+          "encoding_ms": 4.700404202700001,
+          "submit_wait_ms": 4.1610749992,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 183222272
+  },
+  {
+    "case": "dense",
+    "repeat": 1,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000042,
+          "encoding_ms": 1.974667,
+          "submit_wait_ms": 17.3585,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 54.48125,
+          "encoding_ms": 1.974667,
+          "submit_wait_ms": 17.3585,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.2430200133333336,
+          "encoding_ms": 0.06326775355193334,
+          "submit_wait_ms": 3.1634182064866674,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.727770146666671,
+          "encoding_ms": 0.08819692312133331,
+          "submit_wait_ms": 3.7851594700366658,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1192109733333324,
+          "encoding_ms": 0.06416595325173337,
+          "submit_wait_ms": 3.0353559735466673,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1689840133333353,
+          "encoding_ms": 0.17294902623823333,
+          "submit_wait_ms": 2.9714025336000005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 21.8947165,
+          "encoding_ms": 1.2492331993999999,
+          "submit_wait_ms": 3.6054542003999996,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 127369216
+  },
+  {
+    "case": "dense",
+    "repeat": 1,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.313875,
+          "encoding_ms": 2.219457005,
+          "submit_wait_ms": 15.633084,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 57.902542,
+          "encoding_ms": 2.219457005,
+          "submit_wait_ms": 15.633084,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.282170006666668,
+          "encoding_ms": 0.1020580634925667,
+          "submit_wait_ms": 3.157258196579998,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.034579990000001,
+          "encoding_ms": 0.09491373358136662,
+          "submit_wait_ms": 4.138980133406666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.5314197333333346,
+          "encoding_ms": 0.13051814950453333,
+          "submit_wait_ms": 3.3732741770633363,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.2406268099999997,
+          "encoding_ms": 0.15450459354329998,
+          "submit_wait_ms": 3.0570265164533317,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 28.1172667,
+          "encoding_ms": 4.5188998017,
+          "submit_wait_ms": 4.7741000992,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 168411136
+  },
+  {
+    "case": "dense",
+    "repeat": 1,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000083,
+          "encoding_ms": 1.865624996,
+          "submit_wait_ms": 17.333625,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 55.539416,
+          "encoding_ms": 1.865624996,
+          "submit_wait_ms": 17.333625,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.3242415366666647,
+          "encoding_ms": 0.10410708940396664,
+          "submit_wait_ms": 3.19717177691,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.933816683333336,
+          "encoding_ms": 0.0853166864053667,
+          "submit_wait_ms": 4.02872587036667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.4367418066666686,
+          "encoding_ms": 0.0813570970300333,
+          "submit_wait_ms": 3.33236609968,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1829467766666655,
+          "encoding_ms": 0.1624872070538,
+          "submit_wait_ms": 2.99774889651333,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 21.6446542,
+          "encoding_ms": 1.2571085011,
+          "submit_wait_ms": 3.8552123995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 128024576
+  },
+  {
+    "case": "dense",
+    "repeat": 1,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.299959,
+          "encoding_ms": 2.081834005,
+          "submit_wait_ms": 17.682625,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 59.583666,
+          "encoding_ms": 2.081834005,
+          "submit_wait_ms": 17.682625,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.9124257166666645,
+          "encoding_ms": 0.0917679135225,
+          "submit_wait_ms": 3.7977232097866658,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.9517547366666665,
+          "encoding_ms": 0.10602472674969997,
+          "submit_wait_ms": 4.997369719996666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.195890813333333,
+          "encoding_ms": 0.13951136990126667,
+          "submit_wait_ms": 4.027933910290001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8706018199999987,
+          "encoding_ms": 0.16334013329426672,
+          "submit_wait_ms": 3.6752965436566645,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 28.0630418,
+          "encoding_ms": 4.5292956995,
+          "submit_wait_ms": 4.6802210002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 167657472
+  },
+  {
+    "case": "dense",
+    "repeat": 2,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0,
+          "encoding_ms": 1.938501002,
+          "submit_wait_ms": 13.978958,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 50.769333,
+          "encoding_ms": 1.938501002,
+          "submit_wait_ms": 13.978958,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.2572898700000015,
+          "encoding_ms": 0.07502920656396661,
+          "submit_wait_ms": 3.161980943350001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 6.032438623333337,
+          "encoding_ms": 0.10456398604723333,
+          "submit_wait_ms": 5.0598811536033335,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.4647148566666663,
+          "encoding_ms": 0.07450059643153335,
+          "submit_wait_ms": 3.3669941532799976,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1126501433333327,
+          "encoding_ms": 0.13984000640293334,
+          "submit_wait_ms": 2.9526956835733333,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 22.376020900000004,
+          "encoding_ms": 1.2382958026000002,
+          "submit_wait_ms": 4.0922501983,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 127205376
+  },
+  {
+    "case": "dense",
+    "repeat": 2,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.286125,
+          "encoding_ms": 1.922541007,
+          "submit_wait_ms": 13.294417,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 53.047,
+          "encoding_ms": 1.922541007,
+          "submit_wait_ms": 13.294417,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.251924626666667,
+          "encoding_ms": 0.07804427950753326,
+          "submit_wait_ms": 3.1548334903866664,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.428706933333335,
+          "encoding_ms": 0.09091036663333334,
+          "submit_wait_ms": 4.505613910086667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.5840505433333334,
+          "encoding_ms": 0.12038873346166665,
+          "submit_wait_ms": 3.4386698464933314,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.213340549999998,
+          "encoding_ms": 0.13776010348563333,
+          "submit_wait_ms": 3.0471323832000015,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 28.865629000000006,
+          "encoding_ms": 4.6508540988,
+          "submit_wait_ms": 5.063870800199998,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 170934272
+  },
+  {
+    "case": "dense",
+    "repeat": 2,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000042,
+          "encoding_ms": 2.001748995,
+          "submit_wait_ms": 17.508334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 54.29875,
+          "encoding_ms": 2.001748995,
+          "submit_wait_ms": 17.508334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.224405426666668,
+          "encoding_ms": 0.0677622034214668,
+          "submit_wait_ms": 3.1393674931999986,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.960978043333333,
+          "encoding_ms": 0.09198730668353333,
+          "submit_wait_ms": 5.057022690126668,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.5238697299999973,
+          "encoding_ms": 0.0783397138508667,
+          "submit_wait_ms": 3.4214015296766678,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.109174346666665,
+          "encoding_ms": 0.1382137533307,
+          "submit_wait_ms": 2.9519398598100013,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 19.1999833,
+          "encoding_ms": 1.162145599,
+          "submit_wait_ms": 3.3706417000999997,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 136462336
+  },
+  {
+    "case": "dense",
+    "repeat": 2,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.322417,
+          "encoding_ms": 2.177666989,
+          "submit_wait_ms": 10.988416,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 53.473834,
+          "encoding_ms": 2.177666989,
+          "submit_wait_ms": 10.988416,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.9320605333333343,
+          "encoding_ms": 0.09958451994626669,
+          "submit_wait_ms": 3.810376296889999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.983104406666668,
+          "encoding_ms": 0.11500335337280002,
+          "submit_wait_ms": 5.009036523389999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.9703066600000017,
+          "encoding_ms": 0.12630468025956673,
+          "submit_wait_ms": 3.816329756470002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8266894133333333,
+          "encoding_ms": 0.13525635026036661,
+          "submit_wait_ms": 3.6645857233033325,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 28.2750541,
+          "encoding_ms": 4.542920800999999,
+          "submit_wait_ms": 4.8127748,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 169213952
+  },
+  {
+    "case": "dense",
+    "repeat": 3,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000042,
+          "encoding_ms": 1.941791998,
+          "submit_wait_ms": 17.266458,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 56.02775,
+          "encoding_ms": 1.941791998,
+          "submit_wait_ms": 17.266458,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.230745690000001,
+          "encoding_ms": 0.0705455665832,
+          "submit_wait_ms": 3.1418214200099994,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.760057653333333,
+          "encoding_ms": 0.09112848356763331,
+          "submit_wait_ms": 4.834258746476666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.398465403333335,
+          "encoding_ms": 0.07342097308159995,
+          "submit_wait_ms": 3.302652649960002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.134093166666667,
+          "encoding_ms": 0.14352851646873327,
+          "submit_wait_ms": 2.969903729913332,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 21.726820699999998,
+          "encoding_ms": 1.2420916995999998,
+          "submit_wait_ms": 3.7483291009,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 129712128
+  },
+  {
+    "case": "dense",
+    "repeat": 3,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.279125,
+          "encoding_ms": 2.096165998,
+          "submit_wait_ms": 16.060709,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 61.878875,
+          "encoding_ms": 2.096165998,
+          "submit_wait_ms": 16.060709,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8751086266666643,
+          "encoding_ms": 0.07484038309513329,
+          "submit_wait_ms": 3.7817114102766656,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 5.9503805733333355,
+          "encoding_ms": 0.09731531019500003,
+          "submit_wait_ms": 5.0334851168200005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.1993769566666685,
+          "encoding_ms": 0.12115497675819994,
+          "submit_wait_ms": 4.051853356606667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8176691699999985,
+          "encoding_ms": 0.13131969632640003,
+          "submit_wait_ms": 3.658742103480002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 27.021329199999997,
+          "encoding_ms": 4.516987498899999,
+          "submit_wait_ms": 4.498704199600001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 171802624
+  },
+  {
+    "case": "dense",
+    "repeat": 3,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0,
+          "encoding_ms": 1.836832998,
+          "submit_wait_ms": 15.41375,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 56.033166,
+          "encoding_ms": 1.836832998,
+          "submit_wait_ms": 15.41375,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1140607066666663,
+          "encoding_ms": 0.03614389318226665,
+          "submit_wait_ms": 3.0689561135833334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.7937857133333335,
+          "encoding_ms": 0.09013915337516668,
+          "submit_wait_ms": 3.8630674932500013,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.4475566933333326,
+          "encoding_ms": 0.08484071644436662,
+          "submit_wait_ms": 3.3366679100866654,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1499064266666665,
+          "encoding_ms": 0.15063832317486658,
+          "submit_wait_ms": 2.9776121000366635,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 22.2620125,
+          "encoding_ms": 1.2534002991000002,
+          "submit_wait_ms": 4.026241500800001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 135380992
+  },
+  {
+    "case": "dense",
+    "repeat": 3,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.318125,
+          "encoding_ms": 2.022334003,
+          "submit_wait_ms": 16.930291,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 58.145334,
+          "encoding_ms": 2.022334003,
+          "submit_wait_ms": 16.930291,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.2522649733333333,
+          "encoding_ms": 0.07421177654236664,
+          "submit_wait_ms": 3.159136420106665,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 6.482382246666668,
+          "encoding_ms": 0.12033398660956661,
+          "submit_wait_ms": 5.467676833280002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.5928700133333304,
+          "encoding_ms": 0.10058430634646662,
+          "submit_wait_ms": 3.4718046098300004,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.0651630466666684,
+          "encoding_ms": 0.07336006310696669,
+          "submit_wait_ms": 2.9796660900299994,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 26.109883500000002,
+          "encoding_ms": 4.5714625993,
+          "submit_wait_ms": 3.5370415005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 168427520
+  },
+  {
+    "case": "dense",
+    "repeat": 4,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000042,
+          "encoding_ms": 1.942999996,
+          "submit_wait_ms": 9.912958005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 47.450542,
+          "encoding_ms": 1.942999996,
+          "submit_wait_ms": 9.912958005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.118729723333334,
+          "encoding_ms": 0.04299304309846667,
+          "submit_wait_ms": 3.065208453446667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.6812361033333345,
+          "encoding_ms": 0.03412665639213333,
+          "submit_wait_ms": 3.1263577835466654,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.033961396666667,
+          "encoding_ms": 0.032013493327833334,
+          "submit_wait_ms": 2.9920675000633334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 2.970357900000002,
+          "encoding_ms": 0.07347432023393337,
+          "submit_wait_ms": 2.8882843133399985,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 19.748662600000003,
+          "encoding_ms": 1.2687335009999998,
+          "submit_wait_ms": 3.3099458001000004,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 125845504
+  },
+  {
+    "case": "dense",
+    "repeat": 4,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.304583,
+          "encoding_ms": 2.104167004,
+          "submit_wait_ms": 10.116041,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 52.279833,
+          "encoding_ms": 2.104167004,
+          "submit_wait_ms": 10.116041,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7457767966666675,
+          "encoding_ms": 0.03435461624269999,
+          "submit_wait_ms": 3.7031615368466624,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.514823749999998,
+          "encoding_ms": 0.03429957975953332,
+          "submit_wait_ms": 3.8905151502400006,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7595858599999987,
+          "encoding_ms": 0.05957789976193333,
+          "submit_wait_ms": 3.689535016739998,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.6805348700000007,
+          "encoding_ms": 0.07633733650433333,
+          "submit_wait_ms": 3.591825156969999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 27.1799251,
+          "encoding_ms": 4.684458401500001,
+          "submit_wait_ms": 4.124441598100001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 168968192
+  },
+  {
+    "case": "dense",
+    "repeat": 4,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000041,
+          "encoding_ms": 2.083583997,
+          "submit_wait_ms": 9.316791002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 46.345542,
+          "encoding_ms": 2.083583997,
+          "submit_wait_ms": 9.316791002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.099535969999998,
+          "encoding_ms": 0.036472767073133315,
+          "submit_wait_ms": 3.054660576443336,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7289480566666664,
+          "encoding_ms": 0.03590485321189996,
+          "submit_wait_ms": 3.158746116719999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.023595013333331,
+          "encoding_ms": 0.033246116703533335,
+          "submit_wait_ms": 2.9807748499200004,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 2.9701611033333313,
+          "encoding_ms": 0.07580641996619994,
+          "submit_wait_ms": 2.8850562101466655,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 20.304337299999997,
+          "encoding_ms": 1.2455251997999999,
+          "submit_wait_ms": 3.3610374005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 132005888
+  },
+  {
+    "case": "dense",
+    "repeat": 4,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.321667,
+          "encoding_ms": 2.069875009,
+          "submit_wait_ms": 9.043499995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 54.318416,
+          "encoding_ms": 2.069875009,
+          "submit_wait_ms": 9.043499995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.115869703333333,
+          "encoding_ms": 0.0378605702044,
+          "submit_wait_ms": 3.0694376397866674,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.6289859366666657,
+          "encoding_ms": 0.03259539344733332,
+          "submit_wait_ms": 3.1185103999333337,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.124790133333332,
+          "encoding_ms": 0.059661533329133314,
+          "submit_wait_ms": 3.0541398700100006,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.0731826433333307,
+          "encoding_ms": 0.07456394979596667,
+          "submit_wait_ms": 2.986477203229999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 27.0267791,
+          "encoding_ms": 4.6152460993,
+          "submit_wait_ms": 3.6080457996999997,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 168394752
+  },
+  {
+    "case": "dense",
+    "repeat": 5,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000042,
+          "encoding_ms": 2.035084006,
+          "submit_wait_ms": 10.721791,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 47.823375,
+          "encoding_ms": 2.035084006,
+          "submit_wait_ms": 10.721791,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.098400276666668,
+          "encoding_ms": 0.029623609904599977,
+          "submit_wait_ms": 3.0608436000233343,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.4782823666666673,
+          "encoding_ms": 0.017324986644533334,
+          "submit_wait_ms": 3.106968333506667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.0074379099999997,
+          "encoding_ms": 0.03228123959403334,
+          "submit_wait_ms": 2.9652229269733312,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.043040103333335,
+          "encoding_ms": 0.11427650992079996,
+          "submit_wait_ms": 2.9136805435499977,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 21.146524799999998,
+          "encoding_ms": 1.2877042019,
+          "submit_wait_ms": 3.3484748988999997,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 127352832
+  },
+  {
+    "case": "dense",
+    "repeat": 5,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.33175,
+          "encoding_ms": 2.142001002,
+          "submit_wait_ms": 9.971291001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 52.617667,
+          "encoding_ms": 2.142001002,
+          "submit_wait_ms": 9.971291001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1323551466666664,
+          "encoding_ms": 0.039236663457366636,
+          "submit_wait_ms": 3.08413599002333,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.083296930000002,
+          "encoding_ms": 0.03594889349196667,
+          "submit_wait_ms": 3.377671266530001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.273167793333334,
+          "encoding_ms": 0.06459554337179994,
+          "submit_wait_ms": 3.197584030156666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.0750890166666633,
+          "encoding_ms": 0.08040823032740002,
+          "submit_wait_ms": 2.9816409498699987,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 27.006600099999996,
+          "encoding_ms": 4.578249899199999,
+          "submit_wait_ms": 3.6500668008999995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 190562304
+  },
+  {
+    "case": "dense",
+    "repeat": 5,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000041,
+          "encoding_ms": 2.151166002,
+          "submit_wait_ms": 11.173334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 48.1655,
+          "encoding_ms": 2.151166002,
+          "submit_wait_ms": 11.173334,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.105726403333333,
+          "encoding_ms": 0.03490553659483334,
+          "submit_wait_ms": 3.062671426690001,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.9677229066666633,
+          "encoding_ms": 0.034517826619466646,
+          "submit_wait_ms": 3.2489569065466655,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.081266023333335,
+          "encoding_ms": 0.03498558013216668,
+          "submit_wait_ms": 3.036467879916666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 2.9973426166666672,
+          "encoding_ms": 0.0887554170192333,
+          "submit_wait_ms": 2.898033489816667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 19.211345799999997,
+          "encoding_ms": 1.1973041967999998,
+          "submit_wait_ms": 3.3668416014,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 124796928
+  },
+  {
+    "case": "dense",
+    "repeat": 5,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.32825,
+          "encoding_ms": 2.359291,
+          "submit_wait_ms": 10.482042,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 53.271667,
+          "encoding_ms": 2.359291,
+          "submit_wait_ms": 10.482042,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7651449766666665,
+          "encoding_ms": 0.0444136299972,
+          "submit_wait_ms": 3.7107723499499974,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.7870049933333325,
+          "encoding_ms": 0.03752734027033335,
+          "submit_wait_ms": 4.0453283432433365,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7825012533333346,
+          "encoding_ms": 0.06518779009709999,
+          "submit_wait_ms": 3.705499436636667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7052973399999964,
+          "encoding_ms": 0.08994089344946667,
+          "submit_wait_ms": 3.599486326726669,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 27.275037200000003,
+          "encoding_ms": 4.6438583006,
+          "submit_wait_ms": 4.0824417003999995,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 170442752
+  },
+  {
+    "case": "dense",
+    "repeat": 6,
+    "variant": "after-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.000083,
+          "encoding_ms": 2.084207998,
+          "submit_wait_ms": 11.322917,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 48.547958,
+          "encoding_ms": 2.084207998,
+          "submit_wait_ms": 11.322917,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.119529183333334,
+          "encoding_ms": 0.04271150683073334,
+          "submit_wait_ms": 3.066460419889999,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8711521933333333,
+          "encoding_ms": 0.03844529666806663,
+          "submit_wait_ms": 3.1958096100666675,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.072857436666667,
+          "encoding_ms": 0.039545113226100014,
+          "submit_wait_ms": 3.0221047601433306,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 2.986921146666666,
+          "encoding_ms": 0.08413157651330003,
+          "submit_wait_ms": 2.8925991667900015,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 19.6390709,
+          "encoding_ms": 1.2059709013,
+          "submit_wait_ms": 3.2719415997999994,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 146145280
+  },
+  {
+    "case": "dense",
+    "repeat": 6,
+    "variant": "after-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.311625,
+          "encoding_ms": 2.043624008,
+          "submit_wait_ms": 9.686041994,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 52.54125,
+          "encoding_ms": 2.043624008,
+          "submit_wait_ms": 9.686041994,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.1161730500000004,
+          "encoding_ms": 0.038128952947299975,
+          "submit_wait_ms": 3.0684573968733337,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8700024733333307,
+          "encoding_ms": 0.036306656668800015,
+          "submit_wait_ms": 3.191723616696667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.140935289999999,
+          "encoding_ms": 0.06339789339129998,
+          "submit_wait_ms": 3.0671755800166642,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.0680507166666664,
+          "encoding_ms": 0.08162454992873336,
+          "submit_wait_ms": 2.972935436783331,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 26.771641499999998,
+          "encoding_ms": 4.572741500299999,
+          "submit_wait_ms": 3.7069541997999997,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 171360256
+  },
+  {
+    "case": "dense",
+    "repeat": 6,
+    "variant": "before-native",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0,
+          "encoding_ms": 2.03625,
+          "submit_wait_ms": 14.097375,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 57.0045,
+          "encoding_ms": 2.03625,
+          "submit_wait_ms": 14.097375,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.125542363333333,
+          "encoding_ms": 0.041594606906600017,
+          "submit_wait_ms": 3.0742890030999988,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.909073440000001,
+          "encoding_ms": 0.03477940023033333,
+          "submit_wait_ms": 3.231749183143336,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.0796995633333317,
+          "encoding_ms": 0.0386944269366333,
+          "submit_wait_ms": 3.030392243130002,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 496,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 496,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 2.991115130000001,
+          "encoding_ms": 0.07928947299683331,
+          "submit_wait_ms": 2.902556346776667,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 20.2762294,
+          "encoding_ms": 1.2542917009,
+          "submit_wait_ms": 3.3720415988,
+          "draw_calls": 4,
+          "buffer_bytes": 1120588,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 576,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 128,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 126631936
+  },
+  {
+    "case": "dense",
+    "repeat": 6,
+    "variant": "before-plugin",
+    "phases": {
+      "registration": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 0.315167,
+          "encoding_ms": 2.161917007,
+          "submit_wait_ms": 11.278875,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 0,
+          "metal_vertex_inline_bytes": 0,
+          "metal_fragment_bytes_calls": 0,
+          "metal_fragment_inline_bytes": 0,
+          "metal_vertex_buffer_binds": 0,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "startup_readback": {
+        "samples": 1,
+        "metrics": {
+          "wall_ms": 54.187292,
+          "encoding_ms": 2.161917007,
+          "submit_wait_ms": 11.278875,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 0,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 0,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_no_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.7801041833333344,
+          "encoding_ms": 0.05234956006413331,
+          "submit_wait_ms": 3.715757106836666,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "warm_readback": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 4.646974996666671,
+          "encoding_ms": 0.04498989022910002,
+          "submit_wait_ms": 3.935649149900004,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 7,
+          "metal_vertex_inline_bytes": 784,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "zoom": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.8022846999999995,
+          "encoding_ms": 0.07135278649660005,
+          "submit_wait_ms": 3.71763498347,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 685.8666666666667,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 685.8666666666667,
+          "metal_vertex_bytes_calls": 9.99,
+          "metal_vertex_inline_bytes": 2697.6,
+          "metal_fragment_bytes_calls": 6,
+          "metal_fragment_inline_bytes": 144,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "paint_update": {
+        "samples": 300,
+        "metrics": {
+          "wall_ms": 3.6841011066666653,
+          "encoding_ms": 0.0843502932791,
+          "submit_wait_ms": 3.5844348333300005,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 128,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 128,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      },
+      "style_reload": {
+        "samples": 10,
+        "metrics": {
+          "wall_ms": 27.3231209,
+          "encoding_ms": 4.71025,
+          "submit_wait_ms": 4.0953748997,
+          "draw_calls": 4,
+          "buffer_bytes": 1120796,
+          "upload_bytes": 48,
+          "vertex_upload_bytes": 0,
+          "index_upload_bytes": 0,
+          "uniform_upload_bytes": 48,
+          "metal_vertex_bytes_calls": 13,
+          "metal_vertex_inline_bytes": 2944,
+          "metal_fragment_bytes_calls": 9,
+          "metal_fragment_inline_bytes": 384,
+          "metal_vertex_buffer_binds": 4,
+          "metal_fragment_buffer_binds": 0
+        }
+      }
+    },
+    "peak_rss_bytes": 171065344
+  }
+]

@@ -91,3 +91,34 @@ Correctness uses the original core circle fixtures and expected images unchanged
 The `--builtin` option on the circle render runner supplies a native reference.
 All eleven circle paint properties are supported; layout sort keys and animated
 transition parity are outside this comparison.
+
+## Focused before/after comparisons
+
+Preserve the pre-change benchmark executable and plugin dylib before rebuilding.
+The focused runner interleaves before-native, before-plugin, after-native and
+after-plugin processes, rotating/reversing order across seven repeats. It refuses
+to overwrite an existing output directory and records hashes for all four input
+artifacts. For example:
+
+```sh
+node benchmark/renderer/compare-circle-metal.mjs \
+  --before-bin /path/to/saved/mln-circle-benchmark \
+  --before-plugin /path/to/saved/libmln-circle-layer.dylib \
+  --after-bin build-circle-metal-on/benchmark/mln-circle-benchmark \
+  --after-plugin build-circle-metal-on/plugins/libmln-circle-layer.dylib \
+  --output benchmark/results/circle-metal-followup
+```
+
+Defaults: dense, eight-layer, 100k-constant and state-update workloads; 100
+warmups, 300 measured frames, seven repeats (112 processes). Use `--cases dense`
+for the isolated dense-shader comparison. `processes.json` preserves per-process
+phase means, counts and peak RSS; `comparisons.json` includes paired before/after
+and native-control ratios with process-level 95% Student-t intervals. Copy those
+two files and `metadata.json` to publish compact results; retain raw JSONL locally.
+Do not run builds, render tests or profilers concurrently with timing runs.
+
+Opt-in `--profile` executable output also includes `plugin_bounds_vertices`:
+the actual number of vertices revisited while refreshing dirty bounds blocks.
+The existing `plugin_snapshot_ms` now times owned feature-view setup, not deep
+cloning. Diagnostic timings/counts must be collected separately from headline
+timing runs, and neither field measures hardware GPU time.
