@@ -62,3 +62,10 @@ target_link_libraries(
 )
 
 set_property(TARGET mbgl-benchmark PROPERTY FOLDER MapLibre)
+
+if(MLN_WITH_METAL AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    add_executable(mln-circle-benchmark EXCLUDE_FROM_ALL renderer/circle_plugin.cpp)
+    target_include_directories(mln-circle-benchmark PRIVATE ${PROJECT_SOURCE_DIR}/src)
+    target_link_libraries(mln-circle-benchmark PRIVATE mbgl-core mbgl-vendor-metal-cpp ${CMAKE_DL_LIBS})
+    set_target_properties(mln-circle-benchmark PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
+endif()
