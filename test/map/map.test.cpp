@@ -2040,6 +2040,83 @@ TEST(Map, SetFrustumOffset) {
     test::checkImage("test/fixtures/map/setFrustumOffset/after", test.frontend.render(test.map).image, 0.0006, 0.1);
 }
 
+class UniformBlockOrderTest : public testing::TestWithParam<std::string> {};
+
+TEST_P(UniformBlockOrderTest, RendersPaintColors) {
+    const auto& kind = GetParam();
+    const bool withText = kind == "text" || kind == "mixed";
+    const bool withImage = kind == "icon" || kind == "mixed" || kind == "background";
+    MapTest<> test;
+    test.fileSource->glyphsResponse = makeResponse("glyphs.pbf");
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "glyphs": "https://example.com/{fontstack}/{range}.pbf",
+        "sources": {},
+        "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+    })");
+    if (withImage) {
+        PremultipliedImage icon({32, 32});
+        for (size_t i = 0; i < icon.bytes(); i += 4) {
+            icon.data[i] = 0;
+            icon.data[i + 1] = 0;
+            icon.data[i + 2] = 255;
+            icon.data[i + 3] = 255;
+        }
+        test.map.getStyle().addImage(std::make_unique<style::Image>("box", std::move(icon), 1.0f));
+    }
+    if (kind == "background") {
+        auto layer = std::make_unique<BackgroundLayer>("pattern");
+        layer->setBackgroundPattern({"box"s});
+        test.map.getStyle().addLayer(std::move(layer));
+    } else {
+        auto source = std::make_unique<GeoJSONSource>("geometry");
+        if (kind == "line") {
+            source->setGeoJSON(Geometry<double>{LineString<double>{{-20.0, 0.0}, {20.0, 0.0}}});
+        } else {
+            source->setGeoJSON(Geometry<double>{Point<double>{0.0, 0.0}});
+        }
+        test.map.getStyle().addSource(std::move(source));
+        if (kind == "line") {
+            auto layer = std::make_unique<LineLayer>("line", "geometry");
+            layer->setLineColor(Color::red());
+            layer->setLineWidth(16.0f);
+            layer->setLineDasharray(std::vector<float>{2.0f, 2.0f});
+            test.map.getStyle().addLayer(std::move(layer));
+        } else {
+            auto layer = std::make_unique<SymbolLayer>("symbol", "geometry");
+            if (withText) {
+                expression::Formatted text("AB");
+                if (withImage) text.sections.emplace_back(expression::Image("box"));
+                layer->setTextField(text);
+                layer->setTextFont(FontStack{"Open Sans Regular"});
+                layer->setTextSize(64.0f);
+                layer->setTextColor(Color::red());
+                layer->setTextAllowOverlap(true);
+            } else {
+                layer->setIconImage({"box"s});
+                layer->setIconAllowOverlap(true);
+            }
+            test.map.getStyle().addLayer(std::move(layer));
+        }
+    }
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(2.0));
+    const auto image = test.frontend.render(test.map).image;
+    size_t redPixels = 0;
+    size_t bluePixels = 0;
+    for (size_t i = 0; i < image.bytes(); i += 4) {
+        const auto* pixel = image.data.get() + i;
+        redPixels += pixel[0] > 200 && pixel[1] < 100 && pixel[2] < 100;
+        bluePixels += pixel[2] > 200 && pixel[0] < 100 && pixel[1] < 100;
+    }
+    if (withText || kind == "line") EXPECT_GT(redPixels, 100u);
+    if (withImage) EXPECT_GT(bluePixels, 100u);
+}
+
+INSTANTIATE_TEST_SUITE_P(Rendering,
+                         UniformBlockOrderTest,
+                         testing::Values("text", "icon", "mixed", "line", "background"),
+                         [](const testing::TestParamInfo<std::string>& info) { return info.param; });
+
 // End-to-end: a feature-state change must alter the *rendered* output, not just
 // the value read back through the API. A fill covering the viewport is colored
 // by a data-driven expression on feature-state "active" (blue by default, red
