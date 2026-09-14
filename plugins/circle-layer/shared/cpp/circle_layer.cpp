@@ -397,7 +397,7 @@ const mln_plugin_uniform_block_descriptor_v1 uniforms[] = {
      0,
      str("CircleDrawableUBO"),
      sizeof(DrawableUBO),
-     MLN_PLUGIN_SHADER_STAGE_VERTEX},
+     MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT},
 };
 const mln_plugin_shader_descriptor_v1 shader = {
     sizeof(mln_plugin_shader_descriptor_v1),

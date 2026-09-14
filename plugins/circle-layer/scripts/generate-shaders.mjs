@@ -122,20 +122,49 @@ for (const backend of ['opengl', 'vulkan', 'metal']) {
   const vertexBody = evaluate(backend) + projection.replace('POSITION', backend === 'metal' ? 'in.a_position' : 'a_position')
     .replaceAll('OUT_', backend === 'metal' ? 'out.' : 'v_');
   if (backend === 'metal') {
+    // Match native circle's fragment inputs: uniform paint stays in a UBO,
+    // only data-driven paint consumes interpolators, and colors use half4.
+    const paintProperties = properties.slice(0, 7);
+    const varyingType = (name, type) => type === 'vec4' ? 'half4' : name === 'radius' ? 'float' : 'half';
+    const fields = paintProperties.map(([name, type]) =>
+      `#if !${macro(name)}\n    ${varyingType(name, type)} ${name};\n#endif`).join('\n');
+    const assignments = paintProperties.map(([name, type]) =>
+      `#if !${macro(name)}\n    out.${name} = ${varyingType(name, type)}(${name});\n#endif`).join('\n');
+    const fragmentPaint = paintProperties.map(([name, type]) => {
+      const t = type === 'vec4' ? 'half4' : 'float';
+      return `#if ${macro(name)}\n    const ${t} ${name} = ${t}(u.${name});\n#else\n    const ${t} ${name} = in.${name};\n#endif`;
+    }).join('\n');
+    const positionBody = evaluate(backend) + projection.slice(0, projection.indexOf('    OUT_local'))
+      .replace('POSITION', 'in.a_position');
     const source = `struct alignas(16) CircleDrawableUBO {${metal(uniformFields)}};
 struct CircleVertex {\n${attributes(backend)}};
 struct CircleVaryings {
-    float4 position [[position]];
-${varyings.map(([t, n]) => `    ${metal(t)} ${n};`).join('\n')}
+    float4 position [[position, invariant]];
+    float2 extrude;
+    float antialiasblur;
+${fields}
 };
 vertex CircleVaryings circleVertex(CircleVertex in [[stage_in]],
     constant CircleDrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
     CircleVaryings out;
-${metal(vertexBody)}    out.position = position;
+${metal(positionBody)}    out.position = position;
+    out.extrude = corner;
+    out.antialiasblur = half(1.0 / u.view.y / outer_radius);
+${assignments}
     return out;
 }
-fragment half4 circleFragment(CircleVaryings in [[stage_in]]) {
-${metal(coverage.replaceAll('IN_', 'in.'))}    return half4(result);
+fragment half4 circleFragment(CircleVaryings in [[stage_in]],
+    constant CircleDrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
+#ifdef OVERDRAW_INSPECTOR
+    return half4(1.0);
+#endif
+${fragmentPaint}
+    const float extrude_length = length(in.extrude);
+    const float antialiased_blur = -max(blur, in.antialiasblur);
+    const float opacity_t = smoothstep(0.0, antialiased_blur, extrude_length - 1.0);
+    const float color_t = stroke_width < 0.01 ? 0.0 : smoothstep(antialiased_blur, 0.0,
+        extrude_length - radius / (radius + stroke_width));
+    return half4(opacity_t * mix(color * opacity, stroke_color * stroke_opacity, color_t));
 }
 `;
     emit('metalSource', source);
