@@ -10,6 +10,7 @@
 #include <mln/tile/raster_dem_tile_worker.hpp>
 #include <mln/tile/tile_loader_impl.hpp>
 #include <mln/tile/tile_observer.hpp>
+#include <mln/util/image.hpp>
 #include <utility>
 
 namespace mln {
@@ -20,7 +21,7 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
                              const Tileset& tileset,
                              TileObserver* observer_)
     : Tile(Kind::RasterDEM, id_, std::move(sourceID_), observer_),
-      loader(*this, id_, parameters, tileset),
+      loader(*this, id_, parameters, tileset, rasterAcceptHeader()),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {

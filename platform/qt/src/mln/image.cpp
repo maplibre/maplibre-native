@@ -1,8 +1,10 @@
 #include <mln/util/image.hpp>
+#include <mln/util/constants.hpp>
 
 #include <QBuffer>
 #include <QByteArray>
 #include <QImage>
+#include <QImageReader>
 
 namespace mln {
 
@@ -48,4 +50,10 @@ PremultipliedImage decodeImage(const std::string& string) {
 
     return {{static_cast<uint32_t>(image.width()), static_cast<uint32_t>(image.height())}, std::move(img)};
 }
+
+std::string_view rasterAcceptHeader() {
+    static const bool supportsWebP = QImageReader::supportedImageFormats().contains("webp");
+    return supportsWebP ? util::MIME_TYPE_RASTER : util::MIME_TYPE_RASTER_NO_WEBP;
+}
+
 } // namespace mln

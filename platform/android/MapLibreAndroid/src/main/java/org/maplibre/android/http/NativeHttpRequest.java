@@ -20,7 +20,7 @@ public class NativeHttpRequest implements HttpResponder {
 
   @Keep
   private NativeHttpRequest(long nativePtr, String resourceUrl, String dataRange, String etag, String modified,
-                            boolean offlineUsage) {
+                            boolean offlineUsage, String acceptHeader) {
     this.nativePtr = nativePtr;
 
     if (resourceUrl.startsWith("local://")) {
@@ -28,7 +28,7 @@ public class NativeHttpRequest implements HttpResponder {
       executeLocalRequest(resourceUrl);
       return;
     }
-    httpRequest.executeRequest(this, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage);
+    httpRequest.executeRequest(this, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage, acceptHeader);
   }
 
   public void cancel() {
