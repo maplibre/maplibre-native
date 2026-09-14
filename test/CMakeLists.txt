@@ -217,6 +217,7 @@ if(MLN_WITH_PLUGINS)
         plugin/layout.test.cpp
         plugin/property_binding.test.cpp
         plugin/registry.test.cpp
+        plugin/rendering.test.cpp
     )
 endif()
 

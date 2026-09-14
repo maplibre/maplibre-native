@@ -101,14 +101,14 @@ std::string propertyPrelude(const ShaderDefinition& shader, const StringIDSetsPa
 
 class PluginShaderGroup final : public gfx::ShaderGroup {
 public:
-    PluginShaderGroup(ShaderDefinition definition_, ProgramParameters parameters_)
-        : definition(std::move(definition_)),
+    PluginShaderGroup(std::string groupName_, ShaderDefinition definition_, ProgramParameters parameters_)
+        : groupName(std::move(groupName_)),
+          definition(std::move(definition_)),
           parameters(std::move(parameters_)) {}
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
                                      std::string_view) override {
-        const auto groupName = shaderGroupName(definition.pluginID, definition.id);
         const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;
         const auto pluginPrelude = resourcePrelude(definition) + propertyPrelude(definition, propertiesAsUniforms);
@@ -184,22 +184,25 @@ public:
     }
 
 private:
+    const std::string groupName;
     ShaderDefinition definition;
     ProgramParameters parameters;
 };
 
 } // namespace
 
-std::string shaderGroupName(const std::string& pluginID, const std::string& shaderID) {
-    return "plugin/" + pluginID + "/" + shaderID;
+std::string shaderGroupName(const std::string& pluginID, const std::string& layerType, const std::string& shaderID) {
+    // IDs may contain separators, and shader IDs are local to a layer type.
+    const auto encode = [](const std::string& value) { return std::to_string(value.size()) + ":" + value; };
+    return "plugin/" + encode(pluginID) + encode(layerType) + encode(shaderID);
 }
 
 void registerPluginShaderGroups(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
     for (const auto& layerType : PluginRegistry::get().allLayerTypes()) {
         for (const auto& shader : layerType.shaders) {
-            const auto name = shaderGroupName(shader.pluginID, shader.id);
+            const auto name = shaderGroupName(shader.pluginID, layerType.type, shader.id);
             if (registry.isShaderGroup(name)) continue;
-            if (!registry.registerShaderGroup(std::make_shared<PluginShaderGroup>(shader, parameters), name)) {
+            if (!registry.registerShaderGroup(std::make_shared<PluginShaderGroup>(name, shader, parameters), name)) {
                 throw std::runtime_error("Failed to register plugin shader group '" + name + "'");
             }
         }
