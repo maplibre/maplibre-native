@@ -1,5 +1,6 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/map/camera.hpp>
 #include <mln/plugin/plugin_api.h>
 #include <mln/plugin/plugin_shader.hpp>
 #include <mln/renderer/renderer.hpp>
@@ -289,6 +290,25 @@ TEST(PluginRendering, GeometryExpressionsInRenderedFeatureQueries) {
     test.setRadius(R"(["case",["<",["distance",{"type":"Point","coordinates":[0,0]}],1],20,1])");
     EXPECT_EQ(2u, test.hits(15));
     EXPECT_EQ(0u, test.hits(25));
+}
+
+TEST(PluginRendering, CameraPropertyQueriesUseMapZoom) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.camera-query", false, true));
+    for (const bool overzoom : {false, true}) {
+        SCOPED_TRACE(overzoom ? "overzoomed source" : "fractional zoom");
+        RenderTest test;
+        auto json = triangleStyle("test.camera-query");
+        if (overzoom) {
+            const auto position = json.find("\"type\":\"geojson\"");
+            json.insert(position, "\"maxzoom\":2,");
+        }
+        test.map.getStyle().loadJSON(json);
+        test.map.jumpTo(CameraOptions().withZoom(overzoom ? 3.5 : 10.5));
+        test.setRadius(overzoom ? R"(["interpolate",["linear"],["zoom"],3,10,4,30])"
+                                : R"(["interpolate",["linear"],["zoom"],10,10,11,30])");
+        EXPECT_EQ(2u, test.hits(15));
+        EXPECT_EQ(0u, test.hits(25));
+    }
 }
 
 } // namespace

@@ -304,7 +304,11 @@ bool RenderPluginStyleLayer::queryIntersectsFeatureInTile(const GeometryCoordina
         mln_plugin_property_value_v1 property{};
         property.struct_size = sizeof(property);
         property.name = {definition.name.data(), definition.name.size()};
-        property.value = value.evaluate(canonical.z, canonical, feature, featureState, definition, storage[i]);
+        // Camera paint uses the same zoom as shader uniforms, not the source's
+        // canonical zoom. Retain the existing feature/composite query policy.
+        const auto zoom = value.isDataDriven() ? static_cast<float>(canonical.z)
+                                               : static_cast<float>(transformState.getZoom());
+        property.value = value.evaluate(zoom, canonical, feature, featureState, definition, storage[i]);
         property.explicitly_set = impl.pluginProperties.find(definition.name) != impl.pluginProperties.end();
         properties.push_back(property);
     }
