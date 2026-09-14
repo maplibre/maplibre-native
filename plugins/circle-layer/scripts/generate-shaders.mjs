@@ -13,10 +13,16 @@ const properties = [
   ['translate_anchor', 'enum', 11, 11], ['pitch_alignment', 'enum', 12, 12],
   ['pitch_scale', 'enum', 13, 13],
 ];
-const uniformFields = `
+const drawableFields = `
     mat4 matrix;
     vec4 camera;
     vec4 view;
+    vec4 interpolation0;
+    vec4 interpolation1;
+    vec4 interpolation2;
+    vec4 interpolation3;
+`;
+const paintFields = `
     float radius;
     float pad0;
     float pad1;
@@ -30,10 +36,6 @@ const uniformFields = `
     vec2 translate;
     float pitch_alignment;
     float pitch_scale;
-    vec4 interpolation0;
-    vec4 interpolation1;
-    vec4 interpolation2;
-    vec4 interpolation3;
 `;
 const varyings = [['vec2', 'local'], ['vec4', 'shape'], ['vec4', 'paint'], ['vec4', 'color'], ['vec4', 'stroke_color']];
 const macro = name => `MLN_PLUGIN_PROPERTY_CIRCLE_${name.toUpperCase()}_IS_UNIFORM`;
@@ -63,7 +65,7 @@ function evaluate(backend) {
     const factor = `u.interpolation${Math.floor(i / 4)}.${'xyzw'[i % 4]}`;
     const low = min !== max ? `${a}a_${name}_min` : `${a}a_${name}.${type === 'vec2' ? 'xy' : 'x'}`;
     const high = min !== max ? `${a}a_${name}_max` : `${a}a_${name}.${type === 'vec2' ? 'zw' : 'y'}`;
-    result += `    ${type === 'enum' ? 'float' : type} ${name} = u.${name};\n#if !${macro(name)}\n`;
+    result += `    ${type === 'enum' ? 'float' : type} ${name} = paint.${name};\n#if !${macro(name)}\n`;
     result += `    ${name} = ${type === 'enum' ? `${factor} < 1.0 ? ${low} : ${high}` : `mix(${low}, ${high}, ${factor})`};\n#endif\n`;
   });
   return result;
@@ -132,11 +134,12 @@ for (const backend of ['opengl', 'vulkan', 'metal']) {
       `#if !${macro(name)}\n    out.${name} = ${varyingType(name, type)}(${name});\n#endif`).join('\n');
     const fragmentPaint = paintProperties.map(([name, type]) => {
       const t = type === 'vec4' ? 'half4' : 'float';
-      return `#if ${macro(name)}\n    const ${t} ${name} = ${t}(u.${name});\n#else\n    const ${t} ${name} = in.${name};\n#endif`;
+      return `#if ${macro(name)}\n    const ${t} ${name} = ${t}(paint.${name});\n#else\n    const ${t} ${name} = in.${name};\n#endif`;
     }).join('\n');
     const positionBody = evaluate(backend) + projection.slice(0, projection.indexOf('    OUT_local'))
       .replace('POSITION', 'in.a_position');
-    const source = `struct alignas(16) CircleDrawableUBO {${metal(uniformFields)}};
+    const source = `struct alignas(16) CircleDrawableUBO {${metal(drawableFields)}};
+struct alignas(16) CirclePaintUBO {${metal(paintFields)}};
 struct CircleVertex {\n${attributes(backend)}};
 struct CircleVaryings {
     float4 position [[position, invariant]];
@@ -145,7 +148,10 @@ struct CircleVaryings {
 ${fields}
 };
 vertex CircleVaryings circleVertex(CircleVertex in [[stage_in]],
-    constant CircleDrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
+    constant CircleDrawableUBO* drawables [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]],
+    constant uint& drawableIndex [[buffer(MLN_PLUGIN_DRAWABLE_INDEX_BINDING)]],
+    constant CirclePaintUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]]) {
+    constant auto& u = drawables[drawableIndex];
     CircleVaryings out;
 ${metal(positionBody)}    out.position = position;
     out.extrude = corner;
@@ -154,7 +160,7 @@ ${assignments}
     return out;
 }
 fragment half4 circleFragment(CircleVaryings in [[stage_in]],
-    constant CircleDrawableUBO& u [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
+    constant CirclePaintUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]]) {
 #ifdef OVERDRAW_INSPECTOR
     return half4(1.0);
 #endif
@@ -170,10 +176,11 @@ ${fragmentPaint}
     emit('metalSource', source);
   } else {
     const io = direction => varyings.map(([t, n], i) => `${backend === 'vulkan' ? `layout(location = ${i}) ` : ''}${direction} ${t} v_${n};\n`).join('');
-    const layout = backend === 'vulkan'
-      ? 'layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING)'
+    const layout = id => backend === 'vulkan'
+      ? `layout(std140, set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_${id}_BINDING)`
       : 'layout(std140)';
-    emit(backend + 'Vertex', `${attributes(backend)}\n${layout} uniform CircleDrawableUBO {${uniformFields}} u;\n${io('out')}
+    emit(backend + 'Vertex', `${attributes(backend)}\n${layout(0)} uniform CircleDrawableUBO {${drawableFields}} u;
+${layout(1)} uniform CirclePaintUBO {${paintFields}} paint;\n${io('out')}
 void main() {
 ${vertexBody}    gl_Position = position;
 ${backend === 'vulkan' ? '    applySurfaceTransform();\n' : ''}}
@@ -196,7 +203,7 @@ for (const [name, type, min, max] of properties) {
 output += '};\n\nconst mln_plugin_shader_property_binding_v1 propertyBindings[] = {\n';
 properties.forEach(([name, type, min, max], i) => {
   const encoding = {float:'FLOAT',vec2:'FLOAT2',vec4:'COLOR',enum:'ENUM_FLOAT'}[type];
-  output += `    {sizeof(mln_plugin_shader_property_binding_v1), str("circle-${name.replaceAll('_','-')}"), MLN_PLUGIN_PROPERTY_ENCODING_${encoding}, 0, offsetof(DrawableUBO, ${name}), ${min}, ${max}, 0, offsetof(DrawableUBO, interpolation) + ${i} * sizeof(float)},\n`;
+  output += `    {sizeof(mln_plugin_shader_property_binding_v1), str("circle-${name.replaceAll('_','-')}"), MLN_PLUGIN_PROPERTY_ENCODING_${encoding}, 1, offsetof(PaintUBO, ${name}), ${min}, ${max}, 0, offsetof(DrawableUBO, interpolation) + ${i} * sizeof(float)},\n`;
 });
 output += '};\n';
 if (values.output) writeFileSync(values.output, output);

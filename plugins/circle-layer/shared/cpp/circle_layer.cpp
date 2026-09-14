@@ -174,17 +174,19 @@ struct alignas(16) DrawableUBO {
     float matrix[16];
     float camera[4];
     float view[4];
+    float interpolation[16];
+};
+struct alignas(16) PaintUBO {
     float radius, pad0, pad1, blur;
     float opacity, stroke_width, stroke_opacity, translate_anchor;
     float color[4], stroke_color[4];
     float translate[2], pitch_alignment, pitch_scale;
-    float interpolation[16];
 };
-static_assert(offsetof(DrawableUBO, radius) == 96);
-static_assert(offsetof(DrawableUBO, color) == 128);
-static_assert(offsetof(DrawableUBO, translate) == 160);
-static_assert(offsetof(DrawableUBO, interpolation) == 176);
-static_assert(sizeof(DrawableUBO) == 240);
+static_assert(offsetof(DrawableUBO, interpolation) == 96);
+static_assert(sizeof(DrawableUBO) == 160);
+static_assert(offsetof(PaintUBO, color) == 32);
+static_assert(offsetof(PaintUBO, translate) == 64);
+static_assert(sizeof(PaintUBO) == 80);
 
 #include "circle_shader_sources.hpp"
 
@@ -192,9 +194,14 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* context,
                                 uint32_t id,
                                 uint8_t* output,
                                 size_t size) {
-    if (!context || context->struct_size < sizeof(*context) || id != 0 || !output || size != sizeof(DrawableUBO)) {
+    if (!context || context->struct_size < sizeof(*context) || !output) {
         return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     }
+    if (id == 1 && size == sizeof(PaintUBO)) {
+        std::memset(output, 0, size); // The host fills the layer-wide paint bindings.
+        return MLN_PLUGIN_STATUS_OK;
+    }
+    if (id != 0 || size != sizeof(DrawableUBO)) return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     DrawableUBO value{};
     std::copy_n(context->tile_matrix, 16, value.matrix);
     value.camera[0] = context->pixels_to_gl_units[0];
@@ -397,7 +404,14 @@ const mln_plugin_uniform_block_descriptor_v1 uniforms[] = {
      0,
      str("CircleDrawableUBO"),
      sizeof(DrawableUBO),
-     MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT},
+     MLN_PLUGIN_SHADER_STAGE_VERTEX,
+     MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY},
+    {sizeof(mln_plugin_uniform_block_descriptor_v1),
+     1,
+     str("CirclePaintUBO"),
+     sizeof(PaintUBO),
+     MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT,
+     MLN_PLUGIN_UNIFORM_LAYER},
 };
 const mln_plugin_shader_descriptor_v1 shader = {
     sizeof(mln_plugin_shader_descriptor_v1),
