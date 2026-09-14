@@ -177,7 +177,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    tileLayerGroup->setStencilTiles(renderTiles);
+    // These drawables disable stencil; generating tile masks adds an unused pass.
     if (!layerTweaker) {
         layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
         layerGroup->addLayerTweaker(layerTweaker);

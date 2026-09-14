@@ -245,6 +245,14 @@ TEST(PluginRendering, LayerLocalShaderIDsProduceDifferentPrograms) {
     test.expectTriangles("test.shader-identity");
 }
 
+TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.no-stencil"));
+    RenderTest test;
+    test.expectTriangles("test.no-stencil");
+    const auto result = test.frontend.render(test.map);
+    EXPECT_EQ(0, result.stats.stencilUpdates);
+}
+
 TEST(PluginRendering, ShaderIdentityHasUnambiguousComponents) {
     EXPECT_NE(plugin::shaderGroupName("a/b", "c", "d"), plugin::shaderGroupName("a", "b/c", "d"));
     EXPECT_NE(plugin::shaderGroupName("a", "b/c", "d"), plugin::shaderGroupName("a", "b", "c/d"));
