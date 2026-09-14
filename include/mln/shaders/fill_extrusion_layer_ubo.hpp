@@ -44,12 +44,12 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 44 */ float base;
     /* 48 */ float height;
     /* 52 */ float light_intensity;
-    /* 56 */ float vertical_gradient;
+    /* 56 */ float gradient_depth;
     /* 60 */ float opacity;
     /* 64 */ float fade;
     /* 68 */ float from_scale;
     /* 72 */ float to_scale;
-    /* 76 */ float pad2;
+    /* 76 */ float gradient_reference_height_inv;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16);
