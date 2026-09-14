@@ -230,6 +230,22 @@ const std::vector<TextureInfo> FillExtrusionPatternShaderInfo::textures = {
     TextureInfo{"u_image", idFillExtrusionImageTexture},
 };
 
+// Fill Extrusion Shadow Mask
+using FillExtrusionShadowMaskShaderInfo =
+    ShaderInfo<BuiltIn::FillExtrusionShadowMaskShader, gfx::Backend::Type::OpenGL>;
+
+const std::vector<UniformBlockInfo> FillExtrusionShadowMaskShaderInfo::uniformBlocks = {
+    UniformBlockInfo{"FillExtrusionShadowDrawableUBO", idFillExtrusionShadowDrawableUBO},
+    UniformBlockInfo{"FillExtrusionShadowPropsUBO", idFillExtrusionShadowPropsUBO},
+};
+const std::vector<AttributeInfo> FillExtrusionShadowMaskShaderInfo::attributes = {
+    AttributeInfo{"a_pos", idFillExtrusionShadowPosVertexAttribute},
+    AttributeInfo{"a_decimals_ed", idFillExtrusionShadowDecimalsEdAttribute},
+    AttributeInfo{"a_base", idFillExtrusionShadowBaseVertexAttribute},
+    AttributeInfo{"a_height", idFillExtrusionShadowHeightVertexAttribute},
+};
+const std::vector<TextureInfo> FillExtrusionShadowMaskShaderInfo::textures = {};
+
 // Heatmap
 using HeatmapShaderInfo = ShaderInfo<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL>;
 

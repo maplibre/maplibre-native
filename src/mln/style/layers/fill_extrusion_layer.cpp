@@ -217,6 +217,114 @@ TransitionOptions FillExtrusionLayer::getFillExtrusionPatternTransition() const 
     return impl().paint.template get<FillExtrusionPattern>().options;
 }
 
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionShadowAzimuth() {
+    return {225.f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionShadowAzimuth() const {
+    return impl().paint.template get<FillExtrusionShadowAzimuth>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowAzimuth(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionShadowAzimuth())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowAzimuth>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowAzimuthTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowAzimuth>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionShadowAzimuthTransition() const {
+    return impl().paint.template get<FillExtrusionShadowAzimuth>().options;
+}
+
+PropertyValue<Color> FillExtrusionLayer::getDefaultFillExtrusionShadowColor() {
+    return {{ 0, 0, 0, 0.35 }};
+}
+
+const PropertyValue<Color>& FillExtrusionLayer::getFillExtrusionShadowColor() const {
+    return impl().paint.template get<FillExtrusionShadowColor>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowColor(const PropertyValue<Color>& value) {
+    if (value == getFillExtrusionShadowColor())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowColor>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowColorTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowColor>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionShadowColorTransition() const {
+    return impl().paint.template get<FillExtrusionShadowColor>().options;
+}
+
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionShadowLength() {
+    return {0.32f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionShadowLength() const {
+    return impl().paint.template get<FillExtrusionShadowLength>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowLength(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionShadowLength())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowLength>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowLengthTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowLength>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionShadowLengthTransition() const {
+    return impl().paint.template get<FillExtrusionShadowLength>().options;
+}
+
+PropertyValue<float> FillExtrusionLayer::getDefaultFillExtrusionShadowOpacity() {
+    return {0.f};
+}
+
+const PropertyValue<float>& FillExtrusionLayer::getFillExtrusionShadowOpacity() const {
+    return impl().paint.template get<FillExtrusionShadowOpacity>().value;
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowOpacity(const PropertyValue<float>& value) {
+    if (value == getFillExtrusionShadowOpacity())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowOpacity>().value = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
+
+void FillExtrusionLayer::setFillExtrusionShadowOpacityTransition(const TransitionOptions& options) {
+    auto impl_ = mutableImpl();
+    impl_->paint.template get<FillExtrusionShadowOpacity>().options = options;
+    baseImpl = std::move(impl_);
+}
+
+TransitionOptions FillExtrusionLayer::getFillExtrusionShadowOpacityTransition() const {
+    return impl().paint.template get<FillExtrusionShadowOpacity>().options;
+}
+
 PropertyValue<std::array<float, 2>> FillExtrusionLayer::getDefaultFillExtrusionTranslate() {
     return {{{0.f, 0.f}}};
 }
@@ -271,15 +379,15 @@ TransitionOptions FillExtrusionLayer::getFillExtrusionTranslateAnchorTransition(
     return impl().paint.template get<FillExtrusionTranslateAnchor>().options;
 }
 
-PropertyValue<bool> FillExtrusionLayer::getDefaultFillExtrusionVerticalGradient() {
-    return {true};
+PropertyValue<VerticalGradient> FillExtrusionLayer::getDefaultFillExtrusionVerticalGradient() {
+    return {{}};
 }
 
-const PropertyValue<bool>& FillExtrusionLayer::getFillExtrusionVerticalGradient() const {
+const PropertyValue<VerticalGradient>& FillExtrusionLayer::getFillExtrusionVerticalGradient() const {
     return impl().paint.template get<FillExtrusionVerticalGradient>().value;
 }
 
-void FillExtrusionLayer::setFillExtrusionVerticalGradient(const PropertyValue<bool>& value) {
+void FillExtrusionLayer::setFillExtrusionVerticalGradient(const PropertyValue<VerticalGradient>& value) {
     if (value == getFillExtrusionVerticalGradient())
         return;
     auto impl_ = mutableImpl();
@@ -302,7 +410,7 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 16u;
+constexpr uint8_t kPaintPropertyCount = 24u;
 
 enum class Property : uint8_t {
     FillExtrusionBase,
@@ -310,6 +418,10 @@ enum class Property : uint8_t {
     FillExtrusionHeight,
     FillExtrusionOpacity,
     FillExtrusionPattern,
+    FillExtrusionShadowAzimuth,
+    FillExtrusionShadowColor,
+    FillExtrusionShadowLength,
+    FillExtrusionShadowOpacity,
     FillExtrusionTranslate,
     FillExtrusionTranslateAnchor,
     FillExtrusionVerticalGradient,
@@ -318,6 +430,10 @@ enum class Property : uint8_t {
     FillExtrusionHeightTransition,
     FillExtrusionOpacityTransition,
     FillExtrusionPatternTransition,
+    FillExtrusionShadowAzimuthTransition,
+    FillExtrusionShadowColorTransition,
+    FillExtrusionShadowLengthTransition,
+    FillExtrusionShadowOpacityTransition,
     FillExtrusionTranslateTransition,
     FillExtrusionTranslateAnchorTransition,
     FillExtrusionVerticalGradientTransition,
@@ -335,6 +451,10 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-extrusion-height", toUint8(Property::FillExtrusionHeight)},
      {"fill-extrusion-opacity", toUint8(Property::FillExtrusionOpacity)},
      {"fill-extrusion-pattern", toUint8(Property::FillExtrusionPattern)},
+     {"fill-extrusion-shadow-azimuth", toUint8(Property::FillExtrusionShadowAzimuth)},
+     {"fill-extrusion-shadow-color", toUint8(Property::FillExtrusionShadowColor)},
+     {"fill-extrusion-shadow-length", toUint8(Property::FillExtrusionShadowLength)},
+     {"fill-extrusion-shadow-opacity", toUint8(Property::FillExtrusionShadowOpacity)},
      {"fill-extrusion-translate", toUint8(Property::FillExtrusionTranslate)},
      {"fill-extrusion-translate-anchor", toUint8(Property::FillExtrusionTranslateAnchor)},
      {"fill-extrusion-vertical-gradient", toUint8(Property::FillExtrusionVerticalGradient)},
@@ -343,6 +463,10 @@ constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal
      {"fill-extrusion-height-transition", toUint8(Property::FillExtrusionHeightTransition)},
      {"fill-extrusion-opacity-transition", toUint8(Property::FillExtrusionOpacityTransition)},
      {"fill-extrusion-pattern-transition", toUint8(Property::FillExtrusionPatternTransition)},
+     {"fill-extrusion-shadow-azimuth-transition", toUint8(Property::FillExtrusionShadowAzimuthTransition)},
+     {"fill-extrusion-shadow-color-transition", toUint8(Property::FillExtrusionShadowColorTransition)},
+     {"fill-extrusion-shadow-length-transition", toUint8(Property::FillExtrusionShadowLengthTransition)},
+     {"fill-extrusion-shadow-opacity-transition", toUint8(Property::FillExtrusionShadowOpacityTransition)},
      {"fill-extrusion-translate-transition", toUint8(Property::FillExtrusionTranslateTransition)},
      {"fill-extrusion-translate-anchor-transition", toUint8(Property::FillExtrusionTranslateAnchorTransition)},
      {"fill-extrusion-vertical-gradient-transition", toUint8(Property::FillExtrusionVerticalGradientTransition)},
@@ -360,6 +484,14 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property propert
             return makeStyleProperty(layer.getFillExtrusionOpacity());
         case Property::FillExtrusionPattern:
             return makeStyleProperty(layer.getFillExtrusionPattern());
+        case Property::FillExtrusionShadowAzimuth:
+            return makeStyleProperty(layer.getFillExtrusionShadowAzimuth());
+        case Property::FillExtrusionShadowColor:
+            return makeStyleProperty(layer.getFillExtrusionShadowColor());
+        case Property::FillExtrusionShadowLength:
+            return makeStyleProperty(layer.getFillExtrusionShadowLength());
+        case Property::FillExtrusionShadowOpacity:
+            return makeStyleProperty(layer.getFillExtrusionShadowOpacity());
         case Property::FillExtrusionTranslate:
             return makeStyleProperty(layer.getFillExtrusionTranslate());
         case Property::FillExtrusionTranslateAnchor:
@@ -376,6 +508,14 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property propert
             return makeStyleProperty(layer.getFillExtrusionOpacityTransition());
         case Property::FillExtrusionPatternTransition:
             return makeStyleProperty(layer.getFillExtrusionPatternTransition());
+        case Property::FillExtrusionShadowAzimuthTransition:
+            return makeStyleProperty(layer.getFillExtrusionShadowAzimuthTransition());
+        case Property::FillExtrusionShadowColorTransition:
+            return makeStyleProperty(layer.getFillExtrusionShadowColorTransition());
+        case Property::FillExtrusionShadowLengthTransition:
+            return makeStyleProperty(layer.getFillExtrusionShadowLengthTransition());
+        case Property::FillExtrusionShadowOpacityTransition:
+            return makeStyleProperty(layer.getFillExtrusionShadowOpacityTransition());
         case Property::FillExtrusionTranslateTransition:
             return makeStyleProperty(layer.getFillExtrusionTranslateTransition());
         case Property::FillExtrusionTranslateAnchorTransition:
@@ -442,7 +582,9 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionColor(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionOpacity || property == Property::FillExtrusionRoundedCornerDistance) {
+    if (property == Property::FillExtrusionOpacity || property == Property::FillExtrusionShadowAzimuth ||
+        property == Property::FillExtrusionShadowLength || property == Property::FillExtrusionShadowOpacity ||
+        property == Property::FillExtrusionRoundedCornerDistance) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
@@ -451,6 +593,21 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 
         if (property == Property::FillExtrusionOpacity) {
             setFillExtrusionOpacity(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionShadowAzimuth) {
+            setFillExtrusionShadowAzimuth(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionShadowLength) {
+            setFillExtrusionShadowLength(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::FillExtrusionShadowOpacity) {
+            setFillExtrusionShadowOpacity(*typedValue);
             return std::nullopt;
         }
 
@@ -467,6 +624,16 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         }
 
         setFillExtrusionPattern(*typedValue);
+        return std::nullopt;
+    }
+    if (property == Property::FillExtrusionShadowColor) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<Color>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        setFillExtrusionShadowColor(*typedValue);
         return std::nullopt;
     }
     if (property == Property::FillExtrusionTranslate) {
@@ -491,7 +658,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
     }
     if (property == Property::FillExtrusionVerticalGradient) {
         Error error;
-        const auto& typedValue = convert<PropertyValue<bool>>(value, error, false, false);
+        const auto& typedValue = convert<PropertyValue<VerticalGradient>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
@@ -528,6 +695,26 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
 
     if (property == Property::FillExtrusionPatternTransition) {
         setFillExtrusionPatternTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionShadowAzimuthTransition) {
+        setFillExtrusionShadowAzimuthTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionShadowColorTransition) {
+        setFillExtrusionShadowColorTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionShadowLengthTransition) {
+        setFillExtrusionShadowLengthTransition(*transition);
+        return std::nullopt;
+    }
+
+    if (property == Property::FillExtrusionShadowOpacityTransition) {
+        setFillExtrusionShadowOpacityTransition(*transition);
         return std::nullopt;
     }
 
