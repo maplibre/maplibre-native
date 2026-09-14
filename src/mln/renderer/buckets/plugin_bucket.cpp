@@ -16,33 +16,6 @@
 namespace mln {
 namespace {
 
-class PluginFeatureSnapshot final : public GeometryTileFeature {
-public:
-    PluginFeatureSnapshot(FeatureType type_,
-                          FeatureIdentifier id_,
-                          PropertyMap properties_,
-                          const GeometryCollection& geometry_)
-        : type(type_),
-          id(std::move(id_)),
-          properties(std::move(properties_)),
-          geometry(geometry_.clone()) {}
-
-    FeatureType getType() const override { return type; }
-    std::optional<Value> getValue(const std::string& key) const override {
-        const auto it = properties.find(key);
-        return it == properties.end() ? std::nullopt : std::optional<Value>{it->second};
-    }
-    const PropertyMap& getProperties() const override { return properties; }
-    FeatureIdentifier getID() const override { return id; }
-    const GeometryCollection& getGeometries() const override { return geometry; }
-
-private:
-    FeatureType type;
-    FeatureIdentifier id;
-    PropertyMap properties;
-    const GeometryCollection geometry;
-};
-
 style::PluginPropertyValue propertyValue(const plugin::PropertyDefinition& definition,
                                          const style::PluginPropertyMap& properties) {
     const auto it = properties.find(definition.name);
@@ -125,19 +98,18 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
 } // namespace
 
 PluginFeatureData::PluginFeatureData(const std::vector<PluginFeatureVertexRange>& ranges,
-                                     const GeometryTileLayer& layer) {
+                                     std::unique_ptr<GeometryTileLayer> layer)
+    : sourceLayer(std::move(layer)) {
+    assert(sourceLayer);
     plugin::performance::Scope profile(plugin::performance::Snapshots);
     std::unordered_map<std::size_t, std::size_t> indexes;
     for (const auto& range : ranges) {
         auto index = indexes.find(range.featureIndex);
         if (index == indexes.end()) {
-            const auto feature = layer.getFeature(range.featureIndex);
+            auto feature = sourceLayer->getFeature(range.featureIndex);
             if (!feature) continue;
             index = indexes.emplace(range.featureIndex, features.size()).first;
-            features.push_back(
-                {featureIDtoString(feature->getID()).value_or(std::string{}),
-                 std::make_unique<PluginFeatureSnapshot>(
-                     feature->getType(), feature->getID(), feature->getProperties(), feature->getGeometries())});
+            features.push_back({featureIDtoString(feature->getID()).value_or(std::string{}), std::move(feature)});
         }
         auto& drawable = drawables[range.drawableKey];
         drawable.byID[features[index->second].id].push_back(drawable.ranges.size());

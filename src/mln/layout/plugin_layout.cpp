@@ -274,7 +274,7 @@ void PluginLayout::createBucket(const ImagePositions&,
     }
     bucket->queryRadius = output.query_radius;
     layoutProfile.stop();
-    const auto features = std::make_shared<const PluginFeatureData>(bucket->featureVertexRanges, *sourceLayer);
+    const auto features = std::make_shared<const PluginFeatureData>(bucket->featureVertexRanges, std::move(sourceLayer));
     for (const auto& layer : layers) {
         const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
         auto& layerBinders = bucket->paintPropertyBinders[impl.id];

@@ -269,7 +269,7 @@ TEST(PluginRegistry, QueryBoundsIncludeEveryDrawable) {
                                            0,
                                            {0, 0, 0},
                                            paint,
-                                           std::make_shared<const PluginFeatureData>(ranges, source)));
+                                           std::make_shared<const PluginFeatureData>(ranges, std::make_unique<GeoJSONTileLayer>(source))));
         }
         bucket.updateQueryRadius("bounds", paint, 0);
         EXPECT_FLOAT_EQ(130, bucket.queryRadii.at("bounds"));

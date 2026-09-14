@@ -59,9 +59,15 @@ struct PluginFeatureVertexRange {
     std::size_t vertexCount = 0;
 };
 
-// One immutable snapshot per source feature, shared by all properties and layers
-// using this bucket. Vertex ranges are shared per drawable too.
+// One owned tile layer and feature view per source feature, shared by all
+// properties/drawables using this bucket. Construction is on the layout worker;
+// subsequent paint evaluation is on the render thread. Lazy feature caches must
+// not be read concurrently across those phases.
 class PluginFeatureData {
+    // Declared before the views so it is destroyed after them. GeometryTileData
+    // permits a layer to outlive its data, but features must not outlive the layer.
+    const std::unique_ptr<const GeometryTileLayer> sourceLayer;
+
 public:
     struct Feature {
         std::string id;
@@ -76,7 +82,7 @@ public:
         std::vector<Range> ranges;
         std::unordered_map<std::string, std::vector<std::size_t>> byID;
     };
-    PluginFeatureData(const std::vector<PluginFeatureVertexRange>&, const GeometryTileLayer&);
+    PluginFeatureData(const std::vector<PluginFeatureVertexRange>&, std::unique_ptr<GeometryTileLayer>);
     ~PluginFeatureData();
     const Drawable& drawable(uint64_t) const;
     std::vector<Feature> features;
