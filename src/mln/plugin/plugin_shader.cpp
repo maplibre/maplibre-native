@@ -199,12 +199,18 @@ std::string shaderGroupName(const std::string& pluginID, const std::string& laye
 
 void registerPluginShaderGroups(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
     for (const auto& layerType : PluginRegistry::get().allLayerTypes()) {
-        for (const auto& shader : layerType.shaders) {
-            const auto name = shaderGroupName(shader.pluginID, layerType.type, shader.id);
-            if (registry.isShaderGroup(name)) continue;
-            if (!registry.registerShaderGroup(std::make_shared<PluginShaderGroup>(name, shader, parameters), name)) {
-                throw std::runtime_error("Failed to register plugin shader group '" + name + "'");
-            }
+        registerPluginShaderGroups(registry, parameters, layerType);
+    }
+}
+
+void registerPluginShaderGroups(gfx::ShaderRegistry& registry,
+                               const ProgramParameters& parameters,
+                               const LayerType& layerType) {
+    for (const auto& shader : layerType.shaders) {
+        const auto name = shaderGroupName(shader.pluginID, layerType.type, shader.id);
+        if (registry.isShaderGroup(name)) continue;
+        if (!registry.registerShaderGroup(std::make_shared<PluginShaderGroup>(name, shader, parameters), name)) {
+            throw std::runtime_error("Failed to register plugin shader group '" + name + "'");
         }
     }
 }

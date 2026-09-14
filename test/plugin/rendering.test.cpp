@@ -150,4 +150,18 @@ TEST(PluginRendering, ShaderIdentityHasUnambiguousComponents) {
     EXPECT_NE(plugin::shaderGroupName("a", "b", "main"), plugin::shaderGroupName("a", "c", "main"));
 }
 
+TEST(PluginRendering, RegistrationAfterRendererInitialization) {
+    {
+        RenderTest test;
+        test.map.getStyle().loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+        test.frontend.render(test.map);
+        // The public contract requires registration before the dependent style,
+        // not before constructing or rendering any map in the process.
+        registerTriangles("test.late-registration");
+        test.expectTriangles("test.late-registration");
+    }
+    RenderTest newMap;
+    newMap.expectTriangles("test.late-registration");
+}
+
 } // namespace

@@ -17,6 +17,8 @@
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/renderer/render_source.hpp>
+#include <mln/renderer/paint_parameters.hpp>
+#include <mln/shaders/program_parameters.hpp>
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/plugin_property.hpp>
 
@@ -156,7 +158,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     gfx::Context& context,
                                     const TransformState& state,
                                     const std::shared_ptr<UpdateParameters>&,
-                                    const PaintParameters&,
+                                    const PaintParameters& parameters,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
@@ -164,6 +166,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
+    // Registration may happen after this renderer initialized its shader registry.
+    // Resolve this layer's immutable shader definitions on the render thread.
+    plugin::registerPluginShaderGroups(shaders, ProgramParameters{parameters.pixelRatio, false}, registration);
     if (!layerGroup) {
         if (auto group = context.createTileLayerGroup(layerIndex, 64, getID())) {
             setLayerGroup(std::move(group), changes);
