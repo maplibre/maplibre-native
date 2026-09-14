@@ -210,7 +210,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         for (const auto& definition : bucket.drawables) {
-            const auto groupName = plugin::shaderGroupName(registration.pluginID, registration.type, definition.shaderID);
+            const auto groupName = plugin::shaderGroupName(
+                registration.pluginID, registration.type, definition.shaderID);
             const auto shaderGroup = shaders.getShaderGroup(groupName);
             StringIDSetsPair propertiesAsUniforms;
             auto* paintBinders = bucket.paintBinders(getID(), definition.key);

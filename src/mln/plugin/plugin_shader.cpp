@@ -193,7 +193,9 @@ private:
 
 std::string shaderGroupName(const std::string& pluginID, const std::string& layerType, const std::string& shaderID) {
     // IDs may contain separators, and shader IDs are local to a layer type.
-    const auto encode = [](const std::string& value) { return std::to_string(value.size()) + ":" + value; };
+    const auto encode = [](const std::string& value) {
+        return std::to_string(value.size()) + ":" + value;
+    };
     return "plugin/" + encode(pluginID) + encode(layerType) + encode(shaderID);
 }
 
@@ -204,8 +206,8 @@ void registerPluginShaderGroups(gfx::ShaderRegistry& registry, const ProgramPara
 }
 
 void registerPluginShaderGroups(gfx::ShaderRegistry& registry,
-                               const ProgramParameters& parameters,
-                               const LayerType& layerType) {
+                                const ProgramParameters& parameters,
+                                const LayerType& layerType) {
     for (const auto& shader : layerType.shaders) {
         const auto name = shaderGroupName(shader.pluginID, layerType.type, shader.id);
         if (registry.isShaderGroup(name)) continue;
