@@ -50,7 +50,7 @@ gfx::AttributeDataType attributeType(mln_plugin_vertex_attribute_type type) {
         case MLN_PLUGIN_VERTEX_FLOAT_X4:
             return gfx::AttributeDataType::Float4;
         case MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED:
-            return gfx::AttributeDataType::UByte4;
+            return gfx::AttributeDataType::UByte4Normalized;
     }
     return gfx::AttributeDataType::Invalid;
 }
