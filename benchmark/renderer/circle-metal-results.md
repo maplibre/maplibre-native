@@ -1,6 +1,169 @@
 # Metal circle plugin benchmark — 2026-09-14
 
-## Conclusion
+## Updated conclusion after the five improvements
+
+**The improvements helped substantially, but the plugin is not yet
+performance-equivalent to native circle.** The largest gains are memory and
+layout/reload costs. Dense rendering improved but retains a measurable gap;
+multi-layer CPU encoding remains expensive. Sparse-state wall-time improvement
+is inconclusive in this experiment.
+
+- 100k constant-circle plugin peak RSS: **2,619.6 → 983.1 MiB** (62.5% lower).
+- Eight-layer plugin peak RSS: **2,246.6 → 149.7 MiB** (93.3% lower).
+- 100k style reload: **428.59 → 170.03 ms** (60.3% lower).
+- Eight-layer style reload: **261.10 → 25.67 ms** (90.2% lower).
+- Dense plugin warm wall time: **5.448 → 3.759 ms** (31.0% lower), still
+  **19.5% slower than matched native**, 95% CI [18.1%, 20.8%].
+- Warm plugin draw counts now match native. Unchanged-paint uniform uploads
+  fall from 1,008 to 48 bytes for one layer and from 7,728 to 48 for eight layers.
+
+The percentages above compare complete before/after runs, not isolated timings
+for each commit. Native controls and process-repeat intervals below help separate
+implementation improvements from machine variation. These are desktop Metal
+results, not a claim about intrinsic C ABI overhead or mobile performance.
+
+### Evidence and validation
+
+The [committed datasets](../results/metal-circle/) include the original baseline,
+the final optimized comparison, five incremental smoke runs, opt-in worker
+profiling and a successful Instruments allocation export. Each full comparison
+contains **189 fresh process runs**, seven repeats per workload/variant, 30
+warmups and 300 measured requests per normal phase. Ten reloads are measured.
+Per-process aggregates, sample counts, percentiles, confidence intervals,
+machine configuration and binary hashes are committed; large per-frame logs
+and the full Instruments trace remain local.
+
+The final uninstrumented run is `circle-metal-optimized-final`, exported as
+[`optimized`](../results/metal-circle/optimized/), source revision
+`73c3b279e6bd`. It was run from scratch after Instruments finished; the interrupted
+sweep is excluded. The baseline is the original pooled run, not an unpooled or
+partially completed run. No builds, render tests or Instruments recordings ran
+concurrently with the final sweep. OS/driver caches were not purged, and this
+was not an isolated laboratory machine. Some intervals are consequently wide.
+
+Validation after all changes: **58/58 supported original circle render fixtures**,
+**42/42 plugin/query tests**, and the standalone circle descriptor, geometry,
+segmentation, map-mode and query tests pass. Expected images and tolerances are
+unchanged. Metal Release builds with plugins enabled and disabled both pass.
+There are no Darwin SDK changes or new public C ABI requirements for these
+optimizations. No OpenGL/Vulkan timing claim is made.
+
+### Warm rendering: before and after
+
+“Native” below is the final plugins-enabled, unregistered control. Wall time
+includes Metal headless completion, without readback. Encoding is a separate
+host CPU counter; it is **not** GPU time. The ratio intervals are paired
+Student-t intervals across seven process means within the final run. An
+interval including 1 does not establish equivalence.
+
+| Workload | Plugin before ms | Plugin after ms | Native after ms | Final plugin/native wall ratio, 95% CI | Final CPU µs, plugin / native |
+|---|---:|---:|---:|---:|---:|
+| 1k constant | 0.411 | 0.387 | 0.406 | 0.963 [0.872, 1.054] | 22.42 / 20.24 |
+| 10k constant | 0.484 | 0.449 | 0.410 | 1.098 [0.890, 1.306] | 23.88 / 19.70 |
+| 100k constant | 1.371 | 0.840 | 0.870 | 0.972 [0.886, 1.057] | 32.17 / 30.11 |
+| 10k camera | 0.488 | 0.413 | 0.410 | 1.006 [0.980, 1.032] | 23.41 / 20.24 |
+| 10k feature | 0.485 | 0.421 | 0.415 | 1.015 [0.993, 1.037] | 23.22 / 19.91 |
+| 10k composite | 0.521 | 0.481 | 0.449 | 1.072 [0.940, 1.203] | 24.54 / 20.77 |
+| 10k state, unchanged | 0.498 | 0.431 | 0.431 | 1.002 [0.978, 1.027] | 23.65 / 20.44 |
+| 10k dense | 5.448 | 3.759 | 3.147 | 1.195 [1.181, 1.208] | 41.93 / 39.73 |
+| Eight layers, 10k features | 1.234 | 0.877 | 0.855 | 1.028 [0.960, 1.096] | 65.44 / 40.72 |
+
+Single-layer CPU overhead is now approximately 2–4 µs. Eight layers still add
+24.72 µs: uniform-upload elimination did **not** eliminate CPU callback/property
+preparation costs. Its plugin encoding mean improved only from 67.92 to 65.44 µs
+between runs, insufficient evidence of a substantial CPU speedup.
+
+Merely enabling plugin support still shows no consistent warm CPU penalty:
+eight of nine enabled-native/disabled-native intervals include 1; the remaining
+feature case is slightly faster, 0.974 [0.952, 0.997]. These comparisons are not
+adjusted for multiple testing and should not be interpreted as proof of a gain.
+
+### Lifecycle, updates and memory
+
+| Operation | Plugin before ms | Plugin after ms | Native after ms | Final plugin/native ratio, 95% CI |
+|---|---:|---:|---:|---:|
+| 100k startup/readback | 357.47 | 196.54 | 182.38 | 1.078 [1.051, 1.104] |
+| 100k style reload | 428.59 | 170.03 | 137.40 | 1.238 [1.213, 1.262] |
+| Eight-layer style reload | 261.10 | 25.67 | 34.47 | 0.745 [0.709, 0.781] |
+| 10k state, change 1% | 0.943 | 0.864 | 0.912 | 0.975 [0.774, 1.177] |
+| 10k state, change 100% | 9.996 | 9.748 | 11.333 | 0.860 [0.849, 0.871] |
+
+Sparse-state native time also moved from 0.611 to 0.912 ms between runs. The
+plugin's lower final mean does not establish either parity or an end-to-end
+speedup from indexing alone. The full-state plugin remains faster in this
+workload, as it was before the optimizations.
+
+| Workload | Plugin peak RSS before MiB | Plugin after MiB | Native after MiB |
+|---|---:|---:|---:|
+| 10k feature | 346.1 | 129.2 | 119.5 |
+| 100k constant | 2,619.6 | 983.1 | 750.2 |
+| Eight layers, 10k features | 2,246.6 | 149.7 | 176.4 |
+
+RSS is the mean of seven process high-water marks, not live plugin allocation
+size. The 100k case still uses about 31% more peak memory than native. GPU buffer
+memory remains nearly equal: final 10k feature native/plugin is
+1,286,868 / 1,287,316 bytes. Snapshot sharing removed the multiplicative CPU
+storage without making each tile's retained geometry/properties free.
+
+### Did each improvement help?
+
+| Separate commit | Change | Evidence and limits |
+|---|---|---|
+| `f7e6fb5c1cbf` | Share immutable feature snapshots across binders/layers | Yes: the first smoke run already removed most RSS inflation; the full final run confirms large RSS and reload reductions. Ownership and constant-to-expression tests pass. This is not an attribution of every saved byte to one allocation site. |
+| `88a38f600b13` | Native-like conditional/half-precision Metal paint varyings | The final dense gap shrank from 73.0% to 19.5%, with essentially unchanged native dense wall time. Consistent with less shader work, but no isolated repeated A/B or GPU timestamps establish this commit's exact share. |
+| `29f924984312` | Remove unused stencil masks | Yes, deterministically: warm draws changed 5→4, 17→16 and 33→32. A regression test asserts no unused stencil updates. |
+| `94c71a7e3776` | Cache uniform storage/values and skip identical GPU uploads | Yes for allocation/upload work: unchanged uniform uploads are now 48 bytes, including eight layers. Callbacks still run each frame, preserving semantics. Multi-layer encoding remains expensive. |
+| `5842416c75eb` | Index drawable ranges by feature ID | Yes for sparse range lookup: only affected ranges are evaluated. End-to-end sparse-state timing remains inconclusive; bounds statistics still scan the paint vertices. |
+
+The five intermediate datasets have only one repeat and three measured frames.
+They are smoke checks, not statistically reliable per-commit speedup estimates.
+The circle implementation (`b47ff67ba75f`), benchmark (`67c7c53ed112`) and profiling
+infrastructure (`73c3b279e6bd`) are separate from these performance commits.
+
+### Isolated diagnostics and Instruments
+
+The separate opt-in worker run records cumulative worker durations, which may
+overlap and must not be summed as main-thread wall time. At 100k constant
+startup: geometry layout 32.90 ms, snapshot construction 65.99 ms, initial paint
+binding 0.045 ms. Eight feature-driven layers: 5.10 / 10.09 / 19.56 ms. These
+single-repeat diagnostics point to snapshot construction for large constant
+layers and binding for many data-driven layers as remaining investigation areas.
+
+Both the one-layer and eight-layer 10k cases create **21,438 feature snapshots**,
+not eight times as many. Counts exceed source feature counts because they sum
+tile-local copies, including tile buffers. Sparse-state updates evaluate 218
+ranges versus 21,438 for full-state updates, with no new snapshots or initial
+binding. Measured binder update totals are 0.167 and 6.428 ms respectively;
+these include the remaining full-array bounds-statistics scan.
+
+The [successful Instruments capture and exported allocation statistics](../results/metal-circle/allocations/)
+cover the optimized eight-layer workload through ten reloads. It records
+9,818,144 heap allocations totaling 1,581,442,688 bytes over the entire process,
+almost all transient—not 1.58 GB simultaneously live. Typed categories contain
+44 shared `PluginFeatureData` allocations and 352 shared paint vertex-vector
+allocations, consistent with snapshot sharing and per-layer paint data.
+The export does not resolve all generic malloc categories to call stacks, and
+there is no matching pre-optimization allocation capture. Consequently it
+cannot prove a before/after allocation-count reduction or absence of leaks.
+
+The successful capture required a debugger-enabled temporary executable copy
+outside the sandbox; the measured benchmark executable was not modified.
+Instrumented timing/RSS is excluded from the comparison tables.
+
+### Remaining work
+
+1. Investigate the remaining dense Metal shader/pipeline gap using GPU timestamps
+   and an isolated repeated shader A/B; do not ascribe it to C dispatch.
+2. Profile multi-layer callback/property preparation: eight-layer encoding still
+   costs about 61% more than native despite matching draw counts and fewer uploads.
+3. Reduce snapshot construction/retention for constant layers while preserving
+   runtime switches to expressions and source-feature lifetime safety.
+4. Explore incremental query-bound statistics for sparse-state updates, then
+   repeat the state benchmark under tighter machine-load control.
+
+The original baseline analysis follows for comparison.
+
+## Original baseline
 
 Enabling plugin support alone showed no consistent warm-rendering penalty in
 this experiment. The circle plugin is visually compatible with the supported
@@ -28,10 +191,10 @@ property binders differ from the native implementation.
   The circle geometry tests and all **37 plugin/query regressions** also pass.
 - No Android/iOS SDK changes or Linux/other-renderer performance claims.
 
-The finalized run is `benchmark/results/circle-metal-pooled/`. Its `metadata.json`
-records the machine and executable/dylib SHA-256 hashes; individual JSONL files
-contain raw measurements, and `summary.json` contains process means and intervals.
-Raw generated results remain local and are not checked into Git. The harness is
+The original run is `benchmark/results/circle-metal-pooled/`. Committed
+[baseline aggregates](../results/metal-circle/baseline/) preserve machine and
+executable/dylib SHA-256 hashes, per-process measurements and confidence intervals.
+Only the large raw per-frame logs remain local. The harness is
 committed in `67c7c53ed112`, building on core/plugin commits `fddaa2667d40` and
 `b47ff67ba75f`. See [reproduction instructions](circle-metal.md).
 
@@ -101,7 +264,7 @@ stalled the native baseline by exhausting command buffers. Outer pooling did
 not eliminate the plugin's high-memory result. Only the finalized pooled run
 is used in the tables above.
 
-## Prioritized follow-up
+## Prioritized follow-up identified from the baseline
 
 1. **Share immutable feature snapshots per bucket.**
    [Each property binder currently clones feature properties and geometry](../../src/mln/renderer/buckets/plugin_bucket.cpp),
@@ -130,5 +293,5 @@ is used in the tables above.
 
 Results are specific to this desktop Metal implementation and machine. Driver
 caches were not purged; GPU elapsed timestamps and dedicated allocation traces
-were not collected. Do not extrapolate these figures to Android, iOS, OpenGL or
+were not collected for this original baseline. Do not extrapolate these figures to Android, iOS, OpenGL or
 Vulkan, or present them as an intrinsic overhead of a C ABI.
