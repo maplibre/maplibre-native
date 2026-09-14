@@ -73,6 +73,16 @@ struct RenderingStats {
     /// Sum of uniform buffers update sizes
     std::size_t uniformUpdateBytes = 0;
 
+    /// Cumulative actual Metal encoder submissions, after binding deduplication.
+    /// Inline bytes include the per-drawable index; these are not buffer updates
+    /// or measurements of GPU/PCIe bandwidth. Zero on other backends.
+    std::size_t metalVertexBytesCalls = 0;
+    std::size_t metalVertexInlineBytes = 0;
+    std::size_t metalFragmentBytesCalls = 0;
+    std::size_t metalFragmentInlineBytes = 0;
+    std::size_t metalVertexBufferBinds = 0;
+    std::size_t metalFragmentBufferBinds = 0;
+
     /// Total texture memory
     int memTextures = 0;
     /// Total buffer memory

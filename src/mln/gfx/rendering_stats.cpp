@@ -53,6 +53,12 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     numUniformBuffers += r.numUniformBuffers;
     numUniformUpdates += r.numUniformUpdates;
     uniformUpdateBytes += r.uniformUpdateBytes;
+    metalVertexBytesCalls += r.metalVertexBytesCalls;
+    metalVertexInlineBytes += r.metalVertexInlineBytes;
+    metalFragmentBytesCalls += r.metalFragmentBytesCalls;
+    metalFragmentInlineBytes += r.metalFragmentInlineBytes;
+    metalVertexBufferBinds += r.metalVertexBufferBinds;
+    metalFragmentBufferBinds += r.metalFragmentBufferBinds;
     memTextures += r.memTextures;
     memBuffers += r.memBuffers;
     memIndexBuffers += r.memIndexBuffers;
@@ -99,6 +105,12 @@ std::string RenderingStats::toString(std::string_view sep) const {
     optionalStatLine(ss, numUniformBuffers, "numUniformBuffers", sep);
     optionalStatLine(ss, numUniformUpdates, "numUniformUpdates", sep);
     optionalStatLine(ss, uniformUpdateBytes, "uniformUpdateBytes", sep);
+    optionalStatLine(ss, metalVertexBytesCalls, "metalVertexBytesCalls", sep);
+    optionalStatLine(ss, metalVertexInlineBytes, "metalVertexInlineBytes", sep);
+    optionalStatLine(ss, metalFragmentBytesCalls, "metalFragmentBytesCalls", sep);
+    optionalStatLine(ss, metalFragmentInlineBytes, "metalFragmentInlineBytes", sep);
+    optionalStatLine(ss, metalVertexBufferBinds, "metalVertexBufferBinds", sep);
+    optionalStatLine(ss, metalFragmentBufferBinds, "metalFragmentBufferBinds", sep);
     optionalStatLine(ss, memTextures, "memTextures", sep);
     optionalStatLine(ss, memBuffers, "memBuffers", sep);
     optionalStatLine(ss, memIndexBuffers, "memIndexBuffers", sep);

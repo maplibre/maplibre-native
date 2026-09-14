@@ -199,6 +199,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     renderPass.unbindFragment(shaders::idGlobalUBOIndex);
     encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
     encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+    auto& stats = parameters.context.renderingStats();
+    ++stats.metalVertexBytesCalls;
+    stats.metalVertexInlineBytes += sizeof(uboIndex);
+    ++stats.metalFragmentBytesCalls;
+    stats.metalFragmentInlineBytes += sizeof(uboIndex);
 
     bindAttributes(renderPass);
     bindInstanceAttributes(renderPass);

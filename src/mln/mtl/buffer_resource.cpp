@@ -172,10 +172,13 @@ void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,
     assert(offset + size_ <= size);
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setVertexBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+        ++context.renderingStats().metalVertexBufferBinds;
         usingVertexBuffer = true;
     } else if (!raw.empty()) {
         size_ = size_ ? std::min(size_, size - offset) : size - offset;
         encoder->setVertexBytes(raw.data() + offset, size_, index);
+        ++context.renderingStats().metalVertexBytesCalls;
+        context.renderingStats().metalVertexInlineBytes += size_;
         usingVertexBuffer = false;
     }
 }
@@ -187,9 +190,12 @@ void BufferResource::bindFragment(const MTLRenderCommandEncoderPtr& encoder,
     assert(offset + size_ <= size);
     if (const auto* mtlBuf = buffer.get()) {
         encoder->setFragmentBuffer(mtlBuf, static_cast<NS::UInteger>(offset), static_cast<NS::UInteger>(index));
+        ++context.renderingStats().metalFragmentBufferBinds;
     } else if (!raw.empty()) {
         size_ = size_ ? std::min(size_, size - offset) : size - offset;
         encoder->setFragmentBytes(raw.data() + offset, size_, index);
+        ++context.renderingStats().metalFragmentBytesCalls;
+        context.renderingStats().metalFragmentInlineBytes += size_;
     }
 }
 

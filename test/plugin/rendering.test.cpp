@@ -332,6 +332,15 @@ TEST(PluginRendering, SharedUniformsRunAtDeclaredScopeAndUpdateWithoutGeometryCh
     EXPECT_EQ(first.stats.totalBuffers, warm.stats.totalBuffers);
     EXPECT_EQ(first.stats.vertexUpdateBytes, warm.stats.vertexUpdateBytes);
     EXPECT_EQ(first.stats.indexUpdateBytes, warm.stats.indexUpdateBytes);
+#if MLN_RENDER_BACKEND_METAL
+    // Eight index binds + two shared resources + the global paint block per
+    // stage, plus eight 24-byte triangle vertex arrays in the vertex stage.
+    // Count encoder copies even though the cached UBOs did not update.
+    EXPECT_EQ(19u, warm.stats.metalVertexBytesCalls - first.stats.metalVertexBytesCalls);
+    EXPECT_EQ(11u, warm.stats.metalFragmentBytesCalls - first.stats.metalFragmentBytesCalls);
+    EXPECT_EQ(400u, warm.stats.metalVertexInlineBytes - first.stats.metalVertexInlineBytes);
+    EXPECT_EQ(112u, warm.stats.metalFragmentInlineBytes - first.stats.metalFragmentInlineBytes);
+#endif
     sharedAlpha = 0.25f; // A stateful layer callback must still execute every frame.
     const auto changed = test.frontend.render(test.map);
     EXPECT_NE(0, std::memcmp(warm.image.data.get(), changed.image.data.get(), warm.image.bytes()));

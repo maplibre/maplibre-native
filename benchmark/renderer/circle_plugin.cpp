@@ -154,7 +154,13 @@ int main(int argc, char** argv) try {
                   << ",\"upload_bytes\":" << after.bufferUpdateBytes - before.bufferUpdateBytes
                   << ",\"vertex_upload_bytes\":" << after.vertexUpdateBytes - before.vertexUpdateBytes
                   << ",\"index_upload_bytes\":" << after.indexUpdateBytes - before.indexUpdateBytes
-                  << ",\"uniform_upload_bytes\":" << after.uniformUpdateBytes - before.uniformUpdateBytes;
+                  << ",\"uniform_upload_bytes\":" << after.uniformUpdateBytes - before.uniformUpdateBytes
+                  << ",\"metal_vertex_bytes_calls\":" << after.metalVertexBytesCalls - before.metalVertexBytesCalls
+                  << ",\"metal_vertex_inline_bytes\":" << after.metalVertexInlineBytes - before.metalVertexInlineBytes
+                  << ",\"metal_fragment_bytes_calls\":" << after.metalFragmentBytesCalls - before.metalFragmentBytesCalls
+                  << ",\"metal_fragment_inline_bytes\":" << after.metalFragmentInlineBytes - before.metalFragmentInlineBytes
+                  << ",\"metal_vertex_buffer_binds\":" << after.metalVertexBufferBinds - before.metalVertexBufferBinds
+                  << ",\"metal_fragment_buffer_binds\":" << after.metalFragmentBufferBinds - before.metalFragmentBufferBinds;
 #ifdef MLN_WITH_PLUGINS
         if (profiling && std::string_view(phase) != "registration") {
             const auto measured = plugin::performance::read();
