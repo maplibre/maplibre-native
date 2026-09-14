@@ -1,0 +1,1262 @@
+[
+  {
+    "layers": 1,
+    "repeat": 0,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.5522283379999998,
+      "encoding_ms": 0.024317487928700015,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5226809960998003,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 0,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6367540199999996,
+      "encoding_ms": 0.031101568238140007,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5996418837349997,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 0,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7149296500000002,
+      "encoding_ms": 0.03175350627862001,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6758634338760001,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 0,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6061135899999994,
+      "encoding_ms": 0.026018300093599983,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5755784038764001,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 0,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7150816519999998,
+      "encoding_ms": 0.03252856394106,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6753058558755989,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 1,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7068138419999996,
+      "encoding_ms": 0.029008824101600012,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6707380039130004,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 1,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.650863646,
+      "encoding_ms": 0.027306239993640003,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.617838411911,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 1,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.5938732499999998,
+      "encoding_ms": 0.027271411788979988,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5612510100044003,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 1,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6971965099999999,
+      "encoding_ms": 0.030662704099240004,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6594398277928006,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 1,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6694151779999997,
+      "encoding_ms": 0.03553001378899999,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6265705003009998,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 2,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6876489320000002,
+      "encoding_ms": 0.030026704015000006,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6513272338480001,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 2,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7374672440000006,
+      "encoding_ms": 0.03426364601181999,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6955808118951992,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 2,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7171903220000005,
+      "encoding_ms": 0.03362379615994,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6756987480312,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 2,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7079979879999996,
+      "encoding_ms": 0.03074654206299999,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6696371979317993,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 2,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.634290496,
+      "encoding_ms": 0.028950332023640023,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6000461020049996,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 3,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.705721346,
+      "encoding_ms": 0.029847653975380008,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6692789319928008,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 3,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6505660360000004,
+      "encoding_ms": 0.02778111019859999,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6172824260416006,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 3,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6963130719999999,
+      "encoding_ms": 0.02850052589195999,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6607794041033996,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 3,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7091163239999997,
+      "encoding_ms": 0.031172382616219987,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6705098094108,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 3,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.5881820980000004,
+      "encoding_ms": 0.02485723412233998,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5585492718378002,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 4,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7091469119999996,
+      "encoding_ms": 0.03095643021514002,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6708208057384004,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 4,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.707661922000001,
+      "encoding_ms": 0.03018997966142002,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6699251263053996,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 4,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7117762000000012,
+      "encoding_ms": 0.03532033796331997,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6691550899587999,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 4,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7001207340000001,
+      "encoding_ms": 0.033798716191140006,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6591020157677997,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 4,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6792669160000006,
+      "encoding_ms": 0.03190336600544001,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6406468999206002,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 5,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7270485859999996,
+      "encoding_ms": 0.03143390615880001,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6882242498278003,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 5,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6106274440000002,
+      "encoding_ms": 0.02822734830299998,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5769793240209999,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 5,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7228721980000006,
+      "encoding_ms": 0.03566985767992,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6796255060480001,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 5,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6257059779999997,
+      "encoding_ms": 0.02991449406542,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5902967518535999,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 5,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7217486960000014,
+      "encoding_ms": 0.034683523932820016,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6792278081161996,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 6,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7177126740000002,
+      "encoding_ms": 0.03689449401257999,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6730429361214003,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 6,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.5955830100000006,
+      "encoding_ms": 0.026926189966420013,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.5636239899632005,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 6,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7258374099999982,
+      "encoding_ms": 0.03702281793794,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6808130800320001,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 6,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.7138356580000003,
+      "encoding_ms": 0.03152316166986002,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6748265661306,
+      "draw_calls": 4,
+      "buffer_bytes": 1287316,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 1,
+    "repeat": 6,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.6541552540000005,
+      "encoding_ms": 0.025778581955960007,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.6226764039424002,
+      "draw_calls": 4,
+      "buffer_bytes": 1286868,
+      "upload_bytes": 496,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 496
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 0,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.550084236,
+      "encoding_ms": 0.09063854605566006,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.4449610679395997,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 0,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.400559848000002,
+      "encoding_ms": 0.1586126038898799,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.2256678199488003,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 0,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.7686127499999995,
+      "encoding_ms": 0.13529132824564016,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.6173447538226007,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 0,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6993520139999996,
+      "encoding_ms": 0.15243583200312005,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5303988538318005,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 0,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.3461210959999996,
+      "encoding_ms": 0.12398025042834,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.2045044858114002,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 1,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.7995250839999999,
+      "encoding_ms": 0.14851415620209985,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.6284100698102004,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 1,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.5498375880000006,
+      "encoding_ms": 0.16358541382980002,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.3641791419558003,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 1,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.8943082379999996,
+      "encoding_ms": 0.18327427794908005,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.6904416419123993,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 1,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.59139083,
+      "encoding_ms": 0.14392833563017998,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.4317009099972011,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 1,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.3163840859999993,
+      "encoding_ms": 0.14139708987284003,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.1447668199765997,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 2,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.386408986000002,
+      "encoding_ms": 0.1201597761536401,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.2512528319068004,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 2,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.8102614160000006,
+      "encoding_ms": 0.15906510376849992,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.6311850822024008,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 2,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6871060459999994,
+      "encoding_ms": 0.12514210387536,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5457001440638014,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 2,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.4365220120000002,
+      "encoding_ms": 0.09074183605908007,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.330403083846601,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 2,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6037425639999987,
+      "encoding_ms": 0.16499368002325995,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.4212884101122005,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 3,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.7737413420000003,
+      "encoding_ms": 0.14634393200532,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.6103806359931987,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 3,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6876080799999984,
+      "encoding_ms": 0.15774006804056007,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5112448500179994,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 3,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.60691715,
+      "encoding_ms": 0.09911861178964,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.491491568135601,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 3,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6239082219999994,
+      "encoding_ms": 0.11158917410584,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.4986775899095988,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 3,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6815396460000007,
+      "encoding_ms": 0.14598766605133998,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5183255160659987,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 4,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.8791185379999992,
+      "encoding_ms": 0.055385247702259985,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.8152132401678001,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 4,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.82011075,
+      "encoding_ms": 0.04114102771548003,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.7712777922398001,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 4,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 0.9712945439999999,
+      "encoding_ms": 0.06993558609970003,
+      "rendered_frames": 1,
+      "submit_wait_ms": 0.8934811622427998,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 4,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6228434939999987,
+      "encoding_ms": 0.1554663141272801,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.449900425914,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 4,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.6718816399999998,
+      "encoding_ms": 0.1527440000365198,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5028523317949998,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 5,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.679705833999999,
+      "encoding_ms": 0.12501431415118003,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5396124840358008,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 5,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.7271872999999993,
+      "encoding_ms": 0.15072750797576,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5594445160182,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 5,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.3431459000000014,
+      "encoding_ms": 0.11983608578159995,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.210008802219601,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 5,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.618411033999999,
+      "encoding_ms": 0.15423457421989997,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.4492611839627998,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 5,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.3379073360000004,
+      "encoding_ms": 0.05223250230494,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.2766670816549994,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 6,
+    "variant": "plugin",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.4101935000000008,
+      "encoding_ms": 0.09718553815087998,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.3038734218972,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 6,
+    "variant": "no-copy",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.4759804979999986,
+      "encoding_ms": 0.1398828481169001,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.3178296520804003,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 6,
+    "variant": "no-uniforms",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.7125696659999998,
+      "encoding_ms": 0.13785393981343985,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.558321456149798,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 6,
+    "variant": "both",
+    "frames": 500,
+    "means": {
+      "wall_ms": 2.1403245600000016,
+      "encoding_ms": 0.14999295590674,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.96948761201,
+      "draw_calls": 32,
+      "buffer_bytes": 6096148,
+      "upload_bytes": 48,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 48
+    }
+  },
+  {
+    "layers": 8,
+    "repeat": 6,
+    "variant": "native",
+    "frames": 500,
+    "means": {
+      "wall_ms": 1.671960677999999,
+      "encoding_ms": 0.13999026187326,
+      "rendered_frames": 1,
+      "submit_wait_ms": 1.5074494941233996,
+      "draw_calls": 32,
+      "buffer_bytes": 6092564,
+      "upload_bytes": 3632,
+      "vertex_upload_bytes": 0,
+      "index_upload_bytes": 0,
+      "uniform_upload_bytes": 3632
+    }
+  }
+]
