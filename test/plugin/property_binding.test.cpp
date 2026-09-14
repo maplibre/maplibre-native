@@ -1,6 +1,9 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
+#include <mln/tile/vector_mvt_tile_data.hpp>
+#include <mln/tile/vector_mlt_tile_data.hpp>
+#include <mln/util/io.hpp>
 #include <gtest/gtest.h>
 
 using namespace mln;
@@ -264,4 +267,28 @@ TEST(PluginPaintBinder, CachedUniformsInvalidateOnZoomAndPropertyChanges) {
     EXPECT_FALSE(binder.synchronize(expression(definition, "30")));
     EXPECT_FLOAT_EQ(30, read(1.5));
     EXPECT_FLOAT_EQ(30, read(2));
+}
+
+TEST(PluginPaintBinder, RetainedVectorViewsOutliveTileData) {
+    for (const bool mlt : {false, true}) {
+        SCOPED_TRACE(mlt ? "MLT" : "MVT");
+        const auto bytes = std::make_shared<const std::string>(util::read_file(
+            std::string("test/fixtures/map/issue12432/0-0-0.") + (mlt ? "mlt" : "mvt")));
+        std::unique_ptr<GeometryTileData> tile;
+        if (mlt) tile = std::make_unique<VectorMLTTileData>(bytes, false);
+        else tile = std::make_unique<VectorMVTTileData>(bytes);
+        auto layer = tile->getLayer("admin");
+        ASSERT_TRUE(layer);
+        ASSERT_GT(layer->featureCount(), 0u);
+        auto original = layer->getFeature(0);
+        const auto properties = original->getProperties();
+        const auto geometry = original->getGeometries().clone();
+        original.reset();
+        const auto data = std::make_shared<const PluginFeatureData>(
+            std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}}, std::move(layer));
+        tile.reset();
+        ASSERT_EQ(1u, data->features.size());
+        EXPECT_EQ(properties, data->features[0].snapshot->getProperties());
+        EXPECT_EQ(geometry, data->features[0].snapshot->getGeometries());
+    }
 }
