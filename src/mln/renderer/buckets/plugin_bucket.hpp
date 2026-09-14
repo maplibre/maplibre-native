@@ -193,7 +193,9 @@ public:
 
     // The render layer retains one immutable snapshot until its evaluated paint
     // changes. Tiles compare identity instead of copying/comparing every property.
-    bool synchronizePaint(const std::string& layerID, const std::shared_ptr<const style::PluginPropertyMap>&, float zoom);
+    bool synchronizePaint(const std::string& layerID,
+                          const std::shared_ptr<const style::PluginPropertyMap>&,
+                          float zoom);
     void updateQueryRadius(const std::string& layerID, const style::PluginPropertyMap&, float zoom);
     PluginPaintPropertyBinders* paintBinders(const std::string& layerID, uint64_t drawableKey);
 

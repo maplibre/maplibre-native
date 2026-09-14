@@ -113,8 +113,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                     individual->scratch.assign(uniform.byteSize, 0);
                     output = individual->scratch.data();
                 }
-                const auto status = registration.updateUniformBlock(
-                    &context, uniform.id, output, uniform.byteSize);
+                const auto status = registration.updateUniformBlock(&context, uniform.id, output, uniform.byteSize);
                 if (status != MLN_PLUGIN_STATUS_OK) {
                     Log::Error(Event::General,
                                "Plugin '" + registration.pluginID + "' failed to update uniform " +

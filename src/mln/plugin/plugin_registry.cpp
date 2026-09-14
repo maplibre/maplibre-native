@@ -284,8 +284,12 @@ bool appendShaders(const std::string& pluginID,
                 return false;
             }
 #endif
-            shader.uniformBlocks.push_back(
-                {uniform.uniform_id, copyString(uniform.name), uniform.byte_size, uniform.stage_mask, bindingID, uniform.scope});
+            shader.uniformBlocks.push_back({uniform.uniform_id,
+                                            copyString(uniform.name),
+                                            uniform.byte_size,
+                                            uniform.stage_mask,
+                                            bindingID,
+                                            uniform.scope});
         }
 
         if (input.property_binding_count && !input.property_bindings) {

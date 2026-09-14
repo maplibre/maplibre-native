@@ -149,8 +149,10 @@ void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum, std::array<f
             for (std::size_t vertex = first; vertex < first + length; ++vertex) {
                 const auto* values = data.data() + vertex * components * 2;
                 for (std::size_t component = 0; component < components; ++component) {
-                    block.minimum[component] = std::min({block.minimum[component], values[component], values[components + component]});
-                    block.maximum[component] = std::max({block.maximum[component], values[component], values[components + component]});
+                    block.minimum[component] = std::min(
+                        {block.minimum[component], values[component], values[components + component]});
+                    block.maximum[component] = std::max(
+                        {block.maximum[component], values[component], values[components + component]});
                 }
             }
             block.dirty = false;

@@ -47,8 +47,8 @@ TEST(PluginPaintBinder, BucketRetainsImmutablePaintSnapshotAndRefreshesZoom) {
     static unsigned radiusCalls;
     radiusCalls = 0;
     plugin::LayerType registration;
-    registration.queryRadius = [](const mln_plugin_property_statistics_v1*, size_t,
-                                  const mln_plugin_property_value_v1*, size_t) -> float {
+    registration.queryRadius =
+        [](const mln_plugin_property_statistics_v1*, size_t, const mln_plugin_property_value_v1*, size_t) -> float {
         ++radiusCalls;
         return 12;
     };
@@ -224,16 +224,17 @@ TEST(PluginPaintBinder, FeatureViewsRetainTheirSourceWithoutCopyingProperties) {
     auto owner = std::make_unique<GeoJSONTileLayer>(collection);
     const auto* properties = &collection->front().properties;
     collection.reset();
-    auto data = std::make_shared<const PluginFeatureData>(
-        std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}}, std::move(owner));
+    auto data = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                          std::move(owner));
     ASSERT_FALSE(lifetime.expired());
     EXPECT_EQ(properties, &data->features[0].snapshot->getProperties());
     // Switching away from a constant still has the original feature/geometry.
     const auto definition = numberDefinition();
-    const plugin::ShaderPropertyBindingDefinition binding{"test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     {
-        PluginPaintPropertyBinder binder(definition, binding, style::defaultPluginPropertyValue(definition),
-                                        0, 1, 4, data);
+        PluginPaintPropertyBinder binder(
+            definition, binding, style::defaultPluginPropertyValue(definition), 0, 1, 4, data);
         data.reset();
         EXPECT_FALSE(lifetime.expired());
         EXPECT_TRUE(binder.synchronize(expression(definition, R"(["get","small"])")));
@@ -255,7 +256,7 @@ TEST(PluginPaintBinder, CachedUniformsInvalidateOnZoomAndPropertyChanges) {
         1,
         1,
         std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}},
-                                                 std::make_unique<GeoJSONTileLayer>(layer)));
+                                                  std::make_unique<GeoJSONTileLayer>(layer)));
     float bytes[2]{};
     auto read = [&](float zoom) {
         binder.writeUniform(zoom, 0, reinterpret_cast<uint8_t*>(bytes), sizeof(bytes));
@@ -272,11 +273,13 @@ TEST(PluginPaintBinder, CachedUniformsInvalidateOnZoomAndPropertyChanges) {
 TEST(PluginPaintBinder, RetainedVectorViewsOutliveTileData) {
     for (const bool mlt : {false, true}) {
         SCOPED_TRACE(mlt ? "MLT" : "MVT");
-        const auto bytes = std::make_shared<const std::string>(util::read_file(
-            std::string("test/fixtures/map/issue12432/0-0-0.") + (mlt ? "mlt" : "mvt")));
+        const auto bytes = std::make_shared<const std::string>(
+            util::read_file(std::string("test/fixtures/map/issue12432/0-0-0.") + (mlt ? "mlt" : "mvt")));
         std::unique_ptr<GeometryTileData> tile;
-        if (mlt) tile = std::make_unique<VectorMLTTileData>(bytes, false);
-        else tile = std::make_unique<VectorMVTTileData>(bytes);
+        if (mlt)
+            tile = std::make_unique<VectorMLTTileData>(bytes, false);
+        else
+            tile = std::make_unique<VectorMVTTileData>(bytes);
         auto layer = tile->getLayer("admin");
         ASSERT_TRUE(layer);
         ASSERT_GT(layer->featureCount(), 0u);
@@ -284,8 +287,8 @@ TEST(PluginPaintBinder, RetainedVectorViewsOutliveTileData) {
         const auto properties = original->getProperties();
         const auto geometry = original->getGeometries().clone();
         original.reset();
-        const auto data = std::make_shared<const PluginFeatureData>(
-            std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}}, std::move(layer));
+        const auto data = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}},
+                                                                    std::move(layer));
         tile.reset();
         ASSERT_EQ(1u, data->features.size());
         EXPECT_EQ(properties, data->features[0].snapshot->getProperties());

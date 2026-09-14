@@ -39,7 +39,8 @@ struct Descriptor {
         source = {sizeof(source), MLN_PLUGIN_BACKEND_OPENGL, view(vertex), view(fragment), {}, {}};
         attributes = {{sizeof(mln_plugin_shader_attribute_v1), 0, 0, view(positionName), MLN_PLUGIN_VERTEX_INT16_X2},
                       {sizeof(mln_plugin_shader_attribute_v1), 1, 1, view(paintName), MLN_PLUGIN_VERTEX_FLOAT_X2}};
-        uniform = {sizeof(uniform), 0, view(uniformName), 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
+        uniform = {
+            sizeof(uniform), 0, view(uniformName), 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
         binding = {sizeof(binding), view(propertyName), MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
         shader = {
             sizeof(shader), view(shaderID), &source, 1, attributes.data(), attributes.size(), &uniform, 1, &binding, 1};

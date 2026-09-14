@@ -28,7 +28,9 @@ std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
 
-void registerTriangles(const std::string& pluginID, bool packedColor = false, bool withUniforms = false,
+void registerTriangles(const std::string& pluginID,
+                       bool packedColor = false,
+                       bool withUniforms = false,
                        bool scopedUniforms = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
@@ -121,8 +123,11 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
         }
         if (scopedUniforms) {
             const auto block = [](const char* name, unsigned id, bool vulkan) {
-                return std::string("layout(std140") + (vulkan ? ",set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_" +
-                    std::to_string(id) + "_BINDING" : "") + ") uniform " + name + "{vec4 value;};";
+                return std::string("layout(std140") +
+                       (vulkan ? ",set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_" + std::to_string(id) +
+                                     "_BINDING"
+                               : "") +
+                       ") uniform " + name + "{vec4 value;};";
             };
             code[i][0] = "in vec2 a_pos;" + block("TileUBO", 0, false) + body + "gl_Position.z=value.x;}";
             code[i][1] = block("PaintUBO", 1, false) + "void main(){fragColor=vec4(" + color + ")*value.x;}";
@@ -130,13 +135,17 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
                          "gl_Position.z=value.x;applySurfaceTransform();}";
             code[i][3] = "layout(location=0) out vec4 fragColor;" + block("PaintUBO", 1, true) +
                          "void main(){fragColor=vec4(" + color + ")*value.x;}";
-            code[i][4] = "struct Input{float2 a_pos [[attribute(0)]];};struct UBO{float4 value;};"
+            code[i][4] =
+                "struct Input{float2 a_pos [[attribute(0)]];};struct UBO{float4 value;};"
                 "vertex float4 triangleVertex(Input in [[stage_in]],"
                 "constant UBO* tiles [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]],"
                 "constant uint& index [[buffer(MLN_PLUGIN_DRAWABLE_INDEX_BINDING)]])"
-                "{return float4((in.a_pos.x" + offset + ")*0.5,in.a_pos.y,tiles[index].value.x,1);}"
+                "{return float4((in.a_pos.x" +
+                offset +
+                ")*0.5,in.a_pos.y,tiles[index].value.x,1);}"
                 "fragment half4 triangleFragment(constant UBO& paint [[buffer(MLN_PLUGIN_UNIFORM_1_BINDING)]])"
-                "{return half4(" + color + ")*half(paint.value.x);}";
+                "{return half4(" +
+                color + ")*half(paint.value.x);}";
         }
         sources[i] = {{{sizeof(mln_plugin_shader_source_v1),
                         MLN_PLUGIN_BACKEND_OPENGL,
@@ -179,18 +188,18 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
             return MLN_PLUGIN_STATUS_OK;
         };
         if (scopedUniforms) {
-            layer.update_uniform_block = [](const mln_plugin_uniform_context_v1* context, uint32_t id,
-                                             uint8_t* bytes, size_t size) {
-                EXPECT_EQ(16u, size);
-                ++uniformCalls.at(id);
-                if (failSharedUniform) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
-                if (id == 1) {
-                    EXPECT_EQ(0, context->pixels_to_tile_units);
-                    for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(i % 5 == 0 ? 1 : 0, context->tile_matrix[i]);
-                    std::memcpy(bytes, &sharedAlpha, sizeof(sharedAlpha));
-                }
-                return MLN_PLUGIN_STATUS_OK;
-            };
+            layer.update_uniform_block =
+                [](const mln_plugin_uniform_context_v1* context, uint32_t id, uint8_t* bytes, size_t size) {
+                    EXPECT_EQ(16u, size);
+                    ++uniformCalls.at(id);
+                    if (failSharedUniform) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+                    if (id == 1) {
+                        EXPECT_EQ(0, context->pixels_to_tile_units);
+                        for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(i % 5 == 0 ? 1 : 0, context->tile_matrix[i]);
+                        std::memcpy(bytes, &sharedAlpha, sizeof(sharedAlpha));
+                    }
+                    return MLN_PLUGIN_STATUS_OK;
+                };
         }
         layer.create_layout = [](const mln_plugin_layout_context_v1*, void** instance) {
             *instance = new (std::nothrow) int(0);

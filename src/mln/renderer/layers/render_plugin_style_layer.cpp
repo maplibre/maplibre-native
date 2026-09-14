@@ -178,8 +178,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         plugin::registerPluginShaderGroups(shaders, ProgramParameters{parameters.pixelRatio, false}, registration);
         for (const auto& definition : registration.shaders) {
             shaderGroups.emplace(definition.id,
-                                 shaders.getShaderGroup(plugin::shaderGroupName(
-                                     registration.pluginID, registration.type, definition.id)));
+                                 shaders.getShaderGroup(
+                                     plugin::shaderGroupName(registration.pluginID, registration.type, definition.id)));
         }
     }
     if (!layerGroup) {
