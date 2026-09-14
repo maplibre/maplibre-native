@@ -59,7 +59,24 @@ Measurements:
 Each frame also records draw calls, buffer memory and upload counters. Counters
 are backend-reported: creation-time allocations need not appear as update
 bytes. Peak RSS is process-wide and uses `getrusage` native units (bytes on macOS).
-Metal GPU timestamps and isolated worker layout/binder timers are not collected.
+Metal GPU timestamps are not collected. For a separate diagnostic run, add
+`--profile` to the script. It records cumulative worker time separately for
+geometry layout, immutable snapshots, initial binding and state updates, plus
+snapshot and affected-range counts. Worker sums can overlap and are not wall
+time. Instrumented runs must not be used as headline performance comparisons.
+Profiling is disabled by default and does not change the public plugin ABI.
+
+To publish compact results, preserving every process mean and confidence interval
+without the large per-frame logs:
+
+```sh
+node benchmark/renderer/export-circle-results.mjs benchmark/results/circle-metal benchmark/results/metal-circle/optimized
+```
+
+The exported `processes.json` retains sample counts, mean/p50/p95 for each metric
+and phase, and peak RSS for each process. Registration-time rendering counters
+reflect the later first frame, not work done by registration; use only `wall_ms`
+for that phase. Machine metadata and binary hashes are retained unchanged.
 
 Correctness uses the original core circle fixtures and expected images unchanged:
 58 supported fixtures, excluding only the unimplemented `circle-sort-key` test.

@@ -1,6 +1,7 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 
 #include <mln/plugin/plugin_registry.hpp>
+#include <mln/plugin/plugin_performance.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/plugin_property.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
@@ -125,6 +126,7 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
 
 PluginFeatureData::PluginFeatureData(const std::vector<PluginFeatureVertexRange>& ranges,
                                      const GeometryTileLayer& layer) {
+    plugin::performance::Scope profile(plugin::performance::Snapshots);
     std::unordered_map<std::size_t, std::size_t> indexes;
     for (const auto& range : ranges) {
         auto index = indexes.find(range.featureIndex);
@@ -141,6 +143,7 @@ PluginFeatureData::PluginFeatureData(const std::vector<PluginFeatureVertexRange>
         drawable.byID[features[index->second].id].push_back(drawable.ranges.size());
         drawable.ranges.push_back({index->second, range.firstVertex, range.vertexCount});
     }
+    if (profile.isActive()) plugin::performance::snapshots.fetch_add(features.size(), std::memory_order_relaxed);
 }
 
 PluginFeatureData::~PluginFeatureData() = default;
@@ -272,6 +275,7 @@ bool PluginPaintPropertyBinder::update(const FeatureStates& states, const Geomet
 bool PluginPaintPropertyBinder::updateRanges(const FeatureStates& states) {
     if (!dataDriven || states.empty()) return false;
     bool changed = false;
+    size_t visited = 0;
     const auto& drawable = features->drawable(drawableKey);
     for (const auto& [id, state] : states) {
         const auto found = drawable.byID.find(id);
@@ -279,10 +283,13 @@ bool PluginPaintPropertyBinder::updateRanges(const FeatureStates& states) {
         for (const auto index : found->second) {
             const auto& range = drawable.ranges[index];
             fillRange(range, *features->features[range.featureIndex].snapshot, state);
+            ++visited;
             changed = true;
         }
     }
     if (changed) updateStatistics();
+    if (plugin::performance::enabled.load(std::memory_order_relaxed))
+        plugin::performance::stateRanges.fetch_add(visited, std::memory_order_relaxed);
     return changed;
 }
 
@@ -340,6 +347,7 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& 
                                                        const CanonicalTileID& canonical,
                                                        const style::PluginPropertyMap& properties,
                                                        std::shared_ptr<const PluginFeatureData> features) {
+    plugin::performance::Scope profile(plugin::performance::Binding);
     const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
     for (const auto& binding : shader.propertyBindings) {
         const auto definition = std::find_if(definitions.begin(), definitions.end(), [&](const auto& candidate) {
@@ -402,6 +410,7 @@ bool PluginPaintPropertyBinders::synchronize(const style::PluginPropertyMap& pro
 }
 
 bool PluginPaintPropertyBinders::update(const FeatureStates& states, const GeometryTileLayer&) {
+    plugin::performance::Scope profile(plugin::performance::State);
     for (const auto& [id, state] : states) (*featureStates)[id] = state;
     bool changed = false;
     for (auto& binder : binders) changed = binder.updateRanges(states) || changed;

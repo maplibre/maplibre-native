@@ -14,6 +14,7 @@
 #include <Foundation/Foundation.hpp>
 #ifdef MLN_WITH_PLUGINS
 #include <mln/plugin/plugin_api.h>
+#include <mln/plugin/plugin_performance.hpp>
 #include <dlfcn.h>
 #endif
 
@@ -72,9 +73,9 @@ std::string fixture(size_t count, int layers, const std::string& paint, bool den
 } // namespace
 
 int main(int argc, char** argv) try {
-    if (argc != 8) {
+    if (argc != 8 && !(argc == 9 && std::string(argv[8]) == "--profile")) {
         std::cerr << "Usage: circle-plugin-benchmark native|PLUGIN_DYLIB COUNT LAYERS "
-                     "constant|camera|feature|composite|state FRAMES WARMUPS dense|spread\n";
+                     "constant|camera|feature|composite|state FRAMES WARMUPS dense|spread [--profile]\n";
         return 2;
     }
     const std::string pluginPath = argv[1], paint = argv[4];
@@ -85,6 +86,9 @@ int main(int argc, char** argv) try {
     const auto processPool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
     const auto registrationStart = Clock::now();
 #ifdef MLN_WITH_PLUGINS
+    const bool profiling = argc == 9;
+    plugin::performance::enabled.store(profiling, std::memory_order_relaxed);
+    plugin::performance::Snapshot profileBefore;
     if (pluginPath != "native") {
         // Keep the DSO loaded for the process lifetime. Neither implementation
         // nor allocator ownership crosses this descriptor-only C boundary.
@@ -150,7 +154,19 @@ int main(int argc, char** argv) try {
                   << ",\"upload_bytes\":" << after.bufferUpdateBytes - before.bufferUpdateBytes
                   << ",\"vertex_upload_bytes\":" << after.vertexUpdateBytes - before.vertexUpdateBytes
                   << ",\"index_upload_bytes\":" << after.indexUpdateBytes - before.indexUpdateBytes
-                  << ",\"uniform_upload_bytes\":" << after.uniformUpdateBytes - before.uniformUpdateBytes << "}\n";
+                  << ",\"uniform_upload_bytes\":" << after.uniformUpdateBytes - before.uniformUpdateBytes;
+#ifdef MLN_WITH_PLUGINS
+        if (profiling && std::string_view(phase) != "registration") {
+            const auto measured = plugin::performance::read();
+            const char* names[] = {"geometry_layout", "snapshot", "binding", "state_update"};
+            for (size_t i = 0; i < plugin::performance::Count; ++i)
+                std::cout << ",\"plugin_" << names[i]
+                          << "_ms\":" << (measured.nanoseconds[i] - profileBefore.nanoseconds[i]) / 1e6;
+            std::cout << ",\"plugin_snapshot_count\":" << measured.snapshots - profileBefore.snapshots
+                      << ",\"plugin_state_ranges\":" << measured.stateRanges - profileBefore.stateRanges;
+        }
+#endif
+        std::cout << "}\n";
     };
     report("registration", 0, registrationMs, stats());
     report("startup_readback", 0, startupMs, {});
@@ -161,6 +177,9 @@ int main(int argc, char** argv) try {
         const int samples = phase == "style_reload" ? std::min(frames, 10) : frames;
         for (int i = 0; i < samples; ++i) {
             const auto before = stats();
+#ifdef MLN_WITH_PLUGINS
+            if (profiling) profileBefore = plugin::performance::read();
+#endif
             const auto start = Clock::now();
             if (phase == "zoom") map.jumpTo(CameraOptions().withZoom(3 + (i % 10) * 0.01));
             if (phase == "paint_update") {

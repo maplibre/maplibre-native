@@ -1,9 +1,32 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
+#include <mln/plugin/plugin_performance.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/tile/geojson_tile_data.hpp>
 #include <gtest/gtest.h>
 
 using namespace mln;
+
+TEST(PluginPerformance, OptInScopesStopOnce) {
+    using namespace plugin::performance;
+    EXPECT_FALSE(enabled.load());
+    const auto before = read();
+    {
+        Scope disabled(plugin::performance::Layout);
+        EXPECT_FALSE(disabled.isActive());
+    }
+    EXPECT_EQ(before.nanoseconds, read().nanoseconds);
+    enabled.store(true);
+    {
+        Scope active(plugin::performance::Layout);
+        EXPECT_TRUE(active.isActive());
+        active.stop();
+        EXPECT_FALSE(active.isActive());
+        const auto stopped = read();
+        active.stop();
+        EXPECT_EQ(stopped.nanoseconds, read().nanoseconds);
+    }
+    enabled.store(false);
+}
 
 namespace {
 GeoJSONTileLayer source() {

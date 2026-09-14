@@ -1,6 +1,7 @@
 #include <mln/layout/plugin_layout.hpp>
 
 #include <mln/geometry/feature_index.hpp>
+#include <mln/plugin/plugin_performance.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
@@ -73,6 +74,7 @@ void PluginLayout::createBucket(const ImagePositions&,
                                 bool,
                                 const CanonicalTileID& canonical) {
     if (!sourceLayer || layers.empty()) return;
+    plugin::performance::Scope layoutProfile(plugin::performance::Layout);
 
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
     mln_plugin_layout_context_v1 context{};
@@ -271,6 +273,7 @@ void PluginLayout::createBucket(const ImagePositions&,
         return;
     }
     bucket->queryRadius = output.query_radius;
+    layoutProfile.stop();
     const auto features = std::make_shared<const PluginFeatureData>(bucket->featureVertexRanges, *sourceLayer);
     for (const auto& layer : layers) {
         const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);

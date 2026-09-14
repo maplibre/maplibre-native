@@ -3,6 +3,7 @@ if(MLN_WITH_PLUGINS)
     target_sources(mbgl-core PRIVATE
         ${PROJECT_SOURCE_DIR}/include/mln/plugin/plugin_api.h
         ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_registry.hpp
+        ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_performance.hpp
         ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_registry.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_shader.hpp
         ${PROJECT_SOURCE_DIR}/src/mln/plugin/plugin_shader.cpp

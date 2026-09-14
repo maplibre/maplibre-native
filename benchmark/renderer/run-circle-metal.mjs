@@ -13,6 +13,7 @@ const {values} = parseArgs({options: {
   warmups: {type: 'string', default: '30'},
   repeats: {type: 'string', default: '7'},
   smoke: {type: 'boolean', default: false},
+  profile: {type: 'boolean', default: false},
 }});
 const run = (cmd, args) => execFileSync(cmd, args, {encoding: 'utf8', maxBuffer: 128 * 1024 * 1024}).trim();
 const output = resolve(values.output);
@@ -40,6 +41,7 @@ const metadata = {
   os: run('sw_vers', ['-productVersion']),
   gpu: displays.SPDisplaysDataType.map(d => d.sppci_model),
   builds, frames, warmups, repeats,
+  profiling: values.profile,
   artifact_sha256: Object.fromEntries([
     `${builds[0]}/benchmark/mln-circle-benchmark`,
     `${builds[1]}/benchmark/mln-circle-benchmark`,
@@ -70,7 +72,8 @@ for (const [count, layers, paint, density] of workloads) {
     for (const [build, library, mode] of order) {
       process.stderr.write(`${workload} repeat ${repeat + 1}/${repeats}: ${mode}\n`);
       const raw = run(`${build}/benchmark/mln-circle-benchmark`,
-        [library, String(count), String(layers), paint, String(frames), String(warmups), density]);
+        [library, String(count), String(layers), paint, String(frames), String(warmups), density,
+          ...(values.profile ? ['--profile'] : [])]);
       writeFileSync(`${output}/${workload}-${repeat}-${mode}.jsonl`, raw + '\n');
       const grouped = new Map();
       for (const line of raw.split('\n')) {
