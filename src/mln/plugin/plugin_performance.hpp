@@ -19,16 +19,19 @@ inline std::atomic<bool> enabled{false};
 inline std::array<std::atomic<uint64_t>, Count> nanoseconds{};
 inline std::atomic<uint64_t> snapshots{0};
 inline std::atomic<uint64_t> stateRanges{0};
+inline std::atomic<uint64_t> boundsVertices{0};
 struct Snapshot {
     std::array<uint64_t, Count> nanoseconds{};
     uint64_t snapshots = 0;
     uint64_t stateRanges = 0;
+    uint64_t boundsVertices = 0;
 };
 inline Snapshot read() {
     Snapshot result;
     for (std::size_t i = 0; i < Count; ++i) result.nanoseconds[i] = nanoseconds[i].load(std::memory_order_relaxed);
     result.snapshots = snapshots.load(std::memory_order_relaxed);
     result.stateRanges = stateRanges.load(std::memory_order_relaxed);
+    result.boundsVertices = boundsVertices.load(std::memory_order_relaxed);
     return result;
 }
 class Scope {

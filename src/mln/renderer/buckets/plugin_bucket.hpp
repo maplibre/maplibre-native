@@ -37,7 +37,8 @@ public:
     PluginPaintVertexVector(std::size_t count_, std::size_t components_)
         : data(count_ * components_ * 2),
           count(count_),
-          components(components_) {}
+          components(components_),
+          blocks(count_ / boundsBlockSize + (count_ % boundsBlockSize != 0)) {}
 
     const void* getRawData() const override { return data.data(); }
     std::size_t getRawSize() const override { return components * 2 * sizeof(float); }
@@ -50,6 +51,12 @@ private:
     std::vector<float> data;
     std::size_t count;
     std::size_t components;
+    static constexpr std::size_t boundsBlockSize = 128;
+    struct BoundsBlock {
+        std::array<float, 4> minimum{}, maximum{};
+        bool dirty = true;
+    };
+    mutable std::vector<BoundsBlock> blocks;
 };
 
 struct PluginFeatureVertexRange {

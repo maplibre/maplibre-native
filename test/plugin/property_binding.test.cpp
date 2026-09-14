@@ -61,6 +61,40 @@ TEST(PluginPerformance, OptInScopesStopOnce) {
     enabled.store(false);
 }
 
+TEST(PluginPaintBinder, SparseVertexBoundsRefreshOnlyTouchedBlocks) {
+    PluginPaintVertexVector vertices(1025, 4);
+    const float low[] = {1, 2, 3, 4}, high[] = {5, 6, 7, 8};
+    vertices.set(0, 1025, low, high);
+    std::array<float, 4> minimum{}, maximum{};
+    plugin::performance::enabled.store(true);
+    auto before = plugin::performance::read().boundsVertices;
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ(1025u, plugin::performance::read().boundsVertices - before);
+    EXPECT_EQ((std::array<float, 4>{1, 2, 3, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 6, 7, 8}), maximum);
+    before = plugin::performance::read().boundsVertices;
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ(0u, plugin::performance::read().boundsVertices - before);
+    const float extremes[] = {-10, 20, -30, 40};
+    vertices.set(127, 2, extremes, extremes); // Cross a block boundary.
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ(256u, plugin::performance::read().boundsVertices - before);
+    EXPECT_EQ((std::array<float, 4>{-10, 2, -30, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 20, 7, 40}), maximum);
+    before = plugin::performance::read().boundsVertices;
+    vertices.set(127, 2, low, high); // Removing an old extreme must shrink bounds.
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ(256u, plugin::performance::read().boundsVertices - before);
+    EXPECT_EQ((std::array<float, 4>{1, 2, 3, 4}), minimum);
+    EXPECT_EQ((std::array<float, 4>{5, 6, 7, 8}), maximum);
+    before = plugin::performance::read().boundsVertices;
+    vertices.set(1024, 1, extremes, extremes);
+    vertices.bounds(minimum, maximum);
+    EXPECT_EQ(1u, plugin::performance::read().boundsVertices - before);
+    EXPECT_EQ((std::array<float, 4>{5, 20, 7, 40}), maximum);
+    plugin::performance::enabled.store(false);
+}
+
 namespace {
 GeoJSONTileLayer source() {
     auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();

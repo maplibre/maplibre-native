@@ -169,7 +169,8 @@ int main(int argc, char** argv) try {
                 std::cout << ",\"plugin_" << names[i]
                           << "_ms\":" << (measured.nanoseconds[i] - profileBefore.nanoseconds[i]) / 1e6;
             std::cout << ",\"plugin_snapshot_count\":" << measured.snapshots - profileBefore.snapshots
-                      << ",\"plugin_state_ranges\":" << measured.stateRanges - profileBefore.stateRanges;
+                      << ",\"plugin_state_ranges\":" << measured.stateRanges - profileBefore.stateRanges
+                      << ",\"plugin_bounds_vertices\":" << measured.boundsVertices - profileBefore.boundsVertices;
         }
 #endif
         std::cout << "}\n";
