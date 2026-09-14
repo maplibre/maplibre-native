@@ -1,9 +1,11 @@
 # Circle plugin submission investigation
 
 Investigated `perf/circle-plugin-metal` at `c5f90bafc72d`, using the Metal
-benchmark on Apple M3 Max. No implementation fixes were applied or pushed.
-Temporary probes and diagnostic switches were removed, the normal benchmark
-rebuilt, and a restored-binary smoke run passed.
+benchmark on Apple M3 Max. The initial findings were committed separately as
+`e5db20e05af0`, before applying fixes. Temporary probes and diagnostic switches
+were removed, the normal benchmark rebuilt, and a restored-binary smoke run
+passed. The subsequent implementation and benchmark rerun are recorded below;
+the diagnostic evidence in the original sections is preserved.
 
 ## Finding
 
@@ -141,6 +143,8 @@ feature-state changes or context restoration, nor does it cover other backends.
 
 ## Reproduction artifacts
 
+The original diagnostic artifacts below describe the pre-fix implementation.
+
 [Committed measurements](../results/metal-circle/submission-investigation/) preserve
 the per-process timing means, diagnostic counts and direct Metal binding records.
 The temporary executable and diagnostic switches are not part of production code.
@@ -157,3 +161,134 @@ with `libmln-circle-layer.dylib`
 the later inline-byte probes; `artifacts.json` records the earlier binary used
 for the initial profile and seven-repeat experiment. Rerunning `run.mjs` would
 replace its result files, so copy the directory first to preserve this evidence.
+
+## Follow-up implementation
+
+The findings and each implementation step are separate commits:
+
+| Commit | Change |
+|---|---|
+| `e5db20e05af0` | Preserve the original findings and diagnostic measurements before fixing anything. |
+| `4b4eba1f09ca` | Retain one immutable evaluated paint snapshot per render layer; tiles compare shared identity, not eleven-property maps. Recompute query bounds on zoom changes independently. |
+| `3b196fdbc68d` | Resolve immutable shader groups once per render layer, matching built-in layers' ownership. Keep late plugin registration supported. |
+| `85056643d70a` | Add explicit drawable, layer, and drawable-array uniform scopes. Share layer buffers; batch drawable buffers on Metal. Validate scopes and reject tile interpolation factors in layer-wide storage. Suppress draws after failed callbacks and retry safely. |
+| `7a603669218c` | Split circle's combined 240-byte block into a 160-byte vertex-only tile block and an 80-byte layer-wide paint block. Metal shaders index the batched tile blocks. |
+| `659f20016033` | Count actual Metal inline-byte calls/bytes and buffer binds, separately from backing-storage updates. Include them in benchmark exports and exact-count regression tests. |
+
+The unpublished C API remains v1, but plugins must rebuild against its new uniform
+descriptor. Layer scope explicitly permits one callback per layer/shader/frame;
+ordinary and array scopes still invoke the callback per drawable/frame. In the
+eight-layer circle workload this means 32 tile callbacks plus 8 paint callbacks,
+not skipping arbitrary stateful callbacks. The batching is a storage/submission
+optimization, not duplicate geometry or a promise of fewer C calls overall.
+OpenGL and Vulkan currently use individual tile blocks for array declarations;
+this follow-up validates and benchmarks **Metal only**.
+
+Validation after the changes:
+
+- **45/45 plugin/query tests** pass, including retained paint ownership,
+  unchanged snapshots, zoom-bound invalidation, scope validation, late registration,
+  per-layer versus per-drawable callback counts, live paint changes, tile-count
+  shrink/growth, callback failure/recovery, and exact Metal binding counts.
+- **58/58 circle fixtures** and **13/13 ngon fixtures** pass on Metal, with no
+  expected-image or tolerance changes. Circle descriptor/geometry/segmentation/
+  map-mode/query tests also pass.
+- Release Metal builds pass with plugins enabled and disabled. No Darwin SDK
+  files were modified. No OpenGL/Vulkan performance or correctness claim is made.
+
+The new tests exercise resource updates and failure recovery, not complete
+context-loss or all pipeline-invalidation paths. The original temporary pipeline
+and dirty-flag probes were not added to the production renderer.
+
+## Full benchmark rerun after the fixes
+
+The [`submission-fixed` dataset](../results/metal-circle/submission-fixed/) was
+captured at `659f20016033` with an empty tracked source diff, on the same Apple
+M3 Max/macOS 26.6.2. Both Release builds include the same lightweight encoder
+counters. All **189 fresh processes** completed: nine workloads × three variants
+× seven repeats, 30 warmups and 300 measured requests per normal phase, with
+ten style reloads. No builds, render tests or Instruments sessions ran during
+the sweep. Desktop background activity and OS/driver caches were not controlled.
+Raw logs remain in `benchmark/results/circle-metal-submission-fixed`; exported
+metadata includes source revision, timestamp and binary hashes.
+
+### Submission work: definite improvement
+
+These counters were constant on every one of the **2,100 warm eight-layer frames
+per variant**. “Before” is the original diagnostic recording, not a newly timed
+old binary. Backing-storage updates and inline submissions must not be added
+together as if they measured the same operation.
+
+| Per eight-layer warm frame | Plugin before | Plugin after | Native after |
+|---|---:|---:|---:|
+| Draws | 32 | 32 | 32 |
+| Vertex/index update bytes | 0 / 0 | 0 / 0 | 0 / 0 |
+| Uniform backing-storage update bytes | 48 | 48 | 3,632 |
+| Vertex inline calls | 65 | 49 | 49 |
+| Fragment inline calls | 65 | 41 | 41 |
+| Vertex inline bytes | 7,856 | 5,936 | 4,272 |
+| Fragment inline bytes | 7,856 | 816 | 688 |
+| **Total inline calls** | **130** | **90** | **90** |
+| **Total inline bytes** | **15,712** | **6,752** | **4,960** |
+| Vertex / fragment MTLBuffer binds | 64 / 0 | 64 / 0 | 64 / 0 |
+
+Inline calls fall **30.8%** and bytes **57.0%**. The excess bytes over native
+fall from 10,752 to 1,792 (**83.3% less excess**), but are not eliminated: the
+plugin still has larger tile and paint blocks. The immutable paint snapshot
+also removes the unconditional per-tile map assignments and comparisons by
+construction, with ownership/unchanged-frame regression coverage. Shader-group
+resolution no longer runs on the retained-layer update path.
+
+### CPU and wall time: promising, but not established parity
+
+“Before” below is the previously committed [`optimized`](../results/metal-circle/optimized/)
+full run, not the noisy temporary-probe experiment. CPU values are means of
+seven process means in microseconds. Ratios are paired within the new sweep,
+with 95% Student-t intervals across processes; an interval containing 1 is
+**not proof of equivalence**. No outliers were removed.
+
+| Workload | Plugin CPU before µs | Plugin CPU after µs | Native CPU after µs | New plugin/native CPU ratio, 95% CI |
+|---|---:|---:|---:|---|
+| 1k constant | 22.42 | 21.83 | 22.76 | 0.984 [0.786, 1.183] |
+| 10k constant | 23.88 | 20.45 | 20.63 | 0.998 [0.888, 1.108] |
+| 100k constant | 32.17 | 32.34 | 26.84 | 1.223 [1.058, 1.389] |
+| 10k camera | 23.41 | 21.72 | 21.67 | 1.003 [0.937, 1.069] |
+| 10k feature | 23.22 | 22.03 | 20.99 | 1.050 [1.018, 1.082] |
+| 10k composite | 24.54 | 22.45 | 22.25 | 1.010 [0.953, 1.067] |
+| 10k state, unchanged | 23.65 | 21.65 | 20.38 | 1.062 [1.032, 1.093] |
+| 10k dense | 41.93 | 42.58 | 37.42 | 1.114 [0.951, 1.277] |
+| Eight layers, 10k features | 65.44 | 47.88 | 52.01 | 0.958 [0.691, 1.225] |
+
+The eight-layer plugin mean drops **26.8%**, consistent with removing hot-path
+work. However, native's mean also moves from 40.72 to 52.01 µs, and the new
+process means range from 34.73–66.76 µs for native and 40.15–82.34 µs for the
+plugin. The wide ratio interval does not establish a precise speedup against
+native or explain the contribution of each commit. There was no separately
+randomized before/after run per fix. Most single-layer means improve modestly;
+100k constant and dense CPU means do not improve, and some residual CPU gaps
+remain measurable.
+
+Eight-layer wall time is 0.842 ms plugin versus 0.992 ms native, ratio
+0.876 [0.711, 1.041], likewise inconclusive. Dense wall time remains
+**3.754 versus 3.113 ms**, ratio **1.206 [1.195, 1.216]**. The previous plugin
+mean was 3.759 ms: the submission fixes did not resolve the dense rendering gap.
+
+Lifecycle and update costs also remain important:
+
+- 100k startup: **199.81 / 187.74 ms** plugin/native; reload:
+  **169.86 / 136.52 ms**, still about 24.4% slower on reload.
+- Eight-layer reload: **25.74 / 34.55 ms**; this advantage already existed
+  before these submission fixes.
+- Change 1% of feature states: **0.710 / 0.590 ms**, ratio
+  **1.204 [1.190, 1.219]**. Change all states: **9.77 / 11.17 ms**, ratio
+  **0.874 [0.859, 0.890]**. These do not support a blanket claim that plugin
+  state updates are faster.
+- 100k peak RSS: **989.4 / 760.1 MiB**; eight layers: **165.1 / 171.8 MiB**.
+  These are process-wide high-water means, not allocations attributed to one
+  subsystem. This round did not target snapshot/layout memory.
+
+**Conclusion:** the diagnosed unnecessary submission work is fixed and the
+operation-count savings are reproducible. Overall Metal performance parity
+is not established. Next priorities remain dense shader/GPU work, large-source
+layout/storage, and a quieter controlled CPU experiment—not speculative dirty
+flag changes unsupported by the measured warm-frame behavior.

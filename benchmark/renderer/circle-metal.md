@@ -58,7 +58,15 @@ Measurements:
 
 Each frame also records draw calls, buffer memory and upload counters. Counters
 are backend-reported: creation-time allocations need not appear as update
-bytes. Peak RSS is process-wide and uses `getrusage` native units (bytes on macOS).
+bytes. In particular, `uniform_upload_bytes` counts backing-storage updates,
+**not** all bytes supplied to Metal. The `metal_vertex_inline_bytes` and
+`metal_fragment_inline_bytes` counters measure actual `setVertexBytes` and
+`setFragmentBytes` submissions after binding deduplication, including small
+vertex arrays and the per-drawable index. Corresponding `*_bytes_calls` count
+these calls; `*_buffer_binds` count `setVertexBuffer`/`setFragmentBuffer` calls
+(not offset-only changes). These are CPU encoder submissions, not GPU/PCIe
+bandwidth measurements. Peak RSS is process-wide and uses `getrusage` native
+units (bytes on macOS).
 Metal GPU timestamps are not collected. For a separate diagnostic run, add
 `--profile` to the script. It records cumulative worker time separately for
 geometry layout, immutable snapshots, initial binding and state updates, plus

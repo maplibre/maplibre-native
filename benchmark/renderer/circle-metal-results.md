@@ -1,6 +1,39 @@
 # Metal circle plugin benchmark — 2026-09-14
 
-## Updated conclusion after the five improvements
+## Latest update: submission-path fixes
+
+The [submission investigation and follow-up report](circle-submission-investigation.md#full-benchmark-rerun-after-the-fixes)
+now includes another complete **189-process** comparison at `659f20016033`,
+with [committed per-process results](../results/metal-circle/submission-fixed/).
+The original findings were committed before implementation; paint snapshot
+sharing, retained shader groups, generic uniform scopes/batching, the circle
+uniform split, and actual Metal submission counters are separate commits.
+
+The eight-layer case now submits **90 inline-byte calls / 6,752 bytes** per
+warm frame, down from **130 / 15,712**. Native submits **90 / 4,960**. Thus
+inline bytes fall **57.0%** and the excess over native falls **83.3%**. The
+original investigation found no duplicate rendering or warm geometry/pipeline
+churn; the fixes target verified map-copy/lookup and uniform-organization costs.
+
+Eight-layer plugin CPU encoding falls from **65.44 to 47.88 µs** (26.8% lower
+mean), but native moves from **40.72 to 52.01 µs**. The new paired CPU ratio
+is **0.958, 95% CI [0.691, 1.225]**: desktop timing variation is substantial,
+and this does **not establish parity or a precise per-fix speedup**. No outliers
+were excluded. Dense wall time remains **3.754 ms plugin / 3.113 ms native**,
+about **20.6% slower**, with a narrow interval. Large-source memory/reloads and
+sparse state updates retain gaps; the detailed report records them too.
+
+Validation: **45 plugin/query tests, 58 circle fixtures, 13 ngon fixtures**, and
+circle descriptor/geometry tests pass on Metal. Expected images and tolerances
+are unchanged. Release builds with plugins on/off pass. This round adds explicit
+uniform scopes to the unpublished v1 C descriptor, requiring plugins to rebuild;
+there are no Darwin SDK changes. OpenGL/Vulkan are not validated by this run.
+
+**Metric correction:** references below to 48 unchanged-frame uniform-upload
+bytes mean backing-storage updates, not total bytes submitted to Metal. The
+new counters separately measure actual inline encoder submissions.
+
+## First optimization round (historical): five improvements
 
 **The improvements helped substantially, but the plugin is not yet
 performance-equivalent to native circle.** The largest gains are memory and
