@@ -2,6 +2,26 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_test(
+    name = "circle-render-tests",
+    timeout = "long",
+    srcs = ["//plugins/circle-layer:render_test.cpp"],
+    args = [
+        "--manifestPath",
+        "plugins/circle-layer/render-tests/manifest.json",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = [
+        "//metrics:render-test-files",
+        "//plugins/circle-layer:render-fixtures",
+    ],
+    tags = ["no-sandbox"],
+    deps = [
+        "//plugins/circle-layer",
+        "//render-test:render-test-srcs",
+    ],
+)
+
+cc_test(
     name = "render-tests",
     timeout = "long",
     srcs = ["render_test.cpp"],

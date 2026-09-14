@@ -1,0 +1,8 @@
+{
+  "base_test_path": "../../../metrics/integration/render-tests",
+  "cache_path": "cache.db",
+  "expectation_paths": [],
+  "ignore_paths": [],
+  "filter": "/circle-(?!sort-key/)[^/]+/[^/]+/style\\.json$",
+  "result_path": "results"
+}

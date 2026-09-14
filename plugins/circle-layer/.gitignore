@@ -1,0 +1,3 @@
+render-tests/results/*
+!render-tests/results/.gitkeep
+render-tests/cache.db*
