@@ -180,3 +180,30 @@ TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLife
     EXPECT_TRUE(a.update({{"1", {}}}, unusedSource)); // Removing state restores fallback.
     EXPECT_FLOAT_EQ(12, static_cast<const float*>(a.getVertexVector()->getRawData())[0]);
 }
+
+TEST(PluginPaintBinder, CachedUniformsInvalidateOnZoomAndPropertyChanges) {
+    const auto layer = source();
+    const auto definition = numberDefinition();
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
+    PluginPaintPropertyBinder binder(
+        definition,
+        binding,
+        expression(definition, R"(["interpolate",["linear"],["zoom"],1,10,2,20])"),
+        1,
+        {1, 0, 0},
+        1,
+        1,
+        std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 1}}, layer));
+    float bytes[2]{};
+    auto read = [&](float zoom) {
+        binder.writeUniform(zoom, 0, reinterpret_cast<uint8_t*>(bytes), sizeof(bytes));
+        return bytes[0];
+    };
+    EXPECT_FLOAT_EQ(10, read(1));
+    EXPECT_FLOAT_EQ(10, read(1));
+    EXPECT_FLOAT_EQ(15, read(1.5));
+    EXPECT_FALSE(binder.synchronize(expression(definition, "30")));
+    EXPECT_FLOAT_EQ(30, read(1.5));
+    EXPECT_FLOAT_EQ(30, read(2));
+}

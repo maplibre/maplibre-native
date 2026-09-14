@@ -231,13 +231,15 @@ void PluginPaintPropertyBinder::writeUniform(float zoom,
                                              std::size_t outputSize) const {
     if (!output) return;
     if (!dataDriven && uniformID == binding.uniformID) {
-        style::PluginPropertyValue::EvaluationStorage storage;
-        const auto evaluated = value.evaluate(zoom, definition, storage);
-        std::array<float, 4> encoded{};
-        encodedValue(evaluated, binding.encoding, definition, encoded);
+        if (!uniformZoom || (!value.isZoomConstant() && *uniformZoom != zoom)) {
+            style::PluginPropertyValue::EvaluationStorage storage;
+            const auto evaluated = value.evaluate(zoom, definition, storage);
+            encodedValue(evaluated, binding.encoding, definition, uniformValue);
+            uniformZoom = zoom;
+        }
         const auto size = componentCount() * sizeof(float);
         if (binding.uniformByteOffset <= outputSize && size <= outputSize - binding.uniformByteOffset) {
-            std::memcpy(output + binding.uniformByteOffset, encoded.data(), size);
+            std::memcpy(output + binding.uniformByteOffset, uniformValue.data(), size);
         }
     }
     if (uniformID == binding.interpolationUniformID && binding.interpolationUniformByteOffset <= outputSize &&
@@ -251,6 +253,7 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     if (value == replacement) return false;
     const bool wasDataDriven = dataDriven;
     value = replacement;
+    uniformZoom.reset();
     dataDriven = value.isDataDriven();
     if (dataDriven && !vertexVector) {
         vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());

@@ -103,7 +103,7 @@ void registerTriangles(const std::string& pluginID, bool packedColor = false, bo
                          body + evaluateRadius;
             code[i][2] =
                 "layout(location=0) in vec2 a_pos;"
-                         "layout(set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_0_BINDING,std140) uniform QueryUBO"
+                "layout(set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_0_BINDING,std140) uniform QueryUBO"
                 "{float u_radius;float u_t;};\n"
                 "#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\n"
                 "layout(location=1) in vec2 a_radius;\n#endif\n" +
@@ -251,6 +251,23 @@ TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {
     test.expectTriangles("test.no-stencil");
     const auto result = test.frontend.render(test.map);
     EXPECT_EQ(0, result.stats.stencilUpdates);
+}
+
+TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.cached-uniforms", false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.cached-uniforms"));
+    const auto first = test.frontend.render(test.map).stats;
+    const auto warm = test.frontend.render(test.map).stats;
+    const auto unchangedBytes = warm.uniformUpdateBytes - first.uniformUpdateBytes;
+    JSDocument value;
+    value.SetDouble(23);
+    ASSERT_FALSE(test.map.getStyle().getLayer("left")->setProperty(
+        "test-radius", style::conversion::Convertible(static_cast<const JSValue*>(&value))));
+    const auto changed = test.frontend.render(test.map).stats;
+    EXPECT_GT(changed.uniformUpdateBytes - warm.uniformUpdateBytes, unchangedBytes);
+    const auto stable = test.frontend.render(test.map).stats;
+    EXPECT_EQ(unchangedBytes, stable.uniformUpdateBytes - changed.uniformUpdateBytes);
 }
 
 TEST(PluginRendering, ShaderIdentityHasUnambiguousComponents) {

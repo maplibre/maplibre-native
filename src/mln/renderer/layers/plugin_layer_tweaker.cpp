@@ -25,7 +25,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     {
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getData() || !checkTweakDrawable(drawable)) return;
-            const auto& data = static_cast<const plugin::DrawableData&>(*drawable.getData());
+            auto& data = static_cast<plugin::DrawableData&>(*drawable.getData());
             const auto* shader = [&]() -> const plugin::ShaderDefinition* {
                 const auto it = std::find_if(registration.shaders.begin(),
                                              registration.shaders.end(),
@@ -66,7 +66,10 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
             for (const auto& uniform : shader->uniformBlocks) {
                 if (!registration.updateUniformBlock) continue;
-                std::vector<uint8_t> bytes(uniform.byteSize);
+                auto& cached = data.uniforms[uniform.id];
+                auto& bytes = cached.scratch;
+                bytes.resize(uniform.byteSize);
+                std::fill(bytes.begin(), bytes.end(), uint8_t{0});
                 const auto status = registration.updateUniformBlock(
                     &callbackContext, uniform.id, bytes.data(), bytes.size());
                 if (status != MLN_PLUGIN_STATUS_OK) {
@@ -81,8 +84,13 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                     binders->writeUniforms(
                         static_cast<float>(parameters.state.getZoom()), uniform.id, bytes.data(), bytes.size());
                 }
-                drawable.mutableUniformBuffers().createOrUpdate(
-                    uniform.bindingID, bytes.data(), bytes.size(), parameters.context);
+                // Callbacks still execute on every frame, including stateful
+                // callbacks. Only identical GPU uploads can be elided safely.
+                auto& buffers = drawable.mutableUniformBuffers();
+                if (!buffers.get(uniform.bindingID) || bytes != cached.uploaded) {
+                    buffers.createOrUpdate(uniform.bindingID, bytes.data(), bytes.size(), parameters.context);
+                    cached.uploaded = bytes;
+                }
             }
         });
         propertiesUpdated = false;
