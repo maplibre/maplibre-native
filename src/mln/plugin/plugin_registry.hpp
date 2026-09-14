@@ -15,8 +15,6 @@ namespace mln {
 namespace plugin {
 
 struct PropertyDefinition {
-    std::string pluginID;
-    std::string targetLayerType;
     std::string name;
     mln_plugin_value_type type = MLN_PLUGIN_VALUE_FLOAT;
     Value defaultValue;
@@ -25,6 +23,7 @@ struct PropertyDefinition {
     std::optional<float> minimum;
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
+    bool operator==(const PropertyDefinition&) const = default;
 };
 
 struct ShaderAttribute {
@@ -32,6 +31,7 @@ struct ShaderAttribute {
     uint32_t location = 0;
     std::string name;
     mln_plugin_vertex_attribute_type type = MLN_PLUGIN_VERTEX_FLOAT;
+    bool operator==(const ShaderAttribute&) const = default;
 };
 
 struct ShaderSource {
@@ -40,6 +40,7 @@ struct ShaderSource {
     std::string fragment;
     std::string vertexEntryPoint;
     std::string fragmentEntryPoint;
+    bool operator==(const ShaderSource&) const = default;
 };
 
 struct UniformBlockDefinition {
@@ -49,6 +50,7 @@ struct UniformBlockDefinition {
     uint32_t stageMask = 0;
     uint32_t bindingID = 0;
     mln_plugin_uniform_scope_v1 scope = MLN_PLUGIN_UNIFORM_DRAWABLE;
+    bool operator==(const UniformBlockDefinition&) const = default;
 };
 
 struct ShaderPropertyBindingDefinition {
@@ -70,18 +72,16 @@ struct ShaderDefinition {
     std::vector<ShaderAttribute> attributes;
     std::vector<UniformBlockDefinition> uniformBlocks;
     std::vector<ShaderPropertyBindingDefinition> propertyBindings;
+    bool operator==(const ShaderDefinition&) const = default;
 };
 
-struct LayerTypeIdentity;
-
 struct LayerType {
-    std::shared_ptr<const LayerTypeIdentity> identity;
     std::string pluginID;
-    std::string pluginVersion;
     std::string type;
     uint32_t backendMask = 0;
     uint32_t geometryTypeMask = 0;
     std::vector<ShaderDefinition> shaders;
+    std::vector<PropertyDefinition> properties;
     mln_plugin_create_layout_fn createLayout = nullptr;
     mln_plugin_layout_feature_fn layoutFeature = nullptr;
     mln_plugin_finish_layout_fn finishLayout = nullptr;
@@ -89,12 +89,17 @@ struct LayerType {
     mln_plugin_query_feature_fn queryFeature = nullptr;
     mln_plugin_query_radius_fn queryRadius = nullptr;
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
+    bool operator==(const LayerType&) const = default;
+
+    const PropertyDefinition* findProperty(const std::string& name) const;
 };
 
-struct LayerTypeIdentity {
-    explicit LayerTypeIdentity(const plugin::LayerType& registration)
-        : name(registration.type),
-          info{name.c_str(),
+// Allocated once and shared as const by factories, styles, workers and renderers.
+// Never copy/move the registered object: info.type points into its owned name.
+struct RegisteredLayer final : LayerType {
+    explicit RegisteredLayer(LayerType definition)
+        : LayerType(std::move(definition)),
+          info{type.c_str(),
                style::LayerTypeInfo::Source::Required,
                style::LayerTypeInfo::Pass3D::NotRequired,
                style::LayerTypeInfo::Layout::Required,
@@ -102,33 +107,31 @@ struct LayerTypeIdentity {
                style::LayerTypeInfo::CrossTileIndex::NotRequired,
                style::LayerTypeInfo::TileKind::Geometry} {}
 
-    std::string name;
+    RegisteredLayer(const RegisteredLayer&) = delete;
+    RegisteredLayer& operator=(const RegisteredLayer&) = delete;
     style::LayerTypeInfo info;
 };
+
+using RegisteredLayerPtr = std::shared_ptr<const RegisteredLayer>;
 
 class PluginRegistry final {
 public:
     static PluginRegistry& get();
 
     mln_plugin_status registerPlugin(const mln_plugin_descriptor_v1&, std::string& error);
-    std::optional<PropertyDefinition> findProperty(const std::string& layerType, const std::string& name) const;
-    std::vector<PropertyDefinition> propertiesForLayer(const std::string& layerType) const;
-    std::optional<LayerType> findLayerType(const std::string& layerType) const;
-    std::vector<LayerType> allLayerTypes() const;
+    RegisteredLayerPtr findLayerType(const std::string& layerType) const;
 
     static bool valueMatches(mln_plugin_value_type, const Value&);
 
     struct PluginRecord {
         std::string version;
-        std::vector<PropertyDefinition> properties;
-        std::vector<LayerType> layerTypes;
+        std::vector<RegisteredLayerPtr> layerTypes;
     };
 
 private:
     mutable std::mutex mutex;
     std::map<std::string, PluginRecord> plugins;
-    std::map<std::pair<std::string, std::string>, PropertyDefinition> properties;
-    std::map<std::string, LayerType> layerTypes;
+    std::map<std::string, RegisteredLayerPtr> layerTypes;
 };
 
 } // namespace plugin

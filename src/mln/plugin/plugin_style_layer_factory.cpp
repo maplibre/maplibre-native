@@ -6,7 +6,7 @@
 
 namespace mln::plugin {
 const style::LayerTypeInfo* PluginStyleLayerFactory::getTypeInfo() const noexcept {
-    return &registration.identity->info;
+    return &registration->info;
 }
 
 std::unique_ptr<style::Layer> PluginStyleLayerFactory::createLayer(

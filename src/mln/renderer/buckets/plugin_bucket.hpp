@@ -146,7 +146,7 @@ private:
 
 class PluginPaintPropertyBinders final : public PaintPropertyBindersBase {
 public:
-    PluginPaintPropertyBinders(const plugin::LayerType&,
+    PluginPaintPropertyBinders(const plugin::RegisteredLayerPtr&,
                                const plugin::ShaderDefinition&,
                                uint64_t drawableKey,
                                std::size_t vertexCount,
@@ -169,7 +169,7 @@ struct PluginAttributeBinding {
     uint32_t attributeID = 0;
     uint32_t streamID = 0;
     uint32_t byteOffset = 0;
-    mln_plugin_vertex_attribute_type type = MLN_PLUGIN_VERTEX_FLOAT;
+    gfx::AttributeDataType type = gfx::AttributeDataType::Invalid;
 };
 
 struct PluginDrawableDefinition {
@@ -182,7 +182,7 @@ struct PluginDrawableDefinition {
 
 class PluginBucket final : public Bucket {
 public:
-    explicit PluginBucket(plugin::LayerType registration_)
+    explicit PluginBucket(plugin::RegisteredLayerPtr registration_)
         : registration(std::move(registration_)) {}
     ~PluginBucket() override = default;
 
@@ -199,7 +199,7 @@ public:
     void updateQueryRadius(const std::string& layerID, const style::PluginPropertyMap&, float zoom);
     PluginPaintPropertyBinders* paintBinders(const std::string& layerID, uint64_t drawableKey);
 
-    plugin::LayerType registration;
+    plugin::RegisteredLayerPtr registration;
     std::map<uint32_t, std::shared_ptr<PluginVertexVector>> vertexStreams;
     std::shared_ptr<gfx::IndexVectorBase> indices;
     std::vector<PluginDrawableDefinition> drawables;

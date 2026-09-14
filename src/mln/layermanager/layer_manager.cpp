@@ -60,12 +60,6 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
     return true;
 }
 
-bool LayerManager::registerLayerFactory(std::unique_ptr<LayerFactory> factory, std::string& error) {
-    std::vector<std::unique_ptr<LayerFactory>> factories;
-    factories.push_back(std::move(factory));
-    return registerLayerFactories(std::move(factories), error);
-}
-
 LayerFactory* LayerManager::findFactory(const std::string& type) noexcept {
     if (auto* factory = getFactory(type)) return factory;
     std::lock_guard lock(impl->runtimeMutex);

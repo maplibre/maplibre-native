@@ -317,7 +317,7 @@ typedef struct mln_plugin_attribute_binding_v1 {
     uint32_t attribute_id;
     uint32_t stream_id;
     uint32_t byte_offset;
-    mln_plugin_vertex_attribute_type type;
+    /* Type comes from the shader's attribute declaration. */
 } mln_plugin_attribute_binding_v1;
 
 typedef struct mln_plugin_segment_v1 {
@@ -326,7 +326,6 @@ typedef struct mln_plugin_segment_v1 {
     uint32_t index_offset;
     uint32_t vertex_length;
     uint32_t index_length;
-    uint64_t feature_index;
 } mln_plugin_segment_v1;
 
 typedef struct mln_plugin_drawable_descriptor_v1 {

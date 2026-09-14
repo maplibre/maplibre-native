@@ -1,6 +1,7 @@
 MLN_PLUGIN_HEADERS = [
     "include/mln/plugin/plugin_api.h",
     "src/mln/plugin/plugin_registry.hpp",
+    "src/mln/plugin/plugin_conversion.hpp",
     "src/mln/plugin/plugin_shader.hpp",
     "src/mln/plugin/plugin_style_layer_factory.hpp",
     "src/mln/layout/plugin_layout.hpp",

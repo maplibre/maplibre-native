@@ -52,7 +52,8 @@ TEST(PluginPaintBinder, BucketRetainsImmutablePaintSnapshotAndRefreshesZoom) {
         ++radiusCalls;
         return 12;
     };
-    PluginBucket first(registration), second(registration);
+    const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
+    PluginBucket first(shared), second(shared);
     auto snapshot = std::make_shared<const style::PluginPropertyMap>();
     EXPECT_FALSE(first.synchronizePaint("layer", snapshot, 10));
     EXPECT_FALSE(second.synchronizePaint("layer", snapshot, 10));
@@ -106,6 +107,62 @@ plugin::PropertyDefinition numberDefinition() {
     return definition;
 }
 } // namespace
+
+TEST(PluginProperties, NativeTransitionsHandleDelayInterruptionAndCompletion) {
+    const auto definition = numberDefinition();
+    const auto start = TimePoint{};
+    const auto duration = std::chrono::milliseconds(100);
+    style::TransitionOptions options;
+    options.duration = duration;
+    options.delay = duration;
+    style::PluginPropertyValue::EvaluationStorage storage;
+    style::PluginTransitioningPropertyValue transition(
+        expression(definition, "30"),
+        style::PluginTransitioningPropertyValue(expression(definition, "10")),
+        options,
+        start);
+    auto evaluate = [&](auto& value, TimePoint time) {
+        return value.evaluate(10, definition, time).evaluate(10, definition, storage).data.float_value;
+    };
+    EXPECT_FLOAT_EQ(10, evaluate(transition, start));
+    EXPECT_FLOAT_EQ(10, evaluate(transition, start + duration));
+    const auto middle = start + duration + duration / 2;
+    const auto halfway = evaluate(transition, middle);
+    EXPECT_GT(halfway, 10);
+    EXPECT_LT(halfway, 30);
+    options.delay = Duration::zero();
+    style::PluginTransitioningPropertyValue interrupted(expression(definition, "50"), transition, options, middle);
+    EXPECT_FLOAT_EQ(halfway, evaluate(interrupted, middle));
+    EXPECT_FLOAT_EQ(50, evaluate(interrupted, middle + duration));
+    EXPECT_FALSE(interrupted.hasTransition());
+    EXPECT_FLOAT_EQ(30, evaluate(transition, start + 2 * duration));
+    EXPECT_FALSE(transition.hasTransition());
+    options.duration = Duration::zero();
+    style::PluginTransitioningPropertyValue immediate(expression(definition, "70"), transition, options, middle);
+    EXPECT_FLOAT_EQ(70, evaluate(immediate, middle));
+    EXPECT_FALSE(immediate.hasTransition());
+}
+
+TEST(PluginProperties, NativeTransitionsPreserveFeatureExpressionsAndEvaluateCameraExpressions) {
+    const auto definition = numberDefinition();
+    const auto start = TimePoint{};
+    const auto duration = std::chrono::milliseconds(100);
+    style::TransitionOptions options;
+    options.duration = duration;
+    const auto featureValue = expression(definition, R"(["get","small"])");
+    style::PluginTransitioningPropertyValue toFeature(
+        featureValue, style::PluginTransitioningPropertyValue(expression(definition, "30")), options, start);
+    EXPECT_EQ(featureValue, toFeature.evaluate(10, definition, start));
+    EXPECT_FALSE(toFeature.hasTransition()); // Native layout needs the expression immediately.
+    style::PluginTransitioningPropertyValue fromFeature(expression(definition, "30"), toFeature, options, start);
+    EXPECT_EQ(featureValue, fromFeature.evaluate(10, definition, start + duration / 2));
+    EXPECT_EQ(expression(definition, "30"), fromFeature.evaluate(10, definition, start + duration));
+    EXPECT_FALSE(fromFeature.hasTransition());
+    style::PluginTransitioningPropertyValue camera(
+        expression(definition, R"(["interpolate",["linear"],["zoom"],10,10,12,30])"));
+    EXPECT_EQ(expression(definition, "20"), camera.evaluate(11, definition, start));
+    EXPECT_EQ(expression(definition, "30"), camera.evaluate(12, definition, start));
+}
 
 TEST(PluginPaintBinder, PackedCompositeEndpointsAndFeatureStateUpdates) {
     auto definition = numberDefinition();

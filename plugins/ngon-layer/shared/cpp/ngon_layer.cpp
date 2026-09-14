@@ -108,7 +108,6 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
         layout.indices.insert(layout.indices.end(), std::begin(quad), std::end(quad));
         active.vertex_length += 4;
         active.index_length += 6;
-        active.feature_index = feature->feature_index;
     }
     if (layout.vertices.size() > firstVertex) {
         layout.featureRanges.push_back({sizeof(mln_plugin_feature_vertex_range_v1),
@@ -138,11 +137,7 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* output) {
                          static_cast<uint32_t>(layout.vertices.size()),
                          sizeof(Vertex)};
     layout.attributes = {{
-        {sizeof(mln_plugin_attribute_binding_v1),
-         positionAttribute,
-         vertexStream,
-         offsetof(Vertex, position),
-         MLN_PLUGIN_VERTEX_INT16_X2},
+        {sizeof(mln_plugin_attribute_binding_v1), positionAttribute, vertexStream, offsetof(Vertex, position)},
     }};
     auto& drawable = layout.drawables[0];
     drawable.struct_size = sizeof(drawable);

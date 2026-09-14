@@ -47,8 +47,8 @@ struct LayoutData {
     std::string shaderID = "test-shader";
     mln_plugin_vertex_stream_v1 stream = {
         sizeof(stream), 0, reinterpret_cast<const uint8_t*>(vertices.data()), sizeof(vertices), 3, 2 * sizeof(int16_t)};
-    mln_plugin_attribute_binding_v1 attribute = {sizeof(attribute), 0, 0, 0, MLN_PLUGIN_VERTEX_INT16_X2};
-    mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3, 0};
+    mln_plugin_attribute_binding_v1 attribute = {sizeof(attribute), 0, 0, 0};
+    mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
     mln_plugin_drawable_descriptor_v1 drawable = {
         sizeof(drawable), 7, {shaderID.data(), shaderID.size()}, &attribute, 1, &segment, 1};
     mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 7, 0, 3};
@@ -185,20 +185,19 @@ std::shared_ptr<PluginBucket> build(State& state) {
     registration.layoutFeature = feature;
     registration.finishLayout = finish;
     registration.destroyLayout = destroy;
-    registration.identity = std::make_shared<plugin::LayerTypeIdentity>(registration);
     plugin::ShaderDefinition shader;
     shader.id = "test-shader";
     shader.attributes.push_back({0, 0, "a_pos", MLN_PLUGIN_VERTEX_INT16_X2});
     registration.shaders.push_back(std::move(shader));
-    auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", registration);
+    const auto shared = std::make_shared<const plugin::RegisteredLayer>(std::move(registration));
+    auto impl = makeMutable<style::PluginStyleLayer::Impl>("test-layer", "points", shared);
     std::vector<Immutable<style::LayerProperties>> layers = {
         makeMutable<style::PluginStyleLayerProperties>(std::move(impl))};
     auto features = std::make_shared<mapbox::feature::feature_collection<int16_t>>();
     features->emplace_back(mapbox::geometry::point<int16_t>{10, 20});
     auto featureIndex = std::make_unique<FeatureIndex>(std::make_unique<GeoJSONTileData>(*features));
-    const BucketParameters parameters{
-        OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &registration.identity->info};
-    PluginLayout layout(parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), registration);
+    const BucketParameters parameters{OverscaledTileID{0, 0, {0, 0, 0}}, MapMode::Static, 1, &shared->info};
+    PluginLayout layout(parameters, std::move(layers), std::make_unique<GeoJSONTileLayer>(features), shared);
     mln::unordered_map<std::string, LayerRenderData> renderData;
     layout.createBucket({}, featureIndex, renderData, false, false, parameters.tileID.canonical);
     return renderData.empty() ? nullptr : std::static_pointer_cast<PluginBucket>(renderData.at("test-layer").bucket);
@@ -264,7 +263,7 @@ TEST(PluginLayout, CopiesGeometryBeforeDestroyingLayout) {
     EXPECT_EQ("test-shader", drawable.shaderID);
     EXPECT_EQ(3u, drawable.vertexCount);
     ASSERT_EQ(1u, drawable.attributes.size());
-    EXPECT_EQ(MLN_PLUGIN_VERTEX_INT16_X2, drawable.attributes.front().type);
+    EXPECT_EQ(gfx::AttributeDataType::Short2, drawable.attributes.front().type);
     ASSERT_EQ(1u, drawable.segments.size());
     EXPECT_EQ(3u, drawable.segments.front().vertexLength);
     ASSERT_EQ(1u, bucket->featureVertexRanges.size());

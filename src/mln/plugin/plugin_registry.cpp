@@ -44,72 +44,6 @@ bool validOptionalString(const mln_plugin_string& value) {
     return value.size == 0 || value.data;
 }
 
-bool descriptorEquals(const PluginRegistry::PluginRecord& existing,
-                      const std::string& version,
-                      const std::vector<PropertyDefinition>& properties,
-                      const std::vector<LayerType>& layerTypes) {
-    if (existing.version != version || existing.properties.size() != properties.size() ||
-        existing.layerTypes.size() != layerTypes.size()) {
-        return false;
-    }
-    for (size_t i = 0; i < properties.size(); ++i) {
-        const auto& lhs = existing.properties[i];
-        const auto& rhs = properties[i];
-        if (lhs.targetLayerType != rhs.targetLayerType || lhs.name != rhs.name || lhs.type != rhs.type ||
-            lhs.defaultValue != rhs.defaultValue || lhs.expressionCapabilities != rhs.expressionCapabilities ||
-            lhs.supportsTransitions != rhs.supportsTransitions || lhs.minimum != rhs.minimum ||
-            lhs.maximum != rhs.maximum || lhs.enumValues != rhs.enumValues) {
-            return false;
-        }
-    }
-    for (size_t i = 0; i < layerTypes.size(); ++i) {
-        const auto& lhs = existing.layerTypes[i];
-        const auto& rhs = layerTypes[i];
-        if (lhs.type != rhs.type || lhs.backendMask != rhs.backendMask ||
-            lhs.geometryTypeMask != rhs.geometryTypeMask || lhs.createLayout != rhs.createLayout ||
-            lhs.layoutFeature != rhs.layoutFeature || lhs.finishLayout != rhs.finishLayout ||
-            lhs.destroyLayout != rhs.destroyLayout || lhs.queryFeature != rhs.queryFeature ||
-            lhs.queryRadius != rhs.queryRadius || lhs.shaders.size() != rhs.shaders.size() ||
-            lhs.updateUniformBlock != rhs.updateUniformBlock) {
-            return false;
-        }
-        for (size_t shaderIndex = 0; shaderIndex < lhs.shaders.size(); ++shaderIndex) {
-            const auto& lhsShader = lhs.shaders[shaderIndex];
-            const auto& rhsShader = rhs.shaders[shaderIndex];
-            if (lhsShader.id != rhsShader.id || lhsShader.sources.size() != rhsShader.sources.size() ||
-                lhsShader.attributes.size() != rhsShader.attributes.size() ||
-                lhsShader.uniformBlocks.size() != rhsShader.uniformBlocks.size() ||
-                lhsShader.propertyBindings != rhsShader.propertyBindings) {
-                return false;
-            }
-            for (size_t sourceIndex = 0; sourceIndex < lhsShader.sources.size(); ++sourceIndex) {
-                const auto& ls = lhsShader.sources[sourceIndex];
-                const auto& rs = rhsShader.sources[sourceIndex];
-                if (ls.backend != rs.backend || ls.vertex != rs.vertex || ls.fragment != rs.fragment ||
-                    ls.vertexEntryPoint != rs.vertexEntryPoint || ls.fragmentEntryPoint != rs.fragmentEntryPoint) {
-                    return false;
-                }
-            }
-            for (size_t attrIndex = 0; attrIndex < lhsShader.attributes.size(); ++attrIndex) {
-                const auto& la = lhsShader.attributes[attrIndex];
-                const auto& ra = rhsShader.attributes[attrIndex];
-                if (la.id != ra.id || la.location != ra.location || la.name != ra.name || la.type != ra.type) {
-                    return false;
-                }
-            }
-            for (size_t uniformIndex = 0; uniformIndex < lhsShader.uniformBlocks.size(); ++uniformIndex) {
-                const auto& lu = lhsShader.uniformBlocks[uniformIndex];
-                const auto& ru = rhsShader.uniformBlocks[uniformIndex];
-                if (lu.id != ru.id || lu.name != ru.name || lu.byteSize != ru.byteSize ||
-                    lu.stageMask != ru.stageMask || lu.bindingID != ru.bindingID || lu.scope != ru.scope) {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
 constexpr uint32_t supportedBackends = MLN_PLUGIN_BACKEND_OPENGL | MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
 
 bool validBackendMask(uint32_t mask) {
@@ -375,17 +309,15 @@ bool appendShaders(const std::string& pluginID,
     return true;
 }
 
-bool appendProperties(const std::string& pluginID,
-                      const std::string& targetLayerType,
-                      const mln_plugin_property_descriptor_v1* properties,
+bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
                       size_t propertyCount,
-                      std::set<std::pair<std::string, std::string>>& propertyKeys,
                       std::vector<PropertyDefinition>& output,
                       std::string& error) {
     if (propertyCount && !properties) {
         error = "plugin property array is missing";
         return false;
     }
+    std::set<std::string> propertyKeys;
     for (size_t p = 0; p < propertyCount; ++p) {
         const auto& property = properties[p];
         constexpr uint32_t validExpressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_PLUGIN_EXPRESSION_FEATURE |
@@ -413,7 +345,7 @@ bool appendProperties(const std::string& pluginID,
             return false;
         }
         const auto propertyName = copyString(property.name);
-        if (!propertyKeys.emplace(targetLayerType, propertyName).second) {
+        if (!propertyKeys.emplace(propertyName).second) {
             error = "plugin descriptor contains duplicate property names";
             return false;
         }
@@ -458,9 +390,7 @@ bool appendProperties(const std::string& pluginID,
             }
         }
         output.push_back(
-            PropertyDefinition{pluginID,
-                               targetLayerType,
-                               propertyName,
+            PropertyDefinition{propertyName,
                                property.type,
                                std::move(defaultValue),
                                property.expression_capabilities,
@@ -494,9 +424,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
 
     const auto pluginID = copyString(descriptor.plugin_id);
     const auto pluginVersion = copyString(descriptor.plugin_version);
-    std::vector<PropertyDefinition> newProperties;
-    std::vector<LayerType> newLayerTypes;
-    std::set<std::pair<std::string, std::string>> propertyKeys;
+    std::vector<RegisteredLayerPtr> newLayerTypes;
 
     std::set<std::string> layerTypeKeys;
     for (size_t i = 0; i < descriptor.layer_type_count; ++i) {
@@ -521,7 +449,6 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         }
         LayerType copiedLayerType;
         copiedLayerType.pluginID = pluginID;
-        copiedLayerType.pluginVersion = pluginVersion;
         copiedLayerType.type = type;
         copiedLayerType.backendMask = layerType.backend_mask;
         copiedLayerType.geometryTypeMask = layerType.geometry_type_mask;
@@ -547,17 +474,14 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             error = "plugin layer declares uniforms without an update callback";
             return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
-        if (!appendProperties(
-                pluginID, type, layerType.properties, layerType.property_count, propertyKeys, newProperties, error)) {
+        if (!appendProperties(layerType.properties, layerType.property_count, copiedLayerType.properties, error)) {
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
         for (const auto& shader : copiedLayerType.shaders) {
             for (const auto& binding : shader.propertyBindings) {
-                const auto property = std::find_if(newProperties.begin(), newProperties.end(), [&](const auto& item) {
-                    return item.targetLayerType == type && item.name == binding.propertyName;
-                });
-                const bool encodingMatches = property != newProperties.end() &&
+                const auto* property = copiedLayerType.findProperty(binding.propertyName);
+                const bool encodingMatches = property != nullptr &&
                                              ((property->type == MLN_PLUGIN_VALUE_FLOAT &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT) ||
                                               (property->type == MLN_PLUGIN_VALUE_FLOAT2 &&
@@ -567,14 +491,13 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                                               (property->type == MLN_PLUGIN_VALUE_STRING &&
                                                !property->enumValues.empty() &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT));
-                if (property == newProperties.end() || !encodingMatches) {
+                if (property == nullptr || !encodingMatches) {
                     error = "plugin shader property binding references an incompatible paint property";
                     return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
                 }
             }
         }
-        for (const auto& property : newProperties) {
-            if (property.targetLayerType != type) continue;
+        for (const auto& property : copiedLayerType.properties) {
             const auto dataDependencies = MLN_PLUGIN_EXPRESSION_FEATURE | MLN_PLUGIN_EXPRESSION_COMPOSITE |
                                           MLN_PLUGIN_EXPRESSION_FEATURE_STATE;
             if ((property.expressionCapabilities & dataDependencies) == 0) continue;
@@ -589,30 +512,26 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                 return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
             }
         }
-        copiedLayerType.identity = std::make_shared<LayerTypeIdentity>(copiedLayerType);
-        newLayerTypes.push_back(std::move(copiedLayerType));
+        newLayerTypes.push_back(std::make_shared<const RegisteredLayer>(std::move(copiedLayerType)));
     }
 
     std::lock_guard<std::mutex> lock(mutex);
     if (const auto existing = plugins.find(pluginID); existing != plugins.end()) {
-        if (descriptorEquals(existing->second, pluginVersion, newProperties, newLayerTypes)) {
+        if (existing->second.version == pluginVersion &&
+            std::equal(existing->second.layerTypes.begin(),
+                       existing->second.layerTypes.end(),
+                       newLayerTypes.begin(),
+                       newLayerTypes.end(),
+                       [](const auto& a, const auto& b) { return *a == *b; })) {
             return MLN_PLUGIN_STATUS_ALREADY_REGISTERED;
         }
         error = "plugin id is already registered with a different descriptor";
         return MLN_PLUGIN_STATUS_CONFLICT;
     }
 
-    for (const auto& property : newProperties) {
-        const auto key = std::make_pair(property.targetLayerType, property.name);
-        if (properties.find(key) != properties.end()) {
-            error = "property '" + property.name + "' is already registered for layer type '" +
-                    property.targetLayerType + "'";
-            return MLN_PLUGIN_STATUS_CONFLICT;
-        }
-    }
     for (const auto& layerType : newLayerTypes) {
-        if (layerTypes.find(layerType.type) != layerTypes.end()) {
-            error = "layer type '" + layerType.type + "' is already registered";
+        if (layerTypes.find(layerType->type) != layerTypes.end()) {
+            error = "layer type '" + layerType->type + "' is already registered";
             return MLN_PLUGIN_STATUS_CONFLICT;
         }
     }
@@ -620,59 +539,31 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
     // Allocate metadata before publishing factories. Lock ordering is registry ->
     // manager, and factory callbacks are never invoked with either lock held.
     std::map<std::string, PluginRecord> pendingPlugins;
-    pendingPlugins.emplace(pluginID, PluginRecord{pluginVersion, newProperties, newLayerTypes});
-    std::map<std::pair<std::string, std::string>, PropertyDefinition> pendingProperties;
-    std::map<std::string, LayerType> pendingTypes;
+    pendingPlugins.emplace(pluginID, PluginRecord{pluginVersion, newLayerTypes});
+    std::map<std::string, RegisteredLayerPtr> pendingTypes;
     std::vector<std::unique_ptr<LayerFactory>> factories;
     for (const auto& type : newLayerTypes) {
-        pendingTypes.emplace(type.type, type);
+        pendingTypes.emplace(type->type, type);
         factories.push_back(std::make_unique<PluginStyleLayerFactory>(type));
-    }
-    for (const auto& property : newProperties) {
-        pendingProperties.emplace(std::make_pair(property.targetLayerType, property.name), property);
     }
     if (!LayerManager::get()->registerLayerFactories(std::move(factories), error)) {
         return MLN_PLUGIN_STATUS_CONFLICT;
     }
-    properties.merge(pendingProperties);
     layerTypes.merge(pendingTypes);
     plugins.merge(pendingPlugins);
     return MLN_PLUGIN_STATUS_OK;
 }
 
-std::optional<LayerType> PluginRegistry::findLayerType(const std::string& layerType) const {
+RegisteredLayerPtr PluginRegistry::findLayerType(const std::string& layerType) const {
     std::lock_guard<std::mutex> lock(mutex);
     const auto it = layerTypes.find(layerType);
-    return it == layerTypes.end() ? std::nullopt : std::optional<LayerType>{it->second};
+    return it == layerTypes.end() ? nullptr : it->second;
 }
 
-std::vector<LayerType> PluginRegistry::allLayerTypes() const {
-    std::lock_guard<std::mutex> lock(mutex);
-    std::vector<LayerType> result;
-    result.reserve(layerTypes.size());
-    for (const auto& [type, registration] : layerTypes) {
-        (void)type;
-        result.push_back(registration);
-    }
-    return result;
-}
-
-std::optional<PropertyDefinition> PluginRegistry::findProperty(const std::string& layerType,
-                                                               const std::string& name) const {
-    std::lock_guard<std::mutex> lock(mutex);
-    const auto it = properties.find(std::make_pair(layerType, name));
-    return it == properties.end() ? std::nullopt : std::optional<PropertyDefinition>{it->second};
-}
-
-std::vector<PropertyDefinition> PluginRegistry::propertiesForLayer(const std::string& layerType) const {
-    std::lock_guard<std::mutex> lock(mutex);
-    std::vector<PropertyDefinition> result;
-    for (const auto& [key, property] : properties) {
-        if (key.first == layerType) {
-            result.push_back(property);
-        }
-    }
-    return result;
+const PropertyDefinition* LayerType::findProperty(const std::string& name) const {
+    const auto it = std::find_if(
+        properties.begin(), properties.end(), [&](const auto& property) { return property.name == name; });
+    return it == properties.end() ? nullptr : &*it;
 }
 
 bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value) {

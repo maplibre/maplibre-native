@@ -10,14 +10,16 @@ namespace mln {
 
 class PluginLayerTweaker final : public LayerTweaker {
 public:
-    PluginLayerTweaker(std::string id, Immutable<style::LayerProperties> properties, plugin::LayerType registration_)
+    PluginLayerTweaker(std::string id,
+                       Immutable<style::LayerProperties> properties,
+                       plugin::RegisteredLayerPtr registration_)
         : LayerTweaker(std::move(id), std::move(properties)),
           registration(std::move(registration_)) {}
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 private:
-    const plugin::LayerType registration;
+    const plugin::RegisteredLayerPtr registration;
     struct SharedUniform {
         std::vector<uint8_t> scratch;
         std::vector<uint8_t> uploaded;

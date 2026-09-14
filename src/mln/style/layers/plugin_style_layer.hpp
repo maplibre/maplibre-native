@@ -12,7 +12,7 @@ namespace style {
 
 class PluginStyleLayer final : public Layer {
 public:
-    PluginStyleLayer(const std::string& id, const std::string& source, plugin::LayerType);
+    PluginStyleLayer(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr);
     ~PluginStyleLayer() final;
 
     using Layer::setProperty;
@@ -42,7 +42,7 @@ private:
 
 class PluginStyleLayer::Impl final : public Layer::Impl {
 public:
-    Impl(const std::string& id, const std::string& source, plugin::LayerType);
+    Impl(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr);
     Impl(const Impl&) = default;
 
     bool hasLayoutDifference(const Layer::Impl&) const override;
@@ -52,7 +52,7 @@ public:
 
     std::map<std::string, PluginPropertyValue> pluginProperties;
     std::map<std::string, TransitionOptions> pluginPropertyTransitions;
-    plugin::LayerType registration;
+    plugin::RegisteredLayerPtr registration;
 };
 
 class PluginStyleLayerProperties final : public LayerProperties {

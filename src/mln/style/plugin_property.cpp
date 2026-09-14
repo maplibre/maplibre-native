@@ -1,4 +1,5 @@
 #include <mln/style/plugin_property.hpp>
+#include <mln/renderer/data_driven_property_evaluator.hpp>
 
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/style/conversion/property_value.hpp>
@@ -12,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
 
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -81,28 +83,52 @@ std::string defaultValue<std::string>(const plugin::PropertyDefinition& definiti
     return definition.defaultValue.getString() ? *definition.defaultValue.getString() : std::string{};
 }
 
+// Dispatch descriptor types only at parsing/default construction. Evaluated values
+// keep their native type until a C callback actually needs the ABI representation.
+template <class Fn>
+auto withPropertyType(mln_plugin_value_type type, Fn&& fn) {
+    switch (type) {
+        case MLN_PLUGIN_VALUE_FLOAT:
+            return fn.template operator()<float>();
+        case MLN_PLUGIN_VALUE_FLOAT2:
+            return fn.template operator()<std::array<float, 2>>();
+        case MLN_PLUGIN_VALUE_COLOR:
+            return fn.template operator()<Color>();
+        case MLN_PLUGIN_VALUE_STRING:
+            return fn.template operator()<std::string>();
+    }
+    throw std::logic_error("Invalid plugin property type");
+}
+
 template <class T>
 T evaluateTyped(const PropertyValue<T>& value,
-                float zoom,
-                const GeometryTileFeature& feature,
-                const FeatureState& state,
+                const expression::EvaluationContext& context,
                 const plugin::PropertyDefinition& definition) {
     const auto fallback = defaultValue<T>(definition);
     return value.match([&](const Undefined&) { return fallback; },
                        [&](const T& constant) { return constant; },
-                       [&](const PropertyExpression<T>& expression) {
-                           return expression.evaluate(expression::EvaluationContext(zoom, &feature, &state), fallback);
-                       });
+                       [&](const PropertyExpression<T>& expression) { return expression.evaluate(context, fallback); });
 }
 
 template <class T>
-T evaluateCameraTyped(const PropertyValue<T>& value, float zoom, const plugin::PropertyDefinition& definition) {
-    const auto fallback = defaultValue<T>(definition);
-    return value.match([&](const Undefined&) { return fallback; },
-                       [&](const T& constant) { return constant; },
-                       [&](const PropertyExpression<T>& expression) {
-                           return expression.evaluate(expression::EvaluationContext(zoom), fallback);
-                       });
+mln_plugin_value toPluginValue(const T& value, PluginPropertyValue::EvaluationStorage& storage) {
+    mln_plugin_value result{};
+    result.struct_size = sizeof(result);
+    if constexpr (std::is_same_v<T, float>) {
+        result.type = MLN_PLUGIN_VALUE_FLOAT;
+        result.data.float_value = value;
+    } else if constexpr (std::is_same_v<T, std::array<float, 2>>) {
+        result.type = MLN_PLUGIN_VALUE_FLOAT2;
+        result.data.float2_value = {value[0], value[1]};
+    } else if constexpr (std::is_same_v<T, Color>) {
+        result.type = MLN_PLUGIN_VALUE_COLOR;
+        result.data.color_value = {value.r, value.g, value.b, value.a};
+    } else {
+        result.type = MLN_PLUGIN_VALUE_STRING;
+        storage.string = value;
+        result.data.string_value = {storage.string.data(), storage.string.size()};
+    }
+    return result;
 }
 
 template <class T>
@@ -173,181 +199,67 @@ float PluginPropertyValue::interpolationFactor(float bucketZoom, float currentZo
                       value);
 }
 
+mln_plugin_value PluginPropertyValue::evaluate(const expression::EvaluationContext& context,
+                                               const plugin::PropertyDefinition& definition,
+                                               EvaluationStorage& storage) const {
+    return std::visit(
+        [&](const auto& typed) { return toPluginValue(evaluateTyped(typed, context, definition), storage); }, value);
+}
+
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
                                                const GeometryTileFeature& feature,
                                                const FeatureState& state,
                                                const plugin::PropertyDefinition& definition,
                                                EvaluationStorage& storage) const {
-    mln_plugin_value result{};
-    result.struct_size = sizeof(result);
-    result.type = definition.type;
-    switch (definition.type) {
-        case MLN_PLUGIN_VALUE_FLOAT:
-            result.data.float_value = evaluateTyped(
-                std::get<PropertyValue<float>>(value), zoom, feature, state, definition);
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT2: {
-            const auto evaluated = evaluateTyped(
-                std::get<PropertyValue<std::array<float, 2>>>(value), zoom, feature, state, definition);
-            result.data.float2_value = {evaluated[0], evaluated[1]};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_COLOR: {
-            const auto evaluated = evaluateTyped(
-                std::get<PropertyValue<Color>>(value), zoom, feature, state, definition);
-            result.data.color_value = {evaluated.r, evaluated.g, evaluated.b, evaluated.a};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_STRING:
-            storage.string = evaluateTyped(
-                std::get<PropertyValue<std::string>>(value), zoom, feature, state, definition);
-            result.data.string_value = {storage.string.data(), storage.string.size()};
-            break;
-    }
-    return result;
+    return evaluate(expression::EvaluationContext(zoom, &feature, &state), definition, storage);
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
                                                const plugin::PropertyDefinition& definition,
                                                EvaluationStorage& storage) const {
-    mln_plugin_value result{};
-    result.struct_size = sizeof(result);
-    result.type = definition.type;
-    switch (definition.type) {
-        case MLN_PLUGIN_VALUE_FLOAT:
-            result.data.float_value = evaluateCameraTyped(std::get<PropertyValue<float>>(value), zoom, definition);
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT2: {
-            const auto evaluated = evaluateCameraTyped(
-                std::get<PropertyValue<std::array<float, 2>>>(value), zoom, definition);
-            result.data.float2_value = {evaluated[0], evaluated[1]};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_COLOR: {
-            const auto evaluated = evaluateCameraTyped(std::get<PropertyValue<Color>>(value), zoom, definition);
-            result.data.color_value = {evaluated.r, evaluated.g, evaluated.b, evaluated.a};
-            break;
-        }
-        case MLN_PLUGIN_VALUE_STRING:
-            storage.string = evaluateCameraTyped(std::get<PropertyValue<std::string>>(value), zoom, definition);
-            result.data.string_value = {storage.string.data(), storage.string.size()};
-            break;
-    }
-    return result;
+    return evaluate(expression::EvaluationContext(zoom), definition, storage);
 }
 
-PluginPropertyValue PluginPropertyValue::evaluateCamera(float zoom,
-                                                        const plugin::PropertyDefinition& definition) const {
-    EvaluationStorage storage;
-    const auto evaluated = evaluate(zoom, definition, storage);
-    switch (definition.type) {
-        case MLN_PLUGIN_VALUE_FLOAT:
-            return PluginPropertyValue{TypedValue{PropertyValue<float>{evaluated.data.float_value}}};
-        case MLN_PLUGIN_VALUE_FLOAT2:
-            return PluginPropertyValue{TypedValue{
-                PropertyValue<std::array<float, 2>>{{evaluated.data.float2_value.x, evaluated.data.float2_value.y}}}};
-        case MLN_PLUGIN_VALUE_COLOR:
-            return PluginPropertyValue{TypedValue{PropertyValue<Color>{Color{evaluated.data.color_value.r,
-                                                                             evaluated.data.color_value.g,
-                                                                             evaluated.data.color_value.b,
-                                                                             evaluated.data.color_value.a}}}};
-        case MLN_PLUGIN_VALUE_STRING:
-            return PluginPropertyValue{TypedValue{PropertyValue<std::string>{storage.string}}};
-    }
-    return *this;
-}
+PluginTransitioningPropertyValue::PluginTransitioningPropertyValue(PluginPropertyValue input)
+    : value(std::visit([](const auto& typed) -> TypedValue { return Transitioning{typed}; }, input.value)) {}
 
-PluginPropertyValue PluginPropertyValue::interpolate(const PluginPropertyValue& from,
-                                                     const PluginPropertyValue& to,
-                                                     float t,
-                                                     const plugin::PropertyDefinition& definition) {
-    switch (definition.type) {
-        case MLN_PLUGIN_VALUE_FLOAT: {
-            const auto& a = std::get<PropertyValue<float>>(from.value).asConstant();
-            const auto& b = std::get<PropertyValue<float>>(to.value).asConstant();
-            return PluginPropertyValue{TypedValue{PropertyValue<float>{util::interpolate(a, b, t)}}};
-        }
-        case MLN_PLUGIN_VALUE_FLOAT2: {
-            const auto& a = std::get<PropertyValue<std::array<float, 2>>>(from.value).asConstant();
-            const auto& b = std::get<PropertyValue<std::array<float, 2>>>(to.value).asConstant();
-            return PluginPropertyValue{TypedValue{PropertyValue<std::array<float, 2>>{util::interpolate(a, b, t)}}};
-        }
-        case MLN_PLUGIN_VALUE_COLOR: {
-            const auto& a = std::get<PropertyValue<Color>>(from.value).asConstant();
-            const auto& b = std::get<PropertyValue<Color>>(to.value).asConstant();
-            return PluginPropertyValue{TypedValue{PropertyValue<Color>{util::interpolate(a, b, t)}}};
-        }
-        default:
-            return t < 1.0f ? from : to;
-    }
-}
-
-PluginTransitioningPropertyValue::PluginTransitioningPropertyValue(PluginPropertyValue value_,
-                                                                   PluginTransitioningPropertyValue prior_,
+PluginTransitioningPropertyValue::PluginTransitioningPropertyValue(PluginPropertyValue input,
+                                                                   PluginTransitioningPropertyValue prior,
                                                                    const TransitionOptions& transition,
                                                                    TimePoint now)
-    : begin(now + transition.delay.value_or(Duration::zero())),
-      end(begin + transition.duration.value_or(Duration::zero())),
-      value(std::move(value_)) {
-    if (transition.isDefined() && !value.isDataDriven() && !prior_.value.isDataDriven()) {
-        prior = std::make_shared<PluginTransitioningPropertyValue>(std::move(prior_));
-    }
-}
+    : value(std::visit(
+          [&]<class T>(const PropertyValue<T>& typed) -> TypedValue {
+              return Transitioning<PropertyValue<T>>{
+                  typed, std::get<Transitioning<PropertyValue<T>>>(std::move(prior.value)), transition, now};
+          },
+          input.value)) {}
 
 PluginPropertyValue PluginTransitioningPropertyValue::evaluate(float zoom,
                                                                const plugin::PropertyDefinition& definition,
                                                                TimePoint now) {
-    if (!prior) return value;
-    if (now >= end) {
-        prior.reset();
-        return value;
-    }
-    if (now < begin) return prior->evaluate(zoom, definition, now);
-    const auto from = prior->evaluate(zoom, definition, now).evaluateCamera(zoom, definition);
-    const auto to = value.evaluateCamera(zoom, definition);
-    const float elapsed = std::chrono::duration<float>(now - begin).count();
-    const float duration = std::chrono::duration<float>(end - begin).count();
-    const auto progress = duration > 0.0f ? std::clamp(elapsed / duration, 0.0f, 1.0f) : 1.0f;
-    const auto eased = static_cast<float>(util::DEFAULT_TRANSITION_EASE.solve(progress, 0.001));
-    return PluginPropertyValue::interpolate(from, to, eased, definition);
+    const PropertyEvaluationParameters parameters(zoom);
+    return std::visit(
+        [&]<class T>(const Transitioning<PropertyValue<T>>& typed) {
+            const auto evaluated = typed.evaluate(
+                DataDrivenPropertyEvaluator<T>(parameters, defaultValue<T>(definition)), now);
+            return evaluated.match([](const auto& result) {
+                return PluginPropertyValue{PluginPropertyValue::TypedValue{PropertyValue<T>{result}}};
+            });
+        },
+        value);
 }
 
 PluginPropertyValue defaultPluginPropertyValue(const plugin::PropertyDefinition& definition) {
-    switch (definition.type) {
-        case MLN_PLUGIN_VALUE_FLOAT:
-            return PluginPropertyValue{
-                PluginPropertyValue::TypedValue{PropertyValue<float>{defaultValue<float>(definition)}}};
-        case MLN_PLUGIN_VALUE_FLOAT2:
-            return PluginPropertyValue{PluginPropertyValue::TypedValue{
-                PropertyValue<std::array<float, 2>>{defaultValue<std::array<float, 2>>(definition)}}};
-        case MLN_PLUGIN_VALUE_COLOR:
-            return PluginPropertyValue{
-                PluginPropertyValue::TypedValue{PropertyValue<Color>{defaultValue<Color>(definition)}}};
-        case MLN_PLUGIN_VALUE_STRING:
-            return PluginPropertyValue{
-                PluginPropertyValue::TypedValue{PropertyValue<std::string>{defaultValue<std::string>(definition)}}};
-    }
-    return {};
+    return withPropertyType(definition.type, [&]<class T>() {
+        return PluginPropertyValue{PluginPropertyValue::TypedValue{PropertyValue<T>{defaultValue<T>(definition)}}};
+    });
 }
 
 std::optional<PluginPropertyValue> convertPluginPropertyValue(const plugin::PropertyDefinition& definition,
                                                               const conversion::Convertible& value,
                                                               conversion::Error& error) {
-    std::optional<PluginPropertyValue> converted;
-    switch (definition.type) {
-        case MLN_PLUGIN_VALUE_FLOAT:
-            converted = convertTyped<float>(definition, value, error);
-            break;
-        case MLN_PLUGIN_VALUE_FLOAT2:
-            converted = convertTyped<std::array<float, 2>>(definition, value, error);
-            break;
-        case MLN_PLUGIN_VALUE_COLOR:
-            converted = convertTyped<Color>(definition, value, error);
-            break;
-        case MLN_PLUGIN_VALUE_STRING:
-            converted = convertTyped<std::string>(definition, value, error);
-            break;
-    }
+    auto converted = withPropertyType(definition.type,
+                                      [&]<class T>() { return convertTyped<T>(definition, value, error); });
     if (converted && !validateConstant(definition, *converted, error)) return std::nullopt;
     if (converted) {
         const auto dependencies = converted->getDependencies();

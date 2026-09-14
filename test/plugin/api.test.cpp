@@ -1,5 +1,6 @@
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
+#include <mln/style/layers/plugin_style_layer.hpp>
 #include <gtest/gtest.h>
 
 #include <cstdlib>
@@ -74,7 +75,6 @@ struct Descriptor {
         EXPECT_EQ(expected, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
         EXPECT_NE('\0', error[0]);
         EXPECT_FALSE(plugin::PluginRegistry::get().findLayerType(type));
-        EXPECT_FALSE(plugin::PluginRegistry::get().findProperty(type, propertyName));
         EXPECT_FALSE(LayerManager::get()->hasLayerType(type));
     }
 
@@ -242,8 +242,7 @@ TEST(PluginApi, RegistrationIsAtomicAndCopiesAllMetadata) {
     const auto layer = plugin::PluginRegistry::get().findLayerType("test.copied-metadata.layer");
     ASSERT_TRUE(layer);
     EXPECT_EQ("test.copied-metadata", layer->pluginID);
-    EXPECT_EQ("test-version", layer->pluginVersion);
-    EXPECT_STREQ("test.copied-metadata.layer", layer->identity->info.type);
+    EXPECT_STREQ("test.copied-metadata.layer", layer->info.type);
     ASSERT_EQ(1u, layer->shaders.size());
     const auto& shader = layer->shaders.front();
     EXPECT_EQ("test-shader", shader.id);
@@ -253,13 +252,50 @@ TEST(PluginApi, RegistrationIsAtomicAndCopiesAllMetadata) {
     EXPECT_EQ("a_anchor", shader.attributes.back().name);
     EXPECT_EQ("TestUBO", shader.uniformBlocks.front().name);
     EXPECT_EQ("test-anchor", shader.propertyBindings.front().propertyName);
-    const auto property = plugin::PluginRegistry::get().findProperty(layer->type, "test-anchor");
+    const auto property = layer->findProperty("test-anchor");
     ASSERT_TRUE(property);
     ASSERT_NE(nullptr, property->defaultValue.getString());
     EXPECT_EQ("viewport", *property->defaultValue.getString());
     EXPECT_EQ(std::vector<std::string>{"viewport"}, property->enumValues);
     Descriptor repeated("test.copied-metadata");
     EXPECT_EQ(MLN_PLUGIN_STATUS_ALREADY_REGISTERED, mln_plugin_register_v1(&repeated.descriptor, nullptr, 0));
+    EXPECT_EQ(layer, plugin::PluginRegistry::get().findLayerType(layer->type));
+    style::PluginStyleLayer original("original", "points", layer);
+    auto clone = static_cast<const style::Layer&>(original).cloneRef("clone");
+    EXPECT_EQ(original.getTypeInfo(), clone->getTypeInfo());
+    EXPECT_EQ(layer, static_cast<style::PluginStyleLayer&>(*clone).impl().registration);
+}
+
+TEST(PluginApi, RepeatedRegistrationComparesNestedDefinitions) {
+    Descriptor original("test.structural-equality");
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&original.descriptor, nullptr, 0));
+    const auto retained = plugin::PluginRegistry::get().findLayerType(original.type);
+    const auto check = [&](auto mutate) {
+        Descriptor changed(original.id);
+        mutate(changed);
+        char error[256]{};
+        EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&changed.descriptor, error, sizeof(error)))
+            << error;
+        EXPECT_EQ(retained, plugin::PluginRegistry::get().findLayerType(original.type));
+    };
+    check([](auto& d) { d.descriptor.plugin_version = {"other", 5}; });
+    check([](auto& d) { d.source.fragment_source = {"different shader", 16}; });
+    check([](auto& d) { d.attributes.front().name = {"different", 9}; });
+    check([](auto& d) { d.uniform.stage_mask |= MLN_PLUGIN_SHADER_STAGE_FRAGMENT; });
+    check([](auto& d) { d.uniform.scope = MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY; });
+    check([](auto& d) { d.binding.uniform_byte_offset = 8; });
+    check([](auto& d) { d.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA; });
+    check([](auto& d) { d.layer.geometry_type_mask |= MLN_PLUGIN_GEOMETRY_POLYGON; });
+    check([](auto& d) {
+        d.layer.query_feature = [](const mln_plugin_feature_v1*,
+                                   const mln_plugin_tile_point_v1*,
+                                   size_t,
+                                   const mln_plugin_query_context_v1*,
+                                   const mln_plugin_property_value_v1*,
+                                   size_t) -> uint8_t {
+            return 0;
+        };
+    });
 }
 
 } // namespace

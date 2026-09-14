@@ -7,7 +7,7 @@ namespace mln::plugin {
 // C descriptors adapt ordinary C++ factories instead of adding a dispatch path.
 class PluginStyleLayerFactory final : public LayerFactory {
 public:
-    explicit PluginStyleLayerFactory(LayerType registration_)
+    explicit PluginStyleLayerFactory(RegisteredLayerPtr registration_)
         : registration(std::move(registration_)) {}
     const style::LayerTypeInfo* getTypeInfo() const noexcept override;
     std::unique_ptr<style::Layer> createLayer(const std::string&,
@@ -18,6 +18,6 @@ public:
                                          const std::vector<Immutable<style::LayerProperties>>&) override;
 
 private:
-    const LayerType registration;
+    const RegisteredLayerPtr registration;
 };
 } // namespace mln::plugin

@@ -12,7 +12,7 @@ public:
     PluginLayout(const BucketParameters&,
                  std::vector<Immutable<style::LayerProperties>>,
                  std::unique_ptr<GeometryTileLayer>,
-                 plugin::LayerType);
+                 plugin::RegisteredLayerPtr);
 
     bool hasDependencies() const override { return false; }
 
@@ -24,11 +24,10 @@ public:
                       const CanonicalTileID&) override;
 
 private:
-    const OverscaledTileID tileID;
     const float zoom;
     std::vector<Immutable<style::LayerProperties>> layers;
     std::unique_ptr<GeometryTileLayer> sourceLayer;
-    plugin::LayerType registration;
+    plugin::RegisteredLayerPtr registration;
 };
 
 } // namespace mln

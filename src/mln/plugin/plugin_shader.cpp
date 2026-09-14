@@ -1,4 +1,5 @@
 #include <mln/plugin/plugin_shader.hpp>
+#include <mln/plugin/plugin_conversion.hpp>
 
 #include <mln/gfx/backend.hpp>
 #include <mln/gfx/gfx_types.hpp>
@@ -29,32 +30,6 @@
 namespace mln {
 namespace plugin {
 namespace {
-
-#if MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_METAL
-gfx::AttributeDataType attributeType(mln_plugin_vertex_attribute_type type) {
-    switch (type) {
-        case MLN_PLUGIN_VERTEX_INT16:
-            return gfx::AttributeDataType::Short;
-        case MLN_PLUGIN_VERTEX_INT16_X2:
-            return gfx::AttributeDataType::Short2;
-        case MLN_PLUGIN_VERTEX_UINT16:
-            return gfx::AttributeDataType::UShort;
-        case MLN_PLUGIN_VERTEX_UINT16_X2:
-            return gfx::AttributeDataType::UShort2;
-        case MLN_PLUGIN_VERTEX_FLOAT:
-            return gfx::AttributeDataType::Float;
-        case MLN_PLUGIN_VERTEX_FLOAT_X2:
-            return gfx::AttributeDataType::Float2;
-        case MLN_PLUGIN_VERTEX_FLOAT_X3:
-            return gfx::AttributeDataType::Float3;
-        case MLN_PLUGIN_VERTEX_FLOAT_X4:
-            return gfx::AttributeDataType::Float4;
-        case MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED:
-            return gfx::AttributeDataType::UByte4Normalized;
-    }
-    return gfx::AttributeDataType::Invalid;
-}
-#endif
 
 #if MLN_RENDER_BACKEND_OPENGL || MLN_RENDER_BACKEND_VULKAN || MLN_RENDER_BACKEND_METAL
 const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backend backend) {
@@ -109,7 +84,9 @@ std::string propertyPrelude(const ShaderDefinition& shader, const StringIDSetsPa
 
 class PluginShaderGroup final : public gfx::ShaderGroup {
 public:
-    PluginShaderGroup(std::string groupName_, ShaderDefinition definition_, ProgramParameters parameters_)
+    PluginShaderGroup(std::string groupName_,
+                      std::shared_ptr<const ShaderDefinition> definition_,
+                      ProgramParameters parameters_)
         : groupName(std::move(groupName_)),
           definition(std::move(definition_)),
           parameters(std::move(parameters_)) {}
@@ -119,33 +96,33 @@ public:
                                      std::string_view) override {
         const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;
-        const auto pluginPrelude = resourcePrelude(definition) + propertyPrelude(definition, propertiesAsUniforms);
+        const auto pluginPrelude = resourcePrelude(*definition) + propertyPrelude(*definition, propertiesAsUniforms);
 
         gfx::ShaderPtr shader;
 #if MLN_RENDER_BACKEND_OPENGL
-        const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_OPENGL);
+        const auto* source = findSource(*definition, MLN_PLUGIN_BACKEND_OPENGL);
         if (!source) return {};
         std::vector<shaders::AttributeInfo> attributes;
-        attributes.reserve(definition.attributes.size());
-        for (const auto& attr : definition.attributes) {
+        attributes.reserve(definition->attributes.size());
+        for (const auto& attr : definition->attributes) {
             if (!propertiesAsUniforms.second.contains(attr.id)) attributes.emplace_back(attr.name, attr.id);
         }
         std::vector<shaders::UniformBlockInfo> uniformBlocks;
-        uniformBlocks.reserve(definition.uniformBlocks.size());
-        for (const auto& uniform : definition.uniformBlocks) {
+        uniformBlocks.reserve(definition->uniformBlocks.size());
+        for (const auto& uniform : definition->uniformBlocks) {
             uniformBlocks.emplace_back(uniform.name, uniform.bindingID);
         }
         std::vector<shaders::TextureInfo> textures;
         shader = gl::ShaderProgramGL::create(static_cast<gl::Context&>(context),
                                              parameters.withProgramType(shaders::BuiltIn::None),
-                                             definition.attributes.front().name,
+                                             definition->attributes.front().name,
                                              uniformBlocks,
                                              textures,
                                              attributes,
                                              pluginPrelude + source->vertex,
                                              pluginPrelude + source->fragment);
 #elif MLN_RENDER_BACKEND_VULKAN
-        const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_VULKAN);
+        const auto* source = findSource(*definition, MLN_PLUGIN_BACKEND_VULKAN);
         if (!source) return {};
         auto created = static_cast<vulkan::Context&>(context).createProgram(shaders::BuiltIn::None,
                                                                             name,
@@ -155,14 +132,14 @@ public:
                                                                             {});
         if (!created) return {};
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
-        for (const auto& attr : definition.attributes) {
+        for (const auto& attr : definition->attributes) {
             if (!propertiesAsUniforms.second.contains(attr.id)) {
                 typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
             }
         }
         shader = std::move(typed);
 #elif MLN_RENDER_BACKEND_METAL
-        const auto* source = findSource(definition, MLN_PLUGIN_BACKEND_METAL);
+        const auto* source = findSource(*definition, MLN_PLUGIN_BACKEND_METAL);
         if (!source) return {};
         auto created = static_cast<mtl::Context&>(context).createProgram(
             shaders::BuiltIn::None,
@@ -174,7 +151,7 @@ public:
             {});
         if (!created) return {};
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
-        for (const auto& attr : definition.attributes) {
+        for (const auto& attr : definition->attributes) {
             if (!propertiesAsUniforms.second.contains(attr.id)) {
                 typed->initVertexAttribute(
                     {attr.location, attributeType(attr.type), shaders::maxUBOCountPerShader + attr.location, attr.id});
@@ -193,7 +170,7 @@ public:
 
 private:
     const std::string groupName;
-    ShaderDefinition definition;
+    const std::shared_ptr<const ShaderDefinition> definition;
     ProgramParameters parameters;
 };
 
@@ -207,19 +184,16 @@ std::string shaderGroupName(const std::string& pluginID, const std::string& laye
     return "plugin/" + encode(pluginID) + encode(layerType) + encode(shaderID);
 }
 
-void registerPluginShaderGroups(gfx::ShaderRegistry& registry, const ProgramParameters& parameters) {
-    for (const auto& layerType : PluginRegistry::get().allLayerTypes()) {
-        registerPluginShaderGroups(registry, parameters, layerType);
-    }
-}
-
 void registerPluginShaderGroups(gfx::ShaderRegistry& registry,
                                 const ProgramParameters& parameters,
-                                const LayerType& layerType) {
-    for (const auto& shader : layerType.shaders) {
-        const auto name = shaderGroupName(shader.pluginID, layerType.type, shader.id);
+                                const RegisteredLayerPtr& layerType) {
+    for (const auto& shader : layerType->shaders) {
+        const auto name = shaderGroupName(shader.pluginID, layerType->type, shader.id);
         if (registry.isShaderGroup(name)) continue;
-        if (!registry.registerShaderGroup(std::make_shared<PluginShaderGroup>(name, shader, parameters), name)) {
+        if (!registry.registerShaderGroup(
+                std::make_shared<PluginShaderGroup>(
+                    name, std::shared_ptr<const ShaderDefinition>(layerType, &shader), parameters),
+                name)) {
             throw std::runtime_error("Failed to register plugin shader group '" + name + "'");
         }
     }

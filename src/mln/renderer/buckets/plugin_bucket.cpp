@@ -321,14 +321,14 @@ void PluginPaintPropertyBinder::updateStatistics() {
     if (vertexVector) vertexVector->bounds(minimumValues, maximumValues);
 }
 
-PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::LayerType& registration,
+PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::RegisteredLayerPtr& registration,
                                                        const plugin::ShaderDefinition& shader,
                                                        uint64_t drawableKey,
                                                        std::size_t vertexCount,
                                                        float bucketZoom,
                                                        const style::PluginPropertyMap& properties,
                                                        std::shared_ptr<const PluginFeatureData> features) {
-    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& definitions = registration->properties;
     for (const auto& binding : shader.propertyBindings) {
         const auto definition = std::find_if(definitions.begin(), definitions.end(), [&](const auto& candidate) {
             return candidate.name == binding.propertyName;
@@ -463,7 +463,7 @@ bool PluginBucket::synchronizePaint(const std::string& layerID,
 void PluginBucket::updateQueryRadius(const std::string& layerID,
                                      const style::PluginPropertyMap& properties,
                                      float zoom) {
-    if (!registration.queryRadius) return;
+    if (!registration->queryRadius) return;
     std::map<std::string, std::pair<mln_plugin_value, mln_plugin_value>> values;
     if (const auto layer = paintPropertyBinders.find(layerID); layer != paintPropertyBinders.end()) {
         for (const auto& [key, binders] : layer->second) {
@@ -478,7 +478,7 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
             {sizeof(mln_plugin_property_statistics_v1), {name.data(), name.size()}, bounds.first, bounds.second});
     }
 
-    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& definitions = registration->properties;
     std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
     std::vector<mln_plugin_property_value_v1> cameraProperties;
     cameraProperties.reserve(definitions.size());
@@ -490,7 +490,7 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
                                     current.evaluate(zoom, definition, storage[i]),
                                     properties.find(definition.name) != properties.end()});
     }
-    const auto radius = registration.queryRadius(
+    const auto radius = registration->queryRadius(
         statistics.data(), statistics.size(), cameraProperties.data(), cameraProperties.size());
     if (std::isfinite(radius) && radius >= 0.0f) {
         queryRadii.insert_or_assign(layerID, radius);
@@ -498,7 +498,7 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     } else {
         queryRadii.insert_or_assign(layerID, 0.0f);
         if (queryRadiusErrorsLogged.emplace(layerID).second) {
-            Log::Warning(Event::Style, "Plugin layer '" + registration.type + "' returned an invalid query radius");
+            Log::Warning(Event::Style, "Plugin layer '" + registration->type + "' returned an invalid query radius");
         }
     }
 }

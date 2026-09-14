@@ -37,10 +37,10 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             if (data.uniformFailed) drawable.setEnabled(true);
             data.uniformFailed = false;
             const auto* shader = [&]() -> const plugin::ShaderDefinition* {
-                const auto it = std::find_if(registration.shaders.begin(),
-                                             registration.shaders.end(),
+                const auto it = std::find_if(registration->shaders.begin(),
+                                             registration->shaders.end(),
                                              [&](const auto& candidate) { return candidate.id == data.shaderID; });
-                return it == registration.shaders.end() ? nullptr : &*it;
+                return it == registration->shaders.end() ? nullptr : &*it;
             }();
             if (!shader) return;
             const auto index = drawableIndex++;
@@ -77,7 +77,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                            : 0.0f;
 
             for (const auto& uniform : shader->uniformBlocks) {
-                if (!registration.updateUniformBlock) continue;
+                if (!registration->updateUniformBlock) continue;
                 const bool layerScope = uniform.scope == MLN_PLUGIN_UNIFORM_LAYER;
                 bool arrayScope = false;
 #if MLN_RENDER_BACKEND_METAL
@@ -113,10 +113,10 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                     individual->scratch.assign(uniform.byteSize, 0);
                     output = individual->scratch.data();
                 }
-                const auto status = registration.updateUniformBlock(&context, uniform.id, output, uniform.byteSize);
+                const auto status = registration->updateUniformBlock(&context, uniform.id, output, uniform.byteSize);
                 if (status != MLN_PLUGIN_STATUS_OK) {
                     Log::Error(Event::General,
-                               "Plugin '" + registration.pluginID + "' failed to update uniform " +
+                               "Plugin '" + registration->pluginID + "' failed to update uniform " +
                                    std::to_string(uniform.id) + " (status " + std::to_string(static_cast<int>(status)) +
                                    ")");
                     if (shared) shared->failed = true;

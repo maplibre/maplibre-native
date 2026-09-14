@@ -5,6 +5,7 @@
 #include <mln/gfx/cull_face_mode.hpp>
 #include <mln/gfx/drawable_builder.hpp>
 #include <mln/plugin/plugin_drawable_data.hpp>
+#include <mln/plugin/plugin_conversion.hpp>
 #include <mln/gfx/shader_group.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/gfx/vertex_attribute.hpp>
@@ -31,44 +32,6 @@ const style::PluginStyleLayer::Impl& pluginImpl(const Immutable<style::Layer::Im
     return static_cast<const style::PluginStyleLayer::Impl&>(*impl);
 }
 
-gfx::AttributeDataType attributeType(mln_plugin_vertex_attribute_type type) {
-    switch (type) {
-        case MLN_PLUGIN_VERTEX_INT16:
-            return gfx::AttributeDataType::Short;
-        case MLN_PLUGIN_VERTEX_INT16_X2:
-            return gfx::AttributeDataType::Short2;
-        case MLN_PLUGIN_VERTEX_UINT16:
-            return gfx::AttributeDataType::UShort;
-        case MLN_PLUGIN_VERTEX_UINT16_X2:
-            return gfx::AttributeDataType::UShort2;
-        case MLN_PLUGIN_VERTEX_FLOAT:
-            return gfx::AttributeDataType::Float;
-        case MLN_PLUGIN_VERTEX_FLOAT_X2:
-            return gfx::AttributeDataType::Float2;
-        case MLN_PLUGIN_VERTEX_FLOAT_X3:
-            return gfx::AttributeDataType::Float3;
-        case MLN_PLUGIN_VERTEX_FLOAT_X4:
-            return gfx::AttributeDataType::Float4;
-        case MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED:
-            return gfx::AttributeDataType::UByte4Normalized;
-    }
-    return gfx::AttributeDataType::Invalid;
-}
-
-mln_plugin_geometry_type geometryType(FeatureType type) {
-    switch (type) {
-        case FeatureType::Point:
-            return MLN_PLUGIN_GEOMETRY_POINT;
-        case FeatureType::LineString:
-            return MLN_PLUGIN_GEOMETRY_LINESTRING;
-        case FeatureType::Polygon:
-            return MLN_PLUGIN_GEOMETRY_POLYGON;
-        case FeatureType::Unknown:
-            return static_cast<mln_plugin_geometry_type>(0);
-    }
-    return static_cast<mln_plugin_geometry_type>(0);
-}
-
 } // namespace
 
 RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer::Impl> impl)
@@ -78,7 +41,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     // its first frame, including styles installed before the initial zoom
     // evaluation.
     const auto& registration = pluginImpl(baseImpl).registration;
-    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& definitions = registration->properties;
     const auto& layerImpl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
         const auto property = layerImpl.pluginProperties.find(definition.name);
@@ -93,7 +56,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
 
 void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) {
     const auto& impl = pluginImpl(baseImpl);
-    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(impl.registration.type);
+    const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
         const auto property = impl.pluginProperties.find(definition.name);
         auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
@@ -118,7 +81,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     passes = RenderPass::Translucent;
 
     evaluatedPluginProperties.clear();
-    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& definitions = registration->properties;
     const auto& impl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
         const auto transition = transitioningPaintProperties.find(definition.name);
@@ -176,10 +139,10 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
     // renderer's lifetime; paint updates do not invalidate shader definitions.
     if (shaderGroups.empty()) {
         plugin::registerPluginShaderGroups(shaders, ProgramParameters{parameters.pixelRatio, false}, registration);
-        for (const auto& definition : registration.shaders) {
+        for (const auto& definition : registration->shaders) {
             shaderGroups.emplace(definition.id,
-                                 shaders.getShaderGroup(
-                                     plugin::shaderGroupName(registration.pluginID, registration.type, definition.id)));
+                                 shaders.getShaderGroup(plugin::shaderGroupName(
+                                     registration->pluginID, registration->type, definition.id)));
         }
     }
     if (!layerGroup) {
@@ -239,7 +202,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             for (const auto& binding : definition.attributes) {
                 const auto stream = bucket.vertexStreams.find(binding.streamID);
                 if (stream == bucket.vertexStreams.end()) continue;
-                const auto type = attributeType(binding.type);
+                const auto type = binding.type;
                 if (const auto& attr = attributes->set(binding.attributeID)) {
                     attr->setSharedRawData(stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
                 }
@@ -248,7 +211,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
 
-            auto builder = context.createDrawableBuilder("plugin/" + registration.type);
+            auto builder = context.createDrawableBuilder("plugin/" + registration->type);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
             builder->setEnableDepth(true);
@@ -283,27 +246,12 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
                                                     const mat4& tileMatrix,
                                                     const FeatureState& featureState) const {
     const auto& registration = pluginImpl(baseImpl).registration;
-    if (!registration.queryFeature) return false;
-    const auto& geometry = feature.getGeometries();
-    std::vector<mln_plugin_tile_point_v1> points;
-    std::vector<uint32_t> offsets;
-    offsets.push_back(0);
-    for (const auto& path : geometry) {
-        for (const auto& point : path) points.push_back({point.x, point.y});
-        offsets.push_back(static_cast<uint32_t>(points.size()));
-    }
+    if (!registration->queryFeature) return false;
+    const plugin::FeatureView pluginFeature(feature);
     std::vector<mln_plugin_tile_point_v1> query;
     query.reserve(queryGeometry.size());
     for (const auto& point : queryGeometry) query.push_back({point.x, point.y});
-    const auto id = featureIDtoString(feature.getID()).value_or(std::string{});
-    mln_plugin_feature_v1 pluginFeature{};
-    pluginFeature.struct_size = sizeof(pluginFeature);
-    pluginFeature.geometry_type = geometryType(feature.getType());
-    pluginFeature.points = points.data();
-    pluginFeature.point_count = points.size();
-    pluginFeature.path_offsets = offsets.data();
-    pluginFeature.path_count = geometry.size();
-    const auto definitions = plugin::PluginRegistry::get().propertiesForLayer(registration.type);
+    const auto& definitions = registration->properties;
     const auto& impl = pluginImpl(baseImpl);
     std::vector<mln_plugin_property_value_v1> properties;
     std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
@@ -328,8 +276,9 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     std::copy(tileMatrix.begin(), tileMatrix.end(), queryContext.tile_matrix);
     queryContext.viewport_width = transformState.getSize().width;
     queryContext.viewport_height = transformState.getSize().height;
-    return registration.queryFeature(
-               &pluginFeature, query.data(), query.size(), &queryContext, properties.data(), properties.size()) != 0;
+    return registration->queryFeature(
+               &pluginFeature.value, query.data(), query.size(), &queryContext, properties.data(), properties.size()) !=
+           0;
 }
 
 } // namespace mln

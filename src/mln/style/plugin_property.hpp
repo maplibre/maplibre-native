@@ -2,6 +2,7 @@
 
 #include <mln/plugin/plugin_api.h>
 #include <mln/style/property_value.hpp>
+#include <mln/style/properties.hpp>
 #include <mln/style/style_property.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/util/chrono.hpp>
@@ -52,11 +53,6 @@ public:
                               const plugin::PropertyDefinition&,
                               EvaluationStorage&) const;
     mln_plugin_value evaluate(float zoom, const plugin::PropertyDefinition&, EvaluationStorage&) const;
-    PluginPropertyValue evaluateCamera(float zoom, const plugin::PropertyDefinition&) const;
-    static PluginPropertyValue interpolate(const PluginPropertyValue&,
-                                           const PluginPropertyValue&,
-                                           float,
-                                           const plugin::PropertyDefinition&);
 
     friend bool operator==(const PluginPropertyValue& lhs, const PluginPropertyValue& rhs) {
         return lhs.value == rhs.value;
@@ -64,26 +60,32 @@ public:
     friend bool operator!=(const PluginPropertyValue& lhs, const PluginPropertyValue& rhs) { return !(lhs == rhs); }
 
 private:
+    friend class PluginTransitioningPropertyValue;
+    mln_plugin_value evaluate(const expression::EvaluationContext&,
+                              const plugin::PropertyDefinition&,
+                              EvaluationStorage&) const;
     TypedValue value;
 };
 
 class PluginTransitioningPropertyValue {
 public:
-    explicit PluginTransitioningPropertyValue(PluginPropertyValue value_ = {})
-        : value(std::move(value_)) {}
+    explicit PluginTransitioningPropertyValue(PluginPropertyValue = {});
     PluginTransitioningPropertyValue(PluginPropertyValue,
                                      PluginTransitioningPropertyValue,
                                      const TransitionOptions&,
                                      TimePoint);
 
     PluginPropertyValue evaluate(float zoom, const plugin::PropertyDefinition&, TimePoint);
-    bool hasTransition() const noexcept { return static_cast<bool>(prior); }
+    bool hasTransition() const noexcept {
+        return std::visit([](const auto& typed) { return typed.hasTransition(); }, value);
+    }
 
 private:
-    std::shared_ptr<PluginTransitioningPropertyValue> prior;
-    TimePoint begin{};
-    TimePoint end{};
-    PluginPropertyValue value;
+    using TypedValue = std::variant<Transitioning<PropertyValue<float>>,
+                                    Transitioning<PropertyValue<std::array<float, 2>>>,
+                                    Transitioning<PropertyValue<Color>>,
+                                    Transitioning<PropertyValue<std::string>>>;
+    TypedValue value;
 };
 
 using PluginPropertyMap = std::map<std::string, PluginPropertyValue>;
