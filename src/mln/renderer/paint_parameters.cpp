@@ -117,16 +117,25 @@ mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned)
     return matrix;
 }
 
-gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {
+gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n,
+                                                     [[maybe_unused]] gfx::DepthMaskType mask) const {
+#if MLN_RENDER_BACKEND_OPENGL
     if (currentLayer < opaquePassCutoff) {
         return gfx::DepthMode::disabled();
     }
-
-#if MLN_RENDER_BACKEND_OPENGL
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
 #else
-    return gfx::DepthMode{.func = gfx::DepthFunctionType::LessEqual, .mask = mask};
+    // 2D drawables are ordered by the render passes (painter's order), and depth-testing them
+    // against each other is not reliable on these backends: the per-layer NDC z offset used to
+    // be folded into the drawable's float32 tile matrix (see LayerTweaker::multiplyWithProjectionMatrix),
+    // whose z translation runs to thousands of clip units under a pitched camera, so an offset of
+    // a few 1e-5 rounds away and the interpolated depths of overlapping polygons from different
+    // layers differ by vertex-rounding noise instead. At camera positions where that noise flips
+    // sign, a translucent fill above an opaque one fails the test and drops out for one frame
+    // (park and landcover fills flashing while navigating). GL is unaffected: its depth ranges
+    // do not go through the matrix.
+    return gfx::DepthMode::disabled();
 #endif
 }
 
