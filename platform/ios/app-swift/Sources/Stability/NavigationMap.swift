@@ -60,9 +60,43 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     private var styleGate: Gate?
     private var task: Task<Void, Never>?
     private var stopped = false
+    private var notifyOnMapLoad = false
+    private var pendingInitialCamera: MLNMapCamera?
+    private var pendingInitialZoom: Double?
+    var onDidFinishLoadingMap: (() -> Void)?
+    var onRouteReady: (() -> Void)?
+    private let specifiedStyleURL: URL?
+    private let loadRoutes: Bool
 
-    init() {
-        super.init(frame: CGRect())
+    init(cameraSource: MLNMapView? = nil, styleURL: URL? = nil, loadRoutes: Bool = true) {
+        specifiedStyleURL = styleURL
+        self.loadRoutes = loadRoutes
+        super.init(frame: CGRect(), styleURL: styleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
+
+        if let cameraSource {
+            pendingInitialCamera = cameraSource.camera
+            pendingInitialZoom = cameraSource.zoomLevel + 2
+            applyPendingInitialCamera()
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        if pendingInitialCamera != nil, bounds.width > 0, bounds.height > 0 {
+            applyPendingInitialCamera()
+            pendingInitialCamera = nil
+            pendingInitialZoom = nil
+        }
+    }
+
+    private func applyPendingInitialCamera() {
+        guard let camera = pendingInitialCamera else { return }
+
+        setCenter(camera.centerCoordinate,
+                  zoomLevel: pendingInitialZoom ?? zoomLevel,
+                  direction: 0,
+                  animated: false)
     }
 
     @available(*, unavailable)
@@ -73,7 +107,7 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     @MainActor func load(style: URL) async {
         let gate = Gate()
         styleGate = gate
-
+        notifyOnMapLoad = true
         styleURL = style
 
         await gate.wait()
@@ -90,10 +124,23 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
         styleGate?.open()
     }
 
+    func mapViewDidFinishLoadingMap(_: MLNMapView) {
+        guard notifyOnMapLoad else { return }
+        notifyOnMapLoad = false
+        onDidFinishLoadingMap?()
+    }
+
     func run() {
         delegate = self
 
-        startNewRoute()
+        if loadRoutes {
+            startNewRoute()
+        } else {
+            task = Task { [weak self] in
+                guard let self else { return }
+                await load(style: specifiedStyleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
+            }
+        }
     }
 
     func stop() {
@@ -107,9 +154,16 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
         // and stop holding on to this map view
         styleGate?.open()
 
+        (locationManager as? NavigationLocationManager)?.navigationDelegate = nil
+
         // drops the simulated location manager, stopping its perform-based
         // update chain (which otherwise keeps the map view alive)
+        route?.unload()
         route = nil
+
+        notifyOnMapLoad = false
+        onDidFinishLoadingMap = nil
+        onRouteReady = nil
     }
 
     deinit {
@@ -127,10 +181,10 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
 
                 guard let self, !Task.isCancelled else { return }
 
-                // reset existing route
+                route?.unload()
                 route = nil
 
-                await load(style: config.STYLES.randomElement(using: &config.RANDOM)!!)
+                await load(style: specifiedStyleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
                 guard !Task.isCancelled else { return }
 
                 let routeJson = config.getRouteResponseJson()
@@ -150,6 +204,7 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
                 )
 
                 setCamera(camera, animated: true)
+                onRouteReady?()
 
                 try await Task.sleep(for: .seconds(config.randomWaitTime()))
                 guard !Task.isCancelled else { return }
