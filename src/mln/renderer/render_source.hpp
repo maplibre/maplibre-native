@@ -85,9 +85,10 @@ public:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
+        const GlobalStateMap* globalState,
         const mat4& projMatrix) const = 0;
 
-    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const = 0;
+    virtual std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const = 0;
 
     virtual FeatureExtensionValue queryFeatureExtensions(const Feature&,
                                                          const std::string&,

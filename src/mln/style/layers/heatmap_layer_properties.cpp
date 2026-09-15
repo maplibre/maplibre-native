@@ -33,6 +33,14 @@ expression::Dependency HeatmapLayerProperties::getDependencies() const noexcept 
     return layerImpl().paint.getDependencies();
 }
 
+expression::Dependency HeatmapLayerProperties::getEvaluatedDependencies() const noexcept {
+    return evaluated.getDependencies();
+}
+
+void HeatmapLayerProperties::collectEvaluatedGlobalStateRefs(std::set<std::string>& refs) const {
+    evaluated.collectGlobalStateRefs(refs);
+}
+
 } // namespace style
 } // namespace mln
 

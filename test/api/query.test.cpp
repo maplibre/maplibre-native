@@ -11,6 +11,8 @@
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/json.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/gfx/headless_frontend.hpp>
@@ -40,6 +42,11 @@ public:
                    fileSource,
                    MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize())};
 };
+
+Filter parseFilter(const std::string& expression) {
+    conversion::Error error;
+    return *conversion::convertJSON<Filter>(expression, error);
+}
 
 std::vector<Feature> getTopClusterFeature(QueryTest& test) {
     test.fileSource->sourceResponse = [&](const Resource& resource) {
@@ -130,6 +137,46 @@ TEST(Query, QueryRenderedFeaturesFilter) {
     const Filter gtFilter(gt(number(get("key2")), literal(1.0)));
     auto features3 = test.frontend.getRenderer()->queryRenderedFeatures(zz, {{}, {gtFilter}});
     EXPECT_EQ(features3.size(), 1u);
+}
+
+TEST(Query, GlobalStateChangeRelayoutsSourceFilter) {
+    QueryTest test;
+    Layer* layer = test.map.getStyle().getLayer("layer4");
+    ASSERT_NE(layer, nullptr);
+    layer->setFilter(parseFilter(R"(["==", ["get", "key1"], ["global-state", "filterValue"]])"));
+
+    const auto point = test.map.pixelForLatLng({0, 0});
+    const RenderedQueryOptions options{{{"layer4"}}, {}};
+
+    test.map.getStyle().setGlobalStateProperty("filterValue", "value1");
+    test.frontend.render(test.map);
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(point, options).size());
+
+    test.map.getStyle().setGlobalStateProperty("filterValue", "other");
+    test.frontend.render(test.map);
+    EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(point, options).empty());
+
+    test.map.getStyle().setGlobalStateProperty("filterValue", "value1");
+    test.frontend.render(test.map);
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(point, options).size());
+}
+
+TEST(Query, QueryFiltersUseGlobalState) {
+    QueryTest test;
+    const auto filter = parseFilter(R"(["==", ["get", "key1"], ["global-state", "queryValue"]])");
+    const auto point = test.map.pixelForLatLng({0, 0});
+    const RenderedQueryOptions renderedOptions{{{"layer4"}}, {filter}};
+    const SourceQueryOptions sourceOptions{{}, {filter}};
+
+    test.map.getStyle().setGlobalStateProperty("queryValue", "value1");
+    test.frontend.render(test.map);
+    EXPECT_EQ(1u, test.frontend.getRenderer()->queryRenderedFeatures(point, renderedOptions).size());
+    EXPECT_EQ(1u, test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).size());
+
+    test.map.getStyle().setGlobalStateProperty("queryValue", "other");
+    test.frontend.render(test.map);
+    EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(point, renderedOptions).empty());
+    EXPECT_TRUE(test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).empty());
 }
 
 TEST(Query, QuerySourceFeatures) {

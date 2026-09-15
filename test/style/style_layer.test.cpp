@@ -2,10 +2,12 @@
 #include <mln/style/layers/custom_layer_impl.hpp>
 #include <mln/style/conversion/filter.hpp>
 #include <mln/style/conversion/json.hpp>
+#include <mln/style/expression/compound_expression.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/expression/format_expression.hpp>
 #include <mln/style/expression/image.hpp>
 #include <mln/style/expression/match.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/background_layer_impl.hpp>
 #include <mln/style/layers/circle_layer.hpp>
@@ -442,12 +444,52 @@ TEST(Layer, SymbolLayerOverrides) {
         layout.get<TextField>() = PossiblyEvaluatedPropertyValue<Formatted>(std::move(formatted));
         paint.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
         EXPECT_TRUE(paint.get<TextColor>().isConstant());
-        MockOverrides::setOverrides(layout, paint);
+        MockOverrides::setOverrides(layout, paint, MockPaintProperties::Unevaluated(), nullptr);
         EXPECT_FALSE(paint.get<TextColor>().isConstant());
 
         MockPaintProperties::PossiblyEvaluated updated;
         updated.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
         MockOverrides::updateOverrides(paint, updated);
         EXPECT_FALSE(updated.get<TextColor>().isConstant());
+    }
+
+    // A text-color folded to a constant from a global-state-only expression
+    // keeps the dependency, its keys, and the state through the override
+    // wrapper.
+    {
+        MockLayoutProperties::PossiblyEvaluated layout;
+        MockPaintProperties::PossiblyEvaluated paint;
+
+        auto formatted = Formatted("");
+        formatted.sections.emplace_back("section text"s, std::nullopt, std::nullopt, Color::green());
+        layout.get<TextField>() = PossiblyEvaluatedPropertyValue<Formatted>(std::move(formatted));
+        paint.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
+
+        ParsingContext ctx;
+        std::vector<std::unique_ptr<Expression>> args;
+        args.push_back(literal("labelColor"));
+        ParseResult stateExpression = createCompoundExpression("global-state", std::move(args), ctx);
+        ASSERT_TRUE(stateExpression);
+        MockPaintProperties::Unevaluated unevaluated;
+        unevaluated.get<TextColor>() = Transitioning<PropertyValue<Color>>(
+            PropertyValue<Color>(PropertyExpression<Color>(toColor(std::move(*stateExpression)))));
+
+        auto state = std::make_shared<const GlobalStateMap>(GlobalStateMap{{"labelColor", std::string("red")}});
+        MockOverrides::setOverrides(layout, paint, unevaluated, state);
+
+        const auto& wrapped = paint.get<TextColor>();
+        EXPECT_FALSE(wrapped.isConstant());
+        EXPECT_TRUE(wrapped.getDependencies() & Dependency::GlobalState);
+        ASSERT_TRUE(wrapped.getGlobalStateRefs());
+        EXPECT_EQ((std::set<std::string>{"labelColor"}), *wrapped.getGlobalStateRefs());
+
+        // A section without an override evaluates from the captured state.
+        const StubGeometryTileFeature feature(PropertyMap{});
+        const Color evaluated = wrapped.match(
+            [&](const PropertyExpression<Color>& fn) {
+                return fn.evaluate(EvaluationContext(0.0f, &feature), Color::black());
+            },
+            [](const Color& constant) { return constant; });
+        EXPECT_EQ(*Color::parse("red"), evaluated);
     }
 }

@@ -215,6 +215,9 @@ private:
     Immutable<std::vector<Immutable<style::Source::Impl>>> sourceImpls;
     Immutable<std::vector<Immutable<style::Layer::Impl>>> layerImpls;
 
+    // The style's global state as of the last update, used by "global-state" expressions.
+    std::shared_ptr<const GlobalStateMap> globalState;
+
     std::unordered_map<std::string, std::unique_ptr<RenderSource>> renderSources;
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
