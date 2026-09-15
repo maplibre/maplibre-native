@@ -241,8 +241,8 @@ UIImage* MLNMapViewOpenGLImpl::snapshot() {
 
 void MLNMapViewOpenGLImpl::layoutChanged() {
   const auto scaleFactor = contentScaleFactor();
-  size = {static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
-          static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor)};
+  setRenderableSize({static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
+                     static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor)});
 }
 
 EAGLContext* MLNMapViewOpenGLImpl::getEAGLContext() {

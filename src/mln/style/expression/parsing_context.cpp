@@ -27,6 +27,7 @@
 #include <mln/style/expression/within.hpp>
 #include <mln/style/expression/index_of.hpp>
 #include <mln/style/expression/slice.hpp>
+#include <mln/style/expression/semiliteral.hpp>
 
 #include <mln/style/expression/find_zoom_curve.hpp>
 #include <mln/style/expression/dsl.hpp>
@@ -141,7 +142,8 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"var", Var::parse},
      {"within", Within::parse},
      {"index-of", IndexOf::parse},
-     {"slice", Slice::parse}});
+     {"slice", Slice::parse},
+     {"semiliteral", Semiliteral::parse}});
 
 bool isExpression(const std::string& name) noexcept {
     return expressionRegistry.contains(name.c_str());

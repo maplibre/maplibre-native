@@ -7,6 +7,25 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 - Add nullable `MLNSky` runtime styling with zoom expressions, transitions, and removal.
 - feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#TBD](https://github.com/maplibre/maplibre-native/pull/TBD)).
 
+## 6.31.0
+
+- Remove CustomDrawableLayer API ([#4611](https://github.com/maplibre/maplibre-native/pull/4611)).
+- Add semiliteral expression to core and mobile SDKs ([#4604](https://github.com/maplibre/maplibre-native/pull/4604)).
+
+## 6.30.0
+
+- Update expected-lite to restore C++23 consumer compatibility for `database_file_source.hpp` ([#4474](https://github.com/maplibre/maplibre-native/pull/4474)).
+- Reduce symbol buffers memory by using instancing (Core optimization) ([#4383](https://github.com/maplibre/maplibre-native/pull/4383)).
+- Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/pull/4508)).
+- core: refactor renderable size ownership ([#4512](https://github.com/maplibre/maplibre-native/pull/4512)).
+- fix(core): Fix missing symbols/glyphs ([#4554](https://github.com/maplibre/maplibre-native/pull/4554)).
+- fix(core): break a label before a left parenthesis, not after it ([#4553](https://github.com/maplibre/maplibre-native/pull/4553)).
+- fix(ios): use window scene interface orientation for heading compensation ([#4548](https://github.com/maplibre/maplibre-native/pull/4548)).
+- Rename OpenGL event to GraphicsBackend ([#4515](https://github.com/maplibre/maplibre-native/pull/4515)).
+- keep digits and short codes upright in CJK line labels ([#4566](https://github.com/maplibre/maplibre-native/pull/4566)).
+- fix(core): keep the padding-dependent pitch limit at or above the minimum pitch ([#4576](https://github.com/maplibre/maplibre-native/pull/4576)).
+- feat(ios): add feature state api ([#4420](https://github.com/maplibre/maplibre-native/pull/4420)).
+
 ## 6.29.0
 
 - fix(core): accept alpha in hsl colors ([#4435](https://github.com/maplibre/maplibre-native/pull/4435)).

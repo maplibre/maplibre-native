@@ -63,6 +63,7 @@ cc_library(
         "src/mln/text/bidi.cpp",
         "src/mln/util/compression.cpp",
         "src/mln/util/filesystem.cpp",
+        "src/mln/util/i18n.cpp",
         "src/mln/util/monotonic_timer.cpp",
         "src/mln/util/png_writer.cpp",
         "src/mln/util/thread_local.cpp",

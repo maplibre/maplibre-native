@@ -7,6 +7,15 @@
 - Add runtime `Sky` style API support, including zoom expressions, transitions, and removal.
 - feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#TBD](https://github.com/maplibre/maplibre-native/pull/TBD)).
 
+## 13.6.1
+
+### 🐞 Bug fixes
+
+- keep digits and short codes upright in CJK line labels ([#4566](https://github.com/maplibre/maplibre-native/pull/4566))
+- fix(core): break a label before a left parenthesis, not after it ([#4553](https://github.com/maplibre/maplibre-native/pull/4553))
+- fix(core): Fix missing symbols/glyphs ([#4554](https://github.com/maplibre/maplibre-native/pull/4554))
+- fix(core): Sync image transition based on layout ([#4540](https://github.com/maplibre/maplibre-native/pull/4540))
+
 ## 13.6.0
 
 ### ✨ Features and improvements

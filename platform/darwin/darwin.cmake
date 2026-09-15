@@ -80,6 +80,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/text/bidi.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/monotonic_timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/png_writer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/thread_local.cpp
@@ -194,7 +195,6 @@ endfunction()
 # available for WebGPU builds.
 if(NOT MLN_WITH_WEBGPU)
     set(_custom_layer_sources
-        "${CMAKE_CURRENT_LIST_DIR}/app/ExampleCustomDrawableStyleLayer.mm"
         "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
         "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     )

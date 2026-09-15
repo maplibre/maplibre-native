@@ -17,8 +17,8 @@ public:
     // GLFWRendererBackend implementation
 public:
     mln::gfx::RendererBackend& getRendererBackend() override { return *this; }
-    mln::Size getSize() const override;
-    void setSize(mln::Size) override;
+    mln::Size getFramebufferSize() const override;
+    void setFramebufferSize(mln::Size) override;
 
     // mln::gfx::RendererBackend implementation
 public:

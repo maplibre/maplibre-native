@@ -896,13 +896,13 @@ void GLFWWebGPUBackend::deactivate() {
     // WebGPU doesn't need explicit context deactivation like OpenGL
 }
 
-mln::Size GLFWWebGPUBackend::getSize() const {
-    return size;
+mln::Size GLFWWebGPUBackend::getFramebufferSize() const {
+    return getSize();
 }
 
-void GLFWWebGPUBackend::setSize(mln::Size newSize) {
+void GLFWWebGPUBackend::setFramebufferSize(mln::Size newSize) {
     // Update swap chain size if needed
-    if (size != newSize) {
+    if (getSize() != newSize) {
 #ifdef __APPLE__
         int width = 0;
         int height = 0;
@@ -918,7 +918,7 @@ void GLFWWebGPUBackend::setSize(mln::Size newSize) {
             }
         }
 #endif
-        size = newSize;
+        setRenderableSize(newSize);
         surfaceNeedsReconfigure = true;
     }
 }
@@ -1066,10 +1066,6 @@ void* GLFWWebGPUBackend::getCurrentTextureView() {
 #endif
 }
 
-mln::Size GLFWWebGPUBackend::getFramebufferSize() const {
-    return getSize();
-}
-
 void* GLFWWebGPUBackend::getDepthStencilView() {
     std::lock_guard<SpinLock> guard(textureStateLock);
     if (!depthStencilView) {
@@ -1126,7 +1122,8 @@ void GLFWWebGPUBackend::reconfigureSurface() {
         return;
     }
 
-    size = {static_cast<uint32_t>(std::max(width, 0)), static_cast<uint32_t>(std::max(height, 0))};
+    setRenderableSize(
+        {static_cast<uint32_t>(std::max(width, 0)), static_cast<uint32_t>(std::max(height, 0))});
 
     // Configure surface
     wgpu::SurfaceConfiguration config = {};

@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -207,6 +208,24 @@ public class Expression {
    */
   public static Expression literal(@NonNull Object[] array) {
     return new Expression("literal", new ExpressionLiteralArray(array));
+  }
+
+  /**
+   * Creates an array by evaluating each element expression.
+   * Use {@link #literal(Object)} for an array whose elements remain literal.
+   *
+   * <pre>
+   * {@code
+   * semiliteral(number(get("x")), number(get("y")))
+   * }
+   * </pre>
+   *
+   * @param elements expressions producing the array elements
+   * @return an array expression
+   */
+  @NonNull
+  public static Expression semiliteral(@NonNull Expression... elements) {
+    return new Expression("semiliteral", new ExpressionArray(elements));
   }
 
   /**
@@ -4828,7 +4847,27 @@ public class Expression {
    */
   public final static class Converter {
 
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+
+    private static Object convertLiteralValue(JsonElement value) {
+      if (value.isJsonNull()) {
+        return null;
+      } else if (value.isJsonArray()) {
+        JsonArray array = value.getAsJsonArray();
+        Object[] result = new Object[array.size()];
+        for (int i = 0; i < result.length; i++) {
+          result[i] = convertLiteralValue(array.get(i));
+        }
+        return result;
+      } else if (value.isJsonObject()) {
+        Map<String, Object> result = new HashMap<>();
+        for (String key : value.getAsJsonObject().keySet()) {
+          result.put(key, convertLiteralValue(value.getAsJsonObject().get(key)));
+        }
+        return result;
+      }
+      return convertToValue(value.getAsJsonPrimitive());
+    }
 
     /**
      * Converts a JsonArray to an expression
@@ -4848,21 +4887,28 @@ public class Expression {
       } else if (operator.equals("distance")) {
         return distance(GeometryGeoJson.fromJson(jsonArray.get(1).toString()));
       }
+      if (operator.equals("semiliteral")) {
+        if (jsonArray.size() != 2) {
+          throw new IllegalArgumentException("'semiliteral' expression requires exactly one argument.");
+        }
+        JsonElement value = jsonArray.get(1);
+        if (value.isJsonArray()) {
+          JsonArray array = value.getAsJsonArray();
+          Expression[] elements = new Expression[array.size()];
+          for (int i = 0; i < array.size(); i++) {
+            elements[i] = array.get(i).isJsonNull()
+              ? new ExpressionJsonValue(array.get(i)) : convert(array.get(i));
+          }
+          return semiliteral(elements);
+        }
+        return new Expression(operator, new ExpressionJsonValue(value));
+      }
       for (int i = 1; i < jsonArray.size(); i++) {
         JsonElement jsonElement = jsonArray.get(i);
         if (operator.equals("literal") && jsonElement instanceof JsonArray) {
-          JsonArray nestedArray = (JsonArray) jsonElement;
-          Object[] array = new Object[nestedArray.size()];
-          for (int j = 0; j < nestedArray.size(); j++) {
-            JsonElement element = nestedArray.get(j);
-            if (element instanceof JsonPrimitive) {
-              array[j] = convertToValue((JsonPrimitive) element);
-            } else {
-              throw new IllegalArgumentException("Nested literal arrays are not supported.");
-            }
-          }
-
-          arguments.add(new ExpressionLiteralArray(array));
+          arguments.add(new ExpressionLiteralArray((Object[]) convertLiteralValue(jsonElement)));
+        } else if (operator.equals("literal") && (jsonElement.isJsonObject() || jsonElement.isJsonNull())) {
+          arguments.add(new ExpressionJsonValue(jsonElement));
         } else {
           arguments.add(convert(jsonElement));
         }
@@ -4934,6 +4980,73 @@ public class Expression {
     }
   }
 
+  /** Preserves literal JSON without interpreting nested arrays as expressions. */
+  private static class ExpressionJsonValue extends Expression implements ValueExpression {
+    private final JsonElement value;
+
+    ExpressionJsonValue(JsonElement value) {
+      this.value = value.deepCopy();
+    }
+
+    @Override
+    public Object toValue() {
+      return Converter.convertLiteralValue(value);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+      return value.toString();
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      return other instanceof ExpressionJsonValue && value.equals(((ExpressionJsonValue) other).value);
+    }
+
+    @Override
+    public int hashCode() {
+      return value.hashCode();
+    }
+  }
+
+  /** An unquoted array whose elements are expressions. */
+  private static class ExpressionArray extends Expression implements ValueExpression {
+    private final Expression[] elements;
+
+    ExpressionArray(Expression[] elements) {
+      this.elements = elements.clone();
+    }
+
+    @NonNull
+    @Override
+    public Object toValue() {
+      Object[] values = new Object[elements.length];
+      for (int i = 0; i < elements.length; i++) {
+        Expression element = elements[i];
+        values[i] = element instanceof ValueExpression
+          ? ((ValueExpression) element).toValue() : element.toArray();
+      }
+      return values;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+      return Converter.gson.toJson(toValue());
+    }
+
+    @Override
+    public boolean equals(@Nullable Object other) {
+      return other instanceof ExpressionArray && Arrays.equals(elements, ((ExpressionArray) other).elements);
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.hashCode(elements);
+    }
+  }
+
   /**
    * Expression to wrap Object[] as a literal
    */
@@ -4960,10 +5073,10 @@ public class Expression {
       StringBuilder builder = new StringBuilder("[");
       for (int i = 0; i < array.length; i++) {
         Object argument = array[i];
-        if (argument instanceof String) {
-          builder.append("\"").append(argument).append("\"");
+        if (argument instanceof Object[]) {
+          builder.append(new ExpressionLiteralArray((Object[]) argument));
         } else {
-          builder.append(argument);
+          builder.append(Converter.gson.toJson(argument));
         }
 
         if (i != array.length - 1) {
@@ -4985,7 +5098,12 @@ public class Expression {
 
       ExpressionLiteralArray that = (ExpressionLiteralArray) o;
 
-      return Arrays.equals((Object[]) this.literal, (Object[]) that.literal);
+      return Arrays.deepEquals((Object[]) this.literal, (Object[]) that.literal);
+    }
+
+    @Override
+    public int hashCode() {
+      return Arrays.deepHashCode((Object[]) literal);
     }
   }
 

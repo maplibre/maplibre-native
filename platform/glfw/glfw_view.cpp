@@ -30,10 +30,6 @@
 #include <mln/util/platform.hpp>
 #include <mln/util/string.hpp>
 
-#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-#include "example_custom_drawable_style_layer.hpp"
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)
@@ -176,7 +172,7 @@ void tileLodZoomShift(mln::Map &map, bool positive) {
     auto shift = positive ? tileLodZoomShiftStep : -tileLodZoomShiftStep;
     shift = map.getTileLodZoomShift() + shift;
     shift = mln::util::clamp(shift, -2.5, 2.5);
-    mln::Log::Info(mln::Event::OpenGL, "Zoom shift: " + std::to_string(shift));
+    mln::Log::Info(mln::Event::GraphicsBackend, "Zoom shift: " + std::to_string(shift));
     map.setTileLodZoomShift(shift);
     map.triggerRepaint();
 }
@@ -217,7 +213,8 @@ void addFillExtrusionLayer(mln::style::Style &style, bool visible) {
 } // namespace
 
 void glfwError(int error, const char *description) {
-    mln::Log::Error(mln::Event::OpenGL, std::string("GLFW error (") + std::to_string(error) + "): " + description);
+    mln::Log::Error(mln::Event::GraphicsBackend,
+                    std::string("GLFW error (") + std::to_string(error) + "): " + description);
 }
 
 GLFWView::GLFWView(bool fullscreen_,
@@ -243,7 +240,7 @@ GLFWView::GLFWView(bool fullscreen_,
 #endif
 
     if (!glfwInit()) {
-        mln::Log::Error(mln::Event::OpenGL, "failed to initialize glfw");
+        mln::Log::Error(mln::Event::GraphicsBackend, "failed to initialize glfw");
         exit(1);
     }
 
@@ -289,7 +286,7 @@ GLFWView::GLFWView(bool fullscreen_,
     window = glfwCreateWindow(width, height, "MapLibre Native", monitor, nullptr);
     if (!window) {
         glfwTerminate();
-        mln::Log::Error(mln::Event::OpenGL, "failed to initialize window");
+        mln::Log::Error(mln::Event::GraphicsBackend, "failed to initialize window");
         exit(1);
     }
 
@@ -313,10 +310,10 @@ GLFWView::GLFWView(bool fullscreen_,
 #if defined(__APPLE__) && !defined(MLN_RENDER_BACKEND_VULKAN)
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
+    backend->setFramebufferSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
 #endif
 
-    pixelRatio = static_cast<float>(backend->getSize().width) / width;
+    pixelRatio = static_cast<float>(backend->getFramebufferSize().width) / width;
 
     glfwMakeContextCurrent(nullptr);
 
@@ -364,7 +361,6 @@ GLFWView::GLFWView(bool fullscreen_,
     printf("- Press `K` to add a random custom runtime imagery annotation\n");
     printf("- Press `L` to add a random line annotation\n");
     printf("- Press `W` to pop the last-added annotation off\n");
-    printf("- Press `V` to toggle custom drawable layer\n");
     printf("- Press `B` to toggle rendering stats\n");
     printf("- Press `P` to pause tile requests\n");
     printf("\n");
@@ -460,9 +456,6 @@ void GLFWView::onKey(GLFWwindow *window, int key, int /*scancode*/, int action, 
                 break;
             case GLFW_KEY_C:
                 view->clearAnnotations();
-                break;
-            case GLFW_KEY_V:
-                view->toggleCustomDrawableStyle();
                 break;
             case GLFW_KEY_B:
                 view->map->enableRenderingStatsView(!view->map->isRenderingStatsViewEnabled());
@@ -938,23 +931,6 @@ void GLFWView::popAnnotation() {
     annotationIDs.pop_back();
 }
 
-void GLFWView::toggleCustomDrawableStyle() {
-#if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    auto &style = map->getStyle();
-
-    const std::string identifier = "ExampleCustomDrawableStyleLayer";
-    const auto &existingLayer = style.getLayer(identifier);
-
-    if (!existingLayer) {
-        style.addLayer(std::make_unique<mln::style::CustomDrawableLayer>(
-            identifier, std::make_unique<ExampleCustomDrawableStyleLayerHost>(MLN_ASSETS_PATH)));
-    } else {
-        style.removeLayer(identifier);
-    }
-
-#endif
-}
-
 void GLFWView::makeSnapshot(bool withOverlay) {
     MLN_TRACE_FUNC();
 
@@ -1038,7 +1014,7 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
 #ifdef __APPLE__
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    view->backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
+    view->backend->setFramebufferSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
 #endif
 }
 
@@ -1046,7 +1022,7 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     MLN_TRACE_FUNC();
 
     auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window));
-    view->backend->setSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
+    view->backend->setFramebufferSize({static_cast<uint32_t>(width), static_cast<uint32_t>(height)});
 
     // This is only triggered when the framebuffer is resized, but not the
     // window. It can happen when you move the window between screens with a
