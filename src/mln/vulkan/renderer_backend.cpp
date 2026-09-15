@@ -16,6 +16,7 @@
 #include <mln/shaders/vulkan/debug.hpp>
 #include <mln/shaders/vulkan/fill.hpp>
 #include <mln/shaders/vulkan/fill_extrusion.hpp>
+#include <mln/shaders/vulkan/globe_depth.hpp>
 #include <mln/shaders/vulkan/heatmap.hpp>
 #include <mln/shaders/vulkan/heatmap_texture.hpp>
 #include <mln/shaders/vulkan/hillshade.hpp>
@@ -23,6 +24,7 @@
 #include <mln/shaders/vulkan/line.hpp>
 #include <mln/shaders/vulkan/location_indicator.hpp>
 #include <mln/shaders/vulkan/raster.hpp>
+#include <mln/shaders/vulkan/sky.hpp>
 #include <mln/shaders/vulkan/symbol.hpp>
 #include <mln/shaders/vulkan/widevector.hpp>
 
@@ -692,6 +694,8 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
     registerTypes<shaders::BuiltIn::BackgroundShader,
                   shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::SkyShader,
+                  shaders::BuiltIn::AtmosphereShader,
                   shaders::BuiltIn::CircleShader,
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
@@ -707,6 +711,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::FillExtrusionInstancedShader,
                   shaders::BuiltIn::FillExtrusionPatternShader,
                   shaders::BuiltIn::FillExtrusionPatternInstancedShader,
+                  shaders::BuiltIn::GlobeDepthShader,
                   shaders::BuiltIn::HeatmapShader,
                   shaders::BuiltIn::HeatmapTextureShader,
                   shaders::BuiltIn::HillshadeShader,

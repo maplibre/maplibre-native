@@ -1,4 +1,5 @@
 #include <mln/renderer/layers/render_color_relief_layer.hpp>
+
 #include <mln/renderer/layers/color_relief_layer_tweaker.hpp>
 #include <mln/renderer/buckets/hillshade_bucket.hpp>
 #include <mln/renderer/render_tile.hpp>
@@ -195,11 +196,17 @@ static const std::string ColorReliefShaderGroupName = "ColorReliefShader";
 
 void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
                                     gfx::Context& context,
-                                    const TransformState&,
+                                    const TransformState& state,
                                     const std::shared_ptr<UpdateParameters>&,
                                     const PaintParameters&,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
+    if (updateProjectionVariant(state)) {
+        colorReliefShader.reset();
+        if (projectionVariant == gfx::ProjectionVariant::Mercator) {
+            globeMeshes.clear();
+        }
+    }
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -222,7 +229,7 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!colorReliefShader) {
-        colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName);
+        colorReliefShader = context.getGenericShader(shaders, ColorReliefShaderGroupName, projectionVariant);
     }
 
     if (!colorReliefShader) {
@@ -299,7 +306,12 @@ void RenderColorReliefLayer::update(gfx::ShaderRegistry& shaders,
         std::shared_ptr<gfx::IndexVector<gfx::Triangles>> indices;
         auto* segments = &staticDataSegments;
 
-        if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+        if (projectionVariant == gfx::ProjectionVariant::Globe) {
+            const auto& globeMesh = globeMeshes.get(tileID.canonical, &HillshadeBucket::layoutVertex);
+            vertices = globeMesh.vertices;
+            indices = globeMesh.indices;
+            segments = &globeMesh.segments;
+        } else if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
             vertices = bucket.sharedVertices;
             indices = bucket.sharedIndices;
             segments = &bucket.segments;

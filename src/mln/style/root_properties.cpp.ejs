@@ -1,12 +1,15 @@
 <%
   const properties = locals.properties;
+  const className = locals.className;
+  const objectName = locals.objectName;
+  const observerName = `${className}Observer`;
 -%>
 // This file is generated. Do not edit.
 
-#include <mln/style/light.hpp>
-#include <mln/style/light_impl.hpp>
-#include <mln/style/light_observer.hpp>
-#include <mln/style/conversion/light.hpp>
+#include <mln/style/<%- objectName %>.hpp>
+#include <mln/style/<%- objectName %>_impl.hpp>
+#include <mln/style/<%- objectName %>_observer.hpp>
+#include <mln/style/conversion/<%- objectName %>.hpp>
 #include <mln/style/conversion/property_value.hpp>
 #include <mln/style/conversion/transition_options.hpp>
 #include <mln/style/conversion/json.hpp>
@@ -21,20 +24,20 @@ namespace mln {
 namespace style {
 
 namespace {
-LightObserver nullObserver;
+<%- observerName %> nullObserver;
 } // namespace
 
-Light::Light(Immutable<Light::Impl> impl_) : impl(std::move(impl_)), observer(&nullObserver) {}
+<%- className %>::<%- className %>(Immutable<<%- className %>::Impl> impl_) : impl(std::move(impl_)), observer(&nullObserver) {}
 
-Light::Light() : Light(makeMutable<Impl>()) {}
+<%- className %>::<%- className %>() : <%- className %>(makeMutable<Impl>()) {}
 
-Light::~Light() = default;
+<%- className %>::~<%- className %>() = default;
 
-void Light::setObserver(LightObserver* observer_) {
+void <%- className %>::setObserver(<%- observerName %>* observer_) {
     observer = observer_ ? observer_ : &nullObserver;
 }
 
-Mutable<Light::Impl> Light::mutableImpl() const {
+Mutable<<%- className %>::Impl> <%- className %>::mutableImpl() const {
     return makeMutable<Impl>(*impl);
 }
 
@@ -62,10 +65,10 @@ constexpr const auto properties = mapbox::eternal::hash_map<mapbox::eternal::str
 
 } // namespace
 
-std::optional<Error> Light::setProperty(const std::string& name, const Convertible& value) {
+std::optional<Error> <%- className %>::setProperty(const std::string& name, const Convertible& value) {
     const auto it = properties.find(name.c_str());
     if (it == properties.end()) {
-        return Error { "light doesn't support this property" };
+        return Error { "<%- objectName %> doesn't support this property" };
     }
 
     auto property = static_cast<Property>(it->second);
@@ -113,10 +116,10 @@ std::optional<Error> Light::setProperty(const std::string& name, const Convertib
     }
     <% } %>
 
-    return Error { "light doesn't support this property" };
+    return Error { "<%- objectName %> doesn't support this property" };
 }
 
-StyleProperty Light::getProperty(const std::string& name) const {
+StyleProperty <%- className %>::getProperty(const std::string& name) const {
     const auto it = properties.find(name.c_str());
     if (it == properties.end()) {
         return {};
@@ -136,30 +139,30 @@ StyleProperty Light::getProperty(const std::string& name) const {
 }
 
 <% for (const property of properties) { -%>
-<%- evaluatedType(property) %> Light::getDefault<%- camelize(property.name) %>() {
-    return Light<%- camelize(property.name) %>::defaultValue();
+<%- evaluatedType(property) %> <%- className %>::getDefault<%- camelize(property.name) %>() {
+    return <%- property.typeName %>::defaultValue();
 }
 
-<%- propertyValueType(property) %> Light::get<%- camelize(property.name) %>() const {
-    return impl->properties.template get<Light<%- camelize(property.name) %>>().value;
+<%- propertyValueType(property) %> <%- className %>::get<%- camelize(property.name) %>() const {
+    return impl->properties.template get<<%- property.typeName %>>().value;
 }
 
-void Light::set<%- camelize(property.name) %>(<%- propertyValueType(property) %> property) {
+void <%- className %>::set<%- camelize(property.name) %>(<%- propertyValueType(property) %> property) {
     auto impl_ = mutableImpl();
-    impl_->properties.template get<Light<%- camelize(property.name) %>>().value = std::move(property);
+    impl_->properties.template get<<%- property.typeName %>>().value = std::move(property);
     impl = std::move(impl_);
-    observer->onLightChanged(*this);
+    observer->on<%- className %>Changed(*this);
 }
 
-void Light::set<%- camelize(property.name) %>Transition(const TransitionOptions& options) {
+void <%- className %>::set<%- camelize(property.name) %>Transition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
-    impl_->properties.template get<Light<%- camelize(property.name) %>>().options = options;
+    impl_->properties.template get<<%- property.typeName %>>().options = options;
     impl = std::move(impl_);
-    observer->onLightChanged(*this);
+    observer->on<%- className %>Changed(*this);
 }
 
-TransitionOptions Light::get<%- camelize(property.name) %>Transition() const {
-    return impl->properties.template get<Light<%- camelize(property.name) %>>().options;
+TransitionOptions <%- className %>::get<%- camelize(property.name) %>Transition() const {
+    return impl->properties.template get<<%- property.typeName %>>().options;
 }
 
 <% } -%>

@@ -3,6 +3,8 @@
 #include <mln/gfx/draw_scope.hpp>
 
 #include <cstddef>
+#include <cstdint>
+#include <limits>
 #include <vector>
 #include <map>
 #include <string>
@@ -55,5 +57,8 @@ public:
 };
 
 using SegmentVector = std::vector<SegmentBase>;
+
+/// A segment's vertices are addressed by 16-bit indices.
+constexpr std::size_t maxSegmentVertices = std::numeric_limits<uint16_t>::max();
 
 } // namespace mln

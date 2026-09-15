@@ -1,4 +1,5 @@
 #include <mln/renderer/buckets/line_bucket.hpp>
+#include <mln/util/subdivision.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/style/layers/line_layer_impl.hpp>
 #include <mln/util/math.hpp>
@@ -51,13 +52,19 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
     }
 }
 
-void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
+void LineBucket::addGeometry(const GeometryCoordinates& inputCoordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
     // Ignore empty coordinates.
-    if (coordinates.empty()) {
+    if (inputCoordinates.empty()) {
         return;
     }
+    const uint32_t granularity = subdivisionGranularity.line.getGranularityForZoomLevel(canonical.z);
+    GeometryCoordinates subdivided;
+    if (granularity >= 2) {
+        subdivided = util::subdivideVertexLine(inputCoordinates, granularity);
+    }
+    const GeometryCoordinates& coordinates = granularity >= 2 ? subdivided : inputCoordinates;
     gfx::PolylineGenerator<LineLayoutVertex, SegmentBase> generator(
         vertices,
         LineBucket::layoutVertex,

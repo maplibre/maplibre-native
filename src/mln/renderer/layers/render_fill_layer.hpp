@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/renderer/render_layer.hpp>
+#include <mln/gfx/shader_group.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
 #include <mln/style/layers/fill_layer_properties.hpp>
 #include <mln/layout/pattern_layout.hpp>

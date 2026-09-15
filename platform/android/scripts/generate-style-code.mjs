@@ -37,6 +37,13 @@ const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
   return memo;
 }, []);
 
+const skyProperties = Object.keys(spec[`sky`]).reduce((memo, name) => {
+  const property = spec[`sky`][name];
+  property.name = name;
+  memo.push(property);
+  return memo;
+}, []);
+
 // Collect layer types from spec
 var layers = Object.keys(spec.layer.type.values).map((type) => {
   const layoutProperties = Object.keys(spec[`layout_${type}`]).reduce((memo, name) => {
@@ -462,6 +469,12 @@ const lightJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/
 const lightJavaUnitTests = ejs.compile(fs.readFileSync(absPath('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/light.junit.ejs'), 'utf8'), {strict: true});
 writeIfModified(absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/light/Light.java`), lightJava({properties: lightProperties}));
 writeIfModified(absPath(`MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/LightTest.java`), lightJavaUnitTests({properties: lightProperties}));
+
+// Java + JNI Sky (snapshot peer model)
+const skyJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/sky/sky.java.ejs'), 'utf8'), {strict: true});
+const skyJavaUnitTests = ejs.compile(fs.readFileSync(absPath('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/sky.junit.ejs'), 'utf8'), {strict: true});
+writeIfModified(absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/sky/Sky.java`), skyJava({properties: skyProperties}));
+writeIfModified(absPath(`MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/SkyTest.java`), skyJavaUnitTests({properties: skyProperties}));
 
 // Java
 const layerJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/layer.java.ejs'), 'utf8'), {strict: true});

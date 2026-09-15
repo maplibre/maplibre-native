@@ -40,9 +40,15 @@ struct alignas(16) SymbolDrawableUBO {
     /* 248 */ float opacity_t;
     /* 252 */ float halo_width_t;
     /* 256 */ float halo_blur_t;
-    /* 260 */
+    /* 260 */ /*bool*/ int is_along_line;
+    /* 264 */ /*bool*/ int is_variable_anchor;
+    /* 268 */ float pitched_scale;
+    /* 272 */ float2 translation;
+    /* 280 */ float pad1;
+    /* 284 */ float pad2;
+    /* 288 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 17 * 16, "wrong size");
+static_assert(sizeof(SymbolDrawableUBO) == 18 * 16, "wrong size");
 
 struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
@@ -136,6 +142,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 uint instanceID [[ instance_id ]],
                                 device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
                                 device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
@@ -149,6 +156,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const ProjectionUBO& projection = projectionVector[uboIndex];
     device const SymbolInstance& symbol = symbolInstances[instance];
     device const DynamicInstance& dynamic = dynamicInstances[instance];
     device const OpacityInstance& opacity = opacityInstances[instance];
@@ -195,7 +203,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = drawable.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float2 translated_a_pos = a_pos + drawable.translation;
+    const float4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = drawable.pitch_with_map ?
@@ -215,7 +224,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
         // See comments in symbol_sdf.vertex
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + float2(1, 0), 0.0, projection);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -226,10 +235,31 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
-    const float2 pos0 = projected_pos.xy / projected_pos.w;
+    const float2 projected_pos_xy = float2(dynamic.projected_pos[0], dynamic.projected_pos[1]);
+    float4 projected_pos;
+    if (drawable.is_along_line || drawable.is_variable_anchor) {
+        projected_pos = float4(projected_pos_xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map) {
+        projected_pos = drawable.label_plane_matrix * float4(projected_pos_xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
+    }
+
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#if defined(PROJECTION_GLOBE)
+    if (drawable.pitch_with_map) {
+        const float anchor_pos_tile_y = (drawable.coord_matrix * float4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
+
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
-    const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+    float4 position = drawable.coord_matrix * float4(projected_pos.xy / projected_pos.w + rotation_matrix * posOffset * projectionScaling, z, 1.0);
+    if (drawable.pitch_with_map) {
+        position = projectTileWithElevation(position.xy, position.z, projection);
+    }
 
     return {
         .position     = position,
@@ -351,6 +381,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 uint instanceID [[ instance_id ]],
                                 device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
                                 device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
@@ -364,6 +395,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const ProjectionUBO& projection = projectionVector[uboIndex];
     device const SymbolInstance& symbol = symbolInstances[instance];
     device const DynamicInstance& dynamic = dynamicInstances[instance];
     device const OpacityInstance& opacity = opacityInstances[instance];
@@ -403,7 +435,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = drawable.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float2 translated_a_pos = a_pos + drawable.translation;
+    const float4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -430,7 +463,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + float2(1, 0), 0.0, projection);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -441,10 +474,31 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_sin = sin(segment_angle + symbol_rotation);
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const auto rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
-    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const float2 projected_pos_xy = float2(dynamic.projected_pos[0], dynamic.projected_pos[1]);
+    float4 projected_pos;
+    if (drawable.is_along_line || drawable.is_variable_anchor) {
+        projected_pos = float4(projected_pos_xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map) {
+        projected_pos = drawable.label_plane_matrix * float4(projected_pos_xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
+    }
+
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#if defined(PROJECTION_GLOBE)
+    if (drawable.pitch_with_map) {
+        const float anchor_pos_tile_y = (drawable.coord_matrix * float4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
+
     const float2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
-    const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
+    float4 position = drawable.coord_matrix * float4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
+    if (drawable.pitch_with_map) {
+        position = projectTileWithElevation(position.xy, position.z, projection);
+    }
 
     return {
         .position     = position,
@@ -623,6 +677,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(idSymbolDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 uint instanceID [[ instance_id ]],
                                 device const SymbolInstance* symbolInstances [[buffer(symbolUBOCount + 2)]],
                                 device const DynamicInstance* dynamicInstances [[buffer(symbolUBOCount + 3)]],
@@ -636,6 +691,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const ProjectionUBO& projection = projectionVector[uboIndex];
     device const SymbolInstance& symbol = symbolInstances[instance];
     device const DynamicInstance& dynamic = dynamicInstances[instance];
     device const OpacityInstance& opacity = opacityInstances[instance];
@@ -675,7 +731,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = drawable.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float2 translated_a_pos = a_pos + drawable.translation;
+    const float4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0, projection);
     const float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -702,7 +759,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + float2(1, 0), 0.0, projection);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -714,10 +771,31 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float angle_cos = cos(segment_angle + symbol_rotation);
     const float2x2 rotation_matrix = float2x2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    const float4 projected_pos = drawable.label_plane_matrix * float4(dynamic.projected_pos[0], dynamic.projected_pos[1], 0.0, 1.0);
+    const float2 projected_pos_xy = float2(dynamic.projected_pos[0], dynamic.projected_pos[1]);
+    float4 projected_pos;
+    if (drawable.is_along_line || drawable.is_variable_anchor) {
+        projected_pos = float4(projected_pos_xy, 0.0, 1.0);
+    } else if (drawable.pitch_with_map) {
+        projected_pos = drawable.label_plane_matrix * float4(projected_pos_xy + drawable.translation, 0.0, 1.0);
+    } else {
+        projected_pos = drawable.label_plane_matrix * projectTileWithElevation(projected_pos_xy + drawable.translation, 0.0, projection);
+    }
+
+    const float z = float(drawable.pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#if defined(PROJECTION_GLOBE)
+    if (drawable.pitch_with_map && !drawable.is_along_line) {
+        const float anchor_pos_tile_y = (drawable.coord_matrix * float4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y, projection) * drawable.pitched_scale, projection.projection_transition);
+    }
+#endif
+
     const float2 pos_rot = a_offset / 32.0 * fontScale;
-    const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
-    const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
+    float4 position = drawable.coord_matrix * float4(projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot * projectionScaling, z, 1.0);
+    if (drawable.pitch_with_map) {
+        position = projectTileWithElevation(position.xy, position.z, projection);
+    }
     const float gamma_scale = position.w;
     const bool is_icon = (is_sdf == ICON);
 

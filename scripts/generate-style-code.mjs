@@ -388,21 +388,24 @@ for (let layer of layers) {
   writeIfModified(`src/mln/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), outLocation);
 }
 
-// Light
-/** @type {any[]} **/
-const lightProperties = Object.keys(spec[`light`]).reduce((/** @type {any} **/ memo, name) => {
-  var property = spec[`light`][name];
-  property.name = name;
-  property['light-property'] = true;
-  memo.push(property);
-  return memo;
-}, []);
+function generateRootProperties(className, objectName) {
+  /** @type {any[]} **/
+  const properties = Object.keys(spec[objectName]).map(name => ({
+    ...spec[objectName][name],
+    name,
+    typeName: className === 'Sky' && name.startsWith('sky-') ? camelize(name) : `${className}${camelize(name)}`,
+    'light-property': className === 'Light'
+  }));
 
-// JSON doesn't have a defined order. We're going to sort them alphabetically
-// to get a deterministic order.
-lightProperties.sort((a, b) => collator.compare(a.name, b.name));
+  // JSON doesn't have a defined order. Sort for deterministic output.
+  properties.sort((a, b) => collator.compare(a.name, b.name));
 
-const lightHpp = readAndCompile(`include/mln/style/light.hpp.ejs`, root);
-const lightCpp = readAndCompile(`src/mln/style/light.cpp.ejs`, root);
-writeIfModified(`include/mln/style/light.hpp`, lightHpp({properties: lightProperties}), outLocation);
-writeIfModified(`src/mln/style/light.cpp`, lightCpp({properties: lightProperties}), outLocation);
+  const header = readAndCompile(`include/mln/style/root_properties.hpp.ejs`, root);
+  const source = readAndCompile(`src/mln/style/root_properties.cpp.ejs`, root);
+  const locals = {className, objectName, properties};
+  writeIfModified(`include/mln/style/${objectName}.hpp`, header(locals), outLocation);
+  writeIfModified(`src/mln/style/${objectName}.cpp`, source(locals), outLocation);
+}
+
+generateRootProperties('Light', 'light');
+generateRootProperties('Sky', 'sky');

@@ -163,11 +163,12 @@ using namespace shaders;
 
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
-                               const TransformState&,
+                               const TransformState& state,
                                const std::shared_ptr<UpdateParameters>&,
                                const PaintParameters&,
                                const RenderTree&,
                                UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -253,7 +254,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeOpacity>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
-        const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto circleShader = circleShaderGroup->getOrCreateShader(
+            context, propertiesAsUniforms, projectionVariant);
         if (!circleShader) {
             continue;
         }

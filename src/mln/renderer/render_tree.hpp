@@ -1,10 +1,12 @@
 #pragma once
 #include <mln/gfx/drawable.hpp>
 #include <mln/renderer/paint_parameters.hpp>
+#include <mln/renderer/render_sky.hpp>
 #include <mln/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -65,17 +67,20 @@ public:
                                   MapMode mapMode_,
                                   MapDebugOptions debugOptions_,
                                   TimePoint timePoint_,
-                                  EvaluatedLight light_)
+                                  EvaluatedLight light_,
+                                  std::optional<EvaluatedSky> sky_)
         : transformParams(state_),
           mapMode(mapMode_),
           debugOptions(debugOptions_),
           timePoint(timePoint_),
-          light(std::move(light_)) {}
+          light(std::move(light_)),
+          sky(std::move(sky_)) {}
     TransformParameters transformParams;
     MapMode mapMode;
     MapDebugOptions debugOptions;
     TimePoint timePoint;
     EvaluatedLight light;
+    std::optional<EvaluatedSky> sky;
     bool has3D = false;
     uint32_t opaquePassCutOff = 0;
     Color backgroundColor;

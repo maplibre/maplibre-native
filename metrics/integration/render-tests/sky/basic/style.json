@@ -1,0 +1,32 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "A pitched planar map renders the configured sky and horizon colors above the background layer.",
+      "width": 256,
+      "height": 256,
+      "maxPitch": 85
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 10,
+  "pitch": 82,
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#4a2917"
+      }
+    }
+  ],
+  "sky": {
+    "sky-color": "#1789d5",
+    "horizon-color": "#ffe7a0",
+    "sky-horizon-blend": 0.6
+  }
+}

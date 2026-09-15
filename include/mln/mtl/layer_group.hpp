@@ -1,7 +1,10 @@
 #pragma once
 
+#include <mln/mtl/mtl_fwd.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/mtl/uniform_buffer.hpp>
+
+#include <optional>
 
 namespace mln {
 
@@ -27,6 +30,9 @@ public:
     gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; };
 
 protected:
+    std::optional<MTLDepthStencilStatePtr> stateDepthReadOnly;
+    std::optional<MTLDepthStencilStatePtr> stateDepthReadWrite;
+    std::optional<MTLDepthStencilStatePtr> stateNone;
     UniformBufferArray uniformBuffers;
 };
 

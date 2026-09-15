@@ -37,7 +37,7 @@ struct HillshadePrepareTilePropsUBO {
 };
 
 @group(0) @binding(2) var<uniform> drawable: HillshadePrepareDrawableUBO;
-@group(0) @binding(4) var<uniform> tileProps: HillshadePrepareTilePropsUBO;
+@group(0) @binding(5) var<uniform> tileProps: HillshadePrepareTilePropsUBO;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -63,7 +63,7 @@ struct HillshadePrepareTilePropsUBO {
     maxzoom: f32,
 };
 
-@group(0) @binding(4) var<uniform> tileProps: HillshadePrepareTilePropsUBO;
+@group(0) @binding(5) var<uniform> tileProps: HillshadePrepareTilePropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
 

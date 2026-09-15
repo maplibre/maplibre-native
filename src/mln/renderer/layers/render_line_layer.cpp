@@ -224,11 +224,12 @@ inline void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const Li
 
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState&,
+                             const TransformState& state,
                              [[maybe_unused]] const std::shared_ptr<UpdateParameters>& parameters,
                              [[maybe_unused]] const PaintParameters& paintParameters,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -382,7 +383,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = lineSDFShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -406,7 +408,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = linePatternShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -447,7 +450,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto shader = lineGradientShaderGroup->getOrCreateShader(
-                context, propertiesAsUniforms, posNormalAttribName);
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -486,7 +489,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = lineShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, projectionVariant, posNormalAttribName);
             if (!shader) {
                 continue;
             }

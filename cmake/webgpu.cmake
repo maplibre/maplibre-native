@@ -35,6 +35,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/debug.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/fill_extrusion.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/globe_depth.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/heatmap.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/heatmap_texture.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/hillshade.cpp
@@ -43,6 +44,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/line.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/location_indicator.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/raster.cpp
+        ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/sky.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/symbol.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/shaders/webgpu/widevector.cpp
         ${PROJECT_SOURCE_DIR}/src/mln/webgpu/vertex_buffer_resource.cpp
@@ -73,6 +75,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/debug.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/fill_extrusion.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/globe_depth.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/heatmap.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/heatmap_texture.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/hillshade.hpp
@@ -81,6 +84,7 @@ list(APPEND
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/line.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/location_indicator.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/raster.hpp
+        ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/sky.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/symbol.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/shaders/webgpu/widevector.hpp
         ${PROJECT_SOURCE_DIR}/include/mln/webgpu/texture2d.hpp
