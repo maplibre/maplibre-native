@@ -74,7 +74,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 taskCount--;
 
                 try {
-                    tasklet();
+                    platform::runTask(tasklet);
                     tasklet = {}; // destroy the function and release its captures before unblocking `waitForEmpty`
 
                     if (!--q->runningCount) {

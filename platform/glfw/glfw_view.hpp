@@ -112,7 +112,6 @@ private:
     void clearAnnotations();
     void popAnnotation();
 
-    void toggleCustomDrawableStyle();
     void makeSnapshot(bool withOverlay = false);
 
     mln::AnnotationIDs annotationIDs;
