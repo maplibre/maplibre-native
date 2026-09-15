@@ -45,6 +45,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) IBInspectable BOOL showsHeading;
 @property (nonatomic) IBInspectable BOOL showsScale;
 
+// Options from MLNMapOptions, which cannot be provided when initializing an
+// MLNMapView from IB.  Changing these after initialization has no effect.
+@property (nonatomic) IBInspectable BOOL fastPFOREnabled;
+@property (nonatomic) IBInspectable BOOL featureInfoEnabled;
+
 @end
 
 NS_ASSUME_NONNULL_END

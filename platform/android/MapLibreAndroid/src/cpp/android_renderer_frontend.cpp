@@ -25,7 +25,7 @@ public:
         : mailbox(std::make_shared<Mailbox>(mapRunLoop)),
           delegate(delegate_, mailbox) {}
 
-    ~ForwardingRendererObserver() { mailbox->close(); }
+    ~ForwardingRendererObserver() override { mailbox->close(); }
 
     void onInvalidate() override { delegate.invoke(&RendererObserver::onInvalidate); }
 
@@ -38,10 +38,10 @@ public:
     void onDidFinishRenderingFrame(RenderMode mode,
                                    bool repaintNeeded,
                                    bool placementChanged,
-                                   const gfx::RenderingStats& stats) override {
-        void (RendererObserver::*f)(
-            RenderMode, bool, bool, const gfx::RenderingStats&) = &RendererObserver::onDidFinishRenderingFrame;
-        delegate.invoke(f, mode, repaintNeeded, placementChanged, stats);
+                                   std::shared_ptr<gfx::RenderingStats> stats) override {
+        void (RendererObserver::*f)(RenderMode, bool, bool, std::shared_ptr<gfx::RenderingStats>) =
+            &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, std::move(stats));
     }
 
     void onDidFinishRenderingMap() override { delegate.invoke(&RendererObserver::onDidFinishRenderingMap); }

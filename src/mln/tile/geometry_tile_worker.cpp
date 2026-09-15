@@ -1,30 +1,28 @@
-#include <mln/tile/geometry_tile_worker.hpp>
-#include <mln/tile/geometry_tile_data.hpp>
-#include <mln/tile/geometry_tile.hpp>
-#include <mln/tile/tile_observer.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/layout/layout.hpp>
-#include <mln/layout/symbol_layout.hpp>
 #include <mln/layout/pattern_layout.hpp>
+#include <mln/layout/symbol_layout.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
+#include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/group_by_layout.hpp>
-#include <mln/style/filter.hpp>
-#include <mln/style/layers/symbol_layer_impl.hpp>
-#include <mln/renderer/layers/render_fill_layer.hpp>
 #include <mln/renderer/layers/render_fill_extrusion_layer.hpp>
+#include <mln/renderer/layers/render_fill_layer.hpp>
 #include <mln/renderer/layers/render_line_layer.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
-#include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/style/filter.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/tile/geometry_tile_data.hpp>
+#include <mln/tile/geometry_tile_worker.hpp>
+#include <mln/tile/geometry_tile.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/error_sink.hpp>
+#include <mln/util/exception.hpp>
 #include <mln/util/instrumentation.hpp>
 #include <mln/util/logging.hpp>
-#include <mln/util/constants.hpp>
-#include <mln/util/string.hpp>
-#include <mln/util/exception.hpp>
 #include <mln/util/stopwatch.hpp>
+#include <mln/util/string.hpp>
 #include <mln/util/thread_pool.hpp>
 
-#include <unordered_set>
 #include <utility>
 
 namespace mln {
@@ -42,6 +40,7 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
                                        const bool showCollisionBoxes_,
                                        gfx::DynamicTextureAtlasPtr dynamicTextureAtlas_,
                                        std::shared_ptr<FontFaces> fontFaces_,
+                                       bool captureRenderedFeatures_,
                                        TileObserver* observer_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
@@ -51,6 +50,7 @@ GeometryTileWorker::GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self
       obsolete(obsolete_),
       mode(mode_),
       pixelRatio(pixelRatio_),
+      captureRenderedFeatures(captureRenderedFeatures_),
       showCollisionBoxes(showCollisionBoxes_),
       dynamicTextureAtlas(dynamicTextureAtlas_),
       fontFaces(fontFaces_),
@@ -456,8 +456,11 @@ void GeometryTileWorker::parse() {
         }
 
         const style::Layer::Impl& leaderImpl = *(group.at(0)->baseImpl);
-        BucketParameters parameters{
-            .tileID = id, .mode = mode, .pixelRatio = pixelRatio, .layerType = leaderImpl.getTypeInfo()};
+        BucketParameters parameters{.tileID = id,
+                                    .mode = mode,
+                                    .pixelRatio = pixelRatio,
+                                    .layerType = leaderImpl.getTypeInfo(),
+                                    .retainFeaturesById = captureRenderedFeatures};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {
@@ -496,12 +499,17 @@ void GeometryTileWorker::parse() {
             const std::string& sourceLayerID = leaderImpl.sourceLayer;
             std::shared_ptr<Bucket> bucket = LayerManager::get()->createBucket(parameters, group);
 
-            for (std::size_t i = 0; !obsolete && i < geometryLayer->featureCount(); i++) {
-                std::unique_ptr<GeometryTileFeature> feature = geometryLayer->getFeature(i);
+            bucket->setRetainFeaturesById(captureRenderedFeatures);
+            bucket->reserveFeatures(geometryLayer->featureCount());
 
-                if (!filter(expression::EvaluationContext(static_cast<float>(this->id.overscaledZ), feature.get())
-                                .withCanonicalTileID(&id.canonical)))
+            for (std::size_t i = 0; !obsolete && i < geometryLayer->featureCount(); i++) {
+                auto feature = geometryLayer->getFeature(i);
+
+                const auto effectiveZ = static_cast<float>(id.overscaledZ);
+                if (!filter(
+                        expression::EvaluationContext(effectiveZ, feature.get()).withCanonicalTileID(&id.canonical))) {
                     continue;
+                }
 
                 const GeometryCollection& geometries = feature->getGeometries();
                 bucket->addFeature(*feature, geometries, {}, PatternLayerMap(), i, id.canonical);
@@ -593,13 +601,12 @@ void GeometryTileWorker::finalizeLayout() {
                                    << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
                                    << id.canonical.y << " Time");
 
-    parent.invoke(&GeometryTile::onLayout,
-                  std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
-                                                               std::move(featureIndex),
-                                                               std::move(glyphAtlas),
-                                                               std::move(imageAtlas),
-                                                               dynamicTextureAtlas),
-                  correlationID);
+    auto layoutResult = std::make_shared<GeometryTile::LayoutResult>(std::move(renderData),
+                                                                     std::move(featureIndex),
+                                                                     std::move(glyphAtlas),
+                                                                     std::move(imageAtlas),
+                                                                     dynamicTextureAtlas);
+    parent.invoke(&GeometryTile::onLayout, std::move(layoutResult), correlationID);
 }
 
 } // namespace mln

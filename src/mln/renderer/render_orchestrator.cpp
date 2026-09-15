@@ -30,6 +30,7 @@
 #include <mln/util/logging.hpp>
 
 #include <algorithm>
+#include <iterator>
 
 namespace mln {
 
@@ -201,7 +202,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                   .tileLodPitchThreshold = updateParameters->tileLodPitchThreshold,
                                   .tileLodZoomShift = updateParameters->tileLodZoomShift,
                                   .tileLodMode = updateParameters->tileLodMode,
-                                  .dynamicTextureAtlas = dynamicTextureAtlas};
+                                  .dynamicTextureAtlas = dynamicTextureAtlas,
+                                  .captureRenderedFeatures = updateParameters->captureRenderedFeatures};
 
     glyphManager->setURL(updateParameters->glyphURL);
     glyphManager->setFontFaces(updateParameters->fontFaces);
@@ -970,8 +972,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
+    allFeatures.reserve(items.size());
+
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
+        const auto& layerId = renderLayer.getId();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -984,8 +990,24 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
+
+        // Accumulate rendered features from each render layer, leaving each one empty.
+        if (!renderLayer.stats.renderedFeatures.empty()) {
+            const auto& sourceId = item.source ? item.source->getId() : std::string{};
+
+            // don't use insert to eliminate the double-lookup because it doesn't
+            // guarantee that the source isn't moved when the item is not inserted.
+            if (const auto hit = allFeatures.find({sourceId, layerId}); hit != allFeatures.end()) {
+                RenderLayer::Stats::merge(hit->second, renderLayer.stats.renderedFeatures);
+            } else {
+                allFeatures.insert({{sourceId, layerId}, std::move(renderLayer.stats.renderedFeatures)});
+            }
+            renderLayer.stats.renderedFeatures.clear();
+        }
     }
     addChanges(changes);
+
+    std::swap(frameRenderedFeatures, allFeatures);
 }
 
 void RenderOrchestrator::processChanges() {

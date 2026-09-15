@@ -2,29 +2,29 @@
 
 #include <mln/geometry/feature_index.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
+#include <mln/gfx/drawable_atlases_tweaker.hpp>
+#include <mln/gfx/drawable_builder.hpp>
 #include <mln/gfx/render_pass.hpp>
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/layer_group.hpp>
+#include <mln/renderer/layers/fill_extrusion_layer_tweaker.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_tile.hpp>
+#include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/tile_render_data.hpp>
+#include <mln/renderer/update_parameters.hpp>
+#include <mln/shaders/fill_extrusion_layer_ubo.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/expression/image.hpp>
 #include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/tile/geometry_tile.hpp>
 #include <mln/tile/tile.hpp>
 #include <mln/util/intersection_tests.hpp>
 #include <mln/util/math.hpp>
-
-#include <mln/gfx/drawable_atlases_tweaker.hpp>
-#include <mln/gfx/drawable_builder.hpp>
-#include <mln/renderer/layer_group.hpp>
-#include <mln/renderer/layers/fill_extrusion_layer_tweaker.hpp>
-#include <mln/renderer/update_parameters.hpp>
-#include <mln/shaders/fill_extrusion_layer_ubo.hpp>
-#include <mln/shaders/shader_program_base.hpp>
 
 namespace mln {
 
@@ -39,6 +39,88 @@ inline const FillExtrusionLayer::Impl& impl_cast(const Immutable<style::Layer::I
 }
 
 } // namespace
+
+void RenderFillExtrusionLayer::captureRenderedFeatures(
+    const FillExtrusionBucket& bucket,
+    const RenderTile& tile,
+    const FillExtrusionBinders& binders,
+    const style::FillExtrusionPaintProperties::PossiblyEvaluated& evaluated,
+    const TransformState& state,
+    const TransformParameters& transformParams) {
+    const auto& tileID = tile.getOverscaledTileID();
+
+    // fill-extrusion-opacity does not support data-driven expressions
+    const auto constantAlpha = evaluated.get<FillExtrusionOpacity>();
+    if (constantAlpha == 0) {
+        return;
+    }
+
+    const bool colorIsConstant = evaluated.template get<FillExtrusionColor>().isConstant();
+    const auto& colorBinder = binders.template get<FillExtrusionColor>();
+    if (colorIsConstant && std::get<0>(colorBinder->uniformValue(evaluated.get<FillExtrusionColor>())).a == 0) {
+        return;
+    }
+
+    constexpr bool inViewportPixelUnits = false;
+    constexpr bool nearClipped = true;
+    constexpr bool aligned = false;
+    constexpr bool is3d = true;
+    constexpr bool enableDepth = true;
+    constexpr std::int32_t subLayerIndex = 1;
+    const auto translation = evaluated.get<FillExtrusionTranslate>();
+    const auto translationAnchor = evaluated.get<FillExtrusionTranslateAnchor>();
+    const auto base = constOrDefault<FillExtrusionBase>(evaluated);
+    const auto height = constOrDefault<FillExtrusionHeight>(evaluated);
+    const std::optional<mln::Point<double>> origin = std::nullopt;
+    const auto zoomFraction = state.getZoomFraction();
+    std::optional<mat4> tileMatrix;
+
+    const auto& features = bucket.getRetainedFeatures();
+    stats.renderedFeatures.reserve(features.size());
+
+    for (std::size_t i = 0; i < features.size(); ++i) {
+        const auto& featureEntry = features[i];
+        const auto& featureID = featureEntry.featureId;
+        assert(!featureID.empty());
+
+        if (!colorIsConstant) {
+            // Consider only the value for the first vertex of this feature, for now.
+            const auto& [vertex] = colorBinder->getVertexValue(featureEntry.vertexOffset);
+            if (unpack_mix_alpha(vertex.a1, zoomFraction) == 0) {
+                continue;
+            }
+        }
+
+        // Compute the tile matrix once
+        if (!tileMatrix.has_value()) {
+            tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
+                                                     state,
+                                                     transformParams,
+                                                     layerIndex,
+                                                     translation,
+                                                     translationAnchor,
+                                                     origin,
+                                                     is3d,
+                                                     enableDepth,
+                                                     subLayerIndex,
+                                                     nearClipped,
+                                                     inViewportPixelUnits,
+                                                     aligned);
+        }
+
+        // Each vertex is considered twice, once at the base z and once at the height z
+        const auto vertexOffset = featureEntry.vertexOffset;
+        const auto vertexCount = featureEntry.vertexCount;
+        const auto getVertex = [&bucket, vertexOffset, vertexCount, base, height](std::size_t vi) {
+            const auto& vertex = bucket.vertices.at(vertexOffset + (vi % vertexCount)).a1;
+            const auto z = (vi < vertexCount) ? base : height;
+            return vec3{vertex[0] + 0.0, vertex[1] + 0.0, z};
+        };
+        if (const auto bound = computeFeatureNDCBound(2 * vertexCount, *tileMatrix, getVertex)) {
+            stats.addRenderedFeature(featureID, *bound, {tileID});
+        }
+    }
+}
 
 RenderFillExtrusionLayer::RenderFillExtrusionLayer(Immutable<style::FillExtrusionLayer::Impl> _impl)
     : RenderLayer(makeMutable<FillExtrusionLayerProperties>(std::move(_impl))),
@@ -103,11 +185,13 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
-                                      const TransformState&,
-                                      const std::shared_ptr<UpdateParameters>&,
+                                      const TransformState& state,
+                                      const std::shared_ptr<UpdateParameters>& updateParameters,
                                       [[maybe_unused]] const PaintParameters& paintParameters,
-                                      const RenderTree&,
+                                      const RenderTree& renderTree,
                                       UniqueChangeRequestVec& changes) {
+    stats.renderedFeatures.clear();
+
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
         return;
@@ -221,6 +305,12 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto vertexCount = bucket.vertices.elements();
         auto& binders = bucket.paintPropertyBinders.at(getID());
+
+        // Capture rendered features if requested
+        if (updateParameters && updateParameters->captureRenderedFeatures) {
+            const auto& params = renderTree.getParameters().transformParams;
+            captureRenderedFeatures(bucket, tile, binders, evaluated, state, params);
+        }
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {

@@ -36,6 +36,13 @@ private:
                                 const mat4 &,
                                 const FeatureState &) const override;
 
+    void captureRenderedFeatures(const FillExtrusionBucket &,
+                                 const RenderTile &,
+                                 const FillExtrusionBinders &,
+                                 const style::FillExtrusionPaintProperties::PossiblyEvaluated &,
+                                 const TransformState &,
+                                 const TransformParameters &);
+
     // Paint properties
     style::FillExtrusionPaintProperties::Unevaluated unevaluated;
 

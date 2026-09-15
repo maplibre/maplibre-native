@@ -2,8 +2,9 @@
 
 #include <mln/shaders/layer_ubo.hpp>
 #include <mln/shaders/shader_source.hpp>
-#include <mln/util/immutable.hpp>
 #include <mln/util/containers.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/immutable.hpp>
 #include <mln/util/mat4.hpp>
 
 #include <array>
@@ -26,6 +27,7 @@ enum class TranslateAnchorType : bool;
 class LayerGroupBase;
 class PaintParameters;
 class RenderTree;
+class TransformParameters;
 class TransformState;
 class UnwrappedTileID;
 
@@ -58,6 +60,20 @@ public:
                               const gfx::Drawable& drawable,
                               bool aligned = false);
 
+    static mat4 getTileMatrix(const UnwrappedTileID& tileID,
+                              const TransformState& transformState,
+                              const TransformParameters& transformParams,
+                              const uint32_t currentLayerIndex,
+                              const std::array<float, 2>& translation,
+                              style::TranslateAnchorType anchor,
+                              const std::optional<mln::Point<double>>& origin,
+                              bool is3d,
+                              bool useDepth,
+                              std::int32_t subLayerIndex,
+                              bool nearClipped,
+                              bool inViewportPixelUnits,
+                              bool aligned);
+
 protected:
     /// Determine whether this tweaker should apply to the given drawable
     bool checkTweakDrawable(const gfx::Drawable&) const;
@@ -66,6 +82,14 @@ protected:
     static void multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
                                              const PaintParameters& parameters,
                                              const gfx::Drawable& drawable,
+                                             bool nearClipped,
+                                             bool aligned);
+    static void multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
+                                             const TransformParameters& transformParams,
+                                             const uint32_t currentLayerIndex,
+                                             bool is3d,
+                                             bool useDepth,
+                                             std::int32_t subLayerIndex,
                                              bool nearClipped,
                                              bool aligned);
 
