@@ -4908,21 +4908,17 @@ static void *windowScreenContext = &windowScreenContext;
     (NSArray<MLNAnnotationView *> *)annotationViews {
   if (annotationViews.count == 0) return;
 
-  MLNAnnotationContainerView *newAnnotationContainerView;
-  if (self.annotationContainerView) {
-    // reload any previously added views
-    newAnnotationContainerView = [MLNAnnotationContainerView
-        annotationContainerViewWithAnnotationContainerView:self.annotationContainerView];
-    [self.annotationContainerView removeFromSuperview];
-  } else {
-    newAnnotationContainerView = [[MLNAnnotationContainerView alloc] initWithFrame:self.bounds];
+  MLNAnnotationContainerView *annotationContainerView = self.annotationContainerView;
+  if (!annotationContainerView) {
+    annotationContainerView = [[MLNAnnotationContainerView alloc] initWithFrame:self.bounds];
+    annotationContainerView.autoresizingMask =
+        UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    annotationContainerView.contentMode = UIViewContentModeCenter;
+    [_mbglView->getView() insertSubview:annotationContainerView atIndex:0];
+    self.annotationContainerView = annotationContainerView;
   }
-  newAnnotationContainerView.autoresizingMask =
-      UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  newAnnotationContainerView.contentMode = UIViewContentModeCenter;
-  [newAnnotationContainerView addSubviews:annotationViews];
-  [_mbglView->getView() insertSubview:newAnnotationContainerView atIndex:0];
-  self.annotationContainerView = newAnnotationContainerView;
+
+  [annotationContainerView addSubviews:annotationViews];
 
   [self updatePresentsWithTransaction];
 }
@@ -5082,7 +5078,7 @@ static void *windowScreenContext = &windowScreenContext;
     if (annotationContext.viewReuseIdentifier) {
       NSMutableArray *annotationViewReuseQueue =
           [self annotationViewReuseQueueForIdentifier:annotationContext.viewReuseIdentifier];
-      if (![annotationViewReuseQueue containsObject:annotationView]) {
+      if ([annotationViewReuseQueue containsObject:annotationView]) {
         [annotationViewReuseQueue removeObject:annotationView];
       }
     }
@@ -5115,6 +5111,25 @@ static void *windowScreenContext = &windowScreenContext;
     if (_mbglMap) {
       self.mbglMap.removeAnnotation(annotationTag);
     }
+  }
+
+  BOOL hasAnnotationViewContexts = NO;
+  for (const auto &annotationContextPair : _annotationContextsByAnnotationTag) {
+    if (annotationContextPair.second.viewReuseIdentifier) {
+      hasAnnotationViewContexts = YES;
+      break;
+    }
+  }
+
+  if (!hasAnnotationViewContexts) {
+    for (NSArray<MLNAnnotationView *>
+             *annotationViewReuseQueue in _annotationViewReuseQueueByIdentifier.allValues) {
+      for (MLNAnnotationView *annotationView in annotationViewReuseQueue) {
+        [annotationView removeFromSuperview];
+        [self.annotationContainerView.annotationViews removeObject:annotationView];
+      }
+    }
+    [_annotationViewReuseQueueByIdentifier removeAllObjects];
   }
 
   [self updatePresentsWithTransaction];
