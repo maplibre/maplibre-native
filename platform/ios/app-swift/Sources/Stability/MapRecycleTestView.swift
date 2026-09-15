@@ -10,7 +10,8 @@ struct MapRecycleTestView: View {
 
     @Environment(\.dismiss) var dismiss
     @State private var remainingCycles = 300
-    @State private var showTopMap = true
+    @State private var showTopMap = false
+    @State private var topMapStarted = false
     @State private var topMapID = UUID()
     @State private var remountTask: Task<Void, Never>?
     @State private var bottomMapHandle = NavigationMapHandle()
@@ -23,7 +24,8 @@ struct MapRecycleTestView: View {
                     NavigationMapView(
                         onDidFinishLoadingMap: scheduleRemount,
                         cameraSource: bottomMapHandle.map,
-                        styleURL: style
+                        styleURL: style,
+                        loadRoutes: false
                     )
                     .id(topMapID)
                 } else {
@@ -32,8 +34,16 @@ struct MapRecycleTestView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            NavigationMapView(onCreated: { bottomMapHandle.map = $0 }, styleURL: style)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            NavigationMapView(
+                onRouteReady: {
+                    guard !topMapStarted else { return }
+                    topMapStarted = true
+                    showTopMap = true
+                },
+                onCreated: { bottomMapHandle.map = $0 },
+                styleURL: style
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .edgesIgnoringSafeArea(.bottom)
         .onAppear {
@@ -64,7 +74,7 @@ struct MapRecycleTestView: View {
                     dismiss()
                     return
                 }
-                try await Task.sleep(for: .seconds(1))
+                try await Task.sleep(for: .seconds(0.1))
                 topMapID = UUID()
                 showTopMap = true
                 remountTask = nil

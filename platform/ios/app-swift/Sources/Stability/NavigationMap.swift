@@ -64,16 +64,18 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     private var pendingInitialCamera: MLNMapCamera?
     private var pendingInitialZoom: Double?
     var onDidFinishLoadingMap: (() -> Void)?
+    var onRouteReady: (() -> Void)?
     private let specifiedStyleURL: URL?
+    private let loadRoutes: Bool
 
-    init(cameraSource: MLNMapView? = nil, styleURL: URL? = nil) {
+    init(cameraSource: MLNMapView? = nil, styleURL: URL? = nil, loadRoutes: Bool = true) {
         specifiedStyleURL = styleURL
-        super.init(frame: CGRect())
-        super.styleURL = styleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!
+        self.loadRoutes = loadRoutes
+        super.init(frame: CGRect(), styleURL: styleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
 
         if let cameraSource {
             pendingInitialCamera = cameraSource.camera
-            pendingInitialZoom = cameraSource.zoomLevel
+            pendingInitialZoom = cameraSource.zoomLevel + 2
             applyPendingInitialCamera()
         }
     }
@@ -95,11 +97,6 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
                   zoomLevel: pendingInitialZoom ?? zoomLevel,
                   direction: 0,
                   animated: false)
-
-        let pitched = self.camera
-        pitched.pitch = camera.pitch
-        pitched.heading = 0
-        setCamera(pitched, animated: false)
     }
 
     @available(*, unavailable)
@@ -136,7 +133,14 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     func run() {
         delegate = self
 
-        startNewRoute()
+        if loadRoutes {
+            startNewRoute()
+        } else {
+            task = Task { [weak self] in
+                guard let self else { return }
+                await load(style: specifiedStyleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
+            }
+        }
     }
 
     func stop() {
@@ -159,6 +163,7 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
 
         notifyOnMapLoad = false
         onDidFinishLoadingMap = nil
+        onRouteReady = nil
     }
 
     deinit {
@@ -199,6 +204,7 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
                 )
 
                 setCamera(camera, animated: true)
+                onRouteReady?()
 
                 try await Task.sleep(for: .seconds(config.randomWaitTime()))
                 guard !Task.isCancelled else { return }

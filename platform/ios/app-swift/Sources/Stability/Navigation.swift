@@ -241,12 +241,12 @@ class NavigationRoute {
 
         mapView?.locationManager = nil
 
-        if let source = mapView?.style?.source(withIdentifier: SourceIdentifier) as? MLNShapeSource {
-            mapView?.style?.removeSource(source)
-        }
-
         if let layer = mapView?.style?.layer(withIdentifier: LayerIdentifier) as? MLNLineStyleLayer {
             mapView?.style?.removeLayer(layer)
+        }
+
+        if let source = mapView?.style?.source(withIdentifier: SourceIdentifier) as? MLNShapeSource {
+            mapView?.style?.removeSource(source)
         }
     }
 }
