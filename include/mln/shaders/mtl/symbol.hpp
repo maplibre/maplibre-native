@@ -152,7 +152,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const SymbolInstance& symbol = symbolInstances[instance];
     device const DynamicInstance& dynamic = dynamicInstances[instance];
     device const OpacityInstance& opacity = opacityInstances[instance];
-    device const DataInstance& data = dataInstances[instance];
 
     const float2 raw_fade_opacity = unpack_opacity(opacity.fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
@@ -161,6 +160,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if defined(HAS_UNIFORM_u_opacity)
     const half fo = half(fade_opacity);
 #else
+    device const DataInstance& data = dataInstances[instance];
     const half fo = half(unpack_mix_float(data.opacity, drawable.opacity_t) * fade_opacity);
 #endif
 
