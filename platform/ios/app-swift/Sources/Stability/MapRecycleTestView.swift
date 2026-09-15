@@ -17,16 +17,7 @@ struct MapRecycleTestView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            let mvt = "https://gc-na.amazon.com/stylesheet/amazon-delivery-us"
-            let mltHereProd = "https://d8j25fm0ain7u.cloudfront.net/amazon-delivery-here-mlt-demo/1.0/stylesheet.json"
-            let mltHereConverge = "https://dr45e484ajson.cloudfront.net/stylesheet/stylesheet.json"
-            let mltHereTess = "https://dr45e484ajson.cloudfront.net/stylesheet/stylesheet_tessellated.json"
-            let styleStr = mvt
-            let style = if #available(iOS 17.0, *) {
-                URL(string: styleStr, encodingInvalidCharacters: false)
-            } else {
-                URL(string: styleStr)
-            }
+            let style: URL? = nil
             Group {
                 if showTopMap {
                     NavigationMapView(

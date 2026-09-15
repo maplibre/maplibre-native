@@ -210,8 +210,6 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
     func stop() {
         guard task != nil else { return }
 
-        print("UserMap: stop")
-
         task?.cancel()
         task = nil
 
@@ -223,7 +221,6 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
 
     deinit {
         task?.cancel()
-        print("UserMap: deinit")
     }
 
     @MainActor func runStyleActions() async {
