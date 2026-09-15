@@ -445,6 +445,8 @@ public:
         OpacityAttributeVector& opacityAttributeData() { return *sharedOpacityAttributeData; }
         const OpacityAttributeVector& opacityAttributeData() const { return *sharedOpacityAttributeData; }
 
+        bool hasVisibleVertices(std::size_t offset, std::size_t count) const;
+
 #if MLN_USE_SYMBOL_INSTANCING
         std::shared_ptr<SortedInstanceVector> sharedSortedInstances = std::make_shared<SortedInstanceVector>();
         SortedInstanceVector& sortedInstances() { return *sharedSortedInstances; }
