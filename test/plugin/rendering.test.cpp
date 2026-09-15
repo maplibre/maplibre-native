@@ -121,19 +121,21 @@ void registerTriangles(const std::string& pluginID,
                 color + ");}";
         }
         if (scopedUniforms) {
-            const auto block = [](const char* name, unsigned id, bool vulkan) {
+            // Use instance names to keep uniform members distinct across GL shader stages.
+            const auto block = [](const char* name, const char* instance, unsigned id, bool vulkan) {
                 return std::string("layout(std140") +
                        (vulkan ? ",set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_" + std::to_string(id) +
                                      "_BINDING"
                                : "") +
-                       ") uniform " + name + "{vec4 value;};";
+                       ") uniform " + name + "{vec4 value;}" + instance + ";";
             };
-            code[i][0] = "in vec2 a_pos;" + block("TileUBO", 0, false) + body + "gl_Position.z=value.x;}";
-            code[i][1] = block("PaintUBO", 1, false) + "void main(){fragColor=vec4(" + color + ")*value.x;}";
-            code[i][2] = "layout(location=0) in vec2 a_pos;" + block("TileUBO", 0, true) + body +
-                         "gl_Position.z=value.x;applySurfaceTransform();}";
-            code[i][3] = "layout(location=0) out vec4 fragColor;" + block("PaintUBO", 1, true) +
-                         "void main(){fragColor=vec4(" + color + ")*value.x;}";
+            code[i][0] = "in vec2 a_pos;" + block("TileUBO", "tile", 0, false) + body + "gl_Position.z=tile.value.x;}";
+            code[i][1] = block("PaintUBO", "paint", 1, false) + "void main(){fragColor=vec4(" + color +
+                         ")*paint.value.x;}";
+            code[i][2] = "layout(location=0) in vec2 a_pos;" + block("TileUBO", "tile", 0, true) + body +
+                         "gl_Position.z=tile.value.x;applySurfaceTransform();}";
+            code[i][3] = "layout(location=0) out vec4 fragColor;" + block("PaintUBO", "paint", 1, true) +
+                         "void main(){fragColor=vec4(" + color + ")*paint.value.x;}";
             code[i][4] =
                 "struct Input{float2 a_pos [[attribute(0)]];};struct UBO{float4 value;};"
                 "vertex float4 triangleVertex(Input in [[stage_in]],"
