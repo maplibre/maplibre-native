@@ -11,6 +11,7 @@ namespace android {
 
 int severityToPriority(EventSeverity severity);
 void changeState(JNIEnv* env, struct android_app* app, bool result);
+std::string getIntentExtra(JNIEnv* env, struct android_app* app, const std::string& name);
 bool copyFile(JNIEnv* env,
               AAssetManager* assetManager,
               const std::string& filePath,

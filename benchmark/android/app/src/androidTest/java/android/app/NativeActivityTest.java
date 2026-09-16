@@ -1,5 +1,6 @@
 package android.app;
 
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
@@ -21,7 +22,9 @@ public class NativeActivityTest {
     @Test(timeout = 1200000L)
     public void runBenchmark() throws Exception {
         Log.v("Benchmark", "Start the benchmark");
-        mActivityTestRule.launchActivity(null);
+        Intent intent = new Intent();
+        intent.putExtra("benchmark_filter", "^ColorParse$");
+        mActivityTestRule.launchActivity(intent);
         while (TestState.running) {
             Log.v("Benchmark", "Benchmark is running...");
             Thread.sleep(1000L);

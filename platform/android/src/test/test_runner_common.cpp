@@ -66,6 +66,24 @@ std::string jstringToStdString(JNIEnv* env, jstring jStr) {
     return ret;
 }
 
+std::string getIntentExtra(JNIEnv* env, struct android_app* app, const std::string& name) {
+    jobject nativeActivity = app->activity->clazz;
+    JavaWrapper<jclass> activityClass(env, env->GetObjectClass(nativeActivity));
+    jmethodID getIntent = env->GetMethodID(activityClass.get(), "getIntent", "()Landroid/content/Intent;");
+    JavaWrapper<jobject> intent(env, env->CallObjectMethod(nativeActivity, getIntent));
+    if (intent.get() == nullptr) {
+        return {};
+    }
+
+    JavaWrapper<jclass> intentClass(env, env->GetObjectClass(intent.get()));
+    jmethodID getStringExtra = env->GetMethodID(
+        intentClass.get(), "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;");
+    JavaWrapper<jstring> key(env, env->NewStringUTF(name.c_str()));
+    JavaWrapper<jstring> value(env,
+                               static_cast<jstring>(env->CallObjectMethod(intent.get(), getStringExtra, key.get())));
+    return jstringToStdString(env, value.get());
+}
+
 void changeState(JNIEnv* env, struct android_app* app, bool result) {
     jobject nativeActivity = app->activity->clazz;
     jclass acl = env->GetObjectClass(nativeActivity);
