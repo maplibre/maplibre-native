@@ -30,7 +30,9 @@ TEST(Expression, IsExpression) {
 
         // TODO: "interpolate-hcl": https://github.com/mapbox/mapbox-gl-native/issues/8720
         // TODO: "interpolate-lab": https://github.com/mapbox/mapbox-gl-native/issues/8720
-        if (name == "interpolate-hcl" || name == "interpolate-lab") {
+        // TODO: "semiliteral": https://github.com/maplibre/maplibre-native/issues/4401
+        // TODO: "global-state": https://github.com/maplibre/maplibre-native/issues/3302
+        if (name == "interpolate-hcl" || name == "interpolate-lab" || name == "semiliteral" || name == "global-state") {
             if (expression::isExpression(conversion::Convertible(expression))) {
                 ASSERT_TRUE(false) << "Expression name" << name
                                    << "is implemented - please update Expression.IsExpression test.";

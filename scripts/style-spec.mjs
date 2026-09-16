@@ -12,6 +12,31 @@ delete modifiedReferenceSpec['layout_symbol']['text-overlap'];
 modifiedReferenceSpec["layout_symbol"]["text-allow-overlap"]["requires"] = referenceSpec["layout_symbol"]["text-allow-overlap"]["requires"].filter(val => JSON.stringify(val) !== '{"!":"text-overlap"}');
 modifiedReferenceSpec["layout_symbol"]["text-allow-overlap"]["requires"] = referenceSpec["layout_symbol"]["icon-allow-overlap"]["requires"].filter(val => JSON.stringify(val) !== '{"!":"icon-overlap"}');
 
+// https://github.com/maplibre/maplibre-native/issues/1929
+delete modifiedReferenceSpec['layout_symbol']['symbol-height-offset'];
+delete modifiedReferenceSpec['layout_symbol']['symbol-height-anchor'];
+
+// https://github.com/maplibre/maplibre-native/issues/4117
+delete modifiedReferenceSpec['paint_raster']['resampling'];
+delete modifiedReferenceSpec['paint_hillshade']['resampling'];
+delete modifiedReferenceSpec['paint_color-relief']['resampling'];
+
+// https://github.com/maplibre/maplibre-native/issues/4298
+delete modifiedReferenceSpec['paint_fill']['fill-layer-opacity'];
+delete modifiedReferenceSpec['paint_line']['line-layer-opacity'];
+
+// https://github.com/maplibre/maplibre-native/issues/4194
+for (const name of ['line-cap', 'line-miter-limit', 'line-round-limit']) {
+    modifiedReferenceSpec['layout_line'][name]['property-type'] = 'data-constant';
+    modifiedReferenceSpec['layout_line'][name].expression.parameters = ['zoom'];
+}
+modifiedReferenceSpec['paint_line']['line-dasharray']['property-type'] = 'cross-faded';
+modifiedReferenceSpec['paint_line']['line-dasharray'].expression.parameters = ['zoom'];
+
+// https://github.com/maplibre/maplibre-native/issues/4517
+modifiedReferenceSpec['layout_symbol']['icon-rotation-alignment']['property-type'] = 'data-constant';
+modifiedReferenceSpec['layout_symbol']['icon-rotation-alignment'].expression.parameters = ['zoom'];
+
 modifiedReferenceSpec.layer.type.values["location-indicator"] = {};
 modifiedReferenceSpec["layout_location-indicator"] = {
   "top-image": {

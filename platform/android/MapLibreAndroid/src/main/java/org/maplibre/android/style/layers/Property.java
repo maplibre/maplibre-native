@@ -606,7 +606,7 @@ public final class Property {
   @Retention(RetentionPolicy.SOURCE)
   public @interface FILL_EXTRUSION_TRANSLATE_ANCHOR {}
 
-  // RASTER_RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+  // RASTER_RESAMPLING: The resampling/interpolation method to use for overscaling, also known as texture magnification filter. It is advised to use the generic `resampling` paint property instead.
 
   /**
    * (Bi)linear filtering interpolates pixel values using the weighted average of the four closest original source pixels creating a smooth but blurry look when overscaled
@@ -618,7 +618,7 @@ public final class Property {
   public static final String RASTER_RESAMPLING_NEAREST = "nearest";
 
   /**
-   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter
+   * The resampling/interpolation method to use for overscaling, also known as texture magnification filter. It is advised to use the generic `resampling` paint property instead.
    */
   @StringDef({
       RASTER_RESAMPLING_LINEAR,
@@ -648,7 +648,7 @@ public final class Property {
   @Retention(RetentionPolicy.SOURCE)
   public @interface HILLSHADE_ILLUMINATION_ANCHOR {}
 
-  // HILLSHADE_METHOD: The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
+  // HILLSHADE_METHOD: The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
 
   /**
    * The legacy hillshade method.
@@ -672,7 +672,7 @@ public final class Property {
   public static final String HILLSHADE_METHOD_MULTIDIRECTIONAL = "multidirectional";
 
   /**
-   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![image](assets/hillshade_methods.png)
+   * The hillshade algorithm to use, one of `standard`, `basic`, `combined`, `igor`, or `multidirectional`. ![Visual comparison of standard, basic, igor, combined, and multidirectional hillshade-method](assets/hillshade_methods.png)
    */
   @StringDef({
       HILLSHADE_METHOD_STANDARD,
