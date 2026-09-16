@@ -40,7 +40,7 @@ float2 unpack_opacity(const float packedOpacity) {
 }
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
-// [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.g * 255 ]
+// [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.a * 255 ]
 float4 decode_color(const float2 encoded) {
     return float4(unpack_float(encoded[0]) / 255, unpack_float(encoded[1]) / 255);
 }

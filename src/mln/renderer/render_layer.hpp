@@ -1,18 +1,19 @@
 #pragma once
+#include <mln/gfx/drawable.hpp>
 #include <mln/layout/layout.hpp>
+#include <mln/renderer/change_request.hpp>
+#include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/render_pass.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/style/layer_properties.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 #include <mln/util/mat4.hpp>
-
-#include <mln/gfx/drawable.hpp>
-#include <mln/renderer/layer_group.hpp>
-#include <mln/renderer/change_request.hpp>
 #include <mln/util/tiny_unordered_map.hpp>
 
+#include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace mln {
@@ -90,45 +91,47 @@ protected:
 public:
     virtual ~RenderLayer() = default;
 
-    // Begin transitions for any properties that have changed since the last frame.
+    const std::string& getId() const;
+
+    /// Begin transitions for any properties that have changed since the last frame.
     virtual void transition(const TransitionParameters&) = 0;
 
-    // Overloaded version for transitions to a new layer impl.
+    /// Overloaded version for transitions to a new layer impl.
     void transition(const TransitionParameters&, Immutable<style::Layer::Impl> newImpl);
 
-    // Fully evaluate possibly-transitioning paint properties based on a zoom
-    // level. Updates the contained `evaluatedProperties` member.
+    /// Fully evaluate possibly-transitioning paint properties based on a zoom
+    /// level. Updates the contained `evaluatedProperties` member.
     virtual void evaluate(const PropertyEvaluationParameters&) = 0;
 
-    // Returns true if any paint properties have active transitions.
+    /// Returns true if any paint properties have active transitions.
     virtual bool hasTransition() const = 0;
 
-    // Returns true if the layer has a pattern property and is actively crossfading.
+    /// Returns true if the layer has a pattern property and is actively crossfading.
     virtual bool hasCrossfade() const = 0;
 
-    // Returns true if layer writes to depth buffer by drawing using PaintParameters::depthModeFor3D().
+    /// Returns true if layer writes to depth buffer by drawing using PaintParameters::depthModeFor3D().
     virtual bool is3D() const { return false; }
 
-    // Returns true is the layer is subject to placement.
+    /// Returns true is the layer is subject to placement.
     bool needsPlacement() const;
 
     const std::string& getID() const;
 
     int32_t getLayerIndex() const noexcept;
 
-    // Checks whether this layer needs to be rendered in the given render pass.
+    /// Checks whether this layer needs to be rendered in the given render pass.
     bool hasRenderPass(RenderPass) const;
 
-    // Checks whether this layer can be rendered.
+    /// Checks whether this layer can be rendered.
     bool needsRendering() const;
 
-    // Checks whether the given zoom is inside this layer zoom range.
+    /// Checks whether the given zoom is inside this layer zoom range.
     bool supportsZoom(float zoom) const;
 
     virtual void upload(gfx::UploadPass&) {}
     virtual void render(PaintParameters&) {}
 
-    // Check whether the given geometry intersects with the feature
+    /// Check whether the given geometry intersects with the feature
     virtual bool queryIntersectsFeature(const GeometryCoordinates&,
                                         const GeometryTileFeature&,
                                         const float,
@@ -145,9 +148,9 @@ public:
 
     const LayerPlacementData& getPlacementData() const { return placementData; }
 
-    // Latest evaluated properties.
+    /// Latest evaluated properties.
     Immutable<style::LayerProperties> evaluatedProperties;
-    // Private implementation
+    /// Private implementation
     Immutable<style::Layer::Impl> baseImpl;
 
     virtual void markContextDestroyed();
@@ -178,7 +181,7 @@ public:
     virtual void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec& changes);
 
     /// @brief Called by the RenderOrchestrator during RenderTree construction.
-    /// This event is run to indicate if the layer should render or not for the current frame.
+    /// @details This event is run to indicate if the layer should render or not for the current frame.
     /// @param willRender Indicates if this layer should render or not
     /// @param changes The collection of current pending change requests
     virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
@@ -216,7 +219,10 @@ protected:
     /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
     ///                       was updated or false if it was skipped because it's for a previous style.
     /// @return true if drawables were updated
-    template <typename Func /* bool(gfx::Drawable&) */>
+    template <typename Func>
+        requires requires(Func update) {
+            { update(std::declval<gfx::Drawable&>()) } -> std::convertible_to<bool>;
+        }
     bool updateTile(TileLayerGroup* tileGroup, RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
         if (!tileGroup) {
             return false;
@@ -248,7 +254,10 @@ protected:
     /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
     ///                       was updated or false if it was skipped because it's for a previous style.
     /// @return true if drawables were updated
-    template <typename Func /* bool(gfx::Drawable&) */>
+    template <typename Func>
+        requires requires(Func update) {
+            { update(std::declval<gfx::Drawable&>()) } -> std::convertible_to<bool>;
+        }
     bool updateTile(RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
         if (!layerGroup) {
             return false;
@@ -269,11 +278,11 @@ protected:
     /// Whether a given tile ID is present in the current cover set (`renderTiles`)
     bool hasRenderTile(const OverscaledTileID&) const;
 
-    /// Get the bucket ID from which a given tile was built
+    /// @brief Get the bucket ID from which a given tile was built
     /// @details When a new style is loaded and contains a layer with the same ID, `layerChanged` will be called during
-    /// style
-    ///          parsing, but the `Bucket` in a tile's `RenderData` will only be replaced when the asynchronous load for
-    ///          the tile is complete, at which point the drawable for the tile may need to be updated or replaced.
+    ///          style parsing, but the `Bucket` in a tile's `RenderData` will only be replaced when the asynchronous
+    ///          load for the tile is complete, at which point the drawable for the tile may need to be updated or
+    ///          replaced.
     util::SimpleIdentity getRenderTileBucketID(const OverscaledTileID&) const;
 
     /// Set the bucket ID from which a given tile was built
@@ -282,6 +291,18 @@ protected:
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
+
+    using FloatPair = std::array<float, 2>;
+    using FloatQuad = std::array<float, 4>;
+
+    // To minimize the number of attributes needed, we encode a 4-component
+    // color into a pair of floats (i.e. a vec2) as follows:
+    // [ floor(color.r * 255) * 256 + color.g * 255, floor(color.b * 255) * 256 + color.a * 255 ]
+    static FloatQuad decode_color(const FloatPair& encoded);
+    // Unpack a pair of paint values and interpolate between them.
+    static FloatQuad unpack_mix_color(const FloatQuad& packedColors, const float t);
+    // Unpack and interpolate only the alpha channel
+    static float unpack_mix_alpha(const FloatQuad& packedColors, const float t);
 
 protected:
     // Stores current set of tiles to be rendered for this layer.
@@ -318,11 +339,67 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
+    // The source provided in the most recent `prepare()`, used to retrieve feature state for rendered features.
+    RenderSource* sourceForState = nullptr;
+
+public:
     struct Stats {
-        size_t propertyEvaluations = 0;
         size_t drawablesAdded = 0;
         size_t drawablesRemoved = 0;
+
+        using NDCBound = gfx::RenderingStats::NDCBound;
+        using LayerFeaturesMap = gfx::RenderingStats::LayerFeaturesMap;
+        LayerFeaturesMap renderedFeatures;
+
+        /// Add an entry or merge with an existing one
+        void addRenderedFeature(std::string featureID,
+                                const gfx::RenderingStats::NDCBound& bound,
+                                mln::unordered_set<OverscaledTileID> tileIDs) {
+            // don't use insert to eliminate the double-lookup because it doesn't
+            // guarantee that the source isn't moved when the item is not inserted.
+            if (const auto hit = renderedFeatures.find(featureID); hit != renderedFeatures.end()) {
+                // already exists, merge
+                hit->second.mergeFrom(bound, tileIDs);
+            } else {
+                // new feature, add it
+                renderedFeatures.insert({std::move(featureID), {.ndcBound = bound, .tileIDs = std::move(tileIDs)}});
+            }
+        }
+
+        static void merge(LayerFeaturesMap& into, const LayerFeaturesMap& from) {
+            for (const auto& [featureID, featureInfo] : from) {
+                const auto& [iter, inserted] = into.insert({featureID, featureInfo});
+                if (!inserted) {
+                    iter->second.mergeFrom(featureInfo);
+                }
+            }
+        }
     } stats;
+
+protected:
+    using FeatureInfo = gfx::RenderingStats::FeatureInfo;
+    using NDCBound = gfx::RenderingStats::NDCBound;
+    using GetVertexFn = std::function<vec3(std::size_t)>;
+
+    /// @brief Compute the bounding box of a bucket's vertices in NDC space.
+    /// @param vertexCount  Number of vertices to iterate over.
+    /// @param tileMatrix   Model matrix for the tile.
+    /// @param preTransformed  If true, the vertices are already in NDC coordinates.
+    /// @param getVertex    Functor that returns (x, y, z) for a given index.
+    /// @return NDC bounds, std::nullopt if the bucket is empty or degenerate.
+    static std::optional<NDCBound> computeFeatureNDCBound(std::size_t vertexCount,
+                                                          const mat4& tileMatrix,
+                                                          bool preTransformed,
+                                                          const GetVertexFn& getVertex);
+
+    // Convenience overload for pre-transformed vertices
+    static auto computeFeatureNDCBound(std::size_t count, const GetVertexFn& get) {
+        return computeFeatureNDCBound(count, matrix::identity4(), true, get);
+    }
+    // Convenience overload for non-pre-transformed vertices
+    static auto computeFeatureNDCBound(std::size_t count, const mat4& mat, const GetVertexFn& get) {
+        return computeFeatureNDCBound(count, mat, false, get);
+    }
 
 private:
     // Some layers may not render correctly on some hardware when the vertex
