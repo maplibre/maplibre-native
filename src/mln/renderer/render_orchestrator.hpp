@@ -173,6 +173,10 @@ public:
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
+    gfx::RenderingStats::FrameRenderedFeaturesMap&& moveFrameRenderedFeatures() {
+        return std::move(frameRenderedFeatures);
+    }
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
@@ -256,6 +260,8 @@ private:
     RenderItem::DebugLayerGroupMap debugLayerGroups;
     GlobeDepthPass globeDepthPass;
     SkyPass skyPass;
+
+    gfx::RenderingStats::FrameRenderedFeaturesMap frameRenderedFeatures;
 };
 
 } // namespace mln

@@ -42,6 +42,7 @@ public:
     SubdivisionGranularitySetting subdivisionGranularity = SubdivisionGranularitySetting::none();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     bool isUpdateSynchronous = false;
+    bool captureRenderedFeatures = false;
 };
 
 } // namespace mln

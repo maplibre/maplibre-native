@@ -8,8 +8,6 @@
 #include <mln/style/layer_properties.hpp>
 #include <mln/util/containers.hpp>
 
-#include <list>
-
 namespace mln {
 
 class PatternDependency {
@@ -99,7 +97,8 @@ public:
           zoom(parameters.tileID.overscaledZ),
           overscaling(parameters.tileID.overscaleFactor()),
           subdivisionGranularity(parameters.subdivisionGranularity),
-          hasPattern(false) {
+          hasPattern(false),
+          retainFeaturesById(parameters.retainFeaturesById) {
         assert(!group.empty());
         auto leaderLayerProperties = staticImmutableCast<LayerPropertiesType>(group.front());
         layout = leaderLayerProperties->layerImpl().layout.evaluate(PropertyEvaluationParameters(zoom));
@@ -129,8 +128,9 @@ public:
             auto feature = sourceLayer->getFeature(i);
             if (!leaderLayerProperties->layerImpl().filter(
                     style::expression::EvaluationContext(this->zoom, feature.get())
-                        .withCanonicalTileID(&parameters.tileID.canonical)))
+                        .withCanonicalTileID(&parameters.tileID.canonical))) {
                 continue;
+            }
 
             PatternLayerMap patternDependencyMap;
             if (hasPattern) {
@@ -178,7 +178,7 @@ public:
                                                                 layout,
                                                                 parameters.tileID.canonical);
         }
-    };
+    }
 
     bool hasDependencies() const override { return hasPattern; }
 
@@ -192,14 +192,16 @@ public:
         if constexpr (requires(BucketType& b) { b.setSubdivisionGranularity(subdivisionGranularity); }) {
             bucket->setSubdivisionGranularity(subdivisionGranularity);
         }
+        bucket->setRetainFeaturesById(retainFeaturesById);
+        bucket->reserveFeatures(features.size());
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
-            std::unique_ptr<GeometryTileFeature> feature = std::move(patternFeature.feature);
+            const auto& feature = patternFeature.feature;
             const PatternLayerMap& patterns = patternFeature.getPatterns();
             const GeometryCollection& geometries = feature->getGeometries();
 
-            bucket->addFeature(*feature, geometries, patternPositions, patterns, i, canonical);
             featureIndex->insert(geometries, i, sourceLayerID, bucketLeaderID);
+            bucket->addFeature(*feature, geometries, patternPositions, patterns, i, canonical);
         }
         if (bucket->hasData()) {
             for (const auto& pair : layerPropertiesMap) {
@@ -221,6 +223,7 @@ protected:
     const SubdivisionGranularitySetting subdivisionGranularity;
     std::string sourceLayerID;
     bool hasPattern;
+    bool retainFeaturesById = false;
 };
 
 } // namespace mln

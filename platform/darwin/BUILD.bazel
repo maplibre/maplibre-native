@@ -277,7 +277,7 @@ objc_library(
 objc_library(
     name = "darwin-loop",
     srcs = [
-        "core/async_task.cpp",
+        "core/async_task.mm",
         "core/run_loop.cpp",
         "core/timer.cpp",
     ] + select({

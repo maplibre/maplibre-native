@@ -92,7 +92,7 @@ void MLNMapViewImpl::onWillStartRenderingFrame() { [mapView mapViewWillStartRend
 void MLNMapViewImpl::onDidFinishRenderingFrame(const mln::MapObserver::RenderFrameStatus& status) {
   const bool fullyRendered = status.mode == mln::MapObserver::RenderMode::Full;
   [mapView mapViewDidFinishRenderingFrameFullyRendered:fullyRendered
-                                        renderingStats:status.renderingStats];
+                                        renderingStats:*status.renderingStats];
 }
 
 void MLNMapViewImpl::onWillStartRenderingMap() { [mapView mapViewWillStartRenderingMap]; }

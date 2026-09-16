@@ -1,11 +1,10 @@
 #pragma once
 
-#include <mln/renderer/query.hpp>
 #include <mln/annotation/annotation.hpp>
+#include <mln/renderer/query.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/geojson.hpp>
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>

@@ -15,7 +15,9 @@
     <public name="maplibre_apiBaseUri" type="attr" />
     <public name="maplibre_localIdeographFontFamily" type="attr" />
     <public name="maplibre_cross_source_collisions" type="attr" />
-    <public name="maplibre_pixelRatio"  type="float" />
+    <public name="maplibre_pixelRatio"  type="attr" />
+    <public name="maplibre_fastPFOREnabled" type="attr"/>
+    <public name="maplibre_featureInfoEnabled" type="attr"/>
 
     <!--Action Journal-->
     <public name="maplibre_actionJournalEnabled" type="attr"/>

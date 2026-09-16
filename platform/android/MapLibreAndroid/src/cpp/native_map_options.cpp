@@ -53,5 +53,11 @@ bool NativeMapOptions::fastPFOREnabled(jni::JNIEnv &env, const jni::Object<Nativ
     return obj.Get(env, field);
 }
 
+bool NativeMapOptions::featureInfoEnabled(jni::JNIEnv &env, const jni::Object<NativeMapOptions> &obj) {
+    auto &javaClass = jni::Class<NativeMapOptions>::Singleton(env);
+    auto field = javaClass.GetField<jni::jboolean>(env, "featureInfoEnabled");
+    return obj.Get(env, field);
+}
+
 } // namespace android
 } // namespace mln

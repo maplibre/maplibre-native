@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/map/mode.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/subdivision_granularity.hpp>
 
@@ -16,6 +17,7 @@ public:
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
     const SubdivisionGranularitySetting subdivisionGranularity{};
+    const bool retainFeaturesById = false;
 };
 
 } // namespace mln

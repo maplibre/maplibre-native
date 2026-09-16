@@ -182,6 +182,8 @@ class NavigationRoute {
 
         loadGeometry(from: geometry)
 
+        assert(mapView?.locationManager as? NavigationLocationManager == nil, "A Navigation Location manager should not already be set")
+
         let locationManager = NavigationLocationManager(coordinates: geometry)
         locationManager.speed = distance / duration
         mapView?.locationManager = locationManager
@@ -225,5 +227,26 @@ class NavigationRoute {
     func start() {
         mapView?.userTrackingMode = .followWithCourse
         mapView?.showsUserLocation = true
+    }
+
+    func stop() {
+        if let locationManager = mapView?.locationManager {
+            locationManager.stopUpdatingLocation()
+        }
+        mapView?.showsUserLocation = false
+    }
+
+    func unload() {
+        stop()
+
+        mapView?.locationManager = nil
+
+        if let layer = mapView?.style?.layer(withIdentifier: LayerIdentifier) as? MLNLineStyleLayer {
+            mapView?.style?.removeLayer(layer)
+        }
+
+        if let source = mapView?.style?.source(withIdentifier: SourceIdentifier) as? MLNShapeSource {
+            mapView?.style?.removeSource(source)
+        }
     }
 }
