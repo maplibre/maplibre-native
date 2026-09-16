@@ -34,12 +34,12 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_base;
     highp float u_height;
     highp float u_lightintensity;
-    highp float u_vertical_gradient;
+    highp float u_gradient_depth;
     highp float u_opacity;
     highp float u_fade;
     highp float u_from_scale;
     highp float u_to_scale;
-    lowp float props_pad2;
+    highp float u_gradient_reference_height_inv;
 };
 
 #pragma mapbox: define highp float base
@@ -82,11 +82,24 @@ void main() {
 
     // Add gradient along z axis of side surfaces
     if (normal.z == 0.0) {
-        // This avoids another branching statement, but multiplies by a constant of 0.84 if no vertical gradient,
-        // and otherwise calculates the gradient based on base + height
-        float fMin = mix(0.7, 0.98, 1.0 - u_lightintensity);
-        float factor = clamp((t + base) * pow(height / 150.0, 0.5), fMin, 1.0);
-        directional *= (1.0 - u_vertical_gradient) + (u_vertical_gradient * factor);
+        // `u_gradient_reference_height_inv` selects the shading model, and holds the reciprocal of the reference height.
+        // Zero runs the uniform ramp instead, shading every building the same regardless of height.
+        // u_gradient_depth sets how dark the foot of a wall gets: 0 is off, 0.5 matches
+        // what a style value of true gives, 1 is twice as dark.
+        //
+        // u_gradient_reference_height_inv decides whether that shading scales with
+        // building height: zero shades every building the same, non-zero shades short
+        // buildings less. It holds 1/height so this stays a multiply, not a divide.
+        float legacyFloor = mix(0.7, 0.98, 1.0 - u_lightintensity);
+        float fMin = 1.0 - (1.0 - legacyFloor) * u_gradient_depth * 2.0;
+
+        float factor;
+        if (u_gradient_reference_height_inv > 0.0) {
+            factor = clamp((t + base) * sqrt(height * u_gradient_reference_height_inv), fMin, 1.0);
+        } else {
+            factor = mix(fMin, 1.0, t);
+        }
+        directional *= factor;
     }
 
     // Assign final color based on surface + ambient light color, diffuse light directional, and light color
