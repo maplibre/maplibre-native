@@ -142,5 +142,5 @@ void main() {
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);
     float fade_change = fade_opacity[1] > 0.5 ? u_symbol_fade_change : -u_symbol_fade_change;
     v_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
-    v_fade_opacity *= calculate_visibility(projectedPoint, u_depth, u_depth_enabled);
+    v_fade_opacity *= calculate_visibility(projectedPoint, u_depth, u_depth_enabled, u_camera_to_center_distance);
 }
