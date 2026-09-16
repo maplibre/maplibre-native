@@ -13,6 +13,7 @@
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/raster_layer_impl.hpp>
 #include <mln/style/source_impl.hpp>
+#include <mln/style/sources/tile_source_impl.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/sources/image_source.hpp>
@@ -661,6 +662,61 @@ TEST(Source, RasterDEMTileAttribution) {
 
     auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
     renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
+
+    test.run();
+}
+
+TEST(Source, RasterDEMInlineZoomOverridesTileJSON) {
+    SourceTest test;
+
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
+        EXPECT_EQ("url", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(
+            R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ], "minzoom": 4, "maxzoom": 12 })TILEJSON");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        const auto& tileset = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset;
+        ASSERT_TRUE(tileset);
+        // The inline maxzoom wins over the TileJSON's; minzoom was not given inline, so the
+        // TileJSON value is kept.
+        EXPECT_EQ(4, tileset->zoomRange.min);
+        EXPECT_EQ(15, tileset->zoomRange.max);
+        EXPECT_EQ(Tileset::RasterEncoding::Terrarium, tileset->rasterEncoding);
+        test.end();
+    };
+
+    RasterDEMSource source(
+        "source", "url", 512, SourceOptions{.rasterEncoding = Tileset::RasterEncoding::Terrarium, .maxzoom = 15});
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+
+    test.run();
+}
+
+TEST(Source, RasterDEMTileJSONZoomKeptWithoutInlineOverride) {
+    SourceTest test;
+
+    test.fileSource->sourceResponse = [&](const Resource&) {
+        Response response;
+        response.data = std::make_unique<std::string>(
+            R"TILEJSON({ "tilejson": "2.1.0", "tiles": [ "tiles" ], "minzoom": 4, "maxzoom": 12 })TILEJSON");
+        return response;
+    };
+
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        const auto& tileset = static_cast<const TileSource::Impl&>(*source.baseImpl).tileset;
+        ASSERT_TRUE(tileset);
+        EXPECT_EQ(4, tileset->zoomRange.min);
+        EXPECT_EQ(12, tileset->zoomRange.max);
+        test.end();
+    };
+
+    RasterDEMSource source("source", "url", 512);
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
 
     test.run();
 }
