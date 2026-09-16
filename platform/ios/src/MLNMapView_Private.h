@@ -27,8 +27,10 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 
 @interface MLNMapView (Private)
 
+#if !TARGET_OS_MACCATALYST
 /// The map view’s OpenGL rendering context.
 @property (nonatomic, readonly, nullable) EAGLContext *context;
+#endif
 
 /// Currently shown popover representing the selected annotation.
 @property (nonatomic, nonnull) UIView<MLNCalloutView> *calloutViewForSelectedAnnotation;
