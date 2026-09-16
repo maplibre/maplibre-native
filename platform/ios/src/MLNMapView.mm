@@ -4350,7 +4350,7 @@ static void *windowScreenContext = &windowScreenContext;
   }
 
   if ([self.camera isEqualToMapCamera:camera] &&
-      UIEdgeInsetsEqualToEdgeInsets(_contentInset, edgePadding)) {
+      UIEdgeInsetsEqualToEdgeInsets(self.cameraEdgeInsets, edgePadding)) {
     if (pendingCompletion) {
       [self animateWithDelay:duration animations:pendingCompletion];
     }
