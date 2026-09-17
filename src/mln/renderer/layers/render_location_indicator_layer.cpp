@@ -984,9 +984,11 @@ void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& 
 
     evaluatedProperties = std::move(properties);
 
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
     if (layerTweaker) {
         layerTweaker->updateProperties(evaluatedProperties);
     }
+#endif
 }
 
 bool RenderLocationIndicatorLayer::hasTransition() const {
