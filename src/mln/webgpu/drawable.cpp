@@ -810,8 +810,12 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
 
         // Compute pipeline state hash for caching
-        const std::size_t pipelineHash = hashPipelineState(
-            vertexLayouts, colorMode, depthMode, stencilMode, drawModeType);
+        const auto& cullMode = getCullFaceMode();
+        const std::size_t pipelineHash = util::hash(
+            hashPipelineState(vertexLayouts, colorMode, depthMode, stencilMode, drawModeType),
+            cullMode.enabled,
+            static_cast<int>(cullMode.side),
+            static_cast<int>(cullMode.winding));
 
         impl->pipelineState = shaderWebGPU.getRenderPipeline(renderable,
                                                              vertexLayouts.empty() ? nullptr : vertexLayouts.data(),
@@ -820,7 +824,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                              depthMode,
                                                              stencilMode,
                                                              drawModeType,
-                                                             pipelineHash);
+                                                             pipelineHash,
+                                                             cullMode);
         if (!impl->pipelineState) {
             Log::Warning(Event::Render,
                          "WebGPU: skipping pipeline creation for drawable '" + getName() + "' (shader='" +

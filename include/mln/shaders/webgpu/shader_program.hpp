@@ -2,6 +2,7 @@
 
 #include <mln/shaders/shader_program_base.hpp>
 #include <webgpu/webgpu.h>
+#include <mln/gfx/cull_face_mode.hpp>
 #include <mln/gfx/gfx_types.hpp>
 #include <mln/gfx/attribute.hpp>
 #include <mln/gfx/color_mode.hpp>
@@ -114,7 +115,8 @@ public:
                                          const gfx::DepthMode& depthMode,
                                          const gfx::StencilMode& stencilMode,
                                          gfx::DrawModeType drawModeType,
-                                         const std::optional<std::size_t> reuseHash = std::nullopt);
+                                         const std::optional<std::size_t> reuseHash = std::nullopt,
+                                         const gfx::CullFaceMode& cullMode = gfx::CullFaceMode::disabled());
 
     const std::vector<BindingInfo>& getBindingInfos() const { return bindingInfos; }
     const std::vector<BindingInfo>& getBindingInfosForGroup(uint32_t group) const;
@@ -138,7 +140,8 @@ protected:
                                       const gfx::ColorMode& colorMode,
                                       const gfx::DepthMode& depthMode,
                                       const gfx::StencilMode& stencilMode,
-                                      gfx::DrawModeType drawModeType);
+                                      gfx::DrawModeType drawModeType,
+                                      const gfx::CullFaceMode& cullMode);
 
     void analyzeShaderBindings(const std::string& source, WGPUShaderStage stage);
     void rebuildBindGroupLayouts();

@@ -202,16 +202,12 @@ ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, 
     hasVertexEntryPoint = !trimmedVertex.empty();
     hasFragmentEntryPoint = !trimmedFragment.empty();
 
-    // Get the prelude from common.hpp
-    using PreludeShader = shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::WebGPU>;
-
-    std::string vertexWithPrelude;
+    // The shader group already prepends the common prelude and runs the preprocessor.
     if (hasVertexEntryPoint) {
-        vertexWithPrelude = std::string(PreludeShader::prelude) + "\n" + vertexSource;
         WGPUShaderSourceWGSL wgslDesc = {};
         wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
         wgslDesc.chain.next = nullptr;
-        WGPUStringView vertexCode = {vertexWithPrelude.c_str(), vertexWithPrelude.length()};
+        WGPUStringView vertexCode = {vertexSource.c_str(), vertexSource.length()};
         wgslDesc.code = vertexCode;
 
         WGPUShaderModuleDescriptor vertexShaderDesc = {};
@@ -222,7 +218,7 @@ ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, 
         vertexShaderModule = wgpuDeviceCreateShaderModule(device, &vertexShaderDesc);
         if (!vertexShaderModule) {
             Log::Error(Event::Render, "Failed to create vertex shader module for " + shaderName);
-            Log::Error(Event::Render, "Vertex shader source length: " + std::to_string(vertexWithPrelude.length()));
+            Log::Error(Event::Render, "Vertex shader source length: " + std::to_string(vertexSource.length()));
             if (shaderName.find("CircleShader") != std::string::npos) {
                 std::ofstream dump("/tmp/circle_vertex.wgsl", std::ios::trunc);
                 dump << vertexSource;
@@ -230,14 +226,11 @@ ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, 
         }
     }
 
-    std::string fragmentWithPrelude;
     if (hasFragmentEntryPoint) {
-        fragmentWithPrelude = std::string(PreludeShader::prelude) + "\n" + fragmentSource;
-
         WGPUShaderSourceWGSL wgslDesc = {};
         wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
         wgslDesc.chain.next = nullptr;
-        WGPUStringView fragmentCode = {fragmentWithPrelude.c_str(), fragmentWithPrelude.length()};
+        WGPUStringView fragmentCode = {fragmentSource.c_str(), fragmentSource.length()};
         wgslDesc.code = fragmentCode;
 
         WGPUShaderModuleDescriptor fragmentShaderDesc = {};
@@ -248,7 +241,7 @@ ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, 
         fragmentShaderModule = wgpuDeviceCreateShaderModule(device, &fragmentShaderDesc);
         if (!fragmentShaderModule) {
             Log::Error(Event::Render, "Failed to create fragment shader module for " + shaderName);
-            Log::Error(Event::Render, "Fragment shader source length: " + std::to_string(fragmentWithPrelude.length()));
+            Log::Error(Event::Render, "Fragment shader source length: " + std::to_string(fragmentSource.length()));
             if (shaderName.find("CircleShader") != std::string::npos) {
                 std::ofstream dump("/tmp/circle_fragment.wgsl", std::ios::trunc);
                 dump << fragmentSource;
@@ -256,7 +249,7 @@ ShaderProgram::ShaderProgram(Context& context, const std::string& vertexSource, 
         }
     }
 
-    createPipelineLayout(vertexWithPrelude, fragmentWithPrelude);
+    createPipelineLayout(vertexSource, fragmentSource);
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -302,7 +295,8 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
                                                     const gfx::DepthMode& depthMode,
                                                     const gfx::StencilMode& stencilMode,
                                                     gfx::DrawModeType drawModeType,
-                                                    const std::optional<std::size_t> reuseHash) {
+                                                    const std::optional<std::size_t> reuseHash,
+                                                    const gfx::CullFaceMode& cullMode) {
     (void)renderable;
     // Check cache first
     if (reuseHash.has_value()) {
@@ -314,7 +308,7 @@ WGPURenderPipeline ShaderProgram::getRenderPipeline(const gfx::Renderable& rende
 
     // Create new pipeline
     WGPURenderPipeline pipeline = createPipeline(
-        vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode, drawModeType);
+        vertexLayouts, vertexLayoutCount, colorMode, depthMode, stencilMode, drawModeType, cullMode);
 
     // Cache the pipeline if we have a reuse hash
     if (reuseHash.has_value() && pipeline) {
@@ -647,7 +641,8 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
                                                  const gfx::ColorMode& colorMode,
                                                  const gfx::DepthMode& depthMode,
                                                  const gfx::StencilMode& stencilMode,
-                                                 gfx::DrawModeType drawModeType) {
+                                                 gfx::DrawModeType drawModeType,
+                                                 const gfx::CullFaceMode& cullMode) {
     WGPUDevice device = static_cast<WGPUDevice>(backend.getDevice());
 
     if (!hasVertexEntryPoint || !hasFragmentEntryPoint) {
@@ -728,8 +723,11 @@ WGPURenderPipeline ShaderProgram::createPipeline(const WGPUVertexBufferLayout* v
                                        drawModeType == gfx::DrawModeType::TriangleStrip)
                                           ? WGPUIndexFormat_Uint16
                                           : WGPUIndexFormat_Undefined;
-    primitiveState.frontFace = WGPUFrontFace_CCW;
-    primitiveState.cullMode = WGPUCullMode_None;
+    primitiveState.frontFace = cullMode.winding == gfx::CullFaceWindingType::CounterClockwise ? WGPUFrontFace_CCW
+                                                                                              : WGPUFrontFace_CW;
+    primitiveState.cullMode = !cullMode.enabled                               ? WGPUCullMode_None
+                              : cullMode.side == gfx::CullFaceSideType::Front ? WGPUCullMode_Front
+                                                                              : WGPUCullMode_Back;
 
     // Set up depth stencil state
     WGPUDepthStencilState depthStencilState = {};

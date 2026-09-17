@@ -333,8 +333,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                const PaintParameters&,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(transformState);
     stats.renderedFeatures.clear();
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -425,7 +425,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeOpacity>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
-        const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto circleShader = circleShaderGroup->getOrCreateShader(
+            context, propertiesAsUniforms, projectionVariant);
         if (!circleShader) {
             continue;
         }

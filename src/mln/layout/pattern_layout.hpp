@@ -96,6 +96,7 @@ public:
         : sourceLayer(std::move(sourceLayer_)),
           zoom(parameters.tileID.overscaledZ),
           overscaling(parameters.tileID.overscaleFactor()),
+          subdivisionGranularity(parameters.subdivisionGranularity),
           hasPattern(false),
           retainFeaturesById(parameters.retainFeaturesById) {
         assert(!group.empty());
@@ -188,9 +189,11 @@ public:
                       const bool /*showCollisionBoxes*/,
                       const CanonicalTileID& canonical) override {
         auto bucket = std::make_shared<BucketType>(layout, layerPropertiesMap, zoom, overscaling);
+        if constexpr (requires(BucketType& b) { b.setSubdivisionGranularity(subdivisionGranularity); }) {
+            bucket->setSubdivisionGranularity(subdivisionGranularity);
+        }
         bucket->setRetainFeaturesById(retainFeaturesById);
         bucket->reserveFeatures(features.size());
-
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
             const auto& feature = patternFeature.feature;
@@ -217,6 +220,7 @@ protected:
 
     const float zoom;
     const uint32_t overscaling;
+    const SubdivisionGranularitySetting subdivisionGranularity;
     std::string sourceLayerID;
     bool hasPattern;
     bool retainFeaturesById = false;

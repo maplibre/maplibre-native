@@ -3,6 +3,7 @@
 #include <mln/map/mode.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 
 namespace mln {
 namespace style {
@@ -15,6 +16,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
+    const SubdivisionGranularitySetting subdivisionGranularity{};
     const bool retainFeaturesById = false;
 };
 

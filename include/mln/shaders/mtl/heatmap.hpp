@@ -22,7 +22,7 @@ struct alignas(16) HeatmapDrawableUBO {
     // Interpolations
     /* 68 */ float weight_t;
     /* 72 */ float radius_t;
-    /* 76 */ float pad1;
+    /* 76 */ float globe_extrude_scale;
     /* 80 */
 };
 static_assert(sizeof(HeatmapDrawableUBO) == 5 * 16, "wrong size");
@@ -80,6 +80,7 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const HeatmapDrawableUBO* drawableVector [[buffer(idHeatmapDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const HeatmapEvaluatedPropsUBO& props [[buffer(idHeatmapEvaluatedPropsUBO)]]) {
 
     device const HeatmapDrawableUBO& drawable = drawableVector[uboIndex];
@@ -120,10 +121,18 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
+#if defined(PROJECTION_GLOBE)
+    const float2 circle_center = floor(float2(vertx.pos) * 0.5);
+    const float3 center_vector = projectToSphere(circle_center, float2(0.0, 0.0), projectionVector[uboIndex]);
+    const float3 corner_vector = globeRotateVector(center_vector, extrude * radius * drawable.globe_extrude_scale);
+    const float4 position = interpolateProjection(circle_center + scaled_extrude, corner_vector, 0.0, projectionVector[uboIndex]);
+#else
     const float4 pos = float4(floor(float2(vertx.pos) * 0.5) + scaled_extrude, 0, 1);
+    const float4 position = drawable.matrix * pos;
+#endif
 
     return {
-        .position    = drawable.matrix * pos,
+        .position    = position,
         .weight      = weight,
         .extrude     = extrude,
     };

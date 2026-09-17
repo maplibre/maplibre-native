@@ -205,6 +205,12 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     placementData.clear();
 
+    const auto& evaluated = static_cast<const SymbolLayerProperties&>(*evaluatedProperties).evaluated;
+    const SymbolTranslate textTranslate{.offset = evaluated.get<style::TextTranslate>(),
+                                        .anchor = evaluated.get<style::TextTranslateAnchor>()};
+    const SymbolTranslate iconTranslate{.offset = evaluated.get<style::IconTranslate>(),
+                                        .anchor = evaluated.get<style::IconTranslateAnchor>()};
+
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
         if (bucket && bucket->bucketLeaderID == getID() && static_cast<Bucket*>(bucket)->check(SYM_GUARD_LOC)) {
@@ -220,14 +226,18 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
                                          .tile = renderTile,
                                          .featureIndex = featureIndex,
                                          .sourceId = baseImpl->source,
-                                         .sortKeyRange = std::nullopt});
+                                         .sortKeyRange = std::nullopt,
+                                         .textTranslate = textTranslate,
+                                         .iconTranslate = iconTranslate});
             } else {
                 for (const auto& sortKeyRange : bucket->sortKeyRanges) {
                     BucketPlacementData layerData{.bucket = *bucket,
                                                   .tile = renderTile,
                                                   .featureIndex = featureIndex,
                                                   .sourceId = baseImpl->source,
-                                                  .sortKeyRange = sortKeyRange};
+                                                  .sortKeyRange = sortKeyRange,
+                                                  .textTranslate = textTranslate,
+                                                  .iconTranslate = iconTranslate};
                     auto sortPosition = std::upper_bound( // NOLINT(modernize-use-ranges)
                         placementData.cbegin(),
                         placementData.cend(),
@@ -586,18 +596,29 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto u_size = evaluatedSize.size;
         const auto u_size_t = evaluatedSize.sizeT;
 
-        const mat4 textLabelPlaneMatrix =
-            (alongLine || hasVariablePlacement)
-                ? matrix::identity4()
-                : getLabelPlaneMatrix(textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 iconLabelPlaneMatrix =
-            (alongLine || hasVariablePlacement)
-                ? matrix::identity4()
-                : getLabelPlaneMatrix(iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 textGLCoordMatrix = getGlCoordMatrix(
-            textDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 iconGLCoordMatrix = getGlCoordMatrix(
-            iconDrawableMatrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        // The projection-aware helpers leave tile projection to the caller. Retain
+        // the accessibility path's tile-to-label and label-to-clip composition.
+        const auto labelMatrix = [&](const mat4& drawableMatrix) {
+            if (alongLine || hasVariablePlacement) {
+                return matrix::identity4();
+            }
+            auto result = getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+            if (!pitchWithMap) {
+                matrix::multiply(result, result, drawableMatrix);
+            }
+            return result;
+        };
+        const auto coordMatrix = [&](const mat4& drawableMatrix) {
+            auto result = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+            if (pitchWithMap) {
+                matrix::multiply(result, drawableMatrix, result);
+            }
+            return result;
+        };
+        const mat4 textLabelPlaneMatrix = labelMatrix(textDrawableMatrix);
+        const mat4 iconLabelPlaneMatrix = labelMatrix(iconDrawableMatrix);
+        const mat4 textGLCoordMatrix = coordMatrix(textDrawableMatrix);
+        const mat4 iconGLCoordMatrix = coordMatrix(iconDrawableMatrix);
 
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
@@ -760,8 +781,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                const PaintParameters&,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     stats.renderedFeatures.clear();
-
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
         return;
@@ -907,7 +928,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             if (hasCollisionBox) {
                 const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
                 if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                        collisionBoxGroup->getOrCreateShader(context, {}))) {
+                        collisionBoxGroup->getOrCreateShader(context, {}, projectionVariant))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector());
@@ -923,7 +944,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             if (hasCollisionCircle) {
                 const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
                 if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                        collisionCircleGroup->getOrCreateShader(context, {}))) {
+                        collisionCircleGroup->getOrCreateShader(context, {}, projectionVariant))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector());
@@ -1142,7 +1163,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, propertiesAsUniforms, posOffsetAttribName));
+                shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant, posOffsetAttribName));
             if (!shader) {
                 return;
             }
