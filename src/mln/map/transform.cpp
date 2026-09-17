@@ -560,6 +560,7 @@ void Transform::startTransition(const CameraOptions& camera,
     transition->fields = cameraFields(camera);
     transition->coupledFields = flight ? Center | Zoom : 0;
     transition->fields |= transition->coupledFields;
+
     // An anchor controls center together with the properties it transforms.
     // An explicit center takes precedence over an anchor.
     transition->anchor = camera.center ? std::nullopt : camera.anchor;
@@ -569,11 +570,13 @@ void Transform::startTransition(const CameraOptions& camera,
         transition->anchor->y = state.getSize().height - transition->anchor->y;
         transition->anchorLatLng = state.screenCoordinateToLatLng(*transition->anchor);
     }
+
     const auto target = frame(1.0);
-    transition->movingFields =
-        ((flight || transition->anchor || camera.center != std::optional(getLatLng(LatLng::Unwrapped))) ? Center : 0) |
-        ((flight || target.zoom != std::optional(getZoom())) ? Zoom : 0) |
-        ((target.bearing != std::optional(-util::rad2deg(getBearing()))) ? Bearing : 0);
+    const bool panning = flight || transition->anchor || camera.center != std::optional(getLatLng(LatLng::Unwrapped));
+    const bool scaling = flight || target.zoom != std::optional(getZoom());
+    const bool rotating = target.bearing != std::optional(-util::rad2deg(getBearing()));
+    transition->movingFields = (panning ? Center : 0) | (scaling ? Zoom : 0) | (rotating ? Bearing : 0);
+
     transition->start = transitionStart = Clock::now();
     transition->duration = transitionDuration = transition->fields ? duration : Duration::zero();
     transition->frame = frame;
@@ -596,6 +599,7 @@ void Transform::startTransition(const CameraOptions& camera,
     observer.onCameraWillChange(animated ? MapObserver::CameraChangeMode::Animated
                                          : MapObserver::CameraChangeMode::Immediate);
     if (std::find(transitions.begin(), transitions.end(), transition) == transitions.end()) return;
+
     if (!animated) {
         applyTransitions({transition}, transition->start);
         std::erase(transitions, transition);
@@ -607,7 +611,7 @@ void Transform::startTransition(const CameraOptions& camera,
 void Transform::applyTransitions(const std::vector<std::shared_ptr<Transition>>& active, const TimePoint& now) {
     auto camera = state.getCameraOptions(std::nullopt);
     camera.center = getLatLng(LatLng::Unwrapped);
-    std::shared_ptr<Transition> anchored;
+
     for (const auto& transition : active) {
         const double t = transition->duration == Duration::zero()
                              ? 1.0
@@ -627,7 +631,9 @@ void Transform::applyTransitions(const std::vector<std::shared_ptr<Transition>>&
         if (fields & Roll) camera.roll = value.roll;
         if (fields & Fov) camera.fov = value.fov;
     }
+
     // An active anchor also applies to immediate changes of other properties.
+    std::shared_ptr<Transition> anchored;
     for (const auto& transition : transitions) {
         if (transition->anchor && (transition->fields & Center)) anchored = transition;
     }
@@ -674,12 +680,14 @@ void Transform::updateTransitions(const TimePoint& now) {
     // before calling user code so each command finishes exactly once.
     if (updatingTransitions || transitions.empty()) return;
     updatingTransitions = true;
-    struct Reset {
-        bool& flag;
-        ~Reset() { flag = false; }
-    } reset{updatingTransitions};
+    struct TransitionUpdateGuard {
+        bool& updating;
+        ~TransitionUpdateGuard() { updating = false; }
+    } guard{updatingTransitions};
+
     const auto active = transitions;
     applyTransitions(active, now);
+
     std::vector<std::shared_ptr<Transition>> finished;
     for (const auto& transition : active) {
         if (now - transition->start >= transition->duration) {
@@ -688,6 +696,7 @@ void Transform::updateTransitions(const TimePoint& now) {
         }
     }
     updateMovementFlags();
+
     for (const auto& transition : active) {
         if (std::find(transitions.begin(), transitions.end(), transition) == transitions.end()) continue;
         if (transition->animation.transitionFrameFn) {
@@ -699,6 +708,7 @@ void Transform::updateTransitions(const TimePoint& now) {
         }
     }
     if (!transitions.empty()) observer.onCameraIsChanging();
+
     finishTransitions(finished);
 }
 
