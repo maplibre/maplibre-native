@@ -14,6 +14,7 @@
 
 #include <mapbox/geometry/envelope.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 
@@ -349,11 +350,11 @@ void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feat
     }
 
     for (const auto& f : features) {
-        // hit testing
-        mln::GeometryBBox<int64_t> featureBox = DefaultWithinBBox;
-        for (const auto& p : f.envelope->front()) mln::updateBBox(featureBox, p);
-
-        const bool hit = mln::boxWithinBox(featureBox, queryBox) || mln::boxWithinBox(queryBox, featureBox);
+        const bool hit = std::any_of(f.envelope->begin(), f.envelope->end(), [&](const auto& polygon) {
+            mln::GeometryBBox<int64_t> featureBox = DefaultWithinBBox;
+            for (const auto& p : polygon.front()) mln::updateBBox(featureBox, p);
+            return mln::boxWithinBox(featureBox, queryBox) || mln::boxWithinBox(queryBox, featureBox);
+        });
         if (hit) {
             assert(f.feature);
             result[f.feature->sourceLayer].push_back(*f.feature);
@@ -362,7 +363,7 @@ void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feat
 }
 
 void DynamicFeatureIndex::insert(std::shared_ptr<Feature> feature,
-                                 std::shared_ptr<mapbox::geometry::polygon<int64_t>> envelope) {
+                                 std::shared_ptr<mapbox::geometry::multi_polygon<int64_t>> envelope) {
     features.push_back({std::move(feature), std::move(envelope)});
 }
 
