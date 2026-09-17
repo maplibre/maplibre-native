@@ -983,6 +983,10 @@ void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& 
         renderImpl->parameters.puckHatImagePath = layout.get<style::TopImage>().asConstant().id();
 
     evaluatedProperties = std::move(properties);
+
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
+    }
 }
 
 bool RenderLocationIndicatorLayer::hasTransition() const {
