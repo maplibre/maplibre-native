@@ -547,8 +547,8 @@ public:
         if (!dirtyFeature) return;
         dirtyFeature = false;
         featureEnvelope->clear();
-        feature->geometry = mapbox::geometry::point<double>{oldParams.puckPosition.latitude(),
-                                                            oldParams.puckPosition.longitude()};
+        feature->geometry = mapbox::geometry::point<double>{oldParams.puckPosition.longitude(),
+                                                            oldParams.puckPosition.latitude()};
         const auto addQuad = [&](const std::array<vec2, 4>& geometry) {
             mapbox::geometry::linear_ring<int64_t> border;
             for (const auto& v : geometry) {

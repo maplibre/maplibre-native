@@ -324,8 +324,9 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
 
 TEST(Query, LocationIndicatorTopImageOnly) {
     QueryTest test;
-    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(16));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{35.693055, 139.766707}).withZoom(16));
     auto layer = std::make_unique<LocationIndicatorLayer>("location");
+    layer->setLocation({{35.693055, 139.766707, 0}});
     layer->setTopImage({"test-icon"});
     layer->setShadowImage({"test-icon"});
     layer->setShadowImageSize(10.0f);
@@ -334,11 +335,15 @@ TEST(Query, LocationIndicatorTopImageOnly) {
     test.map.getStyle().addLayer(std::move(layer));
     test.frontend.render(test.map);
 
-    const auto center = test.map.pixelForLatLng({0, 0});
+    const auto center = test.map.pixelForLatLng({35.693055, 139.766707});
     const RenderedQueryOptions options({{{"location"}}, {}});
     const auto features = test.frontend.getRenderer()->queryRenderedFeatures(center, options);
     ASSERT_EQ(features.size(), 1u);
     EXPECT_EQ(features.front().sourceLayer, "location");
+    ASSERT_TRUE(features.front().geometry.is<mapbox::geometry::point<double>>());
+    const auto& point = features.front().geometry.get<mapbox::geometry::point<double>>();
+    EXPECT_DOUBLE_EQ(point.x, 139.766707);
+    EXPECT_DOUBLE_EQ(point.y, 35.693055);
     // Shadow and accuracy-circle coverage outside the top image is not queryable.
     EXPECT_TRUE(
         test.frontend.getRenderer()->queryRenderedFeatures(ScreenCoordinate{center.x + 60, center.y}, options).empty());
