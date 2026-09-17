@@ -1400,14 +1400,15 @@ TEST(Transform, ComposePaddingPitchAndFieldOfView) {
     AnimationOptions animation(Seconds(4));
     animation.easing.emplace(1.0 / 3, 1.0 / 3, 2.0 / 3, 2.0 / 3);
     transform.easeTo(CameraOptions().withPadding(EdgeInsets{300, 20, 0, 0}), animation);
-    transform.easeTo(CameraOptions().withPitch(50).withFov(45), animation);
+    transform.easeTo(CameraOptions().withPitch(60).withFov(45), animation);
     const auto end = transform.getTransitionStart() + Seconds(4);
     transform.updateTransitions(end);
     EXPECT_EQ(transform.getState().getEdgeInsets(), (EdgeInsets{300, 20, 0, 0}));
     EXPECT_NEAR(util::rad2deg(transform.getFieldOfView()), 45, 1e-5);
     const auto maxPitch = transform.getState().getMaxPitch() + util::deg2rad(45.0) / 2 -
                           std::atan(1.3 * std::tan(util::deg2rad(45.0) / 2));
-    EXPECT_NEAR(transform.getPitch(), std::min(util::deg2rad(50.0), maxPitch), 1e-5);
+    ASSERT_LT(maxPitch, util::deg2rad(60.0));
+    EXPECT_NEAR(transform.getPitch(), maxPitch, 1e-5);
     EXPECT_FALSE(transform.inTransition());
 }
 

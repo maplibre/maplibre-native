@@ -115,6 +115,8 @@ public:
     // Transitions
     bool inTransition() const;
     void updateTransitions(const TimePoint& now);
+    // Timing of the most recently started command, even after it finishes.
+    // Other commands may still be active.
     TimePoint getTransitionStart() const { return transitionStart; }
     Duration getTransitionDuration() const { return transitionDuration; }
     void cancelTransitions();
@@ -163,8 +165,12 @@ private:
     struct Transition {
         explicit Transition(const AnimationOptions& options)
             : animation(options) {}
+        // Remaining property ownership; replacement removes fields from this mask.
         uint16_t fields;
+        // Replacing any coupled field relinquishes all coupled fields together.
         uint16_t coupledFields;
+        // Properties classified as moving at command start; intersect with fields
+        // when reporting movement so replaced properties no longer contribute.
         uint16_t movingFields;
         TimePoint start;
         Duration duration;
