@@ -15,10 +15,12 @@ public:
     LocationIndicatorLayerTweaker(std::string id_,
                                   Immutable<style::LayerProperties> properties,
                                   const mln::mat4& projectionCircle_,
-                                  const mln::mat4& projectionPuck_)
+                                  const mln::mat4& projectionPuck_,
+                                  const mln::mat4& projectionSector_)
         : LayerTweaker(std::move(id_), properties),
           projectionCircle(projectionCircle_),
-          projectionPuck(projectionPuck_) {}
+          projectionPuck(projectionPuck_),
+          projectionSector(projectionSector_) {}
 
 public:
     ~LocationIndicatorLayerTweaker() override = default;
@@ -28,6 +30,7 @@ public:
 private:
     const mln::mat4& projectionCircle;
     const mln::mat4& projectionPuck;
+    const mln::mat4& projectionSector;
 };
 
 } // namespace mln

@@ -1,0 +1,44 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 256,
+      "ignoreProbing": true
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 16,
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "indicator",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          0,
+          0
+        ],
+        "bearing": 350,
+        "bearing-accuracy": 25,
+        "bearing-accuracy-radius": 85,
+        "bearing-accuracy-color": "rgba(0, 100, 255, 0.65)",
+        "perspective-compensation": 1,
+        "accuracy-radius": 65,
+        "accuracy-radius-color": "rgba(0, 100, 255, 0.12)",
+        "accuracy-radius-border-color": "rgba(0, 100, 255, 0.3)"
+      }
+    }
+  ]
+}

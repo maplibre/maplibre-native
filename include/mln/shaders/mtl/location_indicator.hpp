@@ -17,9 +17,10 @@ enum {
 struct alignas(16) LocationIndicatorDrawableUBO {
     /*  0 */ float4x4 matrix;
     /* 64 */ float4 color;
-    /* 80 */
+    /* 80 */ float4 sector;
+    /* 96 */
 };
-static_assert(sizeof(LocationIndicatorDrawableUBO) == 5 * 16, "wrong size");
+static_assert(sizeof(LocationIndicatorDrawableUBO) == 6 * 16, "wrong size");
 
 )";
 
@@ -42,19 +43,30 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+    float2 local;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LocationIndicatorDrawableUBO& drawable [[buffer(idLocationIndicatorUBO)]]) {
 
     return {
-        .position = drawable.matrix * float4(vertx.position, 1.0)
+        .position = drawable.matrix * float4(vertx.position, 1.0),
+        .local = vertx.position
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LocationIndicatorDrawableUBO& drawable [[buffer(idLocationIndicatorUBO)]]) {
-    return half4(drawable.color);
+    float opacity = 1.0;
+    if (drawable.sector.y > 0.0) {
+        float radius = length(in.local);
+        float angle = atan2(max(abs(in.local.x), 0.000001), -in.local.y);
+        float feather = length(fwidth(in.local)) / max(radius, 0.0001);
+        float angular = drawable.sector.x >= 3.14159265 ? 1.0 :
+            1.0 - smoothstep(drawable.sector.x - feather, drawable.sector.x + feather, angle);
+        opacity = angular * (1.0 - smoothstep(0.0, 1.0, radius));
+    }
+    return half4(drawable.color * opacity);
 }
 )";
 };

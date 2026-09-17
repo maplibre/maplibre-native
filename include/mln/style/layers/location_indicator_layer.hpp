@@ -60,6 +60,24 @@ public:
     void setBearingTransition(const TransitionOptions&);
     TransitionOptions getBearingTransition() const;
 
+    static PropertyValue<float> getDefaultBearingAccuracy();
+    const PropertyValue<float>& getBearingAccuracy() const;
+    void setBearingAccuracy(const PropertyValue<float>&);
+    void setBearingAccuracyTransition(const TransitionOptions&);
+    TransitionOptions getBearingAccuracyTransition() const;
+
+    static PropertyValue<Color> getDefaultBearingAccuracyColor();
+    const PropertyValue<Color>& getBearingAccuracyColor() const;
+    void setBearingAccuracyColor(const PropertyValue<Color>&);
+    void setBearingAccuracyColorTransition(const TransitionOptions&);
+    TransitionOptions getBearingAccuracyColorTransition() const;
+
+    static PropertyValue<float> getDefaultBearingAccuracyRadius();
+    const PropertyValue<float>& getBearingAccuracyRadius() const;
+    void setBearingAccuracyRadius(const PropertyValue<float>&);
+    void setBearingAccuracyRadiusTransition(const TransitionOptions&);
+    TransitionOptions getBearingAccuracyRadiusTransition() const;
+
     static PropertyValue<float> getDefaultBearingImageSize();
     const PropertyValue<float>& getBearingImageSize() const;
     void setBearingImageSize(const PropertyValue<float>&);

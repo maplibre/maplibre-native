@@ -1,6 +1,7 @@
 layout (std140) uniform LocationIndicatorDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
+    vec4 u_sector;
 };
 
 layout(location = 0) in vec2 a_pos;

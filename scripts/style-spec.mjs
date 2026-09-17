@@ -119,6 +119,44 @@ modifiedReferenceSpec["paint_location-indicator"] = {
       "transition": true,
       "doc": "The accuracy, in meters, of the position source used to retrieve the position of the location indicator."
   },
+  "bearing-accuracy": {
+      "type": "number",
+      "units": "degrees",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 180,
+      "property-type": "data-constant",
+      "expression": {
+          "interpolated": true,
+          "parameters": ["zoom"]
+      },
+      "transition": true,
+      "doc": "The angular half-width of the bearing accuracy sector, centered on bearing. A value of 15 produces a 30 degree sector; 180 produces a full circle. A value of 0 hides the sector."
+  },
+  "bearing-accuracy-radius": {
+      "type": "number",
+      "units": "pixels",
+      "default": 0,
+      "minimum": 0,
+      "property-type": "data-constant",
+      "expression": {
+          "interpolated": true,
+          "parameters": ["zoom"]
+      },
+      "transition": true,
+      "doc": "The visual radius of the bearing accuracy sector, in logical pixels before perspective compensation. The sector follows the location indicator's bearing and perspective-compensation. It is independent of accuracy-radius. A value of 0 hides the sector."
+  },
+  "bearing-accuracy-color": {
+      "type": "color",
+      "default": "#ffffff",
+      "property-type": "data-constant",
+      "expression": {
+          "interpolated": true,
+          "parameters": ["zoom"]
+      },
+      "transition": true,
+      "doc": "The color of the bearing accuracy sector. The alpha component controls opacity at the center, fading smoothly to transparent at the outer edge."
+  },
   "top-image-size": {
       "type": "number",
       "units": "factor of the original icon size",
