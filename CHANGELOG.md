@@ -28,6 +28,8 @@
 
 ### 🐞 Bug fixes
 
+- [core] Skip WebGPU draws with missing required bindings instead of submitting invalid commands.
+
 - *...Add new stuff here...*
 - [OpenGL] Fix invisible raster layers on Adreno 3xx by avoiding an in-place alpha assignment in the fragment shader.
 - [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
