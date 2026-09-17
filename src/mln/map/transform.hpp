@@ -13,6 +13,8 @@
 #include <cmath>
 #include <functional>
 #include <optional>
+#include <memory>
+#include <vector>
 
 namespace mln {
 
@@ -144,16 +146,45 @@ private:
 
     void startTransition(const CameraOptions&,
                          const AnimationOptions&,
-                         const std::function<void(double)>&,
-                         const Duration&);
+                         const std::function<CameraOptions(double)>&,
+                         const Duration&,
+                         bool flight = false);
+
+    enum CameraField : uint16_t {
+        Center = 1 << 0,
+        Zoom = 1 << 1,
+        Bearing = 1 << 2,
+        Pitch = 1 << 3,
+        Padding = 1 << 4,
+        Altitude = 1 << 5,
+        Roll = 1 << 6,
+        Fov = 1 << 7
+    };
+    struct Transition {
+        explicit Transition(const AnimationOptions& options)
+            : animation(options) {}
+        uint16_t fields;
+        uint16_t coupledFields;
+        uint16_t movingFields;
+        TimePoint start;
+        Duration duration;
+        AnimationOptions animation;
+        std::function<CameraOptions(double)> frame;
+        std::optional<ScreenCoordinate> anchor;
+        LatLng anchorLatLng;
+    };
+    static uint16_t cameraFields(const CameraOptions&);
+    void applyTransitions(const std::vector<std::shared_ptr<Transition>>&, const TimePoint&);
+    void updateMovementFlags();
+    void finishTransitions(const std::vector<std::shared_ptr<Transition>>&);
 
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
 
     TimePoint transitionStart;
     Duration transitionDuration;
-    std::function<bool(const TimePoint)> transitionFrameFn;
-    std::function<void()> transitionFinishFn;
+    std::vector<std::shared_ptr<Transition>> transitions;
+    bool updatingTransitions = false;
 };
 
 } // namespace mln
