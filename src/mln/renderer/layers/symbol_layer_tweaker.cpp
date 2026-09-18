@@ -16,6 +16,7 @@
 #include <mln/shaders/symbol_layer_ubo.hpp>
 #include <mln/style/layers/symbol_layer_properties.hpp>
 #include <mln/util/convert.hpp>
+#include <mln/util/math.hpp>
 #include <mln/util/std.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -93,12 +94,15 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     const auto camDist = state.getCameraToCenterDistance();
     const auto screenSpaceProp = symbolLayerProperties.layerImpl().layout.get<SymbolScreenSpace>();
     const auto isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
                                                             : SymbolScreenSpace::defaultValue();
+
+    const auto pitchedScale = static_cast<float>(state.getProjection().circleRadiusCorrection(state));
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
@@ -123,20 +127,35 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
+        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                   : evaluated.get<style::IconTranslateAnchor>();
 
-        mat4 matrix;
+        ProjectionData projection;
 
         if (isScreenSpace) {
-            matrix::ortho(matrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
-            matrix::translate(matrix, matrix, 0, -util::EXTENT, 0);
-            matrix::translate(matrix, matrix, translate[0], translate[1], 0);
+            mat4 screenMatrix;
+            matrix::ortho(screenMatrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
+            matrix::translate(screenMatrix, screenMatrix, 0, -util::EXTENT, 0);
+            matrix::translate(screenMatrix, screenMatrix, translate[0], translate[1], 0);
+            projection = parameters.state.getProjectionDataForMatrix(tileID, screenMatrix);
         } else {
             constexpr bool nearClipped = false;
             constexpr bool inViewportPixelUnits = false;
-            const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
-                                       : evaluated.get<style::IconTranslateAnchor>();
-            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+            projection = getProjectionData(
+                tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
         }
+        // The symbol shader adds the translation itself, where the label plane needs it too; on Mercator it
+        // stays baked into the matrix.
+        const std::array<float, 2> tileTranslation = state.isGlobeRendering() ? util::cast<float>(projection.translate)
+                                                                              : std::array<float, 2>{0.f, 0.f};
+        projection.translate = {};
+        const auto& matrix = projection.fallbackMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());
@@ -149,9 +168,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                           (isText || symbolData.textFit != IconTextFitType::None);
         const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement)
                                           ? matrix::identity4()
-                                          : getLabelPlaneMatrix(
-                                                matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+                                          : getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 glCoordMatrix = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
@@ -192,6 +210,13 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
+
+            .is_along_line = alongLine,
+            .is_variable_anchor = hasVariablePlacement,
+            .pitched_scale = pitchedScale,
+            .translation = tileTranslation,
+            .pad1 = 0,
+            .pad2 = 0,
         };
 
 #if MLN_UBO_CONSOLIDATION
@@ -233,6 +258,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     layerUniforms.set(idSymbolDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idSymbolTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

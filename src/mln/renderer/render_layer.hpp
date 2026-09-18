@@ -1,11 +1,13 @@
 #pragma once
 #include <mln/gfx/drawable.hpp>
+#include <mln/gfx/projection_variant.hpp>
 #include <mln/layout/layout.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/render_pass.hpp>
 #include <mln/renderer/render_source.hpp>
 #include <mln/style/layer_properties.hpp>
+#include <mln/style/types.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/tiny_unordered_map.hpp>
@@ -26,6 +28,7 @@ class PatternAtlas;
 class RenderTile;
 class RenderTree;
 class SymbolBucket;
+class TileProjector;
 class TransformState;
 class TransitionParameters;
 class UpdateParameters;
@@ -64,6 +67,12 @@ public:
     size_t end;
 };
 
+/// A symbol layer's `*-translate` in pixels, carried into placement the way GL JS passes `translation`.
+struct SymbolTranslate {
+    std::array<float, 2> offset{0, 0};
+    style::TranslateAnchorType anchor = style::TranslateAnchorType::Map;
+};
+
 class BucketPlacementData {
 public:
     std::reference_wrapper<Bucket> bucket;
@@ -71,6 +80,8 @@ public:
     std::shared_ptr<FeatureIndex> featureIndex;
     std::string sourceId;
     std::optional<SortKeyRange> sortKeyRange;
+    SymbolTranslate textTranslate;
+    SymbolTranslate iconTranslate;
 };
 
 using LayerPlacementData = std::list<BucketPlacementData>;
@@ -319,6 +330,10 @@ protected:
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;
+    gfx::ProjectionVariant projectionVariant = gfx::ProjectionVariant::Mercator;
+
+    /// Picks the shader variant for the state's projection; returns true and drops the drawables when it changed.
+    bool updateProjectionVariant(const TransformState&);
 
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;
@@ -400,6 +415,15 @@ protected:
     static auto computeFeatureNDCBound(std::size_t count, const mat4& mat, const GetVertexFn& get) {
         return computeFeatureNDCBound(count, mat, false, get);
     }
+
+    /// @brief The same bound through the tile's projection, for a projection a matrix cannot express.
+    /// @param translation  The layer's translation in tile units.
+    /// @param getVertex    Functor that returns (x, y) in tile units and the elevation in meters.
+    /// @return NDC bounds of what the horizon leaves visible, std::nullopt if that is nothing.
+    static std::optional<NDCBound> computeFeatureNDCBound(std::size_t vertexCount,
+                                                          const TileProjector&,
+                                                          const std::array<float, 2>& translation,
+                                                          const GetVertexFn& getVertex);
 
 private:
     // Some layers may not render correctly on some hardware when the vertex

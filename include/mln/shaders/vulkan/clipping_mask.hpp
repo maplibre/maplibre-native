@@ -24,6 +24,30 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
     static constexpr auto vertex = R"(
         layout(location = 0) in ivec2 position;
 
+#ifdef PROJECTION_GLOBE
+        // The two matrices fill the guaranteed 128 bytes of push constants; the per-tile vectors ride as instance
+        // attributes, so each mask sees the same projection block the layers do.
+        layout(location = 1) in vec4 tile_mercator_coords;
+        layout(location = 2) in vec4 clipping_plane;
+        layout(location = 3) in vec4 transition;
+        layout(push_constant) uniform constants {
+            mat4 matrix;
+            mat4 fallback_matrix;
+        } constant;
+
+        void main() {
+            ProjectionUBO projection;
+            projection.matrix = constant.matrix;
+            projection.fallback_matrix = constant.fallback_matrix;
+            projection.tile_mercator_coords = tile_mercator_coords;
+            projection.clipping_plane = clipping_plane;
+            projection.projection_transition = transition.x;
+            projection.depth_offset = 0.0;
+            projection.translate = vec2(0.0);
+            gl_Position = projectTile(vec2(position), vec2(position), projection);
+            gl_Position.y *= -1.0;
+        }
+#else
         layout(push_constant) uniform constants {
             mat4 matrix;
         } constant;
@@ -32,6 +56,7 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
             gl_Position = constant.matrix * vec4(position, 0.0, 1.0);
             gl_Position.y *= -1.0;
         }
+#endif
     )";
 
     static constexpr auto fragment = R"(

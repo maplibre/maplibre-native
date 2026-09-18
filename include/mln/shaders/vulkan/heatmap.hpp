@@ -52,12 +52,16 @@ struct HeatmapDrawableUBO {
     // Interpolations
     float weight_t;
     float radius_t;
-    float pad1;
+    float globe_extrude_scale;
 };
 
 layout(std140, set = LAYER_SET_INDEX, binding = idHeatmapDrawableUBO) readonly buffer HeatmapDrawableUBOVector {
     HeatmapDrawableUBO drawable_ubo[];
 } drawableVector;
+
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
 
 layout(set = LAYER_SET_INDEX, binding = idHeatmapEvaluatedPropsUBO) uniform HeatmapEvaluatedPropsUBO {
     float weight;
@@ -109,7 +113,14 @@ void main() {
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
+#ifdef PROJECTION_GLOBE
+    const vec2 circle_center = floor(in_position * 0.5);
+    const vec3 center_vector = projectToSphere(circle_center, vec2(0.0, 0.0), projectionVector.projection_ubo[constant.ubo_index]);
+    const vec3 corner_vector = globeRotateVector(center_vector, extrude * radius * drawable.globe_extrude_scale);
+    gl_Position = interpolateProjection(circle_center + scaled_extrude, corner_vector, 0.0, projectionVector.projection_ubo[constant.ubo_index]);
+#else
     gl_Position = drawable.matrix * vec4(floor(in_position * 0.5) + scaled_extrude, 0, 1);
+#endif
     gl_Position.y *= -1.0;
 
     frag_weight = weight;

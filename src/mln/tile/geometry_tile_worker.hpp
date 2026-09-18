@@ -2,6 +2,7 @@
 
 #include <mln/map/mode.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/text/glyph_manager.hpp>
@@ -54,6 +55,7 @@ public:
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
                    Immutable<std::set<std::string>> availableImages,
+                   const SubdivisionGranularitySetting&,
                    uint64_t correlationID);
     void setData(std::unique_ptr<const GeometryTileData>,
                  Immutable<std::set<std::string>> availableImages,
@@ -124,6 +126,7 @@ private:
     Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     bool showCollisionBoxes;
+    SubdivisionGranularitySetting subdivisionGranularity;
     bool firstLoad = true;
 
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;

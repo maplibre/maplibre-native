@@ -2,6 +2,7 @@
 
 #include <mln/gfx/context.hpp>
 #include <mln/gfx/drawable.hpp>
+#include <mln/math/angles.hpp>
 #include <mln/plugin/plugin_drawable_data.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -15,7 +16,9 @@
 #include <mln/util/logging.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstring>
+#include <iterator>
 #include <limits>
 
 namespace mln {
@@ -30,6 +33,9 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         uniform.failed = false;
     }
     uint32_t drawableIndex = 0;
+    const double latitudeScale = parameters.state.isGlobeRendering()
+                                     ? std::cos(util::deg2rad(parameters.state.getLatLng().latitude()))
+                                     : 1.0;
     {
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getData() || !checkTweakDrawable(drawable)) return;
@@ -49,16 +55,18 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             const bool hasTile = drawable.getTileID().has_value();
             const std::optional<UnwrappedTileID> tileID =
                 hasTile ? std::optional<UnwrappedTileID>{drawable.getTileID()->toUnwrapped()} : std::nullopt;
-            mat4 tileMatrix = matrix::identity4();
+            ProjectionData projection{.mainMatrix = matrix::identity4(),
+                                      .projectionTransition = parameters.state.getProjectionTransition(),
+                                      .fallbackMatrix = matrix::identity4()};
             if (hasTile) {
-                tileMatrix = getTileMatrix(*tileID,
-                                           parameters,
-                                           {0.0f, 0.0f},
-                                           style::TranslateAnchorType::Viewport,
-                                           false,
-                                           false,
-                                           drawable,
-                                           true);
+                projection = getProjectionData(*tileID,
+                                               parameters,
+                                               {0.0f, 0.0f},
+                                               style::TranslateAnchorType::Viewport,
+                                               false,
+                                               false,
+                                               drawable,
+                                               true);
             }
             mln_plugin_uniform_context_v1 callbackContext{};
             callbackContext.struct_size = sizeof(callbackContext);
@@ -67,8 +75,17 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             callbackContext.pixel_ratio = parameters.pixelRatio;
             callbackContext.pixels_to_gl_units[0] = parameters.pixelsToGLUnits[0];
             callbackContext.pixels_to_gl_units[1] = parameters.pixelsToGLUnits[1];
-            const auto tileMatrixFloats = util::cast<float>(tileMatrix);
+            const auto tileMatrixFloats = util::cast<float>(projection.fallbackMatrix);
             std::copy(tileMatrixFloats.begin(), tileMatrixFloats.end(), callbackContext.tile_matrix);
+            callbackContext.projection_transition = static_cast<float>(projection.projectionTransition);
+            const auto tileMercatorCoords = util::cast<float>(projection.tileMercatorCoords);
+            std::copy(tileMercatorCoords.begin(), tileMercatorCoords.end(), callbackContext.tile_mercator_coords);
+            const auto projectionMatrix = util::cast<float>(projection.mainMatrix);
+            std::copy(projectionMatrix.begin(), projectionMatrix.end(), callbackContext.projection_matrix);
+            const auto clippingPlane = util::cast<float>(projection.clippingPlane);
+            std::copy(clippingPlane.begin(), clippingPlane.end(), callbackContext.clipping_plane);
+            callbackContext.pixels_to_sphere_radians = globeExtrudeScale(
+                UnwrappedTileID(0, 0, 0), static_cast<float>(parameters.state.getZoom()), latitudeScale);
             const auto viewportSize = parameters.state.getSize();
             callbackContext.viewport_width = viewportSize.width;
             callbackContext.viewport_height = viewportSize.height;
@@ -106,6 +123,9 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                     if (layerScope) {
                         const auto identity = util::cast<float>(matrix::identity4());
                         std::copy(identity.begin(), identity.end(), context.tile_matrix);
+                        std::copy(identity.begin(), identity.end(), context.projection_matrix);
+                        std::fill(
+                            std::begin(context.tile_mercator_coords), std::end(context.tile_mercator_coords), 0.0f);
                         context.pixels_to_tile_units = 0;
                     }
                 } else {
