@@ -12,6 +12,7 @@ class Transform;
 class MapProjection : private util::noncopyable {
 public:
     explicit MapProjection(const Map&);
+    explicit MapProjection(const TransformState&);
     ~MapProjection();
 
     ScreenCoordinate pixelForLatLng(const LatLng&) const;
