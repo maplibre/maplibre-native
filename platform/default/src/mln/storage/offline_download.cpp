@@ -465,7 +465,8 @@ void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tiles
     std::string_view acceptHeader;
     switch (type) {
         case SourceType::Vector:
-            // Raster can be differentiated based on magic bytes, MLT/MVT not => so the cache can tell the two encodings apart
+            // Raster can be differentiated based on magic bytes, MLT/MVT not => so the cache can tell the two encodings
+            // apart
             vectorEncoding = http::vectorEncodingOf(tileset);
             acceptHeader = http::vectorAcceptHeader(*vectorEncoding);
             break;
