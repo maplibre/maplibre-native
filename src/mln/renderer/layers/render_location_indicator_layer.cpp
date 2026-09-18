@@ -60,6 +60,18 @@ using namespace std::numbers;
 
 namespace mln {
 
+namespace {
+/// Whether the puck is drawn on the globe: the drawables follow the projection, OpenGL's own renderer draws with
+/// its Mercator matrix on either one.
+bool drawsOnGlobe([[maybe_unused]] const TransformState& state) {
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+    return state.isGlobeRendering();
+#else
+    return false;
+#endif
+}
+} // namespace
+
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
     explicit LocationIndicatorRenderParameters(const TransformParameters& tp)
@@ -625,6 +637,13 @@ protected:
 
     // Size in "map pixels" for a screen pixel
     static float pixelSizeToWorldSizeH(const LatLng& pos, const TransformState& s) {
+        if (drawsOnGlobe(s)) {
+            // Toward the horizon a pixel covers more of the map because the sphere turns away, which is not
+            // perspective and would stretch the puck along the horizon: only the camera distance counts.
+            vec4 clip;
+            s.latLngToScreenCoordinate(pos, clip);
+            return static_cast<float>(clip[3] / s.getCameraToCenterDistance());
+        }
         ScreenCoordinate posScreen = latLngToScreenCoordinate(pos, s);
         ScreenCoordinate posScreenLeftPx = posScreen;
         posScreenLeftPx.x -= 1;
@@ -713,10 +732,18 @@ protected:
         // edge of the screen going toward the top.
 
         Point<double> verticalShift = hatShadowShiftVector(params.puckPosition, params);
+        // The puck is sized in Mercator pixels, which the sphere shrinks with the latitude: keep the size it has at
+        // the map's center, the way the globe keeps circles and pitched text.
+        const double puckLatitude = util::clamp(
+            params.puckPosition.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
+        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(s.getProjection().circleRadiusCorrection(s) /
+                                                                         std::cos(util::deg2rad(puckLatitude)))
+                                                    : 1.0f;
         const float horizontalScaleFactor =
-            (1.0f - params.perspectiveCompensation) +
-            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
-                params.perspectiveCompensation; // Compensation factor for the perspective deformation
+            ((1.0f - params.perspectiveCompensation) +
+             util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
+                 params.perspectiveCompensation) * // Compensation factor for the perspective deformation
+            latitudeScale;
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -1046,7 +1073,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
-void RenderLocationIndicatorLayer::captureRenderedFeatures([[maybe_unused]] const TransformState& state) {
+void RenderLocationIndicatorLayer::captureRenderedFeatures(const TransformState& state) {
     using namespace vector;
     constexpr auto locationID = "maplibre:LocationIndicator";
 
@@ -1054,10 +1081,8 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures([[maybe_unused]] cons
     const auto& proj = renderImpl->getProjectionPuck();
     const auto& geom = renderImpl->getPuckGeometry();
 
-#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
-    // OpenGL's own renderer draws the puck with its Mercator matrix on either projection; the drawables follow the
-    // globe, where the puck's corners are world pixel offsets from its position on the sphere.
-    if (state.isGlobeRendering()) {
+    // On the globe the puck's corners are world pixel offsets from its position on the sphere.
+    if (drawsOnGlobe(state)) {
         const auto& position = renderImpl->getPositionMercator();
         std::vector<vec3> visible;
         for (const auto& corner : geom) {
@@ -1073,7 +1098,6 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures([[maybe_unused]] cons
         }
         return;
     }
-#endif
 
     const auto getVertex = [&](std::size_t i) {
         return vec3{geom[i].x, geom[i].y, 0};
