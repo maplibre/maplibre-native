@@ -90,7 +90,7 @@ struct Puck {
     std::optional<gfx::RenderingStats::NDCBound> captured;
 };
 
-Puck renderPuckOnGlobe(const LatLng& location) {
+Puck renderPuck(const std::string& projection, const LatLng& location) {
     util::RunLoop loop;
 
     HeadlessFrontend frontend{1};
@@ -100,8 +100,8 @@ Puck renderPuckOnGlobe(const LatLng& location) {
             ResourceOptions().withCachePath(":memory:"));
 
     map.getStyle().loadJSON(
-        R"({"version":8,"projection":{"type":"globe"},"sources":{},)"
-        R"("layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
+        R"({"version":8,"projection":{"type":")" + projection +
+        R"("},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
     map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1.0));
 
     // Black on white: the WebGPU shader multiplies the image by the black the tweaker hands every textured quad.
@@ -120,8 +120,6 @@ Puck renderPuckOnGlobe(const LatLng& location) {
     puck->setBearingImageSize(1.0f);
     map.getStyle().addLayer(std::move(puck));
 
-    // The puck's image is uploaded with the first frame and drawn from the next.
-    frontend.render(map);
     const auto image = frontend.render(map).image;
 
     Puck result;
@@ -167,6 +165,42 @@ TEST(LocationIndicator, GlobePuckAtItsLocation) {
     expectPuckAtItsLocation("globe");
 }
 
+// The puck lies flat on the sphere: the surface turning away narrows it, and nothing makes it larger than the
+// 16 pixels its image has at the map's center.
+TEST(LocationIndicator, GlobePuckKeepsItsSize) {
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
+    GTEST_SKIP() << "OpenGL draws the location indicator with its own renderer, which has no globe path yet";
+#endif
+    const mln::JSValue emptyObject(rapidjson::kObjectType);
+    style::conversion::Error error;
+    if (!LayerManager::get()->createLayer("location-indicator", "probe", &emptyObject, error)) {
+        GTEST_SKIP() << "no location-indicator layer on this platform";
+    }
+
+    constexpr double pixel = 2.0 / 256.0;
+    for (const auto& location : {LatLng{0.0, 0.0},
+                                 LatLng{0.0, 30.0},
+                                 LatLng{0.0, 60.0},
+                                 LatLng{40.0, 0.0},
+                                 LatLng{60.0, 0.0},
+                                 LatLng{-20.0, -45.0}}) {
+        SCOPED_TRACE(testing::Message() << location.latitude() << ", " << location.longitude());
+        const auto puck = renderPuck("globe", location);
+        ASSERT_TRUE(puck.rendered);
+        const double width = (puck.rendered->maxX - puck.rendered->minX) / pixel;
+        const double height = (puck.rendered->maxY - puck.rendered->minY) / pixel;
+        EXPECT_LE(width, 18.0);
+        EXPECT_LE(height, 18.0);
+        EXPECT_GE(std::max(width, height), 13.0);
+    }
+
+    // Mercator keeps the image's size at every latitude.
+    const auto mercator = renderPuck("mercator", LatLng{35.0, 20.0});
+    ASSERT_TRUE(mercator.rendered);
+    EXPECT_NEAR((mercator.rendered->maxX - mercator.rendered->minX) / pixel, 16.0, 2.0);
+    EXPECT_NEAR((mercator.rendered->maxY - mercator.rendered->minY) / pixel, 16.0, 2.0);
+}
+
 // The capture reports the puck where the globe draws it, and nothing for a puck behind the horizon.
 TEST(LocationIndicator, GlobePuckCapturedWhereItIsDrawn) {
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -181,7 +215,7 @@ TEST(LocationIndicator, GlobePuckCapturedWhereItIsDrawn) {
     constexpr double twoPixels = 2.0 * 2.0 / 256.0;
     for (const auto& location : {LatLng{0.0, 0.0}, LatLng{40.0, 0.0}, LatLng{0.0, 30.0}, LatLng{-20.0, -45.0}}) {
         SCOPED_TRACE(testing::Message() << location.latitude() << ", " << location.longitude());
-        const auto puck = renderPuckOnGlobe(location);
+        const auto puck = renderPuck("globe", location);
         ASSERT_TRUE(puck.rendered);
         ASSERT_TRUE(puck.captured);
         EXPECT_NEAR(puck.captured->minX, puck.rendered->minX, twoPixels);
@@ -190,7 +224,7 @@ TEST(LocationIndicator, GlobePuckCapturedWhereItIsDrawn) {
         EXPECT_NEAR(puck.captured->maxY, puck.rendered->maxY, twoPixels);
     }
 
-    const auto hidden = renderPuckOnGlobe(LatLng{0.0, 120.0});
+    const auto hidden = renderPuck("globe", LatLng{0.0, 120.0});
     EXPECT_FALSE(hidden.rendered);
     EXPECT_FALSE(hidden.captured);
 }
