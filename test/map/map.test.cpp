@@ -2195,14 +2195,18 @@ TEST_P(UniformBlockOrderTest, RendersPaintColors) {
         redPixels += pixel[0] > 200 && pixel[1] < 100 && pixel[2] < 100;
         bluePixels += pixel[2] > 200 && pixel[0] < 100 && pixel[1] < 100;
     }
-    if (withText || kind == "line") EXPECT_GT(redPixels, 100u);
-    if (withImage) EXPECT_GT(bluePixels, 100u);
+    if (withText || kind == "line") {
+        EXPECT_GT(redPixels, 100u);
+    }
+    if (withImage) {
+        EXPECT_GT(bluePixels, 100u);
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(Rendering,
                          UniformBlockOrderTest,
                          testing::Values("text", "icon", "mixed", "line", "background"),
-                         [](const testing::TestParamInfo<std::string>& info) { return info.param; });
+                         [](const testing::TestParamInfo<std::string>& paramInfo) { return paramInfo.param; });
 
 // End-to-end: a feature-state change must alter the *rendered* output, not just
 // the value read back through the API. A fill covering the viewport is colored
