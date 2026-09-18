@@ -1027,7 +1027,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
     if (paintParameters.captureRenderedFeatures) {
-        captureRenderedFeatures();
+        captureRenderedFeatures(paintParameters.state);
     }
 
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
@@ -1046,19 +1046,40 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
-void RenderLocationIndicatorLayer::captureRenderedFeatures() {
+void RenderLocationIndicatorLayer::captureRenderedFeatures([[maybe_unused]] const TransformState& state) {
     using namespace vector;
+    constexpr auto locationID = "maplibre:LocationIndicator";
 
     // Only considering the puck for now, not the accuracy circle
     const auto& proj = renderImpl->getProjectionPuck();
     const auto& geom = renderImpl->getPuckGeometry();
+
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+    // OpenGL's own renderer draws the puck with its Mercator matrix on either projection; the drawables follow the
+    // globe, where the puck's corners are world pixel offsets from its position on the sphere.
+    if (state.isGlobeRendering()) {
+        const auto& position = renderImpl->getPositionMercator();
+        std::vector<vec3> visible;
+        for (const auto& corner : geom) {
+            const auto latLng = Projection::unproject({position.x + corner.x, position.y + corner.y}, state.getScale());
+            if (!state.isLocationOccluded(latLng)) {
+                vec4 clip;
+                state.latLngToScreenCoordinate(latLng, clip);
+                visible.push_back({clip[0] / clip[3], clip[1] / clip[3], 0});
+            }
+        }
+        if (const auto bound = computeFeatureNDCBound(visible.size(), [&](std::size_t i) { return visible[i]; })) {
+            stats.addRenderedFeature(locationID, *bound, {/* no tile */});
+        }
+        return;
+    }
+#endif
 
     const auto getVertex = [&](std::size_t i) {
         return vec3{geom[i].x, geom[i].y, 0};
     };
 
     if (const auto bound = computeFeatureNDCBound(geom.size(), proj, getVertex)) {
-        constexpr auto locationID = "maplibre:LocationIndicator";
         stats.addRenderedFeature(locationID, *bound, {/* no tile */});
     }
 }
@@ -1127,7 +1148,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (updateParameters->captureRenderedFeatures) {
-        captureRenderedFeatures();
+        captureRenderedFeatures(state);
     }
 
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());

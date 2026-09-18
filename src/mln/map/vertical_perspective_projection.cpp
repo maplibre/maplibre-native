@@ -460,8 +460,9 @@ ProjectionData VerticalPerspectiveProjection::getProjectionData(const TransformS
 
 ProjectedTilePoint VerticalPerspectiveProjection::projectTilePoint(const ProjectionData& data,
                                                                    const UnwrappedTileID& tileID,
-                                                                   const Point<double>& point) const {
-    const vec3 sphere = tileCoordinatesToSphere(point, tileID);
+                                                                   const Point<double>& point,
+                                                                   const double elevation) const {
+    const vec3 sphere = scaled(tileCoordinatesToSphere(point, tileID), 1.0 + elevation / globeRadiusMeters);
     vec4 pos = {{sphere[0], sphere[1], sphere[2], 1}};
     matrix::transformMat4(pos, pos, data.mainMatrix);
     const auto& plane = data.clippingPlane;
