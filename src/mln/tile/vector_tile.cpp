@@ -15,12 +15,7 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
                        TileObserver* observer_)
     : GeometryTile(id_, std::move(sourceID_), parameters_, observer_),
       loader(std::make_unique<TileLoader<VectorTile>>(
-          *this,
-          id_,
-          parameters_,
-          tileset,
-          http::vectorAcceptHeader(tileset),
-          http::vectorEncodingOf(tileset))) {}
+          *this, id_, parameters_, tileset, http::vectorAcceptHeader(tileset), http::vectorEncodingOf(tileset))) {}
 
 VectorTile::~VectorTile() {}
 
