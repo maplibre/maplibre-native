@@ -98,6 +98,30 @@ target_include_directories(
         ${PROJECT_SOURCE_DIR}/platform/default/include
 )
 
+# TEMPORARY WORKAROUND: the OpenHarmony SDK's clang rejects the missing `typename`
+# at vendor/maplibre-tile-spec/cpp/include/mlt/common.hpp:25. Inject a patched copy
+# of that header ahead of the vendored include directory for every target that
+# compiles MLT code. The real fix is upstreaming `typename` to
+# maplibre/maplibre-tile-spec and bumping the vendored submodule; delete this block
+# and platform/ohos/compat/mlt/common.hpp once that lands.
+target_include_directories(
+    mbgl-core
+    BEFORE
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/platform/ohos/compat
+)
+
+foreach(MLN_OHOS_MLT_TARGET mlt-cpp mlt-cpp-encoder)
+    if(TARGET ${MLN_OHOS_MLT_TARGET})
+        target_include_directories(
+            ${MLN_OHOS_MLT_TARGET}
+            BEFORE
+            PRIVATE
+                ${PROJECT_SOURCE_DIR}/platform/ohos/compat
+        )
+    endif()
+endforeach()
+
 target_link_libraries(
     mbgl-core
     PRIVATE
