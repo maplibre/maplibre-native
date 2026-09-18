@@ -49,7 +49,7 @@ private:
 
     void populateDynamicRenderFeatureIndex(DynamicFeatureIndex &) const override;
 
-    void captureRenderedFeatures();
+    void captureRenderedFeatures(const TransformState &);
 
 private:
     bool contextDestroyed = false;
