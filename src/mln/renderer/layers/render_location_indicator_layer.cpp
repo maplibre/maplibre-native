@@ -938,12 +938,14 @@ public:
                parameters.bearingAccuracyColor.a > 0;
     }
 
-private:
+protected:
     bool positionChanged = false;
     bool radiusChanged = false;
     bool bearingChanged = false;
     mln::LocationIndicatorRenderParameters oldParams;
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     bool initialized = false;
+#endif
     bool dirtyFeature = true;
 
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
