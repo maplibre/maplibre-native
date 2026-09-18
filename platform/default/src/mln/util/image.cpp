@@ -1,7 +1,6 @@
 #include <mln/util/image.hpp>
 #include <mln/util/string.hpp>
 #include <mln/util/premultiply.hpp>
-#include <mln/util/constants.hpp>
 
 namespace mln {
 
@@ -45,8 +44,8 @@ PremultipliedImage decodeImage(const std::string& string) {
     throw std::runtime_error("unsupported image type");
 }
 
-std::string_view rasterAcceptHeader() {
-    return util::MIME_TYPE_RASTER;
+bool supportsWebPDecoding() {
+    return true;
 }
 
 } // namespace mln

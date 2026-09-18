@@ -1,4 +1,3 @@
-#include <mln/util/constants.hpp>
 #include <mln/util/image+MLNAdditions.hpp>
 
 #import <ImageIO/ImageIO.h>
@@ -94,11 +93,11 @@ PremultipliedImage decodeImage(const std::string& source) {
   return MLNPremultipliedImageFromCGImage(*image);
 }
 
-std::string_view rasterAcceptHeader() {
+bool supportsWebPDecoding() {
   if (@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)) {
-    return util::MIME_TYPE_RASTER;
+    return true;
   }
-  return util::MIME_TYPE_RASTER_NO_WEBP;
+  return false;
 }
 
 }  // namespace mln

@@ -5,7 +5,6 @@
 #include <mln/util/size.hpp>
 
 #include <string>
-#include <string_view>
 #include <cstring>
 #include <memory>
 #include <algorithm>
@@ -180,6 +179,7 @@ using AlphaImage = Image<ImageAlphaMode::Exclusive>;
 PremultipliedImage decodeImage(const std::string&);
 std::string encodePNG(const PremultipliedImage&);
 
-std::string_view rasterAcceptHeader();
+/// Whether `decodeImage` can decode WebP on this platform.
+bool supportsWebPDecoding();
 
 } // namespace mln

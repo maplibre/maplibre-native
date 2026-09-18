@@ -1,6 +1,5 @@
 #include <mln/util/image.hpp>
 #include <mln/util/string.hpp>
-#include <mln/util/constants.hpp>
 
 #include <string>
 
@@ -18,8 +17,8 @@ PremultipliedImage decodeImage(const std::string& string) {
     return android::Bitmap::GetImage(*env, android::BitmapFactory::DecodeByteArray(*env, array, 0, string.size()));
 }
 
-std::string_view rasterAcceptHeader() {
-    return util::MIME_TYPE_RASTER;
+bool supportsWebPDecoding() {
+    return true;
 }
 
 } // namespace mln

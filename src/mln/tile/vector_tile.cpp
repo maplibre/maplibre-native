@@ -2,7 +2,7 @@
 
 #include <mln/renderer/tile_parameters.hpp>
 #include <mln/tile/tile_loader_impl.hpp>
-#include <mln/util/constants.hpp>
+#include <mln/util/accept_header.hpp>
 
 #include <utility>
 
@@ -20,8 +20,8 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
           parameters_,
           tileset,
           tileset.vectorEncoding.value_or(Tileset::VectorEncoding::Mapbox) == Tileset::VectorEncoding::MLT
-              ? util::MIME_TYPE_MLT
-              : util::MIME_TYPE_MVT)) {}
+              ? http::MIME_TYPE_MLT
+              : http::MIME_TYPE_MVT)) {}
 
 VectorTile::~VectorTile() {}
 
