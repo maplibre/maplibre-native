@@ -537,7 +537,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                         Log::Warning(Event::Render,
                                      "WebGPU: missing bind group layout for group " + std::to_string(group) +
                                          " in shader '" + shaderName + "'");
-                        continue;
+                        return;
                     }
 
                     const auto& bindingInfos = webgpuShader->getBindingInfosForGroup(group);
@@ -648,7 +648,7 @@ void Drawable::draw(PaintParameters& parameters) const {
                         Log::Warning(Event::Render,
                                      "WebGPU: invalid bindings for drawable '" + getName() +
                                          "' (group=" + std::to_string(group) + ", slot=" + std::to_string(slot) + ")");
-                        continue;
+                        return;
                     }
 
                     const std::string label = getName() + " bind-group " + std::to_string(group);
@@ -661,6 +661,9 @@ void Drawable::draw(PaintParameters& parameters) const {
                     descriptor.entries = entries.data();
 
                     WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(deviceHandle, &descriptor);
+                    if (!bindGroup) {
+                        return;
+                    }
                     impl->bindGroups.push_back({static_cast<uint32_t>(slot), group, bindGroup});
                 }
             }
