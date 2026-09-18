@@ -31,7 +31,11 @@ LogLevel logLevelForSeverity(EventSeverity severity) {
 
 void Log::platformRecord(EventSeverity severity, const std::string& msg) {
     const auto message = std::string("[") + Enum<EventSeverity>::toString(severity) + "] " + msg;
-    OH_LOG_PrintMsg(LOG_APP, logLevelForSeverity(severity), kMapLibreHilogDomain, kMapLibreHilogTag, message.c_str());
+    // Pass the message as an argument to a constant format string so that '%' in
+    // log text is never interpreted as a hilog format specifier. {public} keeps
+    // the text from being redacted as private data.
+    OH_LOG_Print(
+        LOG_APP, logLevelForSeverity(severity), kMapLibreHilogDomain, kMapLibreHilogTag, "%{public}s", message.c_str());
 }
 
 } // namespace mln

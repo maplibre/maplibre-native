@@ -207,6 +207,8 @@ void applyCacheHeaders(Response& response, Http_Headers* headers) {
     }
     if (const auto cacheControl = headerValue(headers, "cache-control")) {
         const auto cc = http::CacheControl::parse(*cacheControl);
+        // Cache-Control takes precedence over Expires, matching the curl file source.
+        response.expires.reset();
         if (cc.maxAge) {
             response.expires = cc.toTimePoint();
         }

@@ -19,9 +19,9 @@ inline std::string buildUserAgent(const ClientOptions& clientOptions) {
         userAgent += " ";
     }
 
-    userAgent += "MapLibreNative/0.0.0 (";
+    userAgent += "MapLibreNative/";
     userAgent += version::revision;
-    userAgent += "; HarmonyOS)";
+    userAgent += " (HarmonyOS)";
     return userAgent;
 }
 
