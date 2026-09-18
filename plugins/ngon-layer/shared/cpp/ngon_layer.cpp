@@ -174,12 +174,16 @@ struct alignas(16) DrawableUBO {
     float color[4], stroke_color[4];
     float translate[2], pitch_alignment, pitch_scale;
     float interpolation[16];
+    float projection[16];
+    float tile_mercator[4], clipping_plane[4];
+    float globe[4];
 };
 static_assert(offsetof(DrawableUBO, radius) == 96);
 static_assert(offsetof(DrawableUBO, color) == 128);
 static_assert(offsetof(DrawableUBO, translate) == 160);
 static_assert(offsetof(DrawableUBO, interpolation) == 176);
-static_assert(sizeof(DrawableUBO) == 240);
+static_assert(offsetof(DrawableUBO, projection) == 240);
+static_assert(sizeof(DrawableUBO) == 352);
 
 #include "ngon_shader_sources.hpp"
 
@@ -198,6 +202,11 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* context,
     value.camera[3] = context->camera_to_center_distance;
     value.view[0] = static_cast<float>(context->bearing);
     value.view[1] = context->pixel_ratio;
+    std::copy_n(context->projection_matrix, 16, value.projection);
+    std::copy_n(context->tile_mercator_coords, 4, value.tile_mercator);
+    std::copy_n(context->clipping_plane, 4, value.clipping_plane);
+    value.globe[0] = context->projection_transition;
+    value.globe[1] = context->pixels_to_sphere_radians;
     std::memcpy(output, &value, sizeof(value));
     return MLN_PLUGIN_STATUS_OK;
 }
