@@ -70,6 +70,8 @@ public:
     static void SetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void GetFeatureState(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void RemoveFeatureState(const Nan::FunctionCallbackInfo<v8::Value>&);
+    static void SetGlobalStateProperty(const Nan::FunctionCallbackInfo<v8::Value>&);
+    static void GetGlobalState(const Nan::FunctionCallbackInfo<v8::Value>&);
 
     static v8::Local<v8::Value> ParseError(const char* msg);
 

@@ -14,9 +14,10 @@ public:
         const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>& layers,
         const RenderedQueryOptions& options,
+        const GlobalStateMap* globalState,
         const mat4& projMatrix) const override;
 
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const override;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const GlobalStateMap*) const override;
 
 private:
     // RenderTileSetSource overrides
