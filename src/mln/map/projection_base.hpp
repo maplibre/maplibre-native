@@ -47,10 +47,12 @@ public:
                                              const UnwrappedTileID&,
                                              const mat4& mercatorMatrix) const = 0;
 
-    /// The clip-space position of a tile point, computed the way the vertex shaders do it.
+    /// The clip-space position of a tile point, `elevation` meters above the surface, computed the way the vertex
+    /// shaders do it.
     virtual ProjectedTilePoint projectTilePoint(const ProjectionData&,
                                                 const UnwrappedTileID&,
-                                                const Point<double>&) const = 0;
+                                                const Point<double>&,
+                                                double elevation) const = 0;
 
     /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center.
     virtual double circleRadiusCorrection(const TransformState&) const { return 1.0; }

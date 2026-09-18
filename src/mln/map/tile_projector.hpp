@@ -17,8 +17,8 @@ public:
           tileID(tileID_),
           data(std::move(data_)) {}
 
-    ProjectedTilePoint project(const Point<double>& point) const {
-        return state->getProjection().projectTilePoint(data, tileID, point);
+    ProjectedTilePoint project(const Point<double>& point, double elevation = 0.0) const {
+        return state->getProjection().projectTilePoint(data, tileID, point, elevation);
     }
 
     double circleRadiusCorrection() const { return state->getProjection().circleRadiusCorrection(*state); }
