@@ -144,6 +144,15 @@ public:
         Paint,
         Layout
     };
+    /***
+     * Sets a property by name, returning an error if it cannot be set.
+     *
+     * @param scope The paint or layout section containing the property when
+     * parsing a style. Plugin layers use this to reject properties in the wrong
+     * section; built-in layers ignore it. Defaults to std::nullopt for direct
+     * property updates without section validation.
+     * @return std::nullopt on success, or a conversion error on failure.
+     */
     virtual std::optional<conversion::Error> setProperty(const std::string& name,
                                                          const conversion::Convertible& value,
                                                          std::optional<PropertyScope> scope = std::nullopt);
