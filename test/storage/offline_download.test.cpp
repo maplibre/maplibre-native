@@ -210,15 +210,8 @@ TEST(OfflineDownload, InlineMLTSource) {
 
     test.loop.run();
 
-    const auto mlt = Resource::tile(urlTemplate,
-                                    1,
-                                    0,
-                                    0,
-                                    0,
-                                    Tileset::Scheme::XYZ,
-                                    Resource::LoadingMethod::All,
-                                    {},
-                                    Tileset::VectorEncoding::MLT);
+    const auto mlt = Resource::tile(
+        urlTemplate, 1, 0, 0, 0, Tileset::Scheme::XYZ, Resource::LoadingMethod::All, {}, Tileset::VectorEncoding::MLT);
     const auto mvt = Resource::tile(urlTemplate,
                                     1,
                                     0,

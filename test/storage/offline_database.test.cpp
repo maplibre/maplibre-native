@@ -415,12 +415,8 @@ TEST(OfflineDatabase, CacheKey) {
 // MVT keeps the bare template so older databases still resolve.
 TEST(OfflineDatabase, TileCacheKey) {
     const auto tileData = [](std::optional<Tileset::VectorEncoding> encoding, std::string urlTemplate) {
-        return Resource::TileData{.urlTemplate = std::move(urlTemplate),
-                                  .pixelRatio = 1,
-                                  .x = 0,
-                                  .y = 0,
-                                  .z = 0,
-                                  .vectorEncoding = encoding};
+        return Resource::TileData{
+            .urlTemplate = std::move(urlTemplate), .pixelRatio = 1, .x = 0, .y = 0, .z = 0, .vectorEncoding = encoding};
     };
 
     EXPECT_EQ("https://example.com/{z}/{x}/{y}",
@@ -448,15 +444,8 @@ TEST(OfflineDatabase, TileEncodingsDoNotShareCacheEntries) {
                                     Resource::LoadingMethod::All,
                                     {},
                                     Tileset::VectorEncoding::Mapbox);
-    const auto mlt = Resource::tile(urlTemplate,
-                                    1,
-                                    0,
-                                    0,
-                                    0,
-                                    Tileset::Scheme::XYZ,
-                                    Resource::LoadingMethod::All,
-                                    {},
-                                    Tileset::VectorEncoding::MLT);
+    const auto mlt = Resource::tile(
+        urlTemplate, 1, 0, 0, 0, Tileset::Scheme::XYZ, Resource::LoadingMethod::All, {}, Tileset::VectorEncoding::MLT);
 
     Response mvtResponse;
     mvtResponse.data = std::make_shared<std::string>("mvt bytes");
