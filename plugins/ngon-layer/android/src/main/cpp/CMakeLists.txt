@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.24)
-project(MapLibreNgonExample LANGUAGES CXX)
+project(MapLibreNgonLayer LANGUAGES CXX)
 
 # Consume only the C header from the SDK AAR, never another copy of mbgl-core.
 find_package(MapLibreAndroid REQUIRED CONFIG)
-get_filename_component(NGON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ngon-layer" ABSOLUTE)
+get_filename_component(NGON_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE)
 add_subdirectory("${NGON_ROOT}" ngon-layer)
 target_link_libraries(mln-ngon-layer PUBLIC MapLibreAndroid::maplibre)
 

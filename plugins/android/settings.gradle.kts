@@ -15,7 +15,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "MapLibrePluginExample"
-include(":app")
+include(":app", ":ngon-layer")
+project(":ngon-layer").projectDir = file("../ngon-layer/android")
 
 // Enable the experimental API in the local SDK, including when VERSION is stable.
 // Forward it as a project property because included builds have their own gradle.properties.

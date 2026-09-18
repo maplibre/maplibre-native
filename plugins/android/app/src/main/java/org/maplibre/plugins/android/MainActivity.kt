@@ -9,6 +9,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.plugins.ngon.NgonLayer
 
 class MainActivity : Activity() {
     private lateinit var mapView: MapView
@@ -25,12 +26,7 @@ class MainActivity : Activity() {
             null
         }
         MapLibre.getInstance(this, null, WellKnownTileServer.MapLibre, requestedRenderer)
-        val library = if (BuildConfig.MULTI_BACKEND && RenderingEngine.getCurrentType() == RenderingEngine.Type.OPENGL) {
-            "libmaplibre-opengl.so"
-        } else {
-            "libmaplibre.so"
-        }
-        NativePlugin.registerNgon(library)
+        NgonLayer.register()
 
         mapView = MapView(this)
         setContentView(mapView)

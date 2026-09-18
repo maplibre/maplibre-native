@@ -9,9 +9,9 @@ void throwRegistrationError(JNIEnv* env, const char* message) {
 }
 } // namespace
 
-extern "C" JNIEXPORT void JNICALL Java_org_maplibre_plugins_android_NativePlugin_registerNgon(JNIEnv* env,
-                                                                                              jclass,
-                                                                                              jstring libraryName) {
+extern "C" JNIEXPORT void JNICALL Java_org_maplibre_plugins_ngon_NgonLayer_registerNative(JNIEnv* env,
+                                                                                          jclass,
+                                                                                          jstring libraryName) {
     const char* name = env->GetStringUTFChars(libraryName, nullptr);
     if (!name) return;
     // Resolve from the renderer MapLibre already loaded, without loading a second registry.
