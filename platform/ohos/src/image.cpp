@@ -263,19 +263,47 @@ PremultipliedImage decodeImage(const std::string& string) {
         throw std::runtime_error("OHOS image decoder returned unsupported pixel format: " + description);
     }
 
-    const auto sourceRowStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
-    const auto bytesRequired = checkedByteCount(sourceRowStride, height, "pixel buffer size");
-    std::vector<uint8_t> pixels(bytesRequired);
-    size_t bytesRead = pixels.size();
-    checkImageResult(OH_PixelmapNative_ReadPixels(pixelmap.get(), pixels.data(), &bytesRead),
-                     "OH_PixelmapNative_ReadPixels");
-    if (bytesRead < bytesRequired) {
-        throw std::runtime_error("OHOS image decoder returned fewer pixel bytes than expected: read " +
-                                 std::to_string(bytesRead) + " of " + std::to_string(bytesRequired) + " bytes, " +
+    // The SDK documents neither whether OH_PixelmapNative_ReadPixels writes rows
+    // tightly packed or padded to rowStride, nor whether bufferSize is updated on
+    // return, but it does document OH_PixelmapNative_GetByteCount as the pixel
+    // byte count "without any padding" and warns to "always consider the impact
+    // of stride" on decoded pixelmaps. Read into a buffer large enough for the
+    // padded layout and decide which layout came back from the reported sizes.
+    const auto tightRowStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
+    if (rowStride < tightRowStride) {
+        throw std::runtime_error("OHOS image decoder returned row stride smaller than image width: " + description);
+    }
+    const auto tightBytes = checkedByteCount(tightRowStride, height, "pixel buffer size");
+    const auto paddedBytes = checkedByteCount(rowStride, height, "padded pixel buffer size");
+
+    uint32_t byteCount = 0;
+    checkImageResult(OH_PixelmapNative_GetByteCount(pixelmap.get(), &byteCount), "OH_PixelmapNative_GetByteCount");
+    if (byteCount != tightBytes) {
+        throw std::runtime_error("OHOS image decoder reported unexpected pixel byte count " +
+                                 std::to_string(byteCount) + " (expected " + std::to_string(tightBytes) + "), " +
                                  description);
     }
 
+    std::vector<uint8_t> pixels(paddedBytes);
+    size_t bufferSize = pixels.size();
+    checkImageResult(OH_PixelmapNative_ReadPixels(pixelmap.get(), pixels.data(), &bufferSize),
+                     "OH_PixelmapNative_ReadPixels");
+
+    std::size_t sourceRowStride = 0;
+    if (bufferSize == paddedBytes && rowStride > tightRowStride) {
+        // Rows are padded to rowStride; copyRows drops the padding.
+        sourceRowStride = rowStride;
+    } else if (bufferSize == tightBytes) {
+        sourceRowStride = tightRowStride;
+    } else {
+        throw std::runtime_error("OHOS image decoder returned an unexpected pixel buffer size: read " +
+                                 std::to_string(bufferSize) + " bytes, expected " + std::to_string(tightBytes) +
+                                 " (tight) or " + std::to_string(paddedBytes) + " (padded), " + description);
+    }
+
     const Size imageSize{width, height};
+    // The SDK does not document which alpha type a decoded pixelmap reports when
+    // it is PIXELMAP_ALPHA_TYPE_UNKNOWN, so UNKNOWN is treated as premultiplied.
     if (alphaType == PIXELMAP_ALPHA_TYPE_UNPREMULTIPLIED) {
         UnassociatedImage image(imageSize);
         copyRows(image.data.get(), pixels.data(), width, height, sourceRowStride, pixelFormat);
