@@ -50,10 +50,6 @@ using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 
-namespace {
-ContextObserver nullObserver;
-}
-
 class Context {
 protected:
     Context(uint32_t maximumVertexBindingCount_)
@@ -61,6 +57,8 @@ protected:
           observer(&nullObserver) {}
 
 public:
+    static ContextObserver nullObserver;
+
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
     const uint32_t maximumVertexBindingCount;
 

@@ -39,7 +39,7 @@ public:
 
     void addFeature(const GeometryTileFeature&,
                     const GeometryCollection&,
-                    const mln::ImagePositions&,
+                    const ImagePositions&,
                     const PatternLayerMap&,
                     std::size_t,
                     const CanonicalTileID&) override;
@@ -88,6 +88,13 @@ public:
     std::map<std::string, FillBinders> paintPropertyBinders;
 
 private:
+    void generateBuffers(const GeometryCollection&);
+    void populateBinders(const GeometryTileFeature&,
+                         const ImagePositions&,
+                         const PatternLayerMap&,
+                         std::size_t featureIndex,
+                         const CanonicalTileID&);
+
     mln::unordered_map<std::string, bool> sdfPatterns;
     mln::unordered_set<std::string> mixedSDFPatternLayers;
 };

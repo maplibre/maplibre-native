@@ -223,6 +223,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         updateParameters->tileLodMode,
         renderableSize,
         scissorRect,
+        updateParameters->captureRenderedFeatures,
     };
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
@@ -479,11 +480,16 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     context.renderingStats().encodingTime = renderTree.getElapsedTime() - context.renderingStats().renderingTime;
 
+    auto stats = std::make_shared<gfx::RenderingStats>(context.threadSafeCopyRenderingStats());
+
+    // Add the feature info from the render orchestrator
+    stats->frameRenderedFeatures = std::move(orchestrator.moveFrameRenderedFeatures());
+
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        context.threadSafeCopyRenderingStats());
+        std::move(stats));
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

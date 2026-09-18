@@ -162,6 +162,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/suppress_copies.hpp
 )
 list(APPEND SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/mln/gfx/context.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/drawable.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/drawable_builder.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/drawable_builder_impl.hpp
@@ -429,6 +430,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/logging.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/lru_cache.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/math.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/noncopyable.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/padding.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/platform.hpp
@@ -549,6 +551,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/backend_scope.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket_parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket_parameters.hpp
@@ -737,6 +740,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/match.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/number_format.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/parsing_context.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/style/expression/semiliteral.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/step.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/style/expression/utf8_op_helpers.cpp
@@ -1015,16 +1019,6 @@ include(${PROJECT_SOURCE_DIR}/cmake/opengl.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/metal.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/vulkan.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/webgpu.cmake)
-
-list(APPEND
-    SRC_FILES
-        ${PROJECT_SOURCE_DIR}/src/mln/layermanager/custom_drawable_layer_factory.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_custom_drawable_layer.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/renderer/layers/render_custom_drawable_layer.hpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer_impl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer_impl.hpp
-        ${PROJECT_SOURCE_DIR}/src/mln/style/layers/custom_drawable_layer.cpp
-)
 
 # Harfbuzz text shaping
 set(SHAPE_TARGETS, "")

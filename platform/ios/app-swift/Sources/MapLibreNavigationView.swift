@@ -12,6 +12,12 @@ struct MapLibreNavigationView: View {
                     .listRowBackground(MapLibreColors.primary)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
+                    NavigationLink("Start Map Recycle Test") {
+                        MapRecycleTestView()
+                    }
+                    .listRowBackground(MapLibreColors.primary)
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
                 }
 
                 NavigationLink("SimpleMap") {
@@ -48,6 +54,12 @@ struct MapLibreNavigationView: View {
                 }
                 NavigationLink("ClusteringExample") {
                     ClusteringExampleUIViewControllerRepresentable()
+                }
+                NavigationLink("FeatureStateExample") {
+                    FeatureStateExample()
+                }
+                NavigationLink("FeatureStateVectorExample") {
+                    FeatureStateVectorExample()
                 }
                 NavigationLink("ObserverExample") {
                     ObserverExampleViewUIViewControllerRepresentable()

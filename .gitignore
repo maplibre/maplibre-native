@@ -48,6 +48,9 @@ CMakeLists.txt.user
 CMakeFiles
 __generated__
 
+# Test runner output.
+/metrics/*.html
+/metrics/integration/expression-tests/index.html
 /metrics/integration/query-tests/**/actual.json
 /metrics/integration/render-tests/**/actual.png
 /metrics/integration/render-tests/**/diff.png

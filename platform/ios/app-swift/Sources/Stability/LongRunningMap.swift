@@ -1,25 +1,47 @@
+import Combine
 import MapLibre
 import SwiftUI
 import UIKit
 
 struct UserMapView: UIViewRepresentable {
-    func makeUIView(context _: Context) -> UIView {
+    func makeUIView(context _: Context) -> UserMap {
         let map = UserMap()
         map.run()
         return map
     }
 
-    func updateUIView(_: UIView, context _: Context) {}
+    func updateUIView(_: UserMap, context _: Context) {}
+
+    static func dismantleUIView(_ map: UserMap, coordinator _: ()) {
+        map.stop()
+    }
 }
 
 struct NavigationMapView: UIViewRepresentable {
-    func makeUIView(context _: Context) -> UIView {
-        let map = NavigationMap()
+    var onDidFinishLoadingMap: (() -> Void)?
+    var onRouteReady: (() -> Void)?
+    var cameraSource: MLNMapView?
+    var onCreated: ((NavigationMap) -> Void)?
+    var styleURL: URL?
+    var loadRoutes: Bool = true
+
+    func makeUIView(context _: Context) -> NavigationMap {
+        let map = NavigationMap(cameraSource: cameraSource, styleURL: styleURL, loadRoutes: loadRoutes)
+        map.onDidFinishLoadingMap = onDidFinishLoadingMap
+        map.onRouteReady = onRouteReady
         map.run()
+        onCreated?(map)
         return map
     }
 
-    func updateUIView(_: UIView, context _: Context) {}
+    func updateUIView(_ map: NavigationMap, context _: Context) {
+        map.onDidFinishLoadingMap = onDidFinishLoadingMap
+        map.onRouteReady = onRouteReady
+    }
+
+    static func dismantleUIView(_ map: NavigationMap, coordinator _: ()) {
+        map.stop()
+    }
 }
 
 struct LongRunningMapView: View {
@@ -28,6 +50,8 @@ struct LongRunningMapView: View {
 
     @Environment(\.dismiss) var dismiss
     @State private var remainingTime: TimeInterval = 72.0 * 60.0 * 60.0
+
+    private let timer = Timer.publish(every: 1.0, on: .main, in: .default).autoconnect()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,7 +66,7 @@ struct LongRunningMapView: View {
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
         }
-        .onReceive(Timer.publish(every: 1.0, on: .current, in: .default).autoconnect()) { _ in
+        .onReceive(timer) { _ in
             if remainingTime > 0 {
                 remainingTime -= 1.0
             } else {

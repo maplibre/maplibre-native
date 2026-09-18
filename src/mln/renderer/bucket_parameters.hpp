@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/map/mode.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
 
 namespace mln {
@@ -14,6 +15,7 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
+    const bool retainFeaturesById = false;
 };
 
 } // namespace mln
