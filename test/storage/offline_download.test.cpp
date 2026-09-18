@@ -11,6 +11,7 @@
 #include <mln/storage/offline_download.hpp>
 #include <mln/storage/http_file_source.hpp>
 #include <mln/text/glyph_range.hpp>
+#include <mln/util/accept_header.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/compression.hpp>
@@ -223,6 +224,47 @@ TEST(OfflineDownload, InlineMLTSource) {
                                     Tileset::VectorEncoding::Mapbox);
     EXPECT_TRUE(bool(test.db.get(mlt)));
     EXPECT_FALSE(bool(test.db.get(mvt)));
+}
+
+TEST(OfflineDownload, InlineRasterSource) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition(
+                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+                             test.db,
+                             test.fileSource);
+
+    test.fileSource.styleResponse = [&](const Resource& resource) {
+        EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
+        return test.response("raster_inline_source.style.json");
+    };
+
+    bool tileRequested = false;
+    test.fileSource.tileResponse = [&](const Resource& resource) {
+        tileRequested = true;
+        // Raster tiles are content negotiated offline exactly as they are online, so that a
+        // downloaded region holds the same encoding the renderer would have fetched live.
+        EXPECT_EQ(http::rasterAcceptHeader(), resource.acceptHeader);
+        EXPECT_FALSE(resource.tileData->vectorEncoding.has_value());
+        return test.response("0-0-0.vector.pbf");
+    };
+
+    auto observer = std::make_unique<MockObserver>();
+
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.complete()) {
+            test.loop.stop();
+        }
+    };
+
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+
+    test.loop.run();
+
+    EXPECT_TRUE(tileRequested);
 }
 
 TEST(OfflineDownload, GeoJSONSource) {

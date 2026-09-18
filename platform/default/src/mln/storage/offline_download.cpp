@@ -463,10 +463,21 @@ void OfflineDownload::queueResource(Resource&& resource) {
 void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tileset& tileset) {
     std::optional<Tileset::VectorEncoding> vectorEncoding;
     std::string_view acceptHeader;
-    // Raster can be differentiated based on magic bytes, MLT/MVT not, so we need to pass this information along
-    if (type == SourceType::Vector) {
-        vectorEncoding = http::vectorEncodingOf(tileset);
-        acceptHeader = http::vectorAcceptHeader(*vectorEncoding);
+    switch (type) {
+        case SourceType::Vector:
+            // Raster can be differentiated based on magic bytes, MLT/MVT not => so the cache can tell the two encodings apart
+            vectorEncoding = http::vectorEncodingOf(tileset);
+            acceptHeader = http::vectorAcceptHeader(*vectorEncoding);
+            break;
+
+        case SourceType::Raster:
+        case SourceType::RasterDEM:
+            acceptHeader = http::rasterAcceptHeader();
+            break;
+
+        default:
+            // Only the tiled source types above reach queueTiles.
+            break;
     }
 
     tileCover(definition, type, tileSize, tileset.zoomRange, [&](const auto& tile) {
