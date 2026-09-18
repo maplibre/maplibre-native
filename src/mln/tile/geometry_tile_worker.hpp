@@ -16,6 +16,7 @@
 
 #include <atomic>
 #include <memory>
+#include <set>
 
 namespace mln {
 
@@ -52,10 +53,10 @@ public:
     void setObserver(TileObserver* observer);
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
-                   std::set<std::string> availableImages,
+                   Immutable<std::set<std::string>> availableImages,
                    uint64_t correlationID);
     void setData(std::unique_ptr<const GeometryTileData>,
-                 std::set<std::string> availableImages,
+                 Immutable<std::set<std::string>> availableImages,
                  uint64_t correlationID);
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
@@ -120,7 +121,7 @@ private:
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
-    std::set<std::string> availableImages;
+    Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     bool showCollisionBoxes;
     bool firstLoad = true;
