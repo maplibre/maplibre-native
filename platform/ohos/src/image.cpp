@@ -302,9 +302,11 @@ PremultipliedImage decodeImage(const std::string& string) {
     }
 
     const Size imageSize{width, height};
-    // The SDK does not document which alpha type a decoded pixelmap reports when
-    // it is PIXELMAP_ALPHA_TYPE_UNKNOWN, so UNKNOWN is treated as premultiplied.
-    if (alphaType == PIXELMAP_ALPHA_TYPE_UNPREMULTIPLIED) {
+    // The SDK does not document what a decoded pixelmap reports when its alpha
+    // type is PIXELMAP_ALPHA_TYPE_UNKNOWN. Decoders generally return straight
+    // (unpremultiplied) alpha unless asked otherwise, so treat UNKNOWN like
+    // UNPREMULTIPLIED and premultiply here. This matches maplibre-native-ffi.
+    if (alphaType == PIXELMAP_ALPHA_TYPE_UNPREMULTIPLIED || alphaType == PIXELMAP_ALPHA_TYPE_UNKNOWN) {
         UnassociatedImage image(imageSize);
         copyRows(image.data.get(), pixels.data(), width, height, sourceRowStride, pixelFormat);
         return util::premultiply(std::move(image));
