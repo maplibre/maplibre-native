@@ -171,6 +171,67 @@ TEST(OfflineDownload, InlineSource) {
     test.loop.run();
 }
 
+TEST(OfflineDownload, InlineMLTSource) {
+    OfflineTest test;
+    auto region = test.createRegion();
+    ASSERT_TRUE(region);
+    OfflineDownload download(region->getID(),
+                             OfflineTilePyramidRegionDefinition(
+                                 "http://127.0.0.1:3000/style.json", LatLngBounds::world(), 0.0, 0.0, 1.0, true),
+                             test.db,
+                             test.fileSource);
+
+    const std::string urlTemplate = "http://127.0.0.1:3000/{z}-{x}-{y}.mlt";
+
+    test.fileSource.styleResponse = [&](const Resource& resource) {
+        EXPECT_EQ("http://127.0.0.1:3000/style.json", resource.url);
+        return test.response("mlt_inline_source.style.json");
+    };
+
+    test.fileSource.tileResponse = [&](const Resource& resource) {
+        const Resource::TileData& tile = *resource.tileData;
+        EXPECT_EQ(urlTemplate, tile.urlTemplate);
+        EXPECT_TRUE(tile.vectorEncoding == Tileset::VectorEncoding::MLT);
+        EXPECT_EQ(std::string_view{"application/vnd.maplibre-tile"}, resource.acceptHeader);
+        return test.response("0-0-0.vector.pbf");
+    };
+
+    auto observer = std::make_unique<MockObserver>();
+
+    observer->statusChangedFn = [&](OfflineRegionStatus status) {
+        if (status.complete()) {
+            EXPECT_EQ(1u, status.completedTileCount);
+            test.loop.stop();
+        }
+    };
+
+    download.setObserver(std::move(observer));
+    download.setState(OfflineRegionDownloadState::Active);
+
+    test.loop.run();
+
+    const auto mlt = Resource::tile(urlTemplate,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    Tileset::Scheme::XYZ,
+                                    Resource::LoadingMethod::All,
+                                    {},
+                                    Tileset::VectorEncoding::MLT);
+    const auto mvt = Resource::tile(urlTemplate,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    Tileset::Scheme::XYZ,
+                                    Resource::LoadingMethod::All,
+                                    {},
+                                    Tileset::VectorEncoding::Mapbox);
+    EXPECT_TRUE(bool(test.db.get(mlt)));
+    EXPECT_FALSE(bool(test.db.get(mvt)));
+}
+
 TEST(OfflineDownload, GeoJSONSource) {
     OfflineTest test;
     auto region = test.createRegion();

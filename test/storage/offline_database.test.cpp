@@ -412,6 +412,78 @@ TEST(OfflineDatabase, CacheKey) {
     EXPECT_EQ("https://example.com/x.pmtiles?token=abc&_mlnRange=200-399", OfflineDatabase::cacheKey(rangedWithQuery));
 }
 
+// MVT keeps the bare template so older databases still resolve.
+TEST(OfflineDatabase, TileCacheKey) {
+    const auto tileData = [](std::optional<Tileset::VectorEncoding> encoding, std::string urlTemplate) {
+        return Resource::TileData{.urlTemplate = std::move(urlTemplate),
+                                  .pixelRatio = 1,
+                                  .x = 0,
+                                  .y = 0,
+                                  .z = 0,
+                                  .vectorEncoding = encoding};
+    };
+
+    EXPECT_EQ("https://example.com/{z}/{x}/{y}",
+              OfflineDatabase::cacheKey(tileData(std::nullopt, "https://example.com/{z}/{x}/{y}")));
+    EXPECT_EQ("https://example.com/{z}/{x}/{y}",
+              OfflineDatabase::cacheKey(tileData(Tileset::VectorEncoding::Mapbox, "https://example.com/{z}/{x}/{y}")));
+    EXPECT_EQ("https://example.com/{z}/{x}/{y}?_mlnEncoding=mlt",
+              OfflineDatabase::cacheKey(tileData(Tileset::VectorEncoding::MLT, "https://example.com/{z}/{x}/{y}")));
+    EXPECT_EQ(
+        "https://example.com/{z}/{x}/{y}?key=abc&_mlnEncoding=mlt",
+        OfflineDatabase::cacheKey(tileData(Tileset::VectorEncoding::MLT, "https://example.com/{z}/{x}/{y}?key=abc")));
+}
+
+TEST(OfflineDatabase, TileEncodingsDoNotShareCacheEntries) {
+    FixtureLog log;
+    OfflineDatabase db(":memory:", fixture::tileServerOptions);
+
+    const std::string urlTemplate = "http://example.com/{z}/{x}/{y}";
+    const auto mvt = Resource::tile(urlTemplate,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    Tileset::Scheme::XYZ,
+                                    Resource::LoadingMethod::All,
+                                    {},
+                                    Tileset::VectorEncoding::Mapbox);
+    const auto mlt = Resource::tile(urlTemplate,
+                                    1,
+                                    0,
+                                    0,
+                                    0,
+                                    Tileset::Scheme::XYZ,
+                                    Resource::LoadingMethod::All,
+                                    {},
+                                    Tileset::VectorEncoding::MLT);
+
+    Response mvtResponse;
+    mvtResponse.data = std::make_shared<std::string>("mvt bytes");
+    Response mltResponse;
+    mltResponse.data = std::make_shared<std::string>("mlt bytes");
+
+    db.put(mvt, mvtResponse);
+    EXPECT_FALSE(bool(db.get(mlt)));
+
+    db.put(mlt, mltResponse);
+
+    auto storedMVT = db.get(mvt);
+    ASSERT_TRUE(storedMVT && storedMVT->data);
+    EXPECT_EQ("mvt bytes", *storedMVT->data);
+
+    auto storedMLT = db.get(mlt);
+    ASSERT_TRUE(storedMLT && storedMLT->data);
+    EXPECT_EQ("mlt bytes", *storedMLT->data);
+
+    const auto unspecified = Resource::tile(urlTemplate, 1, 0, 0, 0, Tileset::Scheme::XYZ);
+    auto storedUnspecified = db.get(unspecified);
+    ASSERT_TRUE(storedUnspecified && storedUnspecified->data);
+    EXPECT_EQ("mvt bytes", *storedUnspecified->data);
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
 TEST(OfflineDatabase, PutResourceNoContent) {
     FixtureLog log;
     OfflineDatabase db(":memory:", fixture::tileServerOptions);

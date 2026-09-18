@@ -93,7 +93,8 @@ Resource Resource::tile(const std::string& urlTemplate,
                         int8_t z,
                         Tileset::Scheme scheme,
                         LoadingMethod loadingMethod,
-                        std::string_view acceptHeader) {
+                        std::string_view acceptHeader,
+                        std::optional<Tileset::VectorEncoding> vectorEncoding) {
     bool supportsRatio = urlTemplate.find("{ratio}") != std::string::npos;
     if (scheme == Tileset::Scheme::TMS) {
         y = (1 << z) - y - 1;
@@ -126,7 +127,8 @@ Resource Resource::tile(const std::string& urlTemplate,
                                        .pixelRatio = uint8_t(supportsRatio && pixelRatio > 1.0 ? 2 : 1),
                                        .x = x,
                                        .y = y,
-                                       .z = z},
+                                       .z = z,
+                                       .vectorEncoding = vectorEncoding},
                     loadingMethod,
                     acceptHeader};
 }
