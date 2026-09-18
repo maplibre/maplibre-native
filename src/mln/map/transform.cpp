@@ -577,8 +577,8 @@ void Transform::startTransition(const CameraOptions& camera,
     const bool rotating = target.bearing != std::optional(-util::rad2deg(getBearing()));
     transition->movingFields = (panning ? Center : 0) | (scaling ? Zoom : 0) | (rotating ? Bearing : 0);
 
-    transition->start = transitionStart = Clock::now();
-    transition->duration = transitionDuration = transition->fields ? duration : Duration::zero();
+    transition->start = latestTransitionStart = Clock::now();
+    transition->duration = latestTransitionDuration = transition->fields ? duration : Duration::zero();
     transition->frame = frame;
 
     std::vector<std::shared_ptr<Transition>> finished;

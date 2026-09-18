@@ -117,8 +117,8 @@ public:
     void updateTransitions(const TimePoint& now);
     // Timing of the most recently started command, even after it finishes.
     // Other commands may still be active.
-    TimePoint getTransitionStart() const { return transitionStart; }
-    Duration getTransitionDuration() const { return transitionDuration; }
+    TimePoint getLatestTransitionStart() const { return latestTransitionStart; }
+    Duration getLatestTransitionDuration() const { return latestTransitionDuration; }
     void cancelTransitions();
 
     // Gesture
@@ -187,8 +187,8 @@ private:
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
 
-    TimePoint transitionStart;
-    Duration transitionDuration;
+    TimePoint latestTransitionStart;
+    Duration latestTransitionDuration;
     std::vector<std::shared_ptr<Transition>> transitions;
     bool updatingTransitions = false;
 };
