@@ -707,7 +707,8 @@ fn main(in: VertexInput) -> VertexOutput {
         tileZoomRatio,
         pos
     );
-    out.v_pos = (ndcXY + vec2<f32>(1.0, 1.0)) * 0.5 * paintParams.world_size;
+    // Fragment positions use a top-left origin, while NDC Y points up.
+    out.v_pos = (ndcXY * vec2<f32>(1.0, -1.0) + vec2<f32>(1.0, 1.0)) * 0.5 * paintParams.world_size;
 #ifndef HAS_UNIFORM_u_color
     out.color = unpack_mix_color(in.color, drawable.color_t);
 #endif

@@ -563,7 +563,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position       = position,
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos2),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos2),
-        .v_pos          = (position.xy / position.w + 1.0) / 2.0 * paintParams.world_size,
+        // Fragment positions use a top-left origin, while NDC Y points up.
+        .v_pos          = (position.xy / position.w * float2(1.0, -1.0) + 1.0) / 2.0 * paintParams.world_size,
 
 #if !defined(HAS_UNIFORM_u_color)
         .color          = half4(unpack_mix_color(vertx.color, drawable.color_t)),
