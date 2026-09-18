@@ -582,6 +582,19 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
     const mat4 iconDrawableMatrix = isScreenSpace ? getScreenMatrix(iconTranslation)
                                                   : getTileMatrix(iconTranslation, iconTranslationAnchor);
 
+    // On the globe the tile's projection stands in for the tile matrix, and the shader adds the translation itself.
+    const auto projector = (state.isGlobeRendering() && !isScreenSpace)
+                               ? std::make_optional<TileProjector>(state, tileID)
+                               : std::nullopt;
+    const auto tileTranslation = [&](const auto& translation, const auto& translationAnchor) {
+        const auto translate = projector
+                                   ? RenderTile::tileUnitTranslation(tileID, translation, translationAnchor, state)
+                                   : std::array<float, 2>{0.f, 0.f};
+        return vec2{translate[0], translate[1]};
+    };
+    const vec2 textTileTranslation = tileTranslation(textTranslation, textTranslationAnchor);
+    const vec2 iconTileTranslation = tileTranslation(iconTranslation, iconTranslationAnchor);
+
     const auto computeBufferBounds = [&](const SymbolBucket::Buffer& buffer, bool isText) {
         const auto values = isText ? textPropertyValues(evaluated, bucketLayout)
                                    : iconPropertyValues(evaluated, bucketLayout);
@@ -596,27 +609,20 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto u_size = evaluatedSize.size;
         const auto u_size_t = evaluatedSize.sizeT;
 
-        // Viewport labels reach the label plane through the tile matrix; pitched labels leave it through the same.
-        const auto labelPlaneMatrixFor = [&](const mat4& drawableMatrix) {
-            mat4 m = getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-            if (!pitchWithMap) {
-                matrix::multiply(m, m, drawableMatrix);
+        const mat4 labelPlaneMatrix = getLabelPlaneMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 glCoordMatrix = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+
+        // `projectTile` of the shaders: the tile matrix on Mercator, the tile's projection on the globe.
+        const auto& drawableMatrix = isText ? textDrawableMatrix : iconDrawableMatrix;
+        const auto& translation = isText ? textTileTranslation : iconTileTranslation;
+        const auto projectTile = [&](const vec2& tilePoint) -> vec4 {
+            if (projector) {
+                const auto projected = projector->project({tilePoint[0], tilePoint[1]});
+                const double w = projected.signedDistanceFromCamera;
+                return {projected.point.x * w, projected.point.y * w, 0, w};
             }
-            return m;
+            return matrix::transformMat4({tilePoint[0], tilePoint[1], 0, 1}, drawableMatrix);
         };
-        const auto glCoordMatrixFor = [&](const mat4& drawableMatrix) {
-            mat4 m = getGlCoordMatrix(pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-            if (pitchWithMap) {
-                matrix::multiply(m, drawableMatrix, m);
-            }
-            return m;
-        };
-        const mat4 textLabelPlaneMatrix = (alongLine || hasVariablePlacement) ? matrix::identity4()
-                                                                              : labelPlaneMatrixFor(textDrawableMatrix);
-        const mat4 iconLabelPlaneMatrix = (alongLine || hasVariablePlacement) ? matrix::identity4()
-                                                                              : labelPlaneMatrixFor(iconDrawableMatrix);
-        const mat4 textGLCoordMatrix = glCoordMatrixFor(textDrawableMatrix);
-        const mat4 iconGLCoordMatrix = glCoordMatrixFor(iconDrawableMatrix);
 
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
@@ -631,6 +637,12 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
 
         for (const auto& symbol : buffer.placedSymbols) {
             if (symbol.hidden || !symbol.featureId) {
+                continue;
+            }
+            // The shader hides what the horizon covers, whatever the placement made of it.
+            if (projector &&
+                projector->project({symbol.anchorPoint.x + translation[0], symbol.anchorPoint.y + translation[1]})
+                    .occluded) {
                 continue;
             }
 
@@ -701,10 +713,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                 const auto a_size_min = floor(a_size[0] / 2);
                 const vec2 in_projected_pos = {dynamicVertex.a1[0], dynamicVertex.a1[1]};
                 const auto segment_angle = -dynamicVertex.a1[2];
-                const auto& drawableMatrix = isText ? textDrawableMatrix : iconDrawableMatrix;
-                const auto& labelPlaneMatrix = isText ? textLabelPlaneMatrix : iconLabelPlaneMatrix;
-                const auto& glCoordMatrix = isText ? textGLCoordMatrix : iconGLCoordMatrix;
-                const vec4 projectedPoint = matrix::transformMat4({a_pos[0], a_pos[1], 0, 1}, drawableMatrix);
+                const vec4 projectedPoint = projectTile(a_pos + translation);
                 const auto camera_to_anchor_distance = projectedPoint[3];
                 const auto aspect_ratio = state.getSize().aspectRatio();
 
@@ -728,7 +737,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
 
                 float symbol_rotation = 0.0;
                 if (rotateInShader) {
-                    const vec4 offsetProjectedPoint = drawableMatrix * vec(a_pos + vec2{1, 0}, 0, 1);
+                    const vec4 offsetProjectedPoint = projectTile(a_pos + translation + vec2{1, 0});
                     const vec2 a = slice<0, 2>(projectedPoint) / projectedPoint[3];
                     const vec2 b = slice<0, 2>(offsetProjectedPoint) / offsetProjectedPoint[3];
                     symbol_rotation = std::atan2((b[1] - a[1]) / aspect_ratio, b[0] - a[0]);
@@ -738,11 +747,23 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                 const auto angle_cos = std::cos(segment_angle + symbol_rotation);
                 const mat2 rotation_matrix{angle_cos, -1.0 * angle_sin, angle_sin, angle_cos};
 
-                const vec4 projected_pos = labelPlaneMatrix * vec(in_projected_pos, 0, 1);
+                const vec4 projected_pos = (alongLine || hasVariablePlacement) ? vec(in_projected_pos, 0, 1)
+                                           : pitchWithMap
+                                               ? labelPlaneMatrix * vec(in_projected_pos + translation, 0, 1)
+                                               : labelPlaneMatrix * projectTile(in_projected_pos + translation);
                 const vec2 pos0 = {projected_pos[0] / projected_pos[3], projected_pos[1] / projected_pos[3]};
                 const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
 
-                const vec4 outPos = glCoordMatrix * vec(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
+                // Pitched labels come back from the label plane in tile units, scaled for their latitude on the globe.
+                double projectionScaling = 1.0;
+                if (projector && pitchWithMap) {
+                    const vec4 anchorTile = glCoordMatrix * vec(pos0, 0.0, 1.0);
+                    projectionScaling = projector->pitchedTextCorrection({anchorTile[0], anchorTile[1]});
+                }
+                vec4 outPos = glCoordMatrix * vec(pos0 + rotation_matrix * posOffset * projectionScaling, 0.0, 1.0);
+                if (pitchWithMap) {
+                    outPos = projectTile(slice<0, 2>(outPos) / outPos[3]);
+                }
                 return slice<0, 3>(outPos) / outPos[3];
             };
             if (const auto bound = computeFeatureNDCBound(vertexCount, getVertex)) {

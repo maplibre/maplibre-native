@@ -1,4 +1,5 @@
 #include <mln/renderer/render_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 
 #include <mln/gfx/context.hpp>
@@ -11,7 +12,12 @@
 #include <mln/style/layer.hpp>
 #include <mln/style/types.hpp>
 #include <mln/tile/tile.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/interpolate.hpp>
 #include <mln/util/logging.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace mln {
 
@@ -367,6 +373,65 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(
     if (ndcRangeX.first < ndcRangeX.second && ndcRangeY.first < ndcRangeY.second &&
         ndcRangeZ.first <= ndcRangeZ.second && -1.0 <= ndcRangeX.second && ndcRangeX.first <= 1.0 &&
         -1.0 <= ndcRangeY.second && ndcRangeY.first <= 1.0) {
+        return NDCBound{
+            .minX = ndcRangeX.first, .maxX = ndcRangeX.second, .minY = ndcRangeY.first, .maxY = ndcRangeY.second};
+    }
+    return std::nullopt;
+}
+
+std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const std::size_t vertexCount,
+                                                                         const TileProjector& projector,
+                                                                         const std::array<float, 2>& translation,
+                                                                         const GetVertexFn& getVertex) {
+    constexpr auto initRange = std::make_pair(std::numeric_limits<double>::max(),
+                                              std::numeric_limits<double>::lowest());
+    auto rangeX = initRange;
+    auto rangeY = initRange;
+    auto rangeZ = initRange;
+    for (std::size_t i = 0; i < vertexCount; ++i) {
+        const auto& vertex = getVertex(i);
+        rangeX = minmax(rangeX, vertex[0]);
+        rangeY = minmax(rangeY, vertex[1]);
+        rangeZ = minmax(rangeZ, vertex[2]);
+    }
+
+    if (rangeX.second <= rangeX.first || rangeY.second <= rangeY.first || rangeZ.second < rangeZ.first) {
+        return std::nullopt;
+    }
+
+    // The box bends with the sphere and the horizon can cut through it, so its corners do not bound it:
+    // sample it every few degrees and keep what the horizon leaves visible.
+    constexpr double maxStepDegrees = 10.0;
+    constexpr double maxSteps = 32.0;
+    const double degreesPerTileUnit = 360.0 / util::EXTENT /
+                                      static_cast<double>(1ull << projector.getTileID().canonical.z);
+    const auto stepsFor = [&](const std::pair<double, double>& range) {
+        const double degrees = (range.second - range.first) * degreesPerTileUnit;
+        return static_cast<std::size_t>(std::clamp(std::ceil(degrees / maxStepDegrees), 1.0, maxSteps));
+    };
+    const auto stepsX = stepsFor(rangeX);
+    const auto stepsY = stepsFor(rangeY);
+    const std::size_t stepsZ = rangeZ.first < rangeZ.second ? 1 : 0;
+
+    auto ndcRangeX = initRange;
+    auto ndcRangeY = initRange;
+    for (std::size_t iz = 0; iz <= stepsZ; ++iz) {
+        const double elevation = iz == 0 ? rangeZ.first : rangeZ.second;
+        for (std::size_t iy = 0; iy <= stepsY; ++iy) {
+            const double y = util::interpolate(rangeY.first, rangeY.second, static_cast<double>(iy) / stepsY);
+            for (std::size_t ix = 0; ix <= stepsX; ++ix) {
+                const double x = util::interpolate(rangeX.first, rangeX.second, static_cast<double>(ix) / stepsX);
+                const auto projected = projector.project({x + translation[0], y + translation[1]}, elevation);
+                if (!projected.occluded) {
+                    ndcRangeX = minmax(ndcRangeX, projected.point.x);
+                    ndcRangeY = minmax(ndcRangeY, projected.point.y);
+                }
+            }
+        }
+    }
+
+    if (ndcRangeX.first < ndcRangeX.second && ndcRangeY.first < ndcRangeY.second && -1.0 <= ndcRangeX.second &&
+        ndcRangeX.first <= 1.0 && -1.0 <= ndcRangeY.second && ndcRangeY.first <= 1.0) {
         return NDCBound{
             .minX = ndcRangeX.first, .maxX = ndcRangeX.second, .minY = ndcRangeY.first, .maxY = ndcRangeY.second};
     }

@@ -28,6 +28,7 @@ class PatternAtlas;
 class RenderTile;
 class RenderTree;
 class SymbolBucket;
+class TileProjector;
 class TransformState;
 class TransitionParameters;
 class UpdateParameters;
@@ -414,6 +415,15 @@ protected:
     static auto computeFeatureNDCBound(std::size_t count, const mat4& mat, const GetVertexFn& get) {
         return computeFeatureNDCBound(count, mat, false, get);
     }
+
+    /// @brief The same bound through the tile's projection, for a projection a matrix cannot express.
+    /// @param translation  The layer's translation in tile units.
+    /// @param getVertex    Functor that returns (x, y) in tile units and the elevation in meters.
+    /// @return NDC bounds of what the horizon leaves visible, std::nullopt if that is nothing.
+    static std::optional<NDCBound> computeFeatureNDCBound(std::size_t vertexCount,
+                                                          const TileProjector&,
+                                                          const std::array<float, 2>& translation,
+                                                          const GetVertexFn& getVertex);
 
 private:
     // Some layers may not render correctly on some hardware when the vertex
