@@ -29,7 +29,13 @@ std::optional<Error> setPaintProperties(Layer& layer, const Convertible& value) 
     if (!isObject(*paintValue)) {
         return {{"layer '" + layer.getID() + "': paint must be an object"}};
     }
-    return eachMember(*paintValue, [&](const std::string& k, const Convertible& v) { return layer.setProperty(k, v); });
+    return eachMember(*paintValue, [&](const std::string& k, const Convertible& v) {
+#if MLN_WITH_PLUGINS
+        return layer.setProperty(k, v, Layer::PropertyScope::Paint);
+#else
+        return layer.setProperty(k, v);
+#endif
+    });
 }
 
 std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operator()(const Convertible& value,
@@ -79,8 +85,13 @@ std::optional<std::unique_ptr<Layer>> Converter<std::unique_ptr<Layer>>::operato
             error.message = "layer '" + *id + "': layout must be an object";
             return std::nullopt;
         }
-        auto error_ = eachMember(*layoutValue,
-                                 [&](const std::string& k, const Convertible& v) { return layer->setProperty(k, v); });
+        auto error_ = eachMember(*layoutValue, [&](const std::string& k, const Convertible& v) {
+#if MLN_WITH_PLUGINS
+            return layer->setProperty(k, v, Layer::PropertyScope::Layout);
+#else
+            return layer->setProperty(k, v);
+#endif
+        });
         if (error_) {
             error = *error_;
             return std::nullopt;
