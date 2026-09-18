@@ -198,11 +198,9 @@ std::size_t checkedByteCount(std::size_t width, std::size_t height, const char* 
 
 void copyRows(
     uint8_t* dst, const uint8_t* src, uint32_t width, uint32_t height, std::size_t rowStride, int32_t format) {
-    const auto tightStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
-
     for (uint32_t y = 0; y < height; ++y) {
         const auto* srcRow = src + y * rowStride;
-        auto* dstRow = dst + y * tightStride;
+        auto* dstRow = dst + y * rowStride;
 
         if (format == PIXEL_FORMAT_BGRA_8888) {
             for (uint32_t x = 0; x < width; ++x) {
@@ -212,7 +210,7 @@ void copyRows(
                 dstRow[4 * x + 3] = srcRow[4 * x + 3];
             }
         } else {
-            std::memcpy(dstRow, srcRow, tightStride);
+            std::memcpy(dstRow, srcRow, rowStride);
         }
     }
 }
@@ -263,18 +261,17 @@ PremultipliedImage decodeImage(const std::string& string) {
         throw std::runtime_error("OHOS image decoder returned unsupported pixel format: " + description);
     }
 
-    // The SDK documents neither whether OH_PixelmapNative_ReadPixels writes rows
-    // tightly packed or padded to rowStride, nor whether bufferSize is updated on
-    // return, but it does document OH_PixelmapNative_GetByteCount as the pixel
-    // byte count "without any padding" and warns to "always consider the impact
-    // of stride" on decoded pixelmaps. Read into a buffer large enough for the
-    // padded layout and decide which layout came back from the reported sizes.
+    // OH_PixelmapNative_ReadPixels copies each row without its padding bytes
+    // and treats bufferSize as input capacity only, so the buffer it fills is
+    // always tightly packed even when the pixelmap reports a padded row stride.
+    // OH_PixelmapNative_GetByteCount reports that unpadded size; verify it
+    // before reading so a decoder that disagrees fails loudly instead of
+    // producing a corrupted image.
     const auto tightRowStride = checkedByteCount(static_cast<std::size_t>(width), 4, "row stride");
     if (rowStride < tightRowStride) {
         throw std::runtime_error("OHOS image decoder returned row stride smaller than image width: " + description);
     }
     const auto tightBytes = checkedByteCount(tightRowStride, height, "pixel buffer size");
-    const auto paddedBytes = checkedByteCount(rowStride, height, "padded pixel buffer size");
 
     uint32_t byteCount = 0;
     checkImageResult(OH_PixelmapNative_GetByteCount(pixelmap.get(), &byteCount), "OH_PixelmapNative_GetByteCount");
@@ -284,22 +281,10 @@ PremultipliedImage decodeImage(const std::string& string) {
                                  description);
     }
 
-    std::vector<uint8_t> pixels(paddedBytes);
+    std::vector<uint8_t> pixels(tightBytes);
     size_t bufferSize = pixels.size();
     checkImageResult(OH_PixelmapNative_ReadPixels(pixelmap.get(), pixels.data(), &bufferSize),
                      "OH_PixelmapNative_ReadPixels");
-
-    std::size_t sourceRowStride = 0;
-    if (bufferSize == paddedBytes && rowStride > tightRowStride) {
-        // Rows are padded to rowStride; copyRows drops the padding.
-        sourceRowStride = rowStride;
-    } else if (bufferSize == tightBytes) {
-        sourceRowStride = tightRowStride;
-    } else {
-        throw std::runtime_error("OHOS image decoder returned an unexpected pixel buffer size: read " +
-                                 std::to_string(bufferSize) + " bytes, expected " + std::to_string(tightBytes) +
-                                 " (tight) or " + std::to_string(paddedBytes) + " (padded), " + description);
-    }
 
     const Size imageSize{width, height};
     // The SDK does not document what a decoded pixelmap reports when its alpha
@@ -308,12 +293,12 @@ PremultipliedImage decodeImage(const std::string& string) {
     // UNPREMULTIPLIED and premultiply here. This matches maplibre-native-ffi.
     if (alphaType == PIXELMAP_ALPHA_TYPE_UNPREMULTIPLIED || alphaType == PIXELMAP_ALPHA_TYPE_UNKNOWN) {
         UnassociatedImage image(imageSize);
-        copyRows(image.data.get(), pixels.data(), width, height, sourceRowStride, pixelFormat);
+        copyRows(image.data.get(), pixels.data(), width, height, tightRowStride, pixelFormat);
         return util::premultiply(std::move(image));
     }
 
     PremultipliedImage image(imageSize);
-    copyRows(image.data.get(), pixels.data(), width, height, sourceRowStride, pixelFormat);
+    copyRows(image.data.get(), pixels.data(), width, height, tightRowStride, pixelFormat);
     return image;
 }
 
