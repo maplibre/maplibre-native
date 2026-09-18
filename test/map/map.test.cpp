@@ -26,6 +26,7 @@
 #include <mln/style/layers/background_layer.hpp>
 #include <mln/style/layers/fill_layer.hpp>
 #include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
 #include <mln/style/layers/raster_layer.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
 #include <mln/style/sources/custom_geometry_source.hpp>
@@ -42,6 +43,7 @@
 #include <mln/util/io.hpp>
 #include <mln/util/logging.hpp>
 #include <mln/util/run_loop.hpp>
+#include <mln/util/timer.hpp>
 
 #include <atomic>
 
@@ -2166,4 +2168,72 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
         EXPECT_LT(centerChannel(result.image, 0), 40) << "red channel (removed)";
         EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (removed)";
     }
+}
+
+TEST(Map, LocationIndicatorAccuracyColorsTransition) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {},
+      "layers": [{
+        "id": "location",
+        "type": "location-indicator",
+        "paint": {
+          "location": [0, 0, 0],
+          "accuracy-radius": 100,
+          "accuracy-radius-color": "blue",
+          "accuracy-radius-border-color": "white"
+        }
+      }]
+    })STYLE");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(16));
+
+    const auto renderUntilIdle = [&] {
+        bool idle = false;
+        util::Timer timeout;
+        timeout.start(std::chrono::seconds(5), Duration::zero(), [&] { test.runLoop.stop(); });
+        test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+            if (status.mode == MapObserver::RenderMode::Full && !status.needsRepaint) {
+                idle = true;
+                test.runLoop.stop();
+            }
+        };
+        test.runLoop.run();
+        test.observer.didFinishRenderingFrameCallback = {};
+        return idle;
+    };
+    const auto centerChannel = [](const PremultipliedImage& image, std::size_t channel) {
+        return image.data[(image.size.height / 2 * image.size.width + image.size.width / 2) * 4 + channel];
+    };
+
+    const auto readImage = [&] {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        return test.frontend.readStillImage();
+    };
+
+    ASSERT_TRUE(renderUntilIdle());
+    const auto initial = readImage();
+    ASSERT_GT(centerChannel(initial, 2), 240);
+    ASSERT_LT(centerChannel(initial, 0), 10);
+
+    auto* layer = static_cast<LocationIndicatorLayer*>(test.map.getStyle().getLayer("location"));
+    ASSERT_NE(layer, nullptr);
+    TransitionOptions transition;
+    transition.duration = std::chrono::milliseconds(100);
+    layer->setAccuracyRadiusColorTransition(transition);
+    layer->setAccuracyRadiusBorderColorTransition(transition);
+    layer->setAccuracyRadiusColor(Color::red());
+    layer->setAccuracyRadiusBorderColor(Color{0, 1, 0, 1});
+
+    ASSERT_TRUE(renderUntilIdle());
+    const auto result = readImage();
+    EXPECT_GT(centerChannel(result, 0), 240);
+    EXPECT_LT(centerChannel(result, 2), 10);
+    std::size_t greenPixels = 0;
+    for (std::size_t i = 0; i < result.bytes(); i += 4) {
+        if (result.data[i] < 40 && result.data[i + 1] > 200 && result.data[i + 2] < 40) {
+            ++greenPixels;
+        }
+    }
+    EXPECT_GT(greenPixels, 0u) << "The accuracy border should finish transitioning to green";
 }
