@@ -121,7 +121,7 @@ public:
                                                            gl::AttributeKey<AttributeList>::defines(attributeBindings)))
                          .first;
             } catch (const std::runtime_error& e) {
-                Log::Error(Event::OpenGL, e.what());
+                Log::Error(Event::GraphicsBackend, e.what());
                 failedInstances.insert(key);
                 return false;
             }

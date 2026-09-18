@@ -2256,6 +2256,14 @@ of north, the map will automatically snap to exact north.
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
+/**
+ If MLNMapOptions.featureInfoEnabled is set, returns the number of features rendered in the previous
+ frame for a given feature, layer and source.  A nil value for any criterion matches all values.
+ */
+- (unsigned)renderedFeatureCountForFeatureID:(nullable NSString *)featureID
+                                     LayerID:(nullable NSString *)layerID
+                                    SourceID:(nullable NSString *)sourceID;
+
 // MARK: Debugging the Map
 
 /**

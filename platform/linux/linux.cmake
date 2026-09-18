@@ -57,6 +57,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/filesystem.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/i18n.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/jpeg_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mln/util/webp_reader.cpp

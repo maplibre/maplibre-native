@@ -1,26 +1,27 @@
 #pragma once
 
-#include <mln/util/chrono.hpp>
+#include <mln/annotation/annotation.hpp>
 #include <mln/map/bound_options.hpp>
+#include <mln/map/camera.hpp>
 #include <mln/map/map_observer.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/mode.hpp>
-#include <mln/util/noncopyable.hpp>
-#include <mln/util/size.hpp>
-#include <mln/annotation/annotation.hpp>
-#include <mln/map/camera.hpp>
-#include <mln/util/geometry.hpp>
 #include <mln/map/projection_mode.hpp>
 #include <mln/storage/resource_options.hpp>
-#include <mln/util/client_options.hpp>
 #include <mln/util/action_journal_options.hpp>
+#include <mln/util/chrono.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/geometry.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/size.hpp>
 
+#include <cstddef>
 #include <cstdint>
-#include <string>
 #include <functional>
-#include <vector>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace mln {
 
@@ -122,7 +123,8 @@ public:
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&) const;
 
     // Transform
-    TransformState getTransfromState() const;
+    TransformState getTransformState() const;
+    [[deprecated("Use getTransformState()")]] TransformState getTransfromState() const;
 
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);
@@ -208,6 +210,32 @@ public:
     ClientOptions getClientOptions() const;
 
     const std::unique_ptr<util::ActionJournal>& getActionJournal();
+
+    // If captureRenderedFeatures is true, these methods allow
+    // access to the results of the most recently completed frame.
+
+    using FeatureInfo = gfx::RenderingStats::FeatureInfo;
+    using FrameRenderedFeaturesMap = gfx::RenderingStats::FrameRenderedFeaturesMap;
+    const FrameRenderedFeaturesMap& getRenderedFeatures() const;
+
+    /// Call the provided function for each matching feature rendered in the last frame
+    void getRenderedFeatures(const std::optional<std::string>& featureId,
+                             const std::optional<std::string>& layerId,
+                             const std::optional<std::string>& sourceId,
+                             const std::function<bool(const std::string&, const FeatureInfo&)>&) const;
+
+    /// Returns the number of matching features rendered in the last frame.
+    std::size_t getRenderedFeatureCount(const std::optional<std::string>& featureId = std::nullopt,
+                                        const std::optional<std::string>& layerId = std::nullopt,
+                                        const std::optional<std::string>& sourceId = std::nullopt,
+                                        std::size_t limit = std::numeric_limits<std::size_t>::max()) const;
+
+    /// Returns true if any matching feature was rendered in the last frame
+    bool isFeatureRendered(const std::optional<std::string>& featureId = std::nullopt,
+                           const std::optional<std::string>& layerId = std::nullopt,
+                           const std::optional<std::string>& sourceId = std::nullopt) const {
+        return 0 < getRenderedFeatureCount(featureId, layerId, sourceId, 1);
+    }
 
 protected:
     class Impl;

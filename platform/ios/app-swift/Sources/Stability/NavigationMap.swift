@@ -57,10 +57,46 @@ private class NavigationConfig {
 class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDelegate {
     fileprivate let config = NavigationConfig()
     private var route: NavigationRoute?
-    private var continuation: CheckedContinuation<Void, Never>?
+    private var styleGate: Gate?
+    private var task: Task<Void, Never>?
+    private var stopped = false
+    private var notifyOnMapLoad = false
+    private var pendingInitialCamera: MLNMapCamera?
+    private var pendingInitialZoom: Double?
+    var onDidFinishLoadingMap: (() -> Void)?
+    var onRouteReady: (() -> Void)?
+    private let specifiedStyleURL: URL?
+    private let loadRoutes: Bool
 
-    init() {
-        super.init(frame: CGRect())
+    init(cameraSource: MLNMapView? = nil, styleURL: URL? = nil, loadRoutes: Bool = true) {
+        specifiedStyleURL = styleURL
+        self.loadRoutes = loadRoutes
+        super.init(frame: CGRect(), styleURL: styleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
+
+        if let cameraSource {
+            pendingInitialCamera = cameraSource.camera
+            pendingInitialZoom = cameraSource.zoomLevel + 2
+            applyPendingInitialCamera()
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        if pendingInitialCamera != nil, bounds.width > 0, bounds.height > 0 {
+            applyPendingInitialCamera()
+            pendingInitialCamera = nil
+            pendingInitialZoom = nil
+        }
+    }
+
+    private func applyPendingInitialCamera() {
+        guard let camera = pendingInitialCamera else { return }
+
+        setCenter(camera.centerCoordinate,
+                  zoomLevel: pendingInitialZoom ?? zoomLevel,
+                  direction: 0,
+                  animated: false)
     }
 
     @available(*, unavailable)
@@ -69,60 +105,114 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
     }
 
     @MainActor func load(style: URL) async {
+        let gate = Gate()
+        styleGate = gate
+        notifyOnMapLoad = true
         styleURL = style
 
-        return await withCheckedContinuation { continuation in
-            guard self.style == nil else {
-                self.continuation = nil
-                continuation.resume()
-                return
-            }
-
-            self.continuation = continuation
-        }
+        await gate.wait()
+        styleGate = nil
     }
 
     @objc(mapView:didFinishLoadingStyle:) func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {
-        continuation?.resume()
-        continuation = nil
+        styleGate?.open()
+    }
+
+    func mapViewDidFailLoadingMap(_: MLNMapView, withError error: Error) {
+        // a failed style load never reports didFinishLoading
+        print("NavigationMap: \(error)")
+        styleGate?.open()
+    }
+
+    func mapViewDidFinishLoadingMap(_: MLNMapView) {
+        guard notifyOnMapLoad else { return }
+        notifyOnMapLoad = false
+        onDidFinishLoadingMap?()
     }
 
     func run() {
         delegate = self
 
-        startNewRoute()
+        if loadRoutes {
+            startNewRoute()
+        } else {
+            task = Task { [weak self] in
+                guard let self else { return }
+                await load(style: specifiedStyleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
+            }
+        }
+    }
+
+    func stop() {
+        guard !stopped else { return }
+
+        stopped = true
+        task?.cancel()
+        task = nil
+
+        // release a pending style load so the task can observe the cancellation
+        // and stop holding on to this map view
+        styleGate?.open()
+
+        (locationManager as? NavigationLocationManager)?.navigationDelegate = nil
+
+        // drops the simulated location manager, stopping its perform-based
+        // update chain (which otherwise keeps the map view alive)
+        route?.unload()
+        route = nil
+
+        notifyOnMapLoad = false
+        onDidFinishLoadingMap = nil
+        onRouteReady = nil
+    }
+
+    deinit {
+        task?.cancel()
     }
 
     func startNewRoute() {
-        Task {
-            try await Task.sleep(for: .seconds(config.randomWaitTime()))
+        guard !stopped else { return }
 
-            // reset existing route
-            route = nil
+        task?.cancel()
+        task = Task { [weak self] in
+            do {
+                guard let waitTime = self?.config.randomWaitTime() else { return }
+                try await Task.sleep(for: .seconds(waitTime))
 
-            await load(style: config.STYLES.randomElement(using: &config.RANDOM)!!)
+                guard let self, !Task.isCancelled else { return }
 
-            let routeJson = config.getRouteResponseJson()
-            route = NavigationRoute(json: routeJson!, mapView: self)
+                route?.unload()
+                route = nil
 
-            let locationManager = locationManager as! NavigationLocationManager
-            let startingWaypoint = locationManager.getCoord(distance: 0.0)
+                await load(style: specifiedStyleURL ?? config.STYLES.randomElement(using: &config.RANDOM)!!)
+                guard !Task.isCancelled else { return }
 
-            locationManager.navigationDelegate = self
-            locationManager.speedMultiplier = config.randomSpeed()
+                let routeJson = config.getRouteResponseJson()
+                route = NavigationRoute(json: routeJson!, mapView: self)
 
-            let camera = MLNMapCamera(
-                lookingAtCenter: startingWaypoint,
-                altitude: config.randomAltitude(),
-                pitch: config.randomTilt(),
-                heading: 0.0
-            )
+                let locationManager = locationManager as! NavigationLocationManager
+                let startingWaypoint = locationManager.getCoord(distance: 0.0)
 
-            setCamera(camera, animated: true)
+                locationManager.navigationDelegate = self
+                locationManager.speedMultiplier = config.randomSpeed()
 
-            try await Task.sleep(for: .seconds(config.randomWaitTime()))
+                let camera = MLNMapCamera(
+                    lookingAtCenter: startingWaypoint,
+                    altitude: config.randomAltitude(),
+                    pitch: config.randomTilt(),
+                    heading: 0.0
+                )
 
-            route!.start()
+                setCamera(camera, animated: true)
+                onRouteReady?()
+
+                try await Task.sleep(for: .seconds(config.randomWaitTime()))
+                guard !Task.isCancelled else { return }
+
+                route?.start()
+            } catch {
+                // cancelled while sleeping
+            }
         }
     }
 

@@ -1,15 +1,15 @@
 #pragma once
 
 #include <mln/style/image_impl.hpp>
+#include <mln/text/glyph_manager.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
-#include <mln/text/glyph_manager.hpp>
 #include <mln/util/containers.hpp>
+
 #include <memory>
 
 namespace mln {
 
-class Bucket;
 class BucketParameters;
 class RenderLayer;
 class FeatureIndex;

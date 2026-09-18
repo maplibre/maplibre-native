@@ -1945,6 +1945,61 @@ TEST(Map, ObserveTileLifecycle) {
     }
 }
 
+TEST(BackgroundLayer, ImmediateStyleReplacementRetainsColor) {
+    MapTest<> test;
+    for (int iteration = 0; iteration < 2; ++iteration) {
+        SCOPED_TRACE(iteration);
+        // The underlay keeps the tested background out of the clear-color optimization.
+        test.map.getStyle().loadJSON(R"({
+            "version": 8,
+            "sources": {},
+            "layers": [{"id": "underlay", "type": "background", "paint": {"background-color": "white"}}]
+        })");
+        auto layer = std::make_unique<BackgroundLayer>("background");
+        layer->setBackgroundColor(Color::red());
+        test.map.getStyle().addLayer(std::move(layer));
+
+        const auto image = test.frontend.render(test.map).image;
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_EQ(pixel[0], 255);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], 0);
+        EXPECT_EQ(pixel[3], 255);
+    }
+}
+
+TEST(BackgroundLayer, SwitchesBetweenSolidAndPatternedDrawables) {
+    MapTest<> test;
+    // The underlay forces shader selection through the drawable path.
+    test.map.getStyle().loadJSON(R"({
+        "version": 8,
+        "sources": {},
+        "layers": [
+            {"id": "underlay", "type": "background", "paint": {"background-color": "white"}},
+            {"id": "background", "type": "background", "paint": {"background-color": "red"}}
+        ]
+    })");
+    const uint8_t blue[] = {0, 0, 255, 255};
+    test.map.getStyle().addImage(
+        std::make_unique<style::Image>("blue", PremultipliedImage({1, 1}, blue, sizeof(blue)), 1.0f));
+    auto* layer = static_cast<BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    const auto expectColor = [&](uint8_t red, uint8_t blueChannel) {
+        const auto image = test.frontend.render(test.map).image;
+        const auto* pixel = image.data.get() + (image.size.height / 2) * image.stride() +
+                            (image.size.width / 2) * image.channels;
+        EXPECT_EQ(pixel[0], red);
+        EXPECT_EQ(pixel[1], 0);
+        EXPECT_EQ(pixel[2], blueChannel);
+        EXPECT_EQ(pixel[3], 255);
+    };
+    expectColor(255, 0);
+    layer->setBackgroundPattern({"blue"s});
+    expectColor(0, 255);
+    layer->setBackgroundPattern({});
+    expectColor(255, 0);
+}
+
 TEST(BackgroundLayer, StyleUpdateZoomDependency) {
     using namespace mln::style::expression::dsl;
 
@@ -2038,4 +2093,94 @@ TEST(Map, SetFrustumOffset) {
     test.map.setFrustumOffset(EdgeInsets{50, 50, 50, 50});
 
     test::checkImage("test/fixtures/map/setFrustumOffset/after", test.frontend.render(test.map).image, 0.0006, 0.1);
+}
+
+// End-to-end: a feature-state change must alter the *rendered* output, not just
+// the value read back through the API. A fill covering the viewport is colored
+// by a data-driven expression on feature-state "active" (blue by default, red
+// when set), and we sample the centre pixel of the rendered frame after each
+// change. This exercises the full path: setFeatureState -> coalesce during
+// prepare -> data-driven paint re-evaluation -> pixels.
+TEST(Map, FeatureStateChangesRenderedStyle) {
+    MapTest<> test;
+
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "fs": {
+          "type": "geojson",
+          "data": {
+            "type": "Feature",
+            "id": 1,
+            "properties": {},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]]]
+            }
+          }
+        }
+      },
+      "layers": [{
+        "id": "fill",
+        "type": "fill",
+        "source": "fs",
+        "paint": {
+          "fill-color": ["case", ["boolean", ["feature-state", "active"], false], "#ff0000", "#0000ff"]
+        }
+      }]
+    })STYLE");
+
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(0.0));
+
+    auto* renderer = test.frontend.getRenderer();
+
+    // Reads one channel (0=R, 1=G, 2=B) of the centre pixel
+    const auto centerChannel = [](const PremultipliedImage& image, size_t channel) -> int {
+        const size_t x = image.size.width / 2;
+        const size_t y = image.size.height / 2;
+        return image.data.get()[y * image.stride() + x * image.channels + channel];
+    };
+
+    // Default state: the fill renders blue
+    {
+        const auto result = test.frontend.render(test.map);
+        EXPECT_LT(centerChannel(result.image, 0), 40) << "red channel (default)";
+        EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (default)";
+    }
+
+    // Setting feature-state "active" flips the rendered fill to red on the next
+    // frame, with no style edit
+    FeatureState active;
+    active["active"] = true;
+    renderer->setFeatureState("fs", {}, "1", active);
+    {
+        const auto result = test.frontend.render(test.map);
+        EXPECT_GT(centerChannel(result.image, 0), 200) << "red channel (active)";
+        EXPECT_LT(centerChannel(result.image, 2), 40) << "blue channel (active)";
+    }
+
+    // Removing the state reverts the rendered fill to blue.
+    renderer->removeFeatureState("fs", {}, std::optional<std::string>("1"), {});
+    {
+        const auto result = test.frontend.render(test.map);
+        EXPECT_LT(centerChannel(result.image, 0), 40) << "red channel (removed)";
+        EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (removed)";
+    }
+}
+
+TEST(Map, LocationIndicatorWithoutImages) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {},
+      "layers": [{
+        "id": "location",
+        "type": "location-indicator",
+        "paint": {"location": [0, 0, 0], "accuracy-radius": 0}
+      }]
+    })STYLE");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(16));
+
+    // Neither the accuracy circle nor any image should produce a draw call.
+    EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
 }

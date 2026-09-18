@@ -19,6 +19,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
     ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
     ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
@@ -58,6 +59,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/dependency.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/expression.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/expression/semiliteral.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/util.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/expression/utf8_op_helpers.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/filter.test.cpp
@@ -123,6 +125,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/vectors.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -141,7 +144,6 @@ if(MLN_WITH_OPENGL)
         mbgl-test
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/bucket.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/enum.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
@@ -159,7 +161,6 @@ if(MLN_WITH_VULKAN)
         mbgl-test
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
-            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
