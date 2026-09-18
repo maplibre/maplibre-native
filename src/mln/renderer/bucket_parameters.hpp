@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/map/mode.hpp>
+#include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/feature.hpp>
 
@@ -19,6 +20,7 @@ public:
     const style::LayerTypeInfo* layerType;
     // The style's global state, used by "global-state" expressions.
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
+    const bool retainFeaturesById = false;
 };
 
 } // namespace mln

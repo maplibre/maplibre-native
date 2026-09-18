@@ -42,6 +42,7 @@ public:
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     bool isUpdateSynchronous = false;
+    bool captureRenderedFeatures = false;
 };
 
 } // namespace mln
