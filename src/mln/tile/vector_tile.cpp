@@ -8,14 +8,6 @@
 
 namespace mln {
 
-namespace {
-
-Tileset::VectorEncoding encodingOf(const Tileset& tileset) {
-    return tileset.vectorEncoding.value_or(Tileset::VectorEncoding::Mapbox);
-}
-
-} // namespace
-
 VectorTile::VectorTile(const OverscaledTileID& id_,
                        std::string sourceID_,
                        const TileParameters& parameters_,
@@ -27,8 +19,8 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
           id_,
           parameters_,
           tileset,
-          encodingOf(tileset) == Tileset::VectorEncoding::MLT ? http::MIME_TYPE_MLT : http::MIME_TYPE_MVT,
-          encodingOf(tileset))) {}
+          http::vectorAcceptHeader(tileset),
+          http::vectorEncodingOf(tileset))) {}
 
 VectorTile::~VectorTile() {}
 

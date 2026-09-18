@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/util/image.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <array>
 #include <cstddef>
@@ -45,6 +46,19 @@ inline constexpr std::string_view acceptHeader{detail::acceptHeaderStorage<first
 inline std::string_view rasterAcceptHeader() {
     return supportsWebPDecoding() ? acceptHeader<MIME_TYPE_WEBP, MIME_TYPE_JPEG, MIME_TYPE_PNG>
                                   : acceptHeader<MIME_TYPE_JPEG, MIME_TYPE_PNG>;
+}
+
+/// The encoding a tileset asks for, defaulting to MVT
+inline Tileset::VectorEncoding vectorEncodingOf(const Tileset& tileset) {
+    return tileset.vectorEncoding.value_or(Tileset::VectorEncoding::Mapbox);
+}
+
+constexpr std::string_view vectorAcceptHeader(Tileset::VectorEncoding encoding) {
+    return encoding == Tileset::VectorEncoding::MLT ? acceptHeader<MIME_TYPE_MLT> : acceptHeader<MIME_TYPE_MVT>;
+}
+
+inline std::string_view vectorAcceptHeader(const Tileset& tileset) {
+    return vectorAcceptHeader(vectorEncodingOf(tileset));
 }
 
 } // namespace http
