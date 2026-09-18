@@ -1,0 +1,7 @@
+{
+  "base_test_path": ".",
+  "cache_path": "cache.db",
+  "expectation_paths": [],
+  "ignore_paths": [],
+  "result_path": "results"
+}

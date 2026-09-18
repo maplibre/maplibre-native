@@ -1324,6 +1324,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable.setTexture(info.textureInfo.texture, shaders::idLocationIndicatorTexture);
             info.textureInfo.dirty = false;
         }
+        drawable.setEnabled(static_cast<bool>(info.textureInfo.texture));
     };
 
     updateCircleDrawable();

@@ -2167,3 +2167,20 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
         EXPECT_GT(centerChannel(result.image, 2), 200) << "blue channel (removed)";
     }
 }
+
+TEST(Map, LocationIndicatorWithoutImages) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {},
+      "layers": [{
+        "id": "location",
+        "type": "location-indicator",
+        "paint": {"location": [0, 0, 0], "accuracy-radius": 0}
+      }]
+    })STYLE");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(16));
+
+    // Neither the accuracy circle nor any image should produce a draw call.
+    EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
+}

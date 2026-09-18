@@ -6,7 +6,10 @@
 namespace mln {
 
 MapProjection::MapProjection(const Map& map)
-    : transform(std::make_unique<Transform>(map.getTransformState())) {}
+    : MapProjection(map.getTransformState()) {}
+
+MapProjection::MapProjection(const TransformState& state)
+    : transform(std::make_unique<Transform>(state)) {}
 
 MapProjection::~MapProjection() = default;
 
