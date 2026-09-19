@@ -162,6 +162,7 @@ if(MLN_WITH_VULKAN)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/renderer/vulkan_acquire.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
 endif()
