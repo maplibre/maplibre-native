@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           submodules: recursive
           persist-credentials: false
@@ -90,13 +90,13 @@ jobs:
           /usr/sbin/update-ccache-symlinks
 
       - name: Set up OpenHarmony SDK
-        uses: openharmony-rs/setup-ohos-sdk@eb82b94ef522b07269679195c2512f22e922ef3b # v1.0.0
+        uses: openharmony-rs/setup-ohos-sdk@b312caf8a43bb836aa24c08f65f97e1f09a89cad # v1.0.1
         with:
           version: ${{ env.OHOS_SDK_VERSION }}
           components: native
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@33522472633dbd32578e909b315f5ee43ba878ce # v1.2.22
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           key: OHOS_${{ matrix.preset }}_${{ env.OHOS_SDK_VERSION }}_${{ github.sha }}
           restore-keys: |
