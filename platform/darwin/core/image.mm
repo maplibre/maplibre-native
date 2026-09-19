@@ -93,4 +93,11 @@ PremultipliedImage decodeImage(const std::string& source) {
   return MLNPremultipliedImageFromCGImage(*image);
 }
 
+bool supportsWebPDecoding() {
+  if (@available(iOS 14.0, macOS 11.0, tvOS 14.0, *)) {
+    return true;
+  }
+  return false;
+}
+
 }  // namespace mln

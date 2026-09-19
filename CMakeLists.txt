@@ -937,6 +937,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/tile/vector_mvt_tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/tile/vector_mvt_tile_data.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/tile/vector_mvt_tile_data.hpp
+    ${PROJECT_SOURCE_DIR}/src/mln/util/accept_header.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/action_journal.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/action_journal_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/util/camera.cpp

@@ -99,6 +99,7 @@ public:
 
     // Builds the offline-cache key for a resource. Exposed for testing.
     static std::string cacheKey(const Resource&);
+    static std::string cacheKey(const Resource::TileData&);
 
 private:
     class DatabaseSizeChangeStats;
