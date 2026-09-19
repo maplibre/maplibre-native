@@ -10,7 +10,7 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_run: ${{ !steps.parent_workflow.outputs.was_skipped_or_cancelled }}
+      should_run: ${{ steps.parent_workflow.outputs.was_skipped_or_cancelled == 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
