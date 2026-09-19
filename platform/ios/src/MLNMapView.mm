@@ -704,9 +704,7 @@ public:
       UIAccessibilityTraitAllowsDirectInteraction | UIAccessibilityTraitAdjustable;
   self.backgroundColor = [UIColor clearColor];
   self.clipsToBounds = YES;
-  if (@available(iOS 11.0, *)) {
-    self.accessibilityIgnoresInvertColors = YES;
-  }
+  self.accessibilityIgnoresInvertColors = YES;
 
   self.preferredFramesPerSecond = MLNMapViewPreferredFramesPerSecondDefault;
 
@@ -1667,10 +1665,8 @@ public:
   UIScreen *screen;
 
 #ifdef SUPPORT_UIWINDOWSCENE
-  if (@available(iOS 13.0, *)) {
-    if (self.window.windowScene) {
-      screen = self.window.windowScene.screen;
-    }
+  if (self.window.windowScene) {
+    screen = self.window.windowScene.screen;
   }
 #endif
 
@@ -1727,18 +1723,7 @@ public:
     newFrameRate = _preferredFramesPerSecond;
   }
 
-  if (@available(iOS 10.0, *)) {
-    _displayLink.preferredFramesPerSecond = newFrameRate;
-  } else {
-    // CADisplayLink.frameInterval does not support more than 60 FPS (and
-    // no device that supports >60 FPS ever supported iOS 9).
-    NSInteger maximumFrameRate = 60;
-
-    // `0` is an alias for maximum frame rate.
-    newFrameRate = newFrameRate ?: maximumFrameRate;
-
-    _displayLink.preferredFramesPerSecond = maximumFrameRate / MIN(newFrameRate, maximumFrameRate);
-  }
+  _displayLink.preferredFramesPerSecond = newFrameRate;
 }
 
 - (void)setPreferredFramesPerSecond:(MLNMapViewPreferredFramesPerSecond)preferredFramesPerSecond {
@@ -1782,13 +1767,10 @@ public:
 
   if (self.window) {
 #ifdef SUPPORT_UIWINDOWSCENE
-    if (@available(iOS 13.0, *)) {
-      [self.window removeObserver:self forKeyPath:@"windowScene" context:windowScreenContext];
-    } else
+    [self.window removeObserver:self forKeyPath:@"windowScene" context:windowScreenContext];
+#else
+    [self.window removeObserver:self forKeyPath:@"screen" context:windowScreenContext];
 #endif
-    {
-      [self.window removeObserver:self forKeyPath:@"screen" context:windowScreenContext];
-    }
   }
 }
 
@@ -1802,19 +1784,16 @@ public:
     [self updatePresentsWithTransaction];
 
 #ifdef SUPPORT_UIWINDOWSCENE
-    if (@available(iOS 13.0, *)) {
-      [self.window addObserver:self
-                    forKeyPath:@"windowScene"
-                       options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                       context:windowScreenContext];
-    } else
+    [self.window addObserver:self
+                  forKeyPath:@"windowScene"
+                     options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                     context:windowScreenContext];
+#else
+    [self.window addObserver:self
+                  forKeyPath:@"screen"
+                     options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                     context:windowScreenContext];
 #endif
-    {
-      [self.window addObserver:self
-                    forKeyPath:@"screen"
-                       options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                       context:windowScreenContext];
-    }
 
     // https://github.com/maplibre/maplibre-native/issues/4204
     [self setNeedsLayout];
@@ -2442,17 +2421,15 @@ public:
     [self cameraIsChanging];
 
     // Trigger a light haptic feedback event when the user rotates to due north.
-    if (@available(iOS 10.0, *)) {
-      if (self.isHapticFeedbackEnabled && fabs(newDegrees) <= 1 &&
-          self.shouldTriggerHapticFeedbackForCompass) {
-        UIImpactFeedbackGenerator *hapticFeedback =
-            [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
-        [hapticFeedback impactOccurred];
+    if (self.isHapticFeedbackEnabled && fabs(newDegrees) <= 1 &&
+        self.shouldTriggerHapticFeedbackForCompass) {
+      UIImpactFeedbackGenerator *hapticFeedback =
+          [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
+      [hapticFeedback impactOccurred];
 
-        self.shouldTriggerHapticFeedbackForCompass = NO;
-      } else if (fabs(newDegrees) > 1) {
-        self.shouldTriggerHapticFeedbackForCompass = YES;
-      }
+      self.shouldTriggerHapticFeedbackForCompass = NO;
+    } else if (fabs(newDegrees) > 1) {
+      self.shouldTriggerHapticFeedbackForCompass = YES;
     }
   } else if ((rotate.state == UIGestureRecognizerStateEnded ||
               rotate.state == UIGestureRecognizerStateCancelled)) {
@@ -5991,31 +5968,13 @@ static void *windowScreenContext = &windowScreenContext;
       BOOL hasWhenInUseUsageDescription = !![[NSBundle mainBundle]
           objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"];
 
-      if (@available(iOS 11.0, *)) {
-        // A WhenInUse string is required in iOS 11+ and the map never has any need for Always, so
-        // it's enough to just ask for WhenInUse.
-        if (hasWhenInUseUsageDescription) {
-          [self.locationManager requestWhenInUseAuthorization];
-        } else {
-          [NSException raise:MLNMissingLocationServicesUsageDescriptionException
-                      format:@"To use location services this app must have a "
-                             @"NSLocationWhenInUseUsageDescription string in its Info.plist."];
-        }
+      // The map only needs WhenInUse authorization.
+      if (hasWhenInUseUsageDescription) {
+        [self.locationManager requestWhenInUseAuthorization];
       } else {
-        // We might have to ask for Always if the app does not provide a WhenInUse string.
-        BOOL hasAlwaysUsageDescription = !![[NSBundle mainBundle]
-            objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"];
-
-        if (hasWhenInUseUsageDescription) {
-          [self.locationManager requestWhenInUseAuthorization];
-        } else if (hasAlwaysUsageDescription) {
-          [self.locationManager requestAlwaysAuthorization];
-        } else {
-          [NSException raise:MLNMissingLocationServicesUsageDescriptionException
-                      format:@"To use location services this app must have a "
-                             @"NSLocationWhenInUseUsageDescription and/or "
-                             @"NSLocationAlwaysUsageDescription string in its Info.plist."];
-        }
+        [NSException raise:MLNMissingLocationServicesUsageDescriptionException
+                    format:@"To use location services this app must have a "
+                           @"NSLocationWhenInUseUsageDescription string in its Info.plist."];
       }
     }
 
@@ -6566,32 +6525,24 @@ static void *windowScreenContext = &windowScreenContext;
     [self.locationManager stopUpdatingLocation];
     [self.locationManager stopUpdatingHeading];
   } else {
-    if (@available(iOS 14, *)) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
-      if (self.userTrackingMode != MLNUserTrackingModeNone &&
-          [manager respondsToSelector:@selector(authorizationStatus)] &&
-          (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
-           manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
-           manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
-          [manager respondsToSelector:@selector(accuracyAuthorization)] &&
-          manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
-          [self accuracyDescriptionString] != nil) {
-        [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:
-                                  @"MLNAccuracyAuthorizationDescription"];
-      } else {
-        [self validateLocationServices];
-      }
-#endif
+    if (self.userTrackingMode != MLNUserTrackingModeNone &&
+        [manager respondsToSelector:@selector(authorizationStatus)] &&
+        (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
+         manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
+         manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
+        [manager respondsToSelector:@selector(accuracyAuthorization)] &&
+        manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
+        [self accuracyDescriptionString] != nil) {
+      [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:
+                                @"MLNAccuracyAuthorizationDescription"];
     } else {
       [self validateLocationServices];
     }
   }
 
-  if (@available(iOS 14, *)) {
-    if ([self.delegate respondsToSelector:@selector(mapView:
-                                              didChangeLocationManagerAuthorization:)]) {
-      [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
-    }
+  if ([self.delegate respondsToSelector:@selector(mapView:
+                                            didChangeLocationManagerAuthorization:)]) {
+    [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
   }
 }
 
@@ -6610,12 +6561,7 @@ static void *windowScreenContext = &windowScreenContext;
     // iOS 27, so it can no longer be used to compensate the heading. It is also
     // called on every heading update, which makes UIKit log a deprecation notice
     // several times per second.
-    UIInterfaceOrientation interfaceOrientation;
-    if (@available(iOS 13.0, *)) {
-      interfaceOrientation = self.window.windowScene.interfaceOrientation;
-    } else {
-      interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
-    }
+    UIInterfaceOrientation interfaceOrientation = self.window.windowScene.interfaceOrientation;
     switch (interfaceOrientation) {
       case (UIInterfaceOrientationLandscapeLeft): {
         orientation = CLDeviceOrientationLandscapeRight;
