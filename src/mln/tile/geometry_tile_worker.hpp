@@ -75,8 +75,7 @@ private:
 
     void coalesce();
 
-    void requestNewGlyphs(const GlyphDependencies&);
-    void requestNewImages(const ImageDependencies&);
+    void requestNewDependencies(const GlyphDependencies&, const ImageDependencies&);
 
     void symbolDependenciesChanged();
     bool hasPendingDependencies() const;
