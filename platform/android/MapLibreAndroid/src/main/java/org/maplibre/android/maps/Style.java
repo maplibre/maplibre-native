@@ -250,6 +250,11 @@ public class Style {
     Layer layer = layers.get(id);
     if (layer == null) {
       layer = nativeMap.getLayer(id);
+      if (layer != null) {
+        // Cache so removeLayer(String) can return ownership to the same peer
+        // the caller already holds (needed to re-add after remove-by-id).
+        layers.put(id, layer);
+      }
     }
     return layer;
   }
@@ -265,7 +270,7 @@ public class Style {
   public <T extends Layer> T getLayerAs(@NonNull String layerId) {
     validateState("getLayerAs");
     // noinspection unchecked
-    return (T) nativeMap.getLayer(layerId);
+    return (T) getLayer(layerId);
   }
 
   /**
@@ -280,14 +285,22 @@ public class Style {
   }
 
   /**
-   * Removes the layer. Any references to the layer become invalid and should not be used anymore
+   * Removes the layer. If a {@link Layer} reference for this id is already known to this
+   * {@link Style} (from {@link #addLayer} / {@link #getLayer}), ownership is returned to that
+   * reference so it can be re-added. Otherwise, any previously obtained references become
+   * invalid and should not be used anymore.
    *
    * @param layerId the layer to remove
    * @return true if the layer was removed, false otherwise
    */
   public boolean removeLayer(@NonNull String layerId) {
     validateState("removeLayer");
-    layers.remove(layerId);
+    // Prefer the cached peer so native ownership is restored to the same Java Layer
+    // instance the caller may still hold (e.g. getLayer → removeLayer(id) → addLayer).
+    Layer cachedLayer = layers.get(layerId);
+    if (cachedLayer != null) {
+      return removeLayer(cachedLayer);
+    }
     return nativeMap.removeLayer(layerId);
   }
 

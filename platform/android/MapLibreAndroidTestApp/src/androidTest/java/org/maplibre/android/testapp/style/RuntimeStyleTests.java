@@ -369,6 +369,33 @@ public class RuntimeStyleTests extends EspressoTest {
     });
   }
 
+  /**
+   * Regression for https://github.com/maplibre/maplibre-native/issues/3101
+   * removeLayer(String) must allow re-adding the same Layer reference, matching removeLayer(Layer).
+   */
+  @Test
+  public void testRemoveLayerByIdThenReaddSameReference() {
+    validateTestSetup();
+    onView(withId(R.id.mapView)).perform(new BaseViewAction() {
+
+      @Override
+      public void perform(UiController uiController, View view) {
+        Layer layer = maplibreMap.getStyle().getLayer("building");
+        assertNotNull(layer);
+
+        assertTrue(maplibreMap.getStyle().removeLayer("building"));
+        assertNull(maplibreMap.getStyle().getLayer("building"));
+
+        // Re-add the same reference obtained before remove-by-id (must not throw)
+        maplibreMap.getStyle().addLayer(layer);
+        Assert.assertNotNull(maplibreMap.getStyle().getLayer(layer.getId()));
+
+        // Property setters should still work on the reused reference
+        layer.setProperties(PropertyFactory.visibility(Property.VISIBLE));
+      }
+    });
+  }
+
   private class AddRemoveLayerAction extends BaseViewAction {
 
     @Override
