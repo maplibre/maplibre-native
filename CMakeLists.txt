@@ -26,15 +26,26 @@ option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires ame
 include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
 
-if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
-endif()
-
 if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
-project("MapLibre Native" LANGUAGES CXX C)
+# Load the toolchain and identify the target OS before choosing deployment defaults.
+# Enable compilers only after the policy is applied, including for core-only builds.
+project("MapLibre Native" LANGUAGES NONE)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # Keep the existing macOS minimum; the iOS 15.5 release-equivalent (12.4) is lower.
+    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3" CACHE STRING "Minimum macOS version" FORCE)
+    elseif(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "14.3")
+        message(FATAL_ERROR "MapLibre Native requires macOS 14.3 or newer; "
+            "CMAKE_OSX_DEPLOYMENT_TARGET is ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
+endif()
+
+enable_language(CXX C)
 
 if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
     # The OHOS SDK toolchain injects --gcc-toolchain, which clang reports as unused.
