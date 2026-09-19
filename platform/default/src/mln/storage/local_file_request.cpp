@@ -3,12 +3,7 @@
 #include <mln/util/filesystem.hpp>
 #include <mln/util/io.hpp>
 
-#if MLN_HAS_STD_FILESYSTEM
 #include <system_error>
-#else
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
 
 namespace mln {
 
@@ -16,7 +11,6 @@ void requestLocalFile(const std::string& path,
                       const ActorRef<FileSourceRequest>& req,
                       const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
     Response response;
-#if MLN_HAS_STD_FILESYSTEM
     std::error_code error;
     std::filesystem::file_status status;
     try {
@@ -28,12 +22,6 @@ void requestLocalFile(const std::string& path,
     }
     const bool notFound = status.type() == std::filesystem::file_type::not_found;
     const bool isDirectory = std::filesystem::is_directory(status);
-#else
-    struct stat buf;
-    const int result = stat(path.c_str(), &buf);
-    const bool notFound = result == -1 && errno == ENOENT;
-    const bool isDirectory = result == 0 && S_ISDIR(buf.st_mode);
-#endif
 
     if (notFound || isDirectory) {
         response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
