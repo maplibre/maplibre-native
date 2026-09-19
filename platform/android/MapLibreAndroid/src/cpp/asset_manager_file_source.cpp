@@ -12,7 +12,42 @@
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
 
+#include <algorithm>
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <utility>
+
 namespace mln {
+
+namespace {
+
+std::optional<std::string> readAsset(AAsset* asset, const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
+    off64_t offset = 0;
+    off64_t length = AAsset_getLength64(asset);
+    if (dataRange) {
+        offset = static_cast<off64_t>(dataRange->first);
+        length = std::min(length - offset, static_cast<off64_t>(dataRange->second) - offset + 1);
+    }
+    if (length <= 0) {
+        return std::string();
+    }
+    if (offset > 0 && AAsset_seek64(asset, offset, SEEK_SET) < 0) {
+        return std::nullopt;
+    }
+
+    std::string data(static_cast<size_t>(length), '\0');
+    for (size_t read = 0; read < data.size();) {
+        const int count = AAsset_read(asset, data.data() + read, data.size() - read);
+        if (count <= 0) {
+            return std::nullopt;
+        }
+        read += static_cast<size_t>(count);
+    }
+    return data;
+}
+
+} // namespace
 
 class AssetManagerFileSource::Impl {
 public:
@@ -24,15 +59,21 @@ public:
           clientOptions(clientOptions_.clone()),
           assetManager(assetManager_) {}
 
-    void request(const std::string& url, ActorRef<FileSourceRequest> req) {
+    void request(const std::string& url,
+                 const std::optional<std::pair<uint64_t, uint64_t>>& dataRange,
+                 ActorRef<FileSourceRequest> req) {
         // Note: AssetManager already prepends "assets" to the filename.
         const std::string path = mln::util::percentDecode(url.substr(8));
 
         Response response;
 
-        if (AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER)) {
-            response.data = std::make_shared<std::string>(reinterpret_cast<const char*>(AAsset_getBuffer(asset)),
-                                                          AAsset_getLength64(asset));
+        if (AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_RANDOM)) {
+            if (auto data = readAsset(asset, dataRange)) {
+                response.data = std::make_shared<std::string>(std::move(*data));
+            } else {
+                response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                                   "Could not read asset");
+            }
             AAsset_close(asset);
         } else {
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
@@ -73,7 +114,7 @@ AssetManagerFileSource::~AssetManagerFileSource() = default;
 std::unique_ptr<AsyncRequest> AssetManagerFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
-    impl->actor().invoke(&Impl::request, resource.url, req->actor());
+    impl->actor().invoke(&Impl::request, resource.url, resource.dataRange, req->actor());
 
     return std::move(req);
 }
