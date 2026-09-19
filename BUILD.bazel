@@ -187,7 +187,6 @@ cc_library(
         "@maplibre_tile_spec//cpp:mlt_cpp",
     ] + select({
         "@platforms//os:ios": [
-            "//vendor:ghc_filesystem",
             "//vendor:icu",
         ],
         "@platforms//os:osx": [

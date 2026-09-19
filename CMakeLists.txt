@@ -1139,7 +1139,6 @@ include(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1198,7 +1197,6 @@ set(EXPORT_TARGETS
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
-    mbgl-vendor-filesystem
     mbgl-vendor-metal-cpp
     mbgl-vendor-rapidjson
     mbgl-vendor-parsedate

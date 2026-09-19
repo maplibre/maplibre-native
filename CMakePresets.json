@@ -15,7 +15,7 @@
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "iOS",
         "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
-        "CMAKE_OSX_DEPLOYMENT_TARGET": "14.0"
+        "CMAKE_OSX_DEPLOYMENT_TARGET": "15.5"
       },
       "condition": {
         "type": "equals",
