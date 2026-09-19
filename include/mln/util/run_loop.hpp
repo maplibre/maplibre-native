@@ -2,13 +2,16 @@
 
 #include <mln/actor/scheduler.hpp>
 #include <mln/actor/mailbox.hpp>
+#include <mln/util/chrono.hpp>
 #include <mln/util/noncopyable.hpp>
+#include <mln/util/scoped.hpp>
 #include <mln/util/util.hpp>
 #include <mln/util/work_task.hpp>
 #include <mln/util/work_request.hpp>
 
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <queue>
 #include <utility>
 
@@ -45,6 +48,23 @@ public:
 
     void run();
     void runOnce();
+
+    /// Like runOnce(), but stops dequeuing tasks once `budget` has elapsed.
+    /// At least one queued task runs. Tasks left behind stay queued and the
+    /// loop is woken again, so the next runOnce() or run() picks them up.
+    ///
+    /// Reentrancy: a task may pump the loop again from inside a budgeted
+    /// pass. A nested runOnce(budget) uses only its own budget, and a nested
+    /// runOnce() or run() is unbounded; neither inherits the outer deadline.
+    /// Once the nested call returns, the outer pass continues to honor its
+    /// original deadline.
+    void runOnce(Duration budget) {
+        const auto now = Clock::now();
+        const auto previousDeadline = std::exchange(processDeadline,
+                                                    budget > TimePoint::max() - now ? TimePoint::max() : now + budget);
+        const Scoped restoreDeadline([this, previousDeadline] { processDeadline = previousDeadline; });
+        runOnce();
+    }
     void stop();
 
     void updateTime();
@@ -116,26 +136,44 @@ private:
     }
 
     void process() {
+        // Take the deadline for this pass only, so a task that pumps the loop
+        // reentrantly does not inherit it. It is put back once the pass ends,
+        // whether or not a nested pass installed a deadline of its own.
+        const auto deadline = std::exchange(processDeadline, std::nullopt);
+        const Scoped restoreDeadline([this, deadline] { processDeadline = deadline; });
+
         std::shared_ptr<WorkTask> task;
         std::unique_lock<std::mutex> lock(mutex);
+        bool ranTask = false;
         while (true) {
+            if (highPriorityQueue.empty() && defaultQueue.empty()) {
+                break;
+            }
+            if (ranTask && deadline && Clock::now() >= *deadline) {
+                // Re-arm the wake so the remaining tasks run on the next iteration.
+                wake();
+                if (platformCallback) {
+                    platformCallback();
+                }
+                break;
+            }
             if (!highPriorityQueue.empty()) {
                 task = std::move(highPriorityQueue.front());
                 highPriorityQueue.pop();
-            } else if (!defaultQueue.empty()) {
+            } else {
                 task = std::move(defaultQueue.front());
                 defaultQueue.pop();
-            } else {
-                break;
             }
             lock.unlock();
             (*task)();
             task.reset();
             lock.lock();
+            ranTask = true;
         }
     }
 
     std::function<void()> platformCallback;
+    std::optional<TimePoint> processDeadline;
 
     Queue defaultQueue;
     Queue highPriorityQueue;
