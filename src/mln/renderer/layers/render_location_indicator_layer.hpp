@@ -16,6 +16,7 @@ public:
     enum class LocationIndicatorComponentType : uint8_t {
         Circle,
         CircleOutline,
+        BearingAccuracy,
         PuckShadow,
         Puck,
         PuckHat,

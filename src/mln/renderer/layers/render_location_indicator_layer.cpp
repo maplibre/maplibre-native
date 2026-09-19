@@ -80,7 +80,10 @@ struct LocationIndicatorRenderParameters {
     // some testing defaults, for before it gets updated via props
     double puckBearing = 0.0;
     LatLng puckPosition = {0, 0};
-    double errorRadiusMeters;
+    double errorRadiusMeters = 0;
+    float bearingAccuracy = 0;
+    float bearingAccuracyRadius = 0;
+    mln::Color bearingAccuracyColor{0, 0, 0, 0};
     mln::Color errorRadiusColor{0, 0, 0, 0};
     mln::Color errorRadiusBorderColor{0, 0, 0, 0};
     float puckScale = 0;
@@ -186,19 +189,33 @@ precision highp float;
 
 attribute vec2 a_pos;
 uniform mat4 u_matrix;
+varying vec2 v_local;
 void main() {
+    v_local = a_pos;
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 }
 )MBGL_SHADER";
 
         const GLchar* fragmentShaderSource = R"MBGL_SHADER(
 #ifdef GL_ES
+#extension GL_OES_standard_derivatives : enable
 precision highp float;
 #endif
 
 uniform vec4 u_color;
+uniform vec4 u_sector;
+varying vec2 v_local;
 void main() {
-    gl_FragColor = u_color;
+    float opacity = 1.0;
+    if (u_sector.y > 0.0) {
+        float radius = length(v_local);
+        float angle = atan(max(abs(v_local.x), 0.000001), -v_local.y);
+        float feather = length(fwidth(v_local)) / max(radius, 0.0001);
+        float angular = u_sector.x >= 3.14159265 ? 1.0 :
+            1.0 - smoothstep(u_sector.x - feather, u_sector.x + feather, angle);
+        opacity = angular * (1.0 - smoothstep(0.0, 1.0, radius));
+    }
+    gl_FragColor = u_color * opacity;
 }
 )MBGL_SHADER";
 
@@ -206,6 +223,7 @@ void main() {
 
         void pullLocations() override {
             a_pos = MBGL_CHECK_ERROR(glGetAttribLocation(program, "a_pos"));
+            u_sector = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_sector"));
             u_color = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_color"));
             u_matrix = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_matrix"));
         }
@@ -215,6 +233,7 @@ void main() {
         }
 
         GLuint a_pos = 0;
+        GLuint u_sector = 0;
         GLuint u_color = 0;
         GLuint u_matrix = 0;
     };
@@ -409,6 +428,7 @@ public:
     void render(const mln::LocationIndicatorRenderParameters& params) {
         initialize();
         drawRadius(params);
+        drawBearingAccuracy(params);
         drawShadow();
         drawPuck();
         drawHat();
@@ -486,6 +506,7 @@ public:
         for (const auto& t : textures) t.second->release();
         buffer.release();
         circleBuffer.release();
+        sectorBuffer.release();
         puckBuffer.release();
         hatBuffer.release();
         texCoordsBuffer.release();
@@ -507,6 +528,7 @@ public:
         } else if (params.puckBearing != oldParams.puckBearing ||
                    params.puckLayersDisplacement != oldParams.puckLayersDisplacement ||
                    params.perspectiveCompensation != oldParams.perspectiveCompensation ||
+                   params.bearingAccuracyRadius != oldParams.bearingAccuracyRadius ||
                    params.puckScale != oldParams.puckScale || params.puckHatScale != oldParams.puckHatScale ||
                    params.puckShadowScale != oldParams.puckShadowScale)
             bearingChanged = true; // changes puck geometry but not necessarily the location
@@ -567,6 +589,7 @@ public:
         featureEnvelope->push_back(border);
     }
 
+    const auto& getProjectionSector() const { return projectionSector; }
     const auto& getProjectionCircle() const { return projectionCircle; }
     const auto& getProjectionPuck() const { return projectionPuck; }
 
@@ -716,7 +739,11 @@ protected:
             (1.0f - params.perspectiveCompensation) +
             util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
                 params.perspectiveCompensation; // Compensation factor for the perspective deformation
-        //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
+        // Clamp above avoids growing the puck too much close to the camera.
+        projectionSector = projectionCircle;
+        matrix::rotate_z(projectionSector, projectionSector, util::deg2rad(params.puckBearing));
+        const double sectorRadius = std::max(0.0f, params.bearingAccuracyRadius) * horizontalScaleFactor;
+        matrix::scale(projectionSector, projectionSector, sectorRadius, sectorRadius, 1.0);
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
         const double shadowRadius = ((texShadow) ? texShadow->width / texShadow->pixelRatio : 0.0) *
@@ -764,12 +791,33 @@ protected:
     }
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
+    void drawBearingAccuracy(const mln::LocationIndicatorRenderParameters& params) {
+        if (!sectorVisible()) return;
+        simpleShader.bind();
+        mln::gl::bindUniform(simpleShader.u_color, params.bearingAccuracyColor);
+        mln::gl::bindUniform(simpleShader.u_matrix, projectionSector);
+        mln::gl::bindUniform(
+            simpleShader.u_sector,
+            std::array<float, 4>{static_cast<float>(util::deg2rad(util::clamp(params.bearingAccuracy, 0.0f, 180.0f))),
+                                 1.0f,
+                                 0.0f,
+                                 0.0f});
+        sectorBuffer.upload(sectorGeometry);
+        MBGL_CHECK_ERROR(glEnableVertexAttribArray(simpleShader.a_pos));
+        MBGL_CHECK_ERROR(glVertexAttribPointer(simpleShader.a_pos, 2, GL_FLOAT, GL_FALSE, 0, nullptr));
+        MBGL_CHECK_ERROR(glDrawArrays(GL_TRIANGLE_FAN, 0, GLsizei(sectorGeometry.size())));
+        MBGL_CHECK_ERROR(glDisableVertexAttribArray(simpleShader.a_pos));
+        sectorBuffer.detach();
+        simpleShader.detach();
+    }
+
     void drawRadius(const mln::LocationIndicatorRenderParameters& params) {
         if (!(params.errorRadiusMeters > 0.0) ||
             (params.errorRadiusColor.a == 0.0 && params.errorRadiusBorderColor.a == 0.0))
             return;
 
         simpleShader.bind();
+        mln::gl::bindUniform(simpleShader.u_sector, std::array<float, 4>{});
         mln::gl::bindUniform(simpleShader.u_color, params.errorRadiusColor);
         mln::gl::bindUniform(simpleShader.u_matrix, projectionCircle);
 
@@ -858,6 +906,7 @@ protected:
     TexturedShader texturedShader;
     Buffer buffer;
     Buffer circleBuffer;
+    Buffer sectorBuffer;
     Buffer shadowBuffer;
     Buffer puckBuffer;
     Buffer hatBuffer;
@@ -878,12 +927,25 @@ protected:
     mln::mat4 translation{};
     mln::mat4 projectionCircle{};
     mln::mat4 projectionPuck{};
+    mln::mat4 projectionSector{};
 
+public:
+    // Unit quad: the sector matrix supplies its radius and geographic bearing.
+    const std::array<vec2, 4> sectorGeometry{{{-1, 1}, {-1, -1}, {1, -1}, {1, 1}}};
+
+    bool sectorVisible() const {
+        return parameters.bearingAccuracy > 0 && parameters.bearingAccuracyRadius > 0 &&
+               parameters.bearingAccuracyColor.a > 0;
+    }
+
+protected:
     bool positionChanged = false;
     bool radiusChanged = false;
     bool bearingChanged = false;
     mln::LocationIndicatorRenderParameters oldParams;
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
     bool initialized = false;
+#endif
     bool dirtyFeature = true;
 
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -910,6 +972,7 @@ public:
         void reset() { textureInfo.reset(); }
     };
 
+    std::optional<std::reference_wrapper<gfx::Drawable>> sectorDrawable;
     CircleDrawableInfo circleDrawableInfo;
     QuadDrawableInfo shadowDrawableInfo;
     QuadDrawableInfo puckDrawableInfo;
@@ -964,6 +1027,9 @@ void RenderLocationIndicatorLayer::evaluate(const PropertyEvaluationParameters& 
     renderImpl->parameters.errorRadiusColor = evaluated.get<style::AccuracyRadiusColor>();
     renderImpl->parameters.errorRadiusBorderColor = evaluated.get<style::AccuracyRadiusBorderColor>();
     renderImpl->parameters.errorRadiusMeters = evaluated.get<style::AccuracyRadius>();
+    renderImpl->parameters.bearingAccuracy = evaluated.get<style::BearingAccuracy>();
+    renderImpl->parameters.bearingAccuracyRadius = evaluated.get<style::BearingAccuracyRadius>();
+    renderImpl->parameters.bearingAccuracyColor = evaluated.get<style::BearingAccuracyColor>();
     renderImpl->parameters.puckScale = evaluated.get<style::BearingImageSize>();
     renderImpl->parameters.puckHatScale = evaluated.get<style::TopImageSize>();
     renderImpl->parameters.puckShadowScale = evaluated.get<style::ShadowImageSize>();
@@ -1107,8 +1173,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
-            getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
+        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(getID(),
+                                                                       evaluatedProperties,
+                                                                       renderImpl->getProjectionCircle(),
+                                                                       renderImpl->getProjectionPuck(),
+                                                                       renderImpl->getProjectionSector());
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
@@ -1122,14 +1191,15 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         // create empty drawable using a builder
         const gfx::UniqueDrawableBuilder& builder = context.createDrawableBuilder(getID());
 
-        const auto createQuadGeometry = [&](gfx::Drawable& drawable, const auto& geometry) {
+        const auto createQuadGeometry = [&](gfx::Drawable& drawable, const auto& geometry, bool textured = true) {
             auto vertexAttrs = context.createVertexAttributeArray();
 
             drawable.setVertices({}, 4, gfx::AttributeDataType::Float2);
             vertexAttrs->set(shaders::idLocationIndicatorPosVertexAttribute, 0, gfx::AttributeDataType::Float2, 4);
 
-            if (const auto& attr = vertexAttrs->set(
-                    shaders::idLocationIndicatorTexVertexAttribute, 0, gfx::AttributeDataType::Float2, 4)) {
+            if (textured) {
+                const auto& attr = vertexAttrs->set(
+                    shaders::idLocationIndicatorTexVertexAttribute, 0, gfx::AttributeDataType::Float2, 4);
                 const std::array<RenderLocationIndicatorImpl::vec2, 4> texCoords = {
                     {{0.0f, 1.0f}, {0.0f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f}}};
 
@@ -1247,6 +1317,19 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         createCircleDrawable();
+        {
+            auto vertexAttrs = context.createVertexAttributeArray();
+            auto& drawable = getCircleDrawable("locationBearingAccuracy", vertexAttrs);
+            drawable->setType(static_cast<uint8_t>(LocationIndicatorComponentType::BearingAccuracy));
+            // Reuse quad indices, but the sector shader only needs position.
+            createQuadGeometry(*drawable, renderImpl->sectorGeometry, false);
+            const auto& attr = drawable->getVertexAttributes()->get(shaders::idLocationIndicatorPosVertexAttribute);
+            const auto* begin = reinterpret_cast<const uint8_t*>(renderImpl->sectorGeometry.data());
+            attr->setRawData(std::vector<uint8_t>(begin, begin + sizeof(renderImpl->sectorGeometry)));
+            renderImpl->sectorDrawable.emplace(*drawable);
+            localLayerGroup->addDrawable(std::move(drawable));
+            ++stats.drawablesAdded;
+        }
         createQuadDrawable(
             renderImpl->shadowDrawableInfo, "locationShadow", LocationIndicatorComponentType::PuckShadow);
         createQuadDrawable(renderImpl->puckDrawableInfo, "locationPuck", LocationIndicatorComponentType::Puck);
@@ -1327,6 +1410,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         drawable.setEnabled(static_cast<bool>(info.textureInfo.texture));
     };
 
+    renderImpl->sectorDrawable->get().setEnabled(renderImpl->sectorVisible());
     updateCircleDrawable();
     updateQuadDrawable(renderImpl->shadowDrawableInfo);
     updateQuadDrawable(renderImpl->puckDrawableInfo);

@@ -4,6 +4,7 @@
 #include <mln/style/conversion/json.hpp>
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layers/location_indicator_layer.hpp>
 
 #include <rapidjson/prettywriter.h>
 
@@ -162,4 +163,38 @@ TEST(StyleConversion, SetGenericProperties) {
     const JSValue newMaxZoom(22.0f);
     layer->setProperty("maxzoom", Convertible(&newMaxZoom));
     EXPECT_EQ(22.0f, layer->getMaxZoom());
+}
+
+TEST(StyleConversion, LocationIndicatorBearingAccuracy) {
+    EXPECT_EQ(0.0f, LocationIndicatorLayer::getDefaultBearingAccuracy().asConstant());
+    EXPECT_EQ(0.0f, LocationIndicatorLayer::getDefaultBearingAccuracyRadius().asConstant());
+    EXPECT_EQ(LocationIndicatorLayer::getDefaultAccuracyRadiusColor(),
+              LocationIndicatorLayer::getDefaultBearingAccuracyColor());
+
+    auto layer = parseLayer(R"JSON({
+        "type": "location-indicator",
+        "id": "location",
+        "paint": {
+            "bearing": 350,
+            "bearing-accuracy": 15,
+            "bearing-accuracy-radius": ["interpolate", ["linear"], ["zoom"], 0, 32, 20, 64],
+            "bearing-accuracy-color": "rgba(0, 128, 255, 0.5)",
+            "bearing-accuracy-transition": {"duration": 200},
+            "bearing-accuracy-radius-transition": {"duration": 300},
+            "bearing-accuracy-color-transition": {"duration": 400}
+        }
+    })JSON");
+    ASSERT_TRUE(layer);
+    const auto& indicator = *static_cast<LocationIndicatorLayer*>(layer.get());
+    EXPECT_EQ(15.0f, indicator.getBearingAccuracy().asConstant());
+    EXPECT_TRUE(indicator.getBearingAccuracyRadius().isExpression());
+    EXPECT_EQ(0.5f, indicator.getBearingAccuracyColor().asConstant().a);
+    EXPECT_EQ(200ms, indicator.getBearingAccuracyTransition().duration);
+    EXPECT_EQ(300ms, indicator.getBearingAccuracyRadiusTransition().duration);
+    EXPECT_EQ(400ms, indicator.getBearingAccuracyColorTransition().duration);
+
+    const auto serialized = stringifyLayer(layer->serialize());
+    auto roundTrip = parseLayer(serialized);
+    ASSERT_TRUE(roundTrip);
+    EXPECT_EQ(serialized, stringifyLayer(roundTrip->serialize()));
 }

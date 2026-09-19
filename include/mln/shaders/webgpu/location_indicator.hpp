@@ -21,11 +21,13 @@ struct VertexInput {
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
+    @location(0) local: vec2<f32>,
 };
 
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
+    sector: vec4<f32>,
 };
 
 @group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
@@ -34,6 +36,7 @@ struct LocationIndicatorUBO {
 fn main(in: VertexInput) -> VertexOutput {
     var out: VertexOutput;
     out.position = ubo.matrix * vec4<f32>(in.position, 0.0, 1.0);
+    out.local = in.position;
     return out;
 }
 )";
@@ -42,13 +45,24 @@ fn main(in: VertexInput) -> VertexOutput {
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
+    sector: vec4<f32>,
 };
 
 @group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
 
 @fragment
-fn main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
-    return ubo.color;
+fn main(@location(0) local: vec2<f32>) -> @location(0) vec4<f32> {
+    var opacity = 1.0;
+    if (ubo.sector.y > 0.0) {
+        let radius = length(local);
+        let angle = atan2(max(abs(local.x), 0.000001), -local.y);
+        let feather = length(fwidth(local)) / max(radius, 0.0001);
+        let angular = select(
+            1.0 - smoothstep(ubo.sector.x - feather, ubo.sector.x + feather, angle),
+            1.0, ubo.sector.x >= 3.14159265);
+        opacity = angular * (1.0 - smoothstep(0.0, 1.0, radius));
+    }
+    return ubo.color * opacity;
 }
 )";
 };
@@ -74,6 +88,7 @@ struct VertexOutput {
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
+    sector: vec4<f32>,
 };
 
 @group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;
@@ -91,6 +106,7 @@ fn main(in: VertexInput) -> VertexOutput {
 struct LocationIndicatorUBO {
     matrix: mat4x4<f32>,
     color: vec4<f32>,
+    sector: vec4<f32>,
 };
 
 @group(0) @binding(4) var<uniform> ubo: LocationIndicatorUBO;

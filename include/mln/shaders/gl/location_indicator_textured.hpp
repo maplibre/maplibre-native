@@ -11,6 +11,7 @@ struct ShaderSource<BuiltIn::LocationIndicatorTexturedShader, gfx::Backend::Type
     static constexpr const char* vertex = R"(layout (std140) uniform LocationIndicatorDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
+    vec4 u_sector;
 };
 
 layout(location = 0) in vec2 a_pos;
@@ -26,6 +27,7 @@ void main() {
     static constexpr const char* fragment = R"(layout (std140) uniform LocationIndicatorDrawableUBO {
     mat4 u_matrix;
     vec4 u_color;
+    vec4 u_sector;
 };
 
 in vec2 frag_uv;

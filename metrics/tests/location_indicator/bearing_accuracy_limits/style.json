@@ -1,0 +1,105 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 256,
+      "ignoreProbing": true
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 16,
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "full",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          -0.0014,
+          0
+        ],
+        "bearing": 350,
+        "bearing-accuracy": 180,
+        "bearing-accuracy-radius": 85,
+        "bearing-accuracy-color": "rgba(0, 100, 255, 0.65)",
+        "perspective-compensation": 1
+      }
+    },
+    {
+      "id": "wide",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          0.0014,
+          0
+        ],
+        "bearing": 90,
+        "bearing-accuracy": 120,
+        "bearing-accuracy-radius": 85,
+        "bearing-accuracy-color": "rgba(0, 100, 255, 0.65)",
+        "perspective-compensation": 1
+      }
+    },
+    {
+      "id": "zero-angle",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          0,
+          0
+        ],
+        "bearing": 350,
+        "bearing-accuracy": 0,
+        "bearing-accuracy-radius": 85,
+        "bearing-accuracy-color": "red",
+        "perspective-compensation": 1
+      }
+    },
+    {
+      "id": "zero-radius",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          0,
+          0
+        ],
+        "bearing": 350,
+        "bearing-accuracy": 25,
+        "bearing-accuracy-radius": 0,
+        "bearing-accuracy-color": "red",
+        "perspective-compensation": 1
+      }
+    },
+    {
+      "id": "transparent",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          0,
+          0
+        ],
+        "bearing": 350,
+        "bearing-accuracy": 25,
+        "bearing-accuracy-radius": 85,
+        "bearing-accuracy-color": "rgba(255,0,0,0)",
+        "perspective-compensation": 1
+      }
+    }
+  ]
+}

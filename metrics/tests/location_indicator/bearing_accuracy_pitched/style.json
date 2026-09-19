@@ -1,0 +1,86 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 512,
+      "height": 256,
+      "ignoreProbing": true,
+      "operations": [
+        [
+          "addImage",
+          "puck",
+          "puck.png"
+        ],
+        [
+          "addImage",
+          "puck_hat",
+          "puck_hat.png"
+        ],
+        [
+          "wait"
+        ],
+        [
+          "setPaintProperty",
+          "indicator",
+          "bearing",
+          80
+        ],
+        [
+          "setPaintProperty",
+          "indicator",
+          "bearing-accuracy",
+          45
+        ],
+        [
+          "setPaintProperty",
+          "indicator",
+          "bearing-accuracy-radius",
+          100
+        ],
+        [
+          "wait"
+        ]
+      ],
+      "pixelRatio": 2
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 16,
+  "sources": {},
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "indicator",
+      "type": "location-indicator",
+      "paint": {
+        "location": [
+          0,
+          0,
+          0
+        ],
+        "bearing": 0,
+        "bearing-accuracy": 25,
+        "bearing-accuracy-radius": 35,
+        "bearing-accuracy-color": "rgba(0, 100, 255, 0.65)",
+        "perspective-compensation": 1,
+        "bearing-image-size": 0.26,
+        "top-image-size": 0.18
+      },
+      "layout": {
+        "bearing-image": "puck",
+        "top-image": "puck_hat"
+      }
+    }
+  ],
+  "pitch": 60,
+  "bearing": 40
+}

@@ -5,6 +5,7 @@
 #include <mln/renderer/layers/render_location_indicator_layer.hpp>
 #include <mln/style/layers/location_indicator_layer_properties.hpp>
 #include <mln/shaders/location_indicator_ubo.hpp>
+#include <mln/util/math.hpp>
 
 namespace mln {
 
@@ -36,6 +37,19 @@ void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const Pa
             case RenderLocationIndicatorLayer::LocationIndicatorComponentType::CircleOutline: {
                 LocationIndicatorDrawableUBO drawableUBO = {.matrix = util::cast<float>(projectionCircle),
                                                             .color = props.evaluated.get<AccuracyRadiusBorderColor>()};
+                drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
+                break;
+            }
+
+            case RenderLocationIndicatorLayer::LocationIndicatorComponentType::BearingAccuracy: {
+                const LocationIndicatorDrawableUBO drawableUBO = {
+                    .matrix = util::cast<float>(projectionSector),
+                    .color = props.evaluated.get<BearingAccuracyColor>(),
+                    .sector = {static_cast<float>(
+                                   util::deg2rad(util::clamp(props.evaluated.get<BearingAccuracy>(), 0.0f, 180.0f))),
+                               1.0f,
+                               0.0f,
+                               0.0f}};
                 drawableUniforms.createOrUpdate(idLocationIndicatorDrawableUBO, &drawableUBO, params.context);
                 break;
             }

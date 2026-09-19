@@ -47,6 +47,18 @@ struct Bearing : PaintProperty<Rotation> {
     static Rotation defaultValue() { return 0.f; }
 };
 
+struct BearingAccuracy : PaintProperty<float> {
+    static float defaultValue() { return 0.f; }
+};
+
+struct BearingAccuracyColor : PaintProperty<Color> {
+    static Color defaultValue() { return Color::white(); }
+};
+
+struct BearingAccuracyRadius : PaintProperty<float> {
+    static float defaultValue() { return 0.f; }
+};
+
 struct BearingImageSize : PaintProperty<float> {
     static float defaultValue() { return 1.f; }
 };
@@ -82,6 +94,9 @@ class LocationIndicatorPaintProperties : public Properties<
     AccuracyRadiusBorderColor,
     AccuracyRadiusColor,
     Bearing,
+    BearingAccuracy,
+    BearingAccuracyColor,
+    BearingAccuracyRadius,
     BearingImageSize,
     ImageTiltDisplacement,
     Location,
