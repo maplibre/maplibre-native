@@ -74,7 +74,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-917cba74.js";
+            window.path_to_searchindex_js = "searchindex-324eb2cf.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-24c1b73c.js"></script>
@@ -859,6 +859,9 @@ cmake --build build-ios-webgpu-wgpu -- -sdk iphonesimulator -arch arm64
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="macos"><a class="header" href="#macos">macOS</a></h1>
 <p>MapLibre Native can be built for macOS. This is mostly used for development.</p>
+<p>The minimum supported macOS version is 14.3. CMake defaults to this version,
+including Qt and <code>MLN_WITH_CORE_ONLY</code> builds. Downstream projects may set
+<code>CMAKE_OSX_DEPLOYMENT_TARGET</code> to a newer version; lower targets are rejected.</p>
 <blockquote class="blockquote-tag blockquote-tag-note">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
 <p>There are some <a href="https://developer.apple.com/documentation/appkit">AppKit</a> APIs for macOS the source tree. However those are not actively maintained. There is an <a href="https://github.com/maplibre/maplibre-native/discussions/3414">discussion</a> on whether we should remove this code.</p>
