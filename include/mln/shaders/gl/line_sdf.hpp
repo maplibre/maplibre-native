@@ -188,14 +188,7 @@ lowp float floorwidth = u_floorwidth;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LineSDFTilePropsUBO {
-    highp float u_sdfgamma;
-    highp float u_mix;
-    lowp float tileprops_pad1;
-    lowp float tileprops_pad2;
-};
-
-layout (std140) uniform LineEvaluatedPropsUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform LineEvaluatedPropsUBO {
     highp vec4 u_color;
     lowp float u_blur;
     lowp float u_opacity;
@@ -205,6 +198,13 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_floorwidth;
     lowp float props_pad1;
     lowp float props_pad2;
+};
+
+layout (std140) uniform LineSDFTilePropsUBO {
+    highp float u_sdfgamma;
+    highp float u_mix;
+    lowp float tileprops_pad1;
+    lowp float tileprops_pad2;
 };
 
 uniform sampler2D u_image;
