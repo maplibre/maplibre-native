@@ -44,7 +44,7 @@ target_sources(
         >
 
         $<$<NOT:$<BOOL:${MLN_DARWIN_USE_LIBUV}>>:
-            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.cpp
+            ${PROJECT_SOURCE_DIR}/platform/darwin/core/async_task.mm
             ${PROJECT_SOURCE_DIR}/platform/darwin/core/run_loop.cpp
             ${PROJECT_SOURCE_DIR}/platform/darwin/core/timer.cpp
         >

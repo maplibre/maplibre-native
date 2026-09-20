@@ -16,6 +16,7 @@
 
 #include <atomic>
 #include <memory>
+#include <set>
 
 namespace mln {
 
@@ -36,25 +37,26 @@ class GeometryTileWorker {
 public:
     GeometryTileWorker(OptionalActorRef<GeometryTileWorker> self,
                        OptionalActorRef<GeometryTile> parent,
-                       const TaggedScheduler& scheduler_,
+                       const TaggedScheduler& scheduler,
                        OverscaledTileID,
-                       std::string,
-                       const std::atomic<bool>&,
+                       std::string sourceID,
+                       const std::atomic<bool>& obsolete,
                        MapMode,
                        float pixelRatio,
-                       bool showCollisionBoxes_,
+                       bool showCollisionBoxes,
                        gfx::DynamicTextureAtlasPtr,
                        std::shared_ptr<FontFaces> fontFaces,
-                       TileObserver* observer);
+                       bool captureRenderedFeatures,
+                       TileObserver*);
     ~GeometryTileWorker();
 
     void setObserver(TileObserver* observer);
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
-                   std::set<std::string> availableImages,
+                   Immutable<std::set<std::string>> availableImages,
                    uint64_t correlationID);
     void setData(std::unique_ptr<const GeometryTileData>,
-                 std::set<std::string> availableImages,
+                 Immutable<std::set<std::string>> availableImages,
                  uint64_t correlationID);
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
@@ -91,6 +93,7 @@ private:
     const std::atomic<bool>& obsolete;
     const MapMode mode;
     const float pixelRatio;
+    const bool captureRenderedFeatures;
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mln::unordered_map<std::string, LayerRenderData> renderData;
@@ -118,7 +121,7 @@ private:
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
-    std::set<std::string> availableImages;
+    Immutable<std::set<std::string>> availableImages = makeMutable<std::set<std::string>>();
 
     bool showCollisionBoxes;
     bool firstLoad = true;

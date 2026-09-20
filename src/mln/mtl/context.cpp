@@ -123,7 +123,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     auto options = NS::TransferPtr(MTL::CompileOptions::alloc()->init());
     options->setPreprocessorMacros(nsDefines);
     options->setFastMathEnabled(true);
-    options->setLanguageVersion(MTL::LanguageVersion2_1);
+    options->setLanguageVersion(MTL::LanguageVersion2_4);
 
     // TODO: Compile common code into a `LibraryTypeDynamic` to be used by other shaders
     // instead of duplicating that code in each and every shader compilation.

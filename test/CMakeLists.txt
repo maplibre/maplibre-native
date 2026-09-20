@@ -19,6 +19,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/math/wrap.test.cpp
     ${PROJECT_SOURCE_DIR}/test/platform/settings.test.cpp
     ${PROJECT_SOURCE_DIR}/test/plugin/plugin.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/renderer/feature_tracking.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/image_manager.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/pattern_atlas.test.cpp
     ${PROJECT_SOURCE_DIR}/test/renderer/renderable.test.cpp
@@ -124,6 +125,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/vectors.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -211,6 +213,16 @@ target_include_directories(
 
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
+
+if(MLN_WITH_PLUGINS)
+    target_sources(mbgl-test PRIVATE
+        plugin/api.test.cpp
+        plugin/layout.test.cpp
+        plugin/property_binding.test.cpp
+        plugin/registry.test.cpp
+        plugin/rendering.test.cpp
+    )
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)

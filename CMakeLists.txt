@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
 
 option(MLN_WITH_CORE_ONLY "Build only the core bits, no platform code" OFF)
+option(MLN_WITH_PLUGINS "Build source-bound native plugin layers" OFF)
 option(MLN_WITH_CLANG_TIDY "Build with clang-tidy checks enabled" OFF)
 option(MLN_WITH_COVERAGE "Enable code coverage collection" OFF)
 option(MLN_WITH_QT "Build MapLibre Native Qt bindings" OFF)
@@ -25,15 +26,36 @@ option(MLN_CREATE_AMALGAMATION "Create static amalgamation of core (requires ame
 include(cmake/validate-backend-options.cmake)
 include(cmake/clang-tidy.cmake)
 
-if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
-endif()
-
 if(WIN32 AND NOT DEFINED ENV{MSYSTEM} AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
-project("MapLibre Native" LANGUAGES CXX C)
+# Load the toolchain and identify the target OS before choosing deployment defaults.
+# Enable compilers only after the policy is applied, including for core-only builds.
+project("MapLibre Native" LANGUAGES NONE)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # Keep the existing macOS minimum; the iOS 15.5 release-equivalent (12.4) is lower.
+    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3" CACHE STRING "Minimum macOS version" FORCE)
+    elseif(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "14.3")
+        message(FATAL_ERROR "MapLibre Native requires macOS 14.3 or newer; "
+            "CMAKE_OSX_DEPLOYMENT_TARGET is ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+    endif()
+endif()
+
+enable_language(CXX C)
+
+if(CMAKE_SYSTEM_NAME STREQUAL OHOS)
+    # The OHOS SDK toolchain injects --gcc-toolchain, which clang reports as unused.
+    # OHOS SDK 6.0.1 ships libc++ ranges algorithms behind -fexperimental-library.
+    add_compile_options(
+        $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wno-unused-command-line-argument>
+        $<$<COMPILE_LANGUAGE:CXX>:-fexperimental-library>
+    )
+endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
@@ -132,6 +154,8 @@ else()
     add_library(mbgl-core STATIC)
 endif()
 
+include(cmake/plugins.cmake)
+
 # Override visibility for mbgl-core when building amalgamation
 if(MLN_CREATE_AMALGAMATION)
     target_compile_options(mbgl-core PRIVATE
@@ -162,6 +186,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/suppress_copies.hpp
 )
 list(APPEND SRC_FILES
+    ${PROJECT_SOURCE_DIR}/src/mln/gfx/context.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/drawable.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/drawable_builder.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/drawable_builder_impl.hpp
@@ -429,6 +454,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/logging.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/lru_cache.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/util/math.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/noncopyable.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/padding.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/platform.hpp
@@ -549,6 +575,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/math/log2.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/platform/settings.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/backend_scope.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket_parameters.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/renderer/bucket_parameters.hpp
@@ -1123,7 +1150,6 @@ include(${PROJECT_SOURCE_DIR}/vendor/maplibre-tile-spec.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/supercluster.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/expected-lite.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/kdbush.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/filesystem.cmake)
 
 if(MLN_USE_RUST)
 include(${PROJECT_SOURCE_DIR}/rustutils/rustutils.cmake)
@@ -1182,7 +1208,6 @@ set(EXPORT_TARGETS
     mbgl-vendor-boost
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
-    mbgl-vendor-filesystem
     mbgl-vendor-metal-cpp
     mbgl-vendor-rapidjson
     mbgl-vendor-parsedate
@@ -1283,6 +1308,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL OHOS)
+    include(${PROJECT_SOURCE_DIR}/platform/ohos/ohos.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     include(${PROJECT_SOURCE_DIR}/platform/darwin/darwin.cmake)
     include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
@@ -1298,5 +1325,8 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/test)
 add_subdirectory(${PROJECT_SOURCE_DIR}/benchmark)
 add_subdirectory(${PROJECT_SOURCE_DIR}/render-test)
+if(MLN_WITH_PLUGINS)
+    add_subdirectory(plugins)
+endif()
 
 include(cmake/mbgl-core-deps.cmake)

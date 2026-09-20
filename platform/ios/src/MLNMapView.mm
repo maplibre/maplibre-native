@@ -452,6 +452,7 @@ public:
 // Plugin Layers
 @property NSMutableArray *pluginLayers;
 
+- (void)initDefaults;
 @end
 
 @implementation MLNMapView {
@@ -510,14 +511,25 @@ public:
   CFTimeInterval _frameDurations;
 
   MLNRenderingStats *_renderingStats;
+
+  BOOL _createdFromIB;
+  BOOL _fastPFOREnabled;
+  BOOL _featureInfoEnabled;
 }
 
 // MARK: - Setup & Teardown -
+
+- (void)initDefaults {
+  _createdFromIB = NO;
+  _fastPFOREnabled = NO;
+  _featureInfoEnabled = NO;
+}
 
 - (instancetype)initWithFrame:(CGRect)frame {
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@", NSStringFromCGRect(frame));
+    [self initDefaults];
     [self commonInitWithOptions:nil];
     self.styleURL = nil;
     MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
@@ -529,6 +541,7 @@ public:
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@ styleURL: %@", NSStringFromCGRect(frame), styleURL);
+    [self initDefaults];
     [self commonInitWithOptions:nil];
     self.styleURL = styleURL;
     MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
@@ -540,6 +553,7 @@ public:
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@ styleJSON: %@", NSStringFromCGRect(frame), styleJSON);
+    [self initDefaults];
     [self commonInitWithOptions:nil];
     self.styleJSON = styleJSON;
     _initialStyleJSON = [styleJSON copy];
@@ -552,6 +566,7 @@ public:
   if (self = [super initWithFrame:frame]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
     MLNLogDebug(@"Initializing frame: %@ with options", NSStringFromCGRect(frame));
+    [self initDefaults];
     [self commonInitWithOptions:options];
 
     if (options) {
@@ -581,11 +596,28 @@ public:
 - (instancetype)initWithCoder:(nonnull NSCoder *)decoder {
   if (self = [super initWithCoder:decoder]) {
     MLNLogInfo(@"Starting %@ initialization.", NSStringFromClass([self class]));
-    [self commonInitWithOptions:nil];
-    self.styleURL = nil;
-    MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
+    [self initDefaults];
+    _createdFromIB = YES;
+    // Options from IB set after this method and before `awakeFromNib` ...
   }
   return self;
+}
+
+- (void)awakeFromNib {
+  // ... options from IB set, continue initialization
+  [super awakeFromNib];
+  MLNMapOptions *options = [[MLNMapOptions alloc] init];
+  options.fastPFOREnabled = _fastPFOREnabled;
+  options.featureInfoEnabled = _featureInfoEnabled;
+  [self commonInitWithOptions:options];
+  self.styleURL = nil;
+
+  // Constraint installation was skipped in `didMoveToSuperview`
+  // in this case, because the subviews did not exist yet.
+  if (self.superview && _createdFromIB) {
+    [self installConstraints];
+  }
+  MLNLogInfo(@"Finalizing %@ initialization.", NSStringFromClass([self class]));
 }
 
 + (NSSet<NSString *> *)keyPathsForValuesAffectingStyle {
@@ -672,9 +704,7 @@ public:
       UIAccessibilityTraitAllowsDirectInteraction | UIAccessibilityTraitAdjustable;
   self.backgroundColor = [UIColor clearColor];
   self.clipsToBounds = YES;
-  if (@available(iOS 11.0, *)) {
-    self.accessibilityIgnoresInvertColors = YES;
-  }
+  self.accessibilityIgnoresInvertColors = YES;
 
   self.preferredFramesPerSecond = MLNMapViewPreferredFramesPerSecondDefault;
 
@@ -711,7 +741,8 @@ public:
       .withConstrainMode(mln::ConstrainMode::None)
       .withViewportMode(mln::ViewportMode::Default)
       .withCrossSourceCollisions(enableCrossSourceCollisions)
-      .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled);
+      .withFastPFOREnabled(mlnMapoptions.fastPFOREnabled)
+      .withRenderedFeatureInfo(mlnMapoptions.featureInfoEnabled);
 
   mln::TileServerOptions *tileServerOptions =
       [[MLNSettings sharedSettings] tileServerOptionsInternal];
@@ -1484,7 +1515,7 @@ public:
     [self didUpdateLocationWithUserTrackingAnimated:animated completionHandler:completion];
   }
 
-  // Compass, logo and attribution button constraints needs to be updated.z
+  // Compass, logo and attribution button constraints needs to be updated.
   [self installConstraints];
 }
 
@@ -1634,10 +1665,8 @@ public:
   UIScreen *screen;
 
 #ifdef SUPPORT_UIWINDOWSCENE
-  if (@available(iOS 13.0, *)) {
-    if (self.window.windowScene) {
-      screen = self.window.windowScene.screen;
-    }
+  if (self.window.windowScene) {
+    screen = self.window.windowScene.screen;
   }
 #endif
 
@@ -1694,18 +1723,7 @@ public:
     newFrameRate = _preferredFramesPerSecond;
   }
 
-  if (@available(iOS 10.0, *)) {
-    _displayLink.preferredFramesPerSecond = newFrameRate;
-  } else {
-    // CADisplayLink.frameInterval does not support more than 60 FPS (and
-    // no device that supports >60 FPS ever supported iOS 9).
-    NSInteger maximumFrameRate = 60;
-
-    // `0` is an alias for maximum frame rate.
-    newFrameRate = newFrameRate ?: maximumFrameRate;
-
-    _displayLink.preferredFramesPerSecond = maximumFrameRate / MIN(newFrameRate, maximumFrameRate);
-  }
+  _displayLink.preferredFramesPerSecond = newFrameRate;
 }
 
 - (void)setPreferredFramesPerSecond:(MLNMapViewPreferredFramesPerSecond)preferredFramesPerSecond {
@@ -1749,13 +1767,10 @@ public:
 
   if (self.window) {
 #ifdef SUPPORT_UIWINDOWSCENE
-    if (@available(iOS 13.0, *)) {
-      [self.window removeObserver:self forKeyPath:@"windowScene" context:windowScreenContext];
-    } else
+    [self.window removeObserver:self forKeyPath:@"windowScene" context:windowScreenContext];
+#else
+    [self.window removeObserver:self forKeyPath:@"screen" context:windowScreenContext];
 #endif
-    {
-      [self.window removeObserver:self forKeyPath:@"screen" context:windowScreenContext];
-    }
   }
 }
 
@@ -1769,19 +1784,16 @@ public:
     [self updatePresentsWithTransaction];
 
 #ifdef SUPPORT_UIWINDOWSCENE
-    if (@available(iOS 13.0, *)) {
-      [self.window addObserver:self
-                    forKeyPath:@"windowScene"
-                       options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                       context:windowScreenContext];
-    } else
+    [self.window addObserver:self
+                  forKeyPath:@"windowScene"
+                     options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                     context:windowScreenContext];
+#else
+    [self.window addObserver:self
+                  forKeyPath:@"screen"
+                     options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
+                     context:windowScreenContext];
 #endif
-    {
-      [self.window addObserver:self
-                    forKeyPath:@"screen"
-                       options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld
-                       context:windowScreenContext];
-    }
 
     // https://github.com/maplibre/maplibre-native/issues/4204
     [self setNeedsLayout];
@@ -1790,7 +1802,7 @@ public:
 
 - (void)didMoveToSuperview {
   [self validateDisplayLink];
-  if (self.superview) {
+  if (self.superview && !_createdFromIB) {
     [self installConstraints];
   }
   [super didMoveToSuperview];
@@ -2409,17 +2421,15 @@ public:
     [self cameraIsChanging];
 
     // Trigger a light haptic feedback event when the user rotates to due north.
-    if (@available(iOS 10.0, *)) {
-      if (self.isHapticFeedbackEnabled && fabs(newDegrees) <= 1 &&
-          self.shouldTriggerHapticFeedbackForCompass) {
-        UIImpactFeedbackGenerator *hapticFeedback =
-            [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
-        [hapticFeedback impactOccurred];
+    if (self.isHapticFeedbackEnabled && fabs(newDegrees) <= 1 &&
+        self.shouldTriggerHapticFeedbackForCompass) {
+      UIImpactFeedbackGenerator *hapticFeedback =
+          [[UIImpactFeedbackGenerator alloc] initWithStyle:UIImpactFeedbackStyleLight];
+      [hapticFeedback impactOccurred];
 
-        self.shouldTriggerHapticFeedbackForCompass = NO;
-      } else if (fabs(newDegrees) > 1) {
-        self.shouldTriggerHapticFeedbackForCompass = YES;
-      }
+      self.shouldTriggerHapticFeedbackForCompass = NO;
+    } else if (fabs(newDegrees) > 1) {
+      self.shouldTriggerHapticFeedbackForCompass = YES;
     }
   } else if ((rotate.state == UIGestureRecognizerStateEnded ||
               rotate.state == UIGestureRecognizerStateCancelled)) {
@@ -5958,31 +5968,13 @@ static void *windowScreenContext = &windowScreenContext;
       BOOL hasWhenInUseUsageDescription = !![[NSBundle mainBundle]
           objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"];
 
-      if (@available(iOS 11.0, *)) {
-        // A WhenInUse string is required in iOS 11+ and the map never has any need for Always, so
-        // it's enough to just ask for WhenInUse.
-        if (hasWhenInUseUsageDescription) {
-          [self.locationManager requestWhenInUseAuthorization];
-        } else {
-          [NSException raise:MLNMissingLocationServicesUsageDescriptionException
-                      format:@"To use location services this app must have a "
-                             @"NSLocationWhenInUseUsageDescription string in its Info.plist."];
-        }
+      // The map only needs WhenInUse authorization.
+      if (hasWhenInUseUsageDescription) {
+        [self.locationManager requestWhenInUseAuthorization];
       } else {
-        // We might have to ask for Always if the app does not provide a WhenInUse string.
-        BOOL hasAlwaysUsageDescription = !![[NSBundle mainBundle]
-            objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"];
-
-        if (hasWhenInUseUsageDescription) {
-          [self.locationManager requestWhenInUseAuthorization];
-        } else if (hasAlwaysUsageDescription) {
-          [self.locationManager requestAlwaysAuthorization];
-        } else {
-          [NSException raise:MLNMissingLocationServicesUsageDescriptionException
-                      format:@"To use location services this app must have a "
-                             @"NSLocationWhenInUseUsageDescription and/or "
-                             @"NSLocationAlwaysUsageDescription string in its Info.plist."];
-        }
+        [NSException raise:MLNMissingLocationServicesUsageDescriptionException
+                    format:@"To use location services this app must have a "
+                           @"NSLocationWhenInUseUsageDescription string in its Info.plist."];
       }
     }
 
@@ -6533,32 +6525,24 @@ static void *windowScreenContext = &windowScreenContext;
     [self.locationManager stopUpdatingLocation];
     [self.locationManager stopUpdatingHeading];
   } else {
-    if (@available(iOS 14, *)) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
-      if (self.userTrackingMode != MLNUserTrackingModeNone &&
-          [manager respondsToSelector:@selector(authorizationStatus)] &&
-          (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
-           manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
-           manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
-          [manager respondsToSelector:@selector(accuracyAuthorization)] &&
-          manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
-          [self accuracyDescriptionString] != nil) {
-        [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:
-                                  @"MLNAccuracyAuthorizationDescription"];
-      } else {
-        [self validateLocationServices];
-      }
-#endif
+    if (self.userTrackingMode != MLNUserTrackingModeNone &&
+        [manager respondsToSelector:@selector(authorizationStatus)] &&
+        (manager.authorizationStatus != kCLAuthorizationStatusRestricted ||
+         manager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways ||
+         manager.authorizationStatus != kCLAuthorizationStatusAuthorizedWhenInUse) &&
+        [manager respondsToSelector:@selector(accuracyAuthorization)] &&
+        manager.accuracyAuthorization == CLAccuracyAuthorizationReducedAccuracy &&
+        [self accuracyDescriptionString] != nil) {
+      [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:
+                                @"MLNAccuracyAuthorizationDescription"];
     } else {
       [self validateLocationServices];
     }
   }
 
-  if (@available(iOS 14, *)) {
-    if ([self.delegate respondsToSelector:@selector(mapView:
-                                              didChangeLocationManagerAuthorization:)]) {
-      [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
-    }
+  if ([self.delegate respondsToSelector:@selector(mapView:
+                                            didChangeLocationManagerAuthorization:)]) {
+    [self.delegate mapView:self didChangeLocationManagerAuthorization:manager];
   }
 }
 
@@ -6577,12 +6561,7 @@ static void *windowScreenContext = &windowScreenContext;
     // iOS 27, so it can no longer be used to compensate the heading. It is also
     // called on every heading update, which makes UIKit log a deprecation notice
     // several times per second.
-    UIInterfaceOrientation interfaceOrientation;
-    if (@available(iOS 13.0, *)) {
-      interfaceOrientation = self.window.windowScene.interfaceOrientation;
-    } else {
-      interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
-    }
+    UIInterfaceOrientation interfaceOrientation = self.window.windowScene.interfaceOrientation;
     switch (interfaceOrientation) {
       case (UIInterfaceOrientationLandscapeLeft): {
         orientation = CLDeviceOrientationLandscapeRight;
@@ -6699,6 +6678,16 @@ static void *windowScreenContext = &windowScreenContext;
   std::vector<mln::Feature> features = _rendererFrontend->getRenderer()->queryRenderedFeatures(
       screenBox, {optionalLayerIDs, optionalFilter});
   return MLNFeaturesFromMBGLFeatures(features);
+}
+
+- (unsigned)renderedFeatureCountForFeatureID:(nullable NSString *)featureID_
+                                     LayerID:(nullable NSString *)layerID_
+                                    SourceID:(nullable NSString *)sourceID_ {
+  const auto featureID =
+      featureID_ ? featureID_.UTF8String : std::optional<std::string>(std::nullopt);
+  const auto layerID = layerID_ ? layerID_.UTF8String : std::optional<std::string>(std::nullopt);
+  const auto sourceID = sourceID_ ? sourceID_.UTF8String : std::optional<std::string>(std::nullopt);
+  return static_cast<unsigned>(self.mbglMap.getRenderedFeatureCount(featureID, layerID, sourceID));
 }
 
 // MARK: - Utility -
@@ -6909,6 +6898,7 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     [_renderingStats setCoreData:stats];
+    [_renderingStats setFeatureInfo:stats];
     [self.delegate mapViewDidFinishRenderingFrame:self
                                     fullyRendered:fullyRendered
                                    renderingStats:_renderingStats];
@@ -7863,6 +7853,20 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)setShowsHeading:(BOOL)showsHeading {
   MLNLogDebug(@"Setting showsHeading: %@", MLNStringFromBOOL(showsHeading));
   self.showsUserHeadingIndicator = showsHeading;
+}
+
+- (BOOL)fastPFOREnabled {
+  return _fastPFOREnabled;
+}
+- (void)setFastPFOREnabled:(BOOL)fastPFOREnabled {
+  _fastPFOREnabled = fastPFOREnabled;
+}
+
+- (BOOL)featureInfoEnabled {
+  return _featureInfoEnabled;
+}
+- (void)setFeatureInfoEnabled:(BOOL)featureInfoEnabled {
+  _featureInfoEnabled = featureInfoEnabled;
 }
 
 @end

@@ -369,6 +369,11 @@ public:
 
     void onSymbolError(const std::string&) override;
 
+    int getRenderedFeatureCount(JNIEnv&,
+                                const jni::String& featureId,
+                                const jni::String& layerId,
+                                const jni::String& sourceId);
+
 private:
     std::shared_ptr<AndroidRendererFrontend> rendererFrontend;
 

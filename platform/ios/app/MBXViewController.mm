@@ -352,8 +352,25 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                    queue:nil
               usingBlock:^(NSNotification *_Nonnull note) {
                 UIScreen *helperScreen = note.object;
-                UIWindow *helperWindow = [[UIWindow alloc] initWithFrame:helperScreen.bounds];
-                helperWindow.screen = helperScreen;
+
+                UIWindowScene *helperWindowScene = nil;
+                for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+                  if (![scene isKindOfClass:[UIWindowScene class]]) {
+                    continue;
+                  }
+
+                  UIWindowScene *windowScene = (UIWindowScene *)scene;
+                  if (windowScene.screen == helperScreen) {
+                    helperWindowScene = windowScene;
+                    break;
+                  }
+                }
+
+                if (!helperWindowScene) {
+                  return;
+                }
+
+                UIWindow *helperWindow = [[UIWindow alloc] initWithWindowScene:helperWindowScene];
                 UIViewController *helperViewController = [[UIViewController alloc] init];
                 MLNMapView *helperMapView =
                     [[MLNMapView alloc] initWithFrame:helperWindow.bounds
@@ -3033,6 +3050,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                         renderingStats:(nonnull MLNRenderingStats *)renderingStats {
   if (self.frameTimeGraphEnabled) {
     [self.frameTimeGraphView updatePathWithFrameDuration:renderingStats.encodingTime];
+  }
+  if (renderingStats.frameRenderedFeatures.count > 0) {
+    NSMutableString *msg = [NSMutableString string];
+    for (MLNSourceLayerID *key in renderingStats.frameRenderedFeatures) {
+      NSArray<MLNFeatureInfo *> *features = renderingStats.frameRenderedFeatures[key];
+      [msg appendFormat:@"%@: %lu, ", key.layerID, static_cast<unsigned long>(features.count)];
+    }
+    const auto total = [mapView renderedFeatureCountForFeatureID:nil LayerID:nil SourceID:nil];
+    NSLog(@"mapViewDidFinishRenderingFrame: %@\nTotal rendered features: %u", msg, total);
   }
 }
 

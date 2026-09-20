@@ -903,8 +903,7 @@ of north, the map will automatically snap to exact north.
  haptic feedback event be played when the user rotates the map to due north
  (0°).
 
- This feature requires a device that supports haptic feedback, running iOS 10 or
- newer.
+ This feature requires a device that supports haptic feedback.
  */
 @property (nonatomic, getter=isHapticFeedbackEnabled) BOOL hapticFeedbackEnabled;
 
@@ -2255,6 +2254,14 @@ of north, the map will automatically snap to exact north.
                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
+
+/**
+ If MLNMapOptions.featureInfoEnabled is set, returns the number of features rendered in the previous
+ frame for a given feature, layer and source.  A nil value for any criterion matches all values.
+ */
+- (unsigned)renderedFeatureCountForFeatureID:(nullable NSString *)featureID
+                                     LayerID:(nullable NSString *)layerID
+                                    SourceID:(nullable NSString *)sourceID;
 
 // MARK: Debugging the Map
 
