@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace mbgl {
+namespace mln {
 
 void Log::platformRecord(EventSeverity severity, const std::string& msg) {
     __android_log_print(android::severityToPriority(severity), "mbgl", "%s", msg.c_str());
@@ -98,13 +98,13 @@ bool copyFile(JNIEnv* env,
 
     bool stateOk = true;
     if (env->CallBooleanMethod(fileToCopy.get(), fileExists)) {
-        mbgl::Log::Warning(mbgl::Event::General, "File '" + filePath + "' already exists");
+        mln::Log::Warning(mln::Event::General, "File '" + filePath + "' already exists");
     } else {
         std::unique_ptr<AAsset, std::function<void(AAsset*)>> fileAsset(
             AAssetManager_open(assetManager, fileName.c_str(), AASSET_MODE_BUFFER),
             [](AAsset* asset) { AAsset_close(asset); });
         if (fileAsset == nullptr) {
-            mbgl::Log::Warning(mbgl::Event::General, "Failed to open asset file " + fileName);
+            mln::Log::Warning(mln::Event::General, "Failed to open asset file " + fileName);
             return false;
         }
         const void* fileData = AAsset_getBuffer(fileAsset.get());
@@ -115,11 +115,11 @@ bool copyFile(JNIEnv* env,
         stateOk = newFile != nullptr;
 
         if (!stateOk) {
-            mbgl::Log::Warning(mbgl::Event::General, "Failed to create new file entry " + fileName);
+            mln::Log::Warning(mln::Event::General, "Failed to create new file entry " + fileName);
         } else {
             auto res = static_cast<off_t>(std::fwrite(fileData, sizeof(char), fileLen, newFile.get()));
             if (fileLen != res) {
-                mbgl::Log::Warning(mbgl::Event::General, "Failed to generate file entry" + fileName + "from assets");
+                mln::Log::Warning(mln::Event::General, "Failed to generate file entry" + fileName + "from assets");
             }
         }
     }
@@ -186,8 +186,8 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
                     env, static_cast<jstring>(env->CallObjectMethod(f, fileGetName)));
 
                 if (!success) {
-                    mbgl::Log::Warning(mbgl::Event::General,
-                                       "Failed to create folder entry " + fileNameStr + " from zip");
+                    mln::Log::Warning(mln::Event::General,
+                                      "Failed to create folder entry " + fileNameStr + " from zip");
                 }
             }
         } else if (!(env->CallBooleanMethod(f, fileExists))) {
@@ -196,7 +196,7 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
                                                          static_cast<jstring>(env->CallObjectMethod(f, fileGetName)));
 
             if (!success) {
-                mbgl::Log::Warning(mbgl::Event::General, "Failed to create folder entry" + fileNameStr + "from zip");
+                mln::Log::Warning(mln::Event::General, "Failed to create folder entry" + fileNameStr + "from zip");
                 continue;
             }
 
@@ -217,10 +217,10 @@ void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& d
     if (env->CallBooleanMethod(fileToDelete.get(), fileExists)) {
         jboolean success = (env->CallBooleanMethod(fileToDelete.get(), deleteFile));
         if (!success) {
-            mbgl::Log::Warning(mbgl::Event::General, "Failed to delete file entry " + zipFilePath);
+            mln::Log::Warning(mln::Event::General, "Failed to delete file entry " + zipFilePath);
         }
     }
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

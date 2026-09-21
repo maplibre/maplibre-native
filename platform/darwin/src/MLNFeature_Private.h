@@ -2,9 +2,9 @@
 #import "MLNFoundation.h"
 #import "MLNShape.h"
 
-#import <mbgl/style/conversion/geojson.hpp>
-#import <mbgl/util/feature.hpp>
-#import <mbgl/util/geo.hpp>
+#import <mln/style/conversion/geojson.hpp>
+#import <mln/util/feature.hpp>
+#import <mln/util/geo.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 MLN_EXPORT
 NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
-    const std::vector<mbgl::Feature> &features);
+    const std::vector<mln::Feature> &features);
 
 /**
  Returns an array of ``MLNFeature`` objects converted from the given vector of
@@ -22,13 +22,13 @@ NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
  */
 MLN_EXPORT
 NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
-    const std::vector<mbgl::GeoJSONFeature> &features);
+    const std::vector<mln::GeoJSONFeature> &features);
 
 /**
- Returns an ``MLNFeature`` object converted from the given mbgl::GeoJSONFeature
+ Returns an ``MLNFeature`` object converted from the given mln::GeoJSONFeature
  */
 MLN_EXPORT
-id<MLNFeature> MLNFeatureFromMBGLFeature(const mbgl::GeoJSONFeature &feature);
+id<MLNFeature> MLNFeatureFromMBGLFeature(const mln::GeoJSONFeature &feature);
 
 /**
  Returns an ``MLNShape`` representing the given geojson. The shape can be
@@ -37,12 +37,12 @@ id<MLNFeature> MLNFeatureFromMBGLFeature(const mbgl::GeoJSONFeature &feature);
 MLNShape *MLNShapeFromGeoJSON(const mapbox::geojson::geojson &geojson);
 
 /**
- Takes an `mbgl::GeoJSONFeature` object, an identifer, and attributes dictionary and
- returns the feature object with converted `mbgl::FeatureIdentifier` and
- `mbgl::PropertyMap` properties.
+ Takes an `mln::GeoJSONFeature` object, an identifer, and attributes dictionary and
+ returns the feature object with converted `mln::FeatureIdentifier` and
+ `mln::PropertyMap` properties.
  */
-mbgl::GeoJSONFeature mbglFeature(mbgl::GeoJSONFeature feature, id identifier,
-                                 NSDictionary *attributes);
+mln::GeoJSONFeature mbglFeature(mln::GeoJSONFeature feature, id identifier,
+                                NSDictionary *attributes);
 
 /**
  Returns an `NSDictionary` representation of an ``MLNFeature``.

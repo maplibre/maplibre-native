@@ -1,0 +1,50 @@
+<%
+  const type = locals.type;
+  const layoutProperties = locals.layoutProperties;
+  const paintProperties = locals.paintProperties;
+-%>
+// clang-format off
+
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
+
+#include <mln/style/layers/<%- type.replace(/-/g, '_') %>_layer_properties.hpp>
+
+#include <mln/style/layers/<%- type.replace(/-/g, '_') %>_layer_impl.hpp>
+
+namespace mln {
+namespace style {
+
+<%- camelize(type) %>LayerProperties::<%- camelize(type) %>LayerProperties(
+    Immutable<<%- camelize(type) %>Layer::Impl> impl_)
+    : LayerProperties(std::move(impl_)) {}
+
+<%- camelize(type) %>LayerProperties::<%- camelize(type) %>LayerProperties(
+    Immutable<<%- camelize(type) %>Layer::Impl> impl_,
+<% if (type === 'background' || type === 'fill' || type === 'line' || type === 'fill-extrusion') { -%>
+    CrossfadeParameters crossfade_,
+<% } -%>
+    <%- camelize(type) %>PaintProperties::PossiblyEvaluated evaluated_)
+  : LayerProperties(std::move(impl_)),
+<% if (type === 'background' || type === 'fill' || type === 'line' || type === 'fill-extrusion') { -%>
+    crossfade(crossfade_),
+<% } -%>
+    evaluated(std::move(evaluated_)) {}
+
+<%- camelize(type) %>LayerProperties::~<%- camelize(type) %>LayerProperties() = default;
+
+unsigned long <%- camelize(type) %>LayerProperties::constantsMask() const {
+    return evaluated.constantsMask();
+}
+
+const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>LayerProperties::layerImpl() const noexcept {
+    return static_cast<const <%- camelize(type) %>Layer::Impl&>(*baseImpl);
+}
+
+expression::Dependency <%- camelize(type) %>LayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies()<% if (layoutProperties.length) { -%> | layerImpl().layout.getDependencies()<% } -%>;
+}
+
+} // namespace style
+} // namespace mln
+
+// clang-format on

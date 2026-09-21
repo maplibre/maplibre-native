@@ -4,11 +4,11 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/circle_layer_factory.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
+#include <mln/layermanager/circle_layer_factory.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class CircleLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     CircleLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    CircleLayer(mbgl::style::CircleLayer&);
+    CircleLayer(mln::style::CircleLayer&);
 
-    CircleLayer(std::unique_ptr<mbgl::style::CircleLayer>);
+    CircleLayer(std::unique_ptr<mln::style::CircleLayer>);
 
     ~CircleLayer();
 
@@ -68,13 +68,13 @@ public:
 
 }; // class CircleLayer
 
-class CircleJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::CircleLayerFactory {
+class CircleJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::CircleLayerFactory {
 public:
     ~CircleJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -83,4 +83,4 @@ public:
 }; // class CircleJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

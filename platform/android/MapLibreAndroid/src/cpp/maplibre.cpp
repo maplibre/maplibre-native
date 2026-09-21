@@ -1,6 +1,6 @@
 #include "maplibre.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<AssetManager>> MapLibre::getAssetManager(jni::JNIEnv& env) {
@@ -20,4 +20,4 @@ void MapLibre::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

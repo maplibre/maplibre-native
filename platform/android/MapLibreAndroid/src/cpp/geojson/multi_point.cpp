@@ -4,11 +4,11 @@
 
 #include "util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
-jni::Local<jni::Object<MultiPoint>> MultiPoint::New(JNIEnv& env, const mbgl::MultiPoint<double>& multiPoint) {
+jni::Local<jni::Object<MultiPoint>> MultiPoint::New(JNIEnv& env, const mln::MultiPoint<double>& multiPoint) {
     static auto& javaClass = jni::Class<MultiPoint>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<MultiPoint>(jni::Object<java::util::List>)>(
         env, "fromLngLats");
@@ -40,4 +40,4 @@ void MultiPoint::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

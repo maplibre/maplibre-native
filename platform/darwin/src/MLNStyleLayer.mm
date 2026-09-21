@@ -1,23 +1,23 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNStyle_Private.h"
 
-#include <mbgl/style/layer.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/style/layer.hpp>
+#include <mln/style/style.hpp>
 
 const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerException";
 
 @interface MLNStyleLayer ()
 
-@property (nonatomic, readonly) mbgl::style::Layer *rawLayer;
+@property (nonatomic, readonly) mln::style::Layer *rawLayer;
 
 @end
 
 @implementation MLNStyleLayer {
-  std::unique_ptr<mbgl::style::Layer> _pendingLayer;
-  mapbox::base::WeakPtr<mbgl::style::Layer> _weakLayer;
+  std::unique_ptr<mln::style::Layer> _pendingLayer;
+  mapbox::base::WeakPtr<mln::style::Layer> _weakLayer;
 }
 
-- (instancetype)initWithRawLayer:(mbgl::style::Layer *)rawLayer {
+- (instancetype)initWithRawLayer:(mln::style::Layer *)rawLayer {
   if (self = [super init]) {
     _identifier = @(rawLayer->getID().c_str());
     _weakLayer = rawLayer->makeWeakPtr();
@@ -26,14 +26,14 @@ const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerExc
   return self;
 }
 
-- (instancetype)initWithPendingLayer:(std::unique_ptr<mbgl::style::Layer>)pendingLayer {
+- (instancetype)initWithPendingLayer:(std::unique_ptr<mln::style::Layer>)pendingLayer {
   if (self = [self initWithRawLayer:pendingLayer.get()]) {
     _pendingLayer = std::move(pendingLayer);
   }
   return self;
 }
 
-- (mbgl::style::Layer *)rawLayer {
+- (mln::style::Layer *)rawLayer {
   return _weakLayer.get();
 }
 
@@ -62,16 +62,16 @@ const MLNExceptionName MLNInvalidStyleLayerException = @"MLNInvalidStyleLayerExc
 - (void)setVisible:(BOOL)visible {
   MLNAssertStyleLayerIsValid();
 
-  mbgl::style::VisibilityType v =
-      visible ? mbgl::style::VisibilityType::Visible : mbgl::style::VisibilityType::None;
+  mln::style::VisibilityType v =
+      visible ? mln::style::VisibilityType::Visible : mln::style::VisibilityType::None;
   self.rawLayer->setVisibility(v);
 }
 
 - (BOOL)isVisible {
   MLNAssertStyleLayerIsValid();
 
-  mbgl::style::VisibilityType v = self.rawLayer->getVisibility();
-  return (v == mbgl::style::VisibilityType::Visible);
+  mln::style::VisibilityType v = self.rawLayer->getVisibility();
+  return (v == mln::style::VisibilityType::Visible);
 }
 
 - (void)setMaximumZoomLevel:(float)maximumZoomLevel {

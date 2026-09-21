@@ -1,13 +1,13 @@
 #pragma once
 
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/util/image.hpp>
 
 #include <android/native_window.h>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AndroidRendererBackend {
@@ -18,9 +18,9 @@ public:
     virtual ~AndroidRendererBackend() = default;
 
     static std::unique_ptr<AndroidRendererBackend> Create(ANativeWindow* window) {
-        return mbgl::gfx::Backend::Create<AndroidRendererBackend, ANativeWindow*>(window);
+        return mln::gfx::Backend::Create<AndroidRendererBackend, ANativeWindow*>(window);
     }
-    virtual mbgl::gfx::RendererBackend& getImpl() = 0;
+    virtual mln::gfx::RendererBackend& getImpl() = 0;
 
     virtual void updateViewPort();
 
@@ -42,4 +42,4 @@ protected:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

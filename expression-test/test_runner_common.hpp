@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mbgl/util/feature.hpp>
+#include <mln/util/feature.hpp>
 
 #include <string>
 #include <vector>
 
-using namespace mbgl;
+using namespace mln;
 
 Value stripPrecision(const Value& value);
 std::vector<std::string> tokenize(std::string str);

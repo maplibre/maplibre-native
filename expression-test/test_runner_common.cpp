@@ -3,7 +3,7 @@
 #include <cmath>
 #include <regex>
 
-using namespace mbgl;
+using namespace mln;
 
 // Strip precision for numbers, so that we can compare evaluated results with
 // fixtures. Copied from JS expression harness.

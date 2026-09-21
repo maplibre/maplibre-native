@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
-#import <mbgl/util/feature.hpp>
+#import <mln/util/feature.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSDictionary (MLNAdditions)
 
-- (mbgl::PropertyMap)mgl_propertyMap;
+- (mln::PropertyMap)mgl_propertyMap;
 
 @end
 

@@ -8,7 +8,7 @@
 @interface MLNSettings ()
 
 @property (atomic) NSString *apiKey;
-@property (atomic) mbgl::TileServerOptions *tileServerOptionsInternal;
+@property (atomic) mln::TileServerOptions *tileServerOptionsInternal;
 @property (atomic) NSString *tileServerOptionsChangeToken;
 
 @end
@@ -20,7 +20,7 @@
 - (instancetype)init {
   if (self = [super init]) {
     self.tileServerOptionsInternal =
-        new mbgl::TileServerOptions(mbgl::TileServerOptions::DefaultConfiguration());
+        new mln::TileServerOptions(mln::TileServerOptions::DefaultConfiguration());
   }
   return self;
 }
@@ -94,13 +94,13 @@
   return url;
 }
 
-+ (void)setTileServerOptionsInternal:(mbgl::TileServerOptions)options {
-  [MLNSettings sharedSettings].tileServerOptionsInternal = new mbgl::TileServerOptions();
++ (void)setTileServerOptionsInternal:(mln::TileServerOptions)options {
+  [MLNSettings sharedSettings].tileServerOptionsInternal = new mln::TileServerOptions();
   *[MLNSettings sharedSettings].tileServerOptionsInternal = options.clone();
   [self tileServerOptionsChanged];
 }
 
-+ (mbgl::TileServerOptions)tileServerOptionsInternal {
++ (mln::TileServerOptions)tileServerOptionsInternal {
   auto options = [MLNSettings sharedSettings];
   return options.tileServerOptionsInternal->clone();
 }
@@ -112,21 +112,21 @@
 + (void)useWellKnownTileServer:(MLNWellKnownTileServer)tileServer {
   switch (tileServer) {
     case MLNMapTiler:
-      [MLNSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapTilerConfiguration()];
+      [MLNSettings setTileServerOptionsInternal:mln::TileServerOptions::MapTilerConfiguration()];
       break;
     case MLNMapLibre:
-      [MLNSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapLibreConfiguration()];
+      [MLNSettings setTileServerOptionsInternal:mln::TileServerOptions::MapLibreConfiguration()];
       break;
     case MLNMapbox:
-      [MLNSettings setTileServerOptionsInternal:mbgl::TileServerOptions::MapboxConfiguration()];
+      [MLNSettings setTileServerOptionsInternal:mln::TileServerOptions::MapboxConfiguration()];
       break;
     default:
-      [MLNSettings setTileServerOptionsInternal:mbgl::TileServerOptions::DefaultConfiguration()];
+      [MLNSettings setTileServerOptionsInternal:mln::TileServerOptions::DefaultConfiguration()];
   }
 }
 
 + (void)setTileServerOptions:(MLNTileServerOptions *)options {
-  auto opts = mbgl::TileServerOptions()
+  auto opts = mln::TileServerOptions()
                   .withBaseURL(std::string([options.baseURL UTF8String]))
                   .withUriSchemeAlias(std::string([options.uriSchemeAlias UTF8String]))
                   .withApiKeyParameterName(std::string([options.apiKeyParameterName UTF8String]));
@@ -161,12 +161,11 @@
                             ? std::string([options.tileVersionPrefix UTF8String])
                             : std::optional<std::string>{});
 
-  std::vector<mbgl::util::DefaultStyle> defaultStyles;
+  std::vector<mln::util::DefaultStyle> defaultStyles;
   if (options.defaultStyles) {
     for (MLNDefaultStyle *objCStyle in options.defaultStyles) {
-      mbgl::util::DefaultStyle cppStyle(std::string([objCStyle.url.absoluteString UTF8String]),
-                                        std::string([objCStyle.name UTF8String]),
-                                        objCStyle.version);
+      mln::util::DefaultStyle cppStyle(std::string([objCStyle.url.absoluteString UTF8String]),
+                                       std::string([objCStyle.name UTF8String]), objCStyle.version);
       defaultStyles.push_back(cppStyle);
     }
   }
@@ -220,7 +219,7 @@
             ? [NSString stringWithUTF8String:cppOpts->tileVersionPrefix().value().c_str()]
             : nil;
 
-    std::vector<mbgl::util::DefaultStyle> cppDefaultStyles = cppOpts->defaultStyles();
+    std::vector<mln::util::DefaultStyle> cppDefaultStyles = cppOpts->defaultStyles();
 
     NSMutableArray<MLNDefaultStyle *> *mglStyles = [[NSMutableArray<MLNDefaultStyle *> alloc] init];
     for (auto it = begin(cppDefaultStyles); it != end(cppDefaultStyles); ++it) {

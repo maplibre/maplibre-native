@@ -1,6 +1,6 @@
-#include <mbgl/util/thread_local.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/platform/thread.hpp>
+#include <mln/util/thread_local.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/platform/thread.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -10,7 +10,7 @@
 #define StorageToThreadInfo reinterpret_cast<THREAD_INFO*&>(storage)
 #define StorageToConstThreadInfo reinterpret_cast<THREAD_INFO* const&>(storage)
 
-namespace mbgl {
+namespace mln {
 namespace util {
 namespace impl {
 
@@ -59,4 +59,4 @@ void ThreadLocalBase::set(void* ptr) {
 
 } // namespace impl
 } // namespace util
-} // namespace mbgl
+} // namespace mln

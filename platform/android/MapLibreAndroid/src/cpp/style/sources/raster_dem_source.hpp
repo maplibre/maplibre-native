@@ -1,10 +1,10 @@
 #pragma once
 
 #include "source.hpp"
-#include <mbgl/style/sources/raster_dem_source.hpp>
+#include <mln/style/sources/raster_dem_source.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class RasterDEMSource : public Source {
@@ -15,7 +15,7 @@ public:
     static void registerNative(jni::JNIEnv&);
 
     RasterDEMSource(jni::JNIEnv&, const jni::String&, const jni::Object<>&, jni::jint);
-    RasterDEMSource(jni::JNIEnv&, mbgl::style::Source&, AndroidRendererFrontend*);
+    RasterDEMSource(jni::JNIEnv&, mln::style::Source&, AndroidRendererFrontend*);
     ~RasterDEMSource();
 
     jni::Local<jni::String> getURL(jni::JNIEnv&);
@@ -26,4 +26,4 @@ private:
 }; // class RasterDEMSource
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,10 +1,10 @@
-#include <mbgl/i18n/collator.hpp>
+#include <mln/i18n/collator.hpp>
 
 #include <sstream>
 
 #import <Foundation/Foundation.h>
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 
 class Collator::Impl {
@@ -61,4 +61,4 @@ int Collator::compare(const std::string& lhs, const std::string& rhs) const {
 std::string Collator::resolvedLocale() const { return impl->resolvedLocale(); }
 
 }  // namespace platform
-}  // namespace mbgl
+}  // namespace mln

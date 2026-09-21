@@ -108,7 +108,7 @@ Main thread:     Tile ready → render
 ### Core C++ (public header)
 
 ```cpp
-namespace mbgl::style {
+namespace mln::style {
 
 enum class TileDataFormat : uint8_t { MVT = 0 };
 
@@ -131,7 +131,7 @@ public:
     void invalidateTile(const CanonicalTileID&);
 };
 
-} // namespace mbgl::style
+} // namespace mln::style
 ```
 
 ### Android (Kotlin)

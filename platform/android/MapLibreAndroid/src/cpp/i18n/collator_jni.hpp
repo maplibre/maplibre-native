@@ -7,11 +7,11 @@
     the JNI wrappers of
     java/text/Collator and java/util/Locale
 
-    mbgl::Collator is the portable interface
+    mln::Collator is the portable interface
     Both implementations are in collator.cpp
  */
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class Locale {
@@ -55,4 +55,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -5,7 +5,7 @@
 #import "MLNTypes.h"
 #import "NSString+MLNAdditions.h"
 
-#import <mbgl/util/geo.hpp>
+#import <mln/util/geo.hpp>
 
 bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D rhs) {
   return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude;
@@ -39,13 +39,13 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
   }
 }
 
-- (mbgl::GeoJSON)geoJSONObject {
+- (mln::GeoJSON)geoJSONObject {
   return self.geometryObject;
 }
 
-- (mbgl::Geometry<double>)geometryObject {
+- (mln::Geometry<double>)geometryObject {
   [NSException raise:MLNAbstractClassException format:@"MLNShape is an abstract class"];
-  return mbgl::Point<double>();
+  return mln::Point<double>();
 }
 
 - (NSData *)geoJSONDataUsingEncoding:(NSStringEncoding)encoding {

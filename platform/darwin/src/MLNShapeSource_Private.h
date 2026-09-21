@@ -1,17 +1,17 @@
-#include <mbgl/util/immutable.hpp>
+#include <mln/util/immutable.hpp>
 #import "MLNFoundation.h"
 #import "MLNShapeSource.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-namespace mbgl {
+namespace mln {
 namespace style {
 struct GeoJSONOptions;
 }
-}  // namespace mbgl
+}  // namespace mln
 
 MLN_EXPORT
-mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
+mln::Immutable<mln::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
     NSDictionary<MLNShapeSourceOption, id> *options);
 
 @interface MLNShapeSource (Private)

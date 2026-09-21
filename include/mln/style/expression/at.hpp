@@ -1,0 +1,42 @@
+#pragma once
+
+#include <mln/style/expression/expression.hpp>
+#include <mln/style/conversion.hpp>
+#include <memory>
+
+namespace mln {
+namespace style {
+namespace expression {
+
+class At : public Expression {
+public:
+    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_)
+        : Expression(Kind::At, input_->getType().get<type::Array>().itemType, depsOf(index_) | depsOf(input_)),
+          index(std::move(index_)),
+          input(std::move(input_)) {}
+
+    static ParseResult parse(const mln::style::conversion::Convertible& value, ParsingContext& ctx);
+
+    EvaluationResult evaluate(const EvaluationContext& params) const override;
+    void eachChild(const std::function<void(const Expression&)>&) const override;
+
+    bool operator==(const Expression& e) const noexcept override {
+        if (e.getKind() == Kind::At) {
+            auto rhs = static_cast<const At*>(&e);
+            return *index == *(rhs->index) && *input == *(rhs->input);
+        }
+        return false;
+    }
+
+    std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
+
+    std::string getOperator() const override { return "at"; }
+
+private:
+    std::unique_ptr<Expression> index;
+    std::unique_ptr<Expression> input;
+};
+
+} // namespace expression
+} // namespace style
+} // namespace mln

@@ -11,14 +11,14 @@
 #import "NSImage+MLNAdditions.h"
 #endif
 
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/util/premultiply.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/util/premultiply.hpp>
 
 @interface MLNImageSource ()
 - (instancetype)initWithIdentifier:(NSString *)identifier
                     coordinateQuad:(MLNCoordinateQuad)coordinateQuad NS_DESIGNATED_INITIALIZER;
 
-@property (nonatomic, readonly) mbgl::style::ImageSource *rawSource;
+@property (nonatomic, readonly) mln::style::ImageSource *rawSource;
 
 @end
 
@@ -27,7 +27,7 @@
 - (instancetype)initWithIdentifier:(NSString *)identifier
                     coordinateQuad:(MLNCoordinateQuad)coordinateQuad {
   const auto coordsArray = MLNLatLngArrayFromCoordinateQuad(coordinateQuad);
-  auto source = std::make_unique<mbgl::style::ImageSource>(identifier.UTF8String, coordsArray);
+  auto source = std::make_unique<mln::style::ImageSource>(identifier.UTF8String, coordsArray);
   return self = [super initWithPendingSource:std::move(source)];
 }
 
@@ -69,7 +69,7 @@
   if (image != nullptr) {
     self.rawSource->setImage(image.mgl_premultipliedImage);
   } else {
-    self.rawSource->setImage(mbgl::PremultipliedImage({0, 0}));
+    self.rawSource->setImage(mln::PremultipliedImage({0, 0}));
   }
   _image = image;
 }
@@ -98,8 +98,8 @@
   }
 }
 
-- (mbgl::style::ImageSource *)rawSource {
-  return (mbgl::style::ImageSource *)super.rawSource;
+- (mln::style::ImageSource *)rawSource {
+  return (mln::style::ImageSource *)super.rawSource;
 }
 
 - (NSString *)attributionHTMLString {

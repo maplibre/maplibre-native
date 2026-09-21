@@ -62,7 +62,7 @@ class SequentialActivityTest(private val activity: Class<out Activity>) {
                 PackageManager.GET_ACTIVITIES
             )
 
-            val activities = packageInfo.activities
+            val activities = packageInfo.activities!!
                 .filter { info ->
                     info.name.startsWith("org.maplibre.android.testapp.activity")
                 }

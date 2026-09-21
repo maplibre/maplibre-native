@@ -1,9 +1,9 @@
 
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/text/tagged_string.hpp>
+#include <mln/text/tagged_string.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TaggedString, Trim) {
     TaggedString basic(u" \t\ntrim that and not this  \n\t", SectionOptions(1.0f, {}, GlyphIDType::FontPBF, 0));

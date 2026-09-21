@@ -1,0 +1,63 @@
+// This is an interface-compatible file analogous to color.cpp
+// which is conditionally compiled when the optional Rust build flag is enabled.
+#include <cmath>
+
+#include <mln/util/color.hpp>
+#include <mln/util/string.hpp>
+
+#include <vector>
+
+#include <rustutils/color.hpp>
+
+namespace mln {
+
+std::optional<Color> Color::parse(const std::string& s) {
+    const auto css_color = rustutils::parse_css_color(s);
+    if (css_color.success) {
+        return {{css_color.r * css_color.a, css_color.g * css_color.a, css_color.b * css_color.a, css_color.a}};
+    } else {
+        return {};
+    }
+}
+
+std::string Color::stringify() const {
+    std::array<double, 4> array = toArray();
+    return "rgba(" + util::toString(array[0]) + "," + util::toString(array[1]) + "," + util::toString(array[2]) + "," +
+           util::toString(array[3]) + ")";
+}
+
+std::array<double, 4> Color::toArray() const {
+    if (a == 0) {
+        return {{0, 0, 0, 0}};
+    } else {
+        return {{
+            r * 255 / a,
+            g * 255 / a,
+            b * 255 / a,
+            floor(a * 100 + .5) / 100 // round to 2 decimal places
+        }};
+    }
+}
+
+mln::Value Color::toObject() const {
+    // Return object format for evaluation output
+    return mapbox::base::ValueObject{{"r", static_cast<double>(r)},
+                                     {"g", static_cast<double>(g)},
+                                     {"b", static_cast<double>(b)},
+                                     {"a", static_cast<double>(a)}};
+}
+
+mln::Value Color::serialize() const {
+    // Emit as an rgba expression array for expression serialization to avoid
+    // "Bare objects invalid" parse errors in expression roundtrips.
+    const auto array = toArray();
+    return std::vector<mln::Value>{
+        std::string("rgba"),
+        array[0],
+        array[1],
+        array[2],
+        array[3],
+    };
+}
+
+} // namespace mln

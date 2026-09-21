@@ -1,0 +1,39 @@
+// clang-format off
+
+// This file is generated. Edit scripts/generate-style-code.js, then run `make style-code`.
+
+#include <mln/style/layers/location_indicator_layer_properties.hpp>
+
+#include <mln/style/layers/location_indicator_layer_impl.hpp>
+
+namespace mln {
+namespace style {
+
+LocationIndicatorLayerProperties::LocationIndicatorLayerProperties(
+    Immutable<LocationIndicatorLayer::Impl> impl_)
+    : LayerProperties(std::move(impl_)) {}
+
+LocationIndicatorLayerProperties::LocationIndicatorLayerProperties(
+    Immutable<LocationIndicatorLayer::Impl> impl_,
+    LocationIndicatorPaintProperties::PossiblyEvaluated evaluated_)
+  : LayerProperties(std::move(impl_)),
+    evaluated(std::move(evaluated_)) {}
+
+LocationIndicatorLayerProperties::~LocationIndicatorLayerProperties() = default;
+
+unsigned long LocationIndicatorLayerProperties::constantsMask() const {
+    return evaluated.constantsMask();
+}
+
+const LocationIndicatorLayer::Impl& LocationIndicatorLayerProperties::layerImpl() const noexcept {
+    return static_cast<const LocationIndicatorLayer::Impl&>(*baseImpl);
+}
+
+expression::Dependency LocationIndicatorLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
+}
+
+} // namespace style
+} // namespace mln
+
+// clang-format on

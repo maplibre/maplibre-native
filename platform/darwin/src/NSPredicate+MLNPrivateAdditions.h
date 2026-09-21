@@ -2,15 +2,15 @@
 
 #import "NSPredicate+MLNAdditions.h"
 
-#include <mbgl/style/filter.hpp>
+#include <mln/style/filter.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSPredicate (MLNPrivateAdditions)
 
-- (mbgl::style::Filter)mgl_filter;
+- (mln::style::Filter)mgl_filter;
 
-+ (nullable instancetype)mgl_predicateWithFilter:(mbgl::style::Filter)filter;
++ (nullable instancetype)mgl_predicateWithFilter:(mln::style::Filter)filter;
 
 @end
 

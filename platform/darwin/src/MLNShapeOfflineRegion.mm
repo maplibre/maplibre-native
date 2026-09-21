@@ -70,7 +70,7 @@
 }
 
 - (instancetype)initWithOfflineRegionDefinition:
-    (const mbgl::OfflineGeometryRegionDefinition &)definition {
+    (const mln::OfflineGeometryRegionDefinition &)definition {
   NSURL *styleURL = [NSURL URLWithString:@(definition.styleURL.c_str())];
   MLNShape *shape = MLNShapeFromGeoJSON(definition.geometry);
   MLNShapeOfflineRegion *result = [self initWithStyleURL:styleURL
@@ -81,7 +81,7 @@
   return result;
 }
 
-- (const mbgl::OfflineRegionDefinition)offlineRegionDefinition {
+- (const mln::OfflineRegionDefinition)offlineRegionDefinition {
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
   const float scaleFactor = [UIScreen instancesRespondToSelector:@selector(nativeScale)]
                                 ? [[UIScreen mainScreen] nativeScale]
@@ -89,7 +89,7 @@
 #elif TARGET_OS_MAC
   const float scaleFactor = [NSScreen mainScreen].backingScaleFactor;
 #endif
-  return mbgl::OfflineGeometryRegionDefinition(
+  return mln::OfflineGeometryRegionDefinition(
       _styleURL.absoluteString.UTF8String, _shape.geometryObject, _minimumZoomLevel,
       _maximumZoomLevel, scaleFactor, _includesIdeographicGlyphs);
 }

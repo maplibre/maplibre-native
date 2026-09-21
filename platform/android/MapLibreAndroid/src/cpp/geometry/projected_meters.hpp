@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
-#include <mbgl/util/geometry.hpp>
+#include <mln/util/noncopyable.hpp>
+#include <mln/util/geometry.hpp>
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class ProjectedMeters : private mbgl::util::noncopyable {
+class ProjectedMeters : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/geometry/ProjectedMeters"; };
 
@@ -18,4 +18,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

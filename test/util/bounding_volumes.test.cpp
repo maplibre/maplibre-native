@@ -1,12 +1,12 @@
 #include <algorithm>
-#include <mbgl/util/bounding_volumes.hpp>
+#include <mln/util/bounding_volumes.hpp>
 
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <numbers>
 
 using namespace std::numbers;
-using namespace mbgl;
+using namespace mln;
 
 TEST(BoundingVolumes, CreateAabb) {
     util::AABB aabb({0, 0, 0}, {2, 4, 6});

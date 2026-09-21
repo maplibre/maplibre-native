@@ -1,10 +1,10 @@
 #include <iostream>
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/utf.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/util/utf.hpp>
+#include <mln/util/platform.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TextConversions, to_upper) {
     EXPECT_EQ(std::string("STREET"), platform::uppercase("strEEt")); // EN

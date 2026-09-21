@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include <mbgl/platform/settings.hpp>
+#include <mln/platform/settings.hpp>
 
-using namespace mbgl;
-using namespace mbgl::platform;
+using namespace mln;
+using namespace mln::platform;
 
 TEST(Settings, SetAndGet) {
     using Value = mapbox::base::Value;

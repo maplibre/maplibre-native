@@ -4,7 +4,7 @@ src:*/usr/*
 
 #############################################################################
 # Mostly hash functions where integer overflow is OK.
-src:*/mbgl/util/hash.hpp
+src:*/mln/util/hash.hpp
 
 #############################################################################
 # vendor libs

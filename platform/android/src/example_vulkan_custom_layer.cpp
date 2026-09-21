@@ -3,9 +3,9 @@
 
 #define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 
-#include <mbgl/style/layers/custom_layer_host.hpp>
-#include <mbgl/style/layers/vulkan/custom_layer_init_parameters.hpp>
-#include <mbgl/style/layers/vulkan/custom_layer_render_parameters.hpp>
+#include <mln/style/layers/custom_layer_host.hpp>
+#include <mln/style/layers/vulkan/custom_layer_init_parameters.hpp>
+#include <mln/style/layers/vulkan/custom_layer_render_parameters.hpp>
 
 #include <array>
 #include <vector>
@@ -188,12 +188,12 @@ static const unsigned char kFragSpirv[] = {
 
 // ---------------------------------------------------------------------------
 
-class ExampleVulkanCustomLayer : public mbgl::style::CustomLayerHost {
+class ExampleVulkanCustomLayer : public mln::style::CustomLayerHost {
 public:
     ~ExampleVulkanCustomLayer() = default;
 
-    void initialize(const mbgl::style::CustomLayerInitParameters &baseParams) override {
-        const auto &params = static_cast<const mbgl::style::vulkan::CustomLayerInitParameters &>(baseParams);
+    void initialize(const mln::style::CustomLayerInitParameters &baseParams) override {
+        const auto &params = static_cast<const mln::style::vulkan::CustomLayerInitParameters &>(baseParams);
 
         __android_log_print(ANDROID_LOG_INFO,
                             VK_LOG_TAG,
@@ -208,8 +208,8 @@ public:
         createPipelineLayout(vulkanDevice, *vulkanDispatcher);
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &baseParams) override {
-        const auto &params = static_cast<const mbgl::style::vulkan::CustomLayerRenderParameters &>(baseParams);
+    void render(const mln::style::CustomLayerRenderParameters &baseParams) override {
+        const auto &params = static_cast<const mln::style::vulkan::CustomLayerRenderParameters &>(baseParams);
 
         const auto &dispatcher = params.dispatcher;
         const auto &cmd = params.commandBuffer;

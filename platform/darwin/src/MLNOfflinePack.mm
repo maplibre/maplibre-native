@@ -10,9 +10,9 @@
 
 #import "NSValue+MLNAdditions.h"
 
-#include <mbgl/map/map_options.hpp>
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/util/variant.hpp>
+#include <mln/map/map_options.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/util/variant.hpp>
 
 const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackException";
 
@@ -40,12 +40,12 @@ const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackE
 @interface MLNShapeOfflineRegion () <MLNOfflineRegion_Private, MLNShapeOfflineRegion_Private>
 @end
 
-class MBGLOfflineRegionObserver : public mbgl::OfflineRegionObserver {
+class MBGLOfflineRegionObserver : public mln::OfflineRegionObserver {
 public:
   MBGLOfflineRegionObserver(MLNOfflinePack *pack_) : pack(pack_) {}
 
-  void statusChanged(mbgl::OfflineRegionStatus status) override;
-  void responseError(mbgl::Response::Error error) override;
+  void statusChanged(mln::OfflineRegionStatus status) override;
+  void responseError(mln::Response::Error error) override;
   void mapboxTileCountLimitExceeded(uint64_t limit) override;
 
 private:
@@ -54,14 +54,14 @@ private:
 
 @interface MLNOfflinePack ()
 
-@property (nonatomic, nullable, readwrite) mbgl::OfflineRegion *mbglOfflineRegion;
+@property (nonatomic, nullable, readwrite) mln::OfflineRegion *mbglOfflineRegion;
 @property (nonatomic, readwrite) MLNOfflinePackProgress progress;
 
 @end
 
 @implementation MLNOfflinePack {
   BOOL _isSuspending;
-  std::shared_ptr<mbgl::DatabaseFileSource> _mbglDatabaseFileSource;
+  std::shared_ptr<mln::DatabaseFileSource> _mbglDatabaseFileSource;
 }
 
 - (instancetype)init {
@@ -75,7 +75,7 @@ private:
   return self;
 }
 
-- (instancetype)initWithMBGLRegion:(mbgl::OfflineRegion *)region {
+- (instancetype)initWithMBGLRegion:(mln::OfflineRegion *)region {
   if (self = [super init]) {
     _mbglOfflineRegion = region;
     _state = MLNOfflinePackStateUnknown;
@@ -103,28 +103,28 @@ private:
 - (id<MLNOfflineRegion>)region {
   MLNAssertOfflinePackIsValid();
 
-  const mbgl::OfflineRegionDefinition &regionDefinition = _mbglOfflineRegion->getDefinition();
+  const mln::OfflineRegionDefinition &regionDefinition = _mbglOfflineRegion->getDefinition();
   MLNAssert([MLNTilePyramidOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)],
             @"MLNTilePyramidOfflineRegion should conform to MLNOfflineRegion_Private.");
   MLNAssert([MLNShapeOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)],
             @"MLNShapeOfflineRegion should conform to MLNOfflineRegion_Private.");
 
   return std::visit(
-      mbgl::overloaded{[&](const mbgl::OfflineTilePyramidRegionDefinition def) {
-                         return (id<MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc]
-                             initWithOfflineRegionDefinition:def];
-                       },
-                       [&](const mbgl::OfflineGeometryRegionDefinition &def) {
-                         return (id<MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc]
-                             initWithOfflineRegionDefinition:def];
-                       }},
+      mln::overloaded{[&](const mln::OfflineTilePyramidRegionDefinition def) {
+                        return (id<MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc]
+                            initWithOfflineRegionDefinition:def];
+                      },
+                      [&](const mln::OfflineGeometryRegionDefinition &def) {
+                        return (id<MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc]
+                            initWithOfflineRegionDefinition:def];
+                      }},
       regionDefinition);
 }
 
 - (NSData *)context {
   MLNAssertOfflinePackIsValid();
 
-  const mbgl::OfflineRegionMetadata &metadata = _mbglOfflineRegion->getMetadata();
+  const mln::OfflineRegionMetadata &metadata = _mbglOfflineRegion->getMetadata();
   return [NSData dataWithBytes:&metadata[0] length:metadata.size()];
 }
 
@@ -132,19 +132,19 @@ private:
     completionHandler:(void (^_Nullable)(NSError *_Nullable error))completion {
   MLNAssertOfflinePackIsValid();
 
-  mbgl::OfflineRegionMetadata metadata(context.length);
+  mln::OfflineRegionMetadata metadata(context.length);
   [context getBytes:&metadata[0] length:metadata.size()];
 
   [self willChangeValueForKey:@"context"];
   __weak MLNOfflinePack *weakSelf = self;
   _mbglDatabaseFileSource->updateOfflineMetadata(
       _mbglOfflineRegion->getID(), metadata,
-      [&, completion, weakSelf](mbgl::expected<mbgl::OfflineRegionMetadata, std::exception_ptr>
-                                    mbglOfflineRegionMetadata) {
+      [&, completion, weakSelf](
+          mln::expected<mln::OfflineRegionMetadata, std::exception_ptr> mbglOfflineRegionMetadata) {
         NSError *error;
         if (!mbglOfflineRegionMetadata) {
           NSString *errorDescription =
-              @(mbgl::util::toString(mbglOfflineRegionMetadata.error()).c_str());
+              @(mln::util::toString(mbglOfflineRegionMetadata.error()).c_str());
           error = [NSError errorWithDomain:MLNErrorDomain
                                       code:MLNErrorCodeModifyingOfflineStorageFailed
                                   userInfo:errorDescription ? @{
@@ -188,7 +188,7 @@ private:
   self.state = MLNOfflinePackStateActive;
 
   _mbglDatabaseFileSource->setOfflineRegionDownloadState(*_mbglOfflineRegion,
-                                                         mbgl::OfflineRegionDownloadState::Active);
+                                                         mln::OfflineRegionDownloadState::Active);
 }
 
 - (void)suspend {
@@ -200,8 +200,8 @@ private:
     _isSuspending = YES;
   }
 
-  _mbglDatabaseFileSource->setOfflineRegionDownloadState(
-      *_mbglOfflineRegion, mbgl::OfflineRegionDownloadState::Inactive);
+  _mbglDatabaseFileSource->setOfflineRegionDownloadState(*_mbglOfflineRegion,
+                                                         mln::OfflineRegionDownloadState::Inactive);
 }
 
 - (void)invalidate {
@@ -226,7 +226,7 @@ private:
     // -[MLNOfflineStorage removePack:withCompletionHandler:] but before the
     // removal is complete and the completion handler is called.
     MLNAssert(_state == MLNOfflinePackStateInvalid,
-              @"A valid MLNOfflinePack has no mbgl::OfflineRegion.");
+              @"A valid MLNOfflinePack has no mln::OfflineRegion.");
     return;
   }
 
@@ -246,9 +246,9 @@ private:
   __weak MLNOfflinePack *weakSelf = self;
   _mbglDatabaseFileSource->getOfflineRegionStatus(
       *_mbglOfflineRegion,
-      [&, weakSelf](mbgl::expected<mbgl::OfflineRegionStatus, std::exception_ptr> status) {
+      [&, weakSelf](mln::expected<mln::OfflineRegionStatus, std::exception_ptr> status) {
         if (status) {
-          mbgl::OfflineRegionStatus checkedStatus = *status;
+          mln::OfflineRegionStatus checkedStatus = *status;
           dispatch_async(dispatch_get_main_queue(), ^{
             MLNOfflinePack *strongSelf = weakSelf;
             [strongSelf offlineRegionStatusDidChange:checkedStatus];
@@ -257,16 +257,16 @@ private:
       });
 }
 
-- (void)offlineRegionStatusDidChange:(mbgl::OfflineRegionStatus)status {
+- (void)offlineRegionStatusDidChange:(mln::OfflineRegionStatus)status {
   MLNAssert(_state != MLNOfflinePackStateInvalid,
             @"Cannot change update progress of an invalid offline pack.");
 
   switch (status.downloadState) {
-    case mbgl::OfflineRegionDownloadState::Inactive:
+    case mln::OfflineRegionDownloadState::Inactive:
       self.state = status.complete() ? MLNOfflinePackStateComplete : MLNOfflinePackStateInactive;
       break;
 
-    case mbgl::OfflineRegionDownloadState::Active:
+    case mln::OfflineRegionDownloadState::Active:
       self.state = MLNOfflinePackStateActive;
       break;
   }
@@ -314,18 +314,18 @@ private:
                           userInfo:userInfo];
 }
 
-NSError *MLNErrorFromResponseError(mbgl::Response::Error error) {
+NSError *MLNErrorFromResponseError(mln::Response::Error error) {
   NSInteger errorCode = MLNErrorCodeUnknown;
   switch (error.reason) {
-    case mbgl::Response::Error::Reason::NotFound:
+    case mln::Response::Error::Reason::NotFound:
       errorCode = MLNErrorCodeNotFound;
       break;
 
-    case mbgl::Response::Error::Reason::Server:
+    case mln::Response::Error::Reason::Server:
       errorCode = MLNErrorCodeBadServerResponse;
       break;
 
-    case mbgl::Response::Error::Reason::Connection:
+    case mln::Response::Error::Reason::Connection:
       errorCode = MLNErrorCodeConnectionFailed;
       break;
 
@@ -341,14 +341,14 @@ NSError *MLNErrorFromResponseError(mbgl::Response::Error error) {
 
 @end
 
-void MBGLOfflineRegionObserver::statusChanged(mbgl::OfflineRegionStatus status) {
+void MBGLOfflineRegionObserver::statusChanged(mln::OfflineRegionStatus status) {
   __weak MLNOfflinePack *weakPack = pack;
   dispatch_async(dispatch_get_main_queue(), ^{
     [weakPack offlineRegionStatusDidChange:status];
   });
 }
 
-void MBGLOfflineRegionObserver::responseError(mbgl::Response::Error error) {
+void MBGLOfflineRegionObserver::responseError(mln::Response::Error error) {
   __weak MLNOfflinePack *weakPack = pack;
   dispatch_async(dispatch_get_main_queue(), ^{
     [weakPack didReceiveError:MLNErrorFromResponseError(error)];

@@ -1,8 +1,8 @@
 #include "map_renderer_runnable.hpp"
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 MapRendererRunnable::MapRendererRunnable(jni::JNIEnv& env, std::function<void()> function_)
@@ -45,4 +45,4 @@ void MapRendererRunnable::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

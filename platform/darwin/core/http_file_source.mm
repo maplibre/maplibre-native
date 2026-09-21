@@ -1,17 +1,17 @@
-#include <mbgl/storage/http_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/response.hpp>
+#include <mln/storage/http_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/response.hpp>
 
-#include <mbgl/util/async_request.hpp>
-#include <mbgl/util/async_task.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/http_header.hpp>
-#include <mbgl/util/version.hpp>
+#include <mln/util/async_request.hpp>
+#include <mln/util/async_task.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/http_header.hpp>
+#include <mln/util/version.hpp>
 
 #import <Foundation/Foundation.h>
 
-#include <mbgl/interface/native_apple_interface.h>
+#include <mln/interface/native_apple_interface.h>
 #include <chrono>
 #include <mutex>
 
@@ -21,7 +21,7 @@
 @implementation MBGLBundleCanary
 @end
 
-namespace mbgl {
+namespace mln {
 
 // Data that is shared between the requesting thread and the thread running the completion handler.
 class HTTPRequestShared {
@@ -149,7 +149,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
   // Avoid %s here because it inserts hidden bidirectional markers on macOS when the system
   // language is set to a right-to-left language.
   [userAgentComponents addObject:[NSString stringWithFormat:@"MapLibreNative/0.0.0 (%@)",
-                                                            @(mbgl::version::revision)]];
+                                                            @(mln::version::revision)]];
 
   NSString *systemName = @"Darwin";
 #if TARGET_OS_IPHONE
@@ -267,7 +267,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource &resource,
 
     [req addValue:impl->userAgent forHTTPHeaderField:@"User-Agent"];
 
-    const bool isTile = resource.kind == mbgl::Resource::Kind::Tile;
+    const bool isTile = resource.kind == mln::Resource::Kind::Tile;
 
     if (isTile) {
       [MLNNativeNetworkManager.sharedManager startDownloadEvent:url.relativePath type:@"tile"];
@@ -444,4 +444,4 @@ void HTTPFileSource::setClientOptions(ClientOptions options) {
 
 ClientOptions HTTPFileSource::getClientOptions() { return impl->getClientOptions(); }
 
-}  // namespace mbgl
+}  // namespace mln

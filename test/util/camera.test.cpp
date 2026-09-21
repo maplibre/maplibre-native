@@ -1,15 +1,15 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/math/angles.hpp>
-#include <mbgl/util/mat3.hpp>
-#include <mbgl/util/quaternion.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/math/angles.hpp>
+#include <mln/util/mat3.hpp>
+#include <mln/util/quaternion.hpp>
 
 #include <gmock/gmock.h>
 
 #include <numbers>
 
-using namespace mbgl;
+using namespace mln;
 using namespace std::numbers;
 
 static const double abs_double_error = 1e-7;

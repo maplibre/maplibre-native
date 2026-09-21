@@ -4,7 +4,7 @@
 #import "MLNLoggingConfiguration_Private.h"
 #import "MLNShape_Private.h"
 
-#import <mbgl/style/conversion/geojson.hpp>
+#import <mln/style/conversion/geojson.hpp>
 
 @implementation MLNShapeCollection
 
@@ -73,7 +73,7 @@
   return [geometries copy];
 }
 
-- (mbgl::Geometry<double>)geometryObject {
+- (mln::Geometry<double>)geometryObject {
   mapbox::geojson::geometry_collection collection;
   collection.reserve(self.shapes.count);
   for (MLNShape *shape in self.shapes) {

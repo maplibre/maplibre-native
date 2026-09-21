@@ -2,17 +2,17 @@
 
 #include "conversion.hpp"
 
-#include <mbgl/util/color.hpp>
+#include <mln/util/color.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
 template <>
-struct Converter<mbgl::Color, int> {
-    Result<mbgl::Color> operator()(jni::JNIEnv&, const int& color) const;
+struct Converter<mln::Color, int> {
+    Result<mln::Color> operator()(jni::JNIEnv&, const int& color) const;
 };
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

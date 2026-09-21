@@ -1,16 +1,16 @@
 #include "map_snapshotter.hpp"
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/renderer/renderer.hpp>
-#include <mbgl/style/style.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/string.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/renderer/renderer.hpp>
+#include <mln/style/style.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/string.hpp>
 
 #include "attach_env.hpp"
 #include "../style/layers/layer_manager.hpp"
 #include "map_snapshot.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
@@ -38,20 +38,20 @@ MapSnapshotter::MapSnapshotter(jni::JNIEnv& _env,
         return;
     }
 
-    weakScheduler = mbgl::Scheduler::GetCurrent()->makeWeakPtr();
+    weakScheduler = mln::Scheduler::GetCurrent()->makeWeakPtr();
 
     jFileSource = FileSource::getNativePeer(_env, _jFileSource);
-    auto size = mbgl::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+    auto size = mln::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
     showLogo = _showLogo;
     showAttribution = _showAttribution;
 
     // Create the core snapshotter
-    snapshotter = std::make_unique<mbgl::MapSnapshotter>(
+    snapshotter = std::make_unique<mln::MapSnapshotter>(
         size,
         pixelRatio,
-        mbgl::android::FileSource::getSharedResourceOptions(_env, _jFileSource),
-        mbgl::android::FileSource::getSharedClientOptions(_env, _jFileSource),
+        mln::android::FileSource::getSharedResourceOptions(_env, _jFileSource),
+        mln::android::FileSource::getSharedClientOptions(_env, _jFileSource),
         *this,
         _localIdeographFontFamily ? jni::Make<std::string>(_env, _localIdeographFontFamily)
                                   : std::optional<std::string>{});
@@ -88,8 +88,8 @@ void MapSnapshotter::start(JNIEnv& env) {
     snapshotter->snapshot([this](std::exception_ptr err,
                                  PremultipliedImage image,
                                  std::vector<std::string> attributions,
-                                 mbgl::MapSnapshotter::PointForFn pointForFn,
-                                 mbgl::MapSnapshotter::LatLngForFn latLngForFn) {
+                                 mln::MapSnapshotter::PointForFn pointForFn,
+                                 mln::MapSnapshotter::LatLngForFn latLngForFn) {
         MBGL_VERIFY_THREAD(tid);
         android::UniqueEnv _env = android::AttachEnv();
         static auto& javaClass = jni::Class<MapSnapshotter>::Singleton(*_env);
@@ -133,7 +133,7 @@ void MapSnapshotter::setStyleJson(JNIEnv& env, const jni::String& styleJSON) {
 }
 
 void MapSnapshotter::setSize(JNIEnv&, jni::jint width, jni::jint height) {
-    auto size = mbgl::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+    auto size = mln::Size{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     snapshotter->setSize(size);
 }
 
@@ -285,21 +285,21 @@ void MapSnapshotter::addSource(JNIEnv& env, const jni::Object<Source>& obj, jlon
     }
 }
 
-void MapSnapshotter::addImages(JNIEnv& env, const jni::Array<jni::Object<mbgl::android::Image>>& jimages) {
+void MapSnapshotter::addImages(JNIEnv& env, const jni::Array<jni::Object<mln::android::Image>>& jimages) {
     jni::NullCheck(env, &jimages);
     std::size_t len = jimages.Length(env);
 
     for (std::size_t i = 0; i < len; ++i) {
-        auto image = mbgl::android::Image::getImage(env, jimages.Get(env, i));
-        snapshotter->getStyle().addImage(std::make_unique<mbgl::style::Image>(image));
+        auto image = mln::android::Image::getImage(env, jimages.Get(env, i));
+        snapshotter->getStyle().addImage(std::make_unique<mln::style::Image>(image));
     }
 }
 
 jni::Local<jni::Object<Layer>> MapSnapshotter::getLayer(JNIEnv& env, const jni::String& layerId) {
     // Find the layer
-    mbgl::style::Layer* coreLayer = snapshotter->getStyle().getLayer(jni::Make<std::string>(env, layerId));
+    mln::style::Layer* coreLayer = snapshotter->getStyle().getLayer(jni::Make<std::string>(env, layerId));
     if (!coreLayer) {
-        mbgl::Log::Debug(mbgl::Event::JNI, "No layer found");
+        mln::Log::Debug(mln::Event::JNI, "No layer found");
         return jni::Local<jni::Object<Layer>>();
     }
 
@@ -309,9 +309,9 @@ jni::Local<jni::Object<Layer>> MapSnapshotter::getLayer(JNIEnv& env, const jni::
 
 jni::Local<jni::Object<Source>> MapSnapshotter::getSource(JNIEnv& env, const jni::String& sourceId) {
     // Find the source
-    mbgl::style::Source* coreSource = snapshotter->getStyle().getSource(jni::Make<std::string>(env, sourceId));
+    mln::style::Source* coreSource = snapshotter->getStyle().getSource(jni::Make<std::string>(env, sourceId));
     if (!coreSource) {
-        mbgl::Log::Debug(mbgl::Event::JNI, "No source found");
+        mln::Log::Debug(mln::Event::JNI, "No source found");
         return jni::Local<jni::Object<Source>>();
     }
 
@@ -368,4 +368,4 @@ void MapSnapshotter::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

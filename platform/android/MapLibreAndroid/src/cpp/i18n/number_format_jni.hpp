@@ -9,7 +9,7 @@
     of java/text/NumberFormat.
  */
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class NumberFormat {
@@ -26,4 +26,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/style/expression/expression.hpp>
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/rapidjson.hpp>
+#include <mln/style/expression/expression.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/rapidjson.hpp>
 
 #include <set>
 #include <string>
 #include <vector>
 #include <filesystem>
 
-using namespace mbgl;
+using namespace mln;
 
 struct Input {
     Input(std::optional<float> zoom_,

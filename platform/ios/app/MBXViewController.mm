@@ -18,8 +18,6 @@
 
 #import "CustomStyleLayerExample.h"
 
-#import "ExampleCustomDrawableStyleLayer.h"
-
 #import <objc/runtime.h>
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
@@ -115,7 +113,6 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
   MBXSettingsRuntimeStylingDDSPolygon,
   MBXSettingsRuntimeStylingCustomLatLonGrid,
   MBXSettingsRuntimeStylingLineGradient,
-  MBXSettingsRuntimeStylingCustomDrawableLayer,
   MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles,
   MBXSettingsRuntimeStylingHeatmapLayer
 };
@@ -355,8 +352,25 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                    queue:nil
               usingBlock:^(NSNotification *_Nonnull note) {
                 UIScreen *helperScreen = note.object;
-                UIWindow *helperWindow = [[UIWindow alloc] initWithFrame:helperScreen.bounds];
-                helperWindow.screen = helperScreen;
+
+                UIWindowScene *helperWindowScene = nil;
+                for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+                  if (![scene isKindOfClass:[UIWindowScene class]]) {
+                    continue;
+                  }
+
+                  UIWindowScene *windowScene = (UIWindowScene *)scene;
+                  if (windowScene.screen == helperScreen) {
+                    helperWindowScene = windowScene;
+                    break;
+                  }
+                }
+
+                if (!helperWindowScene) {
+                  return;
+                }
+
+                UIWindow *helperWindow = [[UIWindow alloc] initWithWindowScene:helperWindowScene];
                 UIViewController *helperViewController = [[UIViewController alloc] init];
                 MLNMapView *helperMapView =
                     [[MLNMapView alloc] initWithFrame:helperWindow.bounds
@@ -501,7 +515,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         @"Dynamically Style Polygon",
         @"Add Custom Lat/Lon Grid",
         @"Style Route line with gradient",
-        @"Add Custom Drawable Layer",
         @"Add FourSquare POIs PMTiles Layer",
         @"Add Earthquake Heatmap"
       ]];
@@ -727,9 +740,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
           break;
         case MBXSettingsRuntimeStylingLineGradient:
           [self styleLineGradient];
-          break;
-        case MBXSettingsRuntimeStylingCustomDrawableLayer:
-          [self addCustomDrawableLayer];
           break;
         case MBXSettingsRuntimeStylingAddFoursquarePOIsPMTiles:
           [self addFoursquarePOIsPMTilesLayer];
@@ -1877,18 +1887,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   [self.mapView.style addSource:routeSource];
   [self.mapView.style addLayer:baseRouteLayer];
   [self.mapView.style addLayer:routeLayer];
-}
-
-- (void)addCustomDrawableLayer {
-#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_OPENGL
-  // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
-  ExampleCustomDrawableStyleLayer *layer =
-      [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
-
-  if (layer) {
-    [self.mapView.style addLayer:layer];
-  }
-#endif
 }
 
 - (void)removeSource:(NSString *)ident {
@@ -3052,6 +3050,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                         renderingStats:(nonnull MLNRenderingStats *)renderingStats {
   if (self.frameTimeGraphEnabled) {
     [self.frameTimeGraphView updatePathWithFrameDuration:renderingStats.encodingTime];
+  }
+  if (renderingStats.frameRenderedFeatures.count > 0) {
+    NSMutableString *msg = [NSMutableString string];
+    for (MLNSourceLayerID *key in renderingStats.frameRenderedFeatures) {
+      NSArray<MLNFeatureInfo *> *features = renderingStats.frameRenderedFeatures[key];
+      [msg appendFormat:@"%@: %lu, ", key.layerID, static_cast<unsigned long>(features.count)];
+    }
+    const auto total = [mapView renderedFeatureCountForFeatureID:nil LayerID:nil SourceID:nil];
+    NSLog(@"mapViewDidFinishRenderingFrame: %@\nTotal rendered features: %u", msg, total);
   }
 }
 

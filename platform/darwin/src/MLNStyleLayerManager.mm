@@ -12,11 +12,9 @@
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
 
-#import "MLNCustomDrawableStyleLayer_Private.h"
-
 #include <vector>
 
-namespace mbgl {
+namespace mln {
 
 LayerManagerDarwin::LayerManagerDarwin() {
 #if defined(MBGL_LAYER_FILL_DISABLE_RUNTIME)
@@ -74,12 +72,6 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
   addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
 #endif
-
-#if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
-  addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
-#elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
-  addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
-#endif
 }
 
 LayerManagerDarwin::~LayerManagerDarwin() = default;
@@ -114,7 +106,7 @@ void LayerManagerDarwin::registerCoreFactory(LayerFactory* factory) {
   }
 }
 
-LayerPeerFactory* LayerManagerDarwin::getPeerFactory(const mbgl::style::LayerTypeInfo* typeInfo) {
+LayerPeerFactory* LayerManagerDarwin::getPeerFactory(const mln::style::LayerTypeInfo* typeInfo) {
   for (const auto& factory : peerFactories) {
     if (layerTypeInfoEquals(factory->getCoreLayerFactory()->getTypeInfo(), typeInfo)) {
       return factory.get();
@@ -128,7 +120,7 @@ LayerFactory* LayerManagerDarwin::getFactory(const std::string& type) noexcept {
   return (search != typeToFactory.end()) ? search->second : nullptr;
 }
 
-LayerFactory* LayerManagerDarwin::getFactory(const mbgl::style::LayerTypeInfo* info) noexcept {
+LayerFactory* LayerManagerDarwin::getFactory(const mln::style::LayerTypeInfo* info) noexcept {
   if (LayerPeerFactory* peerFactory = getPeerFactory(info)) {
     return peerFactory->getCoreLayerFactory();
   }
@@ -159,4 +151,4 @@ const bool LayerManager::annotationsEnabled = false;
 const bool LayerManager::annotationsEnabled = true;
 #endif
 
-}  // namespace mbgl
+}  // namespace mln

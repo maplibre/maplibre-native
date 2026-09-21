@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.24)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
@@ -28,7 +27,7 @@ if(MLN_WITH_OPENGL)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/gl/headless_backend.cpp
             ${PROJECT_SOURCE_DIR}/platform/darwin/src/gl_functions.cpp ${PROJECT_SOURCE_DIR}/platform/darwin/src/headless_backend_cgl.mm
     )
     target_link_libraries(
@@ -43,7 +42,7 @@ if(MLN_WITH_VULKAN)
     target_sources(
         mbgl-core
         PRIVATE
-            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mln/vulkan/headless_backend.cpp
     )
 
     if(Vulkan_FOUND)
@@ -74,7 +73,7 @@ target_include_directories(
 add_subdirectory(${PROJECT_SOURCE_DIR}/bin)
 add_subdirectory(${PROJECT_SOURCE_DIR}/expression-test)
 if(MLN_WITH_GLFW)
-add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/platform/glfw)
 endif()
 if(MLN_WITH_NODE)
     add_subdirectory(${PROJECT_SOURCE_DIR}/platform/node)
@@ -82,7 +81,7 @@ endif()
 
 add_executable(
     mbgl-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/test/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/test/main.cpp
 )
 
 target_include_directories(
@@ -102,7 +101,7 @@ target_link_libraries(
 
 add_executable(
     mbgl-benchmark-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/benchmark/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/benchmark/main.cpp
 )
 
 target_include_directories(
@@ -117,7 +116,7 @@ target_link_libraries(
 
 add_executable(
     mbgl-render-test-runner
-    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/render-test/main.cpp
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mln/render-test/main.cpp
 )
 
 target_link_libraries(
@@ -144,12 +143,23 @@ add_test(
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 find_program(ARMERGE NAMES armerge)
+find_program(
+    LLVM_OBJCOPY
+    NAMES llvm-objcopy
+    HINTS
+        /opt/homebrew/opt/llvm/bin
+        /usr/local/opt/llvm/bin
+)
 
 if(MLN_CREATE_AMALGAMATION)
-    if ("${ARMERGE}" STREQUAL "ARMERGE-NOTFOUND")
+    if(NOT ARMERGE)
         message(FATAL_ERROR "armerge required when MLN_CREATE_AMALGAMATION=ON")
     endif()
+    if(NOT LLVM_OBJCOPY)
+        message(FATAL_ERROR "llvm-objcopy required when MLN_CREATE_AMALGAMATION=ON")
+    endif()
     message(STATUS "Found armerge: ${ARMERGE}")
+    message(STATUS "Found llvm-objcopy: ${LLVM_OBJCOPY}")
     include(${PROJECT_SOURCE_DIR}/cmake/find_static_library.cmake)
     set(STATIC_LIBS "")
 
@@ -161,7 +171,7 @@ if(MLN_CREATE_AMALGAMATION)
     add_custom_command(
         TARGET mbgl-core
         POST_BUILD
-        COMMAND armerge --keep-symbols 'mbgl.*' --output libmbgl-core-amalgam.a
+        COMMAND ${ARMERGE} --keep-symbols 'mln.*' --output libmbgl-core-amalgam.a
             $<TARGET_FILE:mbgl-core>
             $<TARGET_FILE:mbgl-freetype>
             $<TARGET_FILE:mbgl-vendor-csscolorparser>
@@ -169,7 +179,14 @@ if(MLN_CREATE_AMALGAMATION)
             $<TARGET_FILE:mbgl-vendor-parsedate>
             $<TARGET_FILE:mbgl-vendor-icu>
             $<TARGET_FILE:mlt-cpp>
+            $<TARGET_FILE:fastpfor-lib>
             ${STATIC_LIBS}
+        # In Mach-O/Itanium ABI names, ZTI/ZTS/ZTV identify typeinfo,
+        # type names, and vtables, while St denotes std::.
+        # Keep them global so C++ exception matching works in downstream code.
+        COMMAND ${LLVM_OBJCOPY} --wildcard
+            "--globalize-symbol=__ZT[ISV]St*"
+            libmbgl-core-amalgam.a
     )
 
 endif()

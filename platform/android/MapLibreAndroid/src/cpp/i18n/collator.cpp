@@ -1,12 +1,12 @@
-#include <mbgl/i18n/collator.hpp>
-#include <mbgl/text/language_tag.hpp>
+#include <mln/i18n/collator.hpp>
+#include <mln/text/language_tag.hpp>
 
 #include <jni/jni.hpp>
 
 #include "attach_env.hpp"
 #include "collator_jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void Collator::registerNative(jni::JNIEnv& env) {
@@ -192,4 +192,4 @@ std::string Collator::resolvedLocale() const {
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

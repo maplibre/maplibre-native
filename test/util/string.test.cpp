@@ -1,10 +1,10 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/string.hpp>
+#include <mln/util/string.hpp>
 
 #include <cstdint>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(ToString, FloatingPoint) {
     EXPECT_EQ("0", util::toString(0.0));

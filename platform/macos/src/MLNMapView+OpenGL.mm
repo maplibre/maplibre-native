@@ -1,11 +1,11 @@
 #import "MLNMapView+OpenGL.h"
 #import "MLNOpenGLLayer.h"
 
-#include <mbgl/gl/renderable_resource.hpp>
+#include <mln/gl/renderable_resource.hpp>
 
 #import <OpenGL/gl.h>
 
-class MLNMapViewOpenGLRenderableResource final : public mbgl::gl::RenderableResource {
+class MLNMapViewOpenGLRenderableResource final : public mln::gl::RenderableResource {
 public:
   MLNMapViewOpenGLRenderableResource(MLNMapViewOpenGLImpl& backend_) : backend(backend_) {}
 
@@ -24,21 +24,21 @@ public:
 
 MLNMapViewOpenGLImpl::MLNMapViewOpenGLImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
-      mbgl::gl::RendererBackend(mbgl::gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable(mapView.framebufferSize,
-                            std::make_unique<MLNMapViewOpenGLRenderableResource>(*this)) {
+      mln::gl::RendererBackend(mln::gfx::ContextMode::Unique),
+      mln::gfx::Renderable(mapView.framebufferSize,
+                           std::make_unique<MLNMapViewOpenGLRenderableResource>(*this)) {
   // Install the OpenGL layer. Interface Builder’s synchronous drawing means
   // we can’t display a map, so don’t even bother to have a map layer.
   mapView.layer = mapView.isTargetingInterfaceBuilder ? [CALayer layer] : [MLNOpenGLLayer layer];
 }
 
-mbgl::gl::ProcAddress MLNMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
+mln::gl::ProcAddress MLNMapViewOpenGLImpl::getExtensionFunctionPointer(const char* name) {
   static CFBundleRef framework = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengl"));
   if (!framework) {
     throw std::runtime_error("Failed to load OpenGL framework.");
   }
 
-  return reinterpret_cast<mbgl::gl::ProcAddress>(CFBundleGetFunctionPointerForName(
+  return reinterpret_cast<mln::gl::ProcAddress>(CFBundleGetFunctionPointerForName(
       framework, (__bridge CFStringRef)[NSString stringWithUTF8String:name]));
 }
 
@@ -74,7 +74,7 @@ void MLNMapViewOpenGLImpl::restoreFramebufferBinding() {
   setViewport(0, 0, mapView.framebufferSize);
 }
 
-mbgl::PremultipliedImage MLNMapViewOpenGLImpl::readStillImage() {
+mln::PremultipliedImage MLNMapViewOpenGLImpl::readStillImage() {
   return readFramebuffer(mapView.framebufferSize);
 }
 

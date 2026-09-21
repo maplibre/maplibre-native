@@ -2,7 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "MLNMockGestureRecognizers.h"
 
-#import <mbgl/math/wrap.hpp>
+#import <mln/math/wrap.hpp>
 
 @interface MLNMapView (MLNMapViewZoomTests)
 @property (nonatomic) BOOL isZooming;
@@ -196,7 +196,7 @@
     rotate.rotation = MLNRadiansFromDegrees([degrees doubleValue]);
     [self.mapView handleRotateGesture:rotate];
 
-    CGFloat wrappedRotation = mbgl::util::wrap(-MLNDegreesFromRadians(rotate.rotation), 0., 360.);
+    CGFloat wrappedRotation = mln::util::wrap(-MLNDegreesFromRadians(rotate.rotation), 0., 360.);
 
     // Check that the direction property now matches the gesture's rotation.
     XCTAssertEqualWithAccuracy(self.mapView.direction, wrappedRotation, 0.001,

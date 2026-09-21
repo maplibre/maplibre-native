@@ -1,0 +1,97 @@
+#include <mln/renderer/buckets/heatmap_bucket.hpp>
+#include <mln/renderer/bucket_parameters.hpp>
+#include <mln/style/layers/heatmap_layer_impl.hpp>
+#include <mln/renderer/layers/render_heatmap_layer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/math.hpp>
+
+namespace mln {
+
+using namespace style;
+
+HeatmapBucket::HeatmapBucket(const BucketParameters& parameters,
+                             const std::vector<Immutable<style::LayerProperties>>& layers)
+    : mode(parameters.mode) {
+    for (const auto& layer : layers) {
+        paintPropertyBinders.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(layer->baseImpl->id),
+            std::forward_as_tuple(getEvaluated<HeatmapLayerProperties>(layer), parameters.tileID.overscaledZ));
+    }
+}
+
+HeatmapBucket::~HeatmapBucket() {
+    sharedVertices->release();
+}
+
+void HeatmapBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
+    uploaded = true;
+}
+
+bool HeatmapBucket::hasData() const {
+    return !segments.empty();
+}
+
+void HeatmapBucket::addFeature(const GeometryTileFeature& feature,
+                               const GeometryCollection& geometry,
+                               const ImagePositions&,
+                               const PatternLayerMap&,
+                               std::size_t featureIndex,
+                               const CanonicalTileID& canonical) {
+    constexpr const uint16_t vertexLength = 4;
+
+    for (auto& points : geometry) {
+        for (auto& point : points) {
+            auto x = point.x;
+            auto y = point.y;
+
+            // Do not include points that are outside the tile boundaries.
+            if (x < 0 || x >= util::EXTENT || y < 0 || y >= util::EXTENT) {
+                continue;
+            }
+
+            if (segments.empty() ||
+                segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max()) {
+                // Move to a new segments because the old one can't hold the geometry.
+                segments.emplace_back(vertices.elements(), triangles.elements());
+            }
+
+            // this geometry will be of the Point type, and we'll derive
+            // two triangles from it.
+            //
+            // ┌─────────┐
+            // │ 4     3 │
+            // │         │
+            // │ 1     2 │
+            // └─────────┘
+            //
+            vertices.emplace_back(HeatmapBucket::vertex(point, -1, -1)); // 1
+            vertices.emplace_back(HeatmapBucket::vertex(point, 1, -1));  // 2
+            vertices.emplace_back(HeatmapBucket::vertex(point, 1, 1));   // 3
+            vertices.emplace_back(HeatmapBucket::vertex(point, -1, 1));  // 4
+
+            auto& segment = segments.back();
+            assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
+            const auto index = static_cast<uint16_t>(segment.vertexLength);
+
+            // 1, 2, 3
+            // 1, 4, 3
+            triangles.emplace_back(index, index + 1, index + 2);
+            triangles.emplace_back(index, index + 3, index + 2);
+
+            segment.vertexLength += vertexLength;
+            segment.indexLength += 6;
+        }
+    }
+
+    for (auto& pair : paintPropertyBinders) {
+        pair.second.populateVertexVectors(feature, vertices.elements(), featureIndex, {}, {}, canonical);
+    }
+}
+
+float HeatmapBucket::getQueryRadius(const RenderLayer& layer) const {
+    (void)layer;
+    return 0;
+}
+
+} // namespace mln

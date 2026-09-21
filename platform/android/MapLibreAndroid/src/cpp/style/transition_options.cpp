@@ -1,6 +1,6 @@
 #include "transition_options.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<TransitionOptions>> TransitionOptions::fromTransitionOptions(
@@ -24,7 +24,7 @@ long TransitionOptions::getDelay(jni::JNIEnv& env, const jni::Object<TransitionO
 }
 
 bool TransitionOptions::isEnablePlacementTransitions(
-    jni::JNIEnv& env, const jni::Object<mbgl::android::TransitionOptions>& transitionOptions) {
+    jni::JNIEnv& env, const jni::Object<mln::android::TransitionOptions>& transitionOptions) {
     static auto& javaClass = jni::Class<TransitionOptions>::Singleton(env);
     static auto field = javaClass.GetField<jboolean>(env, "enablePlacementTransitions");
     return transitionOptions.Get(env, field);
@@ -35,4 +35,4 @@ void TransitionOptions::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

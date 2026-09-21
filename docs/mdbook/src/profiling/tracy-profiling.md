@@ -23,7 +23,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 
 #### Instrumentation in MapLibre
 
-The file `include/mbgl/util/instrumentation.hpp` defines the following instrumentation macros:
+The file `include/mln/util/instrumentation.hpp` defines the following instrumentation macros:
 
 ##### `MLN_TRACE_ZONE(label)`
 The macro records the timestamps at the start and end of the code scope. The parameter label is a user defined name for the zone. Example:

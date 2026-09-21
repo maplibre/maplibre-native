@@ -16,7 +16,7 @@
 
 #import <objc/runtime.h>
 
-#import <mbgl/style/expression/expression.hpp>
+#import <mln/style/expression/expression.hpp>
 
 const MLNExpressionInterpolationMode MLNExpressionInterpolationModeLinear = @"linear";
 const MLNExpressionInterpolationMode MLNExpressionInterpolationModeExponential = @"exponential";
@@ -271,10 +271,10 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
 @implementation NSExpression (MLNPrivateAdditions)
 
-- (std::vector<mbgl::Value>)mgl_aggregateMBGLValue {
+- (std::vector<mln::Value>)mgl_aggregateMBGLValue {
   if ([self.constantValue isKindOfClass:[NSArray class]] ||
       [self.constantValue isKindOfClass:[NSSet class]]) {
-    std::vector<mbgl::Value> convertedValues;
+    std::vector<mln::Value> convertedValues;
     for (id value in self.constantValue) {
       NSExpression *expression = value;
       if (![expression isKindOfClass:[NSExpression class]]) {
@@ -289,7 +289,7 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return {};
 }
 
-- (mbgl::Value)mgl_constantMBGLValue {
+- (mln::Value)mgl_constantMBGLValue {
   id value = self.constantValue;
   if ([value isKindOfClass:NSString.class]) {
     return {std::string([(NSString *)value UTF8String])};
@@ -319,11 +319,11 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
       return {(double)number.doubleValue};
     } else if ([number compare:@(0)] == NSOrderedDescending ||
                [number compare:@(0)] == NSOrderedSame) {
-      // Positive integer or zero; use uint64_t per mbgl::Value definition.
+      // Positive integer or zero; use uint64_t per mln::Value definition.
       // We use unsigned long long here to avoid any truncation.
       return {(uint64_t)number.unsignedLongLongValue};
     } else if ([number compare:@(0)] == NSOrderedAscending) {
-      // Negative integer; use int64_t per mbgl::Value definition.
+      // Negative integer; use int64_t per mln::Value definition.
       // We use long long here to avoid any truncation.
       return {(int64_t)number.longLongValue};
     }
@@ -332,15 +332,15 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
     return {hexString};
   } else if (value && value != [NSNull null]) {
     [NSException raise:NSInvalidArgumentException
-                format:@"Can’t convert %s:%@ to mbgl::Value", [value objCType], value];
+                format:@"Can’t convert %s:%@ to mln::Value", [value objCType], value];
   }
   return {};
 }
 
-- (std::vector<mbgl::FeatureType>)mgl_aggregateFeatureType {
+- (std::vector<mln::FeatureType>)mgl_aggregateFeatureType {
   if ([self.constantValue isKindOfClass:[NSArray class]] ||
       [self.constantValue isKindOfClass:[NSSet class]]) {
-    std::vector<mbgl::FeatureType> convertedValues;
+    std::vector<mln::FeatureType> convertedValues;
     for (id value in self.constantValue) {
       NSExpression *expression = value;
       if (![expression isKindOfClass:[NSExpression class]]) {
@@ -355,37 +355,37 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return {};
 }
 
-- (mbgl::FeatureType)mgl_featureType {
+- (mln::FeatureType)mgl_featureType {
   id value = self.constantValue;
   if ([value isKindOfClass:NSString.class]) {
     if ([value isEqualToString:@"Point"]) {
-      return mbgl::FeatureType::Point;
+      return mln::FeatureType::Point;
     }
     if ([value isEqualToString:@"LineString"]) {
-      return mbgl::FeatureType::LineString;
+      return mln::FeatureType::LineString;
     }
     if ([value isEqualToString:@"Polygon"]) {
-      return mbgl::FeatureType::Polygon;
+      return mln::FeatureType::Polygon;
     }
   } else if ([value isKindOfClass:NSNumber.class]) {
     switch ([value integerValue]) {
       case 1:
-        return mbgl::FeatureType::Point;
+        return mln::FeatureType::Point;
       case 2:
-        return mbgl::FeatureType::LineString;
+        return mln::FeatureType::LineString;
       case 3:
-        return mbgl::FeatureType::Polygon;
+        return mln::FeatureType::Polygon;
       default:
         break;
     }
   }
-  return mbgl::FeatureType::Unknown;
+  return mln::FeatureType::Unknown;
 }
 
-- (std::vector<mbgl::FeatureIdentifier>)mgl_aggregateFeatureIdentifier {
+- (std::vector<mln::FeatureIdentifier>)mgl_aggregateFeatureIdentifier {
   if ([self.constantValue isKindOfClass:[NSArray class]] ||
       [self.constantValue isKindOfClass:[NSSet class]]) {
-    std::vector<mbgl::FeatureIdentifier> convertedValues;
+    std::vector<mln::FeatureIdentifier> convertedValues;
     for (id value in self.constantValue) {
       NSExpression *expression = value;
       if (![expression isKindOfClass:[NSExpression class]]) {
@@ -400,8 +400,8 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
   return {};
 }
 
-- (mbgl::FeatureIdentifier)mgl_featureIdentifier {
-  mbgl::Value mbglValue = self.mgl_constantMBGLValue;
+- (mln::FeatureIdentifier)mgl_featureIdentifier {
+  mln::Value mbglValue = self.mgl_constantMBGLValue;
 
   if (mbglValue.is<std::string>()) {
     return mbglValue.get<std::string>();
@@ -574,14 +574,20 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
 + (NSExpression *)expressionForFunctionHelper:(NSString *)name arguments:(NSArray *)parameters {
   if (parameters.count) {
-    if (@available(iOS 15.5, macOS 12, *)) {
-      NSExpression *functionExpression = [NSExpression expressionWithFormat:@"sum({})"];
-      return [NSExpression expressionForFunction:functionExpression.operand
-                                    selectorName:name
-                                       arguments:parameters];
-    }
+    NSExpression *functionExpression = [NSExpression expressionWithFormat:@"sum({})"];
+    return [NSExpression expressionForFunction:functionExpression.operand
+                                  selectorName:name
+                                     arguments:parameters];
   }
   return [NSExpression expressionForFunction:name arguments:parameters];
+}
+
++ (instancetype)mgl_expressionForArray:(NSArray<NSExpression *> *)elements {
+  return [NSExpression expressionForFunctionHelper:@"MLN_FUNCTION"
+                                         arguments:@[
+                                           [NSExpression expressionForConstantValue:@"semiliteral"],
+                                           [NSExpression expressionForAggregate:elements]
+                                         ]];
 }
 
 + (NSExpression *)zoomLevelVariableExpression {
@@ -779,6 +785,16 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
     } else if ([op isEqualToString:@"collator"]) {
       // Avoid wrapping collator options object in literal expression.
       return [NSExpression expressionForFunctionHelper:@"MLN_FUNCTION" arguments:array];
+    } else if ([op isEqualToString:@"semiliteral"]) {
+      if (argumentObjects.count != 1) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"'semiliteral' expression requires exactly one argument."];
+      }
+      id value = argumentObjects.firstObject;
+      if ([value isKindOfClass:[NSArray class]]) {
+        return [NSExpression mgl_expressionForArray:MLNSubexpressionsWithJSONObjects(value)];
+      }
+      return [NSExpression expressionForConstantValue:value];
     } else if ([op isEqualToString:@"literal"]) {
       if ([argumentObjects.firstObject isKindOfClass:[NSArray class]]) {
         return [NSExpression
@@ -1355,6 +1371,13 @@ NSArray *MLNSubexpressionsWithJSONObjects(NSArray *objects) {
       } else if ([function isEqualToString:@"MLN_FUNCTION"] ||
                  [function isEqualToString:@"MLN_FUNCTION:"]) {
         NSExpression *firstOp = self.arguments.firstObject;
+        if (firstOp.expressionType == NSConstantValueExpressionType &&
+            [firstOp.constantValue isEqualToString:@"semiliteral"]) {
+          NSExpression *elements = self.arguments[1];
+          return @[
+            @"semiliteral", [elements.collection valueForKeyPath:@"mgl_jsonExpressionObject"]
+          ];
+        }
         if (firstOp.expressionType == NSConstantValueExpressionType &&
             [firstOp.constantValue isEqualToString:@"collator"]) {
           // Avoid wrapping collator options object in literal expression.

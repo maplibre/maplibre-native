@@ -1,12 +1,12 @@
-#include <mbgl/i18n/number_format.hpp>
-#include <mbgl/text/language_tag.hpp>
+#include <mln/i18n/number_format.hpp>
+#include <mln/text/language_tag.hpp>
 
 #include <jni/jni.hpp>
 
 #include "attach_env.hpp"
 #include "number_format_jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void NumberFormat::registerNative(jni::JNIEnv& env) {
@@ -85,4 +85,4 @@ std::string formatNumber(double number,
 }
 
 } // namespace platform
-} // namespace mbgl
+} // namespace mln

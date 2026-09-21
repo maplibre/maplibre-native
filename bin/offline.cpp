@@ -1,12 +1,12 @@
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/geojson.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/geojson.hpp>
 
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/storage/file_source_manager.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/client_options.hpp>
-#include <mbgl/util/tile_server_options.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/storage/file_source_manager.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/client_options.hpp>
+#include <mln/util/tile_server_options.hpp>
 
 #include <args.hxx>
 
@@ -51,19 +51,19 @@ mapbox::geometry::geometry<double> parseGeometry(const std::string& json) {
                          });
 }
 
-std::ostream& operator<<(std::ostream& os, mbgl::Response::Error::Reason r) {
+std::ostream& operator<<(std::ostream& os, mln::Response::Error::Reason r) {
     switch (r) {
-        case mbgl::Response::Error::Reason::Success:
+        case mln::Response::Error::Reason::Success:
             return os << "Response::Error::Reason::Success";
-        case mbgl::Response::Error::Reason::NotFound:
+        case mln::Response::Error::Reason::NotFound:
             return os << "Response::Error::Reason::NotFound";
-        case mbgl::Response::Error::Reason::Server:
+        case mln::Response::Error::Reason::Server:
             return os << "Response::Error::Reason::Server";
-        case mbgl::Response::Error::Reason::Connection:
+        case mln::Response::Error::Reason::Connection:
             return os << "Response::Error::Reason::Connection";
-        case mbgl::Response::Error::Reason::RateLimit:
+        case mln::Response::Error::Reason::RateLimit:
             return os << "Response::Error::Reason::RateLimit";
-        case mbgl::Response::Error::Reason::Other:
+        case mln::Response::Error::Reason::Other:
             return os << "Response::Error::Reason::Other";
     }
 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
         exit(2);
     }
 
-    auto mapTilerConfiguration = mbgl::TileServerOptions::MapTilerConfiguration();
+    auto mapTilerConfiguration = mln::TileServerOptions::MapTilerConfiguration();
 
     std::string style = styleValue ? args::get(styleValue) : mapTilerConfiguration.defaultStyles().at(0).getUrl();
     std::cout << " Style: " << style << std::endl;
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     const bool includeIdeographs = includeIdeographsValue ? args::get(includeIdeographsValue) : false;
     const std::string output = outputValue ? args::get(outputValue) : "offline.db";
 
-    using namespace mbgl;
+    using namespace mln;
 
     OfflineRegionDefinition definition = [&]() {
         if (geometryValue) {
@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
         int retCode = 0;
         std::cout << "Start Merge" << std::endl;
         inputSource.mergeOfflineRegions(
-            *mergePath, [&](mbgl::expected<std::vector<OfflineRegion>, std::exception_ptr> result) {
+            *mergePath, [&](mln::expected<std::vector<OfflineRegion>, std::exception_ptr> result) {
                 if (!result) {
                     std::cerr << "Error merging database: " << util::toString(result.error()) << std::endl;
                     retCode = 1;
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
     std::signal(SIGINT, [](int) { stop(); });
 
     fileSource->createOfflineRegion(
-        definition, metadata, [&](mbgl::expected<OfflineRegion, std::exception_ptr> region_) {
+        definition, metadata, [&](mln::expected<OfflineRegion, std::exception_ptr> region_) {
             if (!region_) {
                 std::cerr << "Error creating region: " << util::toString(region_.error()) << std::endl;
                 loop.stop();

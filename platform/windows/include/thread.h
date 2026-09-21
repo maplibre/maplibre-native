@@ -55,13 +55,13 @@ extern DummyClassThread dummyClassThread;
 
 THREAD_INFO* GetCurrentThreadInfo();
 
-namespace mbgl {
+namespace mln {
 namespace platform {
 std::string getCurrentThreadName();
 void setCurrentThreadName(const std::string& name);
 void makeThreadLowPriority();
 void setCurrentThreadPriority(double priority);
 } // namespace platform
-} // namespace mbgl
+} // namespace mln
 
 #endif

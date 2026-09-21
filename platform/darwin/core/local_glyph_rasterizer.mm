@@ -1,10 +1,10 @@
-#include <mbgl/text/local_glyph_rasterizer.hpp>
-#include <mbgl/util/constants.hpp>
-#include <mbgl/util/i18n.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/platform.hpp>
+#include <mln/text/local_glyph_rasterizer.hpp>
+#include <mln/util/constants.hpp>
+#include <mln/util/i18n.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/platform.hpp>
 
-#include <mbgl/interface/native_apple_interface.h>
+#include <mln/interface/native_apple_interface.h>
 
 #include <cmath>
 #include <unordered_map>
@@ -18,7 +18,7 @@
 /// Enables local glyph rasterization for all writing systems, not just CJK.
 #define MBGL_DARWIN_NO_REMOTE_FONTS 0
 
-namespace mbgl {
+namespace mln {
 
 // 2x bitmap with 1x logical metrics.
 constexpr uint32_t kLocalGlyphTextureScale = 2;
@@ -349,4 +349,4 @@ Glyph LocalGlyphRasterizer::rasterizeGlyph(const FontStack &fontStack, GlyphID g
   return manufacturedGlyph;
 }
 
-}  // namespace mbgl
+}  // namespace mln

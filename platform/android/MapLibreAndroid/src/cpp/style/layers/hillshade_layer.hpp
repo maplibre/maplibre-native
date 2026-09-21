@@ -4,11 +4,11 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/hillshade_layer_factory.hpp>
-#include <mbgl/style/layers/hillshade_layer.hpp>
+#include <mln/layermanager/hillshade_layer_factory.hpp>
+#include <mln/style/layers/hillshade_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class HillshadeLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     HillshadeLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    HillshadeLayer(mbgl::style::HillshadeLayer&);
+    HillshadeLayer(mln::style::HillshadeLayer&);
 
-    HillshadeLayer(std::unique_ptr<mbgl::style::HillshadeLayer>);
+    HillshadeLayer(std::unique_ptr<mln::style::HillshadeLayer>);
 
     ~HillshadeLayer();
 
@@ -52,13 +52,13 @@ public:
 
 }; // class HillshadeLayer
 
-class HillshadeJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::HillshadeLayerFactory {
+class HillshadeJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::HillshadeLayerFactory {
 public:
     ~HillshadeJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -67,4 +67,4 @@ public:
 }; // class HillshadeJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

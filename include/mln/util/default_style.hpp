@@ -1,0 +1,23 @@
+#pragma once
+
+#include <string>
+
+namespace mln {
+namespace util {
+
+class DefaultStyle {
+public:
+    DefaultStyle(std::string, std::string, int);
+
+    const std::string& getUrl() const;
+    const std::string& getName() const;
+    int getCurrentVersion() const;
+
+private:
+    std::string url;
+    std::string name;
+    int currentVersion;
+};
+
+} // end namespace util
+} // end namespace mln

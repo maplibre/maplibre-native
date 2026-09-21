@@ -4,7 +4,7 @@
 
 #include "bitmap.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class BitmapFactory {
@@ -19,4 +19,4 @@ public:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

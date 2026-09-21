@@ -1,6 +1,6 @@
-#import <mbgl/gfx/renderer_backend.hpp>
-#import <mbgl/map/map_observer.hpp>
-#import <mbgl/util/image.hpp>
+#import <mln/gfx/renderer_backend.hpp>
+#import <mln/map/map_observer.hpp>
+#import <mln/util/image.hpp>
 
 #import "MLNBackendResource.h"
 
@@ -10,14 +10,14 @@
 
 @class MLNMapView;
 
-class MLNMapViewImpl : public mbgl::MapObserver {
+class MLNMapViewImpl : public mln::MapObserver {
 public:
   static std::unique_ptr<MLNMapViewImpl> Create(MLNMapView*);
 
   MLNMapViewImpl(MLNMapView*);
   virtual ~MLNMapViewImpl() = default;
 
-  virtual mbgl::gfx::RendererBackend& getRendererBackend() = 0;
+  virtual mln::gfx::RendererBackend& getRendererBackend() = 0;
 
   // Returns a handle to the OpenGL context object if this view is rendered with OpenGL.
   virtual EAGLContext* getEAGLContext() { return nullptr; }
@@ -56,37 +56,36 @@ public:
 
   virtual MLNBackendResource* getObject() = 0;
 
-  // mbgl::MapObserver implementation
-  void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;
+  // mln::MapObserver implementation
+  void onCameraWillChange(mln::MapObserver::CameraChangeMode) override;
   void onCameraIsChanging() override;
-  void onCameraDidChange(mbgl::MapObserver::CameraChangeMode) override;
+  void onCameraDidChange(mln::MapObserver::CameraChangeMode) override;
   void onWillStartLoadingMap() override;
   void onDidFinishLoadingMap() override;
-  void onDidFailLoadingMap(mbgl::MapLoadError mapError, const std::string& what) override;
+  void onDidFailLoadingMap(mln::MapLoadError mapError, const std::string& what) override;
   void onWillStartRenderingFrame() override;
-  void onDidFinishRenderingFrame(const mbgl::MapObserver::RenderFrameStatus&) override;
+  void onDidFinishRenderingFrame(const mln::MapObserver::RenderFrameStatus&) override;
   void onWillStartRenderingMap() override;
-  void onDidFinishRenderingMap(mbgl::MapObserver::RenderMode) override;
+  void onDidFinishRenderingMap(mln::MapObserver::RenderMode) override;
   void onDidFinishLoadingStyle() override;
-  void onSourceChanged(mbgl::style::Source& source) override;
+  void onSourceChanged(mln::style::Source& source) override;
   void onDidBecomeIdle() override;
   void onStyleImageMissing(const std::string& imageIdentifier) override;
   bool onCanRemoveUnusedStyleImage(const std::string& imageIdentifier) override;
-  void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
-  void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type,
+  void onRegisterShaders(mln::gfx::ShaderRegistry&) override;
+  void onPreCompileShader(mln::shaders::BuiltIn, mln::gfx::Backend::Type,
                           const std::string&) override;
-  void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type,
+  void onPostCompileShader(mln::shaders::BuiltIn, mln::gfx::Backend::Type,
                            const std::string&) override;
-  void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type,
+  void onShaderCompileFailed(mln::shaders::BuiltIn, mln::gfx::Backend::Type,
                              const std::string&) override;
-  void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
-  void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
-  void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
-  void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&,
-                    const std::string&) override;
-  void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
-  void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
-  void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
+  void onGlyphsLoaded(const mln::FontStack&, const mln::GlyphRange&) override;
+  void onGlyphsError(const mln::FontStack&, const mln::GlyphRange&, std::exception_ptr) override;
+  void onGlyphsRequested(const mln::FontStack&, const mln::GlyphRange&) override;
+  void onTileAction(mln::TileOperation, const mln::OverscaledTileID&, const std::string&) override;
+  void onSpriteLoaded(const std::optional<mln::style::Sprite>&) override;
+  void onSpriteError(const std::optional<mln::style::Sprite>&, std::exception_ptr) override;
+  void onSpriteRequested(const std::optional<mln::style::Sprite>&) override;
   void onRenderError(std::exception_ptr) override;
 
 protected:

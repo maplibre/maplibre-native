@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import <mbgl/interface/native_apple_interface.h>
+#import <mln/interface/native_apple_interface.h>
 
 @implementation MLNInternalNetworkResponse
 

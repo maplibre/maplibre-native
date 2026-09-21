@@ -1,8 +1,8 @@
-#include <mbgl/storage/pmtiles_file_source.hpp>
-#include <mbgl/storage/resource.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/storage/pmtiles_file_source.hpp>
+#include <mln/storage/resource.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <filesystem>
 
@@ -13,12 +13,12 @@ namespace {
 
 std::string toAbsoluteURL(const std::string &fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/pmtiles" / fileName;
-    return std::string(mbgl::util::PMTILES_PROTOCOL) + std::string(mbgl::util::FILE_PROTOCOL) + path.string();
+    return std::string(mln::util::PMTILES_PROTOCOL) + std::string(mln::util::FILE_PROTOCOL) + path.string();
 }
 
 } // namespace
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(PMTilesFileSource, AcceptsURL) {
     PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());

@@ -1,0 +1,41 @@
+#pragma once
+
+#include <mln/math/clamp.hpp>
+#include <mln/util/image.hpp>
+#include <mln/util/tileset.hpp>
+
+#include <memory>
+#include <array>
+#include <cassert>
+#include <vector>
+
+namespace mln {
+
+class DEMData {
+public:
+    DEMData(const PremultipliedImage& image, Tileset::RasterEncoding encoding);
+    void backfillBorder(const DEMData& borderTileData, int8_t dx, int8_t dy);
+
+    int32_t get(int32_t x, int32_t y) const;
+    const std::array<float, 4>& getUnpackVector() const;
+
+    const PremultipliedImage* getImage() const { return &*image; }
+    const std::shared_ptr<PremultipliedImage>& getImagePtr() const { return image; }
+
+    const int32_t dim;
+    const int32_t stride;
+    const Tileset::RasterEncoding encoding;
+
+private:
+    std::shared_ptr<PremultipliedImage> image;
+
+    size_t idx(const int32_t x, const int32_t y) const {
+        assert(x >= -1);
+        assert(x < dim + 1);
+        assert(y >= -1);
+        assert(y < dim + 1);
+        return (y + 1) * stride + (x + 1);
+    }
+};
+
+} // namespace mln

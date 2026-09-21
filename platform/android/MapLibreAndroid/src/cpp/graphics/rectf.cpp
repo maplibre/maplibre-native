@@ -1,6 +1,6 @@
 #include "rectf.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 float RectF::getLeft(jni::JNIEnv& env, const jni::Object<RectF>& rectf) {
@@ -32,4 +32,4 @@ void RectF::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

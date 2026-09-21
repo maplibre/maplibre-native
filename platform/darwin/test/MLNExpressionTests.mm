@@ -79,20 +79,10 @@ using namespace std::string_literals;
   //  Objective-C sample of how to create a stepping expression with color.
   NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MLNColor redColor]];
   NSExpression *stops = [NSExpression expressionForConstantValue:@{@18 : constantExpression}];
-  NSExpression *functionExpression;
-
-  if (@available(iOS 15, *)) {
-    // How to create expressions with iOS 15
-    functionExpression =
-        [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
-                                           fromExpression:constantExpression
-                                                    stops:stops];
-  } else {
-    // How to create expressions up to iOS 14
-    functionExpression =
-        [NSExpression expressionWithFormat:@"mgl_step:from:stops:($zoomLevel, %@, %@)",
-                                           constantExpression, stops];
-  }
+  NSExpression *functionExpression =
+      [NSExpression mgl_expressionForSteppingExpression:NSExpression.zoomLevelVariableExpression
+                                         fromExpression:constantExpression
+                                                  stops:stops];
   // #-end-example-code
 
   XCTAssertNotNil(functionExpression);
@@ -105,22 +95,11 @@ using namespace std::string_literals;
 
   NSDictionary *opacityStops = @{@5.0f : @0.0f, @14.0 : @0.7f, @20.0f : @1.0f};
   NSExpression *stops = [NSExpression expressionForConstantValue:opacityStops];
-  NSExpression *functionExpression;
-
-  if (@available(iOS 15, *)) {
-    // How to create expressions with iOS 15
-    functionExpression = [NSExpression
-        mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression
-                                   withCurveType:MLNExpressionInterpolationModeLinear
-                                      parameters:nil
-                                           stops:stops];
-  } else {
-    // How to create expressions up to iOS 14
-    functionExpression = [NSExpression
-        expressionWithFormat:
-            @"mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
-            stops];
-  }
+  NSExpression *functionExpression = [NSExpression
+      mgl_expressionForInterpolatingExpression:NSExpression.zoomLevelVariableExpression
+                                 withCurveType:MLNExpressionInterpolationModeLinear
+                                    parameters:nil
+                                         stops:stops];
   // #-end-example-code
 
   XCTAssertNotNil(functionExpression);
@@ -171,7 +150,7 @@ using namespace std::string_literals;
 }
 
 - (void)testIntegerValuation {
-  // Negative integers should always come back as int64_t per mbgl::Value definition.
+  // Negative integers should always come back as int64_t per mln::Value definition.
   MLNAssertConstantEqualsValue(@SHRT_MIN, static_cast<int64_t>(SHRT_MIN),
                                @"Negative short NSNumber should convert to int64_t.");
   MLNAssertConstantEqualsValue(@INT_MIN, static_cast<int64_t>(INT_MIN),
@@ -183,7 +162,7 @@ using namespace std::string_literals;
   MLNAssertConstantEqualsValue(@NSIntegerMin, static_cast<int64_t>(NSIntegerMin),
                                @"Negative NSInteger NSNumber should convert to int64_t.");
 
-  // Positive integers should always come back as uint64_t per mbgl::Value definition.
+  // Positive integers should always come back as uint64_t per mln::Value definition.
   MLNAssertConstantEqualsValue(@SHRT_MAX, static_cast<uint64_t>(SHRT_MAX),
                                @"Positive short NSNumber should convert to uint64_t.");
   MLNAssertConstantEqualsValue(@INT_MAX, static_cast<uint64_t>(INT_MAX),
@@ -197,7 +176,7 @@ using namespace std::string_literals;
 }
 
 - (void)testUnsignedIntegerValuation {
-  // Zero-value integers should always come back as uint64_t per mbgl::Value definition
+  // Zero-value integers should always come back as uint64_t per mln::Value definition
   // (using the interpretation that zero is not negative). We use the unsigned long long
   // value just for parity with the positive integer test.
   MLNAssertConstantEqualsValue(@(static_cast<unsigned short>(0)), static_cast<uint64_t>(0),
@@ -211,7 +190,7 @@ using namespace std::string_literals;
   MLNAssertConstantEqualsValue(@(static_cast<NSUInteger>(0)), static_cast<uint64_t>(0),
                                @"Unsigned NSUInteger NSNumber should convert to uint64_t.");
 
-  // Positive integers should always come back as uint64_t per mbgl::Value definition.
+  // Positive integers should always come back as uint64_t per mln::Value definition.
   // We use the unsigned long long value because it can store the highest number on
   // both 32- and 64-bit and won't overflow.
   MLNAssertConstantEqualsValue(@USHRT_MAX, static_cast<uint64_t>(USHRT_MAX),
@@ -227,43 +206,74 @@ using namespace std::string_literals;
 }
 
 - (void)testNullValuation {
-  mbgl::NullValue nullValue;
+  mln::NullValue nullValue;
   MLNAssertConstantEqualsValue([NSNull null], nullValue,
-                               @"NSNull should convert to mbgl::NullValue.");
+                               @"NSNull should convert to mln::NullValue.");
 }
 
 // MARK: - Feature type tests
 
 - (void)testFeatureType {
   XCTAssertEqual([NSExpression expressionForConstantValue:@"Point"].mgl_featureType,
-                 mbgl::FeatureType::Point);
+                 mln::FeatureType::Point);
   XCTAssertEqual([NSExpression expressionForConstantValue:@"LineString"].mgl_featureType,
-                 mbgl::FeatureType::LineString);
+                 mln::FeatureType::LineString);
   XCTAssertEqual([NSExpression expressionForConstantValue:@"Polygon"].mgl_featureType,
-                 mbgl::FeatureType::Polygon);
+                 mln::FeatureType::Polygon);
   XCTAssertEqual([NSExpression expressionForConstantValue:@"Unknown"].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
   XCTAssertEqual([NSExpression expressionForConstantValue:@""].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
 
   XCTAssertEqual([NSExpression expressionForConstantValue:@1].mgl_featureType,
-                 mbgl::FeatureType::Point);
+                 mln::FeatureType::Point);
   XCTAssertEqual([NSExpression expressionForConstantValue:@2].mgl_featureType,
-                 mbgl::FeatureType::LineString);
+                 mln::FeatureType::LineString);
   XCTAssertEqual([NSExpression expressionForConstantValue:@3].mgl_featureType,
-                 mbgl::FeatureType::Polygon);
+                 mln::FeatureType::Polygon);
   XCTAssertEqual([NSExpression expressionForConstantValue:@0].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
   XCTAssertEqual([NSExpression expressionForConstantValue:@-1].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
   XCTAssertEqual([NSExpression expressionForConstantValue:@4].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
 
   XCTAssertEqual([NSExpression expressionForConstantValue:nil].mgl_featureType,
-                 mbgl::FeatureType::Unknown);
+                 mln::FeatureType::Unknown);
 }
 
 // MARK: - JSON expression object tests
+
+- (void)testSemiliteral {
+  NSArray *json = @[
+    @"semiliteral",
+    @[ @"top", @[ @"semiliteral", @[ @[ @"get", @"x" ], @2 ] ], @[ @"literal", @[ @1, @2 ] ] ]
+  ];
+  NSExpression *expression = [NSExpression expressionWithMLNJSONObject:json];
+  XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, json);
+  NSExpression *built = [NSExpression mgl_expressionForArray:@[
+    [NSExpression expressionForConstantValue:@"top"], [NSExpression mgl_expressionForArray:@[
+      [NSExpression expressionForKeyPath:@"x"], [NSExpression expressionForConstantValue:@2]
+    ]],
+    [NSExpression expressionForConstantValue:@[ @1, @2 ]]
+  ]];
+  XCTAssertEqualObjects(built.mgl_jsonExpressionObject, json);
+  XCTAssertEqualObjects([NSExpression mgl_expressionForArray:@[]].mgl_jsonExpressionObject,
+                        (@[ @"semiliteral", @[] ]));
+  XCTAssertEqualObjects(
+      [NSExpression expressionForAggregate:@[ [NSExpression expressionForConstantValue:@1] ]]
+          .mgl_jsonExpressionObject,
+      (@[ @"literal", @[ @1 ] ]));
+}
+
+- (void)testSemiliteralNonArrays {
+  NSDictionary *object = @{@"x" : @[ @"get", @"x" ]};
+  NSExpression *expression = [NSExpression expressionWithMLNJSONObject:@[ @"semiliteral", object ]];
+  XCTAssertEqualObjects(expression.constantValue, object);
+  XCTAssertEqualObjects(expression.mgl_jsonExpressionObject, (@[ @"literal", object ]));
+  XCTAssertThrowsSpecificNamed([NSExpression expressionWithMLNJSONObject:@[ @"semiliteral" ]],
+                               NSException, NSInvalidArgumentException);
+}
 
 - (void)testVariableExpressionObject {
   {
