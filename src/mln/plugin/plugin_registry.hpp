@@ -89,6 +89,8 @@ struct LayerType {
     mln_plugin_query_feature_fn queryFeature = nullptr;
     mln_plugin_query_radius_fn queryRadius = nullptr;
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
+    bool enableStencilOverlapDedup = false;
+    bool enableNearClippedMatrix = false;
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;
