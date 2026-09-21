@@ -446,7 +446,7 @@ typedef struct mln_plugin_layer_type_v1 {
      * When nonzero, every drawable in this layer instead gets is3D + stencil
      * test/write and no depth test, and the layer's one TileLayerGroup shares
      * a single stencil ref for the pass.
-    */
+     */
     uint8_t enable_stencil_overlap_dedup;
     /*
      * Off (0, the default) matches every existing plugin's current tile

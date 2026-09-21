@@ -279,9 +279,11 @@ TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {
 }
 
 TEST(PluginRendering, StencilOverlapDedupGeneratesStencilUpdates) {
-    ASSERT_NO_FATAL_FAILURE(
-        registerTriangles("test.stencil-dedup", /*packedColor=*/false, /*withUniforms=*/false,
-                          /*scopedUniforms=*/false, /*stencilOverlapDedup=*/true));
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.stencil-dedup",
+                                              /*packedColor=*/false,
+                                              /*withUniforms=*/false,
+                                              /*scopedUniforms=*/false,
+                                              /*stencilOverlapDedup=*/true));
     RenderTest test;
     test.expectTriangles("test.stencil-dedup");
     const auto result = test.frontend.render(test.map);
