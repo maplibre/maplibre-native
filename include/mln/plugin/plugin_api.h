@@ -94,6 +94,9 @@ typedef struct mln_plugin_float2 {
     float y;
 } mln_plugin_float2;
 
+/* Registration defaults use straight-alpha colors. The host premultiplies
+ * them when it adopts them into the style system; evaluated paint values
+ * passed to callbacks use premultiplied colors. */
 typedef struct mln_plugin_color {
     float r;
     float g;
