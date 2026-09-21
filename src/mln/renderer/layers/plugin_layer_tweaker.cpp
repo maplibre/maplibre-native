@@ -55,10 +55,10 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                            parameters,
                                            {0.0f, 0.0f},
                                            style::TranslateAnchorType::Viewport,
-                                           false,
+                                           registration->enableNearClippedMatrix,
                                            false,
                                            drawable,
-                                           true);
+                                           !registration->enableNearClippedMatrix);
             }
             mln_plugin_uniform_context_v1 callbackContext{};
             callbackContext.struct_size = sizeof(callbackContext);
