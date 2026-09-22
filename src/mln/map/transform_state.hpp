@@ -319,6 +319,9 @@ private:
 
     // map position
     double x = 0, y = 0, z = 0;
+    /// The centre's altitude over sea level; `z` is the same in pixels at the current zoom.
+    double altitudeMeters = 0;
+    void updateZ();
     double bearing = 0;
     double scale = 1;
     double fov = util::DEFAULT_FOV;

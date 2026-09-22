@@ -4,7 +4,9 @@
 #include <cmath>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/quaternion.hpp>
 
 #include <numbers>
@@ -145,6 +147,23 @@ TEST(Transform, PerspectiveProjection) {
     transform.jumpTo(CameraOptions().withCenter(LatLng{38.0, -77.0}).withZoom(18.0).withPitch(51.56620156));
     point = transform.getState().latLngToScreenCoordinate({7.692872969426375, -76.75823239205641}, p);
     ASSERT_LT(p[3], 0.0);
+}
+
+TEST(TransformState, CenterAltitudeStaysInMetersAcrossZoomAndLatitude) {
+    TransformState state;
+    state.setSize({1000, 1000});
+    state.setLatLngZoom(LatLng{50.7, 15.0}, 12.0);
+    state.setCenterAltitude(1500.0);
+    ASSERT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+
+    // A height over sea level, not a length on screen: zooming or moving north keeps it.
+    // (Transform's transitions re-apply the altitude after each step; the state alone did not.)
+    state.setLatLngZoom(LatLng{50.7, 15.0}, 14.5);
+    EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+    state.setLatLngZoom(LatLng{51.4, 15.0}, 14.5);
+    EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+    state.setScale(state.getScale() / 2);
+    EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
 }
 
 TEST(Transform, UnwrappedLatLng) {
