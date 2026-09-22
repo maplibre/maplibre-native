@@ -73,7 +73,7 @@ constexpr uint32_t shadowLengthAttribute = 8;
 constexpr uint32_t shadowOpacityAttribute = 9;
 constexpr uint32_t shadowColorMinAttribute = 10;
 constexpr uint32_t shadowColorMaxAttribute = 11;
-constexpr uint32_t normalAttribute = 12; // building shader only, real (always-bound) mesh data
+constexpr uint32_t normalAttribute = 12;           // building shader only, real (always-bound) mesh data
 constexpr uint32_t verticalGradientAttribute = 13; // building shader only, dead (camera-only)
 
 constexpr uint32_t vertexStream = 0;
@@ -396,7 +396,9 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
     auto& layout = *static_cast<Layout*>(instance);
     const auto firstVertex = static_cast<uint32_t>(layout.vertices.size());
 
-    const auto clampCoord = [](double v) { return static_cast<int16_t>(std::clamp(v, -32768.0, 32767.0)); };
+    const auto clampCoord = [](double v) {
+        return static_cast<int16_t>(std::clamp(v, -32768.0, 32767.0));
+    };
     const auto ringWinding = [](const std::vector<Point2D>& ring2D) {
         double signedArea = 0;
         for (size_t i = 0; i < ring2D.size(); ++i) {
@@ -440,8 +442,7 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
         for (size_t i = 0; i < ring.size(); ++i) {
             const auto p0 = ring[i];
             const auto p1 = ring[(i + 1) % ring.size()];
-            const auto edge =
-                normalized(Point2D{static_cast<double>(p1.x - p0.x), static_cast<double>(p1.y - p0.y)});
+            const auto edge = normalized(Point2D{static_cast<double>(p1.x - p0.x), static_cast<double>(p1.y - p0.y)});
             const auto outward = ccw ? Point2D{edge.y, -edge.x} : Point2D{-edge.y, edge.x};
             const auto nx = static_cast<int16_t>(std::clamp(outward.x * kNormalScale, -32768.0, 32767.0));
             const auto ny = static_cast<int16_t>(std::clamp(outward.y * kNormalScale, -32768.0, 32767.0));
@@ -453,16 +454,16 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
             // once back-face culling is enabled.
             if (ccw) {
                 pushQuad(layout,
-                        Vertex{p0.x, p0.y, 0, nx, ny},
-                        Vertex{p1.x, p1.y, 0, nx, ny},
-                        Vertex{p1.x, p1.y, 1, nx, ny},
-                        Vertex{p0.x, p0.y, 1, nx, ny});
+                         Vertex{p0.x, p0.y, 0, nx, ny},
+                         Vertex{p1.x, p1.y, 0, nx, ny},
+                         Vertex{p1.x, p1.y, 1, nx, ny},
+                         Vertex{p0.x, p0.y, 1, nx, ny});
             } else {
                 pushQuad(layout,
-                        Vertex{p1.x, p1.y, 0, nx, ny},
-                        Vertex{p0.x, p0.y, 0, nx, ny},
-                        Vertex{p0.x, p0.y, 1, nx, ny},
-                        Vertex{p1.x, p1.y, 1, nx, ny});
+                         Vertex{p1.x, p1.y, 0, nx, ny},
+                         Vertex{p0.x, p0.y, 0, nx, ny},
+                         Vertex{p0.x, p0.y, 1, nx, ny},
+                         Vertex{p1.x, p1.y, 1, nx, ny});
             }
         }
     }
@@ -497,10 +498,16 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* fea
 
     if (layout.vertices.size() > firstVertex) {
         const auto count = static_cast<uint32_t>(layout.vertices.size() - firstVertex);
-        layout.featureRanges.push_back(
-            {sizeof(mln_plugin_feature_vertex_range_v1), feature->feature_index, buildingDrawableKey, firstVertex, count});
-        layout.featureRanges.push_back(
-            {sizeof(mln_plugin_feature_vertex_range_v1), feature->feature_index, shadowDrawableKey, firstVertex, count});
+        layout.featureRanges.push_back({sizeof(mln_plugin_feature_vertex_range_v1),
+                                        feature->feature_index,
+                                        buildingDrawableKey,
+                                        firstVertex,
+                                        count});
+        layout.featureRanges.push_back({sizeof(mln_plugin_feature_vertex_range_v1),
+                                        feature->feature_index,
+                                        shadowDrawableKey,
+                                        firstVertex,
+                                        count});
     }
     return MLN_PLUGIN_STATUS_OK;
 } catch (...) {
@@ -636,7 +643,8 @@ mln_plugin_status updateUniformBlock(const mln_plugin_uniform_context_v1* contex
         return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     }
     if (id == buildingDrawableUniformId || id == shadowDrawableUniformId) {
-        const size_t expected = id == buildingDrawableUniformId ? sizeof(BuildingDrawableUBO) : sizeof(ShadowDrawableUBO);
+        const size_t expected = id == buildingDrawableUniformId ? sizeof(BuildingDrawableUBO)
+                                                                : sizeof(ShadowDrawableUBO);
         if (size != expected) return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         std::memset(output, 0, size);
         std::memcpy(output, context->tile_matrix, sizeof(context->tile_matrix));
@@ -690,10 +698,10 @@ constexpr mln_plugin_value stringValue(mln_plugin_string s) {
 }
 
 constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
-                                                      mln_plugin_value value,
-                                                      float minimum = -std::numeric_limits<float>::infinity(),
-                                                      float maximum = std::numeric_limits<float>::infinity(),
-                                                      uint32_t expressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA) {
+                                                     mln_plugin_value value,
+                                                     float minimum = -std::numeric_limits<float>::infinity(),
+                                                     float maximum = std::numeric_limits<float>::infinity(),
+                                                     uint32_t expressionCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA) {
     mln_plugin_property_descriptor_v1 p{};
     p.struct_size = sizeof(p);
     p.name = name;
@@ -712,9 +720,9 @@ constexpr mln_plugin_property_descriptor_v1 property(mln_plugin_string name,
 // real style syntax exactly, unlike encoding a 0/1 float, so styles ported from real
 // fill-extrusion by only renaming property keys (not rewriting values) still parse correctly.
 constexpr mln_plugin_property_descriptor_v1 stringEnumProperty(mln_plugin_string name,
-                                                                mln_plugin_string defaultValue,
-                                                                const mln_plugin_string* enumValues,
-                                                                size_t enumValueCount) {
+                                                               mln_plugin_string defaultValue,
+                                                               const mln_plugin_string* enumValues,
+                                                               size_t enumValueCount) {
     mln_plugin_property_descriptor_v1 p{};
     p.struct_size = sizeof(p);
     p.name = name;
@@ -730,11 +738,10 @@ constexpr mln_plugin_property_descriptor_v1 stringEnumProperty(mln_plugin_string
 // Layout properties are evaluated once per bucket at layout time, not per-frame, so unlike
 // `property()` they never support transitions or anything beyond camera/zoom expressions --
 // the host rejects a descriptor claiming otherwise (see plugin_registry.cpp).
-constexpr mln_plugin_property_descriptor_v1 layoutProperty(
-    mln_plugin_string name,
-    mln_plugin_value value,
-    float minimum = -std::numeric_limits<float>::infinity(),
-    float maximum = std::numeric_limits<float>::infinity()) {
+constexpr mln_plugin_property_descriptor_v1 layoutProperty(mln_plugin_string name,
+                                                           mln_plugin_value value,
+                                                           float minimum = -std::numeric_limits<float>::infinity(),
+                                                           float maximum = std::numeric_limits<float>::infinity()) {
     mln_plugin_property_descriptor_v1 p{};
     p.struct_size = sizeof(p);
     p.name = name;
@@ -755,8 +762,11 @@ constexpr uint32_t dataDrivenCapabilities = MLN_PLUGIN_EXPRESSION_CAMERA | MLN_P
 const mln_plugin_string translateAnchorValues[] = {str("map"), str("viewport")};
 
 const mln_plugin_property_descriptor_v1 properties[] = {
-    property(str("fill-extrusion-plugin-color"), opaqueColor(0.79f, 0.8f, 0.82f), -INFINITY, INFINITY,
-            dataDrivenCapabilities),
+    property(str("fill-extrusion-plugin-color"),
+             opaqueColor(0.79f, 0.8f, 0.82f),
+             -INFINITY,
+             INFINITY,
+             dataDrivenCapabilities),
     property(str("fill-extrusion-plugin-opacity"), number(1), 0, 1),
     property(str("fill-extrusion-plugin-height"), number(0), 0, INFINITY, dataDrivenCapabilities),
     property(str("fill-extrusion-plugin-base"), number(0), 0, INFINITY, dataDrivenCapabilities),
@@ -770,7 +780,9 @@ const mln_plugin_property_descriptor_v1 properties[] = {
     // getTileMatrix()'s translation/anchor parameters -- not property-bound to any shader
     // uniform, since it affects the tile matrix itself rather than per-vertex/per-fragment math.
     property(str("fill-extrusion-plugin-translate"), float2(0, 0)),
-    stringEnumProperty(str("fill-extrusion-plugin-translate-anchor"), str("map"), translateAnchorValues,
+    stringEnumProperty(str("fill-extrusion-plugin-translate-anchor"),
+                       str("map"),
+                       translateAnchorValues,
                        std::size(translateAnchorValues)),
 };
 
@@ -1182,13 +1194,25 @@ fragment half4 shadowFragment(ShadowVaryings in [[stage_in]],
 const mln_plugin_shader_attribute_v1 buildingShaderAttributes[] = {
     {sizeof(mln_plugin_shader_attribute_v1), positionAttribute, 0, str("a_position"), MLN_PLUGIN_VERTEX_INT16_X2},
     {sizeof(mln_plugin_shader_attribute_v1), topAttribute, 1, str("a_top"), MLN_PLUGIN_VERTEX_UINT16},
-    {sizeof(mln_plugin_shader_attribute_v1), buildingColorMinAttribute, 2, str("a_color_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
-    {sizeof(mln_plugin_shader_attribute_v1), buildingColorMaxAttribute, 3, str("a_color_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1),
+     buildingColorMinAttribute,
+     2,
+     str("a_color_min"),
+     MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1),
+     buildingColorMaxAttribute,
+     3,
+     str("a_color_max"),
+     MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), heightAttribute, 4, str("a_height"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), baseAttribute, 5, str("a_base"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), buildingOpacityAttribute, 6, str("a_opacity"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), normalAttribute, 7, str("a_normal"), MLN_PLUGIN_VERTEX_INT16_X2},
-    {sizeof(mln_plugin_shader_attribute_v1), verticalGradientAttribute, 8, str("a_vertical_gradient"), MLN_PLUGIN_VERTEX_FLOAT_X2},
+    {sizeof(mln_plugin_shader_attribute_v1),
+     verticalGradientAttribute,
+     8,
+     str("a_vertical_gradient"),
+     MLN_PLUGIN_VERTEX_FLOAT_X2},
 };
 
 const mln_plugin_shader_attribute_v1 shadowShaderAttributes[] = {
@@ -1199,37 +1223,81 @@ const mln_plugin_shader_attribute_v1 shadowShaderAttributes[] = {
     {sizeof(mln_plugin_shader_attribute_v1), shadowAzimuthAttribute, 4, str("a_azimuth"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), shadowLengthAttribute, 5, str("a_length"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), shadowOpacityAttribute, 6, str("a_opacity"), MLN_PLUGIN_VERTEX_FLOAT_X2},
-    {sizeof(mln_plugin_shader_attribute_v1), shadowColorMinAttribute, 7, str("a_color_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
-    {sizeof(mln_plugin_shader_attribute_v1), shadowColorMaxAttribute, 8, str("a_color_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1),
+     shadowColorMinAttribute,
+     7,
+     str("a_color_min"),
+     MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1),
+     shadowColorMaxAttribute,
+     8,
+     str("a_color_max"),
+     MLN_PLUGIN_VERTEX_FLOAT_X4},
 };
 
 const mln_plugin_uniform_block_descriptor_v1 buildingUniforms[] = {
-    {sizeof(mln_plugin_uniform_block_descriptor_v1), buildingDrawableUniformId, str("BuildingDrawableUBO"),
-     sizeof(BuildingDrawableUBO), MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE},
+    {sizeof(mln_plugin_uniform_block_descriptor_v1),
+     buildingDrawableUniformId,
+     str("BuildingDrawableUBO"),
+     sizeof(BuildingDrawableUBO),
+     MLN_PLUGIN_SHADER_STAGE_VERTEX,
+     MLN_PLUGIN_UNIFORM_DRAWABLE},
     // Declared for both stages even though the fragment shader no longer reads it (all
     // lighting/color math now happens in the vertex stage, matching real fill-extrusion's own
     // shader) -- a vertex-only mask here would share an identical stage mask with the
     // drawable-scope BuildingDrawableUBO above, which the host rejects as two uniform blocks
     // packed into the same stage slot.
-    {sizeof(mln_plugin_uniform_block_descriptor_v1), buildingLayerUniformId, str("BuildingLayerUBO"),
-     sizeof(BuildingLayerUBO), MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT, MLN_PLUGIN_UNIFORM_LAYER},
+    {sizeof(mln_plugin_uniform_block_descriptor_v1),
+     buildingLayerUniformId,
+     str("BuildingLayerUBO"),
+     sizeof(BuildingLayerUBO),
+     MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT,
+     MLN_PLUGIN_UNIFORM_LAYER},
 };
 
 const mln_plugin_uniform_block_descriptor_v1 shadowUniforms[] = {
-    {sizeof(mln_plugin_uniform_block_descriptor_v1), shadowDrawableUniformId, str("ShadowDrawableUBO"),
-     sizeof(ShadowDrawableUBO), MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE},
-    {sizeof(mln_plugin_uniform_block_descriptor_v1), shadowLayerUniformId, str("ShadowLayerUBO"),
-     sizeof(ShadowLayerUBO), MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT, MLN_PLUGIN_UNIFORM_LAYER},
+    {sizeof(mln_plugin_uniform_block_descriptor_v1),
+     shadowDrawableUniformId,
+     str("ShadowDrawableUBO"),
+     sizeof(ShadowDrawableUBO),
+     MLN_PLUGIN_SHADER_STAGE_VERTEX,
+     MLN_PLUGIN_UNIFORM_DRAWABLE},
+    {sizeof(mln_plugin_uniform_block_descriptor_v1),
+     shadowLayerUniformId,
+     str("ShadowLayerUBO"),
+     sizeof(ShadowLayerUBO),
+     MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT,
+     MLN_PLUGIN_UNIFORM_LAYER},
 };
 
 const mln_plugin_shader_source_v1 buildingShaderSources[] = {
-    {sizeof(mln_plugin_shader_source_v1), MLN_PLUGIN_BACKEND_OPENGL, str(buildingOpenglVertex), str(buildingOpenglFragment), {}, {}},
-    {sizeof(mln_plugin_shader_source_v1), MLN_PLUGIN_BACKEND_METAL, str(buildingMetalSource), {}, str("buildingVertex"), str("buildingFragment")},
+    {sizeof(mln_plugin_shader_source_v1),
+     MLN_PLUGIN_BACKEND_OPENGL,
+     str(buildingOpenglVertex),
+     str(buildingOpenglFragment),
+     {},
+     {}},
+    {sizeof(mln_plugin_shader_source_v1),
+     MLN_PLUGIN_BACKEND_METAL,
+     str(buildingMetalSource),
+     {},
+     str("buildingVertex"),
+     str("buildingFragment")},
 };
 
 const mln_plugin_shader_source_v1 shadowShaderSources[] = {
-    {sizeof(mln_plugin_shader_source_v1), MLN_PLUGIN_BACKEND_OPENGL, str(shadowOpenglVertex), str(shadowOpenglFragment), {}, {}},
-    {sizeof(mln_plugin_shader_source_v1), MLN_PLUGIN_BACKEND_METAL, str(shadowMetalSource), {}, str("shadowVertex"), str("shadowFragment")},
+    {sizeof(mln_plugin_shader_source_v1),
+     MLN_PLUGIN_BACKEND_OPENGL,
+     str(shadowOpenglVertex),
+     str(shadowOpenglFragment),
+     {},
+     {}},
+    {sizeof(mln_plugin_shader_source_v1),
+     MLN_PLUGIN_BACKEND_METAL,
+     str(shadowMetalSource),
+     {},
+     str("shadowVertex"),
+     str("shadowFragment")},
 };
 
 const mln_plugin_shader_descriptor_v1 buildingShader = {
@@ -1315,8 +1383,8 @@ const mln_plugin_descriptor_v1 descriptor = {
 } // namespace
 
 extern "C" mln_plugin_status mln_fill_extrusion_plugin_register(mln_plugin_register_function_v1 registerPlugin,
-                                                                 char* error,
-                                                                 size_t capacity) {
+                                                                char* error,
+                                                                size_t capacity) {
     if (!registerPlugin) return MLN_PLUGIN_STATUS_NOT_FOUND;
     return registerPlugin(&descriptor, error, capacity);
 }

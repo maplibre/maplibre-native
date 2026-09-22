@@ -217,13 +217,12 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
 
-            const auto shaderDefinition = std::find_if(registration->shaders.begin(),
-                                                       registration->shaders.end(),
-                                                       [&](const auto& candidate) {
-                                                           return candidate.id == definition.shaderID;
-                                                       });
-            const bool depthWrite =
-                shaderDefinition != registration->shaders.end() && shaderDefinition->enableDepthWrite;
+            const auto shaderDefinition = std::find_if(
+                registration->shaders.begin(), registration->shaders.end(), [&](const auto& candidate) {
+                    return candidate.id == definition.shaderID;
+                });
+            const bool depthWrite = shaderDefinition != registration->shaders.end() &&
+                                    shaderDefinition->enableDepthWrite;
 
             const auto finish = [&](gfx::DrawableBuilder& builder) {
                 builder.setSegments(

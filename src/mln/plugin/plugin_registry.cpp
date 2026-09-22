@@ -481,8 +481,10 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
-        if (!appendProperties(
-                layerType.layout_properties, layerType.layout_property_count, copiedLayerType.layoutProperties, error)) {
+        if (!appendProperties(layerType.layout_properties,
+                              layerType.layout_property_count,
+                              copiedLayerType.layoutProperties,
+                              error)) {
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
@@ -586,9 +588,8 @@ const PropertyDefinition* LayerType::findProperty(const std::string& name) const
 }
 
 const PropertyDefinition* LayerType::findLayoutProperty(const std::string& name) const {
-    const auto it = std::find_if(layoutProperties.begin(), layoutProperties.end(), [&](const auto& property) {
-        return property.name == name;
-    });
+    const auto it = std::find_if(
+        layoutProperties.begin(), layoutProperties.end(), [&](const auto& property) { return property.name == name; });
     return it == layoutProperties.end() ? nullptr : &*it;
 }
 

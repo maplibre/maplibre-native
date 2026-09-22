@@ -88,8 +88,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             return it->second;
         };
         // If we're using group-wide states, build only the ones that actually get used
-        getDepthStencilState =
-            [&](bool depth, bool stencil, const void* shaderKey) -> const MTLDepthStencilStatePtr& {
+        getDepthStencilState = [&](bool depth, bool stencil, const void* shaderKey) -> const MTLDepthStencilStatePtr& {
             if (depth) {
                 // We assume this doesn't change over the lifetime of a layer group.
                 const auto depthMode = parameters.depthModeFor3D();
@@ -97,8 +96,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
                     auto it = stateDepthStencilByShader.find(shaderKey);
                     if (it == stateDepthStencilByShader.end()) {
                         it = stateDepthStencilByShader
-                                 .emplace(shaderKey,
-                                          context.makeDepthStencilState(depthMode, stencilModeFor(shaderKey), renderable))
+                                 .emplace(
+                                     shaderKey,
+                                     context.makeDepthStencilState(depthMode, stencilModeFor(shaderKey), renderable))
                                  .first;
                     }
                     return it->second;
