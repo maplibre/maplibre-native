@@ -459,6 +459,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         copiedLayerType.queryFeature = layerType.query_feature;
         copiedLayerType.queryRadius = layerType.get_query_radius;
         copiedLayerType.updateUniformBlock = layerType.update_uniform_block;
+        copiedLayerType.enableStencilOverlapDedup = layerType.enable_stencil_overlap_dedup != 0;
+        copiedLayerType.enableNearClippedMatrix = layerType.enable_near_clipped_matrix != 0;
         if (!appendShaders(pluginID,
                            layerType.shaders,
                            layerType.shader_count,

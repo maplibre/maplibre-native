@@ -104,6 +104,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/http_timeout.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/mapbox.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/mat3.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
