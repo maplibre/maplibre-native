@@ -258,6 +258,23 @@ typedef struct mln_plugin_shader_descriptor_v1 {
     size_t uniform_block_count;
     const mln_plugin_shader_property_binding_v1* property_bindings;
     size_t property_binding_count;
+    /*
+     * Off (0, the default) leaves this shader's drawables on the layer-wide render mode
+     * (mln_plugin_layer_type_v1's enable_stencil_overlap_dedup, or the original depth-read-only
+     * default if that is also off).
+     *
+     * When nonzero, this shader's drawables instead get real depth test+write and no stencil,
+     * regardless of the layer-wide mode -- the same choice fill-extrusion makes for its own
+     * opaque-ish color pass. This gives correct occlusion against other 3D content (buildings vs.
+     * buildings, buildings vs. terrain), which neither of the other two modes provide: they either
+     * disable depth entirely (stencil dedup) or never write it (the original default). The
+     * tradeoff is the one this mode gives up: self-overlapping triangles (concave corners) will
+     * double-blend under translucency, same as the original default, since there is no stencil
+     * dedup here. A layer type with, say, an opaque building shader and a separate ground-shadow
+     * shader can set this on just the building shader while leaving enable_stencil_overlap_dedup
+     * on for the layer as a whole, so the shadow keeps its dedup and the building gets real depth.
+     */
+    uint8_t enable_depth_write;
 } mln_plugin_shader_descriptor_v1;
 
 /* Borrowed render-thread inputs for a host-owned plugin uniform block. */
@@ -271,6 +288,17 @@ typedef struct mln_plugin_uniform_context_v1 {
     float pixels_to_tile_units;
     float camera_to_center_distance;
     float pixel_ratio;
+    /*
+     * The map's current global light, already fully resolved: color as linear RGB (no alpha, no
+     * gamma-encoding beyond whatever the style author's color already carries), position as a
+     * cartesian direction with the light's own anchor (map- or viewport-relative) already applied
+     * -- a plugin never needs to know which anchor was configured or redo that rotation itself --
+     * and a plain intensity scalar. Matches exactly what fill-extrusion's own shader receives for
+     * its ambient/vertical-gradient wall shading.
+     */
+    float light_color[3];
+    float light_position[3];
+    float light_intensity;
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only
@@ -302,6 +330,14 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    /* Evaluated layout property values, in the same order as this layer type's
+     * layout_properties array (mln_plugin_layer_type_v1), each evaluated once per bucket at
+     * this context's zoom -- unlike paint properties, layout properties never support
+     * per-feature/data-driven expressions or transitions. Null/0 when the layer type declares
+     * no layout properties. Added after the original zoom/extent fields: check struct_size
+     * before reading. */
+    const mln_plugin_value* layout_property_values;
+    size_t layout_property_value_count;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after
@@ -460,6 +496,16 @@ typedef struct mln_plugin_layer_type_v1 {
      * non-pixel-snapped, near-clipped projection.
      */
     uint8_t enable_near_clipped_matrix;
+    /*
+     * Layout properties: evaluated once per bucket at that tile's zoom and passed via
+     * mln_plugin_layout_context_v1's layout_property_values (in this array's order) to
+     * create_layout(). Reuses mln_plugin_property_descriptor_v1's shape, but
+     * expression_capabilities, supports_transitions, and enum_values are ignored here --
+     * real style layout properties never support data-driven expressions or transitions.
+     * Null/0 (the default) declares no layout properties.
+     */
+    const mln_plugin_property_descriptor_v1* layout_properties;
+    size_t layout_property_count;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

@@ -40,7 +40,7 @@ const mln_plugin_descriptor_v1* testDescriptor() {
     static const mln_plugin_shader_property_binding_v1 binding = {
         sizeof(binding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 1, 0, 4};
     static const mln_plugin_shader_descriptor_v1 shader = {
-        sizeof(shader), {"test", 4}, &source, 1, attributes, 2, &uniform, 1, &binding, 1};
+        sizeof(shader), {"test", 4}, &source, 1, attributes, 2, &uniform, 1, &binding, 1, 0};
     static const mln_plugin_layer_type_v1 layer = [] {
         mln_plugin_layer_type_v1 value{};
         value.struct_size = sizeof(value);

@@ -17,3 +17,20 @@ cc_test(
         "//render-test:render-test-srcs",
     ],
 )
+
+cc_test(
+    name = "fill-extrusion-plugin-render-tests",
+    timeout = "long",
+    srcs = ["fill_extrusion_plugin_render_test.cpp"],
+    args = [
+        "--manifestPath",
+        "plugins/fill-extrusion-plugin/render-tests/manifest.json",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = ["//plugins/fill-extrusion-plugin:render-fixtures"],
+    tags = ["no-sandbox"],
+    deps = [
+        "//plugins/fill-extrusion-plugin",
+        "//render-test:render-test-srcs",
+    ],
+)

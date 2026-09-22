@@ -12,6 +12,8 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/logging.hpp>
 
+#include <unordered_map>
+
 namespace mln {
 namespace vulkan {
 
@@ -49,12 +51,16 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
     // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
-    // drawables end up using the same mode value.
+    // drawables using the SAME shader end up using the same mode value. Scoping the mode per
+    // shader (rather than one shared by the whole layer group) matters when a layer group has
+    // more than one shader (e.g. a plugin layer type with two shaders sharing one layer): two
+    // unrelated shaders' geometry shouldn't dedup against each other's fragments, or one shader's
+    // drawables can wrongly reject the other's genuinely-visible fragments purely by draw order.
+    // Depth mode doesn't have this problem (no per-call-unique ref), so it stays a single value.
     // 2D and 3D features in the same layer group is not supported.
     bool features3d = false;
-    bool stencil3d = false;
     std::optional<gfx::DepthMode> depthMode3d;
-    std::optional<gfx::StencilMode> stencilMode3d;
+    std::unordered_map<const void*, gfx::StencilMode> stencilModesByShader;
 
     // If we're using stencil clipping, we need to handle 3D features separately
     if (stencilTiles && !stencilTiles->empty()) {
@@ -62,9 +68,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         visitDrawables([&](const gfx::Drawable& drawable) {
             if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
                 features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
-                }
             }
         });
     }
@@ -73,15 +76,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    // If we're doing 3D stenciling and have any features to draw, set up the single-value stencil mask.
+    // If we're doing 3D stenciling and have any features to draw, set up the depth mode (fixed
+    // for the whole group) and, lazily below, a stencil mask per shader.
     // If we're doing 2D stenciling and have any drawables with tile IDs, render each tile into the stencil buffer with
     // a different value.
     if (features3d) {
         depthMode3d = parameters.depthModeFor3D();
-
-        if (stencil3d) {
-            stencilMode3d = parameters.stencilModeFor3D();
-        }
     } else if (stencilTiles && !stencilTiles->empty()) {
         parameters.renderTileClippingMasks(stencilTiles);
     }
@@ -107,9 +107,16 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             const auto& depth = drawableImpl.getEnableDepth() ? depthMode3d.value() : gfx::DepthMode::disabled();
             drawableImpl.setDepthModeFor3D(depth);
 
-            const auto& stencil = drawableImpl.getEnableStencil() ? stencilMode3d.value()
-                                                                  : gfx::StencilMode::disabled();
-            drawableImpl.setStencilModeFor3D(stencil);
+            if (drawableImpl.getEnableStencil()) {
+                const void* shaderKey = drawable.getShader().get();
+                auto it = stencilModesByShader.find(shaderKey);
+                if (it == stencilModesByShader.end()) {
+                    it = stencilModesByShader.emplace(shaderKey, parameters.stencilModeFor3D()).first;
+                }
+                drawableImpl.setStencilModeFor3D(it->second);
+            } else {
+                drawableImpl.setStencilModeFor3D(gfx::StencilMode::disabled());
+            }
         }
 
         drawable.draw(parameters);

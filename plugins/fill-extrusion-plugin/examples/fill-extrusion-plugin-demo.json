@@ -1,0 +1,89 @@
+{
+  "version": 8,
+  "name": "fill-extrusion-plugin demo",
+  "center": [0, 0],
+  "zoom": 17,
+  "pitch": 55,
+  "bearing": -20,
+  "light": {
+    "anchor": "map",
+    "color": "#fff6e0",
+    "intensity": 0.6,
+    "position": [1.5, 225, 60]
+  },
+  "sources": {
+    "buildings": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {"height": 40, "base": 0, "color": "#c9d3dc"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[
+                [-0.00060, -0.00040], [-0.00010, -0.00040],
+                [-0.00010, 0.00000], [-0.00060, 0.00000],
+                [-0.00060, -0.00040]
+              ]]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {"height": 70, "base": 0, "color": "#a9b6c4"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[
+                [0.00010, -0.00030], [0.00050, -0.00030],
+                [0.00050, 0.00010], [0.00010, 0.00010],
+                [0.00010, -0.00030]
+              ]]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {"height": 25, "base": 0, "color": "#d8cdb8"},
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [[
+                [-0.00020, 0.00020], [0.00015, 0.00020], [0.00015, 0.00035],
+                [-0.00005, 0.00035], [-0.00005, 0.00050], [-0.00020, 0.00050],
+                [-0.00020, 0.00020]
+              ]]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "#dce8f0"}
+    },
+    {
+      "id": "buildings",
+      "type": "fill-extrusion-plugin",
+      "source": "buildings",
+      "layout": {
+        "fill-extrusion-plugin-rounded-corner-distance": 10
+      },
+      "paint": {
+        "fill-extrusion-plugin-height": ["get", "height"],
+        "fill-extrusion-plugin-base": ["get", "base"],
+        "fill-extrusion-plugin-color": ["get", "color"],
+        "fill-extrusion-plugin-opacity": 1.0,
+        "fill-extrusion-plugin-vertical-gradient": 1,
+        "fill-extrusion-plugin-shadow-azimuth": 225,
+        "fill-extrusion-plugin-shadow-length": 0.5,
+        "fill-extrusion-plugin-shadow-opacity": 0.10,
+        "fill-extrusion-plugin-shadow-color": "#000000"
+      }
+    }
+  ]
+}

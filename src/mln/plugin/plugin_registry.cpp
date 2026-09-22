@@ -114,6 +114,7 @@ bool appendShaders(const std::string& pluginID,
         ShaderDefinition shader;
         shader.pluginID = pluginID;
         shader.id = copyString(input.shader_id);
+        shader.enableDepthWrite = input.enable_depth_write != 0;
         if (!shaderIDs.emplace(shader.id).second) {
             error = "plugin layer contains duplicate shader ids";
             return false;
@@ -480,6 +481,22 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
                                                                 : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
         }
+        if (!appendProperties(
+                layerType.layout_properties, layerType.layout_property_count, copiedLayerType.layoutProperties, error)) {
+            return error.find("duplicate") != std::string::npos ? MLN_PLUGIN_STATUS_CONFLICT
+                                                                : MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+        // Real style layout properties never support data-driven expressions or transitions
+        // (LayoutProperty<T> in core has neither) -- reject descriptors that claim otherwise
+        // rather than silently ignoring the bits, since a plugin author setting them likely
+        // expects behavior this ABI doesn't provide for layout properties.
+        for (const auto& layoutProperty : copiedLayerType.layoutProperties) {
+            if (layoutProperty.expressionCapabilities != MLN_PLUGIN_EXPRESSION_CAMERA ||
+                layoutProperty.supportsTransitions) {
+                error = "plugin layout properties may not be data-driven or support transitions";
+                return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+            }
+        }
         for (const auto& shader : copiedLayerType.shaders) {
             for (const auto& binding : shader.propertyBindings) {
                 const auto* property = copiedLayerType.findProperty(binding.propertyName);
@@ -566,6 +583,13 @@ const PropertyDefinition* LayerType::findProperty(const std::string& name) const
     const auto it = std::find_if(
         properties.begin(), properties.end(), [&](const auto& property) { return property.name == name; });
     return it == properties.end() ? nullptr : &*it;
+}
+
+const PropertyDefinition* LayerType::findLayoutProperty(const std::string& name) const {
+    const auto it = std::find_if(layoutProperties.begin(), layoutProperties.end(), [&](const auto& property) {
+        return property.name == name;
+    });
+    return it == layoutProperties.end() ? nullptr : &*it;
 }
 
 bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value) {

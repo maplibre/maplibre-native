@@ -1,0 +1,32 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//bazel:flags.bzl", "CPP_FLAGS")
+
+cc_library(
+    name = "fill-extrusion-plugin",
+    srcs = ["shared/cpp/fill_extrusion_plugin.cpp"],
+    hdrs = ["shared/include/fill_extrusion_plugin.hpp"],
+    copts = CPP_FLAGS,
+    includes = ["shared/include"],
+    target_compatible_with = select({
+        "//:plugins_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    visibility = ["//visibility:public"],
+    deps = ["//:mln-plugin-api"],
+)
+
+cc_test(
+    name = "unit-tests",
+    srcs = ["tests/fill_extrusion_plugin.test.cpp"],
+    copts = CPP_FLAGS,
+    deps = [":fill-extrusion-plugin"],
+)
+
+filegroup(
+    name = "render-fixtures",
+    srcs = glob(
+        ["render-tests/**"],
+        exclude = ["render-tests/results/**"],
+    ) + ["render-tests/results/.gitkeep"],
+    visibility = ["//plugins:__pkg__"],
+)

@@ -431,6 +431,7 @@ const mln_plugin_shader_descriptor_v1 shader = {
     std::size(uniforms),
     propertyBindings,
     std::size(propertyBindings),
+    0, // enable_depth_write: off, unaffected by this layer type
 };
 const mln_plugin_layer_type_v1 layerType = [] {
     mln_plugin_layer_type_v1 v{};

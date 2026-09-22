@@ -5,6 +5,7 @@
 #include <mln/renderer/buckets/plugin_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/plugin_property.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/logging.hpp>
 
@@ -40,10 +41,30 @@ void PluginLayout::createBucket(const ImagePositions&,
     if (!sourceLayer || layers.empty()) return;
 
     const auto& leader = static_cast<const style::PluginStyleLayer::Impl&>(*layers.front()->baseImpl);
+
+    // Layout properties are evaluated once per bucket at this tile's zoom -- unlike paint
+    // properties, they never support per-feature/data-driven expressions or transitions, so a
+    // plain camera-only evaluate() is enough. The evaluation storage vector must outlive the
+    // create_layout() call below since a string-typed value's data points into it.
+    std::vector<style::PluginPropertyValue::EvaluationStorage> layoutPropertyStorage(
+        registration->layoutProperties.size());
+    std::vector<mln_plugin_value> layoutPropertyValues;
+    layoutPropertyValues.reserve(registration->layoutProperties.size());
+    for (std::size_t i = 0; i < registration->layoutProperties.size(); ++i) {
+        const auto& definition = registration->layoutProperties[i];
+        const auto valueIt = leader.pluginLayoutProperties.find(definition.name);
+        const auto pluginValue = valueIt != leader.pluginLayoutProperties.end()
+                                     ? valueIt->second
+                                     : style::defaultPluginPropertyValue(definition);
+        layoutPropertyValues.push_back(pluginValue.evaluate(zoom, definition, layoutPropertyStorage[i]));
+    }
+
     mln_plugin_layout_context_v1 context{};
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
+    context.layout_property_values = layoutPropertyValues.empty() ? nullptr : layoutPropertyValues.data();
+    context.layout_property_value_count = layoutPropertyValues.size();
 
     void* layoutInstance = nullptr;
     const auto createStatus = registration->createLayout(&context, &layoutInstance);

@@ -6,6 +6,7 @@
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
+#include <mln/renderer/render_light.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/plugin_property.hpp>
@@ -13,15 +14,48 @@
 #include <mln/util/convert.hpp>
 #include <mln/util/geo.hpp>
 #include <mln/util/logging.hpp>
+#include <mln/util/mat3.hpp>
 
 #include <algorithm>
 #include <cstring>
 #include <limits>
+#include <string_view>
 
 namespace mln {
 
 void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) return;
+
+    // fill-extrusion-plugin-translate/-translate-anchor are camera-only, so read them once per
+    // frame here rather than through the property-binding/uniform machinery -- they affect the
+    // tile matrix itself (via getTileMatrix()'s own translation/anchor parameters, the same ones
+    // every built-in *-translate property uses), not per-vertex/per-fragment shader math.
+    const auto& pluginProps = static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties);
+    std::array<float, 2> translate{0.0f, 0.0f};
+    auto translateAnchor = style::TranslateAnchorType::Map;
+    style::PluginPropertyValue::EvaluationStorage evalStorage;
+    const auto zoom = static_cast<float>(parameters.state.getZoom());
+    if (const auto* translateDef = registration->findProperty("fill-extrusion-plugin-translate")) {
+        const auto it = pluginProps.evaluatedPaintProperties.find("fill-extrusion-plugin-translate");
+        if (it != pluginProps.evaluatedPaintProperties.end()) {
+            const auto value = it->second.evaluate(zoom, *translateDef, evalStorage);
+            if (value.type == MLN_PLUGIN_VALUE_FLOAT2) {
+                translate = {value.data.float2_value.x, value.data.float2_value.y};
+            }
+        }
+    }
+    if (const auto* anchorDef = registration->findProperty("fill-extrusion-plugin-translate-anchor")) {
+        const auto it = pluginProps.evaluatedPaintProperties.find("fill-extrusion-plugin-translate-anchor");
+        if (it != pluginProps.evaluatedPaintProperties.end()) {
+            const auto value = it->second.evaluate(zoom, *anchorDef, evalStorage);
+            const auto& s = value.data.string_value;
+            constexpr std::string_view viewport = "viewport";
+            if (value.type == MLN_PLUGIN_VALUE_STRING && s.data && s.size == viewport.size() &&
+                std::memcmp(s.data, viewport.data(), viewport.size()) == 0) {
+                translateAnchor = style::TranslateAnchorType::Viewport;
+            }
+        }
+    }
 
     const auto drawableCount = layerGroup.getDrawableCount();
     if (drawableCount > std::numeric_limits<uint32_t>::max()) return;
@@ -53,8 +87,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             if (hasTile) {
                 tileMatrix = getTileMatrix(*tileID,
                                            parameters,
-                                           {0.0f, 0.0f},
-                                           style::TranslateAnchorType::Viewport,
+                                           translate,
+                                           translateAnchor,
                                            registration->enableNearClippedMatrix,
                                            false,
                                            drawable,
@@ -75,6 +109,23 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             callbackContext.pixels_to_tile_units = hasTile ? tileID->pixelsToTileUnits(
                                                                  1.0f, static_cast<float>(parameters.state.getZoom()))
                                                            : 0.0f;
+
+            // Fully resolved, matching exactly what fill-extrusion's own shader receives: color
+            // as-is, position with the light's own map-/viewport-relative anchor already applied.
+            const auto& light = parameters.evaluatedLight;
+            const auto evaluatedLightColor = light.get<style::LightColor>();
+            callbackContext.light_color[0] = evaluatedLightColor.r;
+            callbackContext.light_color[1] = evaluatedLightColor.g;
+            callbackContext.light_color[2] = evaluatedLightColor.b;
+            auto lightPosition = light.get<style::LightPosition>().getCartesian();
+            if (light.get<style::LightAnchor>() == style::LightAnchorType::Viewport) {
+                mat3 lightMatrix;
+                matrix::identity(lightMatrix);
+                matrix::rotate(lightMatrix, lightMatrix, -parameters.state.getBearing());
+                matrix::transformMat3f(lightPosition, lightPosition, lightMatrix);
+            }
+            std::copy(lightPosition.begin(), lightPosition.end(), callbackContext.light_position);
+            callbackContext.light_intensity = light.get<style::LightIntensity>();
 
             for (const auto& uniform : shader->uniformBlocks) {
                 if (!registration->updateUniformBlock) continue;

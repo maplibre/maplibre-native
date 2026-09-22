@@ -20,3 +20,10 @@ target_link_libraries(mln-ngon-tests PRIVATE mln-ngon-layer)
 
 add_executable(mln-plugin-render-tests EXCLUDE_FROM_ALL render_test.cpp)
 target_link_libraries(mln-plugin-render-tests PRIVATE mln-ngon-layer mbgl-render-test)
+
+add_library(mln-fill-extrusion-plugin STATIC fill-extrusion-plugin/shared/cpp/fill_extrusion_plugin.cpp)
+target_include_directories(mln-fill-extrusion-plugin PUBLIC fill-extrusion-plugin/shared/include)
+target_link_libraries(mln-fill-extrusion-plugin PUBLIC mbgl-core)
+
+add_executable(mln-fill-extrusion-plugin-tests EXCLUDE_FROM_ALL fill-extrusion-plugin/tests/fill_extrusion_plugin.test.cpp)
+target_link_libraries(mln-fill-extrusion-plugin-tests PRIVATE mln-fill-extrusion-plugin)

@@ -4,6 +4,7 @@
 #include <mln/style/style_property.hpp>
 #include <mln/style/layer.hpp>
 
+#include <algorithm>
 #include <array>
 #include <map>
 #include <mutex>
@@ -72,6 +73,13 @@ struct ShaderDefinition {
     std::vector<ShaderAttribute> attributes;
     std::vector<UniformBlockDefinition> uniformBlocks;
     std::vector<ShaderPropertyBindingDefinition> propertyBindings;
+    // Off (false, the default) keeps this shader's drawables on the layer-wide render mode
+    // (enable_stencil_overlap_dedup or the original depth-read-only default). When true, this
+    // shader's own drawables instead get real depth test+write and no stencil, overriding the
+    // layer-wide mode for just this shader -- for layer types whose shaders need different render
+    // modes (e.g. an opaque-ish color pass wanting real occlusion, alongside a ground shadow pass
+    // on the same layer type that still needs stencil overlap dedup).
+    bool enableDepthWrite = false;
     bool operator==(const ShaderDefinition&) const = default;
 };
 
@@ -82,6 +90,11 @@ struct LayerType {
     uint32_t geometryTypeMask = 0;
     std::vector<ShaderDefinition> shaders;
     std::vector<PropertyDefinition> properties;
+    // Evaluated once per bucket at that tile's zoom (no transitions, no per-feature/data-driven
+    // support) rather than per-frame like `properties`; reuses PropertyDefinition's shape, but
+    // its expressionCapabilities/supportsTransitions/enumValues fields are ignored here. See the
+    // layout_properties doc comment on mln_plugin_layer_type_v1.
+    std::vector<PropertyDefinition> layoutProperties;
     mln_plugin_create_layout_fn createLayout = nullptr;
     mln_plugin_layout_feature_fn layoutFeature = nullptr;
     mln_plugin_finish_layout_fn finishLayout = nullptr;
@@ -94,6 +107,7 @@ struct LayerType {
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;
+    const PropertyDefinition* findLayoutProperty(const std::string& name) const;
 };
 
 // Allocated once and shared as const by factories, styles, workers and renderers.
@@ -101,9 +115,17 @@ struct LayerType {
 struct RegisteredLayer final : LayerType {
     explicit RegisteredLayer(LayerType definition)
         : LayerType(std::move(definition)),
+          // A shader with enable_depth_write needs the real depth buffer/3D pass that the host
+          // only sets up when at least one visible layer is Pass3D::Required -- unlike
+          // enable_stencil_overlap_dedup, which uses the always-available stencil buffer and needs
+          // no such opt-in. Without this, a depth-write shader's depth test/write is effectively
+          // undefined (no depth attachment exists to test or write against) whenever the style has
+          // no other Pass3D::Required layer, which for a plugin-only style is the common case.
           info{type.c_str(),
                style::LayerTypeInfo::Source::Required,
-               style::LayerTypeInfo::Pass3D::NotRequired,
+               std::any_of(shaders.begin(), shaders.end(), [](const auto& shader) { return shader.enableDepthWrite; })
+                   ? style::LayerTypeInfo::Pass3D::Required
+                   : style::LayerTypeInfo::Pass3D::NotRequired,
                style::LayerTypeInfo::Layout::Required,
                style::LayerTypeInfo::FadingTiles::NotRequired,
                style::LayerTypeInfo::CrossTileIndex::NotRequired,

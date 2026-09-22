@@ -1,6 +1,7 @@
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/layer_observer.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/style/conversion/stringify.hpp>
 #include <mln/style/conversion/transition_options.hpp>
 
 namespace mln {
@@ -26,11 +27,20 @@ PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, p
 
 bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     assert(other.getTypeInfo() == getTypeInfo());
-    return filter != other.filter || visibility != other.visibility;
+    const auto& otherImpl = static_cast<const Impl&>(other);
+    return filter != other.filter || visibility != other.visibility ||
+           pluginLayoutProperties != otherImpl.pluginLayoutProperties;
 }
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
+    for (const auto& [name, value] : pluginLayoutProperties) {
+        const auto property = value.toStyleProperty();
+        if (property.getKind() != StyleProperty::Kind::Undefined) {
+            writer.Key(name.c_str());
+            conversion::stringify(writer, property.getValue());
+        }
+    }
     writer.EndObject();
 }
 
@@ -76,8 +86,15 @@ StyleProperty PluginStyleLayer::getProperty(const std::string& name) const {
     if (value != impl().pluginProperties.end()) {
         return value->second.toStyleProperty();
     }
-    const auto definition = impl().registration->findProperty(name);
-    return definition ? defaultPluginPropertyValue(*definition).toStyleProperty() : StyleProperty{};
+    const auto layoutValue = impl().pluginLayoutProperties.find(name);
+    if (layoutValue != impl().pluginLayoutProperties.end()) {
+        return layoutValue->second.toStyleProperty();
+    }
+    if (const auto definition = impl().registration->findProperty(name)) {
+        return defaultPluginPropertyValue(*definition).toStyleProperty();
+    }
+    const auto layoutDefinition = impl().registration->findLayoutProperty(name);
+    return layoutDefinition ? defaultPluginPropertyValue(*layoutDefinition).toStyleProperty() : StyleProperty{};
 }
 
 std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::string& name,
@@ -107,6 +124,38 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
     const auto existing = impl_->pluginProperties.find(name);
     if (existing != impl_->pluginProperties.end() && existing->second == *converted) return std::nullopt;
     impl_->pluginProperties.insert_or_assign(name, std::move(*converted));
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+    return std::nullopt;
+}
+
+std::optional<conversion::Error> PluginStyleLayer::setPluginLayoutProperty(const std::string& name,
+                                                                           const conversion::Convertible& value,
+                                                                           std::optional<PropertyScope> scope) {
+    using namespace conversion;
+    const auto definition = impl().registration->findLayoutProperty(name);
+    if (!definition) return Error{"layer doesn't support this property"};
+    if (scope) {
+        if (*scope != PropertyScope::Layout) {
+            return Error{"plugin layout property '" + name + "' is in the wrong style section"};
+        }
+    }
+
+    auto impl_ = mutableImpl();
+    if (isUndefined(value)) {
+        if (impl_->pluginLayoutProperties.erase(name) != 0) {
+            baseImpl = std::move(impl_);
+            observer->onLayerChanged(*this);
+        }
+        return std::nullopt;
+    }
+
+    Error conversionError;
+    auto converted = convertPluginPropertyValue(*definition, value, conversionError);
+    if (!converted) return conversionError;
+    const auto existing = impl_->pluginLayoutProperties.find(name);
+    if (existing != impl_->pluginLayoutProperties.end() && existing->second == *converted) return std::nullopt;
+    impl_->pluginLayoutProperties.insert_or_assign(name, std::move(*converted));
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
     return std::nullopt;
@@ -162,6 +211,16 @@ Value PluginStyleLayer::serialize() const {
         if (!paint.getObject()) paint = mapbox::base::ValueObject{};
         paint.getObject()->insert_or_assign(name + transitionSuffix, transition.serialize());
     }
+    for (const auto& [name, value] : impl().pluginLayoutProperties) {
+        const auto definition = impl().registration->findLayoutProperty(name);
+        if (!definition) continue;
+        auto& object = result["layout"];
+        if (!object.getObject()) object = mapbox::base::ValueObject{};
+        const auto property = value.toStyleProperty();
+        if (property.getKind() != StyleProperty::Kind::Undefined) {
+            object.getObject()->insert_or_assign(name, property.getValue());
+        }
+    }
 
     return serialized;
 }
@@ -169,6 +228,7 @@ Value PluginStyleLayer::serialize() const {
 std::optional<conversion::Error> PluginStyleLayer::setPropertyInternal(const std::string& name,
                                                                        const conversion::Convertible& value) {
     if (pluginTransitionPropertyName(*impl().registration, name)) return setPluginTransition(name, value);
+    if (impl().registration->findLayoutProperty(name)) return setPluginLayoutProperty(name, value);
     return setPluginProperty(name, value);
 }
 
@@ -176,6 +236,7 @@ std::optional<conversion::Error> PluginStyleLayer::setProperty(const std::string
                                                                const conversion::Convertible& value,
                                                                PropertyScope scope) {
     if (pluginTransitionPropertyName(*impl().registration, name)) return setPluginTransition(name, value, scope);
+    if (impl().registration->findLayoutProperty(name)) return setPluginLayoutProperty(name, value, scope);
     if (impl().registration->findProperty(name)) return setPluginProperty(name, value, scope);
     return Layer::setProperty(name, value);
 }
