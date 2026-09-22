@@ -1,3 +1,6 @@
+#include <mln/util/projection.hpp>
+#include <cmath>
+#include <limits>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_impl.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -320,7 +323,47 @@ void Map::Impl::onDidFinishRenderingMap() {
     }
 };
 
+void Map::Impl::anchorCenterOnTerrain() {
+    // The last reported height outlives a removed terrain; the style says whether there is one.
+    if (!style->impl->getTerrain() || std::isnan(terrainCenterElevation)) {
+        return;
+    }
+    const TransformState& state = transform.getState();
+    const double rise = terrainCenterElevation - state.getCenterAltitude();
+    if (std::abs(rise) < 1.0) {
+        return;
+    }
+    const CameraOptions camera = transform.getCameraOptions(std::nullopt);
+    if (!camera.center || !camera.zoom) {
+        return;
+    }
+    const double pitch = util::deg2rad(camera.pitch.value_or(0.0));
+    const double bearing = util::deg2rad(camera.bearing.value_or(0.0));
+    const LatLng center = *camera.center;
+    // Camera-to-centre distance in metres, along the line of sight.
+    const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(center.latitude(), *camera.zoom);
+    const double distance = state.getCameraToCenterDistance() * metresPerPixel;
+    // Up the line of sight by `rise`: that much closer to the camera, rise·tan(pitch) nearer it
+    // on the ground.
+    const double closer = rise / std::max(std::cos(pitch), 0.05);
+    const double remaining = distance - closer;
+    if (remaining < distance * 0.05) {
+        return; // the ground is (nearly) at the camera: leave it
+    }
+    const double shift = rise * std::tan(pitch);
+    // Towards the camera, which sits opposite the bearing.
+    const double north = -shift * std::cos(bearing), east = -shift * std::sin(bearing);
+    const LatLng anchored{center.latitude() + north / 111195.0,
+                          center.longitude() + east / (111195.0 * std::cos(util::deg2rad(center.latitude())))};
+    transform.jumpTo(CameraOptions()
+                         .withCenter(anchored)
+                         .withZoom(*camera.zoom + std::log2(distance / remaining))
+                         .withCenterAltitude(terrainCenterElevation));
+    onUpdate();
+}
+
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
+    terrainCenterElevation = elevationMeters;
     if (!centerClampedToGround) {
         return;
     }

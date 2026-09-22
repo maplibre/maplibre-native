@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_observer.hpp>
@@ -123,6 +124,9 @@ public:
     /// pans. Opt in with Map::setCenterClampedToGround until it is applied during render
     /// setup instead, the way GL JS's recalculateZoomAndCenter is.
     bool centerClampedToGround = false;
+    /// Terrain height under the centre, as the renderer last reported it (NaN until then).
+    double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    void anchorCenterOnTerrain();
     bool debugAboveGroundLog = false;
 };
 
