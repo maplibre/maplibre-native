@@ -43,7 +43,6 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
-    const auto& encoder = renderPass.getMetalEncoder();
     const auto& renderable = renderPass.getDescriptor().renderable;
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
