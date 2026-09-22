@@ -159,6 +159,7 @@ public:
     /// frame has no real texture for (e.g. the DEM / terrain-depth slots of the symbol, circle
     /// and fill-extrusion shaders when 3D terrain is off). Metal's API validation aborts on an
     /// unbound sampler even when the shader never samples it; Vulkan already binds a dummy.
+    /// Backends release it with their own resources, before checking that none are left.
     const Texture2DPtr& getPlaceholderTexture2D();
 
     /// Create a new drawable builder
