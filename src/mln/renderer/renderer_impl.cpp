@@ -272,8 +272,15 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         // permanent blankness in single-frame still renders (the render tests).
         terrain->prepareSource(orchestrator);
         const std::set<UnwrappedTileID> demTileIDs = terrain->computeMeshCover(state, updateParameters);
+        // Full-size drape textures only for the finest tiles of the cover - the ones nearest the
+        // camera, where the ground is magnified most; the coarser tiles further out get a quarter
+        // of the memory. At 1024 px each target costs ~9 MB with its stencil, and a pitched cover
+        // over relief runs to dozens of them: all full size, an older phone ran out of GPU memory.
+        uint8_t finestZoom = 0;
+        for (const auto& id : demTileIDs) finestZoom = std::max(finestZoom, id.canonical.z);
         for (const auto& id : demTileIDs) {
-            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor);
+            const uint32_t size = id.canonical.z >= finestZoom ? drapeTileSize * drapeQualityFactor : drapeTileSize;
+            texturePool.createRenderTarget(context, id, renderTreeParameters.backgroundColor, size);
         }
         texturePool.removeStaleRenderTargets(demTileIDs);
         frameDrapeTargetCount = demTileIDs.size();
@@ -601,8 +608,17 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
         int drapeBudget = drapeCap > 0 ? drapeCap : (1 << 30);
         orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) {
             if (renderTarget.getDrapeTileID()) {
-                const auto res = renderTarget.render(
-                    orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
+                // Out of GPU memory for a drape texture (Metal returns no texture and the backend
+                // throws bad_alloc): keep the target's last bake and go on, rather than abort the
+                // app. The next frame tries again, by which time the cover may be smaller.
+                RenderTarget::RenderResult res;
+                try {
+                    res = renderTarget.render(orchestrator, renderTree, parameters, /*canRerender=*/drapeBudget > 0);
+                } catch (const std::bad_alloc&) {
+                    Log::Warning(Event::Render, "Terrain: out of memory for a drape target; skipped this frame");
+                    drapeWorkDeferred = true;
+                    return;
+                }
                 if (res == RenderTarget::RenderResult::Rendered) {
                     --drapeBudget;
                 } else if (res == RenderTarget::RenderResult::Deferred) {
