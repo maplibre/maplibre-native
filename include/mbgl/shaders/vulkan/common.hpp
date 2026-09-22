@@ -158,6 +158,9 @@ layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     float pad1;
 } paintParams;
 
+// using lod bias variant for sampling as a workaround for Adreno 600 series
+#define texture(sampler, uv)    texture(sampler, uv, 0.0)
+
 )";
 };
 
