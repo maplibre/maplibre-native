@@ -152,19 +152,6 @@ float dot2(float2 v) {
     return dot(v,v);
 }
 
-float sdTriangle(float2 p, float2 p0, float2 p1, float2 p2)
-{
-    float2 e0=p1-p0, v0=p-p0; float d0=dot2(v0-e0*clamp(dot(v0,e0)/dot(e0,e0),0.0,1.0));
-    float2 e1=p2-p1, v1=p-p1; float d1=dot2(v1-e1*clamp(dot(v1,e1)/dot(e1,e1),0.0,1.0));
-    float2 e2=p0-p2, v2=p-p2; float d2=dot2(v2-e2*clamp(dot(v2,e2)/dot(e2,e2),0.0,1.0));
-
-    float o = e0.x*e2.y-e0.y*e2.x;
-    float2 d = min(min(float2(d0,o*(v0.x*e0.y-v0.y*e0.x)),
-                       float2(d1,o*(v1.x*e1.y-v1.y*e1.x))),
-                       float2(d2,o*(v2.x*e2.y-v2.y*e2.x)));
-    return -sqrt(d.x)*sign(d.y);
-}
-
 float opUnion(float a, float b) {
     return min(a, b);
 }
@@ -233,12 +220,9 @@ float dRoundedTri(float2 p, thread float &dTri, float2 v0, float2 v1, float2 v2,
 
     // plane to isolate the two halfs of the circle (make the circle cutout asymmetrical)
     float dPlaneIn = sdPlane(p - circlePos, -bisect, -radius * angle);
-    float dPlaneOut = sdPlane(p - circlePos, bisect, radius * angle - 0.02);
 
     // mask based on plane
     dTri = opIntersection(dTri, dPlaneIn);
-    // this part becomes optional if the circle can always fit inside the triangle
-    dCircle = opIntersection(dCircle, dPlaneOut);
 
     return dCircle;
 }
@@ -395,7 +379,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half opacity = in.opacity;
 #endif
 
-    float dTri = sdTriangle(in.pos, in.v0, in.v1, in.v2);
+    float dTri = -1;
 
     if (in.v0Prev.x != in.v0Next.x || in.v0Prev.y != in.v0Next.y) {
         float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, 20.0);
@@ -412,7 +396,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         dTri = opUnion(dTri, d2);
     }
 
-    if (-dTri * in.external <= 0) {
+    if (dTri * in.external > 0) {
         discard_fragment();
     }
 
