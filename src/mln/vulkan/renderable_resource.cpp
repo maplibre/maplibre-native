@@ -7,28 +7,8 @@ namespace mln {
 namespace vulkan {
 
 SurfaceRenderableResource::~SurfaceRenderableResource() {
-    if (!backend.getDevice()) {
-        return;
-    }
-
-    try {
-        backend.getDevice()->waitIdle(backend.getDispatcher());
-    } catch (const vk::DeviceLostError& error) {
-        Log::Error(mln::Event::Render, "Vulkan device lost during surface shutdown");
-    }
-
-    // specific order
-    swapchainFramebuffers.clear();
+    destroyResources();
     renderPass.reset();
-    swapchainImageViews.clear();
-    swapchainImages.clear();
-    swapchain.reset();
-    surface.reset();
-
-    depthAllocation.reset();
-    colorAllocations.clear();
-
-    readTexture.reset();
 }
 
 void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
@@ -480,6 +460,53 @@ void SurfaceRenderableResource::recreateSwapchain() {
     readTexture.reset();
 
     init(extent.width, extent.height);
+}
+
+void SurfaceRenderableResource::recreateSurface() {
+    if (!surface) return;
+
+    backend.getDevice()->waitIdle(backend.getDispatcher());
+
+    swapchainFramebuffers.clear();
+    swapchainImageViews.clear();
+    swapchainImages.clear();
+    acquireSemaphores.clear();
+    presentSemaphores.clear();
+    swapchain.reset();
+    surface.reset();
+
+    readTexture.reset();
+
+    createPlatformSurface();
+
+    init(extent.width, extent.height);
+}
+
+void SurfaceRenderableResource::destroyResources() {
+    if (!backend.getDevice()) {
+        return;
+    }
+
+    try {
+        backend.getDevice()->waitIdle(backend.getDispatcher());
+    } catch (const vk::DeviceLostError& error) {
+        Log::Error(mln::Event::Render, "Vulkan device lost during surface deletion");
+    }
+
+    // specific order
+    swapchainFramebuffers.clear();
+    swapchainImageViews.clear();
+    swapchainImages.clear();
+    swapchain.reset();
+    surface.reset();
+
+    acquireSemaphores.clear();
+    presentSemaphores.clear();
+
+    depthAllocation.reset();
+    colorAllocations.clear();
+
+    readTexture.reset();
 }
 
 void SurfaceRenderableResource::queueSurfaceRead() {

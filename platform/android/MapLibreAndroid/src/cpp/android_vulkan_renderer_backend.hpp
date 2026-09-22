@@ -21,8 +21,6 @@ public:
 
     mln::gfx::RendererBackend& getImpl() override { return *this; }
 
-    std::vector<const char*> getInstanceExtensions() override;
-
     void resizeFramebuffer(int width, int height) override;
     void enableFramebufferRead(bool value) override;
     PremultipliedImage readFramebuffer() override;
@@ -38,6 +36,8 @@ protected:
     void deactivate() override {
         // no-op
     }
+
+    std::vector<const char*> getInstanceExtensions() override;
 
 protected:
     ANativeWindow* window;

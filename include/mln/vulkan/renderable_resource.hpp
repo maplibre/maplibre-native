@@ -77,6 +77,8 @@ public:
 
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
+    void recreateSurface();
+    void destroyResources();
     void swap() override;
 
     void queueSurfaceRead();
