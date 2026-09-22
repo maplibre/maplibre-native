@@ -49,13 +49,12 @@ void addFillExternalIndices(SegmentVector& fillSegments,
 
     auto& triangleSegment = fillSegments.back();
     triangleSegment.instanceCount += nIndices / 3;
-    
-    for (std::size_t i = 0; i < nIndices; i ++) {
+
+    for (std::size_t i = 0; i < nIndices; i++) {
         bool ignored = (i != 1);
         bool external = (i == 1);
-        fillIndexes.emplace_back(FillIndexVertex{{{
-            (static_cast<uint32_t>(startVertices) + indices[i]) * 4 + (ignored ? 1 : 0) * 2 + (external ? 1 : 0)
-        }}});
+        fillIndexes.emplace_back(FillIndexVertex{
+            {{(static_cast<uint32_t>(startVertices) + indices[i]) * 4 + (ignored ? 1 : 0) * 2 + (external ? 1 : 0)}}});
     }
 }
 
@@ -66,23 +65,23 @@ std::size_t addRingVertices(gfx::VertexVector<FillLayoutVertex>& vertices,
                             std::vector<bool>& ignoredVertices) {
     std::size_t startVertices = vertices.elements();
     uint countVertices = static_cast<uint>(ring.size() - 1);
-    for (uint i = 0; i < countVertices; i ++) {
+    for (uint i = 0; i < countVertices; i++) {
         uint prevIndex = (i + countVertices - 1) % countVertices;
         uint nextIndex = (i + 1) % countVertices;
-        
+
         auto& prev = ring[prevIndex];
         auto& point = ring[i];
         auto& next = ring[nextIndex];
-        
+
         auto a = prev - point;
         auto b = next - point;
         float cross = a.x * b.y - a.y * b.x;
-        
-        if (cross > 0 ) {
+
+        if (cross > 0) {
             std::vector<uint32_t> indices = {prevIndex, i, nextIndex};
             addFillExternalIndices(fillSegments, fillIndexes, indices, startVertices);
         }
-        
+
         vertices.emplace_back(FillBucket::layoutVertex(point, prevIndex - i, nextIndex - i));
         ignoredVertices.emplace_back(cross > 0);
     }
@@ -114,13 +113,12 @@ void addFillIndices(SegmentVector& fillSegments,
 
     auto& triangleSegment = fillSegments.back();
     triangleSegment.instanceCount += nIndices / 3;
-    
-    for (std::size_t i = 0; i < nIndices; i ++) {
+
+    for (std::size_t i = 0; i < nIndices; i++) {
         bool ignored = ignoredVertices[indices[i]];
         bool external = false;
-        fillIndexes.emplace_back(FillIndexVertex{{{
-            (static_cast<uint32_t>(startVertices) + indices[i]) * 4 + (ignored ? 1 : 0) * 2 + (external ? 1 : 0)
-        }}});
+        fillIndexes.emplace_back(FillIndexVertex{
+            {{(static_cast<uint32_t>(startVertices) + indices[i]) * 4 + (ignored ? 1 : 0) * 2 + (external ? 1 : 0)}}});
     }
 }
 
@@ -277,7 +275,8 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         for (const auto& ring : polygon) {
             const std::size_t base = fillVertices.elements();
-            const std::size_t nVertices = addRingVertices(fillVertices, fillIndexes, fillSegments, ring, ignoredVertices);
+            const std::size_t nVertices = addRingVertices(
+                fillVertices, fillIndexes, fillSegments, ring, ignoredVertices);
             addOutlineIndices(base, nVertices, basicLineSegments, basicLineIndexes);
             lineGenerator.generate(ring, lineOptions);
         }

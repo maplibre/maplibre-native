@@ -148,7 +148,7 @@ float sdPlane(float2 p, float2 n, float h)
     return dot(p,n) + h;
 }
 
-float dot2(float2 v) { 
+float dot2(float2 v) {
     return dot(v,v);
 }
 
@@ -157,7 +157,7 @@ float sdTriangle(float2 p, float2 p0, float2 p1, float2 p2)
     float2 e0=p1-p0, v0=p-p0; float d0=dot2(v0-e0*clamp(dot(v0,e0)/dot(e0,e0),0.0,1.0));
     float2 e1=p2-p1, v1=p-p1; float d1=dot2(v1-e1*clamp(dot(v1,e1)/dot(e1,e1),0.0,1.0));
     float2 e2=p0-p2, v2=p-p2; float d2=dot2(v2-e2*clamp(dot(v2,e2)/dot(e2,e2),0.0,1.0));
-    
+
     float o = e0.x*e2.y-e0.y*e2.x;
     float2 d = min(min(float2(d0,o*(v0.x*e0.y-v0.y*e0.x)),
                        float2(d1,o*(v1.x*e1.y-v1.y*e1.x))),
@@ -198,14 +198,14 @@ float constrainRadius(float2 v0, float2 v1, float2 v2, float radius) {
     float cosTheta0 = dot(normalize(v1 - v0), normalize(v2 - v0));
     float cosTheta1 = dot(normalize(v2 - v1), normalize(v0 - v1));
     float cosTheta2 = dot(normalize(v0 - v2), normalize(v1 - v2));
-    
+
     float cot0 = cotHalf(cosTheta0);
     float cot1 = cotHalf(cosTheta1);
     float cot2 = cotHalf(cosTheta2);
 
     float r01 = length(v1 - v0) / (cot0 + cot1);
     float r02 = length(v2 - v0) / (cot0 + cot2);
-    
+
     return min(min(radius, r01), r02);
 }
 
@@ -225,7 +225,7 @@ float dRoundedTri(float2 p, thread float &dTri, float2 v0, float2 v1, float2 v2,
 
     radius = constrainRadius(v0, v1, v2, radius);
     distance = radius / angle;
-    
+
     // circle used to round it
     float2 bisect = bisector(v0, v1, v2);
     float2 circlePos = v0 + bisect * distance;

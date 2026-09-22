@@ -12,7 +12,7 @@ using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::M
 const std::array<AttributeInfo, 5> FillShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
-    
+
     AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
 
     // Data driven
