@@ -192,8 +192,7 @@ jobs:
         run: |
           output_base="$(bazel info output_base)"
           df -h "$HOME"
-          bazel --output_base="$output_base/rules_xcodeproj.noindex/build_output_base" shutdown
-          rm -rf "$output_base/rules_xcodeproj.noindex"
+          bazel --output_base="$output_base/rules_xcodeproj.noindex/build_output_base" clean --expunge
           df -h "$HOME"
 
       # Size test (Bloaty)
@@ -242,10 +241,8 @@ jobs:
       - name: Remove the Bazel output base before the cache save
         if: ${{ !cancelled() }}
         run: |
-          output_base="$(bazel info output_base)"
           df -h "$HOME"
-          bazel shutdown
-          rm -rf "$output_base"
+          bazel clean --expunge
           df -h "$HOME"
 
   ios-build-cmake:
