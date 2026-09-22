@@ -138,6 +138,111 @@ union FillTilePropsUnionUBO {
     FillOutlinePatternTilePropsUBO fillOutlinePatternTilePropsUBO;
 };
 
+float sdCircle(float2 p, float r) {
+    return length(p) - r;
+}
+
+float sdPlane(float2 p, float2 n, float h)
+{
+    // n must be normalized
+    return dot(p,n) + h;
+}
+
+float dot2(float2 v) { 
+    return dot(v,v);
+}
+
+float sdTriangle(float2 p, float2 p0, float2 p1, float2 p2)
+{
+    float2 e0=p1-p0, v0=p-p0; float d0=dot2(v0-e0*clamp(dot(v0,e0)/dot(e0,e0),0.0,1.0));
+    float2 e1=p2-p1, v1=p-p1; float d1=dot2(v1-e1*clamp(dot(v1,e1)/dot(e1,e1),0.0,1.0));
+    float2 e2=p0-p2, v2=p-p2; float d2=dot2(v2-e2*clamp(dot(v2,e2)/dot(e2,e2),0.0,1.0));
+    
+    float o = e0.x*e2.y-e0.y*e2.x;
+    float2 d = min(min(float2(d0,o*(v0.x*e0.y-v0.y*e0.x)),
+                       float2(d1,o*(v1.x*e1.y-v1.y*e1.x))),
+                       float2(d2,o*(v2.x*e2.y-v2.y*e2.x)));
+    return -sqrt(d.x)*sign(d.y);
+}
+
+float opUnion(float a, float b) {
+    return min(a, b);
+}
+
+float opSmoothUnion(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5*(d2 - d1)/k, 0.0, 1.0);
+    return mix(d2, d1, h) - k*h*(1.0 - h);
+}
+
+float opIntersection(float a, float b) {
+    return max(a, b);
+}
+
+float opSubtraction(float a, float b) {
+    return max(a, -b);
+}
+
+float2 bisector(float2 v0, float2 v1, float2 v2) {
+    float2 v01 = normalize(v1 - v0);
+    float2 v02 = normalize(v2 - v0);
+    return normalize(v01 + v02);
+}
+
+float cotHalf(float cosTheta) {
+    float sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
+    return (1.0 + cosTheta) / sinTheta;
+}
+
+float constrainRadius(float2 v0, float2 v1, float2 v2, float radius) {
+    // TODO don't recompute this
+    float cosTheta0 = dot(normalize(v1 - v0), normalize(v2 - v0));
+    float cosTheta1 = dot(normalize(v2 - v1), normalize(v0 - v1));
+    float cosTheta2 = dot(normalize(v0 - v2), normalize(v1 - v2));
+    
+    float cot0 = cotHalf(cosTheta0);
+    float cot1 = cotHalf(cosTheta1);
+    float cot2 = cotHalf(cosTheta2);
+
+    float r01 = length(v1 - v0) / (cot0 + cot1);
+    float r02 = length(v2 - v0) / (cot0 + cot2);
+    
+    return min(min(radius, r01), r02);
+}
+
+void fitCircle(float2 v0, float2 v1, float2 v2, float distance, thread float &angle, thread float &radius) {
+    float cosTheta = dot(normalize(v1 - v0), normalize(v2 - v0));
+    float sinHalf = sqrt((1.0 - cosTheta) * 0.5);
+
+    angle = sinHalf;
+    radius = distance * sinHalf;
+}
+
+float dRoundedTri(float2 p, thread float &dTri, float2 v0, float2 v1, float2 v2, float distance) {
+    // circle distance from vertex
+    float angle;
+    float radius;
+    fitCircle(v0, v1, v2, distance, angle, radius);
+
+    radius = constrainRadius(v0, v1, v2, radius);
+    distance = radius / angle;
+    
+    // circle used to round it
+    float2 bisect = bisector(v0, v1, v2);
+    float2 circlePos = v0 + bisect * distance;
+    float dCircle = sdCircle(p - circlePos, radius);
+
+    // plane to isolate the two halfs of the circle (make the circle cutout asymmetrical)
+    float dPlaneIn = sdPlane(p - circlePos, -bisect, -radius * angle);
+    float dPlaneOut = sdPlane(p - circlePos, bisect, radius * angle - 0.02);
+
+    // mask based on plane
+    dTri = opIntersection(dTri, dPlaneIn);
+    // this part becomes optional if the circle can always fit inside the triangle
+    dCircle = opIntersection(dCircle, dPlaneOut);
+
+    return dCircle;
+}
+
 )";
 
 template <>
@@ -146,26 +251,49 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
+    static const std::array<AttributeInfo, 5> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto prelude = fillShaderPrelude;
     static constexpr auto source = R"(
 
-struct VertexStage {
-    short2 position [[attribute(0)]];
+struct PolygonVertex {
+    short2 position;
+    short2 prev_next;
+};
 
+struct TriangleIndex {
+    uint value;
+};
+
+struct DataVertex {
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
+    float color[4];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(2)]];
+    float opacity[2];
 #endif
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+    float2 pos;
+
+    float2 v0 [[flat]];
+    float2 v1 [[flat]];
+    float2 v2 [[flat]];
+
+    float2 v0Prev [[flat]];
+    float2 v0Next [[flat]];
+
+    float2 v1Prev [[flat]];
+    float2 v1Next [[flat]];
+
+    float2 v2Prev [[flat]];
+    float2 v2Next [[flat]];
+
+    float external [[flat]];
 
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
@@ -175,19 +303,76 @@ struct FragmentStage {
 #endif
 };
 
-FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+FragmentStage vertex vertexMain(uint vertexID [[vertex_id]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]]) {
+                                device const FillDrawableUnionUBO* drawableVector [[buffer(idFillDrawableUBO)]],
+                                device const PolygonVertex* polygon [[buffer(fillUBOCount + 0)]],
+                                device const TriangleIndex* indices [[buffer(fillUBOCount + 1)]],
+                                device const DataVertex* data [[buffer(fillUBOCount + 2)]],
+                                uint instanceID [[instance_id]]) {
 
     device const FillDrawableUBO& drawable = drawableVector[uboIndex].fillDrawableUBO;
 
+    uint index = indices[instanceID * 3 + vertexID].value >> 2;
+    float2 position = float2(polygon[index].position);
+
+    uint i0 = indices[instanceID * 3 + 0].value >> 2;
+    uint i1 = indices[instanceID * 3 + 1].value >> 2;
+    uint i2 = indices[instanceID * 3 + 2].value >> 2;
+
+    uint ignored0 = indices[instanceID * 3 + 0].value % 4 >> 1;
+    uint ignored1 = indices[instanceID * 3 + 1].value % 4 >> 1;
+    uint ignored2 = indices[instanceID * 3 + 2].value % 4 >> 1;
+
+    uint external0 = indices[instanceID * 3 + 0].value % 2;
+    uint external1 = indices[instanceID * 3 + 1].value % 2;
+    uint external2 = indices[instanceID * 3 + 2].value % 2;
+
+    uint i0Prev = 0;
+    uint i0Next = 0;
+    if (ignored0 == 0) {
+        i0Prev = i0 + polygon[i0].prev_next[0];
+        i0Next = i0 + polygon[i0].prev_next[1];
+    }
+
+    uint i1Prev = 0;
+    uint i1Next = 0;
+    if (ignored1 == 0) {
+        i1Prev = i1 + polygon[i1].prev_next[0];
+        i1Next = i1 + polygon[i1].prev_next[1];
+    }
+
+    uint i2Prev = 0;
+    uint i2Next = 0;
+    if (ignored2 == 0) {
+        i2Prev = i2 + polygon[i2].prev_next[0];
+        i2Next = i2 + polygon[i2].prev_next[1];
+    }
+
     return {
-        .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
+        .position = drawable.matrix * float4(position, 0.0f, 1.0f),
+        .pos = position,
+
+        .v0 = float2(polygon[i0].position),
+        .v1 = float2(polygon[i1].position),
+        .v2 = float2(polygon[i2].position),
+
+        .v0Prev = float2(polygon[i0Prev].position),
+        .v0Next = float2(polygon[i0Next].position),
+
+        .v1Prev = float2(polygon[i1Prev].position),
+        .v1Next = float2(polygon[i1Next].position),
+
+        .v2Prev = float2(polygon[i2Prev].position),
+        .v2Next = float2(polygon[i2Next].position),
+
+        .external = (external0 || external1 || external2) ? -1.0 : 1.0,
+
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(unpack_mix_color(vertx.color, drawable.color_t)),
+        .color    = half4(unpack_mix_color(data[index].color, drawable.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity  = half(unpack_mix_float(vertx.opacity, drawable.opacity_t)),
+        .opacity  = half(unpack_mix_float(data[index].opacity, drawable.opacity_t)),
 #endif
     };
 }
@@ -209,6 +394,27 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #else
     const half opacity = in.opacity;
 #endif
+
+    float dTri = sdTriangle(in.pos, in.v0, in.v1, in.v2);
+
+    if (in.v0Prev.x != in.v0Next.x || in.v0Prev.y != in.v0Next.y) {
+        float d0 = dRoundedTri(in.pos, dTri, in.v0, in.v0Prev, in.v0Next, 20.0);
+        dTri = opUnion(dTri, d0);
+    }
+
+    if (in.v1Prev.x != in.v1Next.x || in.v1Prev.y != in.v1Next.y) {
+        float d1 = dRoundedTri(in.pos, dTri, in.v1, in.v1Prev, in.v1Next, 20.0);
+        dTri = opUnion(dTri, d1);
+    }
+
+    if (in.v2Prev.x != in.v2Next.x || in.v2Prev.y != in.v2Next.y) {
+        float d2 = dRoundedTri(in.pos, dTri, in.v2, in.v2Prev, in.v2Next, 20.0);
+        dTri = opUnion(dTri, d2);
+    }
+
+    if (-dTri * in.external <= 0) {
+        discard_fragment();
+    }
 
     return half4(color * opacity);
 }

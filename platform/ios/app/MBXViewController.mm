@@ -2525,7 +2525,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
   /// Style that does not require an `apiKey` nor any further configuration
   [self.styleNames addObject:@"OpenFreeMap Liberty"];
-  [self.styleURLs addObject:[NSURL URLWithString:@"https://tiles.openfreemap.org/styles/liberty"]];
+  [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/019d8d5f-9080-7e3d-a3ce-3f05d755a907/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
 
   [self.styleNames addObject:@"MapLibre Basic"];
   [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];

@@ -25,7 +25,8 @@ class BucketParameters;
 class RenderFillLayer;
 
 using FillBinders = PaintPropertyBinders<style::FillPaintProperties::DataDrivenProperties>;
-using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
+using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos, attributes::prev_next>>;
+using FillIndexVertex = gfx::Vertex<TypeList<attributes::index>>;
 
 class FillBucket final : public Bucket {
 public:
@@ -52,7 +53,8 @@ public:
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
 
-    static FillLayoutVertex layoutVertex(Point<int16_t> p) { return FillLayoutVertex{{{p.x, p.y}}}; }
+    static FillLayoutVertex layoutVertex(Point<int16_t> p, int16_t prev, int16_t next) { return FillLayoutVertex{{{p.x, p.y}}, {prev, next}}; }
+    static FillIndexVertex indexVertex(uint32_t value, bool ignored) { return FillIndexVertex{{{value * 2 + (ignored ? 1 : 0)}}}; }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
     using LineVertexVector = gfx::VertexVector<LineLayoutVertex>;
@@ -76,6 +78,10 @@ public:
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
 
+    using FIndexVector = gfx::VertexVector<FillIndexVertex>;
+    const std::shared_ptr<FIndexVector> sharedIndices = std::make_shared<FIndexVector>();
+    FIndexVector& indices = *sharedIndices;
+    
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;

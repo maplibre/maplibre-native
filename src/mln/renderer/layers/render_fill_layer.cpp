@@ -349,6 +349,20 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
+        if (const auto& attr = vertexAttrs->set(idFillPrevNextVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillLayoutVertex, a2),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
+        }
+        if (const auto& attr = vertexAttrs->set(idFillIndicesVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedIndices,
+                                   offsetof(FillIndexVertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillIndexVertex),
+                                   gfx::AttributeDataType::UInt);
+        }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
         const auto lineVertexCount = bucket.lineVertices.elements();
@@ -464,7 +478,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedLineIndexes,
                                          bucket.lineSegments.data(),
                                          bucket.lineSegments.size());
-                    finish(*builder, FillVariant::FillOutlineTriangulated);
+                    //finish(*builder, FillVariant::FillOutlineTriangulated);
                 }
             };
 #endif
