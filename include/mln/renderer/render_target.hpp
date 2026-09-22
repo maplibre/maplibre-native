@@ -135,6 +135,10 @@ protected:
         /// tiles or their data change - a tile loading, unloading, getting new data or emptied,
         /// or an integer-zoom crossing.
         std::size_t contentHash = 0;
+        /// The part of contentHash that comes from the style revisions of the covering layers
+        /// (an app animating a draped layer). A change here is a genuine change of look, never
+        /// a transient drop-out, so it is exempt from the keep-the-better-bake rule.
+        std::size_t revisionHash = 0;
         /// Integer tile-zoom (draped UBOs carry zoom-derived values like line ratio);
         /// stored quantized so a pinch within one zoom level does not invalidate the
         /// cache. See computeDrapeCoverage.

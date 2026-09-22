@@ -250,6 +250,13 @@ void Texture2D::updateSamplerConfiguration() {
 }
 
 void Texture2D::bind(RenderPass& renderPass, int32_t location) {
+    // An image set after the texture was first uploaded (a line-gradient ramp updated in place)
+    // waits for a drawable upload that only happens when drawables are rebuilt; push it here, so
+    // it shows on the next draw. Same-size CPU copy into the texture, no render pass needed.
+    if (image && image->valid() && !textureDirty && metalTexture && image->size == size) {
+        uploadSubRegion(image->data.get(), image->size, 0, 0);
+        image.reset();
+    }
     assert(!textureDirty);
 
     // Update the sampler state if it was changed after resource creation

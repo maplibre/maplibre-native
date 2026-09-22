@@ -158,8 +158,20 @@ RenderTarget::DrapeCoverage RenderTarget::computeDrapeCoverage(RenderOrchestrato
         for (const auto& tile : tileGroup.getEmptyTileIDs()) {
             group.addEmpty(tile);
         }
+        const terrain::DrapeGroupFallback fallback = group.fallback();
         coverage.contentHash += group.contentHash();
-        coverage.groups.push_back(group.fallback());
+        coverage.groups.push_back(fallback);
+        // The layer's style revision: an app animating a draped layer (a line-gradient
+        // reveal) changes its look without changing which tiles cover the target.
+        if (fallback.deficit >= 0 && parameters.drapeLayerRevisions) {
+            if (const auto it = parameters.drapeLayerRevisions->find(layerGroup.getName());
+                it != parameters.drapeLayerRevisions->end()) {
+                std::size_t revisionHash = std::hash<std::string>{}(layerGroup.getName());
+                util::hash_combine(revisionHash, it->second);
+                coverage.contentHash += revisionHash;
+                coverage.revisionHash += revisionHash;
+            }
+        }
     });
     return coverage;
 }
@@ -314,7 +326,8 @@ RenderTarget::RenderResult RenderTarget::render(RenderOrchestrator& orchestrator
         // above the target where those were one, then count as worse for good. The
         // target's lifetime bounds staleness: when its terrain tile leaves the cover it
         // is destroyed.
-        if (contentComing && coverage.worseThan(bakedCoverage)) {
+        if (contentComing && coverage.revisionHash == bakedCoverage.revisionHash &&
+            coverage.worseThan(bakedCoverage)) {
             // Keeping the already-baked (better) content: record that at this
             // signature the decision was to hold, so future identical frames skip
             // the scan too, until the content has come (see above). A real change

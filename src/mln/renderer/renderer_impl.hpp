@@ -70,6 +70,8 @@ private:
     static constexpr uint32_t drapeTileSize = 512;
     static constexpr uint32_t drapeQualityFactor = 2;
     TexturePool texturePool{drapeTileSize * drapeQualityFactor};
+    /// This frame's layer revisions (see PaintParameters::drapeLayerRevisions).
+    std::unordered_map<std::string, std::uintptr_t> layerIdentities;
 
     gfx::RendererBackend& backend;
 

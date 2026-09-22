@@ -373,12 +373,25 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
             std::size_t drapedGroupCount = 0;
             std::vector<std::pair<UnwrappedTileID, std::size_t>> drapedTiles;
             drapedTiles.reserve(1024);
+            // Layer id -> revision of its style (RenderLayer::styleRevision), from this frame's tree.
+            layerIdentities.clear();
+            for (const auto& item : renderTree.getLayerRenderItemMap()) {
+                const RenderLayer& layer = item.layer.get();
+                layerIdentities.emplace(layer.getID(), static_cast<std::uintptr_t>(layer.styleRevision));
+            }
             orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
                 if (layerGroup.getType() != LayerGroupBase::Type::TileLayerGroup ||
                     !layerGroup.shouldRenderToTerrain()) {
                     return;
                 }
                 drapedGroupCount++;
+                // The layer's style object is replaced when the app changes its paint or layout
+                // (setPaintProperty and the like) - not on zoom, fades or transitions. Folding it
+                // in re-bakes, only under that layer's tiles, a drape the app is animating (a
+                // replay revealing a route by its line-gradient), which otherwise showed a stale
+                // bake until something else invalidated it.
+                const auto found = layerIdentities.find(layerGroup.getName());
+                const std::uintptr_t layerIdentity = found != layerIdentities.end() ? found->second : 0;
                 static_cast<TileLayerGroup&>(layerGroup).visitDrawables([&](const gfx::Drawable& drawable) {
                     if (!drawable.getEnabled() || !drawable.getTileID()) {
                         return;
@@ -389,6 +402,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                     util::hash_combine(h, tile.canonical.z);
                     util::hash_combine(h, tile.canonical.x);
                     util::hash_combine(h, tile.canonical.y);
+                    util::hash_combine(h, layerIdentity);
                     // Fold the identity of the drawn data so new data under the same covering-tile
                     // id re-renders the drape instead of serving the stale bake until the next zoom.
                     util::hash_combine(h, RenderTarget::drapedDataID(drawable));
@@ -434,6 +448,7 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
                 });
             }
             parameters.perTargetDrapeSignature = &perTargetDrapeSignature;
+            parameters.drapeLayerRevisions = &layerIdentities;
         }
         // Latch whether the drape cover had targets this frame, for the re-bake trigger above.
         terrainHadCoverLastFrame = frameDrapeTargetCount > 0;
