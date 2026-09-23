@@ -2184,3 +2184,37 @@ TEST(Map, LocationIndicatorWithoutImages) {
     // Neither the accuracy circle nor any image should produce a draw call.
     EXPECT_EQ(test.frontend.render(test.map).stats.numDrawCalls, 0);
 }
+
+TEST(Map, TileSelectionOptionsPublishUpdates) {
+    util::RunLoop loop;
+    class Frontend final : public RendererFrontend {
+    public:
+        std::shared_ptr<UpdateParameters> parameters;
+        TaggedScheduler scheduler{Scheduler::GetBackground(), {}};
+        void reset() override {}
+        void setObserver(RendererObserver&) override {}
+        void update(std::shared_ptr<UpdateParameters> value) override { parameters = std::move(value); }
+        const TaggedScheduler& getThreadPool() const override { return scheduler; }
+    } frontend;
+    StubMapObserver observer;
+    MapAdapter map{
+        frontend, observer, std::make_shared<StubFileSource>(), MapOptions().withMapMode(MapMode::Continuous)};
+    map.getStyle().loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+    ASSERT_TRUE(frontend.parameters);
+
+    const auto check = [&](auto setter, auto member, auto value) {
+        const auto before = frontend.parameters;
+        (map.*setter)(value);
+        EXPECT_NE(before, frontend.parameters);
+        EXPECT_EQ(value, frontend.parameters.get()->*member);
+        const auto after = frontend.parameters;
+        (map.*setter)(value);
+        EXPECT_EQ(after, frontend.parameters);
+    };
+    check(&Map::setPrefetchZoomDelta, &UpdateParameters::prefetchZoomDelta, uint8_t{2});
+    check(&Map::setTileLodMinRadius, &UpdateParameters::tileLodMinRadius, 4.0);
+    check(&Map::setTileLodScale, &UpdateParameters::tileLodScale, 2.0);
+    check(&Map::setTileLodPitchThreshold, &UpdateParameters::tileLodPitchThreshold, 0.5);
+    check(&Map::setTileLodZoomShift, &UpdateParameters::tileLodZoomShift, 1.0);
+    check(&Map::setTileLodMode, &UpdateParameters::tileLodMode, TileLodMode::Distance);
+}
