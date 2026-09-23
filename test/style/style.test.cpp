@@ -4,6 +4,8 @@
 #include <mln/test/fixture_log_observer.hpp>
 
 #include <mln/style/style_impl.hpp>
+#include <mln/style/observer.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
 #include <mln/style/source_impl.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/layer.hpp>
@@ -211,4 +213,54 @@ TEST(Style, AddRemoveRemoveImage) {
     EXPECT_TRUE(!!style.getImage("three"));
     EXPECT_FALSE(!!style.getImage("two"));
     EXPECT_FALSE(!!style.getImage("four"));
+}
+
+TEST(Style, LayerTransitionRefreshesImmutableCollection) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+    auto layer = std::make_unique<LineLayer>("line", "source");
+    auto* line = layer.get();
+    style.addLayer(std::move(layer));
+    const auto before = style.getLayerImpls();
+
+    line->setLineColorTransition({Milliseconds(123), Milliseconds(45)});
+    const auto after = style.getLayerImpls();
+    EXPECT_NE(before, after);
+    ASSERT_EQ(1u, after->size());
+    EXPECT_EQ(line->baseImpl, after->front());
+    const auto& impl = static_cast<const LineLayer::Impl&>(*after->front());
+    EXPECT_EQ(Milliseconds(123), impl.paint.get<LineColor>().options.duration);
+    EXPECT_EQ(Milliseconds(45), impl.paint.get<LineColor>().options.delay);
+}
+
+TEST(Style, TransitionOptionsPublishUpdates) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+    struct Observer final : style::Observer {
+        Style::Impl& style;
+        TransitionOptions options;
+        size_t updates = 0;
+        explicit Observer(Style::Impl& style_)
+            : style(style_),
+              options(style.getTransitionOptions()) {}
+        void onUpdate() override {
+            options = style.getTransitionOptions();
+            ++updates;
+        }
+    } observer{style};
+    style.setObserver(&observer);
+
+    style.setTransitionOptions({Milliseconds(123), Milliseconds(45)});
+    EXPECT_EQ(Milliseconds(123), observer.options.duration);
+    EXPECT_EQ(Milliseconds(45), observer.options.delay);
+    style.setTransitionOptions({Milliseconds(123), Milliseconds(45), false});
+    EXPECT_FALSE(observer.options.enablePlacementTransitions);
+
+    const auto updates = observer.updates;
+    style.setTransitionOptions({Milliseconds(123), Milliseconds(45), false});
+    EXPECT_EQ(updates, observer.updates);
 }

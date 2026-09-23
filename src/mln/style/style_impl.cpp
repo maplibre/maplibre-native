@@ -155,7 +155,11 @@ std::string Style::Impl::getURL() const {
 }
 
 void Style::Impl::setTransitionOptions(const TransitionOptions& options) {
+    if (transitionOptions.duration == options.duration && transitionOptions.delay == options.delay &&
+        transitionOptions.enablePlacementTransitions == options.enablePlacementTransitions)
+        return;
     transitionOptions = options;
+    observer->onUpdate();
 }
 
 TransitionOptions Style::Impl::getTransitionOptions() const {
