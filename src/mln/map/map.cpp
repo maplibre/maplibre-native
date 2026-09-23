@@ -432,8 +432,8 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
 }
 
-LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
-    return impl->transform.screenCoordinateToLatLng(pixel);
+LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
+    return impl->transform.screenCoordinateToLatLng(pixel, wrapMode);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
@@ -445,19 +445,23 @@ std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& l
     return ret;
 }
 
-std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& screenCoords) const {
+std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& screenCoords,
+                                          LatLng::WrapMode wrapMode) const {
     std::vector<LatLng> ret;
     ret.reserve(screenCoords.size());
     for (const auto& point : screenCoords) {
-        ret.emplace_back(latLngForPixel(point));
+        ret.emplace_back(latLngForPixel(point, wrapMode));
     }
     return ret;
 }
 
 // MARK: - Transform
 
-TransformState Map::getTransfromState() const {
+TransformState Map::getTransformState() const {
     return impl->transform.getState();
+}
+TransformState Map::getTransfromState() const {
+    return getTransformState();
 }
 
 // MARK: - Annotations
@@ -602,6 +606,59 @@ ClientOptions Map::getClientOptions() const {
 
 const std::unique_ptr<util::ActionJournal>& Map::getActionJournal() {
     return impl->actionJournal;
+}
+
+void Map::getRenderedFeatures(const std::optional<std::string>& featureId,
+                              const std::optional<std::string>& layerId,
+                              const std::optional<std::string>& sourceId,
+                              const std::function<bool(const std::string&, const FeatureInfo&)>& result) const {
+    const auto stats = impl->lastFrameStats;
+    if (!stats || stats->frameRenderedFeatures.empty()) {
+        return;
+    }
+
+    const auto& features = stats->frameRenderedFeatures;
+
+    using LayerFeaturesMap = gfx::RenderingStats::LayerFeaturesMap;
+    const auto searchFeatures = [&](const LayerFeaturesMap& features_) {
+        for (const auto& [fId, fInfo] : features_) {
+            if ((!featureId || fId == *featureId) && !result(fId, fInfo)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    if (sourceId && layerId) {
+        // Both source and layer are specified, look for an exact match
+        if (auto it = features.find({.sourceID = *sourceId, .layerID = *layerId}); it != features.end()) {
+            searchFeatures(it->second);
+        }
+    } else {
+        // Linear search for matching items
+        for (const auto& [sourceLayerId, layerFeaturesMap] : features) {
+            if ((!sourceId || sourceLayerId.sourceID == *sourceId) && (!layerId || sourceLayerId.layerID == *layerId)) {
+                if (!searchFeatures(layerFeaturesMap)) {
+                    break;
+                }
+            }
+        }
+    }
+}
+
+std::size_t Map::getRenderedFeatureCount(const std::optional<std::string>& featureId,
+                                         const std::optional<std::string>& layerId,
+                                         const std::optional<std::string>& sourceId,
+                                         std::size_t limit) const {
+    std::size_t count = 0;
+    getRenderedFeatures(
+        featureId, layerId, sourceId, [&](const std::string&, const FeatureInfo&) { return (++count < limit); });
+    return count;
+}
+
+const Map::FrameRenderedFeaturesMap& Map::getRenderedFeatures() const {
+    static const Map::FrameRenderedFeaturesMap emptyFeatures{};
+    return impl->lastFrameStats ? impl->lastFrameStats->frameRenderedFeatures : emptyFeatures;
 }
 
 } // namespace mln

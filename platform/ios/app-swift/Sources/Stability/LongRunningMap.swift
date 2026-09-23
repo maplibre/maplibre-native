@@ -18,13 +18,26 @@ struct UserMapView: UIViewRepresentable {
 }
 
 struct NavigationMapView: UIViewRepresentable {
+    var onDidFinishLoadingMap: (() -> Void)?
+    var onRouteReady: (() -> Void)?
+    var cameraSource: MLNMapView?
+    var onCreated: ((NavigationMap) -> Void)?
+    var styleURL: URL?
+    var loadRoutes: Bool = true
+
     func makeUIView(context _: Context) -> NavigationMap {
-        let map = NavigationMap()
+        let map = NavigationMap(cameraSource: cameraSource, styleURL: styleURL, loadRoutes: loadRoutes)
+        map.onDidFinishLoadingMap = onDidFinishLoadingMap
+        map.onRouteReady = onRouteReady
         map.run()
+        onCreated?(map)
         return map
     }
 
-    func updateUIView(_: NavigationMap, context _: Context) {}
+    func updateUIView(_ map: NavigationMap, context _: Context) {
+        map.onDidFinishLoadingMap = onDidFinishLoadingMap
+        map.onRouteReady = onRouteReady
+    }
 
     static func dismantleUIView(_ map: NavigationMap, coordinator _: ()) {
         map.stop()

@@ -576,6 +576,16 @@ TEST(TileCount, BoundsCrossingAntimeridian) {
     EXPECT_EQ(8u, util::tileCount(crossingBounds, 4));
 }
 
+TEST(TileCover, CoveringZoomLevelRoundsForRasterSources) {
+    EXPECT_EQ(4, util::coveringZoomLevel(4.6, style::SourceType::Vector, util::tileSize_I));
+    EXPECT_EQ(4, util::coveringZoomLevel(4.6, style::SourceType::GeoJSON, util::tileSize_I));
+    EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::Raster, util::tileSize_I));
+    EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::RasterDEM, util::tileSize_I));
+    EXPECT_EQ(5, util::coveringZoomLevel(4.6, style::SourceType::Video, util::tileSize_I));
+    EXPECT_EQ(4, util::coveringZoomLevel(4.4, style::SourceType::RasterDEM, util::tileSize_I));
+    EXPECT_EQ(6, util::coveringZoomLevel(4.6, style::SourceType::RasterDEM, 256));
+}
+
 TEST(TileCover, DISABLED_FuzzPoly) {
     while (true) {
         std::srand(static_cast<uint32_t>(time(nullptr)));

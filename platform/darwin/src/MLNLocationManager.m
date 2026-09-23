@@ -38,12 +38,8 @@
 }
 
 - (CLAuthorizationStatus)authorizationStatus {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
-    if (@available(iOS 14.0, *)) {
-        return self.locationManager.authorizationStatus;
-    } else {
-        return kCLAuthorizationStatusNotDetermined;
-    }
+#if TARGET_OS_IPHONE
+    return self.locationManager.authorizationStatus;
 #else
     return [CLLocationManager authorizationStatus];
 #endif
@@ -57,19 +53,13 @@
     return self.locationManager.activityType;
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+#if TARGET_OS_IPHONE
 - (CLAccuracyAuthorization)accuracyAuthorization {
-    if (@available(iOS 14.0, *)) {
-        return self.locationManager.accuracyAuthorization;
-    } else {
-        return CLAccuracyAuthorizationFullAccuracy;
-    }
+    return self.locationManager.accuracyAuthorization;
 }
 
 - (void)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:(NSString *)purposeKey {
-    if (@available(iOS 14.0, *)) {
-        [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:purposeKey];
-    }
+    [self.locationManager requestTemporaryFullAccuracyAuthorizationWithPurposeKey:purposeKey];
 }
 #endif
 
@@ -142,7 +132,7 @@
     }
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+#if TARGET_OS_IPHONE
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager {
     [self.delegate locationManagerDidChangeAuthorization:self];
 }

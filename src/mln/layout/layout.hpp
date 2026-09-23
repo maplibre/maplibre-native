@@ -1,15 +1,17 @@
 #pragma once
 
 #include <mln/style/image_impl.hpp>
+#include <mln/text/glyph_manager.hpp>
 #include <mln/text/glyph.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
-#include <mln/text/glyph_manager.hpp>
 #include <mln/util/containers.hpp>
+
 #include <memory>
+#include <set>
+#include <string>
 
 namespace mln {
 
-class Bucket;
 class BucketParameters;
 class RenderLayer;
 class FeatureIndex;
@@ -44,7 +46,7 @@ public:
     std::shared_ptr<FontFaces> fontFaces;
     GlyphDependencies& glyphDependencies;
     ImageDependencies& imageDependencies;
-    std::set<std::string>& availableImages;
+    const std::set<std::string>& availableImages;
 };
 
 } // namespace mln
