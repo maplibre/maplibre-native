@@ -446,7 +446,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     }
 }
 
-void SurfaceRenderableResource::recreateSwapchain() {
+void SurfaceRenderableResource::recreateSwapchain(bool recreateSurface) {
     if (!surface) return;
 
     backend.getDevice()->waitIdle(backend.getDispatcher());
@@ -457,27 +457,14 @@ void SurfaceRenderableResource::recreateSwapchain() {
     acquireSemaphores.clear();
     presentSemaphores.clear();
 
-    readTexture.reset();
+    if (recreateSurface) {
+        swapchain.reset();
+        surface.reset();
 
-    init(extent.width, extent.height);
-}
-
-void SurfaceRenderableResource::recreateSurface() {
-    if (!surface) return;
-
-    backend.getDevice()->waitIdle(backend.getDispatcher());
-
-    swapchainFramebuffers.clear();
-    swapchainImageViews.clear();
-    swapchainImages.clear();
-    acquireSemaphores.clear();
-    presentSemaphores.clear();
-    swapchain.reset();
-    surface.reset();
+        createPlatformSurface();
+    }
 
     readTexture.reset();
-
-    createPlatformSurface();
 
     init(extent.width, extent.height);
 }
