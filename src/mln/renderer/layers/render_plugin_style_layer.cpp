@@ -158,6 +158,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
         layerGroup->addLayerTweaker(layerTweaker);
     }
+    if (registration->enableStencilOverlapDedup) {
+        // Every is3D + stencil-enabled drawable below shares this group's single stencil ref.
+        // See the enable_stencil_overlap_dedup doc comment in plugin_api.h.
+        tileLayerGroup->setStencilTiles(renderTiles);
+    }
 
     const auto renderPass = RenderPass::Translucent;
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf(
@@ -214,12 +219,19 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             auto builder = context.createDrawableBuilder("plugin/" + registration->type);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
-            builder->setEnableDepth(true);
-            builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-            builder->setIs3D(false);
+            if (registration->enableStencilOverlapDedup) {
+                // No depth test: visibility relative to other layers comes entirely from style layer order.
+                builder->setEnableDepth(false);
+                builder->setIs3D(true);
+                builder->setEnableStencil(true);
+            } else {
+                builder->setEnableDepth(true);
+                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                builder->setIs3D(false);
+                builder->setEnableStencil(false);
+            }
             builder->setColorMode(gfx::ColorMode::alphaBlended());
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setEnableStencil(false);
             builder->setVertexAttributes(std::move(attributes));
             builder->setRawVertices({}, vertexCount, firstType);
             builder->setSegments(

@@ -188,6 +188,13 @@ jobs:
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTests.xctest.zip
             ${{ env.ios_cpp_test_artifacts_dir }}/CppUnitTestsApp.ipa
 
+      - name: Remove the Xcode project build output base
+        run: |
+          output_base="$(bazel info output_base)"
+          df -h "$HOME"
+          bazel --output_base="$output_base/rules_xcodeproj.noindex/build_output_base" clean --expunge
+          df -h "$HOME"
+
       # Size test (Bloaty)
 
       - name: Build dynamic library for size test (Bloaty)
@@ -230,6 +237,13 @@ jobs:
         working-directory: .
         run: |
           HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+
+      - name: Remove the Bazel output base before the cache save
+        if: ${{ !cancelled() }}
+        run: |
+          df -h "$HOME"
+          bazel clean --expunge
+          df -h "$HOME"
 
   ios-build-cmake:
     needs: pre_job

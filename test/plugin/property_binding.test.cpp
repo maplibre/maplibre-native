@@ -108,6 +108,25 @@ plugin::PropertyDefinition numberDefinition() {
 }
 } // namespace
 
+TEST(PluginProperties, DefaultColorsMatchStyleParsedColors) {
+    plugin::PropertyDefinition definition;
+    definition.name = "test-color";
+    definition.type = MLN_PLUGIN_VALUE_COLOR;
+    for (const double alpha : {0.0, 0.5, 1.0}) {
+        SCOPED_TRACE(alpha);
+        definition.defaultValue = std::vector<Value>{1.0, 0.5, 0.25, alpha};
+        const auto json = "[\"rgba\",255,127.5,63.75," + std::to_string(alpha) + "]";
+        style::PluginPropertyValue::EvaluationStorage storage;
+        const auto expected = expression(definition, json.c_str()).evaluate(0, definition, storage).data.color_value;
+        const auto actual =
+            style::defaultPluginPropertyValue(definition).evaluate(0, definition, storage).data.color_value;
+        EXPECT_FLOAT_EQ(expected.r, actual.r);
+        EXPECT_FLOAT_EQ(expected.g, actual.g);
+        EXPECT_FLOAT_EQ(expected.b, actual.b);
+        EXPECT_FLOAT_EQ(expected.a, actual.a);
+    }
+}
+
 TEST(PluginProperties, NativeTransitionsHandleDelayInterruptionAndCompletion) {
     const auto definition = numberDefinition();
     const auto start = TimePoint{};

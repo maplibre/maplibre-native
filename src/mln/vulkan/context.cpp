@@ -302,10 +302,7 @@ void Context::beginFrame() {
         }
     }
 
-    backend.startFrameCapture();
-
     auto& frame = frameResources[frameResourceIndex];
-    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
     if (!waitFrame()) {
         return;
@@ -318,7 +315,7 @@ void Context::beginFrame() {
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
                 renderableResource.getSwapchain().get(),
-                timeout,
+                renderableResource.getAcquireTimeout(),
                 renderableResource.getAcquireSemaphore(),
                 nullptr,
                 dispatcher);
@@ -328,6 +325,11 @@ void Context::beginFrame() {
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
                 requestSurfaceUpdate();
+            } else if (acquireImageResult.result == vk::Result::eTimeout ||
+                       acquireImageResult.result == vk::Result::eNotReady) {
+                // No image or semaphore signal belongs to this frame. Leave its fence
+                // signaled and abort before recording or submitting any commands.
+                throw SurfaceNotReady();
             } else {
                 mln::Log::Error(
                     mln::Event::Render,
@@ -343,6 +345,8 @@ void Context::beginFrame() {
     } else {
         renderableResource.setAcquiredImageIndex(frameResourceIndex);
     }
+
+    backend.startFrameCapture();
 
     frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources, dispatcher);
     frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);

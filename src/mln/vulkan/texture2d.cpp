@@ -442,6 +442,7 @@ void Texture2D::destroyTexture(bool deferred) {
         }
 
         imageLayout = vk::ImageLayout::eUndefined;
+        textureDirty = true;
 
         context.threadSafeAccessRenderingStats([&](gfx::RenderingStats& stats) {
             stats.numActiveTextures--;

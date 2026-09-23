@@ -75,7 +75,7 @@ Color defaultValue<Color>(const plugin::PropertyDefinition& definition) {
     if (const auto* array = definition.defaultValue.getArray(); array && array->size() == result.size()) {
         for (size_t i = 0; i < result.size(); ++i) result[i] = numericValue<float>((*array)[i]).value_or(0.0f);
     }
-    return {result[0], result[1], result[2], result[3]};
+    return {result[0] * result[3], result[1] * result[3], result[2] * result[3], result[3]};
 }
 
 template <>

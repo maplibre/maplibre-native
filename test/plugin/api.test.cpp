@@ -286,6 +286,8 @@ TEST(PluginApi, RepeatedRegistrationComparesNestedDefinitions) {
     check([](auto& d) { d.binding.uniform_byte_offset = 8; });
     check([](auto& d) { d.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA; });
     check([](auto& d) { d.layer.geometry_type_mask |= MLN_PLUGIN_GEOMETRY_POLYGON; });
+    check([](auto& d) { d.layer.enable_stencil_overlap_dedup = 1; });
+    check([](auto& d) { d.layer.enable_near_clipped_matrix = 1; });
     check([](auto& d) {
         d.layer.query_feature = [](const mln_plugin_feature_v1*,
                                    const mln_plugin_tile_point_v1*,
@@ -296,6 +298,24 @@ TEST(PluginApi, RepeatedRegistrationComparesNestedDefinitions) {
             return 0;
         };
     });
+}
+
+TEST(PluginApi, CopiesRenderingModeFlags) {
+    Descriptor withDefaults("test.render-flags.default");
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&withDefaults.descriptor, nullptr, 0));
+    const auto defaultLayer = plugin::PluginRegistry::get().findLayerType(withDefaults.type);
+    ASSERT_TRUE(defaultLayer);
+    EXPECT_FALSE(defaultLayer->enableStencilOverlapDedup);
+    EXPECT_FALSE(defaultLayer->enableNearClippedMatrix);
+
+    Descriptor withFlagsEnabled("test.render-flags.enabled");
+    withFlagsEnabled.layer.enable_stencil_overlap_dedup = 1;
+    withFlagsEnabled.layer.enable_near_clipped_matrix = 1;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&withFlagsEnabled.descriptor, nullptr, 0));
+    const auto enabledLayer = plugin::PluginRegistry::get().findLayerType(withFlagsEnabled.type);
+    ASSERT_TRUE(enabledLayer);
+    EXPECT_TRUE(enabledLayer->enableStencilOverlapDedup);
+    EXPECT_TRUE(enabledLayer->enableNearClippedMatrix);
 }
 
 } // namespace
