@@ -207,7 +207,7 @@ TEST(SymbolRendering, ContinuousCollisionVisibilityFadesAndReappears) {
     observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
         if (status.mode != MapObserver::RenderMode::Full) return;
 
-        const auto drawCalls = status.renderingStats.numDrawCalls;
+        const auto drawCalls = status.renderingStats->numDrawCalls;
         switch (phase) {
             case Phase::Initial:
                 if (status.needsRepaint) return;
