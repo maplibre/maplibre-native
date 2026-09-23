@@ -1,5 +1,12 @@
 # Changelog MapLibre Native for Android
 
+## 13.5.2
+
+### 🐞 Bug fixes
+
+- core: Extend the Adreno 600 series Vulkan texture sampling workaround to all textures ([#4666](https://github.com/maplibre/maplibre-native/pull/4666)).
+- core: Fix Vulkan image transition synchronization for dynamic textures and snapshotters ([#4540](https://github.com/maplibre/maplibre-native/pull/4540)).
+
 ## 13.5.1
 
 ### 🐞 Bug fixes
