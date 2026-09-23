@@ -6201,6 +6201,10 @@ static void *windowScreenContext = &windowScreenContext;
   }
 }
 
+- (BOOL)isGestureInProgress {
+  return _mbglMap && _mbglMap->isGestureInProgress();
+}
+
 - (void)setShowsUserHeadingIndicator:(BOOL)showsUserHeadingIndicator {
   MLNLogDebug(@"Setting showsUserHeadingIndicator: %@",
               MLNStringFromBOOL(showsUserHeadingIndicator));
@@ -6226,6 +6230,35 @@ static void *windowScreenContext = &windowScreenContext;
   }
 }
 
+/// Whether this location sample will start the constant-zoom `flyTo` that
+/// `Transform::easeTo` uses when zoom does not change. Mirrors the early-outs
+/// in `-didUpdateLocationWithUserTrackingDuration:completionHandler:` and in
+/// `easeTo` itself. The opening fly and a target-coordinate fit change zoom,
+/// so they stay on the linear puck animation.
+- (BOOL)userLocationUpdateStartsConstantZoomFlyWithDuration:(NSTimeInterval)duration {
+  if (duration <= 0 || !_mbglMap) {
+    return NO;
+  }
+  CLLocation *location = self.userLocation.location;
+  if (!_showsUserLocation || !location || !CLLocationCoordinate2DIsValid(location.coordinate) ||
+      self.userTrackingMode == MLNUserTrackingModeNone ||
+      self.userTrackingState != MLNUserTrackingStateChanged) {
+    return NO;
+  }
+  if (self.userTrackingMode == MLNUserTrackingModeFollowWithCourse &&
+      CLLocationCoordinate2DIsValid(self.targetCoordinate)) {
+    return NO;
+  }
+  if (_mbglMap->isGestureInProgress()) {
+    return NO;
+  }
+  const std::optional<mln::LatLngBounds> bounds = _mbglMap->getBounds().bounds;
+  if (!bounds || *bounds != mln::LatLngBounds()) {
+    return NO;
+  }
+  return [self userLocationUpdateIsSignificant];
+}
+
 - (void)locationManager:(id<MLNLocationManager>)manager didUpdateLocations:(NSArray *)locations {
   [self locationManager:manager didUpdateLocations:locations animated:YES completionHandler:nil];
 }
@@ -6238,8 +6271,11 @@ static void *windowScreenContext = &windowScreenContext;
   CLLocation *newLocation = locations.lastObject;
   _distanceFromOldUserLocation = [newLocation distanceFromLocation:oldLocation];
 
-  if (!_showsUserLocation || !newLocation || !CLLocationCoordinate2DIsValid(newLocation.coordinate))
+  if (!_showsUserLocation || !newLocation ||
+      !CLLocationCoordinate2DIsValid(newLocation.coordinate)) {
+    _userLocationCameraFollowsConstantZoomFly = NO;
     return;
+  }
 
   if (!oldLocation || !CLLocationCoordinate2DIsValid(oldLocation.coordinate) ||
       [newLocation distanceFromLocation:oldLocation] || oldLocation.course != newLocation.course) {
@@ -6258,13 +6294,18 @@ static void *windowScreenContext = &windowScreenContext;
     userLocationDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp],
                                MLNUserLocationAnimationDuration);
   }
-  [self updateUserLocationAnnotationViewAnimatedWithDuration:userLocationDuration];
 
   NSTimeInterval cameraDuration = MLNUserLocationAnimationDuration;
   if (self.dynamicNavigationCameraAnimationDuration && oldLocation) {
     cameraDuration = MIN([newLocation.timestamp timeIntervalSinceDate:oldLocation.timestamp],
                          MLNUserLocationAnimationDuration);
   }
+  _userLocationCameraFollowsConstantZoomFly =
+      [self userLocationUpdateStartsConstantZoomFlyWithDuration:cameraDuration];
+  // Capture the media time that we're starting the animation, to allow a user
+  // to match the animation path.
+  _userLocationAnimationReferenceTime = CACurrentMediaTime();
+  [self updateUserLocationAnnotationViewAnimatedWithDuration:userLocationDuration];
   [self didUpdateLocationWithUserTrackingDuration:cameraDuration completionHandler:completion];
 
   if (self.userTrackingMode == MLNUserTrackingModeNone &&
@@ -6281,6 +6322,15 @@ static void *windowScreenContext = &windowScreenContext;
                                 completionHandler:completion];
 }
 
+- (BOOL)userLocationUpdateIsSignificant {
+  if (self.userTrackingMode == MLNUserTrackingModeFollowWithCourse) {
+    return YES;
+  }
+  const CGPoint annotation = self.userLocationAnnotationViewCenter;
+  const CGPoint location = [self convertCoordinate:self.userLocation.coordinate toPointToView:self];
+  return std::abs(location.x - annotation.x) >= 1.0 || std::abs(location.y - annotation.y) >= 1.0;
+}
+
 - (void)didUpdateLocationWithUserTrackingDuration:(NSTimeInterval)duration
                                 completionHandler:(nullable void (^)(void))completion {
   CLLocation *location = self.userLocation.location;
@@ -6295,11 +6345,7 @@ static void *windowScreenContext = &windowScreenContext;
 
   // If the user location annotation is already where it’s supposed to be,
   // don’t change the viewport.
-  CGPoint correctPoint = self.userLocationAnnotationViewCenter;
-  CGPoint currentPoint = [self convertCoordinate:self.userLocation.coordinate toPointToView:self];
-  if (std::abs(currentPoint.x - correctPoint.x) <= 1.0 &&
-      std::abs(currentPoint.y - correctPoint.y) <= 1.0 &&
-      self.userTrackingMode != MLNUserTrackingModeFollowWithCourse) {
+  if (![self userLocationUpdateIsSignificant]) {
     if (completion) {
       completion();
     }
@@ -6310,7 +6356,7 @@ static void *windowScreenContext = &windowScreenContext;
       CLLocationCoordinate2DIsValid(self.targetCoordinate)) {
     if (self.userTrackingState != MLNUserTrackingStateBegan) {
       // Keep both the user and the destination in view.
-      [self didUpdateLocationWithTargetAnimated:duration != 0 completionHandler:completion];
+      [self didUpdateLocationWithTargetDuration:duration completionHandler:completion];
     }
   } else if (self.userTrackingState == MLNUserTrackingStatePossible) {
     // The first location update is often a great distance away from the
@@ -6372,10 +6418,11 @@ static void *windowScreenContext = &windowScreenContext;
 
 /// Changes the viewport based on a location update in the presence of a target
 /// coordinate that must also be displayed on the map concurrently.
-- (void)didUpdateLocationWithTargetAnimated:(BOOL)animated
+- (void)didUpdateLocationWithTargetDuration:(NSTimeInterval)duration
                           completionHandler:(nullable void (^)(void))completion {
+  BOOL animated = duration > 0;
   BOOL firstUpdate = self.userTrackingState == MLNUserTrackingStatePossible;
-  void (^animationCompletion)(void);
+  void (^animationCompletion)(void) = nil;
   if (animated && firstUpdate) {
     self.userTrackingState = MLNUserTrackingStateBegan;
     __weak MLNMapView *weakSelf = self;
@@ -6407,7 +6454,7 @@ static void *windowScreenContext = &windowScreenContext;
                          count:sizeof(foci) / sizeof(foci[0])
                    edgePadding:inset
                      direction:self.directionByFollowingWithCourse
-                      duration:animated ? MLNUserLocationAnimationDuration : 0
+                      duration:duration
        animationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear]
              completionHandler:animationCompletion];
 }
