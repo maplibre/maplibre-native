@@ -246,7 +246,7 @@ TEST(Style, ImageRemovalPublishesUpdates) {
     auto fileSource = std::make_shared<StubFileSource>();
     Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
     style.loadJSON(R"({"version":8,"sources":{},"layers":[]})");
-    style.addImage(std::make_unique<style::Image>("image", PremultipliedImage({1, 1}), 1));
+    style.addImage(std::make_unique<style::Image>("image", PremultipliedImage({1, 1}), 1.0f));
 
     struct Observer final : style::Observer {
         Style::Impl& style;
