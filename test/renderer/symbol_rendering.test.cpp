@@ -198,12 +198,13 @@ TEST(SymbolRendering, FullyHiddenLayerCanReappear) {
 
     auto blocker = std::make_unique<style::SymbolLayer>("blocker", "points");
     blocker->setIconImage({"marker"});
-    auto* blockerLayer = blocker.get();
     test.map.getStyle().addLayer(std::move(blocker));
     const auto hidden = test.frontend.render(test.map);
     EXPECT_EQ(hidden.stats.numDrawCalls, 1);
     EXPECT_EQ(initial.image, hidden.image);
 
+    auto* blockerLayer = test.map.getStyle().getLayer("blocker");
+    ASSERT_NE(blockerLayer, nullptr);
     blockerLayer->setVisibility(style::VisibilityType::None);
     const auto visible = test.frontend.render(test.map);
     EXPECT_EQ(visible.stats.numDrawCalls, 1);
