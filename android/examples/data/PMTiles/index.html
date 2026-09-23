@@ -1599,7 +1599,7 @@
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">style</span><span class="p">.</span><span class="na">addLayer</span><span class="p">(</span><span class="n">RasterLayer</span><span class="p">(</span><span class="s">&quot;watercolor&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;watercolor&quot;</span><span class="p">))</span>
 </span></code></pre></div>
 <blockquote>
-<p>Note: <code>pmtiles://asset://</code> (files in <code>src/main/assets/</code>) is not currently supported. <code>AssetManagerFileSource</code> does not implement byte-range reads, which PMTiles requires to read its header and metadata. Use <code>file://</code> from device storage instead. See the <a href="https://github.com/maplibre/maplibre-native/issues/4360">open issue</a> for status.</p>
+<p>Note: <code>pmtiles://asset://</code> and <code>pmtiles://file:///android_asset/</code> (files in <code>src/main/assets/</code>) are not currently supported. <code>AssetManagerFileSource</code> does not implement byte-range reads, which PMTiles requires to read its header and metadata. Use <code>file://</code> from device storage instead. See the <a href="https://github.com/maplibre/maplibre-native/issues/4360">open issue</a> for status.</p>
 </blockquote>
 
 
