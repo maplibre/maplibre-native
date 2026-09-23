@@ -133,10 +133,8 @@ void MLNMapViewMetalImpl::setPresentsWithTransaction(const bool value) {
   auto& resource = getResource<MLNMapViewMetalRenderableResource>();
   resource.presentsWithTransaction = value;
 
-  if (@available(iOS 13.0, *)) {
-    if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
-      metalLayer.presentsWithTransaction = value;
-    }
+  if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
+    metalLayer.presentsWithTransaction = value;
   }
 }
 
@@ -176,10 +174,8 @@ void MLNMapViewMetalImpl::createView() {
   resource.mtlView.opaque = mapView.opaque;
   resource.mtlView.layer.opaque = mapView.opaque;
   resource.mtlView.enableSetNeedsDisplay = YES;
-  if (@available(iOS 13.0, *)) {
-    CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-    metalLayer.presentsWithTransaction = resource.presentsWithTransaction;
-  }
+  CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
+  metalLayer.presentsWithTransaction = resource.presentsWithTransaction;
 
   [mapView insertSubview:resource.mtlView atIndex:0];
 }

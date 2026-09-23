@@ -105,6 +105,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/http_timeout.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/image.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/mapbox.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/mat3.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
@@ -163,6 +164,7 @@ if(MLN_WITH_VULKAN)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/renderer/vulkan_acquire.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )
 endif()
@@ -214,6 +216,16 @@ target_include_directories(
 
 include(${PROJECT_SOURCE_DIR}/vendor/cpp-httplib.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/googletest.cmake)
+
+if(MLN_WITH_PLUGINS)
+    target_sources(mbgl-test PRIVATE
+        plugin/api.test.cpp
+        plugin/layout.test.cpp
+        plugin/property_binding.test.cpp
+        plugin/registry.test.cpp
+        plugin/rendering.test.cpp
+    )
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set_target_properties(mbgl-test mbgl-vendor-googletest PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)
