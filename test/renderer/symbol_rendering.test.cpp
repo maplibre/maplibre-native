@@ -6,8 +6,10 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
+#include <mln/style/expression/dsl.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/style.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/run_loop.hpp>
@@ -17,7 +19,6 @@
 #endif
 
 #include <algorithm>
-#include <sstream>
 
 using namespace mln;
 
@@ -30,24 +31,40 @@ enum class SymbolKind {
     TextAndIcon
 };
 
-std::string collidingSymbolsStyle(std::size_t count, double spacing, SymbolKind kind) {
-    std::ostringstream json;
-    json << R"({"version":8,"sources":{"points":{"type":"geojson","maxzoom":0,"data":{
-        "type":"FeatureCollection","features":[)";
+void setupCollidingSymbolsStyle(style::Style& style, std::size_t count, double spacing, SymbolKind kind) {
+    style.loadJSON(R"({
+        "version": 8,
+        "sources": {},
+        "glyphs": "glyphs/{fontstack}/{range}.pbf",
+        "layers": []
+    })");
+
+    FeatureCollection features;
+    features.reserve(count);
     for (std::size_t i = 0; i < count; ++i) {
-        if (i) json << ',';
-        json << R"({"type":"Feature","properties":{"rank":)" << i << R"(},"geometry":{"type":"Point","coordinates":[)"
-             << 5 + i * spacing << R"(,5]}})";
+        features.emplace_back(mln::Point<double>{5 + i * spacing, 5});
+        features.back().properties["rank"] = static_cast<uint64_t>(i);
     }
-    json << R"(]}}},"glyphs":"glyphs/{fontstack}/{range}.pbf",
-        "layers":[{"id":"symbols","type":"symbol","source":"points","layout":{
-        "symbol-sort-key":["get","rank"])";
-    if (kind != SymbolKind::Text) json << R"(,"icon-image":"marker")";
+    auto options = makeMutable<style::GeoJSONOptions>();
+    options->maxzoom = 0;
+    auto source = std::make_unique<style::GeoJSONSource>("points", std::move(options));
+    source->setGeoJSON(features);
+    style.addSource(std::move(source));
+
+    auto layer = std::make_unique<style::SymbolLayer>("symbols", "points");
+    using namespace style::expression::dsl;
+    layer->setSymbolSortKey(style::PropertyExpression<float>(number(get("rank"))));
+    if (kind != SymbolKind::Text) {
+        layer->setIconImage({"marker"});
+    }
     if (kind == SymbolKind::Text || kind == SymbolKind::TextAndIcon) {
-        json << R"(,"text-field":"Label","text-font":["Open Sans Regular"],"text-size":16)";
+        layer->setTextField({"Label"});
+        layer->setTextFont(std::vector<std::string>{"Open Sans Regular"});
+        layer->setTextSize(16.0f);
     }
-    json << R"(},"paint":{"text-halo-color":"white","text-halo-width":1}}]})";
-    return json.str();
+    layer->setTextHaloColor(Color::white());
+    layer->setTextHaloWidth(1.0f);
+    style.addLayer(std::move(layer));
 }
 
 class SymbolRenderingTest {
@@ -63,7 +80,7 @@ public:
             response.data = std::make_shared<const std::string>(util::read_file("test/fixtures/resources/glyphs.pbf"));
             return response;
         };
-        map.getStyle().loadJSON(collidingSymbolsStyle(count, spacing, kind));
+        setupCollidingSymbolsStyle(map.getStyle(), count, spacing, kind);
         PremultipliedImage marker({16, 16});
         std::fill_n(marker.data.get(), marker.bytes(), uint8_t{255});
         map.getStyle().addImage(
