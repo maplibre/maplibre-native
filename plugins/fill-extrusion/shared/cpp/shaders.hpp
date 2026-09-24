@@ -100,6 +100,10 @@ void main() {
     float z = t > 0.0 ? height : base;
     gl_Position = u.matrix * vec4(pos, z, 1.0);
     applySurfaceTransform();
+#if !MLN_PLUGIN_COLOR_WRITE
+    frag_color = vec4(0.0);
+    return;
+#endif
 #if MLN_PLUGIN_HAS_PATTERN
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_PATTERN_IS_UNIFORM
     vec4 pattern_from = u.pattern_from, pattern_to = u.pattern_to;
@@ -158,7 +162,9 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING) uni
 } u;
 #endif
 void main() {
-#if MLN_PLUGIN_HAS_PATTERN
+#if !MLN_PLUGIN_COLOR_WRITE
+    out_color = vec4(0.0);
+#elif MLN_PLUGIN_HAS_PATTERN
     vec2 pos_a = mix(frag_pattern_from.xy/u.texture_size,frag_pattern_from.zw/u.texture_size,mod(frag_pos_a,1.0));
     vec2 pos_b = mix(frag_pattern_to.xy/u.texture_size,frag_pattern_to.zw/u.texture_size,mod(frag_pos_b,1.0));
     out_color = mix(texture(image0_sampler,pos_a),texture(image0_sampler,pos_b),u.fade)*frag_color;

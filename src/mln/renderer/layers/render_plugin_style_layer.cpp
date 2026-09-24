@@ -243,6 +243,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 auto* paintBinders = bucket.paintBinders(getID(), definition.key);
                 auto attributes = context.createVertexAttributeArray();
                 if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
+                if (!pass.colorWrite) propertiesAsUniforms.first.emplace("__plugin_depth_only");
                 const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
                                                 : gfx::ShaderPtr{};
                 if (!shader || definition.segments.empty()) {

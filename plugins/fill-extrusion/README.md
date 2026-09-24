@@ -42,6 +42,9 @@ permits a built-in name replacement; it never permits replacing another plugin.
 `draw_passes` declares ordered depth-test/write, color-write, premultiplied-blend,
 culling, and layer-stencil-deduplication settings. Passes run across all tiles
 in array order. A zero count retains the original single 2D default pass.
+Shaders receive `MLN_PLUGIN_COLOR_WRITE` for the current pass; the extrusion
+plugin omits lighting and texture sampling when color writes are disabled.
+Shader cache keys distinguish color/depth variants and pattern availability.
 
 `evaluate_layer` receives evaluated camera properties before render orchestration.
 Its output enables passes and specifies host-applied translation/anchor.

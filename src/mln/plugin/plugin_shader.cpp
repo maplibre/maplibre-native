@@ -76,6 +76,7 @@ std::string propertyMacro(const std::string& propertyName) {
 
 std::string propertyPrelude(const ShaderDefinition& shader, const StringIDSetsPair& propertiesAsUniforms) {
     std::ostringstream output;
+    output << "#define MLN_PLUGIN_COLOR_WRITE " << !propertiesAsUniforms.first.contains("__plugin_depth_only") << '\n';
     output << "#define MLN_PLUGIN_HAS_PATTERN " << propertiesAsUniforms.first.contains("__plugin_pattern_enabled")
            << '\n';
     for (const auto& binding : shader.propertyBindings) {
@@ -97,7 +98,12 @@ public:
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
                                      std::string_view) override {
-        const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
+        // The base hash covers attribute IDs only. Resource/pass switches also
+        // affect generated source and must identify distinct cached programs.
+        const auto variant = groupName +
+                             (propertiesAsUniforms.first.contains("__plugin_pattern_enabled") ? "/pattern" : "/solid") +
+                             (propertiesAsUniforms.first.contains("__plugin_depth_only") ? "/depth" : "/color");
+        const auto name = getShaderName(variant, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;
         const auto pluginPrelude = resourcePrelude(*definition) + propertyPrelude(*definition, propertiesAsUniforms);
 

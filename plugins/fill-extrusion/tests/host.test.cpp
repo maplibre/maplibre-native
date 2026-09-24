@@ -230,3 +230,35 @@ TEST(FillExtrusionPlugin, ImageDescriptorValidation) {
     EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
 }
 } // namespace
+
+TEST(FillExtrusionPlugin, CachedShadersDistinguishPatternPresenceAndDepthPasses) {
+    util::RunLoop loop;
+    const auto status = mln_fill_extrusion_register(mln_plugin_register_v1, nullptr, 0);
+    ASSERT_TRUE(status == MLN_PLUGIN_STATUS_OK || status == MLN_PLUGIN_STATUS_ALREADY_REGISTERED);
+    const auto prepare = [](Scene& scene) {
+        PremultipliedImage image({2, 2});
+        for (size_t i = 0; i < image.bytes(); i += 4) {
+            image.data[i] = 200;
+            image.data[i + 1] = 100;
+            image.data[i + 2] = 50;
+            image.data[i + 3] = 255;
+        }
+        scene.map.getStyle().addImage(std::make_unique<style::Image>("p", std::move(image), 1));
+        scene.set("fill-extrusion-height", "100");
+    };
+    Scene plugin(true);
+    prepare(plugin);
+    for (const char* pattern : {"null", R"("p")", "null", R"("")", R"("p")"}) {
+        SCOPED_TRACE(pattern);
+        // The native layer does not relayout to request a newly selected atlas
+        // sprite. Construct its reference with the intended pattern each time.
+        Scene builtin(false);
+        prepare(builtin);
+        for (auto* scene : {&builtin, &plugin}) scene->set("fill-extrusion-pattern", pattern);
+        for (const char* opacity : {"1", "0.5", "0", "1"}) {
+            SCOPED_TRACE(opacity);
+            for (auto* scene : {&builtin, &plugin}) scene->set("fill-extrusion-opacity", opacity);
+            compare(builtin, plugin);
+        }
+    }
+}
