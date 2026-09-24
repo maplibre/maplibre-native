@@ -74,9 +74,9 @@ void setupCollidingSymbolsStyle(style::Style& style, std::size_t count, double s
 // Keep resource loading asynchronous, but let tests choose when each frame is rendered.
 class TimedHeadlessFrontend : public HeadlessFrontend {
 public:
-    TimedHeadlessFrontend(mln::Size size, float pixelRatio)
-        : HeadlessFrontend(size,
-                           pixelRatio,
+    TimedHeadlessFrontend(mln::Size size_, float pixelRatio_)
+        : HeadlessFrontend(size_,
+                           pixelRatio_,
                            gfx::HeadlessBackend::SwapBehaviour::NoFlush,
                            gfx::ContextMode::Unique,
                            std::nullopt,
