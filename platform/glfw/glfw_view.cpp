@@ -383,6 +383,8 @@ GLFWView::GLFWView(bool fullscreen_,
 GLFWView::~GLFWView() {
     MLN_TRACE_FUNC();
 
+    // Vulkan swapchain teardown still needs the window's Wayland connection.
+    backend.reset();
     glfwDestroyWindow(window);
     glfwTerminate();
 }
