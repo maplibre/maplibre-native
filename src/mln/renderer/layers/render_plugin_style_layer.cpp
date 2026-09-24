@@ -103,8 +103,9 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
         staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
-    const uint32_t allPasses = registration->drawPasses.size() == 32 ? 0xffffffffu :
-        (uint32_t{1} << registration->drawPasses.size()) - 1;
+    const uint32_t allPasses = registration->drawPasses.size() == 32
+                                   ? 0xffffffffu
+                                   : (uint32_t{1} << registration->drawPasses.size()) - 1;
     properties->rendering.enabled_passes = allPasses;
     if (registration->evaluateLayer) {
         std::vector<mln_plugin_property_value_v1> cameraProperties;
@@ -114,10 +115,12 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
             const auto& value = evaluatedPluginProperties.at(definition.name);
             if (value.isDataDriven()) continue;
             cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
-                {definition.name.data(), definition.name.size()}, value.evaluate(parameters.z, definition, storage[i]),
-                static_cast<uint8_t>(impl.pluginProperties.contains(definition.name))});
+                                        {definition.name.data(), definition.name.size()},
+                                        value.evaluate(parameters.z, definition, storage[i]),
+                                        static_cast<uint8_t>(impl.pluginProperties.contains(definition.name))});
         }
-        const auto status = registration->evaluateLayer(cameraProperties.data(), cameraProperties.size(), &properties->rendering);
+        const auto status = registration->evaluateLayer(
+            cameraProperties.data(), cameraProperties.size(), &properties->rendering);
         const auto& rendering = properties->rendering;
         if (status != MLN_PLUGIN_STATUS_OK || rendering.struct_size != sizeof(rendering) ||
             (rendering.enabled_passes & ~allPasses) || rendering.translation_anchor_viewport > 1 ||
@@ -183,7 +186,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-    // These drawables disable stencil; generating tile masks adds an unused pass.
+    // A 3D group needs the shared layer stencil state, never per-tile clipping.
     if (!layerTweaker) {
         layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
         layerGroup->addLayerTweaker(layerTweaker);
@@ -219,61 +222,66 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         for (size_t passIndex = 0; passIndex < registration->drawPasses.size(); ++passIndex) {
-        const auto& pass = registration->drawPasses[passIndex];
-        for (const auto& definition : bucket.drawables) {
-            const auto shaderGroup = shaderGroups.at(definition.shaderID);
-            StringIDSetsPair propertiesAsUniforms;
-            auto* paintBinders = bucket.paintBinders(getID(), definition.key);
-            auto attributes = context.createVertexAttributeArray();
-            if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
-            const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
-                                            : gfx::ShaderPtr{};
-            if (!shader || definition.segments.empty()) {
-                continue;
-            }
-
-            std::size_t vertexCount = 0;
-            gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
-            for (const auto& binding : definition.attributes) {
-                const auto stream = bucket.vertexStreams.find(binding.streamID);
-                if (stream == bucket.vertexStreams.end()) continue;
-                const auto type = binding.type;
-                if (const auto& attr = attributes->set(binding.attributeID)) {
-                    attr->setSharedRawData(stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
+            const auto& pass = registration->drawPasses[passIndex];
+            for (const auto& definition : bucket.drawables) {
+                const auto shaderGroup = shaderGroups.at(definition.shaderID);
+                StringIDSetsPair propertiesAsUniforms;
+                auto* paintBinders = bucket.paintBinders(getID(), definition.key);
+                auto attributes = context.createVertexAttributeArray();
+                if (paintBinders) paintBinders->populateVertexAttributes(*attributes, propertiesAsUniforms);
+                const auto shader = shaderGroup ? shaderGroup->getOrCreateShader(context, propertiesAsUniforms)
+                                                : gfx::ShaderPtr{};
+                if (!shader || definition.segments.empty()) {
+                    continue;
                 }
-                vertexCount = std::max(vertexCount, stream->second->getRawCount());
-                if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
-            }
-            if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
 
-            auto builder = context.createDrawableBuilder("plugin/" + registration->type);
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-            builder->setRenderPass(renderPass);
-            builder->setDrawPriority(passIndex);
-            builder->setEnableDepth(pass.depthTest);
-            builder->setDepthType(pass.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-            builder->setIs3D(registration->is3D);
-            builder->setEnableStencil(pass.stencilDedup);
-            builder->setEnableColor(pass.colorWrite);
-            builder->setColorMode(!pass.colorWrite ? gfx::ColorMode::disabled() : pass.blend ? gfx::ColorMode::alphaBlended() : gfx::ColorMode::unblended());
-            builder->setCullFaceMode(pass.cull == MLN_PLUGIN_CULL_BACK_CCW ? gfx::CullFaceMode::backCCW() : gfx::CullFaceMode::disabled());
-            builder->setVertexAttributes(std::move(attributes));
-            builder->setRawVertices({}, vertexCount, firstType);
-            builder->setSegments(
-                gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
-            builder->flush(context);
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                drawable->setLayerTweaker(layerTweaker);
-                if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
-                drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID, passIndex));
-                drawable->setDepthMaskFor3D(pass.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-                drawable->setRenderTile(renderTilesOwner, &tile);
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
+                std::size_t vertexCount = 0;
+                gfx::AttributeDataType firstType = gfx::AttributeDataType::Invalid;
+                for (const auto& binding : definition.attributes) {
+                    const auto stream = bucket.vertexStreams.find(binding.streamID);
+                    if (stream == bucket.vertexStreams.end()) continue;
+                    const auto type = binding.type;
+                    if (const auto& attr = attributes->set(binding.attributeID)) {
+                        attr->setSharedRawData(
+                            stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
+                    }
+                    vertexCount = std::max(vertexCount, stream->second->getRawCount());
+                    if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
+                }
+                if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
+
+                auto builder = context.createDrawableBuilder("plugin/" + registration->type);
+                builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+                builder->setRenderPass(renderPass);
+                builder->setDrawPriority(passIndex);
+                builder->setEnableDepth(pass.depthTest);
+                builder->setDepthType(pass.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+                builder->setIs3D(registration->is3D);
+                builder->setEnableStencil(pass.stencilDedup);
+                builder->setEnableColor(pass.colorWrite);
+                builder->setColorMode(!pass.colorWrite ? gfx::ColorMode::disabled()
+                                      : pass.blend     ? gfx::ColorMode::alphaBlended()
+                                                       : gfx::ColorMode::unblended());
+                builder->setCullFaceMode(pass.cull == MLN_PLUGIN_CULL_BACK_CCW ? gfx::CullFaceMode::backCCW()
+                                                                               : gfx::CullFaceMode::disabled());
+                builder->setVertexAttributes(std::move(attributes));
+                builder->setRawVertices({}, vertexCount, firstType);
+                builder->setSegments(
+                    gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
+                builder->flush(context);
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(layerTweaker);
+                    if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
+                    drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID, passIndex));
+                    drawable->setDepthMaskFor3D(pass.depthWrite ? gfx::DepthMaskType::ReadWrite
+                                                                : gfx::DepthMaskType::ReadOnly);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
             }
         }
-    }
     }
 }
 

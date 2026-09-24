@@ -20,7 +20,8 @@ using namespace mln;
 namespace {
 const mln_plugin_descriptor_v1* registeredDescriptor;
 mln_plugin_status captureDescriptor(const mln_plugin_descriptor_v1* d, char*, size_t) {
-    registeredDescriptor = d; return MLN_PLUGIN_STATUS_OK;
+    registeredDescriptor = d;
+    return MLN_PLUGIN_STATUS_OK;
 }
 const char* styleJSON = R"({"version":8,"center":[0,0],"zoom":15.5,"pitch":55,"bearing":25,
 "sources":{"s":{"type":"geojson","data":{"type":"FeatureCollection","features":[
@@ -30,8 +31,8 @@ const char* styleJSON = R"({"version":8,"center":[0,0],"zoom":15.5,"pitch":55,"b
 struct Scene {
     std::shared_ptr<StubFileSource> source = std::make_shared<StubFileSource>();
     MapObserver observer;
-    HeadlessFrontend frontend{Size{256,256}, 1};
-    MapAdapter map{frontend, observer, source, MapOptions().withMapMode(MapMode::Static).withSize({256,256})};
+    HeadlessFrontend frontend{Size{256, 256}, 1};
+    MapAdapter map{frontend, observer, source, MapOptions().withMapMode(MapMode::Static).withSize({256, 256})};
     style::Layer* layer = nullptr;
     Scene(bool plugin) {
         map.getStyle().loadJSON(styleJSON);
@@ -43,12 +44,15 @@ struct Scene {
             EXPECT_TRUE(parsed) << error.message;
             extrusion = std::move(*parsed);
             EXPECT_EQ(extrusion->getTypeInfo(), &plugin::PluginRegistry::get().findLayerType("fill-extrusion")->info);
-        } else extrusion = std::make_unique<style::FillExtrusionLayer>("extrusion", "s");
+        } else
+            extrusion = std::make_unique<style::FillExtrusionLayer>("extrusion", "s");
         layer = extrusion.get();
         map.getStyle().addLayer(std::move(extrusion));
     }
     void set(const std::string& name, const char* json) {
-        JSDocument doc; doc.Parse(json); const JSValue* value = &doc;
+        JSDocument doc;
+        doc.Parse(json);
+        const JSValue* value = &doc;
         EXPECT_FALSE(layer->setProperty(name, style::conversion::Convertible(value)));
     }
 };
@@ -61,8 +65,7 @@ void compare(Scene& builtin, Scene& plugin) {
     size_t different = 0;
     for (size_t i = 0; i < a.image.bytes(); i += 4) {
         bool differs = false;
-        for (size_t c = 0; c < 4; ++c)
-            differs |= std::abs(int(a.image.data[i+c]) - int(b.image.data[i+c])) > 1;
+        for (size_t c = 0; c < 4; ++c) differs |= std::abs(int(a.image.data[i + c]) - int(b.image.data[i + c])) > 1;
         different += differs;
     }
     EXPECT_LE(different, size_t(65));
@@ -85,19 +88,23 @@ TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
     type.replace_builtin = 1;
     copy.plugin_id = {"another-extrusion", 17};
     EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&copy, error, sizeof(error)));
-    EXPECT_EQ(MLN_PLUGIN_STATUS_ALREADY_REGISTERED, mln_fill_extrusion_register(mln_plugin_register_v1, error, sizeof(error)));
+    EXPECT_EQ(MLN_PLUGIN_STATUS_ALREADY_REGISTERED,
+              mln_fill_extrusion_register(mln_plugin_register_v1, error, sizeof(error)));
     Scene plugin(true);
     for (auto* scene : {&builtin, &plugin}) {
-        scene->set("fill-extrusion-height", R"(["interpolate",["linear"],["zoom"],15,["get","h"],16,["*",2,["get","h"]]])");
+        scene->set("fill-extrusion-height",
+                   R"(["interpolate",["linear"],["zoom"],15,["get","h"],16,["*",2,["get","h"]]])");
         scene->set("fill-extrusion-color", "\"#da526c\"");
     }
     for (const auto* opacity : {"0", "0.5", "1", "0.25", "0", "1"}) {
         SCOPED_TRACE(opacity);
-        builtin.set("fill-extrusion-opacity", opacity); plugin.set("fill-extrusion-opacity", opacity);
+        builtin.set("fill-extrusion-opacity", opacity);
+        plugin.set("fill-extrusion-opacity", opacity);
         compare(builtin, plugin);
     }
     for (const auto* gradient : {"false", "true"}) {
-        builtin.set("fill-extrusion-vertical-gradient", gradient); plugin.set("fill-extrusion-vertical-gradient", gradient);
+        builtin.set("fill-extrusion-vertical-gradient", gradient);
+        plugin.set("fill-extrusion-vertical-gradient", gradient);
         for (const auto* anchor : {"\"map\"", "\"viewport\""}) {
             for (auto* scene : {&builtin, &plugin}) {
                 scene->set("fill-extrusion-translate", "[21,-17]");
@@ -111,7 +118,8 @@ TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
     }
     for (auto* scene : {&builtin, &plugin}) {
         scene->set("fill-extrusion-height", R"(["coalesce",["feature-state","height"],["get","h"]])");
-        scene->set("fill-extrusion-color", R"(["case",["boolean",["feature-state","selected"],false],"#12ef47","#ab3265"])");
+        scene->set("fill-extrusion-color",
+                   R"(["case",["boolean",["feature-state","selected"],false],"#12ef47","#ab3265"])");
         scene->frontend.getRenderer()->setFeatureState("s", {}, "1", {{"height", 180.0}, {"selected", true}});
     }
     compare(builtin, plugin);
@@ -119,9 +127,12 @@ TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
         scene->frontend.getRenderer()->setFeatureState("s", {}, "1", {{"height", 30.0}, {"selected", false}});
     compare(builtin, plugin);
 
-    JSDocument unsupported; unsupported.SetString("unsupported"); const JSValue* value = &unsupported;
+    JSDocument unsupported;
+    unsupported.SetString("unsupported");
+    const JSValue* value = &unsupported;
     EXPECT_TRUE(plugin.layer->setProperty("fill-extrusion-pattern", style::conversion::Convertible(value)));
-    EXPECT_TRUE(plugin.layer->setProperty("fill-extrusion-rounded-corner-distance", style::conversion::Convertible(value)));
+    EXPECT_TRUE(
+        plugin.layer->setProperty("fill-extrusion-rounded-corner-distance", style::conversion::Convertible(value)));
     EXPECT_NE(builtin.layer->getTypeInfo(), plugin.layer->getTypeInfo());
 }
 } // namespace

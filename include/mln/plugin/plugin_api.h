@@ -465,10 +465,9 @@ typedef struct mln_plugin_layer_evaluation_v1 {
  * Properties and output are borrowed. Output starts with all passes enabled and
  * zero translation. Failure or invalid output suppresses rendering for this
  * evaluation. Geometry and feature paint bindings are unaffected. */
-typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(
-    const mln_plugin_property_value_v1* camera_properties,
-    size_t property_count,
-    mln_plugin_layer_evaluation_v1* output);
+typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_property_value_v1* camera_properties,
+                                                          size_t property_count,
+                                                          mln_plugin_layer_evaluation_v1* output);
 
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;

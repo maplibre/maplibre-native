@@ -27,12 +27,14 @@ mln_plugin_string view(const std::string& text) {
 std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
+int evaluationMode = 0;
 
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
                        bool withUniforms = false,
                        bool scopedUniforms = false,
-                       bool stencilOverlapDedup = false) {
+                       bool stencilOverlapDedup = false,
+                       bool evaluateRendering = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -186,9 +188,21 @@ void registerTriangles(const std::string& pluginID,
         layer.shader_count = 1;
         layer.properties = withUniforms ? &radius : nullptr;
         layer.property_count = withUniforms ? 1u : 0u;
-        static const mln_plugin_draw_pass_v1 stencilPass{sizeof(mln_plugin_draw_pass_v1), 0, 0, 1, 1, 1, MLN_PLUGIN_CULL_NONE};
+        static const mln_plugin_draw_pass_v1 stencilPass{
+            sizeof(mln_plugin_draw_pass_v1), 0, 0, 1, 1, 1, MLN_PLUGIN_CULL_NONE};
         layer.is_3d = stencilOverlapDedup;
-        if (stencilOverlapDedup) { layer.draw_passes = &stencilPass; layer.draw_pass_count = 1; }
+        if (stencilOverlapDedup) {
+            layer.draw_passes = &stencilPass;
+            layer.draw_pass_count = 1;
+        }
+        if (evaluateRendering)
+            layer.evaluate_layer =
+                [](const mln_plugin_property_value_v1*, size_t, mln_plugin_layer_evaluation_v1* out) {
+                    if (evaluationMode == 1) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+                    if (evaluationMode == 2) out->enabled_passes = 2; // Invalid bit for a single-pass layer.
+                    if (evaluationMode == 3) out->enabled_passes = 0;
+                    return MLN_PLUGIN_STATUS_OK;
+                };
         layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
             return MLN_PLUGIN_STATUS_OK;
         };
@@ -383,6 +397,20 @@ TEST(PluginRendering, NormalizedByteColorAttributes) {
         EXPECT_NEAR(64, pixel[1], 1);
         EXPECT_EQ(0, pixel[2]);
         EXPECT_EQ(255, pixel[3]);
+    }
+}
+
+TEST(PluginRendering, LayerEvaluationFailureInvalidOutputAndRecovery) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.layer-evaluation", false, false, false, false, true));
+    RenderTest test;
+    test.expectTriangles("test.layer-evaluation");
+    for (const auto mode : {1, 2, 3, 0}) {
+        evaluationMode = mode;
+        // Layer metadata changes force evaluation before render orchestration.
+        for (const auto* id : {"left", "right"}) test.map.getStyle().getLayer(id)->setMaxZoom(20 + mode);
+        const auto result = test.frontend.render(test.map);
+        const auto* pixel = result.image.data.get() + (32 * 64 + 16) * 4;
+        EXPECT_EQ(mode == 0 ? 255 : 0, pixel[3]);
     }
 }
 

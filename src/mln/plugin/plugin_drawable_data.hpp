@@ -9,7 +9,8 @@
 namespace mln::plugin {
 struct DrawableData final : gfx::DrawableData {
     explicit DrawableData(std::string shaderID_, uint32_t passIndex_ = 0)
-        : shaderID(std::move(shaderID_)), passIndex(passIndex_) {}
+        : shaderID(std::move(shaderID_)),
+          passIndex(passIndex_) {}
     std::string shaderID;
     uint32_t passIndex;
     bool uniformFailed = false;

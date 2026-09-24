@@ -56,7 +56,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 tileMatrix = getTileMatrix(*tileID,
                                            parameters,
                                            {rendering.translation.x, rendering.translation.y},
-                                           rendering.translation_anchor_viewport ? style::TranslateAnchorType::Viewport : style::TranslateAnchorType::Map,
+                                           rendering.translation_anchor_viewport ? style::TranslateAnchorType::Viewport
+                                                                                 : style::TranslateAnchorType::Map,
                                            registration->enableNearClippedMatrix,
                                            false,
                                            drawable,

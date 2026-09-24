@@ -33,7 +33,8 @@ LayerManager::LayerManager() = default;
 LayerManager::~LayerManager() = default;
 
 #if MLN_WITH_PLUGINS
-bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>> factories, std::string& error,
+bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>> factories,
+                                          std::string& error,
                                           const std::vector<std::string>& replaceBuiltins) {
     std::lock_guard lock(impl->runtimeMutex);
     error.clear();
@@ -44,8 +45,9 @@ bool LayerManager::registerLayerFactories(std::vector<std::unique_ptr<LayerFacto
             error = "Layer factory must have a non-empty, immutable type name";
             return false;
         }
-        if ((getFactory(info->type) && std::find(replaceBuiltins.begin(), replaceBuiltins.end(), info->type) == replaceBuiltins.end()) || impl->runtimeFactories.contains(info->type) ||
-            !names.emplace(info->type).second) {
+        if ((getFactory(info->type) &&
+             std::find(replaceBuiltins.begin(), replaceBuiltins.end(), info->type) == replaceBuiltins.end()) ||
+            impl->runtimeFactories.contains(info->type) || !names.emplace(info->type).second) {
             error = "Layer type is already registered: " + std::string(info->type);
             return false;
         }
@@ -73,7 +75,6 @@ LayerFactory* LayerManager::findFactory(const style::LayerTypeInfo* info) noexce
     // layers, which can carry separate but equivalent LayerTypeInfo instances.
     // Check the name first because some platform pointer lookups assert when
     // they encounter a runtime type.
-
 
     // Runtime factories require factory-owned type identity, not just a name.
     std::lock_guard lock(impl->runtimeMutex);

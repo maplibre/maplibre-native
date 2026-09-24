@@ -485,8 +485,12 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                 error = "plugin draw pass is malformed";
                 return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
             }
-            copiedLayerType.drawPasses.push_back({bool(pass.depth_test), bool(pass.depth_write),
-                bool(pass.color_write), bool(pass.blend), bool(pass.stencil_dedup), pass.cull});
+            copiedLayerType.drawPasses.push_back({bool(pass.depth_test),
+                                                  bool(pass.depth_write),
+                                                  bool(pass.color_write),
+                                                  bool(pass.blend),
+                                                  bool(pass.stencil_dedup),
+                                                  pass.cull});
         }
         if (copiedLayerType.drawPasses.empty()) copiedLayerType.drawPasses.emplace_back();
         copiedLayerType.enableNearClippedMatrix = layerType.enable_near_clipped_matrix != 0;
@@ -580,7 +584,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         factories.push_back(std::make_unique<PluginStyleLayerFactory>(type));
     }
     std::vector<std::string> replacements;
-    for (const auto& type : newLayerTypes) if (type->replaceBuiltin) replacements.push_back(type->type);
+    for (const auto& type : newLayerTypes)
+        if (type->replaceBuiltin) replacements.push_back(type->type);
     if (!LayerManager::get()->registerLayerFactories(std::move(factories), error, replacements)) {
         return MLN_PLUGIN_STATUS_CONFLICT;
     }

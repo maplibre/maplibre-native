@@ -388,7 +388,9 @@ TEST(PluginProperties, BooleanDefaultsSerializationCameraAndFeatureState) {
     const auto geometry = tile.getFeature(0);
     EXPECT_FALSE(feature.evaluate(10, *geometry, {}, definition, storage).data.boolean_value);
     EXPECT_TRUE(feature.evaluate(10, *geometry, {{"enabled", true}}, definition, storage).data.boolean_value);
-    JSDocument doc; doc.SetInt(1); const JSValue* value = &doc;
+    JSDocument doc;
+    doc.SetInt(1);
+    const JSValue* value = &doc;
     style::conversion::Error error;
     EXPECT_FALSE(style::convertPluginPropertyValue(definition, style::conversion::Convertible(value), error));
 }

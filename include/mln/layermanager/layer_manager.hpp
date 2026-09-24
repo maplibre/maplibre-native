@@ -44,7 +44,8 @@ public:
      * Registration and lookups are thread-safe; callbacks run without the lock.
      * This is a C++ API for code built against the same core, not a DSO ABI.
      */
-    bool registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>>, std::string& error,
+    bool registerLayerFactories(std::vector<std::unique_ptr<LayerFactory>>,
+                                std::string& error,
                                 const std::vector<std::string>& replaceBuiltins = {});
     bool hasLayerType(const std::string&) noexcept;
 #endif

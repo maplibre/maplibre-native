@@ -318,12 +318,10 @@ TEST(PluginApi, CopiesRenderingModeFlags) {
     EXPECT_TRUE(enabledLayer->enableNearClippedMatrix);
 }
 
-
 TEST(PluginApi, ValidatesAndCopiesOrderedRenderingDescriptors) {
     Descriptor input("test.ordered-passes");
-    mln_plugin_draw_pass_v1 passes[] = {
-        {sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
-        {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 1, MLN_PLUGIN_CULL_BACK_CCW}};
+    mln_plugin_draw_pass_v1 passes[] = {{sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
+                                        {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 1, MLN_PLUGIN_CULL_BACK_CCW}};
     input.layer.draw_passes = passes;
     input.layer.draw_pass_count = 2;
     input.expectRejected(); // Layer stencil requires an explicit 3D layer.
