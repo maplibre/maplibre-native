@@ -42,6 +42,7 @@ const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backen
 
 std::string resourcePrelude(const ShaderDefinition& shader) {
     std::ostringstream output;
+    output << "#define MLN_PLUGIN_INSTANCED " << shader.instanced << '\n';
 #if MLN_RENDER_BACKEND_METAL
     output << "#define MLN_PLUGIN_DRAWABLE_INDEX_BINDING " << shaders::idGlobalUBOIndex << '\n';
 #endif
@@ -136,7 +137,10 @@ public:
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
         for (const auto& attr : definition->attributes) {
             if (!propertiesAsUniforms.second.contains(attr.id)) {
-                typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
+                if (definition->instanced)
+                    typed->initInstanceAttribute({attr.location, attributeType(attr.type), attr.id});
+                else
+                    typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
             }
         }
         if (definition->tilePatternTexture && propertiesAsUniforms.first.contains("__plugin_pattern_enabled"))

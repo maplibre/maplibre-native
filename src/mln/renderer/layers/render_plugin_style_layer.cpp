@@ -256,8 +256,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                     if (stream == bucket.vertexStreams.end()) continue;
                     const auto type = binding.type;
                     if (const auto& attr = attributes->set(binding.attributeID)) {
-                        attr->setSharedRawData(
-                            stream->second, binding.byteOffset, 0, stream->second->getRawSize(), type);
+                        attr->setSharedRawData(stream->second,
+                                               binding.byteOffset,
+                                               binding.elementOffset,
+                                               stream->second->getRawSize(),
+                                               type);
                     }
                     vertexCount = std::max(vertexCount, stream->second->getRawCount());
                     if (firstType == gfx::AttributeDataType::Invalid) firstType = type;
@@ -283,8 +286,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                                        : gfx::ColorMode::unblended());
                 builder->setCullFaceMode(pass.cull == MLN_PLUGIN_CULL_BACK_CCW ? gfx::CullFaceMode::backCCW()
                                                                                : gfx::CullFaceMode::disabled());
-                builder->setVertexAttributes(std::move(attributes));
-                builder->setRawVertices({}, vertexCount, firstType);
+                if (definition.instanced)
+                    builder->setInstanceAttributes(std::move(attributes));
+                else
+                    builder->setVertexAttributes(std::move(attributes));
+                builder->setRawVertices({}, definition.primitiveVertexCount, firstType);
                 builder->setSegments(
                     gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
                 builder->flush(context);

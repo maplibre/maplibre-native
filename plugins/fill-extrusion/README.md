@@ -15,9 +15,10 @@ type and properties. Existing built-in layer objects keep their implementation
 identity, including their renderer and layout dispatch. Another plugin cannot
 claim an already registered replacement.
 
-The plugin owns ring classification, holes, Earcut roof triangulation, walls,
-16-bit index segmentation, lighting shaders, and footprint queries. The host
-owns tiles, GPU buffers, property expressions and transitions, feature-state
+The plugin owns ring classification, holes, Earcut roof triangulation, instanced
+wall quads, 16-bit roof index segmentation, lighting shaders, and footprint queries.
+Roofs and walls share packed eight-byte outline records and feature paint buffers.
+The host owns tiles, GPU buffers, property expressions and transitions, feature-state
 bindings, light evaluation, translation matrices, and pass orchestration.
 
 Supported paint properties are color (black), base (0), height (0), opacity (1),
@@ -66,6 +67,18 @@ Uniform contexts supply tile coordinates, wrap, zoom, crossfade scales/fraction,
 and atlas dimensions. Pattern expressions participate in sprite dependencies
 and bucket invalidation; explicitly empty and undefined properties stay distinct.
 
+A Vulkan shader can set `instanced = 1`; all geometry and host paint attributes
+then advance once per instance. The shader generates each primitive's corners
+from `gl_VertexIndex`, with `MLN_PLUGIN_INSTANCED` supplied by the host. Segment
+`first_instance` and `instance_count` select input records; ordinary shaders
+require both fields to be zero. Attribute `element_offset` selects a starting
+record within a shared stream, allowing wall endpoints to read adjacent records
+without duplicating the outline. The host validates record bounds independently
+of primitive indices. Feature ranges address input records, including unused
+sentinels, and identical feature mappings/property bindings share paint buffers
+across roof and wall drawables. Mixed vertex/instance attributes within one
+shader and non-Vulkan instancing are not exposed by this API.
+
 All metadata is copied at registration, callback memory remains borrowed, and
 all callbacks must return normally. The n-gon example uses an explicit pass
 matching its original rendering settings.
@@ -105,4 +118,4 @@ Earcut is vendored from the repository's existing copy with its ISC license.
 
 A separate built-in/plugin benchmark measures initial loading, steady frames,
 paint updates, feature-state updates, draw calls, and buffer memory. See the
-[commands, measurements, optimizations, and remaining memory gap](benchmarks/README.md).
+[commands, instancing measurements, and remaining costs](benchmarks/README.md).

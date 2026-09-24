@@ -1,4 +1,5 @@
 #include <mln/vulkan/drawable.hpp>
+#include <tuple>
 
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/depth_mode.hpp>
@@ -436,7 +437,10 @@ void Drawable::buildVulkanInputBindings() {
     impl->pipelineInfo.inputAttributes.clear();
     impl->pipelineInfo.inputBindings.clear();
 
-    std::vector<const gfx::VertexBufferResource*> uniqueBuffers;
+    // Different record offsets, strides, or input rates need distinct bindings
+    // even when attributes share the same GPU allocation.
+    using BufferBindingKey = std::tuple<const gfx::VertexBufferResource*, uint32_t, uint32_t, vk::VertexInputRate>;
+    std::vector<BufferBindingKey> uniqueBuffers;
 
     const auto buildBindings = [&](const gfx::AttributeBindingArray& bindings, vk::VertexInputRate inputRate) {
         for (size_t i = 0; i < bindings.size(); ++i) {
@@ -446,13 +450,15 @@ void Drawable::buildVulkanInputBindings() {
             const auto& vertexBuffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
             const auto& buffer = vertexBuffer->get();
 
-            const auto& buffIt = std::find(uniqueBuffers.begin(), uniqueBuffers.end(), binding->vertexBufferResource);
+            const BufferBindingKey key{
+                binding->vertexBufferResource, binding->vertexStride, binding->vertexOffset, inputRate};
+            const auto buffIt = std::find(uniqueBuffers.begin(), uniqueBuffers.end(), key);
             std::size_t bindingIndex = 0;
 
             if (buffIt == uniqueBuffers.end()) {
                 bindingIndex = impl->pipelineInfo.inputBindings.size();
 
-                uniqueBuffers.push_back(binding->vertexBufferResource);
+                uniqueBuffers.push_back(key);
 
                 // add new buffer binding
                 impl->pipelineInfo.inputBindings.push_back(vk::VertexInputBindingDescription()
@@ -461,7 +467,7 @@ void Drawable::buildVulkanInputBindings() {
                                                                .setInputRate(inputRate));
 
                 impl->vulkanVertexBuffers.push_back(buffer.getVulkanBuffer());
-                impl->vulkanVertexOffsets.push_back(0u);
+                impl->vulkanVertexOffsets.push_back(vk::DeviceSize(binding->vertexOffset) * binding->vertexStride);
             } else {
                 bindingIndex = std::distance(uniqueBuffers.begin(), buffIt);
             }

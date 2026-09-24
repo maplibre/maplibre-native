@@ -21,17 +21,18 @@ using Polygon = std::vector<Ring>;
 struct Vertex {
     int16_t position[2];
     uint16_t decimalsEdge[2];
-    int16_t normal[2];
 };
+static_assert(sizeof(Vertex) == 8);
 struct Layout {
     double cornerDistance = 0;
     std::vector<Vertex> vertices;
-    std::vector<uint16_t> indices;
+    std::vector<uint16_t> indices{0, 2, 1, 1, 2, 3};
     std::vector<mln_plugin_segment_v1> segments;
     std::vector<mln_plugin_feature_vertex_range_v1> ranges;
     mln_plugin_vertex_stream_v1 stream{};
-    mln_plugin_attribute_binding_v1 attributes[3]{};
-    mln_plugin_drawable_descriptor_v1 drawable{};
+    mln_plugin_attribute_binding_v1 roofAttributes[4]{}, wallAttributes[4]{};
+    mln_plugin_segment_v1 wallSegment{};
+    mln_plugin_drawable_descriptor_v1 drawables[2]{};
 };
 
 double area(const Ring& ring) {
@@ -73,21 +74,17 @@ std::vector<Polygon> polygons(const mln_plugin_feature_v1& f) {
 void reservePrimitive(Layout& l, uint32_t count) {
     if (l.vertices.size() > UINT32_MAX - count || l.indices.size() > UINT32_MAX - 6u)
         throw std::length_error("extrusion geometry exceeds ABI limits");
-    if (l.segments.empty() || l.segments.back().vertex_length + count > UINT16_MAX)
+    if (l.segments.empty() || l.vertices.size() - l.segments.back().vertex_offset + count > UINT16_MAX)
         l.segments.push_back(
-            {sizeof(mln_plugin_segment_v1), uint32_t(l.vertices.size()), uint32_t(l.indices.size()), 0, 0});
+            {sizeof(mln_plugin_segment_v1), uint32_t(l.vertices.size()), uint32_t(l.indices.size()), 0, 0, 0, 0});
 }
-Vertex vertex(const Point& p, float top, float nx, float ny, float nz, float edge = 0) {
-    (void)nz; // A zero XY normal marks a roof.
+Vertex vertex(const Point& p, bool discarded, uint16_t edge = 0) {
     const auto q = quantize(p);
     const auto x = std::floor(q[0]), y = std::floor(q[1]);
     const auto fx = uint16_t((q[0] - x) * 128), fy = uint16_t((q[1] - y) * 128);
-    return {{int16_t(x), int16_t(y)},
-            {uint16_t((fx * 256 + fy) * 2 + (top > 0)), uint16_t(edge)},
-            {int16_t(nx * 16384), int16_t(ny * 16384)}};
+    return {{int16_t(x), int16_t(y)}, {uint16_t((fx * 256 + fy) * 2 + discarded), edge}};
 }
 void emitPolygon(Layout& l, Polygon& poly) {
-    // Bound pathological hole counts exactly as the built-in tessellator does.
     if (poly.size() > 501) {
         std::nth_element(poly.begin() + 1, poly.begin() + 501, poly.end(), [](const Ring& a, const Ring& b) {
             return std::abs(area(a)) > std::abs(area(b));
@@ -95,55 +92,58 @@ void emitPolygon(Layout& l, Polygon& poly) {
         poly.resize(501);
     }
     if (l.cornerDistance > 0) poly = rounded(std::move(poly), l.cornerDistance);
+    const auto roof = mapbox::earcut<uint32_t>(poly);
+    if (roof.empty()) return;
     std::vector<Point> flat;
+    for (const auto& ring : poly) flat.insert(flat.end(), ring.begin(), ring.end());
+    if (flat.size() > UINT32_MAX - l.vertices.size() || roof.size() > UINT32_MAX - l.indices.size())
+        throw std::length_error("extrusion geometry exceeds ABI limits");
+    const auto polygonStart = uint32_t(l.vertices.size());
+    if (flat.size() <= UINT16_MAX) reservePrimitive(l, uint32_t(flat.size()));
+    // Adjacent instance attributes read the same outline buffer, shifted by one
+    // record. Ring terminators suppress walls joining unrelated rings/features.
     for (const auto& ring : poly) {
-        flat.insert(flat.end(), ring.begin(), ring.end());
-        uint32_t edgeDistance = 0;
-        for (size_t i = 0; i + 1 < ring.size(); ++i) {
-            const auto& a = ring[i];
-            const auto& b = ring[i + 1];
-            const auto qa = quantize(a), qb = quantize(b);
-            const float dx = float(qb[0] - qa[0]), dy = float(qb[1] - qa[1]);
-            const float length = std::sqrt(dx * dx + dy * dy);
-            if (!length) continue;
-            const auto distance = static_cast<uint16_t>(std::hypot(b[0] - a[0], b[1] - a[1]));
-            const auto nextDistance = (edgeDistance + distance > UINT16_MAX ? 0 : edgeDistance) + distance;
-            reservePrimitive(l, 4);
-            auto& seg = l.segments.back();
-            const auto start = seg.vertex_length;
-            const float nx = -dy / length, ny = dx / length;
-            l.vertices.insert(l.vertices.end(),
-                              {vertex(b, 0, nx, ny, 0, float(edgeDistance)),
-                               vertex(b, 1, nx, ny, 0, float(edgeDistance)),
-                               vertex(a, 0, nx, ny, 0, float(nextDistance)),
-                               vertex(a, 1, nx, ny, 0, float(nextDistance))});
-            edgeDistance = nextDistance;
-            for (uint32_t n : {0u, 2u, 1u, 1u, 2u, 3u}) l.indices.push_back(uint16_t(start + n));
-            seg.vertex_length += 4;
-            seg.index_length += 6;
+        uint32_t distance = 0;
+        for (size_t i = 0; i < ring.size(); ++i) {
+            const bool last = i + 1 == ring.size();
+            const bool discarded = last || quantize(ring[i]) == quantize(ring[i + 1]);
+            l.vertices.push_back(vertex(ring[i], discarded, uint16_t(distance)));
+            if (!last) {
+                const auto edge = uint16_t(std::hypot(ring[i + 1][0] - ring[i][0], ring[i + 1][1] - ring[i][1]));
+                distance = (distance + edge > UINT16_MAX ? 0 : distance) + edge;
+            }
         }
     }
-    const auto roof = mapbox::earcut<uint32_t>(poly);
-    std::vector<uint32_t> roofVertices(flat.size(), UINT32_MAX);
-    uint32_t roofSegment = UINT32_MAX;
-    for (size_t i = 0; i < roof.size(); i += 3) {
-        // A triangle can introduce up to three vertices. At a segment boundary
-        // rebuild the local remap; indices must never refer into another segment.
-        reservePrimitive(l, 3);
-        auto& seg = l.segments.back();
-        if (roofSegment != seg.vertex_offset) {
-            std::fill(roofVertices.begin(), roofVertices.end(), UINT32_MAX);
-            roofSegment = seg.vertex_offset;
-        }
-        for (size_t j : {i, i + 2, i + 1}) {
-            auto& index = roofVertices.at(roof[j]);
-            if (index == UINT32_MAX) {
-                index = seg.vertex_length++;
-                l.vertices.push_back(vertex(flat.at(roof[j]), 1, 0, 0, 1));
+    if (flat.size() <= UINT16_MAX) {
+        auto& segment = l.segments.back();
+        for (size_t i = 0; i < roof.size(); i += 3)
+            for (size_t j : {i, i + 2, i + 1})
+                l.indices.push_back(uint16_t(polygonStart - segment.vertex_offset + roof[j]));
+        segment.vertex_length = uint32_t(l.vertices.size()) - segment.vertex_offset;
+        segment.index_length += uint32_t(roof.size());
+    } else {
+        // Exceptional outlines can exceed the index range. Keep walls instanced
+        // and remap roof vertices into independent 16-bit segments. These copied
+        // vertices are all marked as wall terminators.
+        std::vector<uint32_t> roofVertices(flat.size(), UINT32_MAX);
+        uint32_t roofSegment = UINT32_MAX;
+        for (size_t i = 0; i < roof.size(); i += 3) {
+            reservePrimitive(l, 3);
+            auto& segment = l.segments.back();
+            if (roofSegment != segment.vertex_offset) {
+                std::fill(roofVertices.begin(), roofVertices.end(), UINT32_MAX);
+                roofSegment = segment.vertex_offset;
             }
-            l.indices.push_back(uint16_t(index));
+            for (size_t j : {i, i + 2, i + 1}) {
+                auto& index = roofVertices.at(roof[j]);
+                if (index == UINT32_MAX) {
+                    index = segment.vertex_length++;
+                    l.vertices.push_back(vertex(flat.at(roof[j]), true));
+                }
+                l.indices.push_back(uint16_t(index));
+            }
+            segment.index_length += 3;
         }
-        seg.index_length += 3;
     }
 }
 mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void** instance) try {
@@ -167,11 +167,12 @@ mln_plugin_status layoutFeature(void* instance, const mln_plugin_feature_v1* f) 
     const auto first = uint32_t(l.vertices.size());
     for (auto& poly : polygons(*f)) emitPolygon(l, poly);
     if (l.vertices.size() != first)
-        l.ranges.push_back({sizeof(mln_plugin_feature_vertex_range_v1),
-                            f->feature_index,
-                            1,
-                            first,
-                            uint32_t(l.vertices.size() - first)});
+        for (uint64_t key : {1u, 2u})
+            l.ranges.push_back({sizeof(mln_plugin_feature_vertex_range_v1),
+                                f->feature_index,
+                                key,
+                                first,
+                                uint32_t(l.vertices.size() - first)});
     return MLN_PLUGIN_STATUS_OK;
 } catch (...) {
     return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
@@ -185,16 +186,29 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* out) {
                 l.vertices.size() * sizeof(Vertex),
                 uint32_t(l.vertices.size()),
                 sizeof(Vertex)};
-    l.attributes[0] = {sizeof(mln_plugin_attribute_binding_v1), 0, 0, offsetof(Vertex, position)};
-    l.attributes[1] = {sizeof(mln_plugin_attribute_binding_v1), 1, 0, offsetof(Vertex, normal)};
-    l.attributes[2] = {sizeof(mln_plugin_attribute_binding_v1), 8, 0, offsetof(Vertex, decimalsEdge)};
-    l.drawable = {sizeof(l.drawable), 1, str("solid"), l.attributes, 3, l.segments.data(), l.segments.size()};
+    l.roofAttributes[0] = {sizeof(mln_plugin_attribute_binding_v1), 0, 0, offsetof(Vertex, position), 0};
+    l.roofAttributes[1] = {sizeof(mln_plugin_attribute_binding_v1), 1, 0, offsetof(Vertex, position), 0};
+    l.roofAttributes[2] = {sizeof(mln_plugin_attribute_binding_v1), 8, 0, offsetof(Vertex, decimalsEdge), 0};
+    l.roofAttributes[3] = {sizeof(mln_plugin_attribute_binding_v1), 13, 0, offsetof(Vertex, decimalsEdge), 0};
+    std::copy_n(l.roofAttributes, 4, l.wallAttributes);
+    l.wallAttributes[1].element_offset = 1;
+    l.wallAttributes[3].element_offset = 1;
+    l.wallSegment = {sizeof(l.wallSegment), 0, 0, 4, 6, 0, l.vertices.empty() ? 0 : uint32_t(l.vertices.size() - 1)};
+    l.drawables[0] = {sizeof(mln_plugin_drawable_descriptor_v1),
+                      1,
+                      str("roof"),
+                      l.roofAttributes,
+                      4,
+                      l.segments.data(),
+                      l.segments.size()};
+    l.drawables[1] = {
+        sizeof(mln_plugin_drawable_descriptor_v1), 2, str("wall"), l.wallAttributes, 4, &l.wallSegment, 1};
     out->vertex_streams = &l.stream;
     out->vertex_stream_count = l.vertices.empty() ? 0 : 1;
     out->indices = l.indices.data();
-    out->index_count = l.indices.size();
-    out->drawables = &l.drawable;
-    out->drawable_count = l.indices.empty() ? 0 : 1;
+    out->index_count = l.vertices.empty() ? 0 : l.indices.size();
+    out->drawables = l.drawables;
+    out->drawable_count = l.vertices.empty() ? 0 : 2;
     out->feature_vertex_ranges = l.ranges.data();
     out->feature_vertex_range_count = l.ranges.size();
     out->query_radius = 0;
@@ -403,7 +417,7 @@ constexpr mln_plugin_property_descriptor_v1 properties[] = {
 };
 constexpr mln_plugin_shader_attribute_v1 attributes[] = {
     {sizeof(mln_plugin_shader_attribute_v1), 0, 0, str("a_pos"), MLN_PLUGIN_VERTEX_INT16_X2},
-    {sizeof(mln_plugin_shader_attribute_v1), 1, 1, str("a_normal"), MLN_PLUGIN_VERTEX_INT16_X2},
+    {sizeof(mln_plugin_shader_attribute_v1), 1, 1, str("a_next_pos"), MLN_PLUGIN_VERTEX_INT16_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 2, 2, str("a_color_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 3, 3, str("a_color_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 4, 4, str("a_base"), MLN_PLUGIN_VERTEX_FLOAT_X2},
@@ -415,6 +429,7 @@ constexpr mln_plugin_shader_attribute_v1 attributes[] = {
     {sizeof(mln_plugin_shader_attribute_v1), 10, 10, str("a_pattern_from_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 11, 11, str("a_pattern_to_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 12, 12, str("a_pattern_to_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1), 13, 13, str("a_next_decimals_edge"), MLN_PLUGIN_VERTEX_UINT16_X2},
 };
 constexpr mln_plugin_shader_property_binding_v1 bindings[] = {
     {sizeof(mln_plugin_shader_property_binding_v1),
@@ -490,17 +505,32 @@ constexpr mln_plugin_uniform_block_descriptor_v1 uniform{
     sizeof(Uniforms),
     MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT,
     MLN_PLUGIN_UNIFORM_DRAWABLE};
-constexpr mln_plugin_shader_descriptor_v1 shader{sizeof(shader),
-                                                 str("solid"),
-                                                 &source,
-                                                 1,
-                                                 attributes,
-                                                 std::size(attributes),
-                                                 &uniform,
-                                                 1,
-                                                 bindings,
-                                                 std::size(bindings),
-                                                 1};
+constexpr mln_plugin_shader_descriptor_v1 shaders[] = {
+    {sizeof(mln_plugin_shader_descriptor_v1),
+     str("roof"),
+     &source,
+     1,
+     attributes,
+     std::size(attributes),
+     &uniform,
+     1,
+     bindings,
+     std::size(bindings),
+     1,
+     0},
+    {sizeof(mln_plugin_shader_descriptor_v1),
+     str("wall"),
+     &source,
+     1,
+     attributes,
+     std::size(attributes),
+     &uniform,
+     1,
+     bindings,
+     std::size(bindings),
+     1,
+     1},
+};
 constexpr mln_plugin_draw_pass_v1 passes[] = {
     {sizeof(mln_plugin_draw_pass_v1), 1, 1, 1, 1, 0, MLN_PLUGIN_CULL_BACK_CCW},
     {sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
@@ -514,8 +544,8 @@ const mln_plugin_layer_type_v1 layer = [] {
     l.properties = properties;
     l.property_count = std::size(properties);
     l.geometry_type_mask = MLN_PLUGIN_GEOMETRY_POLYGON;
-    l.shaders = &shader;
-    l.shader_count = 1;
+    l.shaders = shaders;
+    l.shader_count = std::size(shaders);
     l.create_layout = createLayout;
     l.layout_feature = layoutFeature;
     l.finish_layout = finishLayout;

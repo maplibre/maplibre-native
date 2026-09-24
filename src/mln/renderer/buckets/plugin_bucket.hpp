@@ -84,6 +84,7 @@ public:
         std::size_t featureIndex;
         std::size_t firstVertex;
         std::size_t vertexCount;
+        bool operator==(const Range&) const = default;
     };
     struct Drawable {
         std::vector<Range> ranges;
@@ -177,6 +178,7 @@ struct PluginAttributeBinding {
     uint32_t streamID = 0;
     uint32_t byteOffset = 0;
     gfx::AttributeDataType type = gfx::AttributeDataType::Invalid;
+    uint32_t elementOffset = 0;
 };
 
 struct PluginDrawableDefinition {
@@ -184,7 +186,9 @@ struct PluginDrawableDefinition {
     std::string shaderID;
     std::vector<PluginAttributeBinding> attributes;
     SegmentVector segments;
-    std::size_t vertexCount = 0;
+    std::size_t vertexCount = 0; // Number of paint/geometry input records.
+    std::size_t primitiveVertexCount = 0;
+    bool instanced = false;
 };
 
 class PluginBucket final : public Bucket {
@@ -211,7 +215,7 @@ public:
     std::shared_ptr<gfx::IndexVectorBase> indices;
     std::vector<PluginDrawableDefinition> drawables;
     std::vector<PluginFeatureVertexRange> featureVertexRanges;
-    std::map<std::string, std::map<uint64_t, PluginPaintPropertyBinders>> paintPropertyBinders;
+    std::map<std::string, std::map<uint64_t, std::shared_ptr<PluginPaintPropertyBinders>>> paintPropertyBinders;
     std::map<std::string, std::shared_ptr<const style::PluginPropertyMap>> latestPaintProperties;
     std::map<std::string, float> latestZoom;
     float queryRadius = 0.0f;

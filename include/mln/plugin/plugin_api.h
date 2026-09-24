@@ -275,6 +275,10 @@ typedef struct mln_plugin_shader_descriptor_v1 {
     size_t property_binding_count;
     /* Tile sprite/pattern atlas, at sampler binding 0. Vulkan only. */
     uint8_t tile_pattern_texture;
+    /* Vulkan only: all attributes, including paint bindings, advance per
+     * instance. The vertex shader generates primitive corners using
+     * gl_VertexIndex. Zero retains ordinary indexed vertex attributes. */
+    uint8_t instanced;
 } mln_plugin_shader_descriptor_v1;
 
 /* Borrowed render-thread inputs for a host-owned plugin uniform block. */
@@ -340,6 +344,8 @@ typedef struct mln_plugin_vertex_stream_v1 {
     uint32_t stream_id;
     const uint8_t* data;
     size_t data_size;
+    /* Input records; instances for an instanced shader. Streams bound to one
+     * drawable must have equal counts before element_offset is applied. */
     uint32_t vertex_count;
     uint32_t stride;
 } mln_plugin_vertex_stream_v1;
@@ -349,15 +355,22 @@ typedef struct mln_plugin_attribute_binding_v1 {
     uint32_t attribute_id;
     uint32_t stream_id;
     uint32_t byte_offset;
-    /* Type comes from the shader's attribute declaration. */
+    /* Type comes from the shader's attribute declaration. Starting record in
+     * the stream, before vertex_offset or first_instance is applied. */
+    uint32_t element_offset;
 } mln_plugin_attribute_binding_v1;
 
 typedef struct mln_plugin_segment_v1 {
     uint32_t struct_size;
+    /* For instanced shaders these describe generated primitive corners,
+     * independently of the instance record range below. */
     uint32_t vertex_offset;
     uint32_t index_offset;
     uint32_t vertex_length;
     uint32_t index_length;
+    /* Both zero for ordinary draws. Instanced shaders require a positive count. */
+    uint32_t first_instance;
+    uint32_t instance_count;
 } mln_plugin_segment_v1;
 
 typedef struct mln_plugin_drawable_descriptor_v1 {
@@ -371,6 +384,8 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     size_t segment_count;
 } mln_plugin_drawable_descriptor_v1;
 
+/* For an instanced shader these ranges address input records (instances),
+ * including unused sentinel records, rather than generated primitive corners. */
 typedef struct mln_plugin_feature_vertex_range_v1 {
     uint32_t struct_size;
     uint64_t feature_index;

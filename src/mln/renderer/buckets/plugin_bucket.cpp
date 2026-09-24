@@ -476,9 +476,10 @@ void PluginBucket::update(const FeatureStates& states,
     const auto it = paintPropertyBinders.find(layerID);
     if (it == paintPropertyBinders.end()) return;
     bool changed = false;
+    std::set<PluginPaintPropertyBinders*> updated;
     for (auto& [key, binders] : it->second) {
         (void)key;
-        changed = binders.update(states, layer) || changed;
+        if (updated.insert(binders.get()).second) changed = binders->update(states, layer) || changed;
     }
     if (changed) {
         uploaded = false;
@@ -513,9 +514,11 @@ bool PluginBucket::synchronizePaint(const std::string& layerID,
     }
     bool rebuildDrawable = false;
     if (propertiesChanged) {
+        std::set<PluginPaintPropertyBinders*> updated;
         for (auto& [key, binders] : it->second) {
             (void)key;
-            rebuildDrawable = binders.synchronize(*properties) || rebuildDrawable;
+            if (updated.insert(binders.get()).second)
+                rebuildDrawable = binders->synchronize(*properties) || rebuildDrawable;
         }
     }
     if (rebuildDrawable) uploaded = false;
@@ -531,7 +534,7 @@ void PluginBucket::updateQueryRadius(const std::string& layerID,
     if (const auto layer = paintPropertyBinders.find(layerID); layer != paintPropertyBinders.end()) {
         for (const auto& [key, binders] : layer->second) {
             (void)key;
-            binders.appendStatistics(zoom, values);
+            binders->appendStatistics(zoom, values);
         }
     }
     std::vector<mln_plugin_property_statistics_v1> statistics;
@@ -570,7 +573,7 @@ PluginPaintPropertyBinders* PluginBucket::paintBinders(const std::string& layerI
     const auto layer = paintPropertyBinders.find(layerID);
     if (layer == paintPropertyBinders.end()) return nullptr;
     const auto drawable = layer->second.find(drawableKey);
-    return drawable == layer->second.end() ? nullptr : &drawable->second;
+    return drawable == layer->second.end() ? nullptr : drawable->second.get();
 }
 
 } // namespace mln

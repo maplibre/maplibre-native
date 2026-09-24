@@ -78,3 +78,27 @@ focused tests, 50 eligible solid renders, four queries, and 13 n-gon renders
 pass. Pattern results remain 7/8 with the byte-identical existing baseline
 failure. The plugins-disabled Vulkan runner builds and the public API header
 passes a C11 syntax check. See [benchmark results](../benchmarks/README.md).
+
+## Instanced walls
+
+Walls now use one generated quad per outline edge. Indexed roofs and instanced
+walls share eight-byte outline records and identical feature paint buffers.
+The generic Vulkan binding path now honors starting-record offsets when two
+attributes read different records from the same GPU allocation.
+
+All 49 focused tests pass. Added coverage checks Vulkan-only instancing
+registration, copied descriptor ownership, shifted record/instance bounds,
+sharing paint only for identical feature mappings, and a 70,000-point outline
+with instanced walls and safely segmented roof indices. Existing runtime
+comparisons cover opacity, translation, light, gradient, feature-state, ten
+rounded cases, and 56 patterned cases using the new instance path.
+
+The built-in and plugin executables were rerun separately: 50/50 eligible solid
+renders and 4/4 queries each. The n-gon unit executable and 13/13 renders pass.
+Pattern results remain 7/8 each; the actual `tile-buffer` PNG hashes remain
+identical to the SHA-256 recorded above. Expectations, tolerances, and ignores
+remain unchanged. The four direct host tests also pass with
+`VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation`, with no validation errors
+reported. The plugins-disabled Vulkan runner builds and the public header
+passes C11 syntax checking. See the fresh
+[benchmark results](../benchmarks/README.md).

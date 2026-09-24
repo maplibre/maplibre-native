@@ -128,7 +128,12 @@ bool appendShaders(const std::string& pluginID,
             error = "tile pattern textures currently require the Vulkan backend";
             return false;
         }
+        if (input.instanced > 1 || (input.instanced && backendMask != MLN_PLUGIN_BACKEND_VULKAN)) {
+            error = "plugin instancing currently requires the Vulkan backend";
+            return false;
+        }
         ShaderDefinition shader;
+        shader.instanced = input.instanced;
         shader.tilePatternTexture = input.tile_pattern_texture;
         shader.pluginID = pluginID;
         shader.id = copyString(input.shader_id);

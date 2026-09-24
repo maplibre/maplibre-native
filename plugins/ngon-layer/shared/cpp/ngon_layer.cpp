@@ -137,7 +137,7 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* output) {
                          static_cast<uint32_t>(layout.vertices.size()),
                          sizeof(Vertex)};
     layout.attributes = {{
-        {sizeof(mln_plugin_attribute_binding_v1), positionAttribute, vertexStream, offsetof(Vertex, position)},
+        {sizeof(mln_plugin_attribute_binding_v1), positionAttribute, vertexStream, offsetof(Vertex, position), 0},
     }};
     auto& drawable = layout.drawables[0];
     drawable.struct_size = sizeof(drawable);
@@ -431,6 +431,7 @@ const mln_plugin_shader_descriptor_v1 shader = {
     std::size(uniforms),
     propertyBindings,
     std::size(propertyBindings),
+    0,
     0,
 };
 const mln_plugin_draw_pass_v1 drawPass = {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 0, MLN_PLUGIN_CULL_NONE};

@@ -55,6 +55,7 @@ struct Descriptor {
                   1,
                   &binding,
                   1,
+                  0,
                   0};
         layer.struct_size = sizeof(layer);
         layer.layer_type = view(type);

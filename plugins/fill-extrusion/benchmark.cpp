@@ -69,7 +69,7 @@ struct Sample {
                   << ",\"encode_ms\":" << percentile(encode, .5) << ",\"render_ms\":" << percentile(render, .5)
                   << ",\"draw_calls\":" << stats.numDrawCalls << ",\"vertex_bytes\":" << stats.memVertexBuffers
                   << ",\"index_bytes\":" << stats.memIndexBuffers << ",\"uniform_bytes\":" << stats.memUniformBuffers
-                  << "}\n";
+                  << ",\"buffer_bytes\":" << stats.memBuffers << "}\n";
     }
 };
 } // namespace

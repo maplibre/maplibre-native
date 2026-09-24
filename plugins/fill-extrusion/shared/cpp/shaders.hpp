@@ -2,7 +2,10 @@
 // the extrusion color's alpha does not control opacity (style-spec semantics).
 constexpr char vertexSource[] = R"glsl(
 layout(location = 0) in ivec2 a_pos;
-layout(location = 1) in ivec2 a_normal;
+#if MLN_PLUGIN_INSTANCED
+layout(location = 1) in ivec2 a_next_pos;
+layout(location = 13) in uvec2 a_next_decimals_edge;
+#endif
 layout(location = 8) in uvec2 a_decimals_edge;
 #if MLN_PLUGIN_HAS_PATTERN && !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_PATTERN_IS_UNIFORM
 layout(location = 9) in vec4 a_pattern_from_min;
@@ -48,8 +51,27 @@ layout(location = 4) out vec4 frag_pattern_to;
 #endif
 void main() {
     uint packed = a_decimals_edge.x;
-    vec2 pos = vec2(a_pos) + vec2(packed >> 9, (packed >> 1) & 127u) / 128.0;
-    vec3 normal = vec3(vec2(a_normal) / 16384.0, all(equal(a_normal, ivec2(0))) ? 1.0 : 0.0);
+    vec2 p1 = vec2(a_pos) + vec2(packed >> 9, (packed >> 1) & 127u) / 128.0;
+#if MLN_PLUGIN_INSTANCED
+    if ((packed & 1u) != 0u) {
+        gl_Position = vec4(0.0);
+        frag_color = vec4(0.0);
+        return;
+    }
+    uint next_packed = a_next_decimals_edge.x;
+    vec2 p2 = vec2(a_next_pos) + vec2(next_packed >> 9, (next_packed >> 1) & 127u) / 128.0;
+    vec2 direction = normalize(p2 - p1);
+    vec3 normal = vec3(-direction.y, direction.x, 0.0);
+    float t = float(gl_VertexIndex & 1);
+    bool at_next = gl_VertexIndex < 2;
+    vec2 pos = at_next ? p2 : p1;
+    float edge = float(at_next ? a_decimals_edge.y : a_next_decimals_edge.y);
+#else
+    vec2 pos = p1;
+    vec3 normal = vec3(0.0, 0.0, 1.0);
+    float t = 1.0;
+    float edge = 0.0;
+#endif
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_COLOR_IS_UNIFORM
     vec4 color = u.color;
 #else
@@ -75,7 +97,6 @@ void main() {
 #else
     float gradient = u.interpolation2.x < 1.0 ? a_gradient.x : a_gradient.y;
 #endif
-    float t = float(packed & 1u);
     float z = t > 0.0 ? height : base;
     gl_Position = u.matrix * vec4(pos, z, 1.0);
     applySurfaceTransform();
@@ -89,7 +110,7 @@ void main() {
     frag_pattern_from = pattern_from; frag_pattern_to = pattern_to;
     vec2 size_a = (pattern_from.zw-pattern_from.xy)/u.pixel_ratio;
     vec2 size_b = (pattern_to.zw-pattern_to.xy)/u.pixel_ratio;
-    vec2 pattern_pos = normal.z == 0.0 ? vec2(float(a_decimals_edge.y),z*u.height_factor) : vec2(a_pos);
+    vec2 pattern_pos = normal.z == 0.0 ? vec2(edge,z*u.height_factor) : vec2(a_pos);
     frag_pos_a = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.from_scale*size_a,u.tile_ratio,pattern_pos);
     frag_pos_b = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.to_scale*size_b,u.tile_ratio,pattern_pos);
     float directional = clamp(dot(normal,u.light_direction),0.0,1.0);

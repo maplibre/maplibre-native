@@ -212,6 +212,7 @@ TEST(FillExtrusionPlugin, ImageDescriptorValidation) {
     descriptor.layer_types = &layer;
     auto shader = layer.shaders[0];
     layer.shaders = &shader;
+    layer.shader_count = 1;
     char error[512]{};
     shader.tile_pattern_texture = 2;
     EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));

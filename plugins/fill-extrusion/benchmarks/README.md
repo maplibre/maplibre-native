@@ -1,9 +1,12 @@
 # Vulkan extrusion performance
 
-The plugin reaches render-time parity on the measured software Vulkan driver:
-its steady frame times are 45–52% lower than the built-in layer's, and initial
-loading is 6–15% faster. Buffer-memory parity is not reached. The built-in uses
-instanced walls; the plugin deliberately retains ordinary indexed triangles.
+The plugin now uses instanced walls. On the measured software Vulkan driver,
+steady frames take 6–12% less time than the built-in layer. Instancing reduces
+plugin vertex-buffer use by 77–86% versus its previous indexed implementation,
+and brings geometry/index storage and draw counts close to the built-in.
+The tradeoff is substantial: instanced frames take 63–96% longer than the
+previous indexed plugin on lavapipe. Data-driven paint still uses more vertex
+buffer space than the built-in's packed attributes.
 
 ## Reproduce
 
@@ -18,9 +21,10 @@ LP_NUM_THREADS=4 python3 plugins/fill-extrusion/benchmarks/run.py \
 `builtin` constructs `FillExtrusionLayer` directly without registering a plugin.
 `plugin` registers the replacement, parses the same layer type, and checks its
 implementation identity. Each trial runs separate processes, alternating their
-order. Neither process reads network resources.
+order. Neither process reads network resources. Builds and correctness tests
+were idle during the measurements.
 
-Measurements below were taken on 2026-09-24 with Release/Clang 21.1.8,
+Measurements were taken on 2026-09-24 with Release/Clang 21.1.8,
 Nixpkgs `a32edd7654519351e48e80372a928df336394670`, Mesa 26.2.3 lavapipe
 (LLVM 21.1.8), four rasterizer threads, and an AMD Ryzen AI Max+ 395 CPU.
 These are software-driver results, not claims about physical GPU performance.
@@ -39,70 +43,107 @@ for 16 features. Wall times include synchronous image readback. Renderer CPU
 encoding/rendering times are also recorded, without GPU timestamp queries.
 Tables show the median of three trials' frame p50 values (milliseconds).
 The raw captures include p95 values, draw calls, and active buffer-byte counters.
+The instancing capture also records `buffer_bytes`, the allocator's total active
+buffer bytes. Resource-role counters can alias: the native instancing path
+wraps shared vertex allocations in uniform/storage-buffer views, so adding
+`vertex_bytes`, `index_bytes`, and `uniform_bytes` does not measure total memory.
+`buffer_bytes` includes alignment and allocations pending frame-safe reclamation;
+it excludes textures and CPU-side geometry.
 
-## Results after optimization
+## Fresh built-in versus instanced plugin
 
 | Scene | Built-in steady | Plugin steady | Built-in load | Plugin load |
 | --- | ---: | ---: | ---: | ---: |
-| Solid | 28.91 | 15.02 | 262.16 | 232.71 |
-| Data-driven | 26.98 | 13.17 | 255.69 | 240.97 |
-| Translucent | 44.94 | 21.74 | 252.38 | 214.39 |
-| Rounded | 101.33 | 49.98 | 330.11 | 287.73 |
-| Pattern | 55.93 | 30.58 | 261.81 | 233.87 |
+| Solid | 29.27 | 27.11 | 246.02 | 247.31 |
+| Data-driven | 26.97 | 24.79 | 253.07 | 250.44 |
+| Translucent | 45.30 | 42.67 | 245.57 | 247.52 |
+| Rounded | 102.80 | 96.38 | 331.64 | 318.65 |
+| Pattern | 56.51 | 49.96 | 252.75 | 255.75 |
 
-Feature-state frames measure 27.39 ms built-in versus 13.52 ms plugin.
-Plugin state-frame CPU encoding dropped from 0.444 to 0.223 ms.
-The built-in and plugin use the same draw-call count for the four non-rounded
-scenarios. Rounded steady draw calls fell from 49 to 37 in the plugin, compared
-with 13 built-in, as fewer vertices require fewer 16-bit segments.
+Feature-state frames measure 27.72 ms built-in versus 25.04 ms plugin;
+CPU encoding is 0.497 versus 0.224 ms. Initial load results are within 4% of
+the built-in across all scenes. Paint-update frames are faster through the
+plugin except for solid (31.24 versus 29.19 ms, 7% slower).
 
-## Measured costs and changes
+## Instancing changes and tradeoffs
 
-The initial plugin used 28-byte vertices and emitted a separate roof vertex for
-every triangle corner. Compact 12-byte records now pack integer/fractional
-positions, top/bottom flags, edge distances, and normals. Roof triangles reuse
-vertices within each 16-bit segment. Positions retain the original 1/128-unit
-precision; normals use signed 14-bit fixed-point precision. Segmentation remains
-safe even when one feature crosses a segment boundary.
+Walls generate four corners from `gl_VertexIndex` for each instance. Two
+attributes read adjacent records from one packed eight-byte outline stream.
+Ring terminators suppress connecting walls; roof triangles index the same
+records. Oversized outlines retain instanced walls while roof copies are
+remapped into safe 16-bit segments. Matching roof/wall feature mappings share
+host paint binders, buffers, and state updates.
 
-Feature-state changes also dirtied every data-driven paint buffer, including
-expressions that could not depend on state. The host now caches that dependency
-and skips those writes while retaining state for later expression changes.
-A focused regression checks both the unchanged buffer and the later transition
-to a state-dependent expression.
+The Vulkan binding path now includes record offset, stride, and input rate
+when identifying shared bindings. This fixes adjacent-record attributes
+previously reading the same position and producing invisible walls.
 
-Active vertex-buffer sizes, decimal MB, including driver buffer copies:
+Active vertex-buffer sizes, decimal MB:
 
-| Scene | Built-in | Plugin before | Plugin after | Plugin reduction |
+| Scene | Built-in | Indexed plugin | Instanced plugin | Reduction |
 | --- | ---: | ---: | ---: | ---: |
-| Solid/translucent/pattern | 0.90 | 13.86 | 5.40 | 61% |
-| Data-driven | 3.60 | 33.66 | 23.40 | 30% |
-| Rounded | 3.78 | 84.42 | 27.00 | 68% |
+| Solid/translucent/pattern | 0.90 | 5.40 | 0.90 | 83% |
+| Data-driven | 3.60 | 23.40 | 5.40 | 77% |
+| Rounded | 3.78 | 27.00 | 3.78 | 86% |
 
-The data-driven and rounded steady phases improved from 17.13 to 13.17 ms and
-54.85 to 49.98 ms respectively. Solid and pattern steady times rose slightly
-(14.62→15.02 ms and 29.92→30.58 ms), a small tradeoff for their buffer reduction.
-These small timing differences should not be generalized beyond this driver.
+Steady total buffer allocation, decimal MB:
 
-Remaining costs are vertex/paint duplication for walls and index storage.
-Plugin index buffers use 1.35 MB for ordinary scenes and 7.83 MB for rounded
-scenes, versus 0.27 and 2.43 MB built-in. Plugin vertex buffers remain 6–7.1 times
-larger. Conversely, its per-draw uniforms are much smaller than the built-in
-instancing uniforms. Reaching memory parity would require a further design
-change such as a generic instancing API or compressed paint attributes; neither
-is introduced by these optimizations. Physical GPU profiling remains a separate
-validation step before claiming performance parity across hardware.
+| Scene | Built-in | Instanced plugin |
+| --- | ---: | ---: |
+| Solid | 1.172 | 1.172 |
+| Data-driven | 3.872 | 5.672 |
+| Translucent/pattern | 1.173 | 1.174 |
+| Rounded | 6.212 | 6.212 |
 
-[Before captures](before.json) use implementation `498ff04759e5` and the harness
-committed in `2129f49cfa67`. [After captures](after.json) use compact indexed
-geometry and state-dependent uploads with that same harness.
+Constant-paint buffer allocations are within 0.11% of the built-in. Data-driven
+steady allocations remain 47% higher. In the state-update phase they are
+6.57 MB built-in versus 5.90 MB plugin: the native path replaces both color and
+height buffers, while the plugin skips state-independent color uploads.
+
+Index buffers fall from 1.35 to 0.27 MB for ordinary scenes and from 7.83 to
+2.43 MB for rounded scenes, matching the built-in within 36 bytes. Steady draw
+calls match exactly: nine for solid/data, 17 for translucent/pattern, and 13
+for rounded. The indexed plugin needed 37 draws for rounded geometry.
+
+| Scene | Previous indexed steady | Instanced steady | Change |
+| --- | ---: | ---: | ---: |
+| Solid | 15.02 | 27.11 | +81% |
+| Data-driven | 13.17 | 24.79 | +88% |
+| Translucent | 21.74 | 42.67 | +96% |
+| Rounded | 49.98 | 96.38 | +93% |
+| Pattern | 30.58 | 49.96 | +63% |
+
+The previous measurements used the same scene/harness and environment; they
+were taken before this change, rather than rerunning the old implementation.
+Fresh built-in steady times remain within roughly 2% of those earlier trials.
+The larger instancing slowdown is in synchronized rendering/readback, while
+plugin steady CPU encoding remains below 0.2 ms. The measurements locate the
+cost in the render path but do not isolate shader execution from lavapipe's
+instance processing. Profiling a physical Vulkan GPU is needed before selecting
+an approach for GPU throughput based on these CPU-driver results.
+
+The remaining data-driven vertex-memory gap comes from generic float color
+samples (32 bytes per record) versus the native packed color samples (16 bytes).
+Height adds eight bytes in both paths. Sharing paint buffers removes the former
+roof/wall duplication; packing color would be a separate encoding change.
+State-independent paint uploads continue to be skipped, preserving the earlier
+feature-state optimization.
+
+[Initial captures](before.json) use implementation `498ff04759e5` and the harness
+committed in `2129f49cfa67`. [Indexed captures](after.json) use compact 12-byte
+geometry and state-dependent uploads from `2bf7cc57a27f`.
+[Instanced captures](instanced.json) use the new instancing implementation and
+the same timing loop with the additional allocation-memory counter.
 
 ## Correctness retained
 
-All 45 focused tests pass, including ten rounded and 56 patterned direct
-comparisons, holes, and 16-bit segmentation. All 50 eligible solid renders,
-four queries, and 13 n-gon renders pass. Seven of eight pattern expectations
-pass; the existing `tile-buffer` failure still produces a byte-identical image
-to the built-in baseline. Expectations, tolerances, and ignores are unchanged.
-The plugins-disabled Vulkan runner builds, and the public API header compiles
-as C11. The benchmark runner script has also been exercised independently.
+All 49 focused tests pass, including ten rounded and 56 patterned direct
+comparisons, holes, shifted instance bounds, paint sharing, and outlines beyond
+the 16-bit index limit. Built-in and plugin each pass all 50 eligible solid
+renders and four queries. All 13 n-gon renders and the n-gon unit executable
+pass. Seven of eight pattern expectations pass; the existing `tile-buffer`
+failure still produces a byte-identical image to the built-in baseline.
+Expectations, tolerances, and ignores are unchanged.
+The plugins-disabled Vulkan runner builds, the public API header compiles as
+C11, and the direct host comparisons pass with the Khronos validation layer
+enabled and no validation errors reported.
