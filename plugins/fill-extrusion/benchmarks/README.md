@@ -1,5 +1,8 @@
 # Vulkan extrusion performance
 
+This page records the instancing baseline at `c10bc57069e9`. See the later
+[optimization experiments](experiments.md) for subsequent changes and measurements.
+
 The plugin now uses instanced walls. On the measured software Vulkan driver,
 steady frames take 6–12% less time than the built-in layer. Instancing reduces
 plugin vertex-buffer use by 77–86% versus its previous indexed implementation,

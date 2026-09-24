@@ -34,14 +34,17 @@ private:
 
 class PluginPaintVertexVector final : public gfx::VertexVectorBase {
 public:
-    PluginPaintVertexVector(std::size_t count_, std::size_t components_)
-        : data(count_ * components_ * 2),
+    PluginPaintVertexVector(std::size_t count_, std::size_t components_, bool singleEndpoint_ = false)
+        : data(count_ * components_ * (singleEndpoint_ ? 1 : 2)),
           count(count_),
           components(components_),
+          singleEndpoint(singleEndpoint_),
           blocks(count_ / boundsBlockSize + (count_ % boundsBlockSize != 0)) {}
 
     const void* getRawData() const override { return data.data(); }
-    std::size_t getRawSize() const override { return components * 2 * sizeof(float); }
+    std::size_t getRawSize() const override { return components * (singleEndpoint ? 1 : 2) * sizeof(float); }
+    std::size_t maximumOffset() const { return singleEndpoint ? 0 : components * sizeof(float); }
+    bool hasSingleEndpoint() const { return singleEndpoint; }
     std::size_t getRawCount() const override { return count; }
 
     void set(std::size_t first, std::size_t length, const float* minimum, const float* maximum);
@@ -51,6 +54,7 @@ private:
     std::vector<float> data;
     std::size_t count;
     std::size_t components;
+    bool singleEndpoint;
     static constexpr std::size_t boundsBlockSize = 128;
     struct BoundsBlock {
         std::array<float, 4> minimum{}, maximum{};
@@ -127,6 +131,7 @@ public:
 private:
     friend class PluginPaintPropertyBinders;
     bool updateRanges(const FeatureStates&);
+    bool canShareEndpoints() const;
     void refill();
     void fillRange(const PluginFeatureData::Range&, const GeometryTileFeature&, const FeatureState&);
     void updateStatistics();

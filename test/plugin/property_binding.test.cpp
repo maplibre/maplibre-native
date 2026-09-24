@@ -427,3 +427,43 @@ TEST(PluginProperties, ImageExpressionsAvailabilitySerializationAndTransitions) 
     EXPECT_EQ("present", at(TimePoint{} + std::chrono::milliseconds(50)));
     EXPECT_EQ("next", at(TimePoint{} + std::chrono::milliseconds(100)));
 }
+
+TEST(PluginPaintBinder, ZoomConstantEndpointsShareStorageAndReallocateForCompositePaint) {
+    auto definition = numberDefinition();
+    definition.name = "test-color";
+    definition.type = MLN_PLUGIN_VALUE_COLOR;
+    definition.defaultValue = std::vector<Value>{0.0, 0.0, 0.0, 1.0};
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-color", MLN_PLUGIN_PROPERTY_ENCODING_COLOR, 0, 0, 1, 2, 0, 16};
+    const auto layer = source();
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
+    auto sourceValue = expression(definition, R"(["case",[">",["get","small"],0],"red","blue"])");
+    PluginPaintPropertyBinder binder(definition, binding, sourceValue, 10, 1, 4, snapshots);
+    ASSERT_EQ(16u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(0u, binder.getVertexVector()->maximumOffset());
+    mln_plugin_value minimum{}, maximum{};
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(1, minimum.data.color_value.r);
+    EXPECT_FLOAT_EQ(0, maximum.data.color_value.b);
+    EXPECT_TRUE(binder.synchronize(expression(
+        definition,
+        R"(["interpolate",["linear"],["zoom"],10,["case",[">",["get","small"],0],"red","blue"],11,"blue"])")));
+    ASSERT_EQ(32u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(16u, binder.getVertexVector()->maximumOffset());
+    auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
+    EXPECT_FLOAT_EQ(1, values[0]);
+    EXPECT_FLOAT_EQ(1, values[6]);
+    EXPECT_FLOAT_EQ(0.5, binder.interpolationFactor(10.5));
+    EXPECT_TRUE(
+        binder.synchronize(expression(definition, R"(["to-color",["coalesce",["feature-state","color"],"red"]])")));
+    EXPECT_EQ(16u, binder.getVertexVector()->getRawSize());
+    EXPECT_TRUE(binder.update({{"1", {{"color", std::string("blue")}}}}, layer));
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(0, maximum.data.color_value.r);
+    EXPECT_FLOAT_EQ(1, minimum.data.color_value.b);
+    EXPECT_TRUE(binder.synchronize(expression(definition, R"("green")")));
+    EXPECT_FALSE(binder.getVertexVector());
+    EXPECT_TRUE(binder.synchronize(sourceValue));
+    EXPECT_EQ(16u, binder.getVertexVector()->getRawSize());
+}

@@ -139,9 +139,9 @@ const PluginFeatureData::Drawable& PluginFeatureData::drawable(uint64_t key) con
 void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const float* minimum, const float* maximum) {
     if (!length || first > count || length > count - first) return;
     for (std::size_t vertex = first; vertex < first + length; ++vertex) {
-        auto* destination = data.data() + vertex * components * 2;
+        auto* destination = data.data() + vertex * components * (singleEndpoint ? 1 : 2);
         std::copy_n(minimum, components, destination);
-        std::copy_n(maximum, components, destination + components);
+        if (!singleEndpoint) std::copy_n(maximum, components, destination + components);
     }
     for (auto block = first / boundsBlockSize; block <= (first + length - 1) / boundsBlockSize; ++block) {
         blocks[block].dirty = true;
@@ -160,12 +160,13 @@ void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum, std::array<f
             const auto first = index * boundsBlockSize;
             const auto length = std::min(boundsBlockSize, count - first);
             for (std::size_t vertex = first; vertex < first + length; ++vertex) {
-                const auto* values = data.data() + vertex * components * 2;
+                const auto* values = data.data() + vertex * components * (singleEndpoint ? 1 : 2);
+                const auto* upper = singleEndpoint ? values : values + components;
                 for (std::size_t component = 0; component < components; ++component) {
                     block.minimum[component] = std::min(
-                        {block.minimum[component], values[component], values[components + component]});
+                        {block.minimum[component], values[component], upper[component]});
                     block.maximum[component] = std::max(
-                        {block.maximum[component], values[component], values[components + component]});
+                        {block.maximum[component], values[component], upper[component]});
                 }
             }
             block.dirty = false;
@@ -200,7 +201,7 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
       features(std::move(features_)),
       featureStates(std::move(states_)) {
     if (dataDriven) {
-        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());
+        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount(), canShareEndpoints());
         refill();
     }
 }
@@ -263,8 +264,8 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     uniformZoom.reset();
     dataDriven = value.isDataDriven();
     stateDependent = value.usesFeatureState();
-    if (dataDriven && !vertexVector) {
-        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());
+    if (dataDriven && (!vertexVector || vertexVector->hasSingleEndpoint() != canShareEndpoints())) {
+        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount(), canShareEndpoints());
     }
     if (dataDriven) refill();
     if (!dataDriven) vertexVector.reset();
@@ -337,6 +338,12 @@ void PluginPaintPropertyBinder::statistics(float zoom, mln_plugin_value& minimum
     maximum = decodedValue(maximumValues, definition);
 }
 
+bool PluginPaintPropertyBinder::canShareEndpoints() const {
+    // Separate attributes can alias one record. A packed float2/float4
+    // attribute still needs both components even when their values agree.
+    return value.isZoomConstant() && binding.minimumAttributeID != binding.maximumAttributeID;
+}
+
 void PluginPaintPropertyBinder::refill() {
     if (!vertexVector) return;
     for (const auto& range : features->drawable(drawableKey).ranges) {
@@ -360,14 +367,14 @@ void PluginPaintPropertyBinder::fillRange(const PluginFeatureData::Range& range,
     const float imageZoom = bucketZoom + (value.isZoomConstant() ? 0.0f : 1.0f);
     const auto minimumValue = value.evaluate(
         image ? imageZoom - (from ? 1 : 0) : bucketZoom, feature, state, definition, minimumStorage, &availableImages);
-    const auto maximumValue = value.evaluate(image                    ? imageZoom + (from ? 1 : 0)
-                                             : value.isZoomConstant() ? bucketZoom
-                                                                      : bucketZoom + 1.0f,
-                                             feature,
-                                             state,
-                                             definition,
-                                             maximumStorage,
-                                             &availableImages);
+    const auto maximumValue = value.isZoomConstant()
+                                  ? minimumValue
+                                  : value.evaluate(image ? imageZoom + (from ? 1 : 0) : bucketZoom + 1.0f,
+                                                   feature,
+                                                   state,
+                                                   definition,
+                                                   maximumStorage,
+                                                   &availableImages);
     std::array<float, 4> minimum{}, maximum{};
     encode(minimumValue, minimum);
     encode(maximumValue, maximum);
@@ -418,7 +425,6 @@ void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeAr
             continue;
         }
         const auto& vector = binder.getVertexVector();
-        const auto components = binder.componentCount();
         if (const auto& minimum = attributes.set(binding.minimumAttributeID)) {
             minimum->setSharedRawData(vector, 0, 0, vector->getRawSize(), binder.attributeType());
         }
@@ -426,7 +432,7 @@ void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeAr
                                 ? attributes.set(binding.maximumAttributeID).get()
                                 : nullptr) {
             maximum->setSharedRawData(vector,
-                                      static_cast<uint32_t>(components * sizeof(float)),
+                                      static_cast<uint32_t>(vector->maximumOffset()),
                                       0,
                                       vector->getRawSize(),
                                       binder.attributeType());
