@@ -351,6 +351,7 @@ void DynamicFeatureIndex::query(std::unordered_map<std::string, std::vector<Feat
 
     for (const auto& f : features) {
         const bool hit = std::any_of(f.envelope->begin(), f.envelope->end(), [&](const auto& polygon) {
+            if (polygon.empty()) return false;
             mln::GeometryBBox<int64_t> featureBox = DefaultWithinBBox;
             for (const auto& p : polygon.front()) mln::updateBBox(featureBox, p);
             return mln::boxWithinBox(featureBox, queryBox) || mln::boxWithinBox(queryBox, featureBox);
