@@ -42,6 +42,7 @@ const ShaderSource* findSource(const ShaderDefinition& shader, mln_plugin_backen
 
 std::string resourcePrelude(const ShaderDefinition& shader) {
     std::ostringstream output;
+    output << "#define MLN_PLUGIN_INSTANCED " << shader.instanced << '\n';
 #if MLN_RENDER_BACKEND_METAL
     output << "#define MLN_PLUGIN_DRAWABLE_INDEX_BINDING " << shaders::idGlobalUBOIndex << '\n';
 #endif
@@ -75,6 +76,9 @@ std::string propertyMacro(const std::string& propertyName) {
 
 std::string propertyPrelude(const ShaderDefinition& shader, const StringIDSetsPair& propertiesAsUniforms) {
     std::ostringstream output;
+    output << "#define MLN_PLUGIN_COLOR_WRITE " << !propertiesAsUniforms.first.contains("__plugin_depth_only") << '\n';
+    output << "#define MLN_PLUGIN_HAS_PATTERN " << propertiesAsUniforms.first.contains("__plugin_pattern_enabled")
+           << '\n';
     for (const auto& binding : shader.propertyBindings) {
         output << "#define " << propertyMacro(binding.propertyName) << ' '
                << (propertiesAsUniforms.first.contains(binding.propertyName) ? 1 : 0) << '\n';
@@ -94,7 +98,12 @@ public:
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
                                      const StringIDSetsPair& propertiesAsUniforms,
                                      std::string_view) override {
-        const auto name = getShaderName(groupName, propertyHash(propertiesAsUniforms));
+        // The base hash covers attribute IDs only. Resource/pass switches also
+        // affect generated source and must identify distinct cached programs.
+        const auto variant = groupName +
+                             (propertiesAsUniforms.first.contains("__plugin_pattern_enabled") ? "/pattern" : "/solid") +
+                             (propertiesAsUniforms.first.contains("__plugin_depth_only") ? "/depth" : "/color");
+        const auto name = getShaderName(variant, propertyHash(propertiesAsUniforms));
         if (auto existing = getShader(name)) return existing;
         const auto pluginPrelude = resourcePrelude(*definition) + propertyPrelude(*definition, propertiesAsUniforms);
 
@@ -134,9 +143,14 @@ public:
         auto typed = std::shared_ptr<vulkan::ShaderProgram>(std::move(created));
         for (const auto& attr : definition->attributes) {
             if (!propertiesAsUniforms.second.contains(attr.id)) {
-                typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
+                if (definition->instanced)
+                    typed->initInstanceAttribute({attr.location, attributeType(attr.type), attr.id});
+                else
+                    typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
             }
         }
+        if (definition->tilePatternTexture && propertiesAsUniforms.first.contains("__plugin_pattern_enabled"))
+            typed->initTexture({0, 0});
         shader = std::move(typed);
 #elif MLN_RENDER_BACKEND_METAL
         const auto* source = findSource(*definition, MLN_PLUGIN_BACKEND_METAL);

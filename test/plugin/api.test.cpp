@@ -1,6 +1,8 @@
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
 #include <gtest/gtest.h>
 
 #include <cstdlib>
@@ -43,8 +45,18 @@ struct Descriptor {
         uniform = {
             sizeof(uniform), 0, view(uniformName), 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
         binding = {sizeof(binding), view(propertyName), MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
-        shader = {
-            sizeof(shader), view(shaderID), &source, 1, attributes.data(), attributes.size(), &uniform, 1, &binding, 1};
+        shader = {sizeof(shader),
+                  view(shaderID),
+                  &source,
+                  1,
+                  attributes.data(),
+                  attributes.size(),
+                  &uniform,
+                  1,
+                  &binding,
+                  1,
+                  0,
+                  0};
         layer.struct_size = sizeof(layer);
         layer.layer_type = view(type);
         layer.backend_mask = MLN_PLUGIN_BACKEND_OPENGL;
@@ -286,7 +298,7 @@ TEST(PluginApi, RepeatedRegistrationComparesNestedDefinitions) {
     check([](auto& d) { d.binding.uniform_byte_offset = 8; });
     check([](auto& d) { d.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA; });
     check([](auto& d) { d.layer.geometry_type_mask |= MLN_PLUGIN_GEOMETRY_POLYGON; });
-    check([](auto& d) { d.layer.enable_stencil_overlap_dedup = 1; });
+    check([](auto& d) { d.layer.is_3d = 1; });
     check([](auto& d) { d.layer.enable_near_clipped_matrix = 1; });
     check([](auto& d) {
         d.layer.query_feature = [](const mln_plugin_feature_v1*,
@@ -305,17 +317,131 @@ TEST(PluginApi, CopiesRenderingModeFlags) {
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&withDefaults.descriptor, nullptr, 0));
     const auto defaultLayer = plugin::PluginRegistry::get().findLayerType(withDefaults.type);
     ASSERT_TRUE(defaultLayer);
-    EXPECT_FALSE(defaultLayer->enableStencilOverlapDedup);
+    EXPECT_FALSE(defaultLayer->is3D);
     EXPECT_FALSE(defaultLayer->enableNearClippedMatrix);
 
     Descriptor withFlagsEnabled("test.render-flags.enabled");
-    withFlagsEnabled.layer.enable_stencil_overlap_dedup = 1;
+    withFlagsEnabled.layer.is_3d = 1;
     withFlagsEnabled.layer.enable_near_clipped_matrix = 1;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&withFlagsEnabled.descriptor, nullptr, 0));
     const auto enabledLayer = plugin::PluginRegistry::get().findLayerType(withFlagsEnabled.type);
     ASSERT_TRUE(enabledLayer);
-    EXPECT_TRUE(enabledLayer->enableStencilOverlapDedup);
+    EXPECT_TRUE(enabledLayer->is3D);
     EXPECT_TRUE(enabledLayer->enableNearClippedMatrix);
 }
 
+TEST(PluginApi, ValidatesAndCopiesOrderedRenderingDescriptors) {
+    Descriptor input("test.ordered-passes");
+    mln_plugin_draw_pass_v1 passes[] = {{sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
+                                        {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 1, MLN_PLUGIN_CULL_BACK_CCW}};
+    input.layer.draw_passes = passes;
+    input.layer.draw_pass_count = 2;
+    input.expectRejected(); // Layer stencil requires an explicit 3D layer.
+    input.layer.is_3d = 1;
+    passes[0].struct_size = 4;
+    input.expectRejected();
+    passes[0].struct_size = sizeof(passes[0]);
+    passes[0].depth_test = 0;
+    input.expectRejected(); // Writing depth without testing is invalid.
+    passes[0].depth_test = 1;
+    passes[0].color_write = 2;
+    input.expectRejected();
+    passes[0].color_write = 0;
+    input.layer.draw_pass_count = 33;
+    input.expectRejected();
+    input.layer.draw_pass_count = 2;
+    input.layer.draw_passes = nullptr;
+    input.expectRejected();
+    input.layer.draw_passes = passes;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+    const auto registered = plugin::PluginRegistry::get().findLayerType(input.type);
+    ASSERT_EQ(2u, registered->drawPasses.size());
+    EXPECT_FALSE(registered->drawPasses[0].colorWrite);
+    EXPECT_TRUE(registered->drawPasses[1].stencilDedup);
+    EXPECT_FALSE(registered->drawPasses[1].depthWrite);
+    EXPECT_EQ(style::LayerTypeInfo::Pass3D::Required, registered->info.pass3d);
+    passes[1].depth_write = 1;
+    EXPECT_FALSE(registered->drawPasses[1].depthWrite); // Borrowed array was copied.
+    EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
+TEST(PluginApi, BooleanDefaultsAndShaderEncodingAreValidated) {
+    Descriptor input("test.boolean-property");
+    input.property.type = MLN_PLUGIN_VALUE_BOOLEAN;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_BOOLEAN;
+    input.property.default_value.data.boolean_value = 1;
+    input.property.enum_value_count = 0;
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT;
+    input.property.default_value.data.boolean_value = 2;
+    input.expectRejected();
+    input.property.default_value.data.boolean_value = 1;
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_FLOAT;
+    input.expectRejected();
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
+TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
+    Descriptor input("test.layout-property");
+    input.property.is_layout = 1;
+    input.property.type = MLN_PLUGIN_VALUE_FLOAT;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_FLOAT;
+    input.property.default_value.data.float_value = 0;
+    input.property.enum_value_count = 0;
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    input.shader.property_binding_count = 0;
+    input.property.supports_transitions = 1;
+    input.expectRejected();
+    input.property.supports_transitions = 0;
+    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE;
+    input.expectRejected();
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+    style::conversion::Error error;
+    auto parse = [&](const std::string& section, int value) {
+        return style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+            "{\"id\":\"test\",\"source\":\"s\",\"type\":\"" + input.type + "\",\"" + section +
+                "\":{\"test-anchor\":" + std::to_string(value) + "}}",
+            error);
+    };
+    EXPECT_FALSE(parse("paint", 2));
+    auto a = parse("layout", 2), b = parse("layout", 4);
+    ASSERT_TRUE(a) << error.message;
+    ASSERT_TRUE(b) << error.message;
+    const auto& ai = static_cast<style::PluginStyleLayer&>(**a).impl();
+    const auto& bi = static_cast<style::PluginStyleLayer&>(**b).impl();
+    EXPECT_TRUE(ai.hasLayoutDifference(bi));
+    EXPECT_FALSE(ai.hasLayoutDifference(ai));
+    const auto serialized = (*a)->serialize();
+    ASSERT_TRUE(serialized.getObject()->at("layout").getObject());
+    EXPECT_EQ(2.0, *serialized.getObject()->at("layout").getObject()->at("test-anchor").getDouble());
+}
+
 } // namespace
+
+TEST(PluginApi, NormalizedColorEncodingValidatesAttributesAndUniformFootprint) {
+    Descriptor input("test.rgba8-color");
+    input.property.type = MLN_PLUGIN_VALUE_COLOR;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_COLOR;
+    input.property.default_value.data.color_value = {1, 0.5f, 0, 1};
+    input.property.enum_value_count = 0;
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8;
+    input.binding.maximum_attribute_id = 2;
+    input.binding.interpolation_uniform_byte_offset = 16;
+    input.attributes[1].type = MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
+    auto maximum = input.attributes[1];
+    maximum.attribute_id = maximum.location = 2;
+    maximum.name = {"a_max", 5};
+    input.attributes.push_back(maximum);
+    input.shader.attributes = input.attributes.data();
+    input.shader.attribute_count = input.attributes.size();
+    input.expectRejected(); // Float4 plus interpolation does not fit in 16 bytes.
+    input.uniform.byte_size = 32;
+    input.attributes[1].type = MLN_PLUGIN_VERTEX_FLOAT_X4;
+    input.expectRejected();
+    input.attributes[1].type = MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
+    input.binding.maximum_attribute_id = 1;
+    input.expectRejected(); // Two endpoints cannot share one attribute ID.
+    input.binding.maximum_attribute_id = 2;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}

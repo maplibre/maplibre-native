@@ -20,6 +20,8 @@ std::string copyString(const mln_plugin_string& value) {
 
 Value copyValue(const mln_plugin_value& value) {
     switch (value.type) {
+        case MLN_PLUGIN_VALUE_BOOLEAN:
+            return Value{value.data.boolean_value != 0};
         case MLN_PLUGIN_VALUE_FLOAT:
             return Value{static_cast<double>(value.data.float_value)};
         case MLN_PLUGIN_VALUE_FLOAT2:
@@ -30,6 +32,7 @@ Value copyValue(const mln_plugin_value& value) {
                                                   static_cast<double>(value.data.color_value.g),
                                                   static_cast<double>(value.data.color_value.b),
                                                   static_cast<double>(value.data.color_value.a)}};
+        case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
             return Value{copyString(value.data.string_value)};
     }
@@ -57,11 +60,15 @@ bool validVertexType(mln_plugin_vertex_attribute_type type) {
 uint32_t propertyEncodingSize(mln_plugin_property_encoding_v1 encoding) {
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
             return 4;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return 8;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             return 16;
     }
     return 0;
@@ -70,11 +77,15 @@ uint32_t propertyEncodingSize(mln_plugin_property_encoding_v1 encoding) {
 uint32_t propertyEncodingAlignment(mln_plugin_property_encoding_v1 encoding) {
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
             return alignof(float);
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return 2 * alignof(float);
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             return 4 * alignof(float);
     }
     return 0;
@@ -83,12 +94,17 @@ uint32_t propertyEncodingAlignment(mln_plugin_property_encoding_v1 encoding) {
 mln_plugin_vertex_attribute_type propertyAttributeType(mln_plugin_property_encoding_v1 encoding) {
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
             return MLN_PLUGIN_VERTEX_FLOAT;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return MLN_PLUGIN_VERTEX_FLOAT_X2;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return MLN_PLUGIN_VERTEX_FLOAT_X4;
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
+            return MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
     }
     return static_cast<mln_plugin_vertex_attribute_type>(0);
 }
@@ -111,7 +127,18 @@ bool appendShaders(const std::string& pluginID,
             error = "plugin shader descriptor is malformed";
             return false;
         }
+        if (input.tile_pattern_texture > 1 ||
+            (input.tile_pattern_texture && backendMask != MLN_PLUGIN_BACKEND_VULKAN)) {
+            error = "tile pattern textures currently require the Vulkan backend";
+            return false;
+        }
+        if (input.instanced > 1 || (input.instanced && backendMask != MLN_PLUGIN_BACKEND_VULKAN)) {
+            error = "plugin instancing currently requires the Vulkan backend";
+            return false;
+        }
         ShaderDefinition shader;
+        shader.instanced = input.instanced;
+        shader.tilePatternTexture = input.tile_pattern_texture;
         shader.pluginID = pluginID;
         shader.id = copyString(input.shader_id);
         if (!shaderIDs.emplace(shader.id).second) {
@@ -230,7 +257,7 @@ bool appendShaders(const std::string& pluginID,
             error = "plugin shader property binding array is missing";
             return false;
         }
-        std::set<std::string> boundProperties;
+        std::set<std::pair<std::string, int>> boundProperties;
         std::set<uint32_t> boundPaintAttributes;
         std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>> hostUniformRanges;
         for (size_t bindingIndex = 0; bindingIndex < input.property_binding_count; ++bindingIndex) {
@@ -262,7 +289,10 @@ bool appendShaders(const std::string& pluginID,
                 shader.attributes.begin(), shader.attributes.end(), [&](const auto& candidate) {
                     return candidate.id == binding.maximum_attribute_id;
                 });
-            if (propertyName.empty() || !encodingSize || !boundProperties.emplace(propertyName).second ||
+            if (propertyName.empty() || !encodingSize ||
+                !boundProperties
+                     .emplace(propertyName, binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO ? 1 : 0)
+                     .second ||
                 (packed && encodingSize > 8) || !boundPaintAttributes.emplace(binding.minimum_attribute_id).second ||
                 (!packed && !boundPaintAttributes.emplace(binding.maximum_attribute_id).second) ||
                 uniform == shader.uniformBlocks.end() || interpolationUniform == shader.uniformBlocks.end() ||
@@ -326,17 +356,28 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
         if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
             property.default_value.struct_size < sizeof(mln_plugin_value) ||
             property.default_value.type != property.type ||
-            (property.type == MLN_PLUGIN_VALUE_STRING &&
+            ((property.type == MLN_PLUGIN_VALUE_STRING || property.type == MLN_PLUGIN_VALUE_IMAGE) &&
              !validOptionalString(property.default_value.data.string_value)) ||
             (property.expression_capabilities & ~validExpressionCapabilities) != 0) {
             error = "plugin property descriptor is malformed";
             return false;
         }
+        if (property.is_layout > 1 ||
+            (property.is_layout &&
+             (property.supports_transitions || (property.expression_capabilities & ~MLN_PLUGIN_EXPRESSION_CAMERA)))) {
+            error = "plugin layout properties support only camera expressions and cannot transition";
+            return false;
+        }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
                                         property.type == MLN_PLUGIN_VALUE_FLOAT2 ||
-                                        property.type == MLN_PLUGIN_VALUE_COLOR;
+                                        property.type == MLN_PLUGIN_VALUE_COLOR ||
+                                        property.type == MLN_PLUGIN_VALUE_IMAGE;
         if (property.supports_transitions && !transitionableType) {
-            error = "plugin transitions require an interpolatable paint property";
+            error = "plugin transitions require an interpolatable paint property or image";
+            return false;
+        }
+        if (property.type == MLN_PLUGIN_VALUE_BOOLEAN && property.default_value.data.boolean_value > 1) {
+            error = "plugin boolean default must be 0 or 1";
             return false;
         }
         auto defaultValue = copyValue(property.default_value);
@@ -397,7 +438,8 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
                                property.supports_transitions != 0,
                                property.has_minimum ? std::optional<float>{property.minimum} : std::nullopt,
                                property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
-                               std::move(enumValues)});
+                               std::move(enumValues),
+                               property.is_layout != 0});
     }
     return true;
 }
@@ -459,7 +501,31 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         copiedLayerType.queryFeature = layerType.query_feature;
         copiedLayerType.queryRadius = layerType.get_query_radius;
         copiedLayerType.updateUniformBlock = layerType.update_uniform_block;
-        copiedLayerType.enableStencilOverlapDedup = layerType.enable_stencil_overlap_dedup != 0;
+        if (layerType.replace_builtin > 1 || layerType.is_3d > 1 || layerType.enable_near_clipped_matrix > 1 ||
+            layerType.draw_pass_count > 32 || (layerType.draw_pass_count && !layerType.draw_passes)) {
+            error = "plugin rendering descriptor is malformed";
+            return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+        }
+        copiedLayerType.replaceBuiltin = layerType.replace_builtin;
+        copiedLayerType.is3D = layerType.is_3d;
+        copiedLayerType.evaluateLayer = layerType.evaluate_layer;
+        for (size_t passIndex = 0; passIndex < layerType.draw_pass_count; ++passIndex) {
+            const auto& pass = layerType.draw_passes[passIndex];
+            if (pass.struct_size < sizeof(pass) || pass.depth_test > 1 || pass.depth_write > 1 ||
+                pass.color_write > 1 || pass.blend > 1 || pass.stencil_dedup > 1 ||
+                (pass.depth_write && !pass.depth_test) || (pass.stencil_dedup && !layerType.is_3d) ||
+                (pass.cull != MLN_PLUGIN_CULL_NONE && pass.cull != MLN_PLUGIN_CULL_BACK_CCW)) {
+                error = "plugin draw pass is malformed";
+                return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+            }
+            copiedLayerType.drawPasses.push_back({bool(pass.depth_test),
+                                                  bool(pass.depth_write),
+                                                  bool(pass.color_write),
+                                                  bool(pass.blend),
+                                                  bool(pass.stencil_dedup),
+                                                  pass.cull});
+        }
+        if (copiedLayerType.drawPasses.empty()) copiedLayerType.drawPasses.emplace_back();
         copiedLayerType.enableNearClippedMatrix = layerType.enable_near_clipped_matrix != 0;
         copiedLayerType.shouldAnimate = layerType.should_animate;
         if (!appendShaders(pluginID,
@@ -484,13 +550,19 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         for (const auto& shader : copiedLayerType.shaders) {
             for (const auto& binding : shader.propertyBindings) {
                 const auto* property = copiedLayerType.findProperty(binding.propertyName);
-                const bool encodingMatches = property != nullptr &&
-                                             ((property->type == MLN_PLUGIN_VALUE_FLOAT &&
+                const bool encodingMatches = property != nullptr && !property->isLayout &&
+                                             ((property->type == MLN_PLUGIN_VALUE_IMAGE && shader.tilePatternTexture &&
+                                               (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM ||
+                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO)) ||
+                                              (property->type == MLN_PLUGIN_VALUE_BOOLEAN &&
+                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT) ||
+                                              (property->type == MLN_PLUGIN_VALUE_FLOAT &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT) ||
                                               (property->type == MLN_PLUGIN_VALUE_FLOAT2 &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2) ||
                                               (property->type == MLN_PLUGIN_VALUE_COLOR &&
-                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR) ||
+                                               (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR ||
+                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8)) ||
                                               (property->type == MLN_PLUGIN_VALUE_STRING &&
                                                !property->enumValues.empty() &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT));
@@ -549,7 +621,10 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         pendingTypes.emplace(type->type, type);
         factories.push_back(std::make_unique<PluginStyleLayerFactory>(type));
     }
-    if (!LayerManager::get()->registerLayerFactories(std::move(factories), error)) {
+    std::vector<std::string> replacements;
+    for (const auto& type : newLayerTypes)
+        if (type->replaceBuiltin) replacements.push_back(type->type);
+    if (!LayerManager::get()->registerLayerFactories(std::move(factories), error, replacements)) {
         return MLN_PLUGIN_STATUS_CONFLICT;
     }
     layerTypes.merge(pendingTypes);
@@ -574,8 +649,11 @@ bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value
         return value.getDouble() || value.getInt() || value.getUint();
     };
     switch (type) {
+        case MLN_PLUGIN_VALUE_BOOLEAN:
+            return value.getBool() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT:
             return numeric();
+        case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
             return value.getString() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT2:

@@ -138,8 +138,15 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
-            const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
-            renderPass.setDepthStencilState(state);
+            if (drawable.getDepthMaskFor3D()) {
+                auto depth = drawable.getEnableDepth() ? parameters.depthModeFor3D() : gfx::DepthMode::disabled();
+                if (drawable.getEnableDepth()) depth.mask = *drawable.getDepthMaskFor3D();
+                renderPass.setDepthStencilState(context.makeDepthStencilState(
+                    depth, drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled(), renderable));
+            } else {
+                const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
+                renderPass.setDepthStencilState(state);
+            }
         }
 
         drawable.draw(parameters);

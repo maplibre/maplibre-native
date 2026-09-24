@@ -5,6 +5,7 @@
 #include <mln/tile/vector_mlt_tile_data.hpp>
 #include <mln/util/io.hpp>
 #include <gtest/gtest.h>
+#include <cstring>
 
 using namespace mln;
 
@@ -285,6 +286,13 @@ TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLife
     EXPECT_FLOAT_EQ(90, values[0]);
     EXPECT_FLOAT_EQ(90, values[2]);
     EXPECT_FLOAT_EQ(10, static_cast<const float*>(b.getVertexVector()->getRawData())[0]);
+    // State-independent paint must not dirty/re-upload its whole vertex buffer.
+    const auto beforeState = util::MonotonicTimer::now();
+    EXPECT_FALSE(b.update({{"1", {{"size", 90.0}}}}, unusedSource));
+    EXPECT_FALSE(b.getVertexVector()->isModifiedAfter(beforeState));
+    // Still retain state for a later expression change.
+    EXPECT_TRUE(b.synchronize(expression(definition, R"(["number",["feature-state","size"],12])")));
+    EXPECT_FLOAT_EQ(90, static_cast<const float*>(b.getVertexVector()->getRawData())[0]);
     EXPECT_FALSE(a.update({{"missing", {{"size", 1.0}}}}, unusedSource));
     EXPECT_TRUE(a.update({{"1", {}}}, unusedSource)); // Removing state restores fallback.
     EXPECT_FLOAT_EQ(12, static_cast<const float*>(a.getVertexVector()->getRawData())[0]);
@@ -370,4 +378,165 @@ TEST(PluginPaintBinder, RetainedVectorViewsOutliveTileData) {
         EXPECT_EQ(properties, data->features[0].snapshot->getProperties());
         EXPECT_EQ(geometry, data->features[0].snapshot->getGeometries());
     }
+}
+
+TEST(PluginProperties, BooleanDefaultsSerializationCameraAndFeatureState) {
+    auto definition = numberDefinition();
+    definition.type = MLN_PLUGIN_VALUE_BOOLEAN;
+    definition.defaultValue = true;
+    style::PluginPropertyValue::EvaluationStorage storage;
+    const auto fallback = style::defaultPluginPropertyValue(definition);
+    ASSERT_NE(nullptr, fallback.toStyleProperty().getValue().getBool());
+    EXPECT_TRUE(*fallback.toStyleProperty().getValue().getBool());
+    auto camera = expression(definition, R"(["step",["zoom"],true,10,false])");
+    EXPECT_TRUE(camera.evaluate(9.5, definition, storage).data.boolean_value);
+    EXPECT_FALSE(camera.evaluate(10, definition, storage).data.boolean_value);
+    auto feature = expression(definition, R"(["boolean",["feature-state","enabled"],false])");
+    auto tile = source();
+    const auto geometry = tile.getFeature(0);
+    EXPECT_FALSE(feature.evaluate(10, *geometry, {}, definition, storage).data.boolean_value);
+    EXPECT_TRUE(feature.evaluate(10, *geometry, {{"enabled", true}}, definition, storage).data.boolean_value);
+    JSDocument doc;
+    doc.SetInt(1);
+    const JSValue* value = &doc;
+    style::conversion::Error error;
+    EXPECT_FALSE(style::convertPluginPropertyValue(definition, style::conversion::Convertible(value), error));
+}
+
+TEST(PluginProperties, ImageExpressionsAvailabilitySerializationAndTransitions) {
+    auto definition = numberDefinition();
+    definition.name = "test-pattern";
+    definition.type = MLN_PLUGIN_VALUE_IMAGE;
+    definition.defaultValue = std::string{};
+    definition.supportsTransitions = true;
+    auto value = expression(definition, R"(["coalesce",["image","absent"],["image","present"]])");
+    const std::set<std::string> available{"present"};
+    style::PluginPropertyValue::EvaluationStorage storage;
+    auto evaluated = value.evaluate(0, definition, storage, &available);
+    EXPECT_EQ(MLN_PLUGIN_VALUE_IMAGE, evaluated.type);
+    EXPECT_EQ("present", std::string(evaluated.data.string_value.data, evaluated.data.string_value.size));
+    auto constant = expression(definition, R"("present")");
+    EXPECT_EQ(Value("present"), constant.toStyleProperty().getValue());
+    style::TransitionOptions options;
+    options.duration = std::chrono::milliseconds(100);
+    style::PluginTransitioningPropertyValue transition(
+        expression(definition, R"("next")"), style::PluginTransitioningPropertyValue(constant), options, TimePoint{});
+    auto at = [&](TimePoint time) {
+        const auto image = transition.evaluate(0, definition, time).evaluate(0, definition, storage);
+        return std::string(image.data.string_value.data, image.data.string_value.size);
+    };
+    EXPECT_EQ("present", at(TimePoint{} + std::chrono::milliseconds(50)));
+    EXPECT_EQ("next", at(TimePoint{} + std::chrono::milliseconds(100)));
+}
+
+TEST(PluginPaintBinder, ZoomConstantEndpointsShareStorageAndReallocateForCompositePaint) {
+    auto definition = numberDefinition();
+    definition.name = "test-color";
+    definition.type = MLN_PLUGIN_VALUE_COLOR;
+    definition.defaultValue = std::vector<Value>{0.0, 0.0, 0.0, 1.0};
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-color", MLN_PLUGIN_PROPERTY_ENCODING_COLOR, 0, 0, 1, 2, 0, 16};
+    const auto layer = source();
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
+    auto sourceValue = expression(definition, R"(["case",[">",["get","small"],0],"red","blue"])");
+    PluginPaintPropertyBinder binder(definition, binding, sourceValue, 10, 1, 4, snapshots);
+    ASSERT_EQ(16u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(0u, binder.getVertexVector()->maximumOffset());
+    mln_plugin_value minimum{}, maximum{};
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(1, minimum.data.color_value.r);
+    EXPECT_FLOAT_EQ(0, maximum.data.color_value.b);
+    EXPECT_TRUE(binder.synchronize(expression(
+        definition,
+        R"(["interpolate",["linear"],["zoom"],10,["case",[">",["get","small"],0],"red","blue"],11,"blue"])")));
+    ASSERT_EQ(32u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(16u, binder.getVertexVector()->maximumOffset());
+    auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
+    EXPECT_FLOAT_EQ(1, values[0]);
+    EXPECT_FLOAT_EQ(1, values[6]);
+    EXPECT_FLOAT_EQ(0.5, binder.interpolationFactor(10.5));
+    EXPECT_TRUE(
+        binder.synchronize(expression(definition, R"(["to-color",["coalesce",["feature-state","color"],"red"]])")));
+    EXPECT_EQ(16u, binder.getVertexVector()->getRawSize());
+    EXPECT_TRUE(binder.update({{"1", {{"color", std::string("blue")}}}}, layer));
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(0, maximum.data.color_value.r);
+    EXPECT_FLOAT_EQ(1, minimum.data.color_value.b);
+    EXPECT_TRUE(binder.synchronize(expression(definition, R"("green")")));
+    EXPECT_FALSE(binder.getVertexVector());
+    EXPECT_TRUE(binder.synchronize(sourceValue));
+    EXPECT_EQ(16u, binder.getVertexVector()->getRawSize());
+}
+
+TEST(PluginPaintBinder, NormalizedColorSamplesPreserveUniformsCompositeAndStateSemantics) {
+    auto definition = numberDefinition();
+    definition.name = "test-color";
+    definition.type = MLN_PLUGIN_VALUE_COLOR;
+    definition.defaultValue = std::vector<Value>{0.0, 0.0, 0.0, 1.0};
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-color", MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8, 0, 0, 1, 2, 0, 16};
+    const auto layer = source();
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 257}},
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
+    PluginPaintPropertyBinder binder(
+        definition, binding, expression(definition, R"(["rgba",255,127.5,63.75,0.5])"), 10, 1, 257, snapshots);
+    float uniforms[8]{};
+    binder.writeUniform(10, 0, reinterpret_cast<uint8_t*>(uniforms), sizeof(uniforms));
+    EXPECT_FLOAT_EQ(0.5, uniforms[0]); // Uniform colors retain premultiplied float precision.
+    EXPECT_FLOAT_EQ(0.25, uniforms[1]);
+    EXPECT_FLOAT_EQ(0.125, uniforms[2]);
+    EXPECT_FLOAT_EQ(0.5, uniforms[3]);
+    EXPECT_TRUE(binder.synchronize(expression(
+        definition,
+        R"(["interpolate",["linear"],["zoom"],10,["case",[">",["get","small"],0],["rgba",255,127.5,63.75,0.5],"red"],11,"blue"])")));
+    EXPECT_EQ(gfx::AttributeDataType::UByte4Normalized, binder.attributeType());
+    ASSERT_EQ(8u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(4u, binder.getVertexVector()->maximumOffset());
+    const auto* bytes = static_cast<const uint8_t*>(binder.getVertexVector()->getRawData());
+    const std::array<uint8_t, 8> expected{127, 63, 31, 127, 0, 0, 255, 255};
+    for (size_t vertex : {0u, 128u, 256u})
+        EXPECT_EQ(0, std::memcmp(bytes + vertex * 8, expected.data(), expected.size()));
+    EXPECT_FLOAT_EQ(0.5, binder.interpolationFactor(10.5));
+    mln_plugin_value minimum{}, maximum{};
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(127 / 255.0f, maximum.data.color_value.r);
+    EXPECT_FLOAT_EQ(1, maximum.data.color_value.b);
+    EXPECT_TRUE(
+        binder.synchronize(expression(definition, R"(["to-color",["coalesce",["feature-state","color"],"red"]])")));
+    EXPECT_EQ(4u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(0u, binder.getVertexVector()->maximumOffset());
+    EXPECT_TRUE(binder.update({{"1", {{"color", std::string("blue")}}}}, layer));
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(0, maximum.data.color_value.r);
+    EXPECT_FLOAT_EQ(1, minimum.data.color_value.b);
+}
+
+TEST(PluginPaintBinder, SeparateScalarAttributesShareSourceValuesAndRetainCompositeInterpolation) {
+    const auto definition = numberDefinition();
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 2, 0, 4};
+    const auto layer = source();
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
+    PluginPaintPropertyBinder binder(
+        definition, binding, expression(definition, R"(["get","small"])"), 10, 1, 4, snapshots);
+    EXPECT_EQ(gfx::AttributeDataType::Float, binder.attributeType());
+    EXPECT_EQ(4u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(0u, binder.getVertexVector()->maximumOffset());
+    EXPECT_TRUE(binder.synchronize(
+        expression(definition, R"(["interpolate",["linear"],["zoom"],10,["get","small"],11,["get","large"]])")));
+    EXPECT_EQ(8u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(4u, binder.getVertexVector()->maximumOffset());
+    const auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
+    EXPECT_FLOAT_EQ(10, values[0]);
+    EXPECT_FLOAT_EQ(30, values[1]);
+    EXPECT_FLOAT_EQ(0.5, binder.interpolationFactor(10.5));
+    EXPECT_TRUE(binder.synchronize(expression(definition, R"(["coalesce",["feature-state","h"],10])")));
+    EXPECT_TRUE(binder.update({{"1", {{"h", 42.0}}}}, layer));
+    EXPECT_EQ(4u, binder.getVertexVector()->getRawSize());
+    mln_plugin_value minimum{}, maximum{};
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(42, minimum.data.float_value);
+    EXPECT_FLOAT_EQ(42, maximum.data.float_value);
 }
