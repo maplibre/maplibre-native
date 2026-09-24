@@ -74,10 +74,13 @@ struct Sample {
 };
 } // namespace
 int main(int argc, char** argv) try {
-    if (argc != 4 || (std::string(argv[1]) != "builtin" && std::string(argv[1]) != "plugin")) {
-        std::cerr << "Usage: mln-fill-extrusion-benchmark builtin|plugin grid-side frame-count\n";
+    if ((argc != 4 && argc != 5) || (std::string(argv[1]) != "builtin" && std::string(argv[1]) != "plugin")) {
+        std::cerr << "Usage: mln-fill-extrusion-benchmark builtin|plugin grid-side frame-count [scenario]\n";
         return 1;
     }
+    if (argc == 5 && std::string(argv[4]) != "solid" && std::string(argv[4]) != "data" &&
+        std::string(argv[4]) != "translucent" && std::string(argv[4]) != "rounded" && std::string(argv[4]) != "pattern")
+        throw std::runtime_error("invalid scenario");
     const bool usePlugin = std::string(argv[1]) == "plugin";
     const auto side = static_cast<unsigned>(std::stoul(argv[2])), frames = static_cast<unsigned>(std::stoul(argv[3]));
     if (!side || side > 1000 || !frames) throw std::runtime_error("invalid sample size");
@@ -90,6 +93,7 @@ int main(int argc, char** argv) try {
     const auto json = sceneJSON(side);
     for (const auto* scenario : {"solid", "data", "translucent", "rounded", "pattern"}) {
         const std::string name(scenario);
+        if (argc == 5 && name != argv[4]) continue;
         auto source = std::make_shared<StubFileSource>();
         MapObserver observer;
         HeadlessFrontend frontend{Size{512, 512}, 1};

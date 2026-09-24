@@ -18,10 +18,12 @@ layout(location = 2) in vec4 a_color_min;
 layout(location = 3) in vec4 a_color_max;
 #endif
 #if !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_BASE_IS_UNIFORM
-layout(location = 4) in vec2 a_base;
+layout(location = 4) in float a_base_min;
+layout(location = 14) in float a_base_max;
 #endif
 #if !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_HEIGHT_IS_UNIFORM
-layout(location = 5) in vec2 a_height;
+layout(location = 5) in float a_height_min;
+layout(location = 15) in float a_height_max;
 #endif
 #if !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_OPACITY_IS_UNIFORM
 layout(location = 6) in vec2 a_opacity;
@@ -80,12 +82,12 @@ void main() {
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_BASE_IS_UNIFORM
     float base = u.base;
 #else
-    float base = max(mix(a_base.x, a_base.y, u.interpolation.y), 0.0);
+    float base = max(mix(a_base_min, a_base_max, u.interpolation.y), 0.0);
 #endif
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_HEIGHT_IS_UNIFORM
     float height = u.height;
 #else
-    float height = max(mix(a_height.x, a_height.y, u.interpolation.z), 0.0);
+    float height = max(mix(a_height_min, a_height_max, u.interpolation.z), 0.0);
 #endif
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_OPACITY_IS_UNIFORM
     float opacity = u.opacity;

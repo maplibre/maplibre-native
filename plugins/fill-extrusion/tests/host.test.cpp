@@ -262,3 +262,35 @@ TEST(FillExtrusionPlugin, CachedShadersDistinguishPatternPresenceAndDepthPasses)
         }
     }
 }
+
+TEST(FillExtrusionPlugin, SharedScalarAndByteColorBindingsUpdateTogether) {
+    util::RunLoop loop;
+    const auto status = mln_fill_extrusion_register(mln_plugin_register_v1, nullptr, 0);
+    ASSERT_TRUE(status == MLN_PLUGIN_STATUS_OK || status == MLN_PLUGIN_STATUS_ALREADY_REGISTERED);
+    Scene builtin(false), plugin(true);
+    for (auto* scene : {&builtin, &plugin}) {
+        scene->set("fill-extrusion-base", R"(["coalesce",["feature-state","base"],0])");
+        scene->set("fill-extrusion-height", R"(["coalesce",["feature-state","height"],["get","h"]])");
+        scene->set("fill-extrusion-color", R"(["to-color",["coalesce",["feature-state","color"],"#da526c"]])");
+        scene->set("fill-extrusion-opacity", "0.5");
+    }
+    compare(builtin, plugin);
+    for (const char* color : {"rgba(127,80,200,0.5)", "#2080cc", "#ffffff"}) {
+        for (auto* scene : {&builtin, &plugin})
+            scene->frontend.getRenderer()->setFeatureState(
+                "s", {}, "1", {{"base", 20.0}, {"height", 140.0}, {"color", std::string(color)}});
+        compare(builtin, plugin);
+    }
+    for (auto* scene : {&builtin, &plugin}) {
+        scene->set("fill-extrusion-base", R"(["interpolate",["linear"],["zoom"],15,0,16,["/",["get","h"],4]])");
+        scene->set("fill-extrusion-height",
+                   R"(["interpolate",["linear"],["zoom"],15,["get","h"],16,["*",2,["get","h"]]])");
+        scene->set(
+            "fill-extrusion-color",
+            R"(["interpolate",["linear"],["zoom"],15,["case",[">",["get","h"],80],"#da526c","#2080cc"],16,"#ffffaa"])");
+    }
+    for (double zoom : {15.1, 15.5, 15.9}) {
+        for (auto* scene : {&builtin, &plugin}) scene->map.jumpTo(CameraOptions().withZoom(zoom));
+        compare(builtin, plugin);
+    }
+}

@@ -10,6 +10,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("executable", type=Path)
 parser.add_argument("--baseline-plugin", type=Path, help="Compare two plugin builds instead of builtin versus plugin")
+parser.add_argument("--scenario", choices=("solid", "data", "translucent", "rounded", "pattern"))
 parser.add_argument("--side", type=int, default=100)
 parser.add_argument("--frames", type=int, default=40)
 parser.add_argument("--trials", type=int, default=3)
@@ -28,13 +29,15 @@ for trial in range(1, args.trials + 1):
         executable = args.baseline_plugin if mode == "baseline" else args.executable
         implementation = "plugin" if mode == "baseline" else mode
         run = subprocess.run(
-            [str(executable.resolve()), implementation, str(args.side), str(args.frames)],
+            [str(executable.resolve()), implementation, str(args.side), str(args.frames)]
+            + ([args.scenario] if args.scenario else []),
             env=env, capture_output=True, text=True, check=True, timeout=600,
         )
         for line in run.stdout.splitlines():
             results.append({"trial": trial, **json.loads(line), "implementation": mode})
 args.output.write_text(json.dumps({
     "platform": platform.platform(),
+    "scenario": args.scenario,
     "executables": {"plugin": str(args.executable), "baseline": str(args.baseline_plugin) if args.baseline_plugin else None},
     "environment": {key: env.get(key) for key in ("LP_NUM_THREADS", "VK_DRIVER_FILES", "VK_ICD_FILENAMES")},
     "results": results,

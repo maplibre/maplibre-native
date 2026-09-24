@@ -102,3 +102,19 @@ remain unchanged. The four direct host tests also pass with
 reported. The plugins-disabled Vulkan runner builds and the public header
 passes C11 syntax checking. See the fresh
 [benchmark results](../benchmarks/README.md).
+
+
+## Subsequent optimization experiments
+
+Identical paint endpoint sharing, depth-only shader specialization, normalized
+byte colors, and separate scalar endpoint attributes were measured independently
+and retained in separate commits. All 55 focused tests pass. The final direct
+comparisons update base/height/color through feature state together and switch
+them to composite expressions at fractional zooms. All six host comparison tests
+also pass with the Khronos Vulkan validation layer and no validation errors.
+
+Final fixture totals remain 50/50 eligible solids, 4/4 queries, 13/13 n-gon renders,
+and 7/8 patterns. The known pattern failure retains the same built-in actual PNG
+hash recorded above. The n-gon unit executable, plugins-disabled Vulkan build,
+and C11 header check pass. See the [individual experiments and raw captures](../benchmarks/experiments.md),
+including the longer investigation of an apparent translucent timing regression.

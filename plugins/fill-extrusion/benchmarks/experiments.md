@@ -117,3 +117,62 @@ and the n-gon unit executable pass. Patterns remain 7/8 with the existing
 baseline failure. New tests cover descriptor rejection, uniform precision,
 premultiplied alpha, composite samples, normalization, statistics, and state.
 [Raw captures](rgba8.json).
+
+## Share base/height scalar endpoints — kept
+
+Baseline: `19b128f486ed`. Base and height now declare separate scalar endpoint
+attributes, allowing the host's source-only sample sharing to apply. Composite
+expressions still retain both floats and the same interpolation. This uses the
+two remaining declared attribute locations (14/15), within the API's 16-slot
+limit. Geometry, draw counts, and scalar precision are unchanged.
+
+| Data-driven scene | Before | After |
+| --- | ---: | ---: |
+| Active vertex buffers | 2.250 MB | 1.800 MB |
+| Steady buffer allocations | 2.522 MB | 2.072 MB |
+| State-update buffer allocations | 2.751 MB | 2.188 MB |
+| Steady frame | 24.592 ms | 24.487 ms |
+| Feature-state frame | 24.639 ms | 24.567 ms |
+| Feature-state CPU encoding | 0.189 ms | 0.161 ms |
+
+Keep for the additional 18% steady allocation reduction. The initial full-suite
+capture showed a possible translucent steady regression (42.452→46.418 ms).
+Both builds showed two timing bands, with the slower band following execution
+order in those three trials. This was investigated instead of accepting that
+comparison as conclusive.
+
+A follow-up isolates translucent rendering with 160 frames per phase and six
+alternating trials, balancing which executable runs first. Both builds used
+the same added scenario-selection harness. Steady medians are 45.890 ms before
+and 46.101 ms after (+0.46%); paint medians are 30.353 and 30.440 ms (+0.29%).
+The initial 9% difference did not reproduce. No timing improvement is claimed.
+The six-trial capture consists of five initial alternating trials followed by
+the sixth candidate-first trial; all results are retained.
+
+```sh
+LP_NUM_THREADS=4 python3 plugins/fill-extrusion/benchmarks/run.py \
+  build-plugin-vulkan/plugins/mln-fill-extrusion-benchmark \
+  --baseline-plugin /tmp/previous-plugin-benchmark --scenario translucent \
+  --side 100 --frames 160 --trials 6 --output /tmp/translucent.json
+```
+
+Validation: 55 focused tests pass, including a new direct native/plugin
+comparison that updates base, height, and color through feature state together,
+then switches all three to composite expressions at fractional zooms. All six
+host comparisons also pass with the Khronos Vulkan validation layer enabled,
+with no validation errors. The solid/query suites remain 50/50 and 4/4; n-gon
+remains 13/13 plus its unit executable. Patterns remain 7/8, and the existing
+`tile-buffer` actual image retains the recorded built-in SHA-256. The
+plugins-disabled runner builds and the public header passes C11 syntax checking.
+[Full-suite captures](scalar-endpoints.json),
+[isolated six-trial captures](scalar-endpoints-translucent.json).
+
+## Cumulative outcome
+
+Data-driven steady buffer allocations fall from 5.672 to 2.072 MB (63% lower)
+without changing the existing expectations, tolerances, or ignores. The earlier
+native capture used 3.872 MB for this scene, so the new allocation count is
+approximately 46% lower. Constant-paint allocations are unchanged. The clear
+frame-time win is approximately 9% for patterns from the depth-only shader;
+the other accepted changes are memory improvements. Initial loading and mixed
+opacity frame timings remain noisy and do not establish a general speedup.

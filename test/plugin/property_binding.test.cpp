@@ -511,3 +511,32 @@ TEST(PluginPaintBinder, NormalizedColorSamplesPreserveUniformsCompositeAndStateS
     EXPECT_FLOAT_EQ(0, maximum.data.color_value.r);
     EXPECT_FLOAT_EQ(1, minimum.data.color_value.b);
 }
+
+TEST(PluginPaintBinder, SeparateScalarAttributesShareSourceValuesAndRetainCompositeInterpolation) {
+    const auto definition = numberDefinition();
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-size", MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 1, 2, 0, 4};
+    const auto layer = source();
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 4}},
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
+    PluginPaintPropertyBinder binder(
+        definition, binding, expression(definition, R"(["get","small"])"), 10, 1, 4, snapshots);
+    EXPECT_EQ(gfx::AttributeDataType::Float, binder.attributeType());
+    EXPECT_EQ(4u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(0u, binder.getVertexVector()->maximumOffset());
+    EXPECT_TRUE(binder.synchronize(
+        expression(definition, R"(["interpolate",["linear"],["zoom"],10,["get","small"],11,["get","large"]])")));
+    EXPECT_EQ(8u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(4u, binder.getVertexVector()->maximumOffset());
+    const auto* values = static_cast<const float*>(binder.getVertexVector()->getRawData());
+    EXPECT_FLOAT_EQ(10, values[0]);
+    EXPECT_FLOAT_EQ(30, values[1]);
+    EXPECT_FLOAT_EQ(0.5, binder.interpolationFactor(10.5));
+    EXPECT_TRUE(binder.synchronize(expression(definition, R"(["coalesce",["feature-state","h"],10])")));
+    EXPECT_TRUE(binder.update({{"1", {{"h", 42.0}}}}, layer));
+    EXPECT_EQ(4u, binder.getVertexVector()->getRawSize());
+    mln_plugin_value minimum{}, maximum{};
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(42, minimum.data.float_value);
+    EXPECT_FLOAT_EQ(42, maximum.data.float_value);
+}
