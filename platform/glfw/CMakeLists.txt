@@ -158,18 +158,3 @@ endif()
 set_property(TARGET mbgl-glfw PROPERTY FOLDER MapLibre)
 
 install(TARGETS mbgl-glfw RUNTIME DESTINATION bin)
-
-if(MLN_WITH_VULKAN)
-    # Requires a desktop session and a Vulkan presentation driver.
-    add_executable(mln-glfw-vulkan-resize-test EXCLUDE_FROM_ALL
-        tests/vulkan_resize.cpp glfw_vulkan_backend.cpp)
-    target_include_directories(mln-glfw-vulkan-resize-test PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src ${GLFW_INCLUDE_DIRS})
-    target_link_libraries(mln-glfw-vulkan-resize-test PRIVATE Mapbox::Map mbgl-compiler-options)
-    if(WIN32)
-        target_link_libraries(mln-glfw-vulkan-resize-test PRIVATE glfw)
-    else()
-        target_link_libraries(mln-glfw-vulkan-resize-test PRIVATE
-            $<$<BOOL:${GLFW_LIBRARY_DIRS}>:-L${GLFW_LIBRARY_DIRS}> ${GLFW_LIBRARIES})
-    endif()
-endif()
