@@ -26,7 +26,6 @@ public:
     void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) try {
         if (useThread[underlying_type(severity)]) {
             auto threadName = platform::getCurrentThreadName();
-            // Construct the worker only when an asynchronous record needs it.
             std::call_once(schedulerOnce, [this] { scheduler = Scheduler::GetSequenced(); });
             scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
         } else {
@@ -55,16 +54,8 @@ Log::Log()
 Log::~Log() = default;
 
 Log* Log::get() noexcept {
-    // Never destroyed: the worker thread may be attached to a host VM (JNI in
-    // MapLibre Android, Java FFM upcalls elsewhere) that is gone by static
-    // destruction, and joining it then deadlocks. The worker never drained its
-    // queue on termination, so nothing is lost.
+    // After VM shutdown, joining the worker or locking its observer mutex can deadlock.
     static auto* const instance = new Log();
-    // Releasing the observer at exit keeps host cleanup that ran from its
-    // destructor; the logger and its thread stay alive.
-    static const struct ObserverRelease {
-        ~ObserverRelease() { removeObserver(); }
-    } observerRelease;
     return instance;
 }
 
