@@ -508,6 +508,16 @@ typedef mln_plugin_status (*mln_plugin_evaluate_layer_fn)(const mln_plugin_prope
                                                           size_t property_count,
                                                           mln_plugin_layer_evaluation_v1* output);
 
+/* Optional animation signal, consulted on the render thread during layer
+ * evaluation with the camera-evaluated paint property values (the same array
+ * shape as query_feature; feature-dependent properties evaluate without a
+ * feature). The property array and its strings are borrowed for the call only.
+ * A nonzero return marks the layer as animating, and the map keeps repainting;
+ * return zero while the layer's animation is disabled. A null callback means
+ * the layer never animates. It must support concurrent calls for different
+ * maps. */
+typedef uint8_t (*mln_plugin_should_animate_fn)(const mln_plugin_property_value_v1* properties, size_t property_count);
+
 typedef struct mln_plugin_layer_type_v1 {
     uint32_t struct_size;
     mln_plugin_string layer_type;
@@ -533,6 +543,7 @@ typedef struct mln_plugin_layer_type_v1 {
     mln_plugin_evaluate_layer_fn evaluate_layer;
     /* Unaligned projection with near-clip adjustment; translation is host-owned. */
     uint8_t enable_near_clipped_matrix;
+    mln_plugin_should_animate_fn should_animate;
 } mln_plugin_layer_type_v1;
 
 typedef struct mln_plugin_descriptor_v1 {

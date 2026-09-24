@@ -107,6 +107,7 @@ struct LayerType {
     std::vector<DrawPass> drawPasses;
     mln_plugin_evaluate_layer_fn evaluateLayer = nullptr;
     bool enableNearClippedMatrix = false;
+    mln_plugin_should_animate_fn shouldAnimate = nullptr;
     bool operator==(const LayerType&) const = default;
 
     const PropertyDefinition* findProperty(const std::string& name) const;

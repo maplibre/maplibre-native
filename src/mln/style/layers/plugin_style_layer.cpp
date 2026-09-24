@@ -195,7 +195,7 @@ std::optional<conversion::Error> PluginStyleLayer::setPropertyInternal(const std
 
 std::optional<conversion::Error> PluginStyleLayer::setProperty(const std::string& name,
                                                                const conversion::Convertible& value,
-                                                               PropertyScope scope) {
+                                                               std::optional<PropertyScope> scope) {
     if (pluginTransitionPropertyName(*impl().registration, name)) return setPluginTransition(name, value, scope);
     if (impl().registration->findProperty(name)) return setPluginProperty(name, value, scope);
     return Layer::setProperty(name, value);

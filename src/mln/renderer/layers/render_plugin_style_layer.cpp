@@ -109,6 +109,28 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     if (*evaluatedPaintSnapshot != evaluatedPluginProperties) {
         evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
     }
+    if (registration->shouldAnimate) {
+        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
+        std::vector<mln_plugin_property_value_v1> animationProperties;
+        animationProperties.reserve(definitions.size());
+        auto storageIt = storage.begin();
+        for (const auto& definition : definitions) {
+            if (definition.isLayout) continue;
+            const auto propertyIt = evaluatedPluginProperties.find(definition.name);
+            const auto value = propertyIt == evaluatedPluginProperties.end()
+                                   ? style::defaultPluginPropertyValue(definition)
+                                   : propertyIt->second;
+            mln_plugin_property_value_v1 property{};
+            property.struct_size = sizeof(property);
+            property.name = {definition.name.data(), definition.name.size()};
+            property.value = value.evaluate(parameters.z, definition, *storageIt++);
+            property.explicitly_set = impl.pluginProperties.contains(definition.name);
+            animationProperties.push_back(property);
+        }
+        animated = registration->shouldAnimate(animationProperties.data(), animationProperties.size()) != 0;
+    } else {
+        animated = false;
+    }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
         staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
     properties->crossfade = parameters.getCrossfadeParameters();
@@ -154,9 +176,9 @@ bool RenderPluginStyleLayer::hasCrossfade() const {
 }
 
 bool RenderPluginStyleLayer::hasTransition() const {
-    return std::any_of(transitioningPaintProperties.begin(),
-                       transitioningPaintProperties.end(),
-                       [](const auto& property) { return property.second.hasTransition(); });
+    return animated || std::any_of(transitioningPaintProperties.begin(),
+                                   transitioningPaintProperties.end(),
+                                   [](const auto& property) { return property.second.hasTransition(); });
 }
 
 void RenderPluginStyleLayer::layerChanged(const TransitionParameters&,

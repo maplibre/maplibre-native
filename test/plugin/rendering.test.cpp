@@ -28,13 +28,16 @@ std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
 int evaluationMode = 0;
+unsigned animationCalls = 0;
+float animationRadius = 0;
 
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
                        bool withUniforms = false,
                        bool scopedUniforms = false,
                        bool stencilOverlapDedup = false,
-                       bool evaluateRendering = false) {
+                       bool evaluateRendering = false,
+                       bool evaluateAnimation = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -73,6 +76,9 @@ void registerTriangles(const std::string& pluginID,
     radius.name = {"test-radius", 11};
     radius.type = MLN_PLUGIN_VALUE_FLOAT;
     radius.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_FLOAT, {.float_value = 1}};
+    std::array<mln_plugin_property_descriptor_v1, 2> animationProperties{radius, radius};
+    animationProperties[1].name = {"test-layout", 11};
+    animationProperties[1].is_layout = 1;
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
         const std::string color = i == 0 ? "1,0,0,1" : "0,1,0,1";
@@ -190,6 +196,19 @@ void registerTriangles(const std::string& pluginID,
         layer.shader_count = 1;
         layer.properties = withUniforms ? &radius : nullptr;
         layer.property_count = withUniforms ? 1u : 0u;
+        if (evaluateAnimation) {
+            layer.properties = animationProperties.data();
+            layer.property_count = animationProperties.size();
+            layer.should_animate = [](const mln_plugin_property_value_v1* properties, size_t count) -> uint8_t {
+                ++animationCalls;
+                EXPECT_EQ(1u, count);
+                if (count == 1) {
+                    EXPECT_EQ("test-radius", std::string(properties[0].name.data, properties[0].name.size));
+                    animationRadius = properties[0].value.data.float_value;
+                }
+                return 0;
+            };
+        }
         static const mln_plugin_draw_pass_v1 stencilPass{
             sizeof(mln_plugin_draw_pass_v1), 0, 0, 1, 1, 1, MLN_PLUGIN_CULL_NONE};
         layer.is_3d = stencilOverlapDedup;
@@ -286,6 +305,26 @@ TEST(PluginRendering, LayerLocalShaderIDsProduceDifferentPrograms) {
     registerTriangles("test.shader-identity");
     RenderTest test;
     test.expectTriangles("test.shader-identity");
+}
+
+TEST(PluginRendering, AnimationCallbackReceivesPaintWithoutLayoutProperties) {
+    animationCalls = 0;
+    animationRadius = 0;
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.animation-paint", false, false, false, false, false, true));
+    RenderTest test;
+    test.expectTriangles("test.animation-paint");
+    EXPECT_GT(animationCalls, 0u);
+    EXPECT_EQ(1, animationRadius);
+    animationCalls = 0;
+    JSDocument value;
+    value.SetDouble(23);
+    for (const auto* id : {"left", "right"}) {
+        ASSERT_FALSE(test.map.getStyle().getLayer(id)->setProperty(
+            "test-radius", style::conversion::Convertible(static_cast<const JSValue*>(&value))));
+    }
+    test.frontend.render(test.map);
+    EXPECT_GT(animationCalls, 0u);
+    EXPECT_EQ(23, animationRadius);
 }
 
 TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {

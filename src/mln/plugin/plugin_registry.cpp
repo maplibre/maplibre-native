@@ -527,6 +527,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         }
         if (copiedLayerType.drawPasses.empty()) copiedLayerType.drawPasses.emplace_back();
         copiedLayerType.enableNearClippedMatrix = layerType.enable_near_clipped_matrix != 0;
+        copiedLayerType.shouldAnimate = layerType.should_animate;
         if (!appendShaders(pluginID,
                            layerType.shaders,
                            layerType.shader_count,
