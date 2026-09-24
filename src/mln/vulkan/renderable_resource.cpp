@@ -479,8 +479,6 @@ void SurfaceRenderableResource::recreateSwapchain() {
 
     readTexture.reset();
 
-    // On surfaces such as Wayland, currentExtent is undefined and the application
-    // must supply the new physical size. Reusing extent keeps the old resolution.
     const auto size = backend.getDefaultRenderable().getSize();
     init(size.width, size.height);
 }
