@@ -39,3 +39,10 @@ add_executable(mln-plugin-api-tests EXCLUDE_FROM_ALL
 target_include_directories(mln-plugin-api-tests PRIVATE ../src ../test/include ../test/src)
 get_target_property(MLN_PLUGIN_TEST_LIBRARIES mbgl-core LINK_LIBRARIES)
 target_link_libraries(mln-plugin-api-tests PRIVATE mln-fill-extrusion mbgl-vendor-googletest ${MLN_PLUGIN_TEST_LIBRARIES})
+
+if(MLN_WITH_VULKAN)
+    add_executable(mln-fill-extrusion-benchmark EXCLUDE_FROM_ALL
+        fill-extrusion/benchmark.cpp ../test/src/mln/test/stub_file_source.cpp)
+    target_include_directories(mln-fill-extrusion-benchmark PRIVATE ../src ../test/include ../test/src)
+    target_link_libraries(mln-fill-extrusion-benchmark PRIVATE mln-fill-extrusion ${MLN_PLUGIN_TEST_LIBRARIES})
+endif()
