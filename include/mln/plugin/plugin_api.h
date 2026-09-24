@@ -238,7 +238,10 @@ typedef enum mln_plugin_property_encoding_v1 {
      * Faded<Image>::to sampling (one zoom higher). The host resolves sprite
      * dependencies; undefined and explicitly empty images stay distinct. */
     MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM = 6,
-    MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO = 7
+    MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO = 7,
+    /* Color samples use floor(clamp(component, 0, 1) * 255) in two distinct
+     * UINT8_X4_NORMALIZED attributes. Uniform colors remain float4. */
+    MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8 = 8
 } mln_plugin_property_encoding_v1;
 
 /*

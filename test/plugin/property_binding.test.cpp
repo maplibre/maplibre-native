@@ -5,6 +5,7 @@
 #include <mln/tile/vector_mlt_tile_data.hpp>
 #include <mln/util/io.hpp>
 #include <gtest/gtest.h>
+#include <cstring>
 
 using namespace mln;
 
@@ -466,4 +467,47 @@ TEST(PluginPaintBinder, ZoomConstantEndpointsShareStorageAndReallocateForComposi
     EXPECT_FALSE(binder.getVertexVector());
     EXPECT_TRUE(binder.synchronize(sourceValue));
     EXPECT_EQ(16u, binder.getVertexVector()->getRawSize());
+}
+
+TEST(PluginPaintBinder, NormalizedColorSamplesPreserveUniformsCompositeAndStateSemantics) {
+    auto definition = numberDefinition();
+    definition.name = "test-color";
+    definition.type = MLN_PLUGIN_VALUE_COLOR;
+    definition.defaultValue = std::vector<Value>{0.0, 0.0, 0.0, 1.0};
+    const plugin::ShaderPropertyBindingDefinition binding{
+        "test-color", MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8, 0, 0, 1, 2, 0, 16};
+    const auto layer = source();
+    auto snapshots = std::make_shared<const PluginFeatureData>(std::vector<PluginFeatureVertexRange>{{0, 1, 0, 257}},
+                                                               std::make_unique<GeoJSONTileLayer>(layer));
+    PluginPaintPropertyBinder binder(
+        definition, binding, expression(definition, R"(["rgba",255,127.5,63.75,0.5])"), 10, 1, 257, snapshots);
+    float uniforms[8]{};
+    binder.writeUniform(10, 0, reinterpret_cast<uint8_t*>(uniforms), sizeof(uniforms));
+    EXPECT_FLOAT_EQ(0.5, uniforms[0]); // Uniform colors retain premultiplied float precision.
+    EXPECT_FLOAT_EQ(0.25, uniforms[1]);
+    EXPECT_FLOAT_EQ(0.125, uniforms[2]);
+    EXPECT_FLOAT_EQ(0.5, uniforms[3]);
+    EXPECT_TRUE(binder.synchronize(expression(
+        definition,
+        R"(["interpolate",["linear"],["zoom"],10,["case",[">",["get","small"],0],["rgba",255,127.5,63.75,0.5],"red"],11,"blue"])")));
+    EXPECT_EQ(gfx::AttributeDataType::UByte4Normalized, binder.attributeType());
+    ASSERT_EQ(8u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(4u, binder.getVertexVector()->maximumOffset());
+    const auto* bytes = static_cast<const uint8_t*>(binder.getVertexVector()->getRawData());
+    const std::array<uint8_t, 8> expected{127, 63, 31, 127, 0, 0, 255, 255};
+    for (size_t vertex : {0u, 128u, 256u})
+        EXPECT_EQ(0, std::memcmp(bytes + vertex * 8, expected.data(), expected.size()));
+    EXPECT_FLOAT_EQ(0.5, binder.interpolationFactor(10.5));
+    mln_plugin_value minimum{}, maximum{};
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(127 / 255.0f, maximum.data.color_value.r);
+    EXPECT_FLOAT_EQ(1, maximum.data.color_value.b);
+    EXPECT_TRUE(
+        binder.synchronize(expression(definition, R"(["to-color",["coalesce",["feature-state","color"],"red"]])")));
+    EXPECT_EQ(4u, binder.getVertexVector()->getRawSize());
+    EXPECT_EQ(0u, binder.getVertexVector()->maximumOffset());
+    EXPECT_TRUE(binder.update({{"1", {{"color", std::string("blue")}}}}, layer));
+    binder.statistics(10, minimum, maximum);
+    EXPECT_FLOAT_EQ(0, maximum.data.color_value.r);
+    EXPECT_FLOAT_EQ(1, minimum.data.color_value.b);
 }

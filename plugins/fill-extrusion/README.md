@@ -63,6 +63,13 @@ them in `layout`, includes them in bucket grouping/invalidation, and supplies
 tile-zoom values to `create_layout`. Layout properties cannot transition or use
 feature expressions.
 
+`MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8` stores feature/composite color samples
+in normalized byte attributes, using the native 8-bit component truncation.
+Constant and camera colors still use float4 uniforms. Color statistics for this
+encoding reflect the quantized samples. Source-only expressions can alias one
+sample across both endpoint attributes; composite expressions retain two.
+The existing `COLOR` encoding remains available with full float precision.
+
 `MLN_PLUGIN_VALUE_IMAGE` uses the borrowed string field. IMAGE_FROM/IMAGE_TO
 bindings resolve tile-atlas rectangles and native composite zoom samples.
 `tile_pattern_texture` requests the host-owned atlas at Vulkan sampler binding 0.
@@ -121,4 +128,5 @@ Earcut is vendored from the repository's existing copy with its ISC license.
 
 A separate built-in/plugin benchmark measures initial loading, steady frames,
 paint updates, feature-state updates, draw calls, and buffer memory. See the
-[commands, instancing measurements, and remaining costs](benchmarks/README.md).
+[instancing baseline](benchmarks/README.md) and the subsequent
+[optimization experiments](benchmarks/experiments.md).

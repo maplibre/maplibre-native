@@ -32,6 +32,7 @@ std::size_t componentCount(mln_plugin_property_encoding_v1 encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             return 4;
     }
     return 0;
@@ -66,6 +67,7 @@ void encodedValue(const mln_plugin_value& value,
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
             break; // Resolved through the binder's tile atlas.
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             output[0] = value.data.color_value.r;
             output[1] = value.data.color_value.g;
             output[2] = value.data.color_value.b;
@@ -138,10 +140,24 @@ const PluginFeatureData::Drawable& PluginFeatureData::drawable(uint64_t key) con
 
 void PluginPaintVertexVector::set(std::size_t first, std::size_t length, const float* minimum, const float* maximum) {
     if (!length || first > count || length > count - first) return;
-    for (std::size_t vertex = first; vertex < first + length; ++vertex) {
-        auto* destination = data.data() + vertex * components * (singleEndpoint ? 1 : 2);
-        std::copy_n(minimum, components, destination);
-        if (!singleEndpoint) std::copy_n(maximum, components, destination + components);
+    const auto samples = singleEndpoint ? 1u : 2u;
+    if (normalized) {
+        std::array<uint8_t, 8> record{};
+        for (size_t sample = 0; sample < samples; ++sample) {
+            const auto* values = sample ? maximum : minimum;
+            for (size_t component = 0; component < components; ++component) {
+                const auto value = std::clamp(values[component], 0.0f, 1.0f);
+                record[sample * components + component] = uint8_t(std::isnan(value) ? 0.0f : value * 255.0f);
+            }
+        }
+        for (std::size_t vertex = first; vertex < first + length; ++vertex)
+            std::copy_n(record.data(), components * samples, byteData.data() + vertex * components * samples);
+    } else {
+        for (std::size_t vertex = first; vertex < first + length; ++vertex) {
+            auto* destination = data.data() + vertex * components * samples;
+            std::copy_n(minimum, components, destination);
+            if (!singleEndpoint) std::copy_n(maximum, components, destination + components);
+        }
     }
     for (auto block = first / boundsBlockSize; block <= (first + length - 1) / boundsBlockSize; ++block) {
         blocks[block].dirty = true;
@@ -160,13 +176,13 @@ void PluginPaintVertexVector::bounds(std::array<float, 4>& minimum, std::array<f
             const auto first = index * boundsBlockSize;
             const auto length = std::min(boundsBlockSize, count - first);
             for (std::size_t vertex = first; vertex < first + length; ++vertex) {
-                const auto* values = data.data() + vertex * components * (singleEndpoint ? 1 : 2);
-                const auto* upper = singleEndpoint ? values : values + components;
+                const auto offset = vertex * components * (singleEndpoint ? 1 : 2);
+                const auto upper = offset + (singleEndpoint ? 0 : components);
                 for (std::size_t component = 0; component < components; ++component) {
-                    block.minimum[component] = std::min(
-                        {block.minimum[component], values[component], upper[component]});
-                    block.maximum[component] = std::max(
-                        {block.maximum[component], values[component], upper[component]});
+                    const auto low = normalized ? byteData[offset + component] / 255.0f : data[offset + component];
+                    const auto high = normalized ? byteData[upper + component] / 255.0f : data[upper + component];
+                    block.minimum[component] = std::min({block.minimum[component], low, high});
+                    block.maximum[component] = std::max({block.maximum[component], low, high});
                 }
             }
             block.dirty = false;
@@ -201,7 +217,11 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
       features(std::move(features_)),
       featureStates(std::move(states_)) {
     if (dataDriven) {
-        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount(), canShareEndpoints());
+        vertexVector = std::make_shared<PluginPaintVertexVector>(
+            vertexCount,
+            componentCount(),
+            canShareEndpoints(),
+            binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8);
         refill();
     }
 }
@@ -221,6 +241,8 @@ gfx::AttributeDataType PluginPaintPropertyBinder::attributeType() const noexcept
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return gfx::AttributeDataType::Float4;
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
+            return gfx::AttributeDataType::UByte4Normalized;
     }
     return gfx::AttributeDataType::Invalid;
 }
@@ -265,7 +287,11 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     dataDriven = value.isDataDriven();
     stateDependent = value.usesFeatureState();
     if (dataDriven && (!vertexVector || vertexVector->hasSingleEndpoint() != canShareEndpoints())) {
-        vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount(), canShareEndpoints());
+        vertexVector = std::make_shared<PluginPaintVertexVector>(
+            vertexCount,
+            componentCount(),
+            canShareEndpoints(),
+            binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8);
     }
     if (dataDriven) refill();
     if (!dataDriven) vertexVector.reset();

@@ -418,3 +418,30 @@ TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
 }
 
 } // namespace
+
+TEST(PluginApi, NormalizedColorEncodingValidatesAttributesAndUniformFootprint) {
+    Descriptor input("test.rgba8-color");
+    input.property.type = MLN_PLUGIN_VALUE_COLOR;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_COLOR;
+    input.property.default_value.data.color_value = {1, 0.5f, 0, 1};
+    input.property.enum_value_count = 0;
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8;
+    input.binding.maximum_attribute_id = 2;
+    input.binding.interpolation_uniform_byte_offset = 16;
+    input.attributes[1].type = MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
+    auto maximum = input.attributes[1];
+    maximum.attribute_id = maximum.location = 2;
+    maximum.name = {"a_max", 5};
+    input.attributes.push_back(maximum);
+    input.shader.attributes = input.attributes.data();
+    input.shader.attribute_count = input.attributes.size();
+    input.expectRejected(); // Float4 plus interpolation does not fit in 16 bytes.
+    input.uniform.byte_size = 32;
+    input.attributes[1].type = MLN_PLUGIN_VERTEX_FLOAT_X4;
+    input.expectRejected();
+    input.attributes[1].type = MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
+    input.binding.maximum_attribute_id = 1;
+    input.expectRejected(); // Two endpoints cannot share one attribute ID.
+    input.binding.maximum_attribute_id = 2;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}

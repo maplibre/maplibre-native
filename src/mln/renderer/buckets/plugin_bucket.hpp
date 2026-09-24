@@ -34,16 +34,25 @@ private:
 
 class PluginPaintVertexVector final : public gfx::VertexVectorBase {
 public:
-    PluginPaintVertexVector(std::size_t count_, std::size_t components_, bool singleEndpoint_ = false)
-        : data(count_ * components_ * (singleEndpoint_ ? 1 : 2)),
+    PluginPaintVertexVector(std::size_t count_,
+                            std::size_t components_,
+                            bool singleEndpoint_ = false,
+                            bool normalized_ = false)
+        : data(normalized_ ? 0 : count_ * components_ * (singleEndpoint_ ? 1 : 2)),
+          byteData(normalized_ ? count_ * components_ * (singleEndpoint_ ? 1 : 2) : 0),
           count(count_),
           components(components_),
           singleEndpoint(singleEndpoint_),
+          normalized(normalized_),
           blocks(count_ / boundsBlockSize + (count_ % boundsBlockSize != 0)) {}
 
-    const void* getRawData() const override { return data.data(); }
-    std::size_t getRawSize() const override { return components * (singleEndpoint ? 1 : 2) * sizeof(float); }
-    std::size_t maximumOffset() const { return singleEndpoint ? 0 : components * sizeof(float); }
+    const void* getRawData() const override {
+        return normalized ? static_cast<const void*>(byteData.data()) : static_cast<const void*>(data.data());
+    }
+    std::size_t getRawSize() const override {
+        return components * (singleEndpoint ? 1 : 2) * (normalized ? 1 : sizeof(float));
+    }
+    std::size_t maximumOffset() const { return singleEndpoint ? 0 : components * (normalized ? 1 : sizeof(float)); }
     bool hasSingleEndpoint() const { return singleEndpoint; }
     std::size_t getRawCount() const override { return count; }
 
@@ -52,9 +61,11 @@ public:
 
 private:
     std::vector<float> data;
+    std::vector<uint8_t> byteData;
     std::size_t count;
     std::size_t components;
     bool singleEndpoint;
+    bool normalized;
     static constexpr std::size_t boundsBlockSize = 128;
     struct BoundsBlock {
         std::array<float, 4> minimum{}, maximum{};

@@ -85,3 +85,35 @@ Separate patterns remain 7/8 with the existing baseline failure. A new direct
 comparison switches pattern presence and opacity on a persistent plugin layer
 to exercise both shader variants and their cache identity.
 [Raw captures](depth-only.json).
+
+## Store data-driven colors as normalized bytes — kept
+
+Baseline: `40116481cb64`. A new opt-in `COLOR_RGBA8` binding stores each sample
+as four normalized bytes using the native component truncation rule. Uniforms
+retain float4 precision. Source-only colors use one sample; composite colors
+keep two samples and interpolate after normalization. The original float color
+encoding remains available for other plugins. Statistics describe the stored,
+quantized samples.
+
+| Data-driven scene | Before | After |
+| --- | ---: | ---: |
+| Active vertex buffers | 3.600 MB | 2.250 MB |
+| Steady buffer allocations | 3.872 MB | 2.522 MB |
+| Steady frame | 24.608 ms | 24.417 ms |
+| Feature-state frame | 24.650 ms | 24.308 ms |
+| Feature-state CPU encoding | 0.183 ms | 0.160 ms |
+| Initial load | 249.401 ms | 256.760 ms |
+
+Keep for the additional 35% reduction in data-scene allocations. This brings
+total allocations 56% below the original instanced plugin and approximately
+35% below the previously measured native data scene. Steady frame changes
+across scenes are −1.2% to +0.5%; no general frame-time gain is established.
+Rounded mixed-opacity p50 rose 15% despite using uniform colors and identical
+buffer sizes; the alternating-opacity statistic has the sensitivity described
+above. This experiment is accepted for memory, not timing.
+
+Validation: 53 focused tests, 50 solid renders, four queries, 13 n-gon renders,
+and the n-gon unit executable pass. Patterns remain 7/8 with the existing
+baseline failure. New tests cover descriptor rejection, uniform precision,
+premultiplied alpha, composite samples, normalization, statistics, and state.
+[Raw captures](rgba8.json).

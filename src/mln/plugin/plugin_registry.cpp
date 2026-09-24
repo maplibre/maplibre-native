@@ -68,6 +68,7 @@ uint32_t propertyEncodingSize(mln_plugin_property_encoding_v1 encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             return 16;
     }
     return 0;
@@ -84,6 +85,7 @@ uint32_t propertyEncodingAlignment(mln_plugin_property_encoding_v1 encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
             return 4 * alignof(float);
     }
     return 0;
@@ -101,6 +103,8 @@ mln_plugin_vertex_attribute_type propertyAttributeType(mln_plugin_property_encod
         case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return MLN_PLUGIN_VERTEX_FLOAT_X4;
+        case MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8:
+            return MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED;
     }
     return static_cast<mln_plugin_vertex_attribute_type>(0);
 }
@@ -556,7 +560,8 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
                                               (property->type == MLN_PLUGIN_VALUE_FLOAT2 &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2) ||
                                               (property->type == MLN_PLUGIN_VALUE_COLOR &&
-                                               binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR) ||
+                                               (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR ||
+                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_COLOR_RGBA8)) ||
                                               (property->type == MLN_PLUGIN_VALUE_STRING &&
                                                !property->enumValues.empty() &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT));
