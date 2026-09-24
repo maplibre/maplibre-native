@@ -23,6 +23,7 @@ namespace mln {
 void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) return;
 
+    const auto& rendering = static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).rendering;
     const auto drawableCount = layerGroup.getDrawableCount();
     if (drawableCount > std::numeric_limits<uint32_t>::max()) return;
     for (auto& [key, uniform] : sharedUniforms) {
@@ -34,7 +35,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getData() || !checkTweakDrawable(drawable)) return;
             auto& data = static_cast<plugin::DrawableData&>(*drawable.getData());
-            if (data.uniformFailed) drawable.setEnabled(true);
+            drawable.setEnabled((rendering.enabled_passes & (uint32_t{1} << data.passIndex)) != 0);
+            if (!drawable.getEnabled()) return;
             data.uniformFailed = false;
             const auto* shader = [&]() -> const plugin::ShaderDefinition* {
                 const auto it = std::find_if(registration->shaders.begin(),
@@ -53,8 +55,8 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             if (hasTile) {
                 tileMatrix = getTileMatrix(*tileID,
                                            parameters,
-                                           {0.0f, 0.0f},
-                                           style::TranslateAnchorType::Viewport,
+                                           {rendering.translation.x, rendering.translation.y},
+                                           rendering.translation_anchor_viewport ? style::TranslateAnchorType::Viewport : style::TranslateAnchorType::Map,
                                            registration->enableNearClippedMatrix,
                                            false,
                                            drawable,
@@ -65,6 +67,18 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             callbackContext.bearing = parameters.state.getBearing();
             callbackContext.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
             callbackContext.pixel_ratio = parameters.pixelRatio;
+            const auto lightColor = parameters.evaluatedLight.get<style::LightColor>();
+            callbackContext.light_color[0] = lightColor.r;
+            callbackContext.light_color[1] = lightColor.g;
+            callbackContext.light_color[2] = lightColor.b;
+            callbackContext.light_intensity = parameters.evaluatedLight.get<style::LightIntensity>();
+            auto direction = parameters.evaluatedLight.get<style::LightPosition>().getCartesian();
+            mat3 lightMatrix;
+            matrix::identity(lightMatrix);
+            if (parameters.evaluatedLight.get<style::LightAnchor>() == style::LightAnchorType::Viewport)
+                matrix::rotate(lightMatrix, lightMatrix, -parameters.state.getBearing());
+            matrix::transformMat3f(direction, direction, lightMatrix);
+            std::copy(direction.begin(), direction.end(), callbackContext.light_direction);
             callbackContext.pixels_to_gl_units[0] = parameters.pixelsToGLUnits[0];
             callbackContext.pixels_to_gl_units[1] = parameters.pixelsToGLUnits[1];
             const auto tileMatrixFloats = util::cast<float>(tileMatrix);

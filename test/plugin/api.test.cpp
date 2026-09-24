@@ -286,7 +286,7 @@ TEST(PluginApi, RepeatedRegistrationComparesNestedDefinitions) {
     check([](auto& d) { d.binding.uniform_byte_offset = 8; });
     check([](auto& d) { d.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA; });
     check([](auto& d) { d.layer.geometry_type_mask |= MLN_PLUGIN_GEOMETRY_POLYGON; });
-    check([](auto& d) { d.layer.enable_stencil_overlap_dedup = 1; });
+    check([](auto& d) { d.layer.is_3d = 1; });
     check([](auto& d) { d.layer.enable_near_clipped_matrix = 1; });
     check([](auto& d) {
         d.layer.query_feature = [](const mln_plugin_feature_v1*,
@@ -305,17 +305,70 @@ TEST(PluginApi, CopiesRenderingModeFlags) {
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&withDefaults.descriptor, nullptr, 0));
     const auto defaultLayer = plugin::PluginRegistry::get().findLayerType(withDefaults.type);
     ASSERT_TRUE(defaultLayer);
-    EXPECT_FALSE(defaultLayer->enableStencilOverlapDedup);
+    EXPECT_FALSE(defaultLayer->is3D);
     EXPECT_FALSE(defaultLayer->enableNearClippedMatrix);
 
     Descriptor withFlagsEnabled("test.render-flags.enabled");
-    withFlagsEnabled.layer.enable_stencil_overlap_dedup = 1;
+    withFlagsEnabled.layer.is_3d = 1;
     withFlagsEnabled.layer.enable_near_clipped_matrix = 1;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&withFlagsEnabled.descriptor, nullptr, 0));
     const auto enabledLayer = plugin::PluginRegistry::get().findLayerType(withFlagsEnabled.type);
     ASSERT_TRUE(enabledLayer);
-    EXPECT_TRUE(enabledLayer->enableStencilOverlapDedup);
+    EXPECT_TRUE(enabledLayer->is3D);
     EXPECT_TRUE(enabledLayer->enableNearClippedMatrix);
+}
+
+
+TEST(PluginApi, ValidatesAndCopiesOrderedRenderingDescriptors) {
+    Descriptor input("test.ordered-passes");
+    mln_plugin_draw_pass_v1 passes[] = {
+        {sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
+        {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 1, MLN_PLUGIN_CULL_BACK_CCW}};
+    input.layer.draw_passes = passes;
+    input.layer.draw_pass_count = 2;
+    input.expectRejected(); // Layer stencil requires an explicit 3D layer.
+    input.layer.is_3d = 1;
+    passes[0].struct_size = 4;
+    input.expectRejected();
+    passes[0].struct_size = sizeof(passes[0]);
+    passes[0].depth_test = 0;
+    input.expectRejected(); // Writing depth without testing is invalid.
+    passes[0].depth_test = 1;
+    passes[0].color_write = 2;
+    input.expectRejected();
+    passes[0].color_write = 0;
+    input.layer.draw_pass_count = 33;
+    input.expectRejected();
+    input.layer.draw_pass_count = 2;
+    input.layer.draw_passes = nullptr;
+    input.expectRejected();
+    input.layer.draw_passes = passes;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+    const auto registered = plugin::PluginRegistry::get().findLayerType(input.type);
+    ASSERT_EQ(2u, registered->drawPasses.size());
+    EXPECT_FALSE(registered->drawPasses[0].colorWrite);
+    EXPECT_TRUE(registered->drawPasses[1].stencilDedup);
+    EXPECT_FALSE(registered->drawPasses[1].depthWrite);
+    EXPECT_EQ(style::LayerTypeInfo::Pass3D::Required, registered->info.pass3d);
+    passes[1].depth_write = 1;
+    EXPECT_FALSE(registered->drawPasses[1].depthWrite); // Borrowed array was copied.
+    EXPECT_EQ(MLN_PLUGIN_STATUS_CONFLICT, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
+TEST(PluginApi, BooleanDefaultsAndShaderEncodingAreValidated) {
+    Descriptor input("test.boolean-property");
+    input.property.type = MLN_PLUGIN_VALUE_BOOLEAN;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_BOOLEAN;
+    input.property.default_value.data.boolean_value = 1;
+    input.property.enum_value_count = 0;
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT;
+    input.property.default_value.data.boolean_value = 2;
+    input.expectRejected();
+    input.property.default_value.data.boolean_value = 1;
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_FLOAT;
+    input.expectRejected();
+    input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
 }
 
 } // namespace

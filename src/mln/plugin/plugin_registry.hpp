@@ -75,6 +75,16 @@ struct ShaderDefinition {
     bool operator==(const ShaderDefinition&) const = default;
 };
 
+struct DrawPass {
+    bool depthTest = true;
+    bool depthWrite = false;
+    bool colorWrite = true;
+    bool blend = true;
+    bool stencilDedup = false;
+    mln_plugin_cull_mode_v1 cull = MLN_PLUGIN_CULL_NONE;
+    bool operator==(const DrawPass&) const = default;
+};
+
 struct LayerType {
     std::string pluginID;
     std::string type;
@@ -89,7 +99,10 @@ struct LayerType {
     mln_plugin_query_feature_fn queryFeature = nullptr;
     mln_plugin_query_radius_fn queryRadius = nullptr;
     mln_plugin_update_uniform_block_fn updateUniformBlock = nullptr;
-    bool enableStencilOverlapDedup = false;
+    bool replaceBuiltin = false;
+    bool is3D = false;
+    std::vector<DrawPass> drawPasses;
+    mln_plugin_evaluate_layer_fn evaluateLayer = nullptr;
     bool enableNearClippedMatrix = false;
     bool operator==(const LayerType&) const = default;
 
@@ -103,7 +116,7 @@ struct RegisteredLayer final : LayerType {
         : LayerType(std::move(definition)),
           info{type.c_str(),
                style::LayerTypeInfo::Source::Required,
-               style::LayerTypeInfo::Pass3D::NotRequired,
+               is3D ? style::LayerTypeInfo::Pass3D::Required : style::LayerTypeInfo::Pass3D::NotRequired,
                style::LayerTypeInfo::Layout::Required,
                style::LayerTypeInfo::FadingTiles::NotRequired,
                style::LayerTypeInfo::CrossTileIndex::NotRequired,

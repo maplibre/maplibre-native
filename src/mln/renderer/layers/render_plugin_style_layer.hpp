@@ -35,6 +35,7 @@ private:
                       const Immutable<style::Layer::Impl>&,
                       UniqueChangeRequestVec&) override;
     bool hasTransition() const override;
+    bool is3D() const override;
     bool hasCrossfade() const override { return false; }
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;

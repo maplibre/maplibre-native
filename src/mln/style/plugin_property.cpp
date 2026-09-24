@@ -56,6 +56,11 @@ template <class T>
 T defaultValue(const plugin::PropertyDefinition& definition);
 
 template <>
+bool defaultValue<bool>(const plugin::PropertyDefinition& definition) {
+    return definition.defaultValue.getBool() && *definition.defaultValue.getBool();
+}
+
+template <>
 float defaultValue<float>(const plugin::PropertyDefinition& definition) {
     return numericValue<float>(definition.defaultValue).value_or(0.0f);
 }
@@ -88,6 +93,8 @@ std::string defaultValue<std::string>(const plugin::PropertyDefinition& definiti
 template <class Fn>
 auto withPropertyType(mln_plugin_value_type type, Fn&& fn) {
     switch (type) {
+        case MLN_PLUGIN_VALUE_BOOLEAN:
+            return fn.template operator()<bool>();
         case MLN_PLUGIN_VALUE_FLOAT:
             return fn.template operator()<float>();
         case MLN_PLUGIN_VALUE_FLOAT2:
@@ -114,7 +121,10 @@ template <class T>
 mln_plugin_value toPluginValue(const T& value, PluginPropertyValue::EvaluationStorage& storage) {
     mln_plugin_value result{};
     result.struct_size = sizeof(result);
-    if constexpr (std::is_same_v<T, float>) {
+    if constexpr (std::is_same_v<T, bool>) {
+        result.type = MLN_PLUGIN_VALUE_BOOLEAN;
+        result.data.boolean_value = value;
+    } else if constexpr (std::is_same_v<T, float>) {
         result.type = MLN_PLUGIN_VALUE_FLOAT;
         result.data.float_value = value;
     } else if constexpr (std::is_same_v<T, std::array<float, 2>>) {

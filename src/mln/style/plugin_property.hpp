@@ -30,7 +30,7 @@ public:
     using TypedValue = std::variant<PropertyValue<float>,
                                     PropertyValue<std::array<float, 2>>,
                                     PropertyValue<Color>,
-                                    PropertyValue<std::string>>;
+                                    PropertyValue<std::string>, PropertyValue<bool>>;
 
     struct EvaluationStorage {
         std::string string;
@@ -84,7 +84,7 @@ private:
     using TypedValue = std::variant<Transitioning<PropertyValue<float>>,
                                     Transitioning<PropertyValue<std::array<float, 2>>>,
                                     Transitioning<PropertyValue<Color>>,
-                                    Transitioning<PropertyValue<std::string>>>;
+                                    Transitioning<PropertyValue<std::string>>, Transitioning<PropertyValue<bool>>>;
     TypedValue value;
 };
 

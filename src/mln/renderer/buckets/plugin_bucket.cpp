@@ -24,6 +24,7 @@ style::PluginPropertyValue propertyValue(const plugin::PropertyDefinition& defin
 std::size_t componentCount(mln_plugin_property_encoding_v1 encoding) {
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
             return 1;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
@@ -42,6 +43,9 @@ void encodedValue(const mln_plugin_value& value,
     switch (encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
             output[0] = value.data.float_value;
+            break;
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
+            output[0] = value.data.boolean_value ? 1.0f : 0.0f;
             break;
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT: {
             const std::string_view text(value.data.string_value.data, value.data.string_value.size);
@@ -71,6 +75,9 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
     value.struct_size = sizeof(value);
     value.type = type;
     switch (type) {
+        case MLN_PLUGIN_VALUE_BOOLEAN:
+            value.data.boolean_value = input[0] != 0;
+            break;
         case MLN_PLUGIN_VALUE_FLOAT:
             value.data.float_value = input[0];
             break;
@@ -197,6 +204,7 @@ gfx::AttributeDataType PluginPaintPropertyBinder::attributeType() const noexcept
     }
     switch (binding.encoding) {
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT:
+        case MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT:
         case MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT:
             return gfx::AttributeDataType::Float;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
@@ -279,7 +287,8 @@ void PluginPaintPropertyBinder::statistics(float zoom, mln_plugin_value& minimum
     if (!dataDriven || !vertexVector) {
         style::PluginPropertyValue::EvaluationStorage storage;
         minimum = value.evaluate(zoom, definition, storage);
-        if (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT) {
+        if (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT ||
+            binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT) {
             std::array<float, 4> encoded{};
             encodedValue(minimum, binding.encoding, definition, encoded);
             minimum = decodedValue(encoded, definition);

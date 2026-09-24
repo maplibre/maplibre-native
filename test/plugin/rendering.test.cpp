@@ -186,7 +186,9 @@ void registerTriangles(const std::string& pluginID,
         layer.shader_count = 1;
         layer.properties = withUniforms ? &radius : nullptr;
         layer.property_count = withUniforms ? 1u : 0u;
-        layer.enable_stencil_overlap_dedup = stencilOverlapDedup;
+        static const mln_plugin_draw_pass_v1 stencilPass{sizeof(mln_plugin_draw_pass_v1), 0, 0, 1, 1, 1, MLN_PLUGIN_CULL_NONE};
+        layer.is_3d = stencilOverlapDedup;
+        if (stencilOverlapDedup) { layer.draw_passes = &stencilPass; layer.draw_pass_count = 1; }
         layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
             return MLN_PLUGIN_STATUS_OK;
         };

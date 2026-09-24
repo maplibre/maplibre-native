@@ -371,3 +371,24 @@ TEST(PluginPaintBinder, RetainedVectorViewsOutliveTileData) {
         EXPECT_EQ(geometry, data->features[0].snapshot->getGeometries());
     }
 }
+
+TEST(PluginProperties, BooleanDefaultsSerializationCameraAndFeatureState) {
+    auto definition = numberDefinition();
+    definition.type = MLN_PLUGIN_VALUE_BOOLEAN;
+    definition.defaultValue = true;
+    style::PluginPropertyValue::EvaluationStorage storage;
+    const auto fallback = style::defaultPluginPropertyValue(definition);
+    ASSERT_NE(nullptr, fallback.toStyleProperty().getValue().getBool());
+    EXPECT_TRUE(*fallback.toStyleProperty().getValue().getBool());
+    auto camera = expression(definition, R"(["step",["zoom"],true,10,false])");
+    EXPECT_TRUE(camera.evaluate(9.5, definition, storage).data.boolean_value);
+    EXPECT_FALSE(camera.evaluate(10, definition, storage).data.boolean_value);
+    auto feature = expression(definition, R"(["boolean",["feature-state","enabled"],false])");
+    auto tile = source();
+    const auto geometry = tile.getFeature(0);
+    EXPECT_FALSE(feature.evaluate(10, *geometry, {}, definition, storage).data.boolean_value);
+    EXPECT_TRUE(feature.evaluate(10, *geometry, {{"enabled", true}}, definition, storage).data.boolean_value);
+    JSDocument doc; doc.SetInt(1); const JSValue* value = &doc;
+    style::conversion::Error error;
+    EXPECT_FALSE(style::convertPluginPropertyValue(definition, style::conversion::Convertible(value), error));
+}

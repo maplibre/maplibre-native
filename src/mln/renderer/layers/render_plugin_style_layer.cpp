@@ -24,6 +24,8 @@
 #include <mln/style/plugin_property.hpp>
 
 #include <set>
+#include <cmath>
+#include <mln/util/logging.hpp>
 
 namespace mln {
 namespace {
@@ -101,9 +103,37 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
         staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
+    const uint32_t allPasses = registration->drawPasses.size() == 32 ? 0xffffffffu :
+        (uint32_t{1} << registration->drawPasses.size()) - 1;
+    properties->rendering.enabled_passes = allPasses;
+    if (registration->evaluateLayer) {
+        std::vector<mln_plugin_property_value_v1> cameraProperties;
+        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
+        for (size_t i = 0; i < definitions.size(); ++i) {
+            const auto& definition = definitions[i];
+            const auto& value = evaluatedPluginProperties.at(definition.name);
+            if (value.isDataDriven()) continue;
+            cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),
+                {definition.name.data(), definition.name.size()}, value.evaluate(parameters.z, definition, storage[i]),
+                static_cast<uint8_t>(impl.pluginProperties.contains(definition.name))});
+        }
+        const auto status = registration->evaluateLayer(cameraProperties.data(), cameraProperties.size(), &properties->rendering);
+        const auto& rendering = properties->rendering;
+        if (status != MLN_PLUGIN_STATUS_OK || rendering.struct_size != sizeof(rendering) ||
+            (rendering.enabled_passes & ~allPasses) || rendering.translation_anchor_viewport > 1 ||
+            !std::isfinite(rendering.translation.x) || !std::isfinite(rendering.translation.y)) {
+            properties->rendering.enabled_passes = 0;
+            Log::Error(Event::General, "Plugin '" + registration->pluginID + "' failed layer evaluation");
+        }
+    }
+    passes = properties->rendering.enabled_passes ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = underlying_type(passes);
     evaluatedProperties = std::move(properties);
     if (layerTweaker) layerTweaker->updateProperties(evaluatedProperties);
+}
+
+bool RenderPluginStyleLayer::is3D() const {
+    return pluginImpl(baseImpl).registration->is3D;
 }
 
 bool RenderPluginStyleLayer::hasTransition() const {
@@ -158,9 +188,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    if (registration->enableStencilOverlapDedup) {
-        // Every is3D + stencil-enabled drawable below shares this group's single stencil ref.
-        // See the enable_stencil_overlap_dedup doc comment in plugin_api.h.
+    if (registration->is3D) {
         tileLayerGroup->setStencilTiles(renderTiles);
     }
 
@@ -190,6 +218,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        for (size_t passIndex = 0; passIndex < registration->drawPasses.size(); ++passIndex) {
+        const auto& pass = registration->drawPasses[passIndex];
         for (const auto& definition : bucket.drawables) {
             const auto shaderGroup = shaderGroups.at(definition.shaderID);
             StringIDSetsPair propertiesAsUniforms;
@@ -219,19 +249,14 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             auto builder = context.createDrawableBuilder("plugin/" + registration->type);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
-            if (registration->enableStencilOverlapDedup) {
-                // No depth test: visibility relative to other layers comes entirely from style layer order.
-                builder->setEnableDepth(false);
-                builder->setIs3D(true);
-                builder->setEnableStencil(true);
-            } else {
-                builder->setEnableDepth(true);
-                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setIs3D(false);
-                builder->setEnableStencil(false);
-            }
-            builder->setColorMode(gfx::ColorMode::alphaBlended());
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+            builder->setDrawPriority(passIndex);
+            builder->setEnableDepth(pass.depthTest);
+            builder->setDepthType(pass.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+            builder->setIs3D(registration->is3D);
+            builder->setEnableStencil(pass.stencilDedup);
+            builder->setEnableColor(pass.colorWrite);
+            builder->setColorMode(!pass.colorWrite ? gfx::ColorMode::disabled() : pass.blend ? gfx::ColorMode::alphaBlended() : gfx::ColorMode::unblended());
+            builder->setCullFaceMode(pass.cull == MLN_PLUGIN_CULL_BACK_CCW ? gfx::CullFaceMode::backCCW() : gfx::CullFaceMode::disabled());
             builder->setVertexAttributes(std::move(attributes));
             builder->setRawVertices({}, vertexCount, firstType);
             builder->setSegments(
@@ -241,12 +266,14 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
                 drawable->setLayerTweaker(layerTweaker);
                 if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
-                drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID));
+                drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID, passIndex));
+                drawable->setDepthMaskFor3D(pass.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
                 drawable->setRenderTile(renderTilesOwner, &tile);
                 tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         }
+    }
     }
 }
 

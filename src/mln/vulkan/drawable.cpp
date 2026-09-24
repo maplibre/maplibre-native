@@ -315,7 +315,9 @@ void Drawable::draw(PaintParameters& parameters) const {
         if (impl->depthFor3D.has_value()) {
             impl->pipelineInfo.setDepthMode(impl->depthFor3D.value());
         } else if (is3D) {
-            impl->pipelineInfo.setDepthMode(parameters.depthModeFor3D());
+            auto depth = parameters.depthModeFor3D();
+            if (getDepthMaskFor3D()) depth.mask = *getDepthMaskFor3D();
+            impl->pipelineInfo.setDepthMode(depth);
         } else {
             const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
             impl->pipelineInfo.setDepthMode(depthMode);
