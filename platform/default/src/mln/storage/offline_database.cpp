@@ -26,7 +26,8 @@ std::string OfflineDatabase::cacheKey(const Resource& resource) {
 
 std::string OfflineDatabase::cacheKey(const Resource::TileData& tile) {
     if (tile.vectorEncoding != Tileset::VectorEncoding::MLT) return tile.urlTemplate;
-    return tile.urlTemplate + (tile.urlTemplate.find('?') == std::string::npos ? "#mln" : "&mln");
+    const auto sep = tile.urlTemplate.find('?') == std::string::npos ? '?' : '&';
+    return tile.urlTemplate + sep + "_mlnEncoding=mlt";
 }
 
 OfflineDatabase::OfflineDatabase(std::string path_, const TileServerOptions& options)

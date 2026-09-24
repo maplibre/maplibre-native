@@ -372,7 +372,7 @@ TEST(OfflineDatabase, PutTile) {
 
     Resource resource{Resource::Tile, "http://example.com/"};
     resource.tileData = Resource::TileData{
-        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0, .vectorEncoding = std::nullopt};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
@@ -496,7 +496,7 @@ TEST(OfflineDatabase, PutTileNotFound) {
 
     Resource resource{Resource::Tile, "http://example.com/"};
     resource.tileData = Resource::TileData{
-        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0, .vectorEncoding = std::nullopt};
     Response response;
     response.noContent = true;
 
@@ -1383,7 +1383,7 @@ TEST(OfflineDatabase, HasRegionResourceTile) {
 
     Resource resource{Resource::Tile, "http://example.com/"};
     resource.tileData = Resource::TileData{
-        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0};
+        .urlTemplate = "http://example.com/", .pixelRatio = 1, .x = 0, .y = 0, .z = 0, .vectorEncoding = std::nullopt};
     Response response;
 
     response.data = std::make_shared<std::string>("first");
