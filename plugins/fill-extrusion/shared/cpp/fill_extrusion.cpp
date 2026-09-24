@@ -17,11 +17,13 @@ constexpr mln_plugin_string str(const char (&s)[N]) {
 using Point = std::array<double, 2>;
 using Ring = std::vector<Point>;
 using Polygon = std::vector<Ring>;
+#include "rounded.hpp"
 struct Vertex {
     float position[3];
     float normal[3];
 };
 struct Layout {
+    double cornerDistance = 0;
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     std::vector<mln_plugin_segment_v1> segments;
@@ -75,7 +77,8 @@ void reservePrimitive(Layout& l, uint32_t count) {
             {sizeof(mln_plugin_segment_v1), uint32_t(l.vertices.size()), uint32_t(l.indices.size()), 0, 0});
 }
 Vertex vertex(const Point& p, float top, float nx, float ny, float nz) {
-    return {{float(p[0]), float(p[1]), top}, {nx, ny, nz}};
+    const auto q = quantize(p);
+    return {{float(q[0]), float(q[1]), top}, {nx, ny, nz}};
 }
 void emitPolygon(Layout& l, Polygon& poly) {
     // Bound pathological hole counts exactly as the built-in tessellator does.
@@ -85,13 +88,15 @@ void emitPolygon(Layout& l, Polygon& poly) {
         });
         poly.resize(501);
     }
+    if (l.cornerDistance > 0) poly = rounded(std::move(poly), l.cornerDistance);
     std::vector<Point> flat;
     for (const auto& ring : poly) {
         flat.insert(flat.end(), ring.begin(), ring.end());
         for (size_t i = 0; i + 1 < ring.size(); ++i) {
             const auto& a = ring[i];
             const auto& b = ring[i + 1];
-            const float dx = float(b[0] - a[0]), dy = float(b[1] - a[1]);
+            const auto qa = quantize(a), qb = quantize(b);
+            const float dx = float(qb[0] - qa[0]), dy = float(qb[1] - qa[1]);
             const float length = std::sqrt(dx * dx + dy * dy);
             if (!length) continue;
             reservePrimitive(l, 4);
@@ -118,8 +123,16 @@ void emitPolygon(Layout& l, Polygon& poly) {
     }
 }
 mln_plugin_status createLayout(const mln_plugin_layout_context_v1* context, void** instance) try {
-    if (!context || context->struct_size < sizeof(*context) || !instance) return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
-    *instance = new Layout;
+    if (!context || context->struct_size < sizeof(*context) || !instance ||
+        (context->property_count && !context->properties))
+        return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
+    auto layout = std::make_unique<Layout>();
+    for (size_t i = 0; i < context->property_count; ++i) {
+        const auto& p = context->properties[i];
+        if (std::string_view(p.name.data, p.name.size) == "fill-extrusion-rounded-corner-distance")
+            layout->cornerDistance = p.value.data.float_value;
+    }
+    *instance = layout.release();
     return MLN_PLUGIN_STATUS_OK;
 } catch (...) {
     return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
@@ -316,7 +329,14 @@ constexpr mln_plugin_property_descriptor_v1 paint(mln_plugin_string name, mln_pl
     }
     return p;
 }
+constexpr mln_plugin_property_descriptor_v1 roundedProperty() {
+    auto p = paint(str("fill-extrusion-rounded-corner-distance"), number(0));
+    p.is_layout = 1;
+    p.supports_transitions = 0;
+    return p;
+}
 constexpr mln_plugin_property_descriptor_v1 properties[] = {
+    roundedProperty(),
     paint(str("fill-extrusion-color"), black(), true),
     paint(str("fill-extrusion-base"), number(0), true),
     paint(str("fill-extrusion-height"), number(0), true),

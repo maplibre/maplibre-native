@@ -46,6 +46,7 @@ RenderPluginStyleLayer::RenderPluginStyleLayer(Immutable<style::PluginStyleLayer
     const auto& definitions = registration->properties;
     const auto& layerImpl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
+        if (definition.isLayout) continue;
         const auto property = layerImpl.pluginProperties.find(definition.name);
         auto value = property == layerImpl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                                   : property->second;
@@ -60,6 +61,7 @@ void RenderPluginStyleLayer::transition(const TransitionParameters& parameters) 
     const auto& impl = pluginImpl(baseImpl);
     const auto& definitions = impl.registration->properties;
     for (const auto& definition : definitions) {
+        if (definition.isLayout) continue;
         const auto property = impl.pluginProperties.find(definition.name);
         auto value = property == impl.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
                                                              : property->second;
@@ -86,6 +88,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     const auto& definitions = registration->properties;
     const auto& impl = pluginImpl(baseImpl);
     for (const auto& definition : definitions) {
+        if (definition.isLayout) continue;
         const auto transition = transitioningPaintProperties.find(definition.name);
         if (transition != transitioningPaintProperties.end()) {
             evaluatedPluginProperties.emplace(definition.name,
@@ -112,6 +115,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
         std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
         for (size_t i = 0; i < definitions.size(); ++i) {
             const auto& definition = definitions[i];
+            if (definition.isLayout) continue;
             const auto& value = evaluatedPluginProperties.at(definition.name);
             if (value.isDataDriven()) continue;
             cameraProperties.push_back({sizeof(mln_plugin_property_value_v1),

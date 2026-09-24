@@ -23,6 +23,7 @@ struct PropertyDefinition {
     std::optional<float> minimum;
     std::optional<float> maximum;
     std::vector<std::string> enumValues;
+    bool isLayout = false;
     bool operator==(const PropertyDefinition&) const = default;
 };
 

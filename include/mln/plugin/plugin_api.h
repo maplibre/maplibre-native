@@ -136,6 +136,9 @@ typedef struct mln_plugin_property_descriptor_v1 {
     /* Optional allowed string values. */
     const mln_plugin_string* enum_values;
     size_t enum_value_count;
+    /* 0 = paint, 1 = layout. Layout values may use camera expressions only,
+     * never transition, and are evaluated at tile zoom before create_layout. */
+    uint8_t is_layout;
 } mln_plugin_property_descriptor_v1;
 
 typedef struct mln_plugin_property_value_v1 {
@@ -310,6 +313,8 @@ typedef struct mln_plugin_layout_context_v1 {
     uint32_t struct_size;
     float zoom;
     uint32_t extent;
+    const mln_plugin_property_value_v1* properties;
+    size_t property_count;
 } mln_plugin_layout_context_v1;
 
 /* Returned bytes remain valid until destroy_layout. The host copies them after

@@ -6,6 +6,7 @@ cc_library(
     srcs = [
         "shared/cpp/fill_extrusion.cpp",
         "shared/cpp/shaders.hpp",
+        "shared/cpp/rounded.hpp",
     ],
     hdrs = ["shared/include/fill_extrusion.hpp"],
     copts = CPP_FLAGS,

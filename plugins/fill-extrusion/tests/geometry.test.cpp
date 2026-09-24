@@ -17,7 +17,7 @@ struct Geometry {
         bucket.struct_size = sizeof(bucket);
         EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_fill_extrusion_register(capture, nullptr, 0));
         layer = descriptor->layer_types;
-        mln_plugin_layout_context_v1 context{sizeof(context), 15, 8192};
+        mln_plugin_layout_context_v1 context{sizeof(context), 15, 8192, nullptr, 0};
         EXPECT_EQ(MLN_PLUGIN_STATUS_OK, layer->create_layout(&context, &layout));
     }
     ~Geometry() { layer->destroy_layout(layout); }

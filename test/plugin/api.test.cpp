@@ -1,6 +1,8 @@
 #include <mln/plugin/plugin_registry.hpp>
 #include <mln/layermanager/layer_manager.hpp>
 #include <mln/style/layers/plugin_style_layer.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
 #include <gtest/gtest.h>
 
 #include <cstdlib>
@@ -367,6 +369,42 @@ TEST(PluginApi, BooleanDefaultsAndShaderEncodingAreValidated) {
     input.expectRejected();
     input.binding.encoding = MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT;
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+}
+
+TEST(PluginApi, LayoutPropertiesValidateScopeSerializeAndInvalidateGeometry) {
+    Descriptor input("test.layout-property");
+    input.property.is_layout = 1;
+    input.property.type = MLN_PLUGIN_VALUE_FLOAT;
+    input.property.default_value.type = MLN_PLUGIN_VALUE_FLOAT;
+    input.property.default_value.data.float_value = 0;
+    input.property.enum_value_count = 0;
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    input.shader.property_binding_count = 0;
+    input.property.supports_transitions = 1;
+    input.expectRejected();
+    input.property.supports_transitions = 0;
+    input.property.expression_capabilities |= MLN_PLUGIN_EXPRESSION_FEATURE;
+    input.expectRejected();
+    input.property.expression_capabilities = MLN_PLUGIN_EXPRESSION_CAMERA;
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&input.descriptor, nullptr, 0));
+    style::conversion::Error error;
+    auto parse = [&](const std::string& section, int value) {
+        return style::conversion::convertJSON<std::unique_ptr<style::Layer>>(
+            "{\"id\":\"test\",\"source\":\"s\",\"type\":\"" + input.type + "\",\"" + section +
+                "\":{\"test-anchor\":" + std::to_string(value) + "}}",
+            error);
+    };
+    EXPECT_FALSE(parse("paint", 2));
+    auto a = parse("layout", 2), b = parse("layout", 4);
+    ASSERT_TRUE(a) << error.message;
+    ASSERT_TRUE(b) << error.message;
+    const auto& ai = static_cast<style::PluginStyleLayer&>(**a).impl();
+    const auto& bi = static_cast<style::PluginStyleLayer&>(**b).impl();
+    EXPECT_TRUE(ai.hasLayoutDifference(bi));
+    EXPECT_FALSE(ai.hasLayoutDifference(ai));
+    const auto serialized = (*a)->serialize();
+    ASSERT_TRUE(serialized.getObject()->at("layout").getObject());
+    EXPECT_EQ(2.0, *serialized.getObject()->at("layout").getObject()->at("test-anchor").getDouble());
 }
 
 } // namespace

@@ -27,8 +27,8 @@ expressions. The remaining properties support camera expressions. Numeric,
 color, and translation values transition; boolean and anchor values are discrete.
 Data-driven base and height use the built-in shader's nonnegative clamping.
 Color and light calculations match the built-in Vulkan shaders, including their
-alpha semantics. Patterns and rounded corners are not implemented in the solid
-milestone and return explicit unsupported-property errors.
+alpha semantics. The layout property `fill-extrusion-rounded-corner-distance` defaults to zero
+and supports camera expressions. Patterns remain unsupported in this milestone.
 
 ## API changes
 
@@ -51,6 +51,11 @@ color, intensity, and bearing-adjusted Cartesian direction.
 Boolean properties use `MLN_PLUGIN_VALUE_BOOLEAN` (0 or 1) and the
 `MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT` shader binding. They parse,
 serialize, evaluate expressions, and validate independently of numeric values.
+Layout descriptors set `is_layout = 1`; the host validates their scope, serializes
+them in `layout`, includes them in bucket grouping/invalidation, and supplies
+tile-zoom values to `create_layout`. Layout properties cannot transition or use
+feature expressions.
+
 All metadata is copied at registration, callback memory remains borrowed, and
 all callbacks must return normally. The n-gon example uses an explicit pass
 matching its original rendering settings.

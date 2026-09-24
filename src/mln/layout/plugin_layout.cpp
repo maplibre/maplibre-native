@@ -44,6 +44,21 @@ void PluginLayout::createBucket(const ImagePositions&,
     context.struct_size = sizeof(context);
     context.zoom = zoom;
     context.extent = util::EXTENT;
+    std::vector<mln_plugin_property_value_v1> layoutProperties;
+    std::vector<style::PluginPropertyValue::EvaluationStorage> storage(registration->properties.size());
+    for (size_t i = 0; i < registration->properties.size(); ++i) {
+        const auto& definition = registration->properties[i];
+        if (!definition.isLayout) continue;
+        const auto it = leader.pluginProperties.find(definition.name);
+        const auto value = it == leader.pluginProperties.end() ? style::defaultPluginPropertyValue(definition)
+                                                               : it->second;
+        layoutProperties.push_back({sizeof(mln_plugin_property_value_v1),
+                                    {definition.name.data(), definition.name.size()},
+                                    value.evaluate(zoom, definition, storage[i]),
+                                    static_cast<uint8_t>(it != leader.pluginProperties.end())});
+    }
+    context.properties = layoutProperties.data();
+    context.property_count = layoutProperties.size();
 
     void* layoutInstance = nullptr;
     const auto createStatus = registration->createLayout(&context, &layoutInstance);

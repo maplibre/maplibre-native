@@ -337,6 +337,12 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
             error = "plugin property descriptor is malformed";
             return false;
         }
+        if (property.is_layout > 1 ||
+            (property.is_layout &&
+             (property.supports_transitions || (property.expression_capabilities & ~MLN_PLUGIN_EXPRESSION_CAMERA)))) {
+            error = "plugin layout properties support only camera expressions and cannot transition";
+            return false;
+        }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
                                         property.type == MLN_PLUGIN_VALUE_FLOAT2 ||
                                         property.type == MLN_PLUGIN_VALUE_COLOR;
@@ -406,7 +412,8 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
                                property.supports_transitions != 0,
                                property.has_minimum ? std::optional<float>{property.minimum} : std::nullopt,
                                property.has_maximum ? std::optional<float>{property.maximum} : std::nullopt,
-                               std::move(enumValues)});
+                               std::move(enumValues),
+                               property.is_layout != 0});
     }
     return true;
 }
@@ -516,7 +523,7 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
         for (const auto& shader : copiedLayerType.shaders) {
             for (const auto& binding : shader.propertyBindings) {
                 const auto* property = copiedLayerType.findProperty(binding.propertyName);
-                const bool encodingMatches = property != nullptr &&
+                const bool encodingMatches = property != nullptr && !property->isLayout &&
                                              ((property->type == MLN_PLUGIN_VALUE_BOOLEAN &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT) ||
                                               (property->type == MLN_PLUGIN_VALUE_FLOAT &&

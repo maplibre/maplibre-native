@@ -31,3 +31,15 @@ descriptors, callback suppression/recovery, polygon holes, segmentation past
 65,535 vertices, opacity changes through zero/partial/one, translation anchors,
 light changes, vertical gradient, and feature-state updates. Direct comparison
 scenes retain an existing built-in object across plugin registration.
+
+## Rounded corners
+
+Separate direct comparisons cover radii 0, 1, 12, 1000 (limited by edge length),
+and a zoom expression, each at opacity 0.5 and 1. The scene includes holes and
+multiple overlapping features across tile boundaries. All ten comparisons pass.
+The plugin reproduces the circular arcs, three intermediate arc samples,
+five-degree straight-edge cutoff, 20% edge-length limit, float tessellation
+coordinates, and 1/128 tile-unit GPU quantization used by the native layer.
+Layout scope/serialization/invalidation and invalid descriptors are checked
+separately. All 42 focused tests pass, as do all 50 eligible solids, four eligible queries,
+and all 13 n-gon fixtures. The original solid suite remains unchanged.

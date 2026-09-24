@@ -135,4 +135,24 @@ TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
         plugin.layer->setProperty("fill-extrusion-rounded-corner-distance", style::conversion::Convertible(value)));
     EXPECT_NE(builtin.layer->getTypeInfo(), plugin.layer->getTypeInfo());
 }
+
+TEST(FillExtrusionPlugin, RoundedCornerParity) {
+    util::RunLoop loop;
+    const auto status = mln_fill_extrusion_register(mln_plugin_register_v1, nullptr, 0);
+    ASSERT_TRUE(status == MLN_PLUGIN_STATUS_OK || status == MLN_PLUGIN_STATUS_ALREADY_REGISTERED);
+    for (const auto* radius : {"0", "1", "12", "1000", R"(["interpolate",["linear"],["zoom"],14,1,17,30])"}) {
+        SCOPED_TRACE(radius);
+        Scene builtin(false), plugin(true);
+        for (auto* scene : {&builtin, &plugin}) {
+            scene->set("fill-extrusion-rounded-corner-distance", radius);
+            scene->set("fill-extrusion-height", "100");
+            scene->set("fill-extrusion-color", "\"#da526c\"");
+            scene->set("fill-extrusion-opacity", "0.5");
+        }
+        compare(builtin, plugin);
+        builtin.set("fill-extrusion-opacity", "1");
+        plugin.set("fill-extrusion-opacity", "1");
+        compare(builtin, plugin);
+    }
+}
 } // namespace
