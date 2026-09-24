@@ -17,6 +17,7 @@
 
 #if MLN_GLFW_PLUGINS
 #include <ngon_layer.hpp>
+#include <fill_extrusion_plugin.hpp>
 #endif
 
 #include <csignal>
@@ -86,6 +87,13 @@ int main(int argc, char* argv[]) {
     const auto pluginStatus = mln_ngon_layer_register(mln_plugin_register_v1, pluginError, sizeof(pluginError));
     if (pluginStatus != MLN_PLUGIN_STATUS_OK && pluginStatus != MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
         std::cerr << "Unable to register n-gon layer: " << pluginError << '\n';
+        return 1;
+    }
+    const auto fillExtrusionPluginStatus = mln_fill_extrusion_plugin_register(
+        mln_plugin_register_v1, pluginError, sizeof(pluginError));
+    if (fillExtrusionPluginStatus != MLN_PLUGIN_STATUS_OK &&
+        fillExtrusionPluginStatus != MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
+        std::cerr << "Unable to register fill-extrusion-plugin layer: " << pluginError << '\n';
         return 1;
     }
 #endif

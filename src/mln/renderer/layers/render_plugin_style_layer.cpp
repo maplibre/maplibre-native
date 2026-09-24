@@ -23,6 +23,7 @@
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/plugin_property.hpp>
 
+#include <algorithm>
 #include <set>
 
 namespace mln {
@@ -216,35 +217,88 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             }
             if (!vertexCount || firstType == gfx::AttributeDataType::Invalid) continue;
 
-            auto builder = context.createDrawableBuilder("plugin/" + registration->type);
-            builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-            builder->setRenderPass(renderPass);
-            if (registration->enableStencilOverlapDedup) {
-                // No depth test: visibility relative to other layers comes entirely from style layer order.
-                builder->setEnableDepth(false);
-                builder->setIs3D(true);
-                builder->setEnableStencil(true);
+            const auto shaderDefinition = std::find_if(
+                registration->shaders.begin(), registration->shaders.end(), [&](const auto& candidate) {
+                    return candidate.id == definition.shaderID;
+                });
+            const bool depthWrite = shaderDefinition != registration->shaders.end() &&
+                                    shaderDefinition->enableDepthWrite;
+
+            const auto finish = [&](gfx::DrawableBuilder& builder) {
+                builder.setSegments(
+                    gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
+                builder.flush(context);
+                for (auto& drawable : builder.clearDrawables()) {
+                    drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(layerTweaker);
+                    if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
+                    drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID));
+                    drawable->setRenderTile(renderTilesOwner, &tile);
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
+                }
+            };
+
+            if (depthWrite) {
+                // Two-pass rendering, matching real fill-extrusion's own color-pass drawable
+                // (render_fill_extrusion_layer.cpp): a depth-only pre-pass first (drawPriority 0,
+                // enableColor false) fills the depth buffer with the true closest surface per pixel
+                // for ALL of this shader's geometry, so the second, colored pass's depth test
+                // naturally rejects occluded fragments *before* they ever reach the stencil test.
+                // A single combined depth+stencil pass (no pre-pass) is not enough: stencil's
+                // draw-order-based "first fragment wins" would otherwise wrongly reject a later,
+                // genuinely-closer fragment -- e.g. suppressing roof pixels that screen-overlap this
+                // same building's own walls, since stencil alone knows nothing about depth ordering.
+                // Stencil (enabled only on the color pass) still deduplicates near-identical
+                // duplicate geometry at tile boundaries, which is why enable_depth_write needs
+                // enableStencilOverlapDedup active for this layer type too (fixes tile-seam z-fighting).
+                auto depthBuilder = context.createDrawableBuilder("plugin/" + registration->type + "/depth");
+                depthBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+                depthBuilder->setRenderPass(renderPass);
+                depthBuilder->setIs3D(true);
+                depthBuilder->setEnableColor(false);
+                depthBuilder->setEnableDepth(true);
+                depthBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                depthBuilder->setEnableStencil(false);
+                depthBuilder->setDrawPriority(0);
+                depthBuilder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                depthBuilder->setVertexAttributes(attributes);
+                depthBuilder->setRawVertices({}, vertexCount, firstType);
+                finish(*depthBuilder);
+
+                auto colorBuilder = context.createDrawableBuilder("plugin/" + registration->type + "/color");
+                colorBuilder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+                colorBuilder->setRenderPass(renderPass);
+                colorBuilder->setIs3D(true);
+                colorBuilder->setEnableDepth(true);
+                colorBuilder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                colorBuilder->setEnableStencil(true);
+                colorBuilder->setDrawPriority(1);
+                colorBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+                colorBuilder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                colorBuilder->setVertexAttributes(std::move(attributes));
+                colorBuilder->setRawVertices({}, vertexCount, firstType);
+                finish(*colorBuilder);
             } else {
-                builder->setEnableDepth(true);
-                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                builder->setIs3D(false);
-                builder->setEnableStencil(false);
-            }
-            builder->setColorMode(gfx::ColorMode::alphaBlended());
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setVertexAttributes(std::move(attributes));
-            builder->setRawVertices({}, vertexCount, firstType);
-            builder->setSegments(
-                gfx::Triangles(), bucket.indices, definition.segments.data(), definition.segments.size());
-            builder->flush(context);
-            for (auto& drawable : builder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                drawable->setLayerTweaker(layerTweaker);
-                if (paintBinders) drawable->setBinders(renderData->bucket, paintBinders);
-                drawable->setData(std::make_unique<plugin::DrawableData>(definition.shaderID));
-                drawable->setRenderTile(renderTilesOwner, &tile);
-                tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
+                auto builder = context.createDrawableBuilder("plugin/" + registration->type);
+                builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+                builder->setRenderPass(renderPass);
+                if (registration->enableStencilOverlapDedup) {
+                    // No depth test: visibility relative to other layers comes entirely from style layer order.
+                    builder->setEnableDepth(false);
+                    builder->setIs3D(true);
+                    builder->setEnableStencil(true);
+                } else {
+                    builder->setEnableDepth(true);
+                    builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                    builder->setIs3D(false);
+                    builder->setEnableStencil(false);
+                }
+                builder->setColorMode(gfx::ColorMode::alphaBlended());
+                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+                builder->setVertexAttributes(std::move(attributes));
+                builder->setRawVertices({}, vertexCount, firstType);
+                finish(*builder);
             }
         }
     }

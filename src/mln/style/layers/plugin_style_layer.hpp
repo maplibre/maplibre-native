@@ -31,6 +31,9 @@ private:
     std::optional<conversion::Error> setPluginProperty(const std::string&,
                                                        const conversion::Convertible&,
                                                        std::optional<PropertyScope> = std::nullopt);
+    std::optional<conversion::Error> setPluginLayoutProperty(const std::string&,
+                                                             const conversion::Convertible&,
+                                                             std::optional<PropertyScope> = std::nullopt);
     std::optional<conversion::Error> setPluginTransition(const std::string&,
                                                          const conversion::Convertible&,
                                                          std::optional<PropertyScope> = std::nullopt);
@@ -52,6 +55,9 @@ public:
 
     std::map<std::string, PluginPropertyValue> pluginProperties;
     std::map<std::string, TransitionOptions> pluginPropertyTransitions;
+    // Layout properties: evaluated once per bucket at layout time, not per-frame -- no
+    // transitions, unlike pluginProperties. See LayerType::layoutProperties.
+    std::map<std::string, PluginPropertyValue> pluginLayoutProperties;
     plugin::RegisteredLayerPtr registration;
 };
 

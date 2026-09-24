@@ -176,7 +176,8 @@ void registerTriangles(const std::string& pluginID,
                       scopedUniforms ? scopedBlocks : (withUniforms ? &uniform : nullptr),
                       scopedUniforms ? 2u : (withUniforms ? 1u : 0u),
                       withUniforms ? &paintBinding : nullptr,
-                      withUniforms ? 1u : 0u};
+                      withUniforms ? 1u : 0u,
+                      0};
         auto& layer = layers[i];
         layer.struct_size = sizeof(layer);
         layer.layer_type = view(types[i]);
