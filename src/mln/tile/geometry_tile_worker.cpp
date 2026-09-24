@@ -134,7 +134,7 @@ GeometryTileWorker::~GeometryTileWorker() {
 */
 
 void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
-                                 std::set<std::string> availableImages_,
+                                 Immutable<std::set<std::string>> availableImages_,
                                  uint64_t correlationID_) {
     MLN_TRACE_FUNC();
 
@@ -161,7 +161,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 }
 
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
-                                   std::set<std::string> availableImages_,
+                                   Immutable<std::set<std::string>> availableImages_,
                                    uint64_t correlationID_) {
     MLN_TRACE_FUNC();
 
@@ -486,7 +486,7 @@ void GeometryTileWorker::parse() {
                                                                                 .fontFaces = fontFaces,
                                                                                 .glyphDependencies = glyphDependencies,
                                                                                 .imageDependencies = imageDependencies,
-                                                                                .availableImages = availableImages},
+                                                                                .availableImages = *availableImages},
                                                                                std::move(geometryLayer),
                                                                                group);
             if (layout->hasDependencies()) {

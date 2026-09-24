@@ -52,7 +52,7 @@ objc_library(
 
 ios_unit_test(
     name = "RenderTest",
-    minimum_os_version = "15.0",
+    minimum_os_version = "15.5",
     provisioning_profile = "//platform/ios:xcode_profile",
     runner = "@rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     test_host = "//platform/ios/test/common:RenderTestApp",
