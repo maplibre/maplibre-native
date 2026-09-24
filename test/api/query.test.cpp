@@ -13,6 +13,8 @@
 #include <mln/style/source.hpp>
 #include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/expression/dsl.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/layermanager/layer_manager.hpp>
 #include <mln/renderer/renderer.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 
@@ -323,6 +325,20 @@ TEST(Query, QueryFeatureExtensionsSuperclusterLeaves) {
 }
 
 TEST(Query, LocationIndicatorTopImageOnly) {
+    {
+        // The Darwin layer manager does not register this layer type.
+        JSDocument document;
+        document.Parse<0>("{}");
+        conversion::Error error;
+        if (!LayerManager::get()->createLayer("location-indicator",
+                                              "probe",
+                                              conversion::Convertible(static_cast<const JSValue*>(&document)),
+                                              error)) {
+            GTEST_SKIP() << "location-indicator layer is not registered on this platform "
+                            "(https://github.com/maplibre/maplibre-native/issues/1405)";
+        }
+    }
+
     QueryTest test;
     test.map.jumpTo(CameraOptions().withCenter(LatLng{35.693055, 139.766707}).withZoom(16));
     auto layer = std::make_unique<LocationIndicatorLayer>("location");
