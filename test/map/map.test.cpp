@@ -20,6 +20,8 @@
 #include <mln/storage/network_status.hpp>
 #include <mln/storage/online_file_source.hpp>
 #include <mln/storage/resource_options.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/layer.hpp>
 #include <mln/style/expression/dsl.hpp>
 #include <mln/style/image_impl.hpp>
 #include <mln/style/image.hpp>
@@ -51,6 +53,15 @@
 using namespace mln;
 using namespace mln::style;
 using namespace std::literals::string_literals;
+
+// Layer types are provided by the platform's LayerManager; the Darwin layer
+// manager does not register location-indicator, so styles using it drop the
+// layer at parse time (https://github.com/maplibre/maplibre-native/issues/1405).
+static bool isLayerTypeAvailable(const std::string& type) {
+    conversion::Error error;
+    return conversion::convertJSON<std::unique_ptr<Layer>>(R"({"id":"probe","type":")" + type + R"("})", error)
+        .has_value();
+}
 
 template <class FileSource = StubFileSource, class Frontend = HeadlessFrontend>
 class MapTest {
@@ -2203,6 +2214,11 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
 }
 
 TEST(Map, LocationIndicatorAccuracyColorsTransition) {
+    if (!isLayerTypeAvailable("location-indicator")) {
+        GTEST_SKIP() << "location-indicator layer is not registered on this platform "
+                        "(https://github.com/maplibre/maplibre-native/issues/1405)";
+    }
+
     MapTest<> test{1, MapMode::Continuous};
     test.map.getStyle().loadJSON(R"STYLE({
       "version": 8,
