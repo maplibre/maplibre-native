@@ -195,6 +195,7 @@ PluginPaintPropertyBinder::PluginPaintPropertyBinder(plugin::PropertyDefinition 
       bucketZoom(bucketZoom_),
       vertexCount(vertexCount_),
       dataDriven(value.isDataDriven()),
+      stateDependent(value.usesFeatureState()),
       drawableKey(drawableKey_),
       features(std::move(features_)),
       featureStates(std::move(states_)) {
@@ -261,6 +262,7 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     value = replacement;
     uniformZoom.reset();
     dataDriven = value.isDataDriven();
+    stateDependent = value.usesFeatureState();
     if (dataDriven && !vertexVector) {
         vertexVector = std::make_shared<PluginPaintVertexVector>(vertexCount, componentCount());
     }
@@ -302,7 +304,7 @@ bool PluginPaintPropertyBinder::update(const FeatureStates& states, const Geomet
 }
 
 bool PluginPaintPropertyBinder::updateRanges(const FeatureStates& states) {
-    if (!dataDriven || states.empty()) return false;
+    if (!dataDriven || !stateDependent || states.empty()) return false;
     bool changed = false;
     const auto& drawable = features->drawable(drawableKey);
     for (const auto& [id, state] : states) {

@@ -100,3 +100,9 @@ Bazel provides `//plugins/fill-extrusion` and
 `//plugins/fill-extrusion:geometry-tests`. The current repository's Bazel core
 has no Vulkan backend configuration; use CMake for Vulkan render tests.
 Earcut is vendored from the repository's existing copy with its ISC license.
+
+## Performance
+
+A separate built-in/plugin benchmark measures initial loading, steady frames,
+paint updates, feature-state updates, draw calls, and buffer memory. See the
+[commands, measurements, optimizations, and remaining memory gap](benchmarks/README.md).

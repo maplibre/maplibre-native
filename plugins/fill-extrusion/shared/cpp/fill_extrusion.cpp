@@ -19,9 +19,9 @@ using Ring = std::vector<Point>;
 using Polygon = std::vector<Ring>;
 #include "rounded.hpp"
 struct Vertex {
-    float position[3];
-    float normal[3];
-    float edge;
+    int16_t position[2];
+    uint16_t decimalsEdge[2];
+    int16_t normal[2];
 };
 struct Layout {
     double cornerDistance = 0;
@@ -78,8 +78,13 @@ void reservePrimitive(Layout& l, uint32_t count) {
             {sizeof(mln_plugin_segment_v1), uint32_t(l.vertices.size()), uint32_t(l.indices.size()), 0, 0});
 }
 Vertex vertex(const Point& p, float top, float nx, float ny, float nz, float edge = 0) {
+    (void)nz; // A zero XY normal marks a roof.
     const auto q = quantize(p);
-    return {{float(q[0]), float(q[1]), top}, {nx, ny, nz}, edge};
+    const auto x = std::floor(q[0]), y = std::floor(q[1]);
+    const auto fx = uint16_t((q[0] - x) * 128), fy = uint16_t((q[1] - y) * 128);
+    return {{int16_t(x), int16_t(y)},
+            {uint16_t((fx * 256 + fy) * 2 + (top > 0)), uint16_t(edge)},
+            {int16_t(nx * 16384), int16_t(ny * 16384)}};
 }
 void emitPolygon(Layout& l, Polygon& poly) {
     // Bound pathological hole counts exactly as the built-in tessellator does.
@@ -119,12 +124,24 @@ void emitPolygon(Layout& l, Polygon& poly) {
         }
     }
     const auto roof = mapbox::earcut<uint32_t>(poly);
+    std::vector<uint32_t> roofVertices(flat.size(), UINT32_MAX);
+    uint32_t roofSegment = UINT32_MAX;
     for (size_t i = 0; i < roof.size(); i += 3) {
+        // A triangle can introduce up to three vertices. At a segment boundary
+        // rebuild the local remap; indices must never refer into another segment.
         reservePrimitive(l, 3);
         auto& seg = l.segments.back();
+        if (roofSegment != seg.vertex_offset) {
+            std::fill(roofVertices.begin(), roofVertices.end(), UINT32_MAX);
+            roofSegment = seg.vertex_offset;
+        }
         for (size_t j : {i, i + 2, i + 1}) {
-            l.indices.push_back(uint16_t(seg.vertex_length++));
-            l.vertices.push_back(vertex(flat.at(roof[j]), 1, 0, 0, 1));
+            auto& index = roofVertices.at(roof[j]);
+            if (index == UINT32_MAX) {
+                index = seg.vertex_length++;
+                l.vertices.push_back(vertex(flat.at(roof[j]), 1, 0, 0, 1));
+            }
+            l.indices.push_back(uint16_t(index));
         }
         seg.index_length += 3;
     }
@@ -170,7 +187,7 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* out) {
                 sizeof(Vertex)};
     l.attributes[0] = {sizeof(mln_plugin_attribute_binding_v1), 0, 0, offsetof(Vertex, position)};
     l.attributes[1] = {sizeof(mln_plugin_attribute_binding_v1), 1, 0, offsetof(Vertex, normal)};
-    l.attributes[2] = {sizeof(mln_plugin_attribute_binding_v1), 8, 0, offsetof(Vertex, edge)};
+    l.attributes[2] = {sizeof(mln_plugin_attribute_binding_v1), 8, 0, offsetof(Vertex, decimalsEdge)};
     l.drawable = {sizeof(l.drawable), 1, str("solid"), l.attributes, 3, l.segments.data(), l.segments.size()};
     out->vertex_streams = &l.stream;
     out->vertex_stream_count = l.vertices.empty() ? 0 : 1;
@@ -385,15 +402,15 @@ constexpr mln_plugin_property_descriptor_v1 properties[] = {
     paint(str("fill-extrusion-translate-anchor"), anchor()),
 };
 constexpr mln_plugin_shader_attribute_v1 attributes[] = {
-    {sizeof(mln_plugin_shader_attribute_v1), 0, 0, str("a_pos"), MLN_PLUGIN_VERTEX_FLOAT_X3},
-    {sizeof(mln_plugin_shader_attribute_v1), 1, 1, str("a_normal"), MLN_PLUGIN_VERTEX_FLOAT_X3},
+    {sizeof(mln_plugin_shader_attribute_v1), 0, 0, str("a_pos"), MLN_PLUGIN_VERTEX_INT16_X2},
+    {sizeof(mln_plugin_shader_attribute_v1), 1, 1, str("a_normal"), MLN_PLUGIN_VERTEX_INT16_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 2, 2, str("a_color_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 3, 3, str("a_color_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 4, 4, str("a_base"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 5, 5, str("a_height"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 6, 6, str("a_opacity"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 7, 7, str("a_gradient"), MLN_PLUGIN_VERTEX_FLOAT_X2},
-    {sizeof(mln_plugin_shader_attribute_v1), 8, 8, str("a_edge"), MLN_PLUGIN_VERTEX_FLOAT},
+    {sizeof(mln_plugin_shader_attribute_v1), 8, 8, str("a_decimals_edge"), MLN_PLUGIN_VERTEX_UINT16_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 9, 9, str("a_pattern_from_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 10, 10, str("a_pattern_from_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
     {sizeof(mln_plugin_shader_attribute_v1), 11, 11, str("a_pattern_to_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},

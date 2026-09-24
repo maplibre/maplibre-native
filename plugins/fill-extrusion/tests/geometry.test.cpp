@@ -37,15 +37,26 @@ TEST(FillExtrusionGeometry, RoofHolesWallsRangesAndQueries) {
     EXPECT_EQ(stream.vertex_count, g.bucket.feature_vertex_ranges[0].vertex_count);
     double roofArea = 0;
     size_t walls = 0;
-    const auto* vertices = reinterpret_cast<const float*>(stream.data);
+    struct Position {
+        double x, y;
+        bool roof;
+    };
+    const auto position = [&](size_t index) {
+        int16_t packed[6];
+        std::memcpy(packed, stream.data + index * stream.stride, sizeof(packed));
+        const auto decimals = uint16_t(packed[2]);
+        return Position{packed[0] + (decimals >> 9) / 128.0,
+                        packed[1] + ((decimals >> 1) & 127) / 128.0,
+                        packed[4] == 0 && packed[5] == 0};
+    };
     for (const auto& seg : std::vector<mln_plugin_segment_v1>(
              g.bucket.drawables[0].segments, g.bucket.drawables[0].segments + g.bucket.drawables[0].segment_count)) {
         for (size_t i = seg.index_offset; i < seg.index_offset + seg.index_length; i += 3) {
-            const auto* a = vertices + (seg.vertex_offset + g.bucket.indices[i]) * (stream.stride / sizeof(float));
-            const auto* b = vertices + (seg.vertex_offset + g.bucket.indices[i + 1]) * (stream.stride / sizeof(float));
-            const auto* c = vertices + (seg.vertex_offset + g.bucket.indices[i + 2]) * (stream.stride / sizeof(float));
-            if (a[5] == 1)
-                roofArea += std::abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2;
+            const auto a = position(seg.vertex_offset + g.bucket.indices[i]);
+            const auto b = position(seg.vertex_offset + g.bucket.indices[i + 1]);
+            const auto c = position(seg.vertex_offset + g.bucket.indices[i + 2]);
+            if (a.roof)
+                roofArea += std::abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) / 2;
             else
                 ++walls;
         }

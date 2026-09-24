@@ -69,3 +69,12 @@ Pattern milestone regression totals: 45/45 focused tests, 50/50 eligible solid
 renders, 4/4 eligible queries, and 13/13 n-gon renders. Both implementations pass
 all seven applicable pattern expectations; the eighth has the identical existing
 baseline failure described above.
+
+## Performance changes
+
+After packing geometry to 12 bytes per vertex, sharing roof vertices within
+16-bit segments, and skipping state-independent paint uploads, the same 45
+focused tests, 50 eligible solid renders, four queries, and 13 n-gon renders
+pass. Pattern results remain 7/8 with the byte-identical existing baseline
+failure. The plugins-disabled Vulkan runner builds and the public API header
+passes a C11 syntax check. See [benchmark results](../benchmarks/README.md).

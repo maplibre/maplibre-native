@@ -285,6 +285,13 @@ TEST(PluginPaintBinder, SnapshotsAreSharedAcrossPropertiesDrawablesAndSourceLife
     EXPECT_FLOAT_EQ(90, values[0]);
     EXPECT_FLOAT_EQ(90, values[2]);
     EXPECT_FLOAT_EQ(10, static_cast<const float*>(b.getVertexVector()->getRawData())[0]);
+    // State-independent paint must not dirty/re-upload its whole vertex buffer.
+    const auto beforeState = util::MonotonicTimer::now();
+    EXPECT_FALSE(b.update({{"1", {{"size", 90.0}}}}, unusedSource));
+    EXPECT_FALSE(b.getVertexVector()->isModifiedAfter(beforeState));
+    // Still retain state for a later expression change.
+    EXPECT_TRUE(b.synchronize(expression(definition, R"(["number",["feature-state","size"],12])")));
+    EXPECT_FLOAT_EQ(90, static_cast<const float*>(b.getVertexVector()->getRawData())[0]);
     EXPECT_FALSE(a.update({{"missing", {{"size", 1.0}}}}, unusedSource));
     EXPECT_TRUE(a.update({{"1", {}}}, unusedSource)); // Removing state restores fallback.
     EXPECT_FLOAT_EQ(12, static_cast<const float*>(a.getVertexVector()->getRawData())[0]);

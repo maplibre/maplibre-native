@@ -1,9 +1,9 @@
 // Solid Vulkan extrusion lighting. Paint values use the host's native binders;
 // the extrusion color's alpha does not control opacity (style-spec semantics).
 constexpr char vertexSource[] = R"glsl(
-layout(location = 0) in vec3 a_pos;
-layout(location = 1) in vec3 a_normal;
-layout(location = 8) in float a_edge;
+layout(location = 0) in ivec2 a_pos;
+layout(location = 1) in ivec2 a_normal;
+layout(location = 8) in uvec2 a_decimals_edge;
 #if MLN_PLUGIN_HAS_PATTERN && !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_PATTERN_IS_UNIFORM
 layout(location = 9) in vec4 a_pattern_from_min;
 layout(location = 10) in vec4 a_pattern_from_max;
@@ -47,6 +47,9 @@ layout(location = 3) out vec4 frag_pattern_from;
 layout(location = 4) out vec4 frag_pattern_to;
 #endif
 void main() {
+    uint packed = a_decimals_edge.x;
+    vec2 pos = vec2(a_pos) + vec2(packed >> 9, (packed >> 1) & 127u) / 128.0;
+    vec3 normal = vec3(vec2(a_normal) / 16384.0, all(equal(a_normal, ivec2(0))) ? 1.0 : 0.0);
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_COLOR_IS_UNIFORM
     vec4 color = u.color;
 #else
@@ -72,9 +75,9 @@ void main() {
 #else
     float gradient = u.interpolation2.x < 1.0 ? a_gradient.x : a_gradient.y;
 #endif
-    float t = a_pos.z;
+    float t = float(packed & 1u);
     float z = t > 0.0 ? height : base;
-    gl_Position = u.matrix * vec4(a_pos.xy, z, 1.0);
+    gl_Position = u.matrix * vec4(pos, z, 1.0);
     applySurfaceTransform();
 #if MLN_PLUGIN_HAS_PATTERN
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_PATTERN_IS_UNIFORM
@@ -86,12 +89,12 @@ void main() {
     frag_pattern_from = pattern_from; frag_pattern_to = pattern_to;
     vec2 size_a = (pattern_from.zw-pattern_from.xy)/u.pixel_ratio;
     vec2 size_b = (pattern_to.zw-pattern_to.xy)/u.pixel_ratio;
-    vec2 pos = a_normal.z == 0.0 ? vec2(a_edge,z*u.height_factor) : floor(a_pos.xy);
-    frag_pos_a = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.from_scale*size_a,u.tile_ratio,pos);
-    frag_pos_b = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.to_scale*size_b,u.tile_ratio,pos);
-    float directional = clamp(dot(a_normal,u.light_direction),0.0,1.0);
+    vec2 pattern_pos = normal.z == 0.0 ? vec2(float(a_decimals_edge.y),z*u.height_factor) : vec2(a_pos);
+    frag_pos_a = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.from_scale*size_a,u.tile_ratio,pattern_pos);
+    frag_pos_b = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.to_scale*size_b,u.tile_ratio,pattern_pos);
+    float directional = clamp(dot(normal,u.light_direction),0.0,1.0);
     directional = mix(1.0-u.intensity,max(0.5+u.intensity,1.0),directional);
-    if (a_normal.z == 0.0) {
+    if (normal.z == 0.0) {
         float factor = clamp((t+base)*pow(height/150.0,0.5),mix(0.7,0.98,1.0-u.intensity),1.0);
         directional *= (1.0-gradient)+gradient*factor;
     }
@@ -99,9 +102,9 @@ void main() {
 #else
     float luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
     color += vec4(0.03, 0.03, 0.03, 1.0);
-    float fraction = clamp(dot(a_normal, u.light_direction), 0.0, 1.0);
+    float fraction = clamp(dot(normal, u.light_direction), 0.0, 1.0);
     float directional = mix(1.0 - u.intensity, max(1.0 - luminance + u.intensity, 1.0), fraction);
-    if (a_normal.z == 0.0) {
+    if (normal.z == 0.0) {
         float factor = clamp((t + base) * pow(height / 150.0, 0.5), mix(0.7, 0.98, 1.0 - u.intensity), 1.0);
         directional *= (1.0 - gradient) + gradient * factor;
     }

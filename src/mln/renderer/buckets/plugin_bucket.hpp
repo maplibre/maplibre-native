@@ -139,6 +139,7 @@ private:
     float bucketZoom;
     std::size_t vertexCount;
     bool dataDriven = false;
+    bool stateDependent = false;
     const uint64_t drawableKey;
     std::shared_ptr<const PluginFeatureData> features;
     std::shared_ptr<FeatureStates> featureStates;
