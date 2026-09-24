@@ -479,7 +479,8 @@ void SurfaceRenderableResource::recreateSwapchain() {
 
     readTexture.reset();
 
-    init(extent.width, extent.height);
+    const auto size = backend.getDefaultRenderable().getSize();
+    init(size.width, size.height);
 }
 
 void SurfaceRenderableResource::queueSurfaceRead() {
