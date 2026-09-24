@@ -36,7 +36,7 @@ private:
                       UniqueChangeRequestVec&) override;
     bool hasTransition() const override;
     bool is3D() const override;
-    bool hasCrossfade() const override { return false; }
+    bool hasCrossfade() const override;
 
     std::map<std::string, style::PluginTransitioningPropertyValue> transitioningPaintProperties;
     style::PluginPropertyMap evaluatedPluginProperties;

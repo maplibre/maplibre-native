@@ -11,6 +11,7 @@
 #include <mln/style/conversion/layer.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/style/light.hpp>
+#include <mln/style/image.hpp>
 #include <mln/test/map_adapter.hpp>
 #include <mln/test/stub_file_source.hpp>
 #include <mln/util/run_loop.hpp>
@@ -128,7 +129,7 @@ TEST(FillExtrusionPlugin, ReplacementAndDynamicParity) {
     compare(builtin, plugin);
 
     JSDocument unsupported;
-    unsupported.SetString("unsupported");
+    unsupported.SetBool(true);
     const JSValue* value = &unsupported;
     EXPECT_TRUE(plugin.layer->setProperty("fill-extrusion-pattern", style::conversion::Convertible(value)));
     EXPECT_TRUE(
@@ -154,5 +155,77 @@ TEST(FillExtrusionPlugin, RoundedCornerParity) {
         plugin.set("fill-extrusion-opacity", "1");
         compare(builtin, plugin);
     }
+}
+TEST(FillExtrusionPlugin, PatternRuntimeAndRoundedParity) {
+    util::RunLoop loop;
+    const auto status = mln_fill_extrusion_register(mln_plugin_register_v1, nullptr, 0);
+    ASSERT_TRUE(status == MLN_PLUGIN_STATUS_OK || status == MLN_PLUGIN_STATUS_ALREADY_REGISTERED);
+    for (const auto* radius : {"0", "12"}) {
+        SCOPED_TRACE(radius);
+        for (const auto* pattern : {R"("a")",
+                                    R"("b")",
+                                    R"("")",
+                                    "null",
+                                    R"(["case",[">",["get","h"],80],"a","b"])",
+                                    R"(["step",["zoom"],["case",[">",["get","h"],80],"a","b"],16,"b"])",
+                                    R"(["coalesce",["image","absent"],["image","a"]])"}) {
+            SCOPED_TRACE(pattern);
+            Scene builtin(false), plugin(true);
+            for (auto* scene : {&builtin, &plugin}) {
+                for (const auto* name : {"a", "b"}) {
+                    PremultipliedImage image({16, 8});
+                    for (size_t i = 0; i < image.bytes(); i += 4) {
+                        const auto x = (i / 4) % 16, y = (i / 4) / 16;
+                        const bool stripe = (x / 4 + y / 4) % 2;
+                        image.data[i] = stripe ? 200 : 40;
+                        image.data[i + 1] = name[0] == 'a' ? 100 : 220;
+                        image.data[i + 2] = stripe ? 30 : 190;
+                        image.data[i + 3] = 255;
+                    }
+                    scene->map.getStyle().addImage(std::make_unique<style::Image>(name, std::move(image), 2));
+                }
+                scene->set("fill-extrusion-height", "100");
+            }
+            for (auto* scene : {&builtin, &plugin}) {
+                scene->set("fill-extrusion-rounded-corner-distance", radius);
+                scene->set("fill-extrusion-pattern", pattern);
+            }
+            for (double zoom : {15.1, 15.8, 16.2, 15.4}) {
+                SCOPED_TRACE(zoom);
+                for (auto* scene : {&builtin, &plugin}) {
+                    scene->map.jumpTo(CameraOptions().withZoom(zoom));
+                    scene->set("fill-extrusion-opacity", zoom == 15.8 ? "0.5" : "1");
+                    scene->set("fill-extrusion-vertical-gradient", zoom == 15.4 ? "false" : "true");
+                }
+                compare(builtin, plugin);
+            }
+        }
+    }
+}
+TEST(FillExtrusionPlugin, ImageDescriptorValidation) {
+    ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_fill_extrusion_register(captureDescriptor, nullptr, 0));
+    auto descriptor = *registeredDescriptor;
+    descriptor.plugin_id = {"test.pattern-descriptor", 23};
+    auto layer = descriptor.layer_types[0];
+    layer.layer_type = {"test-pattern-descriptor", 23};
+    layer.replace_builtin = 0;
+    descriptor.layer_types = &layer;
+    auto shader = layer.shaders[0];
+    layer.shaders = &shader;
+    char error[512]{};
+    shader.tile_pattern_texture = 2;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    shader.tile_pattern_texture = 0;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    shader.tile_pattern_texture = 1;
+    std::vector<mln_plugin_shader_property_binding_v1> bindings(
+        shader.property_bindings, shader.property_bindings + shader.property_binding_count);
+    shader.property_bindings = bindings.data();
+    ASSERT_EQ(MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM, bindings[0].encoding);
+    ASSERT_EQ(MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO, bindings[1].encoding);
+    bindings[1].encoding = MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_INVALID_ARGUMENT, mln_plugin_register_v1(&descriptor, error, sizeof(error)));
+    bindings[1].encoding = MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO;
+    EXPECT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
 }
 } // namespace

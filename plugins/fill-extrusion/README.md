@@ -28,7 +28,10 @@ color, and translation values transition; boolean and anchor values are discrete
 Data-driven base and height use the built-in shader's nonnegative clamping.
 Color and light calculations match the built-in Vulkan shaders, including their
 alpha semantics. The layout property `fill-extrusion-rounded-corner-distance` defaults to zero
-and supports camera expressions. Patterns remain unsupported in this milestone.
+and supports camera expressions. `fill-extrusion-pattern` supports sprite IDs,
+image/coalesce expressions, feature and composite expressions, integer-zoom
+crossfades, and pattern transitions. Missing/empty sprites retain native rendering
+semantics. Rounded geometry can also use patterns.
 
 ## API changes
 
@@ -42,8 +45,8 @@ in array order. A zero count retains the original single 2D default pass.
 `evaluate_layer` receives evaluated camera properties before render orchestration.
 Its output enables passes and specifies host-applied translation/anchor.
 A failed callback, nonfinite translation, or invalid pass mask suppresses that
-evaluation. Geometry does not depend on opacity. Opaque extrusions enable one
-color pass; translucent ones enable depth-only then deduplicated color passes.
+evaluation. Geometry does not depend on opacity. Opaque solid extrusions enable one
+color pass; translucent or patterned ones enable depth-only then deduplicated color passes.
 Zero opacity disables rendering. `enable_near_clipped_matrix` selects the
 unaligned near-clipped projection. Uniform contexts include evaluated light
 color, intensity, and bearing-adjusted Cartesian direction.
@@ -55,6 +58,13 @@ Layout descriptors set `is_layout = 1`; the host validates their scope, serializ
 them in `layout`, includes them in bucket grouping/invalidation, and supplies
 tile-zoom values to `create_layout`. Layout properties cannot transition or use
 feature expressions.
+
+`MLN_PLUGIN_VALUE_IMAGE` uses the borrowed string field. IMAGE_FROM/IMAGE_TO
+bindings resolve tile-atlas rectangles and native composite zoom samples.
+`tile_pattern_texture` requests the host-owned atlas at Vulkan sampler binding 0.
+Uniform contexts supply tile coordinates, wrap, zoom, crossfade scales/fraction,
+and atlas dimensions. Pattern expressions participate in sprite dependencies
+and bucket invalidation; explicitly empty and undefined properties stay distinct.
 
 All metadata is copied at registration, callback memory remains borrowed, and
 all callbacks must return normally. The n-gon example uses an explicit pass
@@ -75,14 +85,16 @@ build-plugin-vulkan/plugins/mln-plugin-api-tests
 build-plugin-vulkan/plugins/mln-ngon-tests
 build-plugin-vulkan/mbgl-render-test-runner --manifestPath plugins/fill-extrusion/render-tests/manifest.json
 build-plugin-vulkan/plugins/mln-fill-extrusion-render-tests --manifestPath plugins/fill-extrusion/render-tests/manifest.json
+build-plugin-vulkan/mbgl-render-test-runner --manifestPath plugins/fill-extrusion/render-tests/patterns.json
+build-plugin-vulkan/plugins/mln-fill-extrusion-render-tests --manifestPath plugins/fill-extrusion/render-tests/patterns.json
 build-plugin-vulkan/plugins/mln-plugin-render-tests --manifestPath plugins/ngon-layer/render-tests/manifest.json
 ```
 
 Run the two render executables separately with the same Vulkan driver. The
 manifest uses the existing Linux expectations, ignores, and `metrics/cache-style.db`.
 Copy the first HTML report before the second run if comparing reports. The
-selection file records every solid render/query candidate and deferred pattern
-fixture. No expectations, tolerances, or ignores were changed.
+selection file records every solid render/query candidate and the separate pattern
+fixtures. No expectations, tolerances, or ignores were changed.
 
 Bazel provides `//plugins/fill-extrusion` and
 `//plugins/fill-extrusion:geometry-tests`. The current repository's Bazel core

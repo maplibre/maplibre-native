@@ -30,7 +30,7 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
     if (filter != other.filter || visibility != other.visibility) return true;
     const auto& rhs = static_cast<const Impl&>(other);
     for (const auto& definition : registration->properties) {
-        if (!definition.isLayout) continue;
+        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
         const auto a = pluginProperties.find(definition.name), b = rhs.pluginProperties.find(definition.name);
         const auto av = a == pluginProperties.end() ? defaultPluginPropertyValue(definition) : a->second;
         const auto bv = b == rhs.pluginProperties.end() ? defaultPluginPropertyValue(definition) : b->second;
@@ -42,7 +42,7 @@ bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
     for (const auto& definition : registration->properties) {
-        if (!definition.isLayout) continue;
+        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
         const auto it = pluginProperties.find(definition.name);
         const auto value = it == pluginProperties.end() ? defaultPluginPropertyValue(definition) : it->second;
         writer.String(definition.name);
@@ -57,6 +57,10 @@ const LayerTypeInfo* PluginStyleLayer::Impl::getTypeInfo() const noexcept {
 
 expression::Dependency PluginStyleLayer::Impl::getDependencies() const noexcept {
     expression::Dependency result = expression::Dependency::None;
+    if (std::any_of(registration->properties.begin(), registration->properties.end(), [](const auto& p) {
+            return p.type == MLN_PLUGIN_VALUE_IMAGE;
+        }))
+        result |= expression::Dependency::Zoom;
     for (const auto& [name, value] : pluginProperties) {
         (void)name;
         result |= value.getDependencies();

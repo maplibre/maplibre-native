@@ -66,6 +66,8 @@ typedef enum mln_plugin_value_type {
     MLN_PLUGIN_VALUE_COLOR = 3,
     MLN_PLUGIN_VALUE_STRING = 4,
     MLN_PLUGIN_VALUE_BOOLEAN = 5,
+    /* Sprite image identifier, represented by data.string_value. */
+    MLN_PLUGIN_VALUE_IMAGE = 6,
 } mln_plugin_value_type;
 
 /* Expression dependencies accepted by a plugin property. */
@@ -230,7 +232,13 @@ typedef enum mln_plugin_property_encoding_v1 {
     MLN_PLUGIN_PROPERTY_ENCODING_COLOR = 3,
     /* Zero-based index into the property descriptor enum_values. */
     MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT = 4,
-    MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT = 5
+    MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT = 5,
+    /* Atlas rectangles (float4). FROM minimum/maximum are the zoom-in/out
+     * endpoints; TO has equal endpoints. Composite images use native
+     * Faded<Image>::to sampling (one zoom higher). The host resolves sprite
+     * dependencies; undefined and explicitly empty images stay distinct. */
+    MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM = 6,
+    MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO = 7
 } mln_plugin_property_encoding_v1;
 
 /*
@@ -265,6 +273,8 @@ typedef struct mln_plugin_shader_descriptor_v1 {
     size_t uniform_block_count;
     const mln_plugin_shader_property_binding_v1* property_bindings;
     size_t property_binding_count;
+    /* Tile sprite/pattern atlas, at sampler binding 0. Vulkan only. */
+    uint8_t tile_pattern_texture;
 } mln_plugin_shader_descriptor_v1;
 
 /* Borrowed render-thread inputs for a host-owned plugin uniform block. */
@@ -282,6 +292,12 @@ typedef struct mln_plugin_uniform_context_v1 {
     float light_intensity;
     /* Cartesian style-light position, rotated for a viewport anchor. */
     float light_direction[3];
+    float zoom;
+    uint32_t tile_x, tile_y;
+    uint8_t tile_z;
+    int32_t tile_wrap;
+    float crossfade_from_scale, crossfade_to_scale, crossfade_t;
+    float pattern_texture_size[2];
 } mln_plugin_uniform_context_v1;
 
 /* output is host-owned writable storage of output_size bytes, borrowed only

@@ -21,6 +21,7 @@ using Polygon = std::vector<Ring>;
 struct Vertex {
     float position[3];
     float normal[3];
+    float edge;
 };
 struct Layout {
     double cornerDistance = 0;
@@ -29,7 +30,7 @@ struct Layout {
     std::vector<mln_plugin_segment_v1> segments;
     std::vector<mln_plugin_feature_vertex_range_v1> ranges;
     mln_plugin_vertex_stream_v1 stream{};
-    mln_plugin_attribute_binding_v1 attributes[2]{};
+    mln_plugin_attribute_binding_v1 attributes[3]{};
     mln_plugin_drawable_descriptor_v1 drawable{};
 };
 
@@ -76,9 +77,9 @@ void reservePrimitive(Layout& l, uint32_t count) {
         l.segments.push_back(
             {sizeof(mln_plugin_segment_v1), uint32_t(l.vertices.size()), uint32_t(l.indices.size()), 0, 0});
 }
-Vertex vertex(const Point& p, float top, float nx, float ny, float nz) {
+Vertex vertex(const Point& p, float top, float nx, float ny, float nz, float edge = 0) {
     const auto q = quantize(p);
-    return {{float(q[0]), float(q[1]), top}, {nx, ny, nz}};
+    return {{float(q[0]), float(q[1]), top}, {nx, ny, nz}, edge};
 }
 void emitPolygon(Layout& l, Polygon& poly) {
     // Bound pathological hole counts exactly as the built-in tessellator does.
@@ -92,6 +93,7 @@ void emitPolygon(Layout& l, Polygon& poly) {
     std::vector<Point> flat;
     for (const auto& ring : poly) {
         flat.insert(flat.end(), ring.begin(), ring.end());
+        uint32_t edgeDistance = 0;
         for (size_t i = 0; i + 1 < ring.size(); ++i) {
             const auto& a = ring[i];
             const auto& b = ring[i + 1];
@@ -99,13 +101,18 @@ void emitPolygon(Layout& l, Polygon& poly) {
             const float dx = float(qb[0] - qa[0]), dy = float(qb[1] - qa[1]);
             const float length = std::sqrt(dx * dx + dy * dy);
             if (!length) continue;
+            const auto distance = static_cast<uint16_t>(std::hypot(b[0] - a[0], b[1] - a[1]));
+            const auto nextDistance = (edgeDistance + distance > UINT16_MAX ? 0 : edgeDistance) + distance;
             reservePrimitive(l, 4);
             auto& seg = l.segments.back();
             const auto start = seg.vertex_length;
             const float nx = -dy / length, ny = dx / length;
-            l.vertices.insert(
-                l.vertices.end(),
-                {vertex(b, 0, nx, ny, 0), vertex(b, 1, nx, ny, 0), vertex(a, 0, nx, ny, 0), vertex(a, 1, nx, ny, 0)});
+            l.vertices.insert(l.vertices.end(),
+                              {vertex(b, 0, nx, ny, 0, float(edgeDistance)),
+                               vertex(b, 1, nx, ny, 0, float(edgeDistance)),
+                               vertex(a, 0, nx, ny, 0, float(nextDistance)),
+                               vertex(a, 1, nx, ny, 0, float(nextDistance))});
+            edgeDistance = nextDistance;
             for (uint32_t n : {0u, 2u, 1u, 1u, 2u, 3u}) l.indices.push_back(uint16_t(start + n));
             seg.vertex_length += 4;
             seg.index_length += 6;
@@ -163,7 +170,8 @@ mln_plugin_status finishLayout(void* instance, mln_plugin_bucket_v1* out) {
                 sizeof(Vertex)};
     l.attributes[0] = {sizeof(mln_plugin_attribute_binding_v1), 0, 0, offsetof(Vertex, position)};
     l.attributes[1] = {sizeof(mln_plugin_attribute_binding_v1), 1, 0, offsetof(Vertex, normal)};
-    l.drawable = {sizeof(l.drawable), 1, str("solid"), l.attributes, 2, l.segments.data(), l.segments.size()};
+    l.attributes[2] = {sizeof(mln_plugin_attribute_binding_v1), 8, 0, offsetof(Vertex, edge)};
+    l.drawable = {sizeof(l.drawable), 1, str("solid"), l.attributes, 3, l.segments.data(), l.segments.size()};
     out->vertex_streams = &l.stream;
     out->vertex_stream_count = l.vertices.empty() ? 0 : 1;
     out->indices = l.indices.data();
@@ -186,8 +194,12 @@ struct alignas(16) Uniforms {
     float lightDirection[3], base;
     float height, opacity, gradient, pad;
     float interpolation[8];
+    float patternFrom[4], patternTo[4];
+    float pixelUpper[2], pixelLower[2];
+    float tileRatio, heightFactor, pixelRatio, fromScale;
+    float toScale, fade, textureSize[2];
 };
-static_assert(sizeof(Uniforms) == 160);
+static_assert(sizeof(Uniforms) == 240);
 #include "shaders.hpp"
 mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* c, uint32_t id, uint8_t* out, size_t size) {
     if (!c || c->struct_size < sizeof(*c) || id || !out || size != sizeof(Uniforms))
@@ -197,6 +209,22 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* c, uint32_t
     std::copy_n(c->light_color, 3, u.lightColor);
     std::copy_n(c->light_direction, 3, u.lightDirection);
     u.intensity = c->light_intensity;
+    u.fromScale = c->crossfade_from_scale;
+    u.toScale = c->crossfade_to_scale;
+    u.fade = c->crossfade_t;
+    u.pixelRatio = c->pixel_ratio;
+    u.textureSize[0] = c->pattern_texture_size[0];
+    u.textureSize[1] = c->pattern_texture_size[1];
+    const double tiles = std::pow(2.0, c->tile_z);
+    const double nearestTileSize = std::floor(512.0 * std::pow(2.0, std::floor(c->zoom) - c->tile_z));
+    const auto x = static_cast<int32_t>(nearestTileSize * (c->tile_x + c->tile_wrap * tiles));
+    const auto y = static_cast<int32_t>(nearestTileSize * c->tile_y);
+    u.pixelUpper[0] = float(x >> 16);
+    u.pixelUpper[1] = float(y >> 16);
+    u.pixelLower[0] = float(x & 65535);
+    u.pixelLower[1] = float(y & 65535);
+    u.tileRatio = float(nearestTileSize / 8192.0);
+    u.heightFactor = float(-tiles / 512.0 / 8.0);
     std::memcpy(out, &u, size);
     return MLN_PLUGIN_STATUS_OK;
 }
@@ -211,7 +239,12 @@ mln_plugin_status evaluateLayer(const mln_plugin_property_value_v1* props,
     if (!out || out->struct_size < sizeof(*out) || (count && !props)) return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     const auto* opacity = property(props, count, "fill-extrusion-opacity");
     const float alpha = opacity ? opacity->data.float_value : 1;
-    out->enabled_passes = alpha <= 0 ? 0 : alpha == 1 ? 1 : 6;
+    bool hasPattern = true; // A data-driven pattern is absent from the camera properties.
+    for (size_t i = 0; i < count; ++i) {
+        if (std::string_view(props[i].name.data, props[i].name.size) == "fill-extrusion-pattern")
+            hasPattern = props[i].explicitly_set;
+    }
+    out->enabled_passes = alpha <= 0 ? 0 : alpha == 1 && !hasPattern ? 1 : 6;
     if (const auto* t = property(props, count, "fill-extrusion-translate")) out->translation = t->data.float2_value;
     if (const auto* a = property(props, count, "fill-extrusion-translate-anchor"))
         out->translation_anchor_viewport = std::string_view(a->data.string_value.data, a->data.string_value.size) ==
@@ -297,6 +330,11 @@ constexpr mln_plugin_value boolean(bool b) {
     v.data.boolean_value = b;
     return v;
 }
+constexpr mln_plugin_value pattern() {
+    mln_plugin_value v{sizeof(v), MLN_PLUGIN_VALUE_IMAGE, {}};
+    v.data.string_value = str("");
+    return v;
+}
 constexpr mln_plugin_value black() {
     mln_plugin_value v{sizeof(v), MLN_PLUGIN_VALUE_COLOR, {}};
     v.data.color_value = {0, 0, 0, 1};
@@ -337,6 +375,7 @@ constexpr mln_plugin_property_descriptor_v1 roundedProperty() {
 }
 constexpr mln_plugin_property_descriptor_v1 properties[] = {
     roundedProperty(),
+    paint(str("fill-extrusion-pattern"), pattern(), true),
     paint(str("fill-extrusion-color"), black(), true),
     paint(str("fill-extrusion-base"), number(0), true),
     paint(str("fill-extrusion-height"), number(0), true),
@@ -354,8 +393,31 @@ constexpr mln_plugin_shader_attribute_v1 attributes[] = {
     {sizeof(mln_plugin_shader_attribute_v1), 5, 5, str("a_height"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 6, 6, str("a_opacity"), MLN_PLUGIN_VERTEX_FLOAT_X2},
     {sizeof(mln_plugin_shader_attribute_v1), 7, 7, str("a_gradient"), MLN_PLUGIN_VERTEX_FLOAT_X2},
+    {sizeof(mln_plugin_shader_attribute_v1), 8, 8, str("a_edge"), MLN_PLUGIN_VERTEX_FLOAT},
+    {sizeof(mln_plugin_shader_attribute_v1), 9, 9, str("a_pattern_from_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1), 10, 10, str("a_pattern_from_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1), 11, 11, str("a_pattern_to_min"), MLN_PLUGIN_VERTEX_FLOAT_X4},
+    {sizeof(mln_plugin_shader_attribute_v1), 12, 12, str("a_pattern_to_max"), MLN_PLUGIN_VERTEX_FLOAT_X4},
 };
 constexpr mln_plugin_shader_property_binding_v1 bindings[] = {
+    {sizeof(mln_plugin_shader_property_binding_v1),
+     str("fill-extrusion-pattern"),
+     MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM,
+     0,
+     offsetof(Uniforms, patternFrom),
+     9,
+     10,
+     0,
+     offsetof(Uniforms, interpolation) + 20},
+    {sizeof(mln_plugin_shader_property_binding_v1),
+     str("fill-extrusion-pattern"),
+     MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO,
+     0,
+     offsetof(Uniforms, patternTo),
+     11,
+     12,
+     0,
+     offsetof(Uniforms, interpolation) + 24},
     {sizeof(mln_plugin_shader_property_binding_v1),
      str("fill-extrusion-color"),
      MLN_PLUGIN_PROPERTY_ENCODING_COLOR,
@@ -404,12 +466,13 @@ constexpr mln_plugin_shader_property_binding_v1 bindings[] = {
 };
 constexpr mln_plugin_shader_source_v1 source{
     sizeof(source), MLN_PLUGIN_BACKEND_VULKAN, str(vertexSource), str(fragmentSource), {}, {}};
-constexpr mln_plugin_uniform_block_descriptor_v1 uniform{sizeof(uniform),
-                                                         0,
-                                                         str("ExtrusionUniforms"),
-                                                         sizeof(Uniforms),
-                                                         MLN_PLUGIN_SHADER_STAGE_VERTEX,
-                                                         MLN_PLUGIN_UNIFORM_DRAWABLE};
+constexpr mln_plugin_uniform_block_descriptor_v1 uniform{
+    sizeof(uniform),
+    0,
+    str("ExtrusionUniforms"),
+    sizeof(Uniforms),
+    MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT,
+    MLN_PLUGIN_UNIFORM_DRAWABLE};
 constexpr mln_plugin_shader_descriptor_v1 shader{sizeof(shader),
                                                  str("solid"),
                                                  &source,
@@ -419,7 +482,8 @@ constexpr mln_plugin_shader_descriptor_v1 shader{sizeof(shader),
                                                  &uniform,
                                                  1,
                                                  bindings,
-                                                 std::size(bindings)};
+                                                 std::size(bindings),
+                                                 1};
 constexpr mln_plugin_draw_pass_v1 passes[] = {
     {sizeof(mln_plugin_draw_pass_v1), 1, 1, 1, 1, 0, MLN_PLUGIN_CULL_BACK_CCW},
     {sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},

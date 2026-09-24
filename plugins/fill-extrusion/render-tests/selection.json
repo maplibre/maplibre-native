@@ -82,7 +82,7 @@
     "render-tests/projection/perspective",
     "render-tests/regressions/mapbox-gl-js#5982"
   ],
-  "deferred_patterns": [
+  "patterns": [
     "render-tests/fill-extrusion-pattern/@2x",
     "render-tests/fill-extrusion-pattern/feature-expression",
     "render-tests/fill-extrusion-pattern/function",

@@ -75,6 +75,8 @@ std::string propertyMacro(const std::string& propertyName) {
 
 std::string propertyPrelude(const ShaderDefinition& shader, const StringIDSetsPair& propertiesAsUniforms) {
     std::ostringstream output;
+    output << "#define MLN_PLUGIN_HAS_PATTERN " << propertiesAsUniforms.first.contains("__plugin_pattern_enabled")
+           << '\n';
     for (const auto& binding : shader.propertyBindings) {
         output << "#define " << propertyMacro(binding.propertyName) << ' '
                << (propertiesAsUniforms.first.contains(binding.propertyName) ? 1 : 0) << '\n';
@@ -137,6 +139,8 @@ public:
                 typed->initVertexAttribute({attr.location, attributeType(attr.type), attr.id});
             }
         }
+        if (definition->tilePatternTexture && propertiesAsUniforms.first.contains("__plugin_pattern_enabled"))
+            typed->initTexture({0, 0});
         shader = std::move(typed);
 #elif MLN_RENDER_BACKEND_METAL
         const auto* source = findSource(*definition, MLN_PLUGIN_BACKEND_METAL);

@@ -25,13 +25,47 @@ bool validRange(std::size_t offset, std::size_t length, std::size_t size) {
 PluginLayout::PluginLayout(const BucketParameters& parameters,
                            std::vector<Immutable<style::LayerProperties>> layers_,
                            std::unique_ptr<GeometryTileLayer> sourceLayer_,
-                           plugin::RegisteredLayerPtr registration_)
+                           plugin::RegisteredLayerPtr registration_,
+                           const LayoutParameters* layoutParameters)
     : zoom(parameters.tileID.overscaledZ),
       layers(std::move(layers_)),
       sourceLayer(std::move(sourceLayer_)),
-      registration(std::move(registration_)) {}
+      registration(std::move(registration_)) {
+    if (!layoutParameters || !sourceLayer) return;
+    for (const auto& layer : layers) {
+        const auto& impl = static_cast<const style::PluginStyleLayer::Impl&>(*layer->baseImpl);
+        for (const auto& definition : registration->properties) {
+            if (definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+            const auto it = impl.pluginProperties.find(definition.name);
+            if (it == impl.pluginProperties.end()) continue;
+            needsImages = true;
+            const auto& value = it->second;
+            style::PluginPropertyValue::EvaluationStorage storage;
+            const auto add = [&](const mln_plugin_value& image) {
+                if (image.data.string_value.size)
+                    layoutParameters->imageDependencies.emplace(
+                        std::string(image.data.string_value.data, image.data.string_value.size), ImageType::Pattern);
+            };
+            for (float z : {zoom - 1, zoom, zoom + 1}) {
+                if (!value.isDataDriven())
+                    add(value.evaluate(z, definition, storage, &layoutParameters->availableImages));
+                else
+                    for (size_t i = 0; i < sourceLayer->featureCount(); ++i) {
+                        const auto feature = sourceLayer->getFeature(i);
+                        if (feature)
+                            add(value.evaluate(z + (value.isZoomConstant() ? 0 : 1),
+                                               *feature,
+                                               {},
+                                               definition,
+                                               storage,
+                                               &layoutParameters->availableImages));
+                    }
+            }
+        }
+    }
+}
 
-void PluginLayout::createBucket(const ImagePositions&,
+void PluginLayout::createBucket(const ImagePositions& imagePositions,
                                 std::unique_ptr<FeatureIndex>& featureIndex,
                                 mln::unordered_map<std::string, LayerRenderData>& renderData,
                                 bool,
@@ -94,6 +128,7 @@ void PluginLayout::createBucket(const ImagePositions&,
     }
 
     auto bucket = std::make_shared<PluginBucket>(registration);
+    const auto positions = std::make_shared<const ImagePositions>(imagePositions);
     std::set<uint32_t> streamIDs;
     bool valid = output.struct_size >= sizeof(output) && std::isfinite(output.query_radius) &&
                  output.query_radius >= 0.0f && (output.vertex_stream_count == 0 || output.vertex_streams) &&
@@ -245,6 +280,7 @@ void PluginLayout::createBucket(const ImagePositions&,
                 std::forward_as_tuple(drawable.key),
                 std::forward_as_tuple(
                     registration, *shader, drawable.key, drawable.vertexCount, zoom, impl.pluginProperties, features));
+            layerBinders.at(drawable.key).setPatternPositions(positions);
         }
         bucket->updateQueryRadius(impl.id, impl.pluginProperties, zoom);
     }

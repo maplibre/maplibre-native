@@ -2,6 +2,7 @@
 
 #include <mln/plugin/plugin_api.h>
 #include <mln/style/property_value.hpp>
+#include <mln/style/expression/image.hpp>
 #include <mln/style/properties.hpp>
 #include <mln/style/style_property.hpp>
 #include <mln/style/transition_options.hpp>
@@ -31,7 +32,8 @@ public:
                                     PropertyValue<std::array<float, 2>>,
                                     PropertyValue<Color>,
                                     PropertyValue<std::string>,
-                                    PropertyValue<bool>>;
+                                    PropertyValue<bool>,
+                                    PropertyValue<expression::Image>>;
 
     struct EvaluationStorage {
         std::string string;
@@ -44,6 +46,7 @@ public:
     StyleProperty toStyleProperty() const;
     expression::Dependency getDependencies() const noexcept;
     bool isDataDriven() const noexcept;
+    bool isUndefined() const noexcept;
     bool isZoomConstant() const noexcept;
     bool usesFeatureState() const noexcept;
     float interpolationFactor(float bucketZoom, float currentZoom) const noexcept;
@@ -52,8 +55,12 @@ public:
                               const GeometryTileFeature&,
                               const FeatureState&,
                               const plugin::PropertyDefinition&,
-                              EvaluationStorage&) const;
-    mln_plugin_value evaluate(float zoom, const plugin::PropertyDefinition&, EvaluationStorage&) const;
+                              EvaluationStorage&,
+                              const std::set<std::string>* availableImages = nullptr) const;
+    mln_plugin_value evaluate(float zoom,
+                              const plugin::PropertyDefinition&,
+                              EvaluationStorage&,
+                              const std::set<std::string>* availableImages = nullptr) const;
 
     friend bool operator==(const PluginPropertyValue& lhs, const PluginPropertyValue& rhs) {
         return lhs.value == rhs.value;
@@ -86,7 +93,8 @@ private:
                                     Transitioning<PropertyValue<std::array<float, 2>>>,
                                     Transitioning<PropertyValue<Color>>,
                                     Transitioning<PropertyValue<std::string>>,
-                                    Transitioning<PropertyValue<bool>>>;
+                                    Transitioning<PropertyValue<bool>>,
+                                    Transitioning<PropertyValue<expression::Image>>>;
     TypedValue value;
 };
 

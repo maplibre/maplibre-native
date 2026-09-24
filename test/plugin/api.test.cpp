@@ -45,8 +45,17 @@ struct Descriptor {
         uniform = {
             sizeof(uniform), 0, view(uniformName), 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
         binding = {sizeof(binding), view(propertyName), MLN_PLUGIN_PROPERTY_ENCODING_ENUM_FLOAT, 0, 0, 1, 1, 0, 4};
-        shader = {
-            sizeof(shader), view(shaderID), &source, 1, attributes.data(), attributes.size(), &uniform, 1, &binding, 1};
+        shader = {sizeof(shader),
+                  view(shaderID),
+                  &source,
+                  1,
+                  attributes.data(),
+                  attributes.size(),
+                  &uniform,
+                  1,
+                  &binding,
+                  1,
+                  0};
         layer.struct_size = sizeof(layer);
         layer.layer_type = view(type);
         layer.backend_mask = MLN_PLUGIN_BACKEND_OPENGL;

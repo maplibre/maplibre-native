@@ -4,6 +4,7 @@
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/cull_face_mode.hpp>
 #include <mln/gfx/drawable_builder.hpp>
+#include <mln/gfx/drawable_atlases_tweaker.hpp>
 #include <mln/plugin/plugin_drawable_data.hpp>
 #include <mln/plugin/plugin_conversion.hpp>
 #include <mln/gfx/shader_group.hpp>
@@ -91,8 +92,12 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
         if (definition.isLayout) continue;
         const auto transition = transitioningPaintProperties.find(definition.name);
         if (transition != transitioningPaintProperties.end()) {
-            evaluatedPluginProperties.emplace(definition.name,
-                                              transition->second.evaluate(parameters.z, definition, parameters.now));
+            evaluatedPluginProperties.emplace(
+                definition.name,
+                transition->second.evaluate(
+                    definition.type == MLN_PLUGIN_VALUE_IMAGE ? std::floor(parameters.z) : parameters.z,
+                    definition,
+                    parameters.now));
         } else {
             const auto property = impl.pluginProperties.find(definition.name);
             evaluatedPluginProperties.emplace(definition.name,
@@ -106,6 +111,7 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
         staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
+    properties->crossfade = parameters.getCrossfadeParameters();
     const uint32_t allPasses = registration->drawPasses.size() == 32
                                    ? 0xffffffffu
                                    : (uint32_t{1} << registration->drawPasses.size()) - 1;
@@ -141,6 +147,10 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
 
 bool RenderPluginStyleLayer::is3D() const {
     return pluginImpl(baseImpl).registration->is3D;
+}
+
+bool RenderPluginStyleLayer::hasCrossfade() const {
+    return static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).crossfade.t != 1;
 }
 
 bool RenderPluginStyleLayer::hasTransition() const {
@@ -257,6 +267,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 auto builder = context.createDrawableBuilder("plugin/" + registration->type);
                 builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
                 builder->setRenderPass(renderPass);
+                if (propertiesAsUniforms.first.contains("__plugin_pattern_enabled")) {
+                    if (const auto& atlases = tile.getAtlasTextures())
+                        builder->addTweaker(std::make_shared<gfx::DrawableAtlasesTweaker>(
+                            atlases, std::nullopt, 0, false, false, style::AlignmentType::Auto, false, false));
+                }
                 builder->setDrawPriority(passIndex);
                 builder->setEnableDepth(pass.depthTest);
                 builder->setDepthType(pass.depthWrite ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);

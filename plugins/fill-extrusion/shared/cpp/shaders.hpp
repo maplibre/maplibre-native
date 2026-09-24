@@ -3,6 +3,13 @@
 constexpr char vertexSource[] = R"glsl(
 layout(location = 0) in vec3 a_pos;
 layout(location = 1) in vec3 a_normal;
+layout(location = 8) in float a_edge;
+#if MLN_PLUGIN_HAS_PATTERN && !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_PATTERN_IS_UNIFORM
+layout(location = 9) in vec4 a_pattern_from_min;
+layout(location = 10) in vec4 a_pattern_from_max;
+layout(location = 11) in vec4 a_pattern_to_min;
+layout(location = 12) in vec4 a_pattern_to_max;
+#endif
 #if !MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_COLOR_IS_UNIFORM
 layout(location = 2) in vec4 a_color_min;
 layout(location = 3) in vec4 a_color_max;
@@ -27,8 +34,18 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING) uni
     float height; float opacity; float gradient; float pad;
     vec4 interpolation;
     vec4 interpolation2;
+    vec4 pattern_from; vec4 pattern_to;
+    vec2 pixel_upper; vec2 pixel_lower;
+    float tile_ratio; float height_factor; float pixel_ratio; float from_scale;
+    float to_scale; float fade; vec2 texture_size;
 } u;
 layout(location = 0) out mediump vec4 frag_color;
+#if MLN_PLUGIN_HAS_PATTERN
+layout(location = 1) out vec2 frag_pos_a;
+layout(location = 2) out vec2 frag_pos_b;
+layout(location = 3) out vec4 frag_pattern_from;
+layout(location = 4) out vec4 frag_pattern_to;
+#endif
 void main() {
 #if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_COLOR_IS_UNIFORM
     vec4 color = u.color;
@@ -59,6 +76,27 @@ void main() {
     float z = t > 0.0 ? height : base;
     gl_Position = u.matrix * vec4(a_pos.xy, z, 1.0);
     applySurfaceTransform();
+#if MLN_PLUGIN_HAS_PATTERN
+#if MLN_PLUGIN_PROPERTY_FILL_EXTRUSION_PATTERN_IS_UNIFORM
+    vec4 pattern_from = u.pattern_from, pattern_to = u.pattern_to;
+#else
+    vec4 pattern_from = u.from_scale > 1.0 ? a_pattern_from_min : a_pattern_from_max;
+    vec4 pattern_to = a_pattern_to_min;
+#endif
+    frag_pattern_from = pattern_from; frag_pattern_to = pattern_to;
+    vec2 size_a = (pattern_from.zw-pattern_from.xy)/u.pixel_ratio;
+    vec2 size_b = (pattern_to.zw-pattern_to.xy)/u.pixel_ratio;
+    vec2 pos = a_normal.z == 0.0 ? vec2(a_edge,z*u.height_factor) : floor(a_pos.xy);
+    frag_pos_a = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.from_scale*size_a,u.tile_ratio,pos);
+    frag_pos_b = get_pattern_pos(u.pixel_upper,u.pixel_lower,u.to_scale*size_b,u.tile_ratio,pos);
+    float directional = clamp(dot(a_normal,u.light_direction),0.0,1.0);
+    directional = mix(1.0-u.intensity,max(0.5+u.intensity,1.0),directional);
+    if (a_normal.z == 0.0) {
+        float factor = clamp((t+base)*pow(height/150.0,0.5),mix(0.7,0.98,1.0-u.intensity),1.0);
+        directional *= (1.0-gradient)+gradient*factor;
+    }
+    frag_color = vec4(clamp(directional*u.light_color,mix(vec3(0.0),vec3(0.3),1.0-u.light_color),vec3(1.0)),1.0)*opacity;
+#else
     float luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
     color += vec4(0.03, 0.03, 0.03, 1.0);
     float fraction = clamp(dot(a_normal, u.light_direction), 0.0, 1.0);
@@ -69,10 +107,39 @@ void main() {
     }
     vec3 minLight = mix(vec3(0.0), vec3(0.3), 1.0 - u.light_color);
     frag_color = vec4(clamp(color.rgb * directional * u.light_color, minLight, vec3(1.0)), 1.0) * opacity;
+#endif
 }
 )glsl";
 constexpr char fragmentSource[] = R"glsl(
 layout(location = 0) in vec4 frag_color;
 layout(location = 0) out vec4 out_color;
-void main() { out_color = frag_color; }
+#if MLN_PLUGIN_HAS_PATTERN
+layout(location = 1) in vec2 frag_pos_a;
+layout(location = 2) in vec2 frag_pos_b;
+layout(location = 3) in vec4 frag_pattern_from;
+layout(location = 4) in vec4 frag_pattern_to;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = MLN_PLUGIN_UNIFORM_0_BINDING) uniform ExtrusionUniforms {
+    mat4 matrix;
+    vec4 color;
+    vec3 light_color; float intensity;
+    vec3 light_direction; float base;
+    float height; float opacity; float gradient; float pad;
+    vec4 interpolation;
+    vec4 interpolation2;
+    vec4 pattern_from; vec4 pattern_to;
+    vec2 pixel_upper; vec2 pixel_lower;
+    float tile_ratio; float height_factor; float pixel_ratio; float from_scale;
+    float to_scale; float fade; vec2 texture_size;
+} u;
+#endif
+void main() {
+#if MLN_PLUGIN_HAS_PATTERN
+    vec2 pos_a = mix(frag_pattern_from.xy/u.texture_size,frag_pattern_from.zw/u.texture_size,mod(frag_pos_a,1.0));
+    vec2 pos_b = mix(frag_pattern_to.xy/u.texture_size,frag_pattern_to.zw/u.texture_size,mod(frag_pos_b,1.0));
+    out_color = mix(texture(image0_sampler,pos_a),texture(image0_sampler,pos_b),u.fade)*frag_color;
+#else
+    out_color = frag_color;
+#endif
+}
 )glsl";

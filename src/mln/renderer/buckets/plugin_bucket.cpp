@@ -29,6 +29,8 @@ std::size_t componentCount(mln_plugin_property_encoding_v1 encoding) {
             return 1;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return 2;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return 4;
     }
@@ -60,6 +62,9 @@ void encodedValue(const mln_plugin_value& value,
             output[0] = value.data.float2_value.x;
             output[1] = value.data.float2_value.y;
             break;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
+            break; // Resolved through the binder's tile atlas.
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             output[0] = value.data.color_value.r;
             output[1] = value.data.color_value.g;
@@ -87,6 +92,7 @@ mln_plugin_value decodedValue(const std::array<float, 4>& input, const plugin::P
         case MLN_PLUGIN_VALUE_COLOR:
             value.data.color_value = {input[0], input[1], input[2], input[3]};
             break;
+        case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
             if (!definition.enumValues.empty()) {
                 const auto index = static_cast<size_t>(
@@ -209,6 +215,8 @@ gfx::AttributeDataType PluginPaintPropertyBinder::attributeType() const noexcept
             return gfx::AttributeDataType::Float;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return gfx::AttributeDataType::Float2;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return gfx::AttributeDataType::Float4;
     }
@@ -231,8 +239,8 @@ void PluginPaintPropertyBinder::writeUniform(float zoom,
     if (!dataDriven && uniformID == binding.uniformID) {
         if (!uniformZoom || (!value.isZoomConstant() && *uniformZoom != zoom)) {
             style::PluginPropertyValue::EvaluationStorage storage;
-            const auto evaluated = value.evaluate(zoom, definition, storage);
-            encodedValue(evaluated, binding.encoding, definition, uniformValue);
+            const auto evaluated = value.evaluate(zoom, definition, storage, &availableImages);
+            encode(evaluated, uniformValue);
             uniformZoom = zoom;
         }
         const auto size = componentCount() * sizeof(float);
@@ -259,6 +267,33 @@ bool PluginPaintPropertyBinder::synchronize(const style::PluginPropertyValue& re
     if (dataDriven) refill();
     if (!dataDriven) vertexVector.reset();
     return wasDataDriven != dataDriven || dataDriven;
+}
+
+bool PluginPaintPropertyBinder::hasImage() const {
+    if (definition.type != MLN_PLUGIN_VALUE_IMAGE) return false;
+    return !value.isUndefined();
+}
+
+void PluginPaintPropertyBinder::setPatternPositions(std::shared_ptr<const ImagePositions> positions) {
+    if (definition.type != MLN_PLUGIN_VALUE_IMAGE) return;
+    imagePositions = std::move(positions);
+    availableImages.clear();
+    for (const auto& [name, position] : *imagePositions) availableImages.insert(name);
+    uniformZoom.reset();
+    if (dataDriven) refill();
+}
+
+void PluginPaintPropertyBinder::encode(const mln_plugin_value& input, std::array<float, 4>& output) const {
+    if (definition.type != MLN_PLUGIN_VALUE_IMAGE) {
+        encodedValue(input, binding.encoding, definition, output);
+        return;
+    }
+    output = {};
+    if (!imagePositions || !input.data.string_value.size) return;
+    const auto it = imagePositions->find(std::string(input.data.string_value.data, input.data.string_value.size));
+    if (it == imagePositions->end()) return;
+    const auto rect = it->second.tlbr();
+    std::copy(rect.begin(), rect.end(), output.begin());
 }
 
 bool PluginPaintPropertyBinder::update(const FeatureStates& states, const GeometryTileLayer&) {
@@ -316,13 +351,24 @@ void PluginPaintPropertyBinder::fillRange(const PluginFeatureData::Range& range,
                                           const FeatureState& state) {
     style::PluginPropertyValue::EvaluationStorage minimumStorage;
     style::PluginPropertyValue::EvaluationStorage maximumStorage;
-    const auto minimumValue = value.evaluate(bucketZoom, feature, state, definition, minimumStorage);
-    const auto maximumValue = value.evaluate(
-        value.isZoomConstant() ? bucketZoom : bucketZoom + 1.0f, feature, state, definition, maximumStorage);
-    std::array<float, 4> minimum{};
-    std::array<float, 4> maximum{};
-    encodedValue(minimumValue, binding.encoding, definition, minimum);
-    encodedValue(maximumValue, binding.encoding, definition, maximum);
+    const bool image = definition.type == MLN_PLUGIN_VALUE_IMAGE;
+    const bool from = binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM;
+    // Native composite pattern dependencies use Faded<Image>::to, evaluated
+    // one zoom above the requested bucket zoom.
+    const float imageZoom = bucketZoom + (value.isZoomConstant() ? 0.0f : 1.0f);
+    const auto minimumValue = value.evaluate(
+        image ? imageZoom - (from ? 1 : 0) : bucketZoom, feature, state, definition, minimumStorage, &availableImages);
+    const auto maximumValue = value.evaluate(image                    ? imageZoom + (from ? 1 : 0)
+                                             : value.isZoomConstant() ? bucketZoom
+                                                                      : bucketZoom + 1.0f,
+                                             feature,
+                                             state,
+                                             definition,
+                                             maximumStorage,
+                                             &availableImages);
+    std::array<float, 4> minimum{}, maximum{};
+    encode(minimumValue, minimum);
+    encode(maximumValue, maximum);
     vertexVector->set(range.firstVertex, range.vertexCount, minimum.data(), maximum.data());
 }
 
@@ -354,9 +400,14 @@ PluginPaintPropertyBinders::PluginPaintPropertyBinders(const plugin::RegisteredL
     }
 }
 
+void PluginPaintPropertyBinders::setPatternPositions(std::shared_ptr<const ImagePositions> positions) {
+    for (auto& binder : binders) binder.setPatternPositions(positions);
+}
+
 void PluginPaintPropertyBinders::populateVertexAttributes(gfx::VertexAttributeArray& attributes,
                                                           gfx::StringIDSetsPair& uniforms) const {
     for (const auto& binder : binders) {
+        if (binder.hasImage()) uniforms.first.emplace("__plugin_pattern_enabled");
         const auto& binding = binder.getBinding();
         if (!binder.isDataDriven()) {
             uniforms.first.emplace(binding.propertyName);
@@ -410,6 +461,7 @@ void PluginPaintPropertyBinders::appendStatistics(
         if (output.find(binder.getDefinition().name) != output.end()) continue;
         mln_plugin_value minimum{};
         mln_plugin_value maximum{};
+        if (binder.getDefinition().type == MLN_PLUGIN_VALUE_IMAGE) continue;
         binder.statistics(zoom, minimum, maximum);
         output.emplace(binder.getDefinition().name, std::make_pair(minimum, maximum));
     }

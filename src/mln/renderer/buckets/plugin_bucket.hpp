@@ -109,6 +109,8 @@ public:
                               std::shared_ptr<const PluginFeatureData>,
                               std::shared_ptr<FeatureStates> = std::make_shared<FeatureStates>());
 
+    bool hasImage() const;
+    void setPatternPositions(std::shared_ptr<const ImagePositions>);
     bool isDataDriven() const noexcept { return dataDriven; }
     const plugin::ShaderPropertyBindingDefinition& getBinding() const noexcept { return binding; }
     const plugin::PropertyDefinition& getDefinition() const noexcept { return definition; }
@@ -127,6 +129,9 @@ private:
     void refill();
     void fillRange(const PluginFeatureData::Range&, const GeometryTileFeature&, const FeatureState&);
     void updateStatistics();
+    void encode(const mln_plugin_value&, std::array<float, 4>&) const;
+    std::shared_ptr<const ImagePositions> imagePositions;
+    std::set<std::string> availableImages;
 
     plugin::PropertyDefinition definition;
     plugin::ShaderPropertyBindingDefinition binding;
@@ -154,6 +159,7 @@ public:
                                const style::PluginPropertyMap&,
                                std::shared_ptr<const PluginFeatureData>);
 
+    void setPatternPositions(std::shared_ptr<const ImagePositions>);
     void populateVertexAttributes(gfx::VertexAttributeArray&, gfx::StringIDSetsPair&) const;
     void writeUniforms(float zoom, uint32_t uniformID, uint8_t* output, std::size_t outputSize) const;
     bool synchronize(const style::PluginPropertyMap&);

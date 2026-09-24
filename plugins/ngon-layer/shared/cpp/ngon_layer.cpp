@@ -431,6 +431,7 @@ const mln_plugin_shader_descriptor_v1 shader = {
     std::size(uniforms),
     propertyBindings,
     std::size(propertyBindings),
+    0,
 };
 const mln_plugin_draw_pass_v1 drawPass = {sizeof(mln_plugin_draw_pass_v1), 1, 0, 1, 1, 0, MLN_PLUGIN_CULL_NONE};
 const mln_plugin_layer_type_v1 layerType = [] {

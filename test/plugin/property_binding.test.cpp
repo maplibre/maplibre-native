@@ -394,3 +394,29 @@ TEST(PluginProperties, BooleanDefaultsSerializationCameraAndFeatureState) {
     style::conversion::Error error;
     EXPECT_FALSE(style::convertPluginPropertyValue(definition, style::conversion::Convertible(value), error));
 }
+
+TEST(PluginProperties, ImageExpressionsAvailabilitySerializationAndTransitions) {
+    auto definition = numberDefinition();
+    definition.name = "test-pattern";
+    definition.type = MLN_PLUGIN_VALUE_IMAGE;
+    definition.defaultValue = std::string{};
+    definition.supportsTransitions = true;
+    auto value = expression(definition, R"(["coalesce",["image","absent"],["image","present"]])");
+    const std::set<std::string> available{"present"};
+    style::PluginPropertyValue::EvaluationStorage storage;
+    auto evaluated = value.evaluate(0, definition, storage, &available);
+    EXPECT_EQ(MLN_PLUGIN_VALUE_IMAGE, evaluated.type);
+    EXPECT_EQ("present", std::string(evaluated.data.string_value.data, evaluated.data.string_value.size));
+    auto constant = expression(definition, R"("present")");
+    EXPECT_EQ(Value("present"), constant.toStyleProperty().getValue());
+    style::TransitionOptions options;
+    options.duration = std::chrono::milliseconds(100);
+    style::PluginTransitioningPropertyValue transition(
+        expression(definition, R"("next")"), style::PluginTransitioningPropertyValue(constant), options, TimePoint{});
+    auto at = [&](TimePoint time) {
+        const auto image = transition.evaluate(0, definition, time).evaluate(0, definition, storage);
+        return std::string(image.data.string_value.data, image.data.string_value.size);
+    };
+    EXPECT_EQ("present", at(TimePoint{} + std::chrono::milliseconds(50)));
+    EXPECT_EQ("next", at(TimePoint{} + std::chrono::milliseconds(100)));
+}

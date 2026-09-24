@@ -18,6 +18,11 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+namespace mln::util {
+template <>
+struct Interpolator<style::expression::Image> : Uninterpolated {};
+} // namespace mln::util
+
 namespace mln {
 namespace style {
 namespace {
@@ -54,6 +59,11 @@ float interpolationFactor(const PropertyValue<T>& value, float bucketZoom, float
 
 template <class T>
 T defaultValue(const plugin::PropertyDefinition& definition);
+
+template <>
+expression::Image defaultValue<expression::Image>(const plugin::PropertyDefinition& definition) {
+    return expression::Image(*definition.defaultValue.getString());
+}
 
 template <>
 bool defaultValue<bool>(const plugin::PropertyDefinition& definition) {
@@ -93,6 +103,8 @@ std::string defaultValue<std::string>(const plugin::PropertyDefinition& definiti
 template <class Fn>
 auto withPropertyType(mln_plugin_value_type type, Fn&& fn) {
     switch (type) {
+        case MLN_PLUGIN_VALUE_IMAGE:
+            return fn.template operator()<expression::Image>();
         case MLN_PLUGIN_VALUE_BOOLEAN:
             return fn.template operator()<bool>();
         case MLN_PLUGIN_VALUE_FLOAT:
@@ -133,6 +145,10 @@ mln_plugin_value toPluginValue(const T& value, PluginPropertyValue::EvaluationSt
     } else if constexpr (std::is_same_v<T, Color>) {
         result.type = MLN_PLUGIN_VALUE_COLOR;
         result.data.color_value = {value.r, value.g, value.b, value.a};
+    } else if constexpr (std::is_same_v<T, expression::Image>) {
+        result.type = MLN_PLUGIN_VALUE_IMAGE;
+        storage.string = value.id();
+        result.data.string_value = {storage.string.data(), storage.string.size()};
     } else {
         result.type = MLN_PLUGIN_VALUE_STRING;
         storage.string = value;
@@ -185,11 +201,22 @@ bool validateConstant(const plugin::PropertyDefinition& definition,
 } // namespace
 
 StyleProperty PluginPropertyValue::toStyleProperty() const {
-    return std::visit([](const auto& typed) { return conversion::makeStyleProperty(typed); }, value);
+    return std::visit(
+        []<class T>(const PropertyValue<T>& typed) {
+            if constexpr (std::is_same_v<T, expression::Image>) {
+                if (typed.isConstant()) return StyleProperty{typed.asConstant().id(), StyleProperty::Kind::Constant};
+            }
+            return conversion::makeStyleProperty(typed);
+        },
+        value);
 }
 
 expression::Dependency PluginPropertyValue::getDependencies() const noexcept {
     return std::visit([](const auto& typed) { return typed.getDependencies(); }, value);
+}
+
+bool PluginPropertyValue::isUndefined() const noexcept {
+    return std::visit([](const auto& typed) { return typed.isUndefined(); }, value);
 }
 
 bool PluginPropertyValue::isDataDriven() const noexcept {
@@ -220,14 +247,18 @@ mln_plugin_value PluginPropertyValue::evaluate(float zoom,
                                                const GeometryTileFeature& feature,
                                                const FeatureState& state,
                                                const plugin::PropertyDefinition& definition,
-                                               EvaluationStorage& storage) const {
-    return evaluate(expression::EvaluationContext(zoom, &feature, &state), definition, storage);
+                                               EvaluationStorage& storage,
+                                               const std::set<std::string>* availableImages) const {
+    return evaluate(expression::EvaluationContext(zoom, &feature, &state).withAvailableImages(availableImages),
+                    definition,
+                    storage);
 }
 
 mln_plugin_value PluginPropertyValue::evaluate(float zoom,
                                                const plugin::PropertyDefinition& definition,
-                                               EvaluationStorage& storage) const {
-    return evaluate(expression::EvaluationContext(zoom), definition, storage);
+                                               EvaluationStorage& storage,
+                                               const std::set<std::string>* availableImages) const {
+    return evaluate(expression::EvaluationContext(zoom).withAvailableImages(availableImages), definition, storage);
 }
 
 PluginTransitioningPropertyValue::PluginTransitioningPropertyValue(PluginPropertyValue input)
@@ -250,6 +281,10 @@ PluginPropertyValue PluginTransitioningPropertyValue::evaluate(float zoom,
     const PropertyEvaluationParameters parameters(zoom);
     return std::visit(
         [&]<class T>(const Transitioning<PropertyValue<T>>& typed) {
+            if constexpr (std::is_same_v<T, expression::Image>) {
+                if (typed.isUndefined())
+                    return PluginPropertyValue{PluginPropertyValue::TypedValue{PropertyValue<T>{}}};
+            }
             const auto evaluated = typed.evaluate(
                 DataDrivenPropertyEvaluator<T>(parameters, defaultValue<T>(definition)), now);
             return evaluated.match([](const auto& result) {
@@ -261,7 +296,10 @@ PluginPropertyValue PluginTransitioningPropertyValue::evaluate(float zoom,
 
 PluginPropertyValue defaultPluginPropertyValue(const plugin::PropertyDefinition& definition) {
     return withPropertyType(definition.type, [&]<class T>() {
-        return PluginPropertyValue{PluginPropertyValue::TypedValue{PropertyValue<T>{defaultValue<T>(definition)}}};
+        if constexpr (std::is_same_v<T, expression::Image>)
+            return PluginPropertyValue{PluginPropertyValue::TypedValue{PropertyValue<T>{}}};
+        else
+            return PluginPropertyValue{PluginPropertyValue::TypedValue{PropertyValue<T>{defaultValue<T>(definition)}}};
     });
 }
 

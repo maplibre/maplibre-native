@@ -32,6 +32,7 @@ Value copyValue(const mln_plugin_value& value) {
                                                   static_cast<double>(value.data.color_value.g),
                                                   static_cast<double>(value.data.color_value.b),
                                                   static_cast<double>(value.data.color_value.a)}};
+        case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
             return Value{copyString(value.data.string_value)};
     }
@@ -64,6 +65,8 @@ uint32_t propertyEncodingSize(mln_plugin_property_encoding_v1 encoding) {
             return 4;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return 8;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return 16;
     }
@@ -78,6 +81,8 @@ uint32_t propertyEncodingAlignment(mln_plugin_property_encoding_v1 encoding) {
             return alignof(float);
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return 2 * alignof(float);
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return 4 * alignof(float);
     }
@@ -92,6 +97,8 @@ mln_plugin_vertex_attribute_type propertyAttributeType(mln_plugin_property_encod
             return MLN_PLUGIN_VERTEX_FLOAT;
         case MLN_PLUGIN_PROPERTY_ENCODING_FLOAT2:
             return MLN_PLUGIN_VERTEX_FLOAT_X2;
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM:
+        case MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO:
         case MLN_PLUGIN_PROPERTY_ENCODING_COLOR:
             return MLN_PLUGIN_VERTEX_FLOAT_X4;
     }
@@ -116,7 +123,13 @@ bool appendShaders(const std::string& pluginID,
             error = "plugin shader descriptor is malformed";
             return false;
         }
+        if (input.tile_pattern_texture > 1 ||
+            (input.tile_pattern_texture && backendMask != MLN_PLUGIN_BACKEND_VULKAN)) {
+            error = "tile pattern textures currently require the Vulkan backend";
+            return false;
+        }
         ShaderDefinition shader;
+        shader.tilePatternTexture = input.tile_pattern_texture;
         shader.pluginID = pluginID;
         shader.id = copyString(input.shader_id);
         if (!shaderIDs.emplace(shader.id).second) {
@@ -235,7 +248,7 @@ bool appendShaders(const std::string& pluginID,
             error = "plugin shader property binding array is missing";
             return false;
         }
-        std::set<std::string> boundProperties;
+        std::set<std::pair<std::string, int>> boundProperties;
         std::set<uint32_t> boundPaintAttributes;
         std::map<uint32_t, std::vector<std::pair<uint32_t, uint32_t>>> hostUniformRanges;
         for (size_t bindingIndex = 0; bindingIndex < input.property_binding_count; ++bindingIndex) {
@@ -267,7 +280,10 @@ bool appendShaders(const std::string& pluginID,
                 shader.attributes.begin(), shader.attributes.end(), [&](const auto& candidate) {
                     return candidate.id == binding.maximum_attribute_id;
                 });
-            if (propertyName.empty() || !encodingSize || !boundProperties.emplace(propertyName).second ||
+            if (propertyName.empty() || !encodingSize ||
+                !boundProperties
+                     .emplace(propertyName, binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO ? 1 : 0)
+                     .second ||
                 (packed && encodingSize > 8) || !boundPaintAttributes.emplace(binding.minimum_attribute_id).second ||
                 (!packed && !boundPaintAttributes.emplace(binding.maximum_attribute_id).second) ||
                 uniform == shader.uniformBlocks.end() || interpolationUniform == shader.uniformBlocks.end() ||
@@ -331,7 +347,7 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
         if (property.struct_size < sizeof(mln_plugin_property_descriptor_v1) || !validString(property.name) ||
             property.default_value.struct_size < sizeof(mln_plugin_value) ||
             property.default_value.type != property.type ||
-            (property.type == MLN_PLUGIN_VALUE_STRING &&
+            ((property.type == MLN_PLUGIN_VALUE_STRING || property.type == MLN_PLUGIN_VALUE_IMAGE) &&
              !validOptionalString(property.default_value.data.string_value)) ||
             (property.expression_capabilities & ~validExpressionCapabilities) != 0) {
             error = "plugin property descriptor is malformed";
@@ -345,9 +361,10 @@ bool appendProperties(const mln_plugin_property_descriptor_v1* properties,
         }
         const bool transitionableType = property.type == MLN_PLUGIN_VALUE_FLOAT ||
                                         property.type == MLN_PLUGIN_VALUE_FLOAT2 ||
-                                        property.type == MLN_PLUGIN_VALUE_COLOR;
+                                        property.type == MLN_PLUGIN_VALUE_COLOR ||
+                                        property.type == MLN_PLUGIN_VALUE_IMAGE;
         if (property.supports_transitions && !transitionableType) {
-            error = "plugin transitions require an interpolatable paint property";
+            error = "plugin transitions require an interpolatable paint property or image";
             return false;
         }
         if (property.type == MLN_PLUGIN_VALUE_BOOLEAN && property.default_value.data.boolean_value > 1) {
@@ -524,7 +541,10 @@ mln_plugin_status PluginRegistry::registerPlugin(const mln_plugin_descriptor_v1&
             for (const auto& binding : shader.propertyBindings) {
                 const auto* property = copiedLayerType.findProperty(binding.propertyName);
                 const bool encodingMatches = property != nullptr && !property->isLayout &&
-                                             ((property->type == MLN_PLUGIN_VALUE_BOOLEAN &&
+                                             ((property->type == MLN_PLUGIN_VALUE_IMAGE && shader.tilePatternTexture &&
+                                               (binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_FROM ||
+                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_IMAGE_TO)) ||
+                                              (property->type == MLN_PLUGIN_VALUE_BOOLEAN &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_BOOLEAN_FLOAT) ||
                                               (property->type == MLN_PLUGIN_VALUE_FLOAT &&
                                                binding.encoding == MLN_PLUGIN_PROPERTY_ENCODING_FLOAT) ||
@@ -622,6 +642,7 @@ bool PluginRegistry::valueMatches(mln_plugin_value_type type, const Value& value
             return value.getBool() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT:
             return numeric();
+        case MLN_PLUGIN_VALUE_IMAGE:
         case MLN_PLUGIN_VALUE_STRING:
             return value.getString() != nullptr;
         case MLN_PLUGIN_VALUE_FLOAT2:

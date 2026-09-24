@@ -41,9 +41,9 @@ TEST(FillExtrusionGeometry, RoofHolesWallsRangesAndQueries) {
     for (const auto& seg : std::vector<mln_plugin_segment_v1>(
              g.bucket.drawables[0].segments, g.bucket.drawables[0].segments + g.bucket.drawables[0].segment_count)) {
         for (size_t i = seg.index_offset; i < seg.index_offset + seg.index_length; i += 3) {
-            const auto* a = vertices + (seg.vertex_offset + g.bucket.indices[i]) * 6;
-            const auto* b = vertices + (seg.vertex_offset + g.bucket.indices[i + 1]) * 6;
-            const auto* c = vertices + (seg.vertex_offset + g.bucket.indices[i + 2]) * 6;
+            const auto* a = vertices + (seg.vertex_offset + g.bucket.indices[i]) * (stream.stride / sizeof(float));
+            const auto* b = vertices + (seg.vertex_offset + g.bucket.indices[i + 1]) * (stream.stride / sizeof(float));
+            const auto* c = vertices + (seg.vertex_offset + g.bucket.indices[i + 2]) * (stream.stride / sizeof(float));
             if (a[5] == 1)
                 roofArea += std::abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2;
             else

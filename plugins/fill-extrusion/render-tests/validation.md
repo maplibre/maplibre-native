@@ -43,3 +43,29 @@ coordinates, and 1/128 tile-unit GPU quantization used by the native layer.
 Layout scope/serialization/invalidation and invalid descriptors are checked
 separately. All 42 focused tests pass, as do all 50 eligible solids, four eligible queries,
 and all 13 n-gon fixtures. The original solid suite remains unchanged.
+
+## Patterns
+
+Separate eight-fixture baseline: built-in 7/8, plugin 7/8, with no ignores.
+The existing `fill-extrusion-pattern/tile-buffer` expectation fails for both;
+their actual PNG files are byte-identical (SHA-256
+`a4c6cc019cb2dac903c52124d9df5e52c925948a279582eeb3b894a83b597b7d`).
+No expectation, threshold, or ignore was changed.
+
+Direct comparisons cover seven pattern cases at four zooms and two corner radii
+(56 comparisons), changing opacity and gradient at runtime. Cases include
+literal sprites at image pixel ratio 2, explicit empty and undefined patterns,
+feature/composite expressions, and image/coalesce fallback. Additional checks
+cover image serialization, availability, discrete transitions, and malformed
+atlas descriptors. Composite sampling follows the native next-zoom `to` value.
+
+The native layer has an additional runtime limitation: replacing a constant
+pattern with a sprite absent from the tile atlas can make the extrusion disappear
+because it does not request a new layout. The plugin requests new dependencies
+for this change. Direct parity scenes start with each pattern to avoid treating
+that existing defect as required behavior.
+
+Pattern milestone regression totals: 45/45 focused tests, 50/50 eligible solid
+renders, 4/4 eligible queries, and 13/13 n-gon renders. Both implementations pass
+all seven applicable pattern expectations; the eighth has the identical existing
+baseline failure described above.

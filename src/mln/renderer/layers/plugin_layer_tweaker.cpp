@@ -68,6 +68,22 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             callbackContext.bearing = parameters.state.getBearing();
             callbackContext.camera_to_center_distance = parameters.state.getCameraToCenterDistance();
             callbackContext.pixel_ratio = parameters.pixelRatio;
+            callbackContext.zoom = parameters.state.getZoom();
+            if (tileID) {
+                callbackContext.tile_x = tileID->canonical.x;
+                callbackContext.tile_y = tileID->canonical.y;
+                callbackContext.tile_z = tileID->canonical.z;
+                callbackContext.tile_wrap = tileID->wrap;
+            }
+            const auto& crossfade =
+                static_cast<const style::PluginStyleLayerProperties&>(*evaluatedProperties).crossfade;
+            callbackContext.crossfade_from_scale = crossfade.fromScale;
+            callbackContext.crossfade_to_scale = crossfade.toScale;
+            callbackContext.crossfade_t = crossfade.t;
+            if (const auto& texture = drawable.getTexture(0)) {
+                callbackContext.pattern_texture_size[0] = texture->getSize().width;
+                callbackContext.pattern_texture_size[1] = texture->getSize().height;
+            }
             const auto lightColor = parameters.evaluatedLight.get<style::LightColor>();
             callbackContext.light_color[0] = lightColor.r;
             callbackContext.light_color[1] = lightColor.g;

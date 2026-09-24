@@ -73,6 +73,7 @@ struct ShaderDefinition {
     std::vector<ShaderAttribute> attributes;
     std::vector<UniformBlockDefinition> uniformBlocks;
     std::vector<ShaderPropertyBindingDefinition> propertyBindings;
+    bool tilePatternTexture = false;
     bool operator==(const ShaderDefinition&) const = default;
 };
 
