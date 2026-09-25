@@ -5,6 +5,8 @@ import androidx.test.espresso.UiController
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.RasterLayer
+import org.maplibre.android.style.sources.RasterSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.action.MapLibreMapAction
 import org.maplibre.android.testapp.activity.EspressoTest
@@ -85,6 +87,25 @@ class StyleLoaderTest : EspressoTest() {
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             Assert.assertEquals("Style URI should match", uri, maplibreMap.style!!.uri)
             Assert.assertEquals("Style json should match", expected, maplibreMap.style!!.json)
+        }
+    }
+
+    @Test
+    fun testRasterSourceFromPMTilesAsset() {
+        validateTestSetup()
+        MapLibreMapAction.invoke(
+            maplibreMap
+        ) { uiController: UiController, maplibreMap: MapLibreMap ->
+            val mapView = rule.activity.findViewById<View>(R.id.mapView) as MapView
+            val loadedSources = mutableSetOf<String>()
+            mapView.addOnSourceChangedListener { loadedSources.add(it) }
+
+            val source = RasterSource("pmtiles-asset", "pmtiles://asset://geography-class-png.pmtiles", 256)
+            maplibreMap.style!!.addSource(source)
+            maplibreMap.style!!.addLayer(RasterLayer("pmtiles-asset", source.id))
+            TestingAsyncUtils.waitForLayer(uiController, mapView)
+
+            Assert.assertTrue("PMTiles archive in assets should load", "pmtiles-asset" in loadedSources)
         }
     }
 }
