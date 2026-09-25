@@ -1,0 +1,2563 @@
+{
+    "routes": [
+        {
+            "voiceLocale": "en",
+            "weight_name": "auto",
+            "weight": 10448.0,
+            "duration": 10448.0,
+            "distance": 168316.0,
+            "geometry": "c_lsxApxcmiFoFoDaKcDcG_@_@@uAQm@SeAi@iDcB}@c@mF}Ck@I[Je@z@_@rAgTpeAaGaDjJsi@`L_p@eAq@oG{DwI{EmDkBcYoOaCiA[MSKeAg@mE{BsUaLgBw@iBm@_BUiAQeCA}DBwDZyE`AkA^mAl@cA|@cCpCoBbCaChC{CbCgDrAiBZoJr@cHUiJkE@ue@?yL?eO?}J?cB@kL?iB?gM?_E?gE?gH?uCt@uBp@yFZ}EZgEJ_CNuE@aD@oEF{BHkBz@qFbAsCHKHKHKFKHMFMFMDOJUFYFYFYDYB[B[@]?[?[A[C[C[C[GYGYGYIWK_@eBuHy@mEg@uDi@iG[iEScF@}Gh@eHxAaJP_@L[L]H]H]H_@F_@Fe@`CsDbBwBpAcBhCyCjDuBb@S^SrFkClG{CtBcA`CiAbIsHjEs@zDmAbQkFhT{HhBe@tUqH|Ae@|Ac@^ItA_@TE`Cg@vCc@j@IlGu@jDW`BIz@Cr@Cr@C~AGnCCl]Hvi@NfRD|MDfe@Pxk@?tXVxF@xMFxW@da@VzL?~TFrNBbn@Pta@LjKBnKDl^Nvc@RdGBrVJp_@Pp^s@hBSpDWlFe@jDa@bAOnIcAjIgBpNkDxF{AzHsCpOoGxUaLzD}BrEwCf@_@dQuNdAaAnSoSvCaDbGeHpG_Ira@}e@nCqD|NgQ|I}KvMyPrCwDnHcLzBsDpB{CdDgEdVqZ|lAu{AbeBwxB~R_XhM{PhGoIdLyNtJaLlCsBrLgNz_@_e@`DyDrG}HtMyOd\\aa@rMqPpMoPlYa_@zV{[tH}JfJoLrE{Fnk@qs@h^ye@|EcJl[aa@|Ye_@rJ{LpBiCtPcTtAgBpiAayAnWi\\zDaFvGmIz@iAzEwF|GyH|GuHdP_PfS}RdXwWh_@s^ps@mr@dd@mc@bRwQdp@}n@fB[vCsB`jAshAvUiUpj@ci@biA_hAxDcEhEgE`P_QxBsCvDiFlKyOpHcLlJsNja@um@~GkK|CkEfHkO~\\gh@~Xqa@hKsOpI{LfIcMbE{GfLsQvDoF`HeLbCeEpGsJvGoKxBmDzI}OhAsBl@kAvBiE@CHQ`AmBtCqGhBcElHwQ~JcZd@}AvAaF^oAdTou@v\\ikA|T_w@jVez@lCyJbFqThFuUfEyRdHe\\pCsMlIc`@nHi]`Lqh@rJ_d@tBwJnIi\\bBmG`BiIlDwMxBaJfCmIlCiIbFqP~JiZlGqS~AmFrNmb@vNu`@vEeMrFwMjF_L~BgEpBoD~@yAZi@b@o@`A}Ap@_A|@oAV]BEl@y@tCsDpIiJzF}FfMiLrMkLtFgFtLmKtBkBrDgDDEbRyPhHwGrg@kd@`HwF`BsAv@o@HI~DaDt@m@t@o@HIxgAacArKqJhYaWzBg@`MwJtPgOxJ}IbBuAvFuEvF{DhD{B~FiDbHyChHkClGgBnCs@zEmArCu@`Di@bCc@hDe@hC[dDcAvF[nGHnG\\bPr@vUpAbJ`@pOr@hsA`G`uAtGlLj@vP~@hObAB?f@FhKfAvKfBzIhB~EtAbRpGt`@fRfYjP~VdOhYtPhnAlt@p]~RDBhS`Mn]jSDDpSpKjAbAd_@rY~PdKrGvD`CtAjBbArKdFhJpE`GfC|FlBnD^hNfEvBn@|Br@rKxCxHjBpHhA~WnEpNvATDzFl@hBLtMj@p`@f@jZNd^Ltd@HdLWjNBxMCvMBrLJzB|@~NHjLR`BFzFLbWLjVLjc@OfUEvC}@pIBj[LdIAbe@Lpg@Lzc@LfJBddBd@fJB|k@NlbAXfJBfJBtlBf@hoBh@r\\HrYHzE@jC@`HBbA?~T?fZDzA@bH@bA@L?nC?`C@reA^hI@hI@hACbDCvCCJAnACp@A`BEz@Cx@EzI_@xEa@tBU`@GLA`BSfAQ`C_@f@ID?pMmCbQuEvCq@x[sHzQuExMaDtc@_K|HeB`IkB~R{Ebg@cLpDw@tD_AdJuBlLkCnIoBpv@uPtDEvJ_BfHiBvU{FtVeFpMaDtv@{P~Bm@~@i@vCgC~t@wQTEdUkFzt@}PTGhvA_\\bDu@bDw@pDy@fMaE`IiDbIyD~DqBbDgB@?jFiD~DkC|GcFdPmNbBsAvNmMFEhE{DfViTvt@ap@lKkJte@kb@lBcBpDcDvAoArEsDZUFGrDiCfBkAzAcApF_DlBgAdCoAlDgB~EwBdE}AhGyBbJ}Cxd@cOtX_Jd\\wKzLaEzMoEd[qKj[sKfBm@dCy@jOgF`KiDtGyBfHwBBAzHgBpG{@tEg@dGWxKMdFDtLHjB@jA@fB?dA@jBAlJ?tFAnHQnIk@hMuAbNcCxRsDfFaAfKeB|McChEaAzDy@vH_CzFqBrDcBnE}BdHmEpGuEvM{JvF_Edc@_\\hA{@xEmDVQvRwNbIgGxG_G`@_@bCeCfCeD~BkDnHqLdHaM`@m@hFkIpEgHpI_LbKqLtE_F|@w@`EmDjEmDdFsDzDiCdAo@xBsApC_BTM^SBAlEwB`EeBhWgJrGgBhK{BjBa@|Dy@tASzJiAlI]hJ_@zOYpMAhNMnISjJq@rKuAtH}AzCw@xJsCvRgG`OqElKaD|IoCxImCnCy@hEqAz@Yva@eM~XsIbMyDpH}BbG_BvF{@fG_AnB_@xImA|I{@rE]`FOvJY|EMjRJ`K^rEVrE^xHd@rF^hH|AjLhCrLhC|WfGv_AlWzaBrc@zI~BtI|B~T`GdAXjL|Cpc@bKjThE~P~CrQbCtFx@nFr@rBXxARtCZdNzAbFb@jHz@v@JrBTjShArH`@~DXhBLf@BRB`DPzJLbOf@lUv@R@xIAlUAdLIlOKjA?nPIzEIfXWjt@m@tTKrSSvYYxA?~HGxHIhGDjABlCJpC@lLjCnD`Fp@z@~DhEhBdCvBjEpDpD|ApIp@jDxLhn@nMxs@vC~O|Ljp@fE~RdRxdArRdeA`ShdA`DnQvAxHp@jDXxA\\xAf@hBZfAh@~AhF`N|EdIdBjCdA`Cz@dCx@bD`@hDl@vG@rBBl_@G`rAAzEMna@D|M@bCDpBb@bEl@vBZx@Xd@j@t@r@p@r@b@vA^J?pAPpGDpM@lTBpD@p`@Nvq@D~k@DxIBdJEfJJxB?p@?r@?rHBzKhFtCjB`D|BfChCvBrCpCbEnAlCdA|Cb@tAb@tAdAhFr@dErArM?nIApXA~T?zICpF@~ADhHJdFDfBFrAJdCpBdSp[lDr@?lIa@HAzDi@bGcAdHoBzGcChT_KfEoBjGuBbCo@vBg@dCe@fCa@dDYbCKhIGpoC`@zLBvF@vFPdFr@|RdEr@PtA\\vA\\tD`AnHfBbJlBvI|AvItAvIdArJlAfFb@rCTrCL|EP|HH~H[dIyAnF_Bx@UjFaBdO{EnGeBxEy@nDg@hDQbEOfG@nB@zb@f@pDB|@BfJJpSXdJL~k@t@fJNjbAjA|@@~vAfBtPT|p@hAnl@~@lbAnB`@?plAdCjsDpHf@@~HTnUf@hx@`BfaAhBnU^d@@fJLnHJloA`BrmD|D|tEfFbi@b@|bAjAxGLxnA`BzABvABnCBzh@t@nX^fw@dAdJLz^f@`y@r@f]n@h^ZzDDfJHtNL~PPj]Zxi@n@nDB~\\Zxd@~@tZ`@zONdJJ`B@dGJfJPvFV`AFpBL`DPhBHxBVdC^hFz@zE~@lCn@~Ad@rBl@bCz@lBv@lBx@jBt@nAl@|@d@fFvCbFpCtCtBnA|@fBrAxHzFlPbOpO|NfLpK`B|AfB`BbB|A~BtBFFpJvI|BtB~M`MbB|AlCdCpAjAnAfAbJfIjExDnClCbHdGbHpGv@p@jAdAbHlG~JjJlFxEvAnAzHhIre@~b@zUbTr[nYtCjC`|@dx@dC|B|AnA|@t@bAv@fA|@dC`BlAz@nAx@bCtAbBz@`Bx@nJ|DjNvFtEnBdH~CnE|BbCvA~CvBjCjBvBdBrH~GhJzInE~D`@\\@@tQbQlChCnJhJvApA@@`K~JjEpEjBrB~FbHbFnGzJrM~@tA~@hB`FtH~BbErBnDlC`FrG~L`EvHv@xAzA|C@BlAdCvAxCjDjHjKtVdFfN\\|@nEbMjC`I\\`Ar@vBzBdHdApDb@vABFl@pBRp@Tx@\\rAfAbEbBnH\\lBDP?DFVF\\Jl@`@~BZfCPtANbB\\vCNfCPpCV`FBnCDfC@dFEnEWzG]zGATS~EeA|Os@rKg@vGu@xKoCl_@QzB_AzLmB|ViBpUwC``@eAtNaAhMyCha@i@bHoArO{@vKcA~LsA`N_AtIcA|Ho@dE_BlKo@`E_AtFyBpLwAxG_DxMwB`JuBpI_B|GaBlGiGzV_BvGOp@cBxGaCdKkBjHuCpL{@rD_Ip[kBvH_DtM{CzLmH`Z}Olp@oIj]eRtu@i@zB}BbJePbq@cCbK_DdN_BpHyCbPeAhGuAtK_AfHKp@aAnJ}@pNIlBIfBA`@Cb@SvFCbBCtAI`QAJDvJ?dB@b@L`KB`BT`HZlG?J`@tJDr@b@lEb@rElA~K~@dHDTn@fE^lBX|AHb@FZj@lCx@tD^fBnBzHl@|BZfA@DHZhAtDb@zA|@lC`A|CbAnCh@tAVn@r@fBbDbItB~E~GpLT\\bBlCrEtG|FpHjCzClBnB`F`FlHnGlBtArCnB~DdCpFxC\\N~At@p@ZnClAn@XzAp@vDxA`ErAvExA`Bd@`AXvDfAdCr@tEpAn@P`@LNDB?ZJzHlBfJ|BtHlBvDdAdMdDpHlBbFnAhIlBlCp@fCj@`Dj@bF|@zFbAhARzAVdJbA|It@pGp@lLx@nJf@bK\\dSl@lIXjBJx@DfFZxDZvDb@~Cb@dF~@pCv@`GpBxFrB~L|ExLvElFtBB@pFtBjGbC~BfAvBdAzBdAjDhBlElC~DzBdDrBj@\\BBrBtAdDxB`@X|CxBzCfCB@JJjAlApAtAv@|@|@lA~@nAzCjF|A~Cz@lBbAfC^~@BHtBnFdA`DHT?@z@vCt@vC`@~Aj@tBb@tAx@bCj@pATj@P`@BF|@fB`AfBfApBb@x@nC~EbBbDlAdCtAvC`BjD|BfFbAzBrD~I`@dAbAlCtAvDz@bCb@jAx@jCpAnElEbPhBtGdA~Dl@~Bf@~Ax@jCp@hBt@dBb@|@^j@fBvCx@|@RRVT\\V\\Vh@XxAn@lGhBdBb@vBh@rEvA`IrCb@P~D|A|DxAhFbB~IpBdCl@lCt@~Bt@rDxA`CxAjDvC`BtAfDfDtC`DlBzBrC~CfApAb@j@vFrGzAfBbJlKlKvLrJpKzCtDv@`AxBlCxCdEh@t@tApBtF~IrEdHxFdJhEvGDH~ChElB|BpCfDnFxFzD|DdGzFdHlGjFxEzP|NhDvCpHnG`DlClAdAbAz@dLvJfOlM|LnKrCbCpHpGlPrNfb@p^je@`b@j[nVfVtSnJhIjHjGlLfKjDbDxClCBBpAjArD|D\\`@bAfAdDtEtBbD`BlCrCdFxCtFR^jEpIfExHjElIpEtI~FfLnD`HrChGfBbF|AzFzAzHRjARlBT|CNhDDdD@bD?`SEna@@xU@|N?L?rPDlNCxNMd[CpC?NO~SKrSFjFFfEN|CTvCTrBz@zGb@|B^lAh@`Bt@zAzDfHvGfK`E`G|JfO`EnGjMjSlClEpNzU~N|VdAfBtDlGzFvJzFtJzBrD`C~DpBbD`Vl`@`JrN|E`HxB~CrBrC|BrCtDjEbEbFvC|CjChC`DbDvHtH|GlGbGrFzh@zf@zL|KjD`DlC`ChCnB|DpC~FxD|I|DtAf@nHvBnHxBfCt@pErAtDhAdD|@bCv@hEpA~@XtBl@rK|CxBl@zEtAxCz@lCt@xFnArEv@vFd@xBH~EJvTNlI@jZEzJ?fJ?tDAfJ@vH@n@BtEJnCN`AHzCl@nCp@~BbAfBdApAhAB@dA`AzBlCrAnBBDx@nAjI`OhBhDlEjIbG~KzBnErAxCn@rAnAdDfAvCd@|A@@vAlF|BjKjBpK|AlIfApEpA`Ev@lB@Dj@lAnA`ClAnBl@|@zCbEhFrGvG`IpHzIdEvEzDnEnIhJhExEvA|AVXhGxGFF~DjEdKtKbLnLdLlLb@d@bD|C|FxFrD~ClCpBtCzAlCbAvC|@fEz@jEn@fHhApFz@rEz@tJbClBn@tBv@lAl@bExBtDrBrBzAxFpEhJtHpUdRnGbFjCpBvGbFzFbEtGtEvCrBdD~BzEhDzB~AhPjLrPrL|c@b[|EfD|HrF|HtFtCrBfD~B`c@vZvj@z_@|PdMhJtGrHjFhI|FzRfNhNrJrCpBbEtCvJ`HhThOzF`Eb`@pXjAv@vm@zb@`VtPxEfDzPtLhPpLzHpF`GhErBfBpCdD`ElFrEfHdHtNjD|JjBpH|AnGfBtIn@xDdAdI~@xJ@F\\fGn@`Qb@~Q^vQ@XDhBR~In@j[JjEZpN?VDjBb@tRxAnk@r@d\\LfMBbR?V?f@CbNAlOAfBCx[?z@?fA?bCEzd@GlXQ~aAGl^EjOClOGp`@Cbd@FfNFdIDxDLvJ\\zPZtNZrHZ~Ex@bId@~Cr@zD`A|Dj@lBl@`BvAlDfCtEfApA|@fApA|ApAtA|DbENJpMfIbOvKtMjJrFxDvB~AvGzEbjAtx@dXtRb[fUzb@lZvBtAjCxA|BhAdCdA~B|@vCt@lDn@xBVxBT`ENrCHlD?bF?bv@YD?F?J?rICxw@KfTAf~Am@x]E|VKdv@MhpBi@xu@Xlt@S|l@OdT@ff@MzVMpGp@`l@FrKAv[Brk@]hZYzSQtJeApw@WfJCfAAfSGfNE|g@ON?vBAbEAZAnNEnUGbIC|NGhDAnA?H?zCAf}@g@rqAm@xEEjcANxmAUvmA[hx@Y`LAxUGjJCD?p`@GxPCzB?vEAn@?fA?x@FlAP~AZfYlIx\\fKhr@fTrNtEbF`Bzc@tNnSxGvGtB|RjFxH~Bzi@nQjO~Exa@~MjWpIx`@jMn_@xLlx@rW``@bMfXxI``@dMnA`@fR~FfM~DrWlItk@lRlFq@jQoFjNoEbFuAvBk@zIaC|IaCfCq@rEoA|DeAxDeAvF{AfGcBj@MvOaF`FkCbBiAdBmA`EmDNOPMb@g@|BkC~AsBZa@hCcEhIqO`BcDr@uAlA_CjBqDlJwPbDmEhByBhCkC~AuAn@i@`D}BfEeC~FsBjBe@fEu@rBm@|GwC~H^z@Nb@H|BrAtLJbJtCPF|MfEtHbCdiA~^lBp@dZtJbDdAxOfF`RbGnC|@rLzDxNvEvS|GpKjDdCx@lH`CnLvDnBn@~HfCjEvAdGt@vBXrBXtFv@bC\\l@AjFCpHIfBEtc@iArCIdU[~IYvNs@dFe@pZo@nEIzBEdKUxHQfCGpVi@tLWD?lVi@dLWzKW`HO|IQ~O_@`NYnFM~@AlKWv@ApJCp@@xKr@~C^fAPb@FxCh@dB`@v_@bLNDb{@~VlIdCtJrCjHvBdh@nO~EtA~F`BxGnBxRlGld@~M|GrBtAb@hPxEzYtId[bJj_@xKhOjEhOlEbb@bLnk@pQ|RrH`x@`Vvj@xPzpAb`@`_@rKzQrF~v@nUdIbChj@jPdiAx\\pN`FfJdCv`@rLpEzAfEvAzXnIzXnIzC|@d[lJzJxChK~CbDfAdBr@fBbApNnIvAdCZr@`@z@d@hAr@lB|@tCdAfE`FlTdCbKzBzHdHvYz@nDvArGj@jCdBxIf@bF\\fEh@xGb@dKXfLBr@Bv@Z|K@VBv@JlC`@~Gx@`KpAhKvB~Lh@`CbBjIjFpPfFzN~DvKj@vArFrKvHbM~C~D~EzF`HnGpFfJfEnElC`CfB|A|@x@lBbBtBlBr@r@JHzQtObC|AzBlAzEbCtBbAhE~@~EdAvHrAlDd@hC`@vGl@zBd@tFv@xHv@XBv@DlDNbBD\\@D?h@BdABhOj@jQz@rW_@`n@m@jYYjCCzACB?~HKnLEzj@c@lZWnA?bB?nMSxSy@jK}@rVqBvKo@bFUdBAx@AbBD`GxAJjQLhORzCAvBCl\\Iv_@ha@{AxAKvAGv{@}G~BYbFo@jUwAjEWr@Ex_AmFvK_@p`@{Bbk@uDb\\aEbAr_@b@dO?BxBzq@t@d^bCtg@j@zLbA~Lv@bJ~@~NFx@|@|JzBdWpBrQvBhPb@tCpA`JnCzQr@rE|@nGlAzGTtAZhB`AdFf@jCd@`C@DxBtKnA`GfAfFp@xCfDfN`DjMtCjL`GbUnGvUbHiLbCkExFaK\\o@fIwNpJ{PrAoCrJwRzFuKbEkHdAiA|@w@hCcBnCiApCk@pBCl@AbBJz@JpCv@jUdJ~]tMvDvAfGzAxGdA`ADlEGnk@iFhDYjDWvDOvGUdPJl[FzORdZ@dC?bm@K`|@v@fFBvFt@rB|@|Y~PdIxEfJzF`PbLdNlJfDlC|FvEhK`KhHdIdBnBxGbI~BfCnKlPtO`SdFlFvDfCn@d@nFtCzCpAfGfBnG|@lG`@jGTrgADlTGt`@G~k@SfaAKfJAfJCdEAhOClUE|KCjLeCbFiBxEaChEwCzDyEn@w@bCuCbCkEb@w@xLuUlFgK|CcGlA_C@EnFgKlFgKlFgK|CcGlA_C@CtDkH`DcGdCuGdBgHj@gChAgFdA_Ij@eIFsBNyEBmE@iB?sASs~AI{o@?GCkOAcOCkOE{OCsOMi_@EyOCoIA{DEmIA}DIyYL{DHiC`@uHNcAd@}D|AgH`ByGbBsEhCaGn@kAzAiCvC{DTYpC_D|CuBtAaArDwBjCmAvGcBvE[vd@Z|k@`@fJFfJFfJFnUNfJHZ?pTNtIFJ?lJHfJFpHDvKA`@?l@?x@?`FA`CKdFSzPw@hCi@BA|A[lDu@lA_@t@UfBk@dHyBlFkBDAjBo@fFuBtB{@xEgBj@SnAe@~EiB`JeDtIaDtIaDhIyCtIeDtIcDti@qStIeDrIcDtIcDtIeDtIcDrIcDtIcDtIeDjXeKj_@yLvIqCxIsCxIqCpTeHrJ}CfJqCtHcBzFqA`Bc@|I}Bj@OpHiBzL_D|XyNVMhIkEtSyKdZwIdE_AhEc@bCQvAKjEK`ADbCJ~CPb@B^DtDp@jDb@`AJzIfAhQvBbALl@HRB`Hz@bJfA`ALx@JhFn@~@JbHz@~@Lz@JzDd@h@P~@Xv@T`FzA~@XB@`G`Ex@h@t@f@^V`DbDv@t@n@p@r@r@xBlDhE|G|D`JpAnCpAjC~DnIxE~KzAlDbKdV`ExJhElMdC`JtClMtAfHz@hD\\`Al@fAhBjB`BnAhMaI|NqJnHuEnS}M^W`@WdEmCpGkEjEqD\\YpH}HXY~EcG\\k@dDeF\\i@Va@d@}@lCeF|AcDpC_GjQ{`@hIaRbEkJnAsCp@}A|AiDxLyXbKwTv@iBzAgDdCmFFM`@y@pD}GRY`FgHxIyI|FeEhCuArCwAbM{DB?DAd@KnSgDNCvS}Cph@aIhb@{G~GeADAf@Ij@IvCe@dVyDvKeBpSaFnM}FjLeI`@[|KaJdCaChFiF~EeGZk@vEuI`C{EfBsDvAyCjCyFh@kAbVkg@jCqF~HsPbFsKnH{Opn@gsAtq@}xArOy\\hPu]nPs]jOg\\|@qBdK{TfIcQrHcPdIaQ~FkLxDkG|CuEzEoG~CoDjCsChBiBvFiFpIoH~PoOlPuNzPyNbLiKvFeG|C_EzDkFnDkFd@w@rC{EbB_DvAoChCoFJS~BmFrAiD`AgCfCmHrAcEnFoQ~D{MrGmTbCmHh@_BfC{GRm@nBsEN]|AiDTi@f@kAfDiH`IsPlGsMdGwL`EiHxJ{PnG{IlD_E`FqFpGgHjV}WjCsCnG_HjHwHxIyIvBkBpF{EpFmEhGqEtIuFjFaDdFqCrIkEjDcBzDcBnCeAhMkEnRgF~Cq@vEcAb@IbB_@h@Mp@O`GoAtQ_EhBa@~ImBh@MpA[zA]`@K|@Ud@MrCw@hE_BfCcAbCsAnDsB|DqCPOrDaDDCZ]vA{AhAkArDqExEwGnEcH`CuDtBcD~JwOx@oApB_DrAyBbH}K|Tm\\`KmO|DgGdAaBbS_[fC}D|DgGBG~@wAdGkJ|DgGDI~@wAbGkJrAuB`LeQnF}HbEmGhDoFvA_C`@s@pE}HjAsBpJwPjNuV~Qe\\tIkOl@eAtF{Jr@oA`@q@hFeJpKmRhGwKt@qA^q@xB{D~K}RvBwD|CqFvAiCt@oA^q@pA_CrA_CpA{BlBiDr@qAr@mA`@q@xAkCdAkBhDeGfHgMZi@t@oA`@s@rBiDn@_A|AaCjHuKzLaQpG}IzE}G~@qAb@o@bUm[dB_CTYvF_IfFkHd@m@fUg[dImKnWg\\~EkGt@}@bAoAb@k@xj@gr@||@kgAhOuRpc@mj@~EiG`@e@fr@u{@`@g@tFaHvGiI`@i@rF_H`@g@rBiC`CwC\\e@vFeH`@g@zwAogB|b@yh@BCxFcHtGoIvD_FjFoGdLiNvGeIjCcDv]ub@jCcDxOiRzUkYzMcPdAoAlZw^fMsNnImKhHcJ|EeG|RmVdY}]tGmIx`@qg@rO_Slj@{r@tDwEhCcDlImKbPqTlOmUbDiF|AgCfAcBz@aB~@{AlGcLzCaGxH{OfGiMjSua@zMyXrKeUbGoOxH_SFK`BgEdFsMrFoNbNe^jAwCjFgNpR}f@rDoJZ{@zD}JhKiXrI{UxD_MhEiNpCiJh@}AbHaU`Yi`AbMya@tRfNpNjKhMbJxi@ha@vZnUfAz@zBdBf`@fZlNnKjBzAhDnCvk@zc@bR|NtcApw@tYxTfb@n[b`@dZzB`BxH`GvH~FtHfGfCnBbXpSby@tn@lA|@LJhHrFNLhHrFNLvH~FhHrFNLxH~Fr@j@rFfEnFbEhA|@NLtElDdAx@dIjGNLhJfH`QxMhEdDfLzIxH`GfBtAt[nV~O~LhHrFLJpM|JlXzSnG~ExH~FfIlGlCtBfa@d[jUxQj\\dWnR~NrR`OxH`GdWfR`u@rk@|b@l\\`At@xH`GxH~F`u@jk@hWzRvH~F~D|CjVbRvH~FrG`Fd@^xH~F|o@bg@`U`QfFdEl\\|VzH~F~AnAhYpTlR|NjBvApEjDzH`GvH~FxH`GvH~FvH~FzH`GjCrBjDjCrR`OtH~F@@zH`GpR~NpR~NfBtApEjDvH~FxH`GbwAdgAxH`GxH~FvH~Fj\\`WzHbGn_@xYf[rVxv@xk@zNtKh@b@`@\\HF|GhFdEpC~L|Hv@d@nGvDpEbCvBnAt@`@|F`D~IvErCxApFhC^RlMdGrYhMrMtEfK`EFBvBx@|NpFl@RHBlItCFBtC`AjMrD~Q~EfN`DlYvFv_@jH|Q`Dd`@zGtt@dMr@NbFx@~LpB~`@~GxAV`Dn@hB^xJtBdDt@~Cr@FBjD`AfD|@fJbCxEpAtBl@lDbApI`Cx_@bKna@|Ktu@vSvTpGju@nSnj@jOrRjFv\\bJzAb@xOfEtMnDd@LdkAn[vHrBd@L`HjBhQxEdc@|LvHxB`@Jv[~IrLlDnCz@fExA`@PjBr@jCbAnAj@JFxG`DpNhIjNtIbIfF~H|Eh@\\|GdERLPL|GdEf@X`CtA|CfBf@Td@V~C`B|@`@j@X\\N|EtBvLjEjGhB~NhEjGdBbIvBd@LzIdCtHvBd@LvI`C`AXvF|AjMlDjF|Ad@LpSzFd@N`EjAdAXj@Pd@NtHvBd@NrHxBd@NtHzBnQhFjCt@rKzC~DfAbBd@vHnB~Ab@zFzAjEfArCp@lJlBjIrAbJnA~Fp@~ARp@H~H|@bJdAxFp@|APn@H~HbAtDd@nD`@nTfCvEl@xE^|FNz@@ZAvBArCG`AEfDWfC[lAQnQ_Dv^wGpGgAnEcArBk@`Cw@~EkB|CwAnAo@tEsCfAw@f@]|AgAfEwDdRkQxQ}PhHcHzBwBlDkDlH_HhHcH|BwBjDiDjHaHhHaHjH_HhLuKxj@mf@lGmFvIsHpHqGrHoGpHoGpHqGzj@wf@hDaD~EmEbMqLlM{NzLgP`Us[`b@gl@rZkb@jH_K~LiOl@u@hIkIfa@{a@dFiFlSySxb@ob@bEkDxE_DzIeF`^kRxEgCpYqOhLgG|DyBdL{F|F}B`GcBZGrDw@~AWr@M|Hw@tGQtHD`CFvHr@~ATnHrAp@R|@TvDjAbEzAlGjCxHlE~E|DzApAfCbCpF|FdEjFj@t@pDlF`@p@FJn@dAhBbDvAlC~IbRvItQNZnEfJDLv@~AxBtEhFxKbChFfDlGxCnEfAtAlA|AbBhBp@t@vAlA`BnA|B~AfDlBbCfAbG|AzAXxAVlBPpG^|GArEErJGbVYdDFj@Bl@@pBFzCTf@DxBT|B^~@Nl@NnQnEhBd@b^dK|QzE~MzDlHrBnUrGvV~G~SdGjCr@x@R|@TbDt@fEh@xH`@`HD~i@G`i@J`ERfXCbKAjI?Z?|QUt`ALvj@@~JC|TD|IEfSKnLBfJAlUEfJA`HAdA?fJArJDdF@tEZlDj@`@HzEnArE`B`DxAt@\\vG`Dt@^nIzDvGdDjB`A`Ap@|FzDvE~Cb@XbAl@@@dDjCdFtF`LdNzVfZb`@|c@fBfCjBbDbBhDrA`DhAfDxC~Px@xFp@nFf@hDzB~MfEjT~DbSnG`SlDtIBHBD|@lBbDbH^p@DF^t@rCfFVZb@h@n@z@|ClF`@`@rF|GlGtHf@j@jAlAhAhAvFlFbNpLr@l@nAfA~DhD\\X`Av@n@f@VP^ZnBvAtA`ApA~@nClBlBtAvE~CfBhAl@`@VN`@VjBjAHFpEzCrExCl@^BBPL`BnAd@^nA`ArC|BxAfA`BrAp@h@TPb@\\~AnA\\X\\Vl@d@hE|DZZ|IrJ`HjIzDxExGbIzG`IvG|H`@b@|@dAl@t@VZXZ~AjBxAfB|BpC~@hA|AfBl@r@VZVZzAjB`@d@|@bA|DzEzAfBl@t@XZTZ|AhB^d@|@dA~DxEzSrVvP`SFHd@h@rFxGrGvHFHzG`If^bb@hBzBxGjIhGhH`F~Fn@t@HH|JvK|DbEdG~Fd@b@`EvDjBbBrHpGp@h@`F~DzFfErFxDxJxGxBpAlFbDvAz@jIlEpAt@pI`EpLhF|CjAzPnGhMhE|_@bMzShHj_@tLn{@rYz@XzG|Bf_@dMvIvChFdB~mBzo@bo@dTfaAd\\`M~DvIpCrT`HlDdArb@pMh_Bte@vm@|QxIhCfu@rT|NzE`M~DnE~AdBp@JDpBv@tElBpAn@~H`E`FlCdLbH|KrHjNxJ|HrFxDlC`Ar@`Ar@vh@x^jLbIlAv@bIhF@?bAn@fAp@jOnI`GvCvI~D`CfA~CnAxNxF~HjCbKxCF@rI|BrA\\t@P|A\\|FpApJfBnNlBfLxA|I~@xANv@H~AJpF\\pFXpMX|MF`kAQ`fA?zO?B?xB?nH?~J?nR`@d@B~Hj@dJlAdWxD|Ev@p@L|JvBzCr@vHnBlN|DzGzBrMxEnOzGhF~BtDbBxCtAzJxE~i@hWpc@tSzZzNjElBpR~I`F~BzCvAhEnB`ChAbMvF~SxJ`V|Kn@XfBz@tDjB@@tCvA~@f@vBdAzH~DbJ~EjJjFdLdHt@f@hNjJhGrEdIfFvDrCbs@tl@dRzOhCxBhDrCfR|OXV|U`SvQnOzFhFbKvLtJfMl@x@hA`BzBhDXb@b@p@fBlC~EhIdAdBbAhBDHlQr\\lFfKvJjRrR~^nFbKlWxf@rCzEpAlBhAbBzCpDjGzGtApArFjErC~ArDnBnDvAzDnAdGxArEv@`Gt@lH?vFAx[EdJAfJAfJC`c@ClUGh^AfE?dJCnUCfJCfJA|k@KfJAnUEx|@E`f@SloBYfJAnUEnHCrMDxHAzBB~EFJ?nERjBHh@DtD\\lDd@f@FD@F@tDr@tBd@j@P`@LhCt@zBz@xAj@zFxBdFlBxLpErO`GhTnIrIhDnDtAzFbCvHnCtJrC~C`ApH`BrHpAxG|@ZDvHr@tH`@xHTxHBjLUvAGt`@}AtRu@vAGfJc@dJa@|WkA~P_A|@GjGc@xAMzD[fFs@pJ{AnIoBtI_CbGuBdJsD`TqKfHoDb@UdG{CfAe@nEoBbC_Ad@QrDmA~Bo@jA[nGcBv@SjFgAz@MdG}@|AOxD]jDQN?vIU`ACzLG~[Ifp@Efq@ObjBi@j_@It`@IfJAfJCfJCfJAdJCfJCnUE~k@M|k@KtmAOjtE[jvBDfw@@fJ?bdBBfJ?jP?jOEdw@Opb@SVAfJEfk@WT?fJEvTKT?fJGpIET?pIET?vaAe@Isv@Cc[EaUBaj@@cU?_\\@sPD}N?sc@Gw]EeLQ_i@Bak@?{C?yISiLMyIJyCCcBCgIKaMCkX?]CkNAgh@Coi@AiO?gCCoS@gU?wSAoi@Emi@@wR?yMBeo@FguAIqv@?{o@?s_@Es_@C{yA?e`AGoIKyDI{B_@oGYqBw@aGkByH{AyEm@_BeAuC_JwT}BaGsEeLsAcDuEaLyIaTsAcDaC}FaFsJzHqJnPoSvGgItGeIvGgIfFmGvBcCxCkCnA{@pEcCxDmAfDi@|BSlAMbHUxe@c@lTAdJVdJf@v]rDr]xDxIn@zBHjELzC?jD?zDQzFWvAMPArg@_EhHeAbNgD|GaCfB_AlAo@zF}CPKxG{DpSkM|g@{[jT_NjRsLbC}AnGmC|CiAj@Sh@MzDaAx@Mz@Ml@Ix@KbEWNArFUpBCfJIfJIlYk@ve@Mv`@@|k@?fJ?fJ?fJ?t`@?fJ?fJ?fJ?fJ?fJ?dJ?fJ?fJ?fJ?fJ?`h@H`n@KxG?pJJfUObJDJ?xA[lCKlF_@bCYbEe@hF{@nFoAb@OjHcCj@U~HaDbJcEfCiAdEuBjB}@xEaCpBcA`FgCdB{@BCpAs@vFyCrAs@tFyCrAs@hImElCyAhImErS{KpDoBdKaFpH{CvGiBlGs@jHGP?~ALdF^JDrGpAjA`@pBn@~EdClLjHtRfNLJ`Ap@hCdBdBlAfAt@FDjCzAhBbAz@d@fDvAjBv@LF~ElAfCn@xEXrBLxAHdCNR?pBHxAD`Oh@fJZ|@B~KBlHOfHm@pAK~I_CdGsBfEwAjCsAvSmKdRyIhGqCbIsDJEvG{CvJ_FJEDC`IcDJETIbIcCbA[`LmCjEu@@AH?bJcA~AQpKm@vPInJVbQlAzF`AtL~BhCt@rF~AdBr@|JbExLlFzOlIfSnKFDb\\|OpOjH|HjC`DhA|KtFfH`FjIdFvItCn@TjIvB`Kt@~KF`EExE[nBWpGmB`HiCpCsAZOHE|FkD`@[hF{DdEqDnEeErGeGlDgD|LwLpGkG~G{GFI`IaI`QiRba@ad@bFqGlWu^jG}IvEwG?Ar@aAjG{IjG{I|OiTt@cA~EgGbBuB|BuCr@}@PUbAqA~DeFdDeEr]c_@HK|G}Hnn@gt@xMmOrSaSxQwRbRwQ|OwMjEqDrPqMb[_TfFeDxJoG|P{JVMjP{HpB{@nMoFlXkJtKiDbKqC`\\kIdVeEjMkB~O_BvKgAvQiBr`@oC|c@_DdZyAbJFhGJnGr@rFl@`JzBhBh@hHzBjH|CpAt@jHdEXTpHpGdA~@xEtFlPxRrP|Slj@tr@jLvNlLlNlCtC~FlGbK~KfFbF~EzE`JtHlJjHdHfFvHpFjEjC`LjGrNfHzG|CdDzA`O|FhNtF|D~A~T~ItSjHvIxCvIxCtIzCnTrHvIzC|QnGd\\hLnTrHtRtGbQfG`Q`Gd@PhRzFrJnBhM`B~Kr@lJd@nITnNNtNMhOw@hHc@tCQ~KcArCc@tHmAj@K`J_B|I}B|Aa@vQgFvJqCxHsCzGaCn@Ud@QnHkClT{HtI{CvI}CtI}CdGwBvJqDtAg@nHkCtI}ClT{HvI}ClT{HNGzSqHvI}CvI{CtI}CtI{CvI}ClTyHtI}Crt@qWb[{Kz\\uLfAa@`TqHLE`A]rG}BjIyCjKaEpGsCzFiCnMyG|GyDjK{G|ByAbEoC|EaD~NoLfOgMdLqKdDkDbHmHh@i@pFwGtF}GrHwJrFiH^g@hG{IzJqNhL}OlGwIlGwIlGwIlGwIrLgPxPcVdA{AjG{IjG{IjGyIDGlGgIxFoHdNoPnKyKzFaExHmEfMgH`Ac@~I_Ez@a@hGsBpNuE`FqA~H_BtEmA~OkDdHaBzTiF~IuB|IsBzS}EhCo@tFoA|IuB|TiFbDw@vOqD|IsBjBc@fTcF|IsBbl@aNnGs@pC]fCY~Ek@`@CbBEtDMfQQrHBD?~Nl@jEXvF`@nJr@rCF|AZ`JrBlGvA|Ad@zIhC|GpB`OhGrOdIPH@@|HjFpQtLjFjD`MpI~K`IjLxH|LxGDBnDnBvCnAtGtCdNtE|NvDhB\\J@fFbAlBTJ@rC^rO`AzMBxK@vESfDM~Ek@lFw@hEu@bEy@jK{CFCrOyFrR}JpTgOnRsO`BuATS~GwFrHkG~QoO\\WrTkP|P}IXMh@YjGwCVMfK_FbGmBZI|FiB`AU\\I~HiB\\I`Ds@~NyCFAzIeA^EtC[nDUhKq@\\CnOS`DH|MTdP`AxAH`Jh@rTvAhs@nCrYfBdJj@|BNnQhAjUxAfJj@pCPdg@zCxk@lDlDRr`@`CjUtAlCPnSz@vEVzJChHS`SgAfL}AtEo@jCi@jFgApBi@rHoBn@QpHuB`@OFApIqCj@SdH}CpD_BzJ{Ef\\gRtL}H|]uUlq@}b@dHqEZSbIeFn{@cj@vV{OnEsCnLsHtEwCpD_CnCeBdSkMdHqEZSfHqElPmKlImFlVuO`IeFbIcFnEsCpBqA|WwPhDyBdSkMrD_CZSZUtA{@nEsCz`@cWf]qTrGcEl@_@jBmAlLqH`LiHtMmInPmKtIsFrFuCtCaBzC_B`LoFfP{G~P{GvDyAvEuA~Ag@x@UtNeEhLgDvAc@zIgCpF_BfBi@vHcCfDaAjYgIpPaFlIeCnEoA~C}@lLeDdUyG~^wKfA[zIgCHCj[aJpz@kVpQmFdS}FpNcErOqEpCy@|IiCdTiGpMmDrFmAtDu@pDq@dEo@|Eq@pFg@tDWxDUtEKjKUzDCx@AbI@xMX~GV~SrA`@BpBRbFj@nH~@jANhF`Aj@J^FJBnB^|@PdCl@nAZv@TzKxCr@RfS|FbYpIxIhCbkAr]bGdBl]~J|`B~f@jt@nUtn@bQp`@tLts@~Slv@dT`PjFpGdBj`AhW|eA~Zzf@tNfYpIvA`@tA`@ldAxZr~@|X~JzClj@zOxIfCz[fJvwAla@~qB|l@`UxGvCx@hBb@nEp@lL~AdFTdDFb]sBdDa@nB]|F{AvE}ApDyAVKjBy@jEiBXOxBeAvCgBdDcCdEiDtFaFhEwEnEqF`EmG@AvEwHb@w@bDaG`DiHpAgDfAcD|@cCtDmM~@sDt@}Cx@wDz@aEr@sDv@yEr@cF`BqN@Mp@oIn@yKZcKLeIC}FMuSMqRe@u`@c@iq@IoLYor@E_NIoPOq_@Oo_@Wwo@_@a`AQo_@?OJaLH}ERwFZqG\\sEV{CNoBd@uDb@}C~AeKzAgHhBeIbDcMpA}DhA{CtAkDdDoHnBsDhCkFzL{SzEeH~DoFpDwExF}GtFiGfAmAfBqBrBoBhAgAn@k@bKcJnDqCtEqDTMnAy@tCgB|A_AnAw@\\SzEgCvC}ApDkBt\\eQpGkEfJeHrBaBjByAjBcBzEmExAgBd@k@xCkDtAqB`AwA^i@fD}Ej@{@R]rGaL`DyFlH_QlBgGdDqKNm@h@qB`DoMxJec@tIac@`Ik^|Gi\\zCsNvAuFbCmIpAyDvBcF|A{CxCwEnDoFjFiFDClA_Az@s@tDyBv@e@XMtCoAhBi@pA]hEw@tCW~CQvBMpDCdDErJD~A?|KDlD@b@?xB@jEFrEJtDJp@@pEFjECxEKdCKbMgA~KiB`FeAbFqApI_CxCmAvKiEvQcJ|H{EnNcLtJsJfIcJTWbGiHzM_PvAgBxJaMdM}OtSoWjYm]hZm_@fAwAlEqFvOuRpMuPjBaCrGkIFKdJaKvIyIfDwBLIdEmC`CgAtAm@rEoA`E{@nEi@r@IpGMN@nDDbJ`A|FtAnGpBlCjAvCnAhFnC~ErCfe@dXLHhPjJdB`AdIvEnSlLfItElSlLxHlELHxHlELFfIvEdItEfIvEnKdGlSnLfIvEdIvEzHpEvNdIbDhBhIpEnSfL`GbDfAn@dIvEdIxEzHnEJFfIrEpSdL~BxA|FlDrH`EbHzDtBhArEhChAn@`N~H`B`AtM`IxOdJdHhEjHlEVNdI|EjF`DvA|@bIdFlCbBrDbC`IhFbC~AzDjCzCpBrKdHbDxBnFnDnGbErD~BvC`Bh@ZlDlBzC~A~@f@lCxAtCtAtHrDdCjAjD~A\\NlI|DpEtB|BdAzCtAlJvErCnA`@P`HpCLDpH`DxR~I`R`IxMxFhEhBvM`G|@`@p@\\rAp@nOxHpBdA`EtBrEzBdDfBjC`B~BxAbC`B^Vd@^n@b@hEdDxGlFhDjCfDhC|CdChDbCNJfBlAdC`BpBlAdB|@dB`A|BdAJD`DtApBr@rBr@lErAxGrB`MlDbL`DdFzA`FxAjGhBzFdBjFtAlIzBpF~ArLlDdTdGxMxDxGpBzNdE`XtH|^jKn_@nKrMrDfY~HzMtDxDdA`D~@rA^fGdBvd@hNzDnAxKhDzDnAlEpAnY`JtLvDjEvA|LzD~J~CrEzAdF`B`FdBjRjGpJzC|EzAbF|AvEzA|KhDxLxDhErApEtAlErA|EtAxEvA~DlAjExAbF|ApLrD~O|EvOxE~GpBdEnAzGrBvMdEjLvDlJxCz@XdK|C`IpB|A`@nDz@pExAvHlC`Cx@zDrAlCz@jDfA`Cr@nC|@rBn@nBl@bCr@nBj@hDbA^L`AXxDjA~Bt@zBv@`EjAzC~@`GrBzEfBhCz@`Ct@zBl@rCx@nF|AhA\\~FjBjCdAvClAbCbApBv@`Cx@ZJxCbAdEnAnDjArF`BjEnArFzApHtBhDfAfDdA|Af@|@VxBt@jCdApBz@`DnA~ChAxBr@\\JxIrC~DrAxBr@D@rBl@VFdB`@dEv@`G`ANBjIvBtHlBtD|@vCp@|Cj@bCb@dC\\|B\\J@`BNdBLD@^BhD\\jCLfDPD?lCLx@BJ@jCJl@DhGZvF^D@pAH|BN|AJv@BtCLdEV|E\\bFh@lEXdAF|AHx@DtBJlERhFJ`DFhBDzTdAnBHpBJj@DlET~Nx@jDPpG`@nBLl@DhEPjER`ABvAD|GP~DDpFDnB@xA@bA@xA@hFDzGC~DSvC[rEm@rJsBlDmAxCgAlB{@v@]jMuF~CiAxAi@|FuBv@YZM|GyAfIqADAx@IpCWtFMvF@pE\\fDp@hEjAdEzAhC|@tCpApF~BtCzAnKjFvEtBz@`@zF~BZLhC~@pBl@bFzAbCb@dB\\\\BlGVbG@zDQvDa@|AWl@KJCxF_Al@KBAfFeAbEw@hDYjEMvE?pFPhLh@~I`@rGFxHCxISrGg@jFy@rF_AvGoAjIaCxEgBjFqBrFmCfGkDxFuD`JiGvJkHNKdHeFfGuEtHwFtHkFtAaAzEgDrHwE|FgDjJ_FtJuEvB}@zEkBfTsIj^_OzFyBhDiA~Bs@bBg@zFkAxH_ApBSpAGRArDMlDCnHBtFRnKz@fDXvCT`Jd@|BJ`HLxC?fJ?zEKxCWhGi@dEm@nAQfHkAjFmA`IkB|GeB~IwClDuAjDuArFgCdJyEbHcEhD{BbEoCrG}EnFkExGaGzHkIbIiJjF}G|MuQhK_OjGcJ`IuMnFsJnH_ObDyG`GwLdDuGd@_AxAyCnHwOtF{KlEgIfBcDzEeIrFuIpF{GlFcGbHkGfI}F~LqHhRsHfQaGnDiAh|@uX|a@oMtr@sTbX}HrCs@fCh@pMaCxf@sL~t@sSj^uLpAsAdC_CfYcHfMgDlm@yOnJgC|C}@vTqGhFY`K_CpHmAxN}ChJ}B~HqBdG_BzPmE~VeGr}@iVbRsF|ByBxCHxDQrE[pDKbB?hD@fBHnDTlBRdDh@PBdDp@jFxAbFhB`JtDbErBdIdE~GnDvUtOt@d@vMnIfExChEzC`EjC`BdFLV`@j@fBzBrb@jc@~HbIhFnFdVzV|HrH|KbK|IbJ~CvDjHfKlEjEv@|AhE~J~CfH~FjNdI`SjChGlG|ON\\pEbLrG~OrCfHjKlWbM~ZrA|JlWdr@tUbj@@DtJfWpHfMbBlCvEvGbCpEzB|DdE~Fp@bAzBlCdDtDxDxDrBdBdDfCTPz@h@rCfBxIlEnChAlDhAlElAvCp@tAXH@fEt@LBfCTB?hG\\|PRnFCdJBfA@lCBpA@|@DzCJbDRrG\\vEh@tEp@nI|A~IjBvKjCD@nCr@xAb@jH~AlH|@`Hx@xDh@~Fd@rEPjJZ~DLzC?`A?rCCpCEp@A~Ge@hFi@nCWtD]^EfJmAdIq@xEc@pEMnDBfE@tAJ`AHtDLDAbF^vATpEf@tNhBdL~ArC^`NxBlJ|AzDvBj\\jIlL|Czj@bMbe@nL~ANhRdDl@F`L|@~C]vMbA|A@vQDrLc@j[Ql[}@xJWrOo@~`@{@xAE`b@_AviBiEjR_@hFK|BGpk@sAnw@qBxYk@xr@yAfJWtDIvK_@ha@wAjBKfFY|BKvEIPClIs@rTw@rZsB|SeB`QiBp`@cFfb@uFneAiN~U}CjIu@zFHx\\d@|G@p[\\pXlAlEZzJr@`I\\tFj@vA@bGe@vL|AlLtBpJ|B~MrDjCz@dXvIr[fKzDnApHzB|YbJlK`DbOvE~HvBxKvCtFxAnDz@Q}Ih@mCbCwQdBqNh@qFhBkNTcBbFun@d@oFf@iGnA{NpAwNjAkNjCqZ^aE\\aENmBrC{\\hBqShBqSf@gEp@gHZgCvAmOpAaPj@eNBoOGqGIaFhBqA`@u@|ByElA}AfAcAbAs@nAe@vCQbHkAnBc@pB_AtAmArAqA~AqBZkIR{Ab@eFD]l@}EnCyPfhAmbAt]gZfFaExPiPjJiInNiOxHeIzBeAhO_MhM}L~GsGjx@wt@de@ac@~GqGxgA}aA`QwNlYcWh]w[zToQrFiE~[aWnS{ObR{O@AVUbDuClG{FjD}C|@y@f@a@jHwGrE}E~@kAdB_ChBaDh@eABCvBiEdBkEpAkDbBoGDSzAaHh@eDj@wDv@yG@]d@sKJmDBiFIgHQ_GSwD}@}JcAqJkBoPy@{GqFa`@vNoHrK_FjI}EnGkEbd@uUbaAoi@pc@oVx[qQ~@g@fIsEx]yRfIqEpu@ab@~l@k\\dh@{XbFyCxz@ef@x_@gRxSsKlCwAvDwBBA`HcEhIyHHIbC_DnIuPJSxEuJtLkVfAwBlKqQzAkBlHyHjF}CBCjK{Fh@Y|WyMrAk@FC`A_@n@WtCw@zB_@zC[jCB|ADnDPxADR?P?h@@lA@xBKpAKz@MREbAWhBk@rW}Ml@]~FaDFE`IkEfAo@~FcDFC`ImEvF{CnAq@hAm@`G}CfAo@zToMzEkBfVmMrF_DdImEh@YjAo@rEeCBAPKnHeE|@g@rQyJlScLnBgAb[gQjH{D`@Uz@e@~CeB~@g@f@YrHmERKnBgA|BqAt@c@b@U`]}RPMdEkClAu@n@a@jAy@nEyC~IoGbRaNxEkDtB}A`GmEx@e@f]mT|KuGvCeBtA{@jAs@nCaB~@i@h@[vG}DrJ{FfIqEvGsDVMVO`IcEfKuFrIsDnDkBjIgEdDeBbB{@~@g@rE_CxBeAf^gQtHkDVMvEyBvBcALGfEsBvBeALGhEsBtBcALGx@c@`RoJvH}DLGjEuBrBeAvE_CtBeAJG~F_Dn@]LIrEqCnBoAjDyBpOwLzCiCrAgADE~DuDdBcBrAsAbC}CbAuA@ClDeFvAyBv@oAvBoE|@gBpMuWzMy]bDuFhFiIPYpGeIrAeBnLwEfDc@hEHnDz@dCfAt@b@fA|@bBlA~@z@|@x@x@bA`AvA|CxF~FhLdDuChCaCf@c@rEwEf@k@f@k@|BcCdVoWnBwBNQhAuAfAwAp@cAnAqBbAqBr@gBx@wB`@oAFWd@kBb@uBVgBVyBVgDZmFJmBJqBD{@H_BNeCNoB^oE\\oCZ{BDS`@}BPaANw@h@iCr@oCjAcEjAqD|@iCXu@Zs@t@iBd@gAJQz@mB~@gBr@oA~@_BhAgBZe@RYPUhAyAt@{@HKdDkDfAaAv@q@`BqAdAu@pAaArCgBbCyAtEkClJmFrDqBzBmAFE|@e@rEcCpAo@PIvAc@nA[hAOz@Gp@AnAHlAT`@vBb@p@P`@Tj@Ll@NpABpAF`FY~@IVCNANCPAN?N?P?N?N@P@N@NBNBNDLBLDNFJDLFLFH@@DJHJFJHJHHHHHFJFHDJDJDHBJ@J@L@J?J?RELAJCJEHEJGJGHGHIHIHKHKFMHKFOFMDODOBGBIHYJc@~CwAdAu@tAaA~CaB~BwAtD?tAk@jOcCvd@iIla@qTfQcTxQgWFGhA{Af@w@f@u@bQqUbSgPnf@gXnCeBzBkAzRkKrAu@hGkC|ABbYiNbP_BpDWfAInBE~GWbAKvDUlDKxDe@LC~NyChYwLDAHEnCuA`OoG|DsAnC{BLIZQjBy@nOuGz@I`BIbEAH?xCFtDH~IhC`JnCpWzGvWuAnDuApI{CBChImCjk@}Kr`@cJ|y@gV|NeE~RoP`HsHFGfHcHlSsVhDoDbRyKtMmBjCE|CBfDB`EDbJNtZd@pLq@xBOrAOvC[|AQlBYvNwBjLsCnGaBdU{FtO}EpC{@nEwAtLcF`IwDl@]~DsBhIkEjCuAd@WxC{AjIiE`Ag@bGoD|KcHbIcF`IcFbIcF`IcFnFyDnAu@xA{@hEsBhBw@hAc@fPyFtEoAdFwAjGaBlBe@lKoCzI}BjHmBp@QhHkBnKoCzI}BjFsAfc@cLhFuA`AQpVgF~TuEfAWrGeBtA_@|Q{FFCzBeArP{HbAe@bFaDfBqAbDaCrMoJ`As@bBeAzCkB|OyJ~HqDtIyC`Co@zUqGxS_Fdf@cLDA\\Irj@wNzSoFjQkI~DkBh@e@pDaD|BoBrDaDnBiC`DgEnBiChKcNb@y@`B_DjFeKjDuGz@uB~BsFpA}CDMhBgGbCeIhCeHnCsH|DeJlDuEnIcL`KeLxHiGrEaCbHsDrJ{ExSiKpGaDrZoLhMkDLEvLgCn@Kb@CnGe@tAIzEYpP`@bHh@bJb@lPtGrAf@l@T`I`DjIpFlBnAjEnDxC~B~FjG~GrHdGjJtDjH@@LVrEzJpB|EhGlSvAdKrDl^vGzt@~@~N@NtAb_@bAlNBPfAfN@NvAnOpDlQv@~Gb@zAjAhE~A|FjAfENf@bHjPbHrKdBhCLNxLpN`@d@dBlApNvJjChBB@pFhBzIrAD@bC^pAJ|CXtABD@bIR`@?vB@lF@@?fJMtBCpFGzFIrMIjd@WpFE`DAdEFfJNdLPv@EnFWrG[nAYrBc@jFgAxLiCp`@cDbJu@fHm@xHkB`PkFb@MfBs@nFiBhBi@jE_BhCaAjCaAhAc@~By@xZ{KfCaAtIeDxDwAPIfCaAtI_DzCgAr@U|QiFxAY??tNaBjACjCE|RGtN?rAM`FMnDYrJkA~GmAvKaDzH{B`SeGBAnJaDhIkChIuCtMkE|EcBXIzHgChUuH|EeBzB{@zE}A`Bm@VKl@QzFaEbRoPVYpKcLtCcDDE~GwHtHsIfGyGvHsIpO}MfJkHzQkL|ToLpLyFhQoIxB}@bF}BhN}GfGwCRMtGqElHaG`BuAnAwAnGgHLQbDaEhFuH~BiEbB}CvBuEJUpBiEzAyDJWjByEzAqDJUjBiELWfBqD~EoJLUrCuFpAqBLStDyFpAcBvFcH^a@`@e@`BgBlB}BZ_@LQvGqIhFgHjFcIfDwFvByDLSrAgClCaFjCoF~FoNbDkIdAuC|CsJxEyOdBcGd@aBzIi[@EtAeFhPgm@fAaEfCuJjDgM@Cb@aBjEaOdBkFlDuInBgEdCiE~@yA~AgCvDwE~G}GtAmA~NiIv@[pGaCbASdCg@fNgAbM?nS^vCFnCLdOZv@LnEN~ABdJTx@B|^\\z@BlEJhBDh`@fAdJX|@@~i@hArGDrCFlEFlTTfJOb@@tCVtOTl[~A\\BtO@fJ@jE@zS`@fJPvAD`QbArQbFv@~AvArArEh@pCIlIq@DHNVRRPRRPTLTJVJTDVDV@L?xI`IrEvDjEtE`G~DlKdQhB|EpCxIr@lCzApINx@bAvGhBpQ\\rDtA|JlIo@tIk@hDhB|BnCnGhLFJx@xAf@`AfMzVjDjEp@z@dArAdApA`@f@vHpHdE|A~DxA~EhBxB^|Ev@bORjI}AxCk@t@Ohz@kRvCq@LChAWlBc@dDu@n_@sIhW_Gbf@uKvA_@h_@sJJEnBe@z[eI|IsB|IsBf^kIzTiF|IsBJC|RsEnVyFJC|G}At@QhHaBr@QhHcB|IsBt@QHC|IsBpTeFJApIqBnVwFvHgBnf@sLjUiF`RwHlDeCdDaCxAcB~AmBrEoFPUpLgPt@aAdIsK`ByBpHmKfCmDzFcIpC}DtAkBvLcPv[{b@bCaDb@m@PUxPgUvD{FdHuKbBiCvDeFdMyPzE_HdD{EzIiRjG_T|Mke@Pm@xCwKPm@dTgv@~Tey@hAeEj@qBt@uChIaZ`@sAn@mBrFkQfCmH`D_IdLoWBE\\u@Xk@lR_b@xDeHv@cABCv@cAxAkBnCyB`G_E~@YvFcB~B[bEWjA@p@@n@?r@BrETxQdAfJd@xAFl@DVBnAFxLr@`ET|a@nCjOv@f@B^DlAHpAJlAFf@B|CPfER|CPnDPfAF~BJ`AFnAFd@B|CPxLj@v@D^BbKh@nNf@~Xt@~AHXBbM|@fI`BlGxCPHhDzCtBhBhB`BfAvAJL|ApBfDnEdBzBBDrChF|ArCpF|JXf@zJlVPn@jEzPp@pD^pBJl@FXn@lDl@~CpCtOZ|AhB|GrA~CvBbEtCzCxH|FdFdBhUzBh`@hFlHz@bM|AxOh@zNJfHKVAxAGzCSvAI`Ik@hFQvBIzKg@jJW`No@jHoAhH_DvGiFx@o@fDwDJMf@m@LKlFyFt@u@zAyAjGaGtN}KtYqLb@Orl@{Rlb@aOtMqF`KcDbC{@lW{I~Ag@~RmGfBs@fd@kOvSuH`a@aOvE_BbTkHrUaIrJgDdGcCn@S~PeHxHyBp@UtIyCr\\oLjLcD@?~IsBnBa@pF}@lW{DtG_BzAB`NsC`ASx@U~EwABAtIqCvBq@~EcB@Av@Wx@a@zE{BrB_ApJkEjU{LzByAlBoA^WnDkCbLqInCyDhKgK|HmUx@eCrAaE`@gAhQwg@|I_X|BgHjGcTlBuGrIk_@vCuMh@{BlBwIvIc`@bJy`@rKka@rBqFrCuH|GiSd@qBdBaHtEwXfImi@fBwLnBkNp@_Fb@kGr@yLOaf@SeJ]iRb@m\\BkAhBiUtB_SzMob@~Oi^nCeHhCiIxAsGdAcFfD{QvBaLv@iEnDcQxB{I|BwHnBgFvCgGhGeKDIpCqEhBkCjDkFvAyBDItDaGpCcF|DsHtCsGh@kAxE{KtA}C~BcGlEeLDMbE_LpAkDtBaGDM`Q_h@|Mma@v@cCl@mBtG}QpEkLtF}KdDuFtAsBlAkBx@oAhZk_@nHgJdRcUx@iAp[_e@`MaT~CsF|Xkf@rDkG|EmIZe@t@kAfG_JxDgFDGXY~VgVzV{Q`Ao@hCcBbAm@n@]rIoDdA_@xIcCbJ_AlQg@~\\CtB?pF@tBApFAvNEd\\InCAvECfU_@tWeF~IcBl@KfQgSd@_AlHeOrBiEbCiKt@_DfBqHxGgYb@yA~Ic[`AeD`Tm_@dLaNrOiKb^aSx@s@~EmFJKrGmIr@}@z[wf@|D_FzCqDFGzGeHnAqAdEiE|AaBdEsElHcIbHmHnCuC~JcPlEeHRi@Ri@bAsCbCyGxEuMnFaKtB{DDCpRuMjIwFhJ}Gd\\aVJIfAw@~F}C|HeEJGhImEfCsAvDiBJGlI_E~IiEpNyC`L?pMvCdDkGpDqFFOP[hD_IT_A@EJk@rAaIXoDx@gMFu@v@gMFs@jAyNbAiM@q@BkARwLJcOU{HKgEM{HIgEEcDGaJE{HKeLIgHWcOMoKCuAFsS`@oXOsQ[oJo@wIi@kJMuCYuM@q@^cObA{NbA{NB_@NsI@oC?eDEaFEyDg@sKWaL{@oUWqHUoE_@oHIyHFeOFcJF}C\\aOb@cOlAe_@b@aOf@aO`@cOHqNBsDFqI?Q@sNBkODe_@?sABsCDcEBkBFiEHgHF{EFmXXcOhCmGrBkCt@qKn@eHjDyIbEgGlBoCbUeZNS~F}HNSvKoNvEeGbPoWvA_I~@wGFkC?e@CcI]wCoAyIuCoHsDmF{FiEuJeDYKGA{HwAwGsAeAKcJi@c@?qB@mE^wJlByI~DgI~CmFrBsAp@sAj@kGtCiF`CeWlLkI|DgFhCwLnFiF`CeBv@cAb@qNlDuNyBoHwE{GyKmDsLcAkG]_KLgLfAyJ|AsNLmAnAeLzAsNNmAj@kFh@uDpBkNnBkNpBiN^mCdCyHvBwG`AcDzCaKrBsIv@aEzAuHNsD`@gJEyCAoAKyHMwBIoAs@mL}@}NIqA_AuRO{HK{E?kGCqR|Aq\\tC{t@@SHqNTcd@_@iJk@{MiCeOSgAaCoKmBsIq@yBuD}LwD}LwUyv@uD}LuD}LcP{h@cGgSeJa[sEuNuCiNw@sFg@eEM}ETeOzDuWdPwYdOuPxYk\\~GyH|GwHdG}G~KyNnB_Et^su@rTgd@dIsPhFgKhFiK|EsJJUdDuGhAkBzFoJfEeHt@iApMmSjG}MdE}IHaA~Cq^Fw@j@iLR{Dt@_OjB}^hB__@nBe`@~@{QxBe_@nB{[x@aNx@aNv@aZw@eOM_CM}B?AkBuSoEoTcEmMc@uAuCcJK]wHcVcLc`@CIiAuGg@sC}Ga`@a@eCaAcGO}@G]aBiKQaAE[}@qFe@uCQgACUwEsYiAwOy@gLwAq^CmEKiOKiOWs_@?[EmNCgFAcGEuLJoBT}EL}CB[`EgVrBeNVyHJqCGoBK}CEcBCu@MkEAOQkCU{CaAiNw@kZpD}c@`Qgt@`D}MtHw[zCoM|CqM|CqMxHc\\fBsHdGgP|LiYNYjC}KFSbAiEz@_GBUl@_EdA{SHeCd@cMB}@d@uK\\aBDUhCcMFUXyAjB_F`HqI|@u@LKbHcGLKfCwB|CgCLK|AoAnD}EJMbGeIlA_BnIuRf@gAzDoIn@u@JMrA_BrCiBfA?N?fEBjFMrDKhDmAvHmCX[dHiHzB}BhDkDtCyCrE{EnJiKh@m@fFcHjBgCXWxCqChF}E`A}@lH{GlAgAfGl@dJ~@bJ~@dJ~@bJ~@fJCfJEhYItH[vKg@xQy@rBLtHb@D?h@DlHhApCBjH@z@B~@BxADnCJz@Bt@BtFPz@BhHZvENvNd@z@D~@BhFRz@DzCLn@B~ABfJNz@@~@@jFJz@@ne@f@pCBz@@`A@vABpCBz@@~@@xA@jB?d@@z@?~@@xA?pC@z@?`A?vAApC?z@A`A?vAApCCz@A~@AvACrCElUYz@A`AAvAApCCz@?`AAvAApCEz@?`AAvA?pCAz@?~@?hFAz@?`A@vA?|[@dOHtAApGAtA?|B@B?nC@rA?rJDzIB~B@@?nC@tA@~B?@?nC@tA?~BBpCDtA@dA?jEBrE@hCb@pBf@hCtAbAfA^b@rA`BfA`Cj@vAZv@LZ?@jB`Gh@dBVz@HR@DtBvF~@`CXh@jCbFn@jA`ErHr@rA`@r@LTjCbFtAlCHPdCxEtFpHfBdBv@t@@BjBfBfAx@pBzAJH@@VPdCvAd@RdBr@TFH@F@nGx@~@VHBDB~B~@bAd@tAfCJRt@dBlApJRlBXxDRtCNt@@BVlAx@zDTb@HNz@~AJPv@rA~BhAPFjBv@HBD@j@PxG|BdPrHNHdB`AHDdAl@nCxAhSdKNHfB|@HDvCxA`Af@nFlChErCxDpChBxADDLJfAbAhEpDdFhBzDIlDkAJCdAe@f@[\\S`Ak@jBsANIpBwANKb@YlCwALGtDgBhCoALGb@SpA_ANKdAcAzAgC\\w@z@_EPiC@aA@]H{D@U@UR_ETs@FUb@iAv@kAFEtBiAhB[fAKtQnA`@?bBGNAdE[LCBA~Bk@NEvDcATOdC{AbC_Bp@c@ZS~AcANIxDwBDCjB_AJAtMeBrBg@dA_@j@[NKBCZa@TYPS\\_@Za@NSPSHK^a@XYRSjBsAb@QVKLCJCLCTAF?N@LFRDTDPFVRv@bAv@`B^xADRR`BLhK@b@BtARhKBxBDhBN~GDxB?Fn@hIJn@ZrBV`BvAfEVf@x@xAp@pA|ClDfA~@|BjBrBpAjAt@j@\\vE|A|@XhBvDr@tF?TFxFZvFz@bHfAjEtAnFtAtE`BpFNd@`AhDfAxD@BjB~FBJrBpERZbB`CJLtBbBf@`@bCz@dDlApHhAp@FdCR~EFT?tEwAnBg@jFsArBOz@IbBN~B|@t@n@|ArAdDjGf@`AxCnJpBrGbAjDhBjGxA`DbAxBnBlBfBhADDxB`@jBKzA_@jCgB`A{AnA}CXs@bBiIJyAHeA`AsLNqBlAaKVaBhBsH`DuJvEiJh@w@l@_ARYlAgBxDsDjAkAlFyCr@]tGeCfHoAD?v@KXENCtAQxC?~CFhB`@jAr@RN`@^XVR^n@bAlBnD`@dAbDbKb@vATr@rBdGTh@Tl@f@nAlBbF`AjB`DdG`CdDtDjFnMxOtDrEHHtCdDf@b@t@p@rEtDl@`@v@f@VPZRxD`Cd@Zl@^r@h@LLvDfDFFf@n@PVZb@x@lAjHtMzE|H~EtGjChCbExC`Bx@d@NHDhDP|@IPCfAMb@QtCgBvEiEjDsEXi@Vi@nA{Ch@mBNk@v@{CjAsIt@wLXeM?yEAs@EsC]aDGo@Q_BWqBwDcTA_DHuALeBX}AHUl@oAj@wAHMVe@bBuC|D_IhBeHb@cFHwIToDt@aDfAwALKBAl@a@`HgCKyKIiDc@gI[sBM{@yA{FsByEiE}GcBkCkCyEGUk@_C_@}BBuBRoBJmAz@oDzA_Ex@kB`BsDhAcBJMhCiD~BmCr@y@pFkFNMbA}@nC_CjAcArHiGpHsG~BwB~AiB~@{AHOdBoCbBiENg@DMd@gBz@gF^mF@iEE_B]}Dq@eEg@oB}@}CmGaOuDwHaHiNcGiLiCcGoAiGg@_GLuG~@kFxAkEvAoC`@w@LYhEeGzCiCjCuA`@Sd@WhFw@lAEj@CvDt@|FdC|HxAhFy@v@]rBoAhCsCJQb@q@tAcC|A}EZiAhAqFb@eDNmAT_BpAeRh@uHnA}K?IR}@d@cCjAaCdAw@b@[dBk@hC?nATF?fFdAlBp@B@ZJhCjAzCxBlHxG~BtA~A^bALB?nCRtESvEWnCShH]z@CdJe@NA|T{AdJk@dJa@dJm@jHg@~Jg@lIo@VAdJc@lIe@XAjIs@XClRgAhNqAdMw@l@ERA`BOnF[vBMxAMhBa@d@MvBm@|DaBZOBCbCaBxCsDHKJMvBmD~AkDHWdB_GZmBbAqJLiBDi@BW?eZAmCAsBZmKt@}I@Qd@qBtAeFn@}BjG{J`A{@xBoBbB{AzAa@|F}A`BIfDSnc@`DfAHV@bGXjJZhJEzAEFAbGa@dJu@lQwBxBWzAOlCObBIVCpN_@|ABnU?vIJrB@@?~YObB?nUIJ?xI^J@hJ?fJ?fJEbLFdJO~@AdHO|AExHBjFuBt@k@p@i@n@c@~BqCdAeAdHeHLM`KeKrFoCjH{DXOFCfHyDbIaFdHiE|BmAhE_C~DaCfCyAjSmL~MkG`CiA|RmKHGTMrEeBjEsArFeAJAbDo@hI@zE\\fBLpFlA|@RxGrCxHdGnIjIrIvKpCnCbE~DzFdD|DrBtSpKn@Zf]lNrIjDfEdBhCfApIpDpIpDpIpDpInDpIpDpIpD`J|A`@F`Ih@\\BhI\\dAD`HAfJ?j@?xHShHg@rDO~AGvMGpFCvaA{BdJQdJKfD?fRn@`Jh@jHd@t@DH@~G`@v@DnF\\~Xz@`J_@nJPxJLtA?zHJbl@dApKA~HExJRzT`@lHr@zFr@`c@z@bGNpBT~HzA|FnAdH~Dj@b@jAv@@B|HnFrClBdDlCzHtFfCdBjAx@lL~HjGbGbTuIpHsCrAi@fU}I`[iMvAq@~BgAjJsF~T{MvLsIt[_Xn^g\\`B{AzP}OdDsCrAiA|YeXjEuDn\\wZdB}AzHgHvDqDpSyP|FyE`UoSbPaOtGyGpK_KtM}LbEyDpF{EtJsIhWcUvb@o_@`QoP~NiKpSyI`GeBpEeAdKcDpBThBD~@?fAClIm@`@CtHe@hMm@fd@_EhFY`RkA`Nw@fKk@ZCrOeBjPuBpEa@VGpDm@lH{A`HmAtD}@lDs@xIkCPGzYuIvOuEBC|L{D`IeCjHyBjJuCvSmGpLoDtIqBnDq@rAWxFe@dCCxBJ`BLbAHPBjCd@bKdCv@TdLjDpBp@|Bp@fDbAxAb@nBt@lHrCjG`DbEbCzBxAz@x@zDvDzBrC^d@zDhGt@~ApBpDtDpIrDlIrLwPtBmDlBuDlA_DbAmChAmDv@mCPy@Pw@^qBf@aDV{B^sDJoAF_ADw@DgAD}@@WJoED}E@uJEwOE}LAaEEaIA{B?a@Qy^GwOEeOGcOC_GAgGEi_@AiMAy@EoEWsHdA{Dn@iCj@sD~@eDhAiCxA_ChFkK`GSxAFzBRlC`@vARrDfApEzArEdBxAj@pDlAlAZZHrBd@hAPp@Hj@Hn@Dt@Bt@?tCErBOxBSxAYnBg@nBm@tDyAnEwBfC{AbDwBlDeCbD{ClDkDrC_D`D_Er@}@hEqFxT{[dJeMvDcFRWNSrGeI`HcIhSmShEaE|DeDzHqGv@o@d]cX|BiBzDeDdM_LhEuDRQPMhCwB`CeBj@_@zA_AlCwA~CwAdC_A|C_AjEcAfC]p@K|Da@vG]bEOfI[\\Ab\\iAjL_@vCA~EC~FNlGd@xFr@r@HlKnB|QbEn@NfJhBvBL~AFtADn@@dAErBItASd@K|A]vBy@~BmAbBiAtBeBxAuARSbCkCvAgBpAgB~A_C|BqD|@uA~DwGfBwC|FmJ|FoJzFmJ|@yA~DsGnFuINW|FkJbC}D`CcDdB}BdBsB|@gA~AcBbCuBvAgALMtAaA`BaAbB_AXMnEwBtGoCzD{AhBs@pF_B~DgAzCo@JCrIyANCrEc@`CKh@ClCGpB@|@FbBJ`G`@B?dU|BjJjB~IfBbE^`D\\r@HfB^|HpCpEtBjCnA`EnBVLxEbCvA~@pBtApBvB`AvAnAhBdClE`@z@pC~FpAlCtArCbD~GtFdK|CvElA~AX^vBjCbCvBJHxCtBhDhBFDfCz@jAd@f@Rr@P^Jr@PxA^rB\\pDb@hFN|FEfHShFc@bHu@tC]`QiCrNoCvA]vD{@jCw@h@Ud@WxBgAzBwAXS`BeAxCyCdAuA`B}BbByCbC_GnAuDPy@BOt@qD~@gGd@mGT{F@k@?a@B}EGaGe@qGi@kG?CAEiAmLwIy}@iBaSa@kEUaDMsBQ}COoFAqEPoHr@}Hl@kEn@_D^sBnCqJTq@Z}@v@iB`CuFpAcCl@gAlAeBn@_AJOhB}BjBkBvD}ClC}ApC{AtAa@rBo@~Cs@zGy@`GO~@ER?vFQhJe@tAUnB[pD{@f@MRIhDqAjFsCvDoCdB_BpCwCjBqBzC}D~@yAzBmDvFoJhDmGvLyThIuNvHiNnFyJl@iAbDyF`@q@\\o@rBaDpA}Ab@g@^e@jDeDb@]ROd@YrCkBtBoAp@_@lHgCj@S|FmBv@U^M`GgBv@]vCmAbCiAp@c@VQzAcAdEeDTOdA}@pEiE`GwFf@i@LO`GgGRSJKbEwDtKoJbGmFhC{B|CyBf@YPGZK~Bo@zDkAjCq@~BWtAGjAGlBBdCP`CXdDl@zIdCxBl@bFhAxAZdDh@~AXl@JxDV~BAd@?~BO~Ck@ZKvAe@xFiCDCzA_AhBsAvCwCtDmFbCeErC_Gp@qAxDsHdMaX~Ng[nBeE|GsNnDsHr@{AtJoSzDmJnBwDzCcFf@w@z@qAp@cA|CcE|@mALOzCwDl@o@`AeApAuAtCeCvLgKbDgDbAcAhEmEVWpEyEnAyA~@gAxG_IhBuBtOqRbGoIrCiEtDwGl@qAr@{A`AuBfBeEFOd@oA~@mCvCeJdBcHFWpA}Ff@qC~@iHz@_IFk@jA}JJu@J{@l@}EhAcHrAkFpA_EdD_I~CsDtByBzCoCfFwD`Co@x@e@xC_BhBiArFgDt@e@XQjCcBrDkCTQ~DwDz@_ATWdAgA|AuBzAiCHQpEoJP_@dA}BjDiJpEqM|EyLfBkEdFgK|HcNxDgIhDgJj@mBp@sCx@oFp@yF`@}EB]l@oKv@wJv@aHbAcJnAeJfA_HhAqG`BkKpBuM|@qIf@qGhAmONuBd@wJr@mOPuDH{H?ML{NDoDHoI?IDuDHmIFiGXu`@PcOLaMB_Ab@yIp@gT\\mKBsBnAev@Bgb@?e@Xc^~@uPlByPbBgKhCuLNi@hJuYfFoMtCiI~AqExAeFjA{DnB}IbBuK~@qJXqGlAy_@PiGH}C\\aJF_B`@aLn@_P~ByZLwANwA|@cIjB{PBMdC{QvAwLdCyRJy@L_An@iF\\iCPyAj@uEFu@?KLkDJsGFyDEiIC{CQgJCgAg@{HaBoR}AuQw@}NoAqUOiBs@kHgA_JGa@wCwTUcBs@oCI_@cDkMkBoHYaAc@uAKYcKaYeEmL]}@}CyJgAoDaBwGu@wCiAeIa@iDSyCMcD?SCyDDiI?ERoGPkCDu@Fg@ZcClAeGZsAd@wBpAeEXm@d@mARe@hBuDtB}C^k@~IcLpW{Y^c@`VkXrBeCnH}IpDmElA{ATWbGkHhEgFx[_`@xGaIdK{LjNsPrFuGDGpGyHfYm]dCcDjDcExHgJlDeEtAcB|DwEfLcNnCgDnAyA`@e@hFkGj@y@jGyIvEiHNUjF{InL}R~@}AlRg\\j@}@nSs\\rBaDxBmDlPoXbBsCtFiJvE_I`@s@rE{HfAgBvEaIpDeGzGgLpAwBhDyFb@u@zDmITm@lCuIpEgPbCeL`BmJ|@iG|@mJp@yJ`@uF^yHRmH@a@LcIFyNA_F?oL?[Ai_@?aDAi_@?{CAi_@?gR?_L@}b@Ps]F{L\\aGf@}Gp@aGbAeGz@uD~AyGzBsHfDgIbDaHxDeG`CcDnDmEdGqErDoClC{ArB}@h@UhCaAbGgBbHyBtToGxQkF`k@iPfMsDlF}AxIgC~GqBtPyEtKqCrI{GpDiATBPDNBPBN?P?NAPCNCPENGNILINKLMLMJOLQJQHQHSHUFS@GjUcK~AcAxHaIdA_AdDo@jIuAvH{@j@ErC_@|JuAtM{AhFa@bBEbGQz@CdFI~@?L@L?p@?dFFx@@xFZjKbAbAJjDb@xDl@nCd@|J~BvCt@`EtAtA`@~DxA|D|AhO|G~C~ArMtG|@d@lG~C|TdLbGnCbBv@`OjHvCvApHvDhFjCn@ZfAl@dFnCDBhFtCzCnBhJtF~O~LlMpKnKzJfRtRlBxBbA~@dJpKhCfDzBtC|F|HdE`GzQvYvBxD~ApCtJ~PbGbLjNrXfRmS`HqHxB_ChDkDpFsF`RgRpYwVjRkObCoBpDuCbCmBpDwCbM{JfUqQnA_AdCkBrDqCzC}B|C{Bv@k@jFaD^OdKwExAk@pNyFb@WjCaBhC{B`@a@`AiAtAmBnBeDLU|AmD`BiEDOjDeMvFkRtHfEpDzAHDxCtAVJHBxAb@~@VfDbATDn@N`Bb@JBfD|@fAXj@N~@XtA^hAHp@BpCHz@BnC{@tEaCzBwB~DeEbEkGvFcD`AQ`Fw@`@NbCdAbCbDHZdB~F|@zDXnAZtAH^r@zGR|DR`ITxFA`G?zIDfDBbBB|AJ~FP~HhApFb@t@xCpFfAnA`B|@LDzBv@nBPp@Hf@DX@zFFxB@fCLvAZXFdA^t@^n@l@t@z@t@rAdA`Ct@tDZdCv@bIzB`U`DnMrFbNdHbMtErHzBdDvDfFxAjBhEhFrSzTpJ`IlFpFh@f@bIrLb@v@dJ~QpFhMHT^v@dC|FlA|C@@vCtHVt@lLl]fDnK|GnTfGbSxC~J@@Vz@lBtGbAjDvC`K@BVx@rD~LxDvL~DrLFRrEbKfGhJrGrJpDbDvFzBpF~@hBXlJl@rFFfJGfJGfJBxN@rVGnUEnUElUEnUGnU@fJ?dJDnUAfJ@fJDnUHzeAGt`@Tdw@j@@?j[~@lw@fBfJNdw@pAdJPnU\\fJTlUb@t`@`AfJZlUz@p`@jAB?rBFjFHD?pBFlFPF?pBDjFN|BFrFLfRd@`X`@R?fJDdJD@?nI?T?pB?vF@T?dFAnA?hC@vFDtB?xQGjA?bA?bCArAA~GIxNSdh@Sl@?jAAjFAn@?jAAv^Wv\\e@v@Ax@ALAzn@o@xAA|VSn`@Mxg@sAhSa@pBCxACnDEzACxAApDG^?NAj@?~LQdEElO[fGMxACpDI`@AN?h@AxAEjP[L?NAD?b@AxAAjGKnFGvBExAAtEIN?f@AjTYzFItAANAf@?dJIxAAvEEN?d@?~LKlGGpHHxALbICvB?pLm@f[KvSPnCAlAtAvBI|ACxBDfBH`ALv@T`E~@Pf@`@x@T^|BrPZfDP`DD`ABlADjC@|A@t@@vBBhGHnYDnMFvVZr]~@pF`ArFPdLV~Q@t@@t@FxCT|PDzBFzEFhD@r@V`Q@z@DdO@hDcC`M\\lZdA|jAvDfNyBhi@ZfNS|HoAhI_@R_@V]X[\\[^Wb@Wf@Sf@Sz@M|@I~@E`AA`A@`AF~@T`BJf@Nf@Nd@Pd@R`@T`@V\\VZhA`GN~Bt@lIVpLNlO?NDzJr@~j@BvBzAdRBjDFxDDrVB|EA`G?rFB|E?bG?~E@dM?dO@xE@z@@rF@tG@t@?P@jD@vDDzS?F@tD@lC@hC@rFBdIDrDInCi@jEm@lCeA|DURUTUVSXQXQZQ\\M\\{CdAqBp@mC`@mEF_CJg@LuA`A}L{@yAWcA[aGmCcDoIwBcGwA}Gq@_IMyHNsLNaMI_MOqAUgCo@{D{AgIeDcNiBeHkBuFyCeGqKqLmFeG}AgBsDgG_A}AyCaFyEyI}KnLsAlAeBpAeBj@eBRsNOyYIw[MgRK",
+            "legs": [
+                {
+                    "via_waypoints": [],
+                    "admins": [
+                        {
+                            "iso_3166_1_alpha3": "",
+                            "iso_3166_1": ""
+                        }
+                    ],
+                    "weight": 10444.0,
+                    "duration": 10444.0,
+                    "distance": 168314.0,
+                    "summary": "Westside Hwy",
+                    "steps": [
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        26
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.91522479999999,
+                                        46.995970199999995
+                                    ],
+                                    "geometry_index": 0
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Head northeast",
+                                "type": "depart",
+                                "bearing_before": 26,
+                                "bearing_after": 26,
+                                "location": [
+                                    -122.91522479999999,
+                                    46.995970199999995
+                                ]
+                            },
+                            "name": "",
+                            "duration": 30.0,
+                            "distance": 198.0,
+                            "driving_side": "right",
+                            "weight": 30.0,
+                            "mode": "driving",
+                            "geometry": "c_lsxApxcmiFoFoDaKcDcG_@_@@uAQm@SeAi@iDcB}@c@mF}Ck@I[Je@z@_@rAgTpeA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        23
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.91605519999999,
+                                        46.9971761
+                                    ],
+                                    "geometry_index": 15
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right toward Tyee Dr SW",
+                                "type": "turn",
+                                "bearing_before": 294,
+                                "bearing_after": 23,
+                                "location": [
+                                    -122.91605519999999,
+                                    46.9971761
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "",
+                            "duration": 3.0,
+                            "distance": 16.0,
+                            "driving_side": "right",
+                            "weight": 3.0,
+                            "mode": "driving",
+                            "geometry": "ojnsxAllemiFaGaD",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        111
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9159739,
+                                        46.9973047
+                                    ],
+                                    "geometry_index": 16
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right toward Tyee Dr SW",
+                                "type": "turn",
+                                "bearing_before": 23,
+                                "bearing_after": 111,
+                                "location": [
+                                    -122.9159739,
+                                    46.9973047
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "",
+                            "duration": 37.0,
+                            "distance": 119.0,
+                            "driving_side": "right",
+                            "weight": 37.0,
+                            "mode": "driving",
+                            "geometry": "qrnsxAjgemiFjJsi@`L_p@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        26
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.91450750000001,
+                                        46.99691440000001
+                                    ],
+                                    "geometry_index": 18
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Tyee Dr SW",
+                                "type": "turn",
+                                "bearing_before": 111,
+                                "bearing_after": 26,
+                                "location": [
+                                    -122.91450750000001,
+                                    46.99691440000001
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Tyee Dr SW",
+                            "duration": 46.0,
+                            "distance": 338.0,
+                            "driving_side": "right",
+                            "weight": 46.0,
+                            "mode": "driving",
+                            "geometry": "czmsxAvkbmiFeAq@oG{DwI{EmDkBcYoOaCiA[MSKeAg@mE{BsUaLgBw@iBm@_BUiAQeCA}DBwDZyE`AkA^mAl@cA|@cCpCoBbCaChC{CbCgDrAiBZoJr@cHU",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        21
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.914012,
+                                        46.9997468
+                                    ],
+                                    "geometry_index": 48
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto Trosper Rd SW",
+                                "type": "turn",
+                                "bearing_before": 3,
+                                "bearing_after": 21,
+                                "location": [
+                                    -122.914012,
+                                    46.9997468
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Trosper Rd SW",
+                            "duration": 42.0,
+                            "distance": 277.0,
+                            "driving_side": "right",
+                            "weight": 42.0,
+                            "mode": "driving",
+                            "geometry": "ekssxAvlamiFiJkE@ue@?yL?eO?}J?cB@kL?iB?gM?_E?gE?gH?uCt@uBp@yFZ}EZgEJ_CNuE@aD@oEF{BHkBz@qFbAsC",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        138
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9105939,
+                                        46.9997566
+                                    ],
+                                    "geometry_index": 73
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, continue straight to stay on Trosper Rd SW",
+                                "type": "roundabout",
+                                "bearing_before": 125,
+                                "bearing_after": 138,
+                                "location": [
+                                    -122.9105939,
+                                    46.9997566
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Trosper Rd SW",
+                            "duration": 17.0,
+                            "distance": 119.0,
+                            "driving_side": "right",
+                            "weight": 17.0,
+                            "mode": "driving",
+                            "geometry": "ykssxAbwzliFHKHKHKFKHMFMFMDOJUFYFYFYDYB[B[@]?[?[A[C[C[C[GYGYGYIWK_@eBuHy@mEg@uDi@iG[iEScF@}Gh@eHxAaJ",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        131
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.90912,
+                                        46.9998043
+                                    ],
+                                    "geometry_index": 109
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, take the 1st exit onto Capitol Blvd SE\nPass by Subway (on the right)",
+                                "type": "roundabout",
+                                "bearing_before": 110,
+                                "bearing_after": 131,
+                                "location": [
+                                    -122.90912,
+                                    46.9998043
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Capitol Blvd SE\nPass by Subway (on the right)",
+                            "duration": 258.0,
+                            "distance": 3021.0,
+                            "driving_side": "right",
+                            "weight": 258.0,
+                            "mode": "driving",
+                            "geometry": "wnssxA~zwliFP_@L[L]H]H]H_@F_@Fe@`CsDbBwBpAcBhCyCjDuBb@S^SrFkClG{CtBcA`CiAbIsHjEs@zDmAbQkFhT{HhBe@tUqH|Ae@|Ac@^ItA_@TE`Cg@vCc@j@IlGu@jDW`BIz@Cr@Cr@C~AGnCCl]Hvi@NfRD|MDfe@Pxk@?tXVxF@xMFxW@da@VzL?~TFrNBbn@Pta@LjKBnKDl^Nvc@RdGBrVJp_@Pp^s@hBSpDWlFe@jDa@bAOnIcAjIgBpNkDxF{AzHsCpOoGxUaLzD}BrEwCf@_@dQuNdAaAnSoSvCaDbGeHpG_Ira@}e@nCqD|NgQ|I}KvMyPrCwDnHcLzBsDpB{CdDgEdVqZ|lAu{AbeBwxB~R_XhM{PhGoIdLyNtJaLlCsBrLgNz_@_e@`DyDrG}HtMyOd\\aa@rMqPpMoP",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        140
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.89603650000001,
+                                        46.975557599999995
+                                    ],
+                                    "geometry_index": 223
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto Old Hwy 99 SE",
+                                "type": "continue",
+                                "bearing_before": 141,
+                                "bearing_after": 140,
+                                "location": [
+                                    -122.89603650000001,
+                                    46.975557599999995
+                                ]
+                            },
+                            "name": "Old Hwy 99 SE",
+                            "duration": 701.0,
+                            "distance": 14591.0,
+                            "driving_side": "right",
+                            "weight": 701.0,
+                            "mode": "driving",
+                            "geometry": "kcdrxAhi~kiFlYa_@zV{[tH}JfJoLrE{Fnk@qs@h^ye@|EcJl[aa@|Ye_@rJ{LpBiCtPcTtAgBpiAayAnWi\\zDaFvGmIz@iAzEwF|GyH|GuHdP_PfS}RdXwWh_@s^ps@mr@dd@mc@bRwQdp@}n@fB[vCsB`jAshAvUiUpj@ci@biA_hAxDcEhEgE`P_QxBsCvDiFlKyOpHcLlJsNja@um@~GkK|CkEfHkO~\\gh@~Xqa@hKsOpI{LfIcMbE{GfLsQvDoF`HeLbCeEpGsJvGoKxBmDzI}OhAsBl@kAvBiE@CHQ`AmBtCqGhBcElHwQ~JcZd@}AvAaF^oAdTou@v\\ikA|T_w@jVez@lCyJbFqThFuUfEyRdHe\\pCsMlIc`@nHi]`Lqh@rJ_d@tBwJnIi\\bBmG`BiIlDwMxBaJfCmIlCiIbFqP~JiZlGqS~AmFrNmb@vNu`@vEeMrFwMjF_L~BgEpBoD~@yAZi@b@o@`A}Ap@_A|@oAV]BEl@y@tCsDpIiJzF}FfMiLrMkLtFgFtLmKtBkBrDgDDEbRyPhHwGrg@kd@`HwF`BsAv@o@HI~DaDt@m@t@o@HIxgAacArKqJhYaWzBg@`MwJtPgOxJ}IbBuAvFuEvF{DhD{B~FiDbHyChHkClGgBnCs@zEmArCu@`Di@bCc@hDe@hC[dDcAvF[nGHnG\\bPr@vUpAbJ`@pOr@hsA`G`uAtGlLj@vP~@hObAB?f@FhKfAvKfBzIhB~EtAbRpGt`@fRfYjP~VdOhYtPhnAlt@p]~RDBhS`Mn]jSDDpSpKjAbAd_@rY~PdKrGvD`CtAjBbArKdFhJpE`GfC|FlBnD^hNfEvBn@|Br@rKxCxHjBpHhA~WnEpNvATDzFl@hBLtMj@p`@f@jZNd^Ltd@HdLWjNBxMCvMBrLJzB|@~NHjLR`BFzFLbWLjVLjc@OfUEvC}@pIBj[LdIAbe@Lpg@Lzc@LfJBddBd@fJB|k@NlbAXfJBfJBtlBf@hoBh@r\\HrYHzE@jC@`HBbA?~T?fZDzA@bH@bA@L?nC?`C@reA^hI@hI@hACbDCvCCJAnACp@A`BEz@Cx@EzI_@xEa@tBU`@GLA`BSfAQ`C_@f@ID?pMmCbQuEvCq@x[sHzQuExMaDtc@_K|HeB`IkB~R{Ebg@cLpDw@tD_AdJuBlLkCnIoBpv@uPtDEvJ_BfHiBvU{FtVeFpMaDtv@{P~Bm@~@i@vCgC~t@wQTEdUkFzt@}PTGhvA_\\bDu@bDw@pDy@fMaE`IiDbIyD~DqBbDgB@?jFiD~DkC|GcFdPmNbBsAvNmMFEhE{DfViTvt@ap@lKkJte@kb@lBcBpDcDvAoArEsDZUFGrDiCfBkAzAcApF_DlBgAdCoAlDgB~EwBdE}AhGyBbJ}Cxd@cOtX_Jd\\wKzLaEzMoEd[qKj[sKfBm@dCy@jOgF`KiDtGyBfHwBBAzHgBpG{@tEg@dGWxKMdFDtLHjB@jA@fB?dA@jBAlJ?tFAnHQnIk@hMuAbNcCxRsDfFaAfKeB|McChEaAzDy@vH_CzFqBrDcBnE}BdHmEpGuEvM{JvF_Edc@_\\hA{@xEmDVQvRwNbIgGxG_G`@_@bCeCfCeD~BkDnHqLdHaM`@m@hFkIpEgHpI_LbKqLtE_F|@w@`EmDjEmDdFsDzDiCdAo@xBsApC_BTM^SBAlEwB`EeBhWgJrGgBhK{BjBa@|Dy@tASzJiAlI]hJ_@zOYpMAhNMnISjJq@rKuAtH}AzCw@xJsCvRgG`OqElKaD|IoCxImCnCy@hEqAz@Yva@eM~XsIbMyDpH}BbG_BvF{@fG_AnB_@xImA|I{@rE]`FOvJY|EMjRJ`K^rEVrE^xHd@rF^hH|AjLhCrLhC|WfGv_AlWzaBrc@zI~BtI|B~T`GdAXjL|Cpc@bKjThE~P~CrQbCtFx@nFr@rBXxARtCZdNzAbFb@jHz@v@JrBTjShArH`@~DXhBLf@BRB`DPzJLbOf@lUv@R@xIAlUAdLIlOKjA?nPIzEIfXWjt@m@tTKrSSvYYxA?~HGxHIhGDjABlCJpC@lLjC",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        221
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.84665679999998,
+                                        46.8593306
+                                    ],
+                                    "geometry_index": 758
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight right toward Old Hwy 99 SE/Sussex Ave E",
+                                "type": "turn",
+                                "bearing_before": 193,
+                                "bearing_after": 221,
+                                "location": [
+                                    -122.84665679999998,
+                                    46.8593306
+                                ],
+                                "modifier": "slight right"
+                            },
+                            "name": "",
+                            "duration": 5.0,
+                            "distance": 48.0,
+                            "driving_side": "right",
+                            "weight": 5.0,
+                            "mode": "driving",
+                            "geometry": "ecakxA`{}hiFnD`Fp@z@~DhEhBdCvBjE",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        214
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.8470705,
+                                        46.859008599999996
+                                    ],
+                                    "geometry_index": 763
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight right onto Old Hwy 99 SE/Sussex Ave E\nContinue to follow Old Hwy 99 SE\nPass by NAPA Auto Parts - Wilson Parts Corporation (on the left in 0.6 mi)",
+                                "type": "turn",
+                                "bearing_before": 229,
+                                "bearing_after": 214,
+                                "location": [
+                                    -122.8470705,
+                                    46.859008599999996
+                                ],
+                                "modifier": "slight right"
+                            },
+                            "name": "Old Hwy 99 SE/Sussex Ave E\nContinue",
+                            "duration": 124.0,
+                            "distance": 1372.0,
+                            "driving_side": "right",
+                            "weight": 124.0,
+                            "mode": "driving",
+                            "geometry": "ao`kxAzt~hiFpDpD|ApIp@jDxLhn@nMxs@vC~O|Ljp@fE~RdRxdArRdeA`ShdA`DnQvAxHp@jDXxA\\xAf@hBZfAh@~AhF`N|EdIdBjCdA`Cz@dCx@bD`@hDl@vG@rBBl_@G`rAAzEMna@D|M@bCDpBb@bEl@vBZx@Xd@j@t@r@p@r@b@vA^J?pAPpGDpM@lTBpD@p`@Nvq@D~k@DxIBdJEfJJxB?p@?r@?rHB",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        201
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.85868500000001,
+                                        46.8525077
+                                    ],
+                                    "geometry_index": 822
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto WA-507 S",
+                                "type": "turn",
+                                "bearing_before": 180,
+                                "bearing_after": 201,
+                                "location": [
+                                    -122.85868500000001,
+                                    46.8525077
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "WA-507 S",
+                            "duration": 22.0,
+                            "distance": 286.0,
+                            "driving_side": "right",
+                            "weight": 22.0,
+                            "mode": "driving",
+                            "geometry": "wxsjxAxjuiiFzKhFtCjB`D|BfChCvBrCpCbEnAlCdA|Cb@tAb@tAdAhFr@dErArM?nIApXA~T?zICpF@~ADhHJdFDfBFrAJdCpBdS",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        187
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.86186610000001,
+                                        46.8516553
+                                    ],
+                                    "geometry_index": 847
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left to stay on WA-507 S",
+                                "type": "turn",
+                                "bearing_before": 256,
+                                "bearing_after": 187,
+                                "location": [
+                                    -122.86186610000001,
+                                    46.8516553
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "WA-507 S",
+                            "duration": 1159.0,
+                            "distance": 20198.0,
+                            "driving_side": "right",
+                            "weight": 1159.0,
+                            "mode": "driving",
+                            "geometry": "mcrjxArq{iiFp[lDr@?lIa@HAzDi@bGcAdHoBzGcChT_KfEoBjGuBbCo@vBg@dCe@fCa@dDYbCKhIGpoC`@zLBvF@vFPdFr@|RdEr@PtA\\vA\\tD`AnHfBbJlBvI|AvItAvIdArJlAfFb@rCTrCL|EP|HH~H[dIyAnF_Bx@UjFaBdO{EnGeBxEy@nDg@hDQbEOfG@nB@zb@f@pDB|@BfJJpSXdJL~k@t@fJNjbAjA|@@~vAfBtPT|p@hAnl@~@lbAnB`@?plAdCjsDpHf@@~HTnUf@hx@`BfaAhBnU^d@@fJLnHJloA`BrmD|D|tEfFbi@b@|bAjAxGLxnA`BzABvABnCBzh@t@nX^fw@dAdJLz^f@`y@r@f]n@h^ZzDDfJHtNL~PPj]Zxi@n@nDB~\\Zxd@~@tZ`@zONdJJ`B@dGJfJPvFV`AFpBL`DPhBHxBVdC^hFz@zE~@lCn@~Ad@rBl@bCz@lBv@lBx@jBt@nAl@|@d@fFvCbFpCtCtBnA|@fBrAxHzFlPbOpO|NfLpK`B|AfB`BbB|A~BtBFFpJvI|BtB~M`MbB|AlCdCpAjAnAfAbJfIjExDnClCbHdGbHpGv@p@jAdAbHlG~JjJlFxEvAnAzHhIre@~b@zUbTr[nYtCjC`|@dx@dC|B|AnA|@t@bAv@fA|@dC`BlAz@nAx@bCtAbBz@`Bx@nJ|DjNvFtEnBdH~CnE|BbCvA~CvBjCjBvBdBrH~GhJzInE~D`@\\@@tQbQlChCnJhJvApA@@`K~JjEpEjBrB~FbHbFnGzJrM~@tA~@hB`FtH~BbErBnDlC`FrG~L`EvHv@xAzA|C@BlAdCvAxCjDjHjKtVdFfN\\|@nEbMjC`I\\`Ar@vBzBdHdApDb@vABFl@pBRp@Tx@\\rAfAbEbBnH\\lBDP?DFVF\\Jl@`@~BZfCPtANbB\\vCNfCPpCV`FBnCDfC@dFEnEWzG]zGATS~EeA|Os@rKg@vGu@xKoCl_@QzB_AzLmB|ViBpUwC``@eAtNaAhMyCha@i@bHoArO{@vKcA~LsA`N_AtIcA|Ho@dE_BlKo@`E_AtFyBpLwAxG_DxMwB`JuBpI_B|GaBlGiGzV_BvGOp@cBxGaCdKkBjHuCpL{@rD_Ip[kBvH_DtM{CzLmH`Z}Olp@oIj]eRtu@i@zB}BbJePbq@cCbK_DdN_BpHyCbPeAhGuAtK_AfHKp@aAnJ}@pNIlBIfBA`@Cb@SvFCbBCtAI`QAJDvJ?dB@b@L`KB`BT`HZlG?J`@tJDr@b@lEb@rElA~K~@dHDTn@fE^lBX|AHb@FZj@lCx@tD^fBnBzHl@|BZfA@DHZhAtDb@zA|@lC`A|CbAnCh@tAVn@r@fBbDbItB~E~GpLT\\bBlCrEtG|FpHjCzClBnB`F`FlHnGlBtArCnB~DdCpFxC\\N~At@p@ZnClAn@XzAp@vDxA`ErAvExA`Bd@`AXvDfAdCr@tEpAn@P`@LNDB?ZJzHlBfJ|BtHlBvDdAdMdDpHlBbFnAhIlBlCp@fCj@`Dj@bF|@zFbAhARzAVdJbA|It@pGp@lLx@nJf@bK\\dSl@lIXjBJx@DfFZxDZvDb@~Cb@dF~@pCv@`GpBxFrB~L|ExLvElFtBB@pFtBjGbC~BfAvBdAzBdAjDhBlElC~DzBdDrBj@\\BBrBtAdDxB`@X|CxBzCfCB@JJjAlApAtAv@|@|@lA~@nAzCjF|A~Cz@lBbAfC^~@BHtBnFdA`DHT?@z@vCt@vC`@~Aj@tBb@tAx@bCj@pATj@P`@BF|@fB`AfBfApBb@x@nC~EbBbDlAdCtAvC`BjD|BfFbAzBrD~I`@dAbAlCtAvDz@bCb@jAx@jCpAnElEbPhBtGdA~Dl@~Bf@~Ax@jCp@hBt@dBb@|@^j@fBvCx@|@RRVT\\V\\Vh@XxAn@lGhBdBb@vBh@rEvA`IrCb@P~D|A|DxAhFbB~IpBdCl@lCt@~Bt@rDxA`CxAjDvC`BtAfDfDtC`DlBzBrC~CfApAb@j@vFrGzAfBbJlKlKvLrJpKzCtDv@`AxBlCxCdEh@t@tApBtF~IrEdHxFdJhEvGDH~ChElB|BpCfDnFxFzD|DdGzFdHlGjFxEzP|NhDvCpHnG`DlClAdAbAz@dLvJfOlM|LnKrCbCpHpGlPrNfb@p^je@`b@j[nVfVtSnJhIjHjGlLfKjDbDxClCBBpAjArD|D\\`@bAfAdDtEtBbD`BlCrCdFxCtFR^jEpIfExHjElIpEtI~FfLnD`HrChGfBbF|AzFzAzHRjARlBT|CNhDDdD@bD?`SEna@@xU@|N?L?rPDlNCxNMd[CpC?NO~SKrSFjFFfEN|CTvCTrBz@zGb@|B^lAh@`Bt@zAzDfHvGfK`E`G|JfO`EnGjMjSlClEpNzU~N|VdAfBtDlGzFvJzFtJzBrD`C~DpBbD`Vl`@`JrN|E`HxB~CrBrC|BrCtDjEbEbFvC|CjChC`DbDvHtH|GlGbGrFzh@zf@zL|KjD`DlC`ChCnB|DpC~FxD|I|DtAf@nHvBnHxBfCt@pErAtDhAdD|@bCv@hEpA~@XtBl@rK|CxBl@zEtAxCz@lCt@xFnArEv@vFd@xBH~EJvTNlI@jZEzJ?fJ?tDAfJ@vH@n@BtEJnCN`AHzCl@nCp@~BbAfBdApAhAB@dA`AzBlCrAnBBDx@nAjI`OhBhDlEjIbG~KzBnErAxCn@rAnAdDfAvCd@|A@@vAlF|BjKjBpK|AlIfApEpA`Ev@lB@Dj@lAnA`ClAnBl@|@zCbEhFrGvG`IpHzIdEvEzDnEnIhJhExEvA|AVXhGxGFF~DjEdKtKbLnLdLlLb@d@bD|C|FxFrD~ClCpBtCzAlCbAvC|@fEz@jEn@fHhApFz@rEz@tJbClBn@tBv@lAl@bExBtDrBrBzAxFpEhJtHpUdRnGbFjCpBvGbFzFbEtGtEvCrBdD~BzEhDzB~AhPjLrPrL|c@b[|EfD|HrF|HtFtCrBfD~B`c@vZvj@z_@|PdMhJtGrHjFhI|FzRfNhNrJrCpBbEtCvJ`HhThOzF`Eb`@pXjAv@vm@zb@`VtPxEfDzPtLhPpLzHpF`GhErBfBpCdD`ElFrEfHdHtNjD|JjBpH|AnGfBtIn@xDdAdI~@xJ@F\\fGn@`Qb@~Q^vQ@XDhBR~In@j[JjEZpN?VDjBb@tRxAnk@r@d\\LfMBbR?V?f@CbNAlOAfBCx[?z@?fA?bCEzd@GlXQ~aAGl^EjOClOGp`@Cbd@FfNFdIDxDLvJ\\zPZtNZrHZ~Ex@bId@~Cr@zD`A|Dj@lBl@`BvAlDfCtEfApA|@fApA|ApAtA|DbENJpMfIbOvKtMjJrFxDvB~AvGzEbjAtx@dXtRb[fUzb@lZvBtAjCxA|BhAdCdA~B|@vCt@lDn@xBVxBT`ENrCHlD?bF?bv@YD?F?J?rICxw@KfTAf~Am@x]E|VKdv@MhpBi@xu@Xlt@S|l@OdT@ff@MzVMpGp@`l@FrKAv[Brk@]hZYzSQtJeApw@WfJCfAAfSGfNE|g@ON?vBAbEAZAnNEnUGbIC|NGhDAnA?H?zCAf}@g@rqAm@xEEjcANxmAUvmA[hx@Y`LAxUGjJCD?p`@GxPCzB?vEAn@?fA?x@FlAP~AZfYlIx\\fKhr@fTrNtEbF`Bzc@tNnSxGvGtB|RjFxH~Bzi@nQjO~Exa@~MjWpIx`@jMn_@xLlx@rW``@bMfXxI``@dMnA`@fR~FfM~D",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        196
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.95766060000001,
+                                        46.7115289
+                                    ],
+                                    "geometry_index": 1840
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue straight onto S Pearl St",
+                                "type": "continue",
+                                "bearing_before": 196,
+                                "bearing_after": 196,
+                                "location": [
+                                    -122.95766060000001,
+                                    46.7115289
+                                ]
+                            },
+                            "name": "S Pearl St",
+                            "duration": 13.0,
+                            "distance": 129.0,
+                            "driving_side": "right",
+                            "weight": 13.0,
+                            "mode": "driving",
+                            "geometry": "qm`bxAxtvoiFrWlItk@lR",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        172
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9581391,
+                                        46.7104204
+                                    ],
+                                    "geometry_index": 1842
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight left onto Southbound Viaduct",
+                                "type": "turn",
+                                "bearing_before": 197,
+                                "bearing_after": 172,
+                                "location": [
+                                    -122.9581391,
+                                    46.7104204
+                                ],
+                                "modifier": "slight left"
+                            },
+                            "name": "Southbound Viaduct",
+                            "duration": 38.0,
+                            "distance": 514.0,
+                            "driving_side": "right",
+                            "weight": 38.0,
+                            "mode": "driving",
+                            "geometry": "gh~axAtrwoiFlFq@jQoFjNoEbFuAvBk@zIaC|IaCfCq@rEoA|DeAxDeAvF{AfGcBj@MvOaF`FkCbBiAdBmA`EmDNOPMb@g@|BkC~AsBZa@hCcEhIqO`BcDr@uAlA_CjBqDlJwPbDmEhByBhCkC~AuAn@i@`D}BfEeC~FsBjBe@fEu@rBm@|GwC",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        184
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.95537539999998,
+                                        46.706334
+                                    ],
+                                    "geometry_index": 1886
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Merge onto S Gold St",
+                                "type": "merge",
+                                "bearing_before": 160,
+                                "bearing_after": 184,
+                                "location": [
+                                    -122.95537539999998,
+                                    46.706334
+                                ]
+                            },
+                            "name": "S Gold St",
+                            "duration": 119.0,
+                            "distance": 1680.0,
+                            "driving_side": "right",
+                            "weight": 119.0,
+                            "mode": "driving",
+                            "geometry": "{hvaxA|eroiF~H^z@Nb@H|BrAtLJbJtCPF|MfEtHbCdiA~^lBp@dZtJbDdAxOfF`RbGnC|@rLzDxNvEvS|GpKjDdCx@lH`CnLvDnBn@~HfCjEvAdGt@vBXrBXtFv@bC\\l@AjFCpHIfBEtc@iArCIdU[~IYvNs@dFe@pZo@nEIzBEdKUxHQfCGpVi@tLWD?lVi@dLWzKW`HO|IQ~O_@`NYnFM~@AlKWv@ApJCp@@xKr@~C^fAPb@FxCh@dB`@v_@bLNDb{@~VlIdCtJrCjHvBdh@nO~EtA~F`B",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        195
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9585016,
+                                        46.6915549
+                                    ],
+                                    "geometry_index": 1964
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto N National Ave",
+                                "type": "continue",
+                                "bearing_before": 195,
+                                "bearing_after": 195,
+                                "location": [
+                                    -122.9585016,
+                                    46.6915549
+                                ]
+                            },
+                            "name": "N National Ave",
+                            "duration": 146.0,
+                            "distance": 2242.0,
+                            "driving_side": "right",
+                            "weight": 146.0,
+                            "mode": "driving",
+                            "geometry": "emy`xAjixoiFxGnBxRlGld@~M|GrBtAb@hPxEzYtId[bJj_@xKhOjEhOlEbb@bLnk@pQ|RrH`x@`Vvj@xPzpAb`@`_@rKzQrF~v@nUdIbChj@jPdiAx\\pN`FfJdCv`@rLpEzAfEvAzXnIzXnIzC|@d[lJzJxChK~CbDfAdBr@fBbApNnIvAdCZr@`@z@d@hAr@lB|@tCdAfE`FlTdCbKzBzHdHvYz@nDvArGj@jCdBxIf@bF\\fEh@xGb@dKXfLBr@Bv@Z|K@VBv@JlC`@~Gx@`KpAhKvB~Lh@`CbBjIjFpPfFzN~DvKj@vArFrKvHbM~C~D~EzF`HnG",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        225
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9703603,
+                                        46.6744713
+                                    ],
+                                    "geometry_index": 2043
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight right to stay on N National Ave",
+                                "type": "turn",
+                                "bearing_before": 213,
+                                "bearing_after": 225,
+                                "location": [
+                                    -122.9703603,
+                                    46.6744713
+                                ],
+                                "modifier": "slight right"
+                            },
+                            "name": "N National Ave",
+                            "duration": 69.0,
+                            "distance": 909.0,
+                            "driving_side": "right",
+                            "weight": 69.0,
+                            "mode": "driving",
+                            "geometry": "max_xAnnopiFpFfJfEnElC`CfB|A|@x@lBbBtBlBr@r@JHzQtObC|AzBlAzEbCtBbAhE~@~EdAvHrAlDd@hC`@vGl@zBd@tFv@xHv@XBv@DlDNbBD\\@D?h@BdABhOj@jQz@rW_@`n@m@jYYjCCzACB?~HKnLEzj@c@lZWnA?bB?nMSxSy@jK}@rVqBvKo@bFUdBAx@AbBD`GxA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        268
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.97147890000001,
+                                        46.6665254
+                                    ],
+                                    "geometry_index": 2098
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto NW West St",
+                                "type": "turn",
+                                "bearing_before": 193,
+                                "bearing_after": 268,
+                                "location": [
+                                    -122.97147890000001,
+                                    46.6665254
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "NW West St",
+                            "duration": 18.0,
+                            "distance": 129.0,
+                            "driving_side": "right",
+                            "weight": 18.0,
+                            "mode": "driving",
+                            "geometry": "yph_xAltqpiFJjQLhORzCAvBCl\\Iv_@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        177
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9731669,
+                                        46.6665099
+                                    ],
+                                    "geometry_index": 2104
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto NW State Ave",
+                                "type": "turn",
+                                "bearing_before": 271,
+                                "bearing_after": 177,
+                                "location": [
+                                    -122.9731669,
+                                    46.6665099
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "NW State Ave",
+                            "duration": 73.0,
+                            "distance": 583.0,
+                            "driving_side": "right",
+                            "weight": 73.0,
+                            "mode": "driving",
+                            "geometry": "{oh_xA|}tpiFha@{AxAKvAGv{@}G~BYbFo@jUwAjEWr@Ex_AmFvK_@p`@{Bbk@uDb\\aE",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        264
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9724871,
+                                        46.6612863
+                                    ],
+                                    "geometry_index": 2118
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto W Main St",
+                                "type": "turn",
+                                "bearing_before": 172,
+                                "bearing_after": 264,
+                                "location": [
+                                    -122.9724871,
+                                    46.6612863
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "W Main St",
+                            "duration": 82.0,
+                            "distance": 642.0,
+                            "driving_side": "right",
+                            "weight": 82.0,
+                            "mode": "driving",
+                            "geometry": "ki~~wAlsspiFbAr_@b@dO?BxBzq@t@d^bCtg@j@zLbA~Lv@bJ~@~NFx@|@|JzBdWpBrQvBhPb@tCpA`JnCzQr@rE|@nGlAzGTtAZhB`AdFf@jCd@`C@DxBtKnA`GfAfFp@xCfDfN`DjMtCjL`GbUnGvU",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        135
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9805143,
+                                        46.6597577
+                                    ],
+                                    "geometry_index": 2154
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto SW Riverside Dr",
+                                "type": "turn",
+                                "bearing_before": 241,
+                                "bearing_after": 135,
+                                "location": [
+                                    -122.9805143,
+                                    46.6597577
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "SW Riverside Dr",
+                            "duration": 40.0,
+                            "distance": 375.0,
+                            "driving_side": "right",
+                            "weight": 40.0,
+                            "mode": "driving",
+                            "geometry": "{i{~wAbicqiFbHiLbCkExFaK\\o@fIwNpJ{PrAoCrJwRzFuKbEkHdAiA|@w@hCcBnCiApCk@pBCl@AbBJz@JpCv@jUdJ~]tMvDvAfGzA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        190
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9790702,
+                                        46.657013899999995
+                                    ],
+                                    "geometry_index": 2178
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue straight onto SW Newaukum Ave",
+                                "type": "continue",
+                                "bearing_before": 194,
+                                "bearing_after": 190,
+                                "location": [
+                                    -122.9790702,
+                                    46.657013899999995
+                                ]
+                            },
+                            "name": "SW Newaukum Ave",
+                            "duration": 40.0,
+                            "distance": 540.0,
+                            "driving_side": "right",
+                            "weight": 40.0,
+                            "mode": "driving",
+                            "geometry": "k~u~wAzn`qiFxGdA`ADlEGnk@iFhDYjDWvDOvGUdPJl[FzORdZ@dC?bm@K`|@v@fFBvFt@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        200
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9790152,
+                                        46.65216470000001
+                                    ],
+                                    "geometry_index": 2195
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto Shorey Rd",
+                                "type": "continue",
+                                "bearing_before": 189,
+                                "bearing_after": 200,
+                                "location": [
+                                    -122.9790152,
+                                    46.65216470000001
+                                ]
+                            },
+                            "name": "Shorey Rd",
+                            "duration": 239.0,
+                            "distance": 4053.0,
+                            "driving_side": "right",
+                            "weight": 239.0,
+                            "mode": "driving",
+                            "geometry": "iol~wAlk`qiFrB|@|Y~PdIxEfJzF`PbLdNlJfDlC|FvEhK`KhHdIdBnBxGbI~BfCnKlPtO`SdFlFvDfCn@d@nFtCzCpAfGfBnG|@lG`@jGTrgADlTGt`@G~k@SfaAKfJAfJCdEAhOClUE|KCjLeCbFiBxEaChEwCzDyEn@w@bCuCbCkEb@w@xLuUlFgK|CcGlA_C@EnFgKlFgKlFgK|CcGlA_C@CtDkH`DcGdCuGdBgHj@gChAgFdA_Ij@eIFsBNyEBmE@iB?sASs~AI{o@?GCkOAcOCkOE{OCsOMi_@EyOCoIA{DEmIA}DIyYL{DHiC`@uHNcAd@}D|AgH`ByGbBsEhCaGn@kAzAiCvC{DTYpC_D|CuBtAaArDwBjCmAvGcBvE[vd@Z|k@`@fJFfJFfJFnUNfJHZ?pTNtIFJ?lJHfJFpHDvKA`@?l@?x@?`FA`CKdFSzPw@hCi@BA|A[lDu@lA_@t@UfBk@dHyBlFkBDAjBo@fFuBtB{@xEgBj@SnAe@~EiB`JeDtIaDtIaDhIyCtIeDtIcDti@qStIeDrIcDtIcDtIeDtIcDrIcDtIcDtIeDjXeKj_@yLvIqCxIsCxIqCpTeHrJ}CfJqCtHcBzFqA`Bc@|I}Bj@OpHiBzL_D|XyNVMhIkEtSyKdZwIdE_AhEc@bCQvAKjEK`ADbCJ~CPb@B^DtDp@jDb@`AJzIfAhQvBbALl@HRB`Hz@bJfA`ALx@JhFn@~@JbHz@~@Lz@JzDd@h@P~@Xv@T`FzA~@XB@`G`Ex@h@t@f@^V`DbDv@t@n@p@r@r@xBlDhE|G|D`JpAnCpAjC~DnIxE~KzAlDbKdV`ExJhElMdC`JtClMtAfHz@hD\\`Al@fAhBjB`BnA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        154
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9706978,
+                                        46.623285499999994
+                                    ],
+                                    "geometry_index": 2433
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Old Hwy 603 S",
+                                "type": "turn",
+                                "bearing_before": 210,
+                                "bearing_after": 154,
+                                "location": [
+                                    -122.9706978,
+                                    46.623285499999994
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Old Hwy 603 S",
+                            "duration": 388.0,
+                            "distance": 7197.0,
+                            "driving_side": "right",
+                            "weight": 388.0,
+                            "mode": "driving",
+                            "geometry": "ibt|wArcppiFhMaI|NqJnHuEnS}M^W`@WdEmCpGkEjEqD\\YpH}HXY~EcG\\k@dDeF\\i@Va@d@}@lCeF|AcDpC_GjQ{`@hIaRbEkJnAsCp@}A|AiDxLyXbKwTv@iBzAgDdCmFFM`@y@pD}GRY`FgHxIyI|FeEhCuArCwAbM{DB?DAd@KnSgDNCvS}Cph@aIhb@{G~GeADAf@Ij@IvCe@dVyDvKeBpSaFnM}FjLeI`@[|KaJdCaChFiF~EeGZk@vEuI`C{EfBsDvAyCjCyFh@kAbVkg@jCqF~HsPbFsKnH{Opn@gsAtq@}xArOy\\hPu]nPs]jOg\\|@qBdK{TfIcQrHcPdIaQ~FkLxDkG|CuEzEoG~CoDjCsChBiBvFiFpIoH~PoOlPuNzPyNbLiKvFeG|C_EzDkFnDkFd@w@rC{EbB_DvAoChCoFJS~BmFrAiD`AgCfCmHrAcEnFoQ~D{MrGmTbCmHh@_BfC{GRm@nBsEN]|AiDTi@f@kAfDiH`IsPlGsMdGwL`EiHxJ{PnG{IlD_E`FqFpGgHjV}WjCsCnG_HjHwHxIyIvBkBpF{EpFmEhGqEtIuFjFaDdFqCrIkEjDcBzDcBnCeAhMkEnRgF~Cq@vEcAb@IbB_@h@Mp@O`GoAtQ_EhBa@~ImBh@MpA[zA]`@K|@Ud@MrCw@hE_BfCcAbCsAnDsB|DqCPOrDaDDCZ]vA{AhAkArDqExEwGnEcH`CuDtBcD~JwOx@oApB_DrAyBbH}K|Tm\\`KmO|DgGdAaBbS_[fC}D|DgGBG~@wAdGkJ|DgGDI~@wAbGkJrAuB`LeQnF}HbEmGhDoFvA_C`@s@pE}HjAsBpJwPjNuV~Qe\\tIkOl@eAtF{Jr@oA`@q@hFeJpKmRhGwKt@qA^q@xB{D~K}RvBwD|CqFvAiCt@oA^q@pA_CrA_CpA{BlBiDr@qAr@mA`@q@xAkCdAkBhDeGfHgMZi@t@oA`@s@rBiDn@_A|AaCjHuKzLaQpG}IzE}G~@qAb@o@bUm[dB_CTYvF_IfFkHd@m@fUg[dImKnWg\\~EkGt@}@bAoAb@k@xj@gr@||@kgAhOuRpc@mj@~EiG`@e@fr@u{@`@g@tFaHvGiI`@i@rF_H`@g@rBiC`CwC\\e@vFeH`@g@zwAogB|b@yh@BCxFcHtGoIvD_FjFoGdLiNvGeIjCcDv]ub@jCcDxOiRzUkYzMcPdAoAlZw^fMsNnImKhHcJ|EeG|RmVdY}]tGmIx`@qg@rO_Slj@{r@tDwEhCcDlImKbPqTlOmUbDiF|AgCfAcBz@aB~@{AlGcLzCaGxH{OfGiMjSua@zMyXrKeUbGoOxH_SFK`BgEdFsMrFoNbNe^jAwCjFgNpR}f@rDoJZ{@zD}JhKiXrI{UxD_MhEiNpCiJh@}AbHaU`Yi`AbMya@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        208
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.91032810000002,
+                                        46.5753681
+                                    ],
+                                    "geometry_index": 2790
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto SW Birch Ave/Old Hwy 603 S\nContinue to follow Old Hwy 603 S",
+                                "type": "turn",
+                                "bearing_before": 120,
+                                "bearing_after": 208,
+                                "location": [
+                                    -122.91032810000002,
+                                    46.5753681
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "SW Birch Ave/Old Hwy 603 S\nContinue",
+                            "duration": 551.0,
+                            "distance": 10320.0,
+                            "driving_side": "right",
+                            "weight": 551.0,
+                            "mode": "driving",
+                            "geometry": "oovywAnfzliFtRfNpNjKhMbJxi@ha@vZnUfAz@zBdBf`@fZlNnKjBzAhDnCvk@zc@bR|NtcApw@tYxTfb@n[b`@dZzB`BxH`GvH~FtHfGfCnBbXpSby@tn@lA|@LJhHrFNLhHrFNLvH~FhHrFNLxH~Fr@j@rFfEnFbEhA|@NLtElDdAx@dIjGNLhJfH`QxMhEdDfLzIxH`GfBtAt[nV~O~LhHrFLJpM|JlXzSnG~ExH~FfIlGlCtBfa@d[jUxQj\\dWnR~NrR`OxH`GdWfR`u@rk@|b@l\\`At@xH`GxH~F`u@jk@hWzRvH~F~D|CjVbRvH~FrG`Fd@^xH~F|o@bg@`U`QfFdEl\\|VzH~F~AnAhYpTlR|NjBvApEjDzH`GvH~FxH`GvH~FvH~FzH`GjCrBjDjCrR`OtH~F@@zH`GpR~NpR~NfBtApEjDvH~FxH`GbwAdgAxH`GxH~FvH~Fj\\`WzHbGn_@xYf[rVxv@xk@zNtKh@b@`@\\HF|GhFdEpC~L|Hv@d@nGvDpEbCvBnAt@`@|F`D~IvErCxApFhC^RlMdGrYhMrMtEfK`EFBvBx@|NpFl@RHBlItCFBtC`AjMrD~Q~EfN`DlYvFv_@jH|Q`Dd`@zGtt@dMr@NbFx@~LpB~`@~GxAV`Dn@hB^xJtBdDt@~Cr@FBjD`AfD|@fJbCxEpAtBl@lDbApI`Cx_@bKna@|Ktu@vSvTpGju@nSnj@jOrRjFv\\bJzAb@xOfEtMnDd@LdkAn[vHrBd@L`HjBhQxEdc@|LvHxB`@Jv[~IrLlDnCz@fExA`@PjBr@jCbAnAj@JFxG`DpNhIjNtIbIfF~H|Eh@\\|GdERLPL|GdEf@X`CtA|CfBf@Td@V~C`B|@`@j@X\\N|EtBvLjEjGhB~NhEjGdBbIvBd@LzIdCtHvBd@LvI`C`AXvF|AjMlDjF|Ad@LpSzFd@N`EjAdAXj@Pd@NtHvBd@NrHxBd@NtHzBnQhFjCt@rKzC~DfAbBd@vHnB~Ab@zFzAjEfArCp@lJlBjIrAbJnA~Fp@~ARp@H~H|@bJdAxFp@|APn@H~HbAtDd@nD`@nTfCvEl@xE^|FNz@@ZAvBArCG`AEfDWfC[lAQnQ_Dv^wGpGgAnEcArBk@`Cw@~EkB|CwAnAo@tEsCfAw@f@]|AgAfEwDdRkQxQ}PhHcHzBwBlDkDlH_HhHcH|BwBjDiDjHaHhHaHjH_HhLuKxj@mf@lGmFvIsHpHqGrHoGpHoGpHqGzj@wf@hDaD~EmEbMqLlM{NzLgP`Us[`b@gl@rZkb@jH_K~LiOl@u@hIkIfa@{a@dFiFlSySxb@ob@bEkDxE_DzIeF`^kRxEgCpYqOhLgG|DyBdL{F|F}B`GcBZGrDw@~AWr@M|Hw@tGQtHD`CFvHr@~ATnHrAp@R|@TvDjAbEzAlGjCxHlE~E|DzApAfCbCpF|FdEjFj@t@pDlF`@p@FJn@dAhBbDvAlC~IbRvItQNZnEfJDLv@~AxBtEhFxKbChFfDlGxCnEfAtAlA|AbBhBp@t@vAlA`BnA|B~AfDlBbCfAbG|AzAXxAVlBPpG^|GArEErJGbVYdDFj@Bl@@pBFzCTf@DxBT|B^~@Nl@NnQnEhBd@b^dK|QzE~MzDlHrBnUrGvV~G~SdGjCr@x@R|@TbDt@fEh@xH`@`HD~i@G`i@J`ERfXCbKAjI?Z?|QUt`ALvj@@~JC|TD|IEfSKnLBfJAlUEfJA`HAdA?fJArJDdF@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        185
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.93816109999999,
+                                        46.4911422
+                                    ],
+                                    "geometry_index": 3242
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto SW Kerron St",
+                                "type": "continue",
+                                "bearing_before": 181,
+                                "bearing_after": 185,
+                                "location": [
+                                    -122.93816109999999,
+                                    46.4911422
+                                ]
+                            },
+                            "name": "SW Kerron St",
+                            "duration": 50.0,
+                            "distance": 544.0,
+                            "driving_side": "right",
+                            "weight": 50.0,
+                            "mode": "driving",
+                            "geometry": "k_rtwA`rpniFtEZlDj@`@HzEnArE`B`DxAt@\\vG`Dt@^nIzDvGdDjB`A`Ap@|FzDvE~Cb@XbAl@@@dDjCdFtF`LdNzVfZb`@|c@fBfCjBbDbBhDrA`DhAfDxC~Px@xFp@nFf@hDzB~MfEjT~DbSnG`S",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        234
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9425996,
+                                        46.4876582
+                                    ],
+                                    "geometry_index": 3278
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto Winlock-Vader Rd",
+                                "type": "continue",
+                                "bearing_before": 238,
+                                "bearing_after": 234,
+                                "location": [
+                                    -122.9425996,
+                                    46.4876582
+                                ]
+                            },
+                            "name": "Winlock-Vader Rd",
+                            "duration": 457.0,
+                            "distance": 10110.0,
+                            "driving_side": "right",
+                            "weight": 457.0,
+                            "mode": "driving",
+                            "geometry": "sektwAngyniFlDtIBHBD|@lBbDbH^p@DF^t@rCfFVZb@h@n@z@|ClF`@`@rF|GlGtHf@j@jAlAhAhAvFlFbNpLr@l@nAfA~DhD\\X`Av@n@f@VP^ZnBvAtA`ApA~@nClBlBtAvE~CfBhAl@`@VN`@VjBjAHFpEzCrExCl@^BBPL`BnAd@^nA`ArC|BxAfA`BrAp@h@TPb@\\~AnA\\X\\Vl@d@hE|DZZ|IrJ`HjIzDxExGbIzG`IvG|H`@b@|@dAl@t@VZXZ~AjBxAfB|BpC~@hA|AfBl@r@VZVZzAjB`@d@|@bA|DzEzAfBl@t@XZTZ|AhB^d@|@dA~DxEzSrVvP`SFHd@h@rFxGrGvHFHzG`If^bb@hBzBxGjIhGhH`F~Fn@t@HH|JvK|DbEdG~Fd@b@`EvDjBbBrHpGp@h@`F~DzFfErFxDxJxGxBpAlFbDvAz@jIlEpAt@pI`EpLhF|CjAzPnGhMhE|_@bMzShHj_@tLn{@rYz@XzG|Bf_@dMvIvChFdB~mBzo@bo@dTfaAd\\`M~DvIpCrT`HlDdArb@pMh_Bte@vm@|QxIhCfu@rT|NzE`M~DnE~AdBp@JDpBv@tElBpAn@~H`E`FlCdLbH|KrHjNxJ|HrFxDlC`Ar@`Ar@vh@x^jLbIlAv@bIhF@?bAn@fAp@jOnI`GvCvI~D`CfA~CnAxNxF~HjCbKxCF@rI|BrA\\t@P|A\\|FpApJfBnNlBfLxA|I~@xANv@H~AJpF\\pFXpMX|MF`kAQ`fA?zO?B?xB?nH?~J?nR`@d@B~Hj@dJlAdWxD|Ev@p@L|JvBzCr@vHnBlN|DzGzBrMxEnOzGhF~BtDbBxCtAzJxE~i@hWpc@tSzZzNjElBpR~I`F~BzCvAhEnB`ChAbMvF~SxJ`V|Kn@XfBz@tDjB@@tCvA~@f@vBdAzH~DbJ~EjJjFdLdHt@f@hNjJhGrEdIfFvDrCbs@tl@dRzOhCxBhDrCfR|OXV|U`SvQnOzFhFbKvLtJfMl@x@hA`BzBhDXb@b@p@fBlC~EhIdAdBbAhBDHlQr\\lFfKvJjRrR~^nFbKlWxf@rCzEpAlBhAbBzCpDjGzGtApArFjErC~ArDnBnDvAzDnAdGxArEv@`Gt@lH?vFAx[EdJAfJAfJC`c@ClUGh^AfE?dJCnUCfJCfJA|k@KfJAnUEx|@E`f@SloBYfJAnUEnHCrMDxHAzBB~EFJ?nERjBHh@DtD\\lDd@f@FD@F@tDr@tBd@j@P`@LhCt@zBz@xAj@zFxBdFlBxLpErO`GhTnIrIhDnDtAzFbCvHnCtJrC~C`ApH`BrHpAxG|@ZDvHr@tH`@xHTxHBjLUvAGt`@}AtRu@vAGfJc@dJa@|WkA~P_A|@GjGc@xAMzD[fFs@pJ{AnIoBtI_CbGuBdJsD`TqKfHoDb@UdG{CfAe@nEoBbC_Ad@QrDmA~Bo@jA[nGcBv@SjFgAz@MdG}@|AOxD]jDQN?vIU`ACzLG~[Ifp@Efq@ObjBi@j_@It`@IfJAfJCfJCfJAdJCfJCnUE~k@M|k@KtmAOjtE[jvBDfw@@fJ?bdBBfJ?jP?jOEdw@Opb@SVAfJEfk@WT?fJEvTKT?fJGpIET?pIET?vaAe@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        90
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.96984940000002,
+                                        46.4019501
+                                    ],
+                                    "geometry_index": 3714
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto WA-506 E",
+                                "type": "turn",
+                                "bearing_before": 179,
+                                "bearing_after": 90,
+                                "location": [
+                                    -122.96984940000002,
+                                    46.4019501
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "WA-506 E",
+                            "duration": 136.0,
+                            "distance": 1797.0,
+                            "driving_side": "right",
+                            "weight": 136.0,
+                            "mode": "driving",
+                            "geometry": "{xcowApnnpiFIsv@Cc[EaUBaj@@cU?_\\@sPD}N?sc@Gw]EeLQ_i@Bak@?{C?yISiLMyIJyCCcBCgIKaMCkX?]CkNAgh@Coi@AiO?gCCoS@gU?wSAoi@Emi@@wR?yMBeo@FguAIqv@?{o@?s_@Es_@C{yA?e`AGoIKyDI{B_@oGYqBw@aGkByH{AyEm@_BeAuC_JwT}BaGsEeLsAcDuEaLyIaTsAcDaC}FaFsJ",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        141
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9469207,
+                                        46.403121299999995
+                                    ],
+                                    "geometry_index": 3776
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto Westside Hwy",
+                                "type": "turn",
+                                "bearing_before": 49,
+                                "bearing_after": 141,
+                                "location": [
+                                    -122.9469207,
+                                    46.403121299999995
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Westside Hwy",
+                            "duration": 1592.0,
+                            "distance": 31228.0,
+                            "driving_side": "right",
+                            "weight": 1592.0,
+                            "mode": "driving",
+                            "geometry": "abfowApuaoiFzHqJnPoSvGgItGeIvGgIfFmGvBcCxCkCnA{@pEcCxDmAfDi@|BSlAMbHUxe@c@lTAdJVdJf@v]rDr]xDxIn@zBHjELzC?jD?zDQzFWvAMPArg@_EhHeAbNgD|GaCfB_AlAo@zF}CPKxG{DpSkM|g@{[jT_NjRsLbC}AnGmC|CiAj@Sh@MzDaAx@Mz@Ml@Ix@KbEWNArFUpBCfJIfJIlYk@ve@Mv`@@|k@?fJ?fJ?fJ?t`@?fJ?fJ?fJ?fJ?fJ?dJ?fJ?fJ?fJ?fJ?`h@H`n@KxG?pJJfUObJDJ?xA[lCKlF_@bCYbEe@hF{@nFoAb@OjHcCj@U~HaDbJcEfCiAdEuBjB}@xEaCpBcA`FgCdB{@BCpAs@vFyCrAs@tFyCrAs@hImElCyAhImErS{KpDoBdKaFpH{CvGiBlGs@jHGP?~ALdF^JDrGpAjA`@pBn@~EdClLjHtRfNLJ`Ap@hCdBdBlAfAt@FDjCzAhBbAz@d@fDvAjBv@LF~ElAfCn@xEXrBLxAHdCNR?pBHxAD`Oh@fJZ|@B~KBlHOfHm@pAK~I_CdGsBfEwAjCsAvSmKdRyIhGqCbIsDJEvG{CvJ_FJEDC`IcDJETIbIcCbA[`LmCjEu@@AH?bJcA~AQpKm@vPInJVbQlAzF`AtL~BhCt@rF~AdBr@|JbExLlFzOlIfSnKFDb\\|OpOjH|HjC`DhA|KtFfH`FjIdFvItCn@TjIvB`Kt@~KF`EExE[nBWpGmB`HiCpCsAZOHE|FkD`@[hF{DdEqDnEeErGeGlDgD|LwLpGkG~G{GFI`IaI`QiRba@ad@bFqGlWu^jG}IvEwG?Ar@aAjG{IjG{I|OiTt@cA~EgGbBuB|BuCr@}@PUbAqA~DeFdDeEr]c_@HK|G}Hnn@gt@xMmOrSaSxQwRbRwQ|OwMjEqDrPqMb[_TfFeDxJoG|P{JVMjP{HpB{@nMoFlXkJtKiDbKqC`\\kIdVeEjMkB~O_BvKgAvQiBr`@oC|c@_DdZyAbJFhGJnGr@rFl@`JzBhBh@hHzBjH|CpAt@jHdEXTpHpGdA~@xEtFlPxRrP|Slj@tr@jLvNlLlNlCtC~FlGbK~KfFbF~EzE`JtHlJjHdHfFvHpFjEjC`LjGrNfHzG|CdDzA`O|FhNtF|D~A~T~ItSjHvIxCvIxCtIzCnTrHvIzC|QnGd\\hLnTrHtRtGbQfG`Q`Gd@PhRzFrJnBhM`B~Kr@lJd@nITnNNtNMhOw@hHc@tCQ~KcArCc@tHmAj@K`J_B|I}B|Aa@vQgFvJqCxHsCzGaCn@Ud@QnHkClT{HtI{CvI}CtI}CdGwBvJqDtAg@nHkCtI}ClT{HvI}ClT{HNGzSqHvI}CvI{CtI}CtI{CvI}ClTyHtI}Crt@qWb[{Kz\\uLfAa@`TqHLE`A]rG}BjIyCjKaEpGsCzFiCnMyG|GyDjK{G|ByAbEoC|EaD~NoLfOgMdLqKdDkDbHmHh@i@pFwGtF}GrHwJrFiH^g@hG{IzJqNhL}OlGwIlGwIlGwIlGwIrLgPxPcVdA{AjG{IjG{IjGyIDGlGgIxFoHdNoPnKyKzFaExHmEfMgH`Ac@~I_Ez@a@hGsBpNuE`FqA~H_BtEmA~OkDdHaBzTiF~IuB|IsBzS}EhCo@tFoA|IuB|TiFbDw@vOqD|IsBjBc@fTcF|IsBbl@aNnGs@pC]fCY~Ek@`@CbBEtDMfQQrHBD?~Nl@jEXvF`@nJr@rCF|AZ`JrBlGvA|Ad@zIhC|GpB`OhGrOdIPH@@|HjFpQtLjFjD`MpI~K`IjLxH|LxGDBnDnBvCnAtGtCdNtE|NvDhB\\J@fFbAlBTJ@rC^rO`AzMBxK@vESfDM~Ek@lFw@hEu@bEy@jK{CFCrOyFrR}JpTgOnRsO`BuATS~GwFrHkG~QoO\\WrTkP|P}IXMh@YjGwCVMfK_FbGmBZI|FiB`AU\\I~HiB\\I`Ds@~NyCFAzIeA^EtC[nDUhKq@\\CnOS`DH|MTdP`AxAH`Jh@rTvAhs@nCrYfBdJj@|BNnQhAjUxAfJj@pCPdg@zCxk@lDlDRr`@`CjUtAlCPnSz@vEVzJChHS`SgAfL}AtEo@jCi@jFgApBi@rHoBn@QpHuB`@OFApIqCj@SdH}CpD_BzJ{Ef\\gRtL}H|]uUlq@}b@dHqEZSbIeFn{@cj@vV{OnEsCnLsHtEwCpD_CnCeBdSkMdHqEZSfHqElPmKlImFlVuO`IeFbIcFnEsCpBqA|WwPhDyBdSkMrD_CZSZUtA{@nEsCz`@cWf]qTrGcEl@_@jBmAlLqH`LiHtMmInPmKtIsFrFuCtCaBzC_B`LoFfP{G~P{GvDyAvEuA~Ag@x@UtNeEhLgDvAc@zIgCpF_BfBi@vHcCfDaAjYgIpPaFlIeCnEoA~C}@lLeDdUyG~^wKfA[zIgCHCj[aJpz@kVpQmFdS}FpNcErOqEpCy@|IiCdTiGpMmDrFmAtDu@pDq@dEo@|Eq@pFg@tDWxDUtEKjKUzDCx@AbI@xMX~GV~SrA`@BpBRbFj@nH~@jANhF`Aj@J^FJBnB^|@PdCl@nAZv@TzKxCr@RfS|FbYpIxIhCbkAr]bGdBl]~J|`B~f@jt@nUtn@bQp`@tLts@~Slv@dT`PjFpGdBj`AhW|eA~Zzf@tNfYpIvA`@tA`@ldAxZr~@|X~JzClj@zOxIfCz[fJvwAla@~qB|l@`UxGvCx@hBb@nEp@lL~AdFTdDFb]sBdDa@nB]|F{AvE}ApDyAVKjBy@jEiBXOxBeAvCgBdDcCdEiDtFaFhEwEnEqF`EmG@AvEwHb@w@bDaG`DiHpAgDfAcD|@cCtDmM~@sDt@}Cx@wDz@aEr@sDv@yEr@cF`BqN@Mp@oIn@yKZcKLeIC}FMuSMqRe@u`@c@iq@IoLYor@E_NIoPOq_@Oo_@Wwo@_@a`AQo_@?OJaLH}ERwFZqG\\sEV{CNoBd@uDb@}C~AeKzAgHhBeIbDcMpA}DhA{CtAkDdDoHnBsDhCkFzL{SzEeH~DoFpDwExF}GtFiGfAmAfBqBrBoBhAgAn@k@bKcJnDqCtEqDTMnAy@tCgB|A_AnAw@\\SzEgCvC}ApDkBt\\eQpGkEfJeHrBaBjByAjBcBzEmExAgBd@k@xCkDtAqB`AwA^i@fD}Ej@{@R]rGaL`DyFlH_QlBgGdDqKNm@h@qB`DoMxJec@tIac@`Ik^|Gi\\zCsNvAuFbCmIpAyDvBcF|A{CxCwEnDoFjFiFDClA_Az@s@tDyBv@e@XMtCoAhBi@pA]hEw@tCW~CQvBMpDCdDErJD~A?|KDlD@b@?xB@jEFrEJtDJp@@pEFjECxEKdCKbMgA~KiB`FeAbFqApI_CxCmAvKiEvQcJ|H{EnNcLtJsJfIcJTWbGiHzM_PvAgBxJaMdM}OtSoWjYm]hZm_@fAwAlEqFvOuRpMuPjBaCrGkIFKdJaKvIyIfDwBLIdEmC`CgAtAm@rEoA`E{@nEi@r@IpGMN@nDDbJ`A|FtAnGpBlCjAvCnAhFnC~ErCfe@dXLHhPjJdB`AdIvEnSlLfItElSlLxHlELHxHlELFfIvEdItEfIvEnKdGlSnLfIvEdIvEzHpEvNdIbDhBhIpEnSfL`GbDfAn@dIvEdIxEzHnEJFfIrEpSdL~BxA|FlDrH`EbHzDtBhArEhChAn@`N~H`B`AtM`IxOdJdHhEjHlEVNdI|EjF`DvA|@bIdFlCbBrDbC`IhFbC~AzDjCzCpBrKdHbDxBnFnDnGbErD~BvC`Bh@ZlDlBzC~A~@f@lCxAtCtAtHrDdCjAjD~A\\NlI|DpEtB|BdAzCtAlJvErCnA`@P`HpCLDpH`DxR~I`R`IxMxFhEhBvM`G|@`@p@\\rAp@nOxHpBdA`EtBrEzBdDfBjC`B~BxAbC`B^Vd@^n@b@hEdDxGlFhDjCfDhC|CdChDbCNJfBlAdC`BpBlAdB|@dB`A|BdAJD`DtApBr@rBr@lErAxGrB`MlDbL`DdFzA`FxAjGhBzFdBjFtAlIzBpF~ArLlDdTdGxMxDxGpBzNdE`XtH|^jKn_@nKrMrDfY~HzMtDxDdA`D~@rA^fGdBvd@hNzDnAxKhDzDnAlEpAnY`JtLvDjEvA|LzD~J~CrEzAdF`B`FdBjRjGpJzC|EzAbF|AvEzA|KhDxLxDhErApEtAlErA|EtAxEvA~DlAjExAbF|ApLrD~O|EvOxE~GpBdEnAzGrBvMdEjLvDlJxCz@XdK|C`IpB|A`@nDz@pExAvHlC`Cx@zDrAlCz@jDfA`Cr@nC|@rBn@nBl@bCr@nBj@hDbA^L`AXxDjA~Bt@zBv@`EjAzC~@`GrBzEfBhCz@`Ct@zBl@rCx@nF|AhA\\~FjBjCdAvClAbCbApBv@`Cx@ZJxCbAdEnAnDjArF`BjEnArFzApHtBhDfAfDdA|Af@|@VxBt@jCdApBz@`DnA~ChAxBr@\\JxIrC~DrAxBr@D@rBl@VFdB`@dEv@`G`ANBjIvBtHlBtD|@vCp@|Cj@bCb@dC\\|B\\J@`BNdBLD@^BhD\\jCLfDPD?lCLx@BJ@jCJl@DhGZvF^D@pAH|BN|AJv@BtCLdEV|E\\bFh@lEXdAF|AHx@DtBJlERhFJ`DFhBDzTdAnBHpBJj@DlET~Nx@jDPpG`@nBLl@DhEPjER`ABvAD|GP~DDpFDnB@xA@bA@xA@hFDzGC~DSvC[rEm@rJsBlDmAxCgAlB{@v@]jMuF~CiAxAi@|FuBv@YZM|GyAfIqADAx@IpCWtFMvF@pE\\fDp@hEjAdEzAhC|@tCpApF~BtCzAnKjFvEtBz@`@zF~BZLhC~@pBl@bFzAbCb@dB\\\\BlGVbG@zDQvDa@|AWl@KJCxF_Al@KBAfFeAbEw@hDYjEMvE?pFPhLh@~I`@rGFxHCxISrGg@jFy@rF_AvGoAjIaCxEgBjFqBrFmCfGkDxFuD`JiGvJkHNKdHeFfGuEtHwFtHkFtAaAzEgDrHwE|FgDjJ_FtJuEvB}@zEkBfTsIj^_OzFyBhDiA~Bs@bBg@zFkAxH_ApBSpAGRArDMlDCnHBtFRnKz@fDXvCT`Jd@|BJ`HLxC?fJ?zEKxCWhGi@dEm@nAQfHkAjFmA`IkB|GeB~IwClDuAjDuArFgCdJyEbHcEhD{BbEoCrG}EnFkExGaGzHkIbIiJjF}G|MuQhK_OjGcJ`IuMnFsJnH_ObDyG`GwLdDuGd@_AxAyCnHwOtF{KlEgIfBcDzEeIrFuIpF{GlFcGbHkGfI}F~LqHhRsHfQaGnDiAh|@uX|a@oMtr@sTbX}HrCs@fCh@pMaCxf@sL~t@sSj^uLpAsAdC_CfYcHfMgDlm@yOnJgC|C}@vTqGhFY`K_CpHmAxN}ChJ}B~HqBdG_BzPmE~VeGr}@iVbRsF|ByBxCHxDQrE[pDKbB?hD@fBHnDTlBRdDh@PBdDp@jFxAbFhB`JtDbErBdIdE~GnDvUtOt@d@vMnIfExChEzC`EjC`BdFLV`@j@fBzBrb@jc@~HbIhFnFdVzV|HrH|KbK|IbJ~CvDjHfKlEjEv@|AhE~J~CfH~FjNdI`SjChGlG|ON\\pEbLrG~OrCfHjKlWbM~ZrA|JlWdr@tUbj@@DtJfWpHfMbBlCvEvGbCpEzB|DdE~Fp@bAzBlCdDtDxDxDrBdBdDfCTPz@h@rCfBxIlEnChAlDhAlElAvCp@tAXH@fEt@LBfCTB?hG\\|PRnFCdJBfA@lCBpA@|@DzCJbDRrG\\vEh@tEp@nI|A~IjBvKjCD@nCr@xAb@jH~AlH|@`Hx@xDh@~Fd@rEPjJZ~DLzC?`A?rCCpCEp@A~Ge@hFi@nCWtD]^EfJmAdIq@xEc@pEMnDBfE@tAJ`AHtDLDAbF^vATpEf@tNhBdL~ArC^`NxBlJ|AzDvBj\\jIlL|Czj@bMbe@nL~ANhRdDl@F`L|@~C]vMbA|A@vQDrLc@j[Ql[}@xJWrOo@~`@{@xAE`b@_AviBiEjR_@hFK|BGpk@sAnw@qBxYk@xr@yAfJWtDIvK_@ha@wAjBKfFY|BKvEIPClIs@rTw@rZsB|SeB`QiBp`@cFfb@uFneAiN~U}CjIu@zFHx\\d@|G@p[\\",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        184
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.91480689999999,
+                                        46.1502218
+                                    ],
+                                    "geometry_index": 5405
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto 1st Ave NW",
+                                "type": "continue",
+                                "bearing_before": 181,
+                                "bearing_after": 184,
+                                "location": [
+                                    -122.91480689999999,
+                                    46.1502218
+                                ]
+                            },
+                            "name": "1st Ave NW",
+                            "duration": 56.0,
+                            "distance": 522.0,
+                            "driving_side": "right",
+                            "weight": 56.0,
+                            "mode": "driving",
+                            "geometry": "{cx_wAl~bmiFpXlAlEZzJr@`I\\tFj@vA@bGe@vL|AlLtBpJ|B~MrDjCz@dXvIr[fKzDnApHzB|YbJlK`DbOvE~HvBxKvCtFxA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        193
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.91621219999999,
+                                        46.145648
+                                    ],
+                                    "geometry_index": 5427
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Allen St",
+                                "type": "turn",
+                                "bearing_before": 194,
+                                "bearing_after": 193,
+                                "location": [
+                                    -122.91621219999999,
+                                    46.145648
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Allen St",
+                            "duration": 59.0,
+                            "distance": 517.0,
+                            "driving_side": "right",
+                            "weight": 59.0,
+                            "mode": "driving",
+                            "geometry": "_fo_wAfvemiFnDz@Q}Ih@mCbCwQdBqNh@qFhBkNTcBbFun@d@oFf@iGnA{NpAwNjAkNjCqZ^aE\\aENmBrC{\\hBqShBqSf@gEp@gHZgCvAmOpAaPj@eNBoOGqGIaF",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        152
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9098269,
+                                        46.144625999999995
+                                    ],
+                                    "geometry_index": 5457
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right toward S 4th Ave",
+                                "type": "turn",
+                                "bearing_before": 87,
+                                "bearing_after": 152,
+                                "location": [
+                                    -122.9098269,
+                                    46.144625999999995
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "",
+                            "duration": 5.0,
+                            "distance": 48.0,
+                            "driving_side": "right",
+                            "weight": 5.0,
+                            "mode": "driving",
+                            "geometry": "cfm_wAdgyliFhBqA`@u@|ByElA}AfAcAbAs@nAe@vCQ",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        170
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.90951489999998,
+                                        46.1442684
+                                    ],
+                                    "geometry_index": 5465
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue straight onto S 4th Ave",
+                                "type": "continue",
+                                "bearing_before": 175,
+                                "bearing_after": 170,
+                                "location": [
+                                    -122.90951489999998,
+                                    46.1442684
+                                ]
+                            },
+                            "name": "S 4th Ave",
+                            "duration": 6.0,
+                            "distance": 48.0,
+                            "driving_side": "right",
+                            "weight": 6.0,
+                            "mode": "driving",
+                            "geometry": "wol_wAtsxliFbHkAnBc@pB_AtAmArAqA~AqB",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        97
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.9092905,
+                                        46.1438756
+                                    ],
+                                    "geometry_index": 5471
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Oak St",
+                                "type": "turn",
+                                "bearing_before": 141,
+                                "bearing_after": 97,
+                                "location": [
+                                    -122.9092905,
+                                    46.1438756
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Oak St",
+                            "duration": 8.0,
+                            "distance": 59.0,
+                            "driving_side": "right",
+                            "weight": 8.0,
+                            "mode": "driving",
+                            "geometry": "gwk_wArexliFZkIR{Ab@eFD]l@}EnCyP",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        147
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.90855189999999,
+                                        46.1437358
+                                    ],
+                                    "geometry_index": 5477
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight right onto Grade St",
+                                "type": "turn",
+                                "bearing_before": 110,
+                                "bearing_after": 147,
+                                "location": [
+                                    -122.90855189999999,
+                                    46.1437358
+                                ],
+                                "modifier": "slight right"
+                            },
+                            "name": "Grade St",
+                            "duration": 128.0,
+                            "distance": 1532.0,
+                            "driving_side": "right",
+                            "weight": 128.0,
+                            "mode": "driving",
+                            "geometry": "onk_wAnwvliFfhAmbAt]gZfFaExPiPjJiInNiOxHeIzBeAhO_MhM}L~GsGjx@wt@de@ac@~GqGxgA}aA`QwNlYcWh]w[zToQrFiE~[aWnS{ObR{O@AVUbDuClG{FjD}C|@y@f@a@jHwGrE}E~@kAdB_ChBaDh@eABCvBiEdBkEpAkDbBoGDSzAaHh@eDj@wDv@yG@]d@sKJmDBiFIgHQ_GSwD}@}JcAqJkBoPy@{GqFa`@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        157
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.8965682,
+                                        46.1339448
+                                    ],
+                                    "geometry_index": 5535
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto S Kelso Dr",
+                                "type": "turn",
+                                "bearing_before": 72,
+                                "bearing_after": 157,
+                                "location": [
+                                    -122.8965682,
+                                    46.1339448
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "S Kelso Dr",
+                            "duration": 191.0,
+                            "distance": 3241.0,
+                            "driving_side": "right",
+                            "weight": 191.0,
+                            "mode": "driving",
+                            "geometry": "qjx~vAnj_liFvNoHrK_FjI}EnGkEbd@uUbaAoi@pc@oVx[qQ~@g@fIsEx]yRfIqEpu@ab@~l@k\\dh@{XbFyCxz@ef@x_@gRxSsKlCwAvDwBBA`HcEhIyHHIbC_DnIuPJSxEuJtLkVfAwBlKqQzAkBlHyHjF}CBCjK{Fh@Y|WyMrAk@FC`A_@n@WtCw@zB_@zC[jCB|ADnDPxADR?P?h@@lA@xBKpAKz@MREbAWhBk@rW}Ml@]~FaDFE`IkEfAo@~FcDFC`ImEvF{CnAq@hAm@`G}CfAo@zToMzEkBfVmMrF_DdImEh@YjAo@rEeCBAPKnHeE|@g@rQyJlScLnBgAb[gQjH{D`@Uz@e@~CeB~@g@f@YrHmERKnBgA|BqAt@c@b@U`]}RPMdEkClAu@n@a@jAy@nEyC~IoGbRaNxEkDtB}A`GmEx@e@f]mT|KuGvCeBtA{@jAs@nCaB~@i@h@[vG}DrJ{FfIqEvGsDVMVO`IcEfKuFrIsDnDkBjIgEdDeBbB{@~@g@rE_CxBeAf^gQtHkDVMvEyBvBcALGfEsBvBeALGhEsBtBcALGx@c@`RoJvH}DLGjEuBrBeAvE_CtBeAJG~F_Dn@]LIrEqCnBoAjDyBpOwLzCiCrAgADE~DuDdBcBrAsAbC}CbAuA@ClDeFvAyBv@oAvBoE|@gBpMuWzMy]bDuFhFiIPYpGeIrAeBnLwEfDc@hEHnDz@dCfAt@b@fA|@bBlA~@z@|@x@x@bA`AvA|CxF~FhL",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        148
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.8794394,
+                                        46.1081359
+                                    ],
+                                    "geometry_index": 5737
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Kelso Dr",
+                                "type": "turn",
+                                "bearing_before": 229,
+                                "bearing_after": 148,
+                                "location": [
+                                    -122.8794394,
+                                    46.1081359
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Kelso Dr",
+                            "duration": 45.0,
+                            "distance": 520.0,
+                            "driving_side": "right",
+                            "weight": 45.0,
+                            "mode": "driving",
+                            "geometry": "o}e}vA|{}jiFdDuChCaCf@c@rEwEf@k@f@k@|BcCdVoWnBwBNQhAuAfAwAp@cAnAqBbAqBr@gBx@wB`@oAFWd@kBb@uBVgBVyBVgDZmFJmBJqBD{@H_BNeCNoB^oE\\oCZ{BDS`@}BPaANw@h@iCr@oCjAcEjAqD|@iCXu@Zs@t@iBd@gAJQz@mB~@gBr@oA~@_BhAgBZe@RYPUhAyAt@{@HKdDkDfAaAv@q@`BqAdAu@pAaArCgBbCyAtEkClJmFrDqBzBmAFE|@e@rEcCpAo@PIvAc@nA[hAOz@Gp@AnAHlAT`@vBb@p@P`@Tj@Ll@NpABpAF`F",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        301
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.87573899999998,
+                                        46.1049988
+                                    ],
+                                    "geometry_index": 5828
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, take the 2nd exit onto Old Pacific Hwy S",
+                                "type": "roundabout",
+                                "bearing_before": 267,
+                                "bearing_after": 301,
+                                "location": [
+                                    -122.87573899999998,
+                                    46.1049988
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Old Pacific Hwy S",
+                            "duration": 252.0,
+                            "distance": 4345.0,
+                            "driving_side": "right",
+                            "weight": 252.0,
+                            "mode": "driving",
+                            "geometry": "my_}vAttvjiFY~@IVCNANCPAN?N?P?N?N@P@N@NBNBNDLBLDNFJDLFLFH@@DJHJFJHJHHHHHFJFHDJDJDHBJ@J@L@J?J?RELAJCJEHEJGJGHGHIHIHKHKFMHKFOFMDODOBGBIHYJc@~CwAdAu@tAaA~CaB~BwAtD?tAk@jOcCvd@iIla@qTfQcTxQgWFGhA{Af@w@f@u@bQqUbSgPnf@gXnCeBzBkAzRkKrAu@hGkC|ABbYiNbP_BpDWfAInBE~GWbAKvDUlDKxDe@LC~NyChYwLDAHEnCuA`OoG|DsAnC{BLIZQjBy@nOuGz@I`BIbEAH?xCFtDH~IhC`JnCpWzGvWuAnDuApI{CBChImCjk@}Kr`@cJ|y@gV|NeE~RoP`HsHFGfHcHlSsVhDoDbRyKtMmBjCE|CBfDB`EDbJNtZd@pLq@xBOrAOvC[|AQlBYvNwBjLsCnGaBdU{FtO}EpC{@nEwAtLcF`IwDl@]~DsBhIkEjCuAd@WxC{AjIiE`Ag@bGoD|KcHbIcF`IcFbIcF`IcFnFyDnAu@xA{@hEsBhBw@hAc@fPyFtEoAdFwAjGaBlBe@lKoCzI}BjHmBp@QhHkBnKoCzI}BjFsAfc@cLhFuA`AQpVgF~TuEfAWrGeBtA_@|Q{FFCzBeArP{HbAe@bFaDfBqAbDaCrMoJ`As@bBeAzCkB|OyJ~HqDtIyC`Co@zUqGxS_Fdf@cLDA\\Irj@wNzSoFjQkI~DkBh@e@pDaD|BoBrDaDnBiC`DgEnBiChKcNb@y@`B_DjFeKjDuGz@uB~BsFpA}CDMhBgGbCeIhCeHnCsH|DeJlDuEnIcL`KeLxHiGrEaCbHsDrJ{ExSiKpGaDrZoLhMkDLEvLgCn@Kb@CnGe@tAIzEYpP`@bHh@bJb@lPtGrAf@l@T`I`DjIpFlBnAjEnDxC~B~FjG~GrHdGjJtDjH@@LVrEzJpB|EhGlSvAdKrDl^vGzt@~@~N@NtAb_@bAlNBPfAfN@NvAnO",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        247
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.86510549999998,
+                                        46.0710598
+                                    ],
+                                    "geometry_index": 6121
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Keep left to continue on Old Hwy 99 S/Old Pacific Hwy S",
+                                "type": "turn",
+                                "bearing_before": 256,
+                                "bearing_after": 247,
+                                "location": [
+                                    -122.86510549999998,
+                                    46.0710598
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Old Hwy 99 S/Old Pacific Hwy S",
+                            "duration": 193.0,
+                            "distance": 3586.0,
+                            "driving_side": "right",
+                            "weight": 193.0,
+                            "mode": "driving",
+                            "geometry": "gp}zvA`|ajiFpDlQv@~Gb@zAjAhE~A|FjAfENf@bHjPbHrKdBhCLNxLpN`@d@dBlApNvJjChBB@pFhBzIrAD@bC^pAJ|CXtABD@bIR`@?vB@lF@@?fJMtBCpFGzFIrMIjd@WpFE`DAdEFfJNdLPv@EnFWrG[nAYrBc@jFgAxLiCp`@cDbJu@fHm@xHkB`PkFb@MfBs@nFiBhBi@jE_BhCaAjCaAhAc@~By@xZ{KfCaAtIeDxDwAPIfCaAtI_DzCgAr@U|QiFxAY??tNaBjACjCE|RGtN?rAM`FMnDYrJkA~GmAvKaDzH{B`SeGBAnJaDhIkChIuCtMkE|EcBXIzHgChUuH|EeBzB{@zE}A`Bm@VKl@QzFaEbRoPVYpKcLtCcDDE~GwHtHsIfGyGvHsIpO}MfJkHzQkL|ToLpLyFhQoIxB}@bF}BhN}GfGwCRMtGqElHaG`BuAnAwAnGgHLQbDaEhFuH~BiEbB}CvBuEJUpBiEzAyDJWjByEzAqDJUjBiELWfBqD~EoJLUrCuFpAqBLStDyFpAcBvFcH^a@`@e@`BgBlB}BZ_@LQvGqIhFgHjFcIfDwFvByDLSrAgClCaFjCoF~FoNbDkIdAuC|CsJxEyOdBcGd@aBzIi[@EtAeFhPgm@fAaEfCuJjDgM@Cb@aBjEaOdBkFlDuInBgEdCiE~@yA~AgCvDwE~G}GtAmA~NiIv@[pGaCbASdCg@fNgAbM?nS^vCFnCLdOZv@LnEN~ABdJTx@B|^\\z@BlEJhBDh`@fAdJX|@@~i@hArGDrCFlEFlTTfJOb@@tCVtOTl[~A\\BtO@fJ@jE@zS`@fJPvAD`QbArQbFv@~AvArArEh@pCIlIq@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        229
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.8543532,
+                                        46.0428891
+                                    ],
+                                    "geometry_index": 6361
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, take the 1st exit onto Kalama River Rd",
+                                "type": "roundabout",
+                                "bearing_before": 174,
+                                "bearing_after": 229,
+                                "location": [
+                                    -122.8543532,
+                                    46.0428891
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Kalama River Rd",
+                            "duration": 18.0,
+                            "distance": 219.0,
+                            "driving_side": "right",
+                            "weight": 18.0,
+                            "mode": "driving",
+                            "geometry": "qofyvA`|liiFDHNVRRPRRPTLTJVJTDVDV@L?xI`IrEvDjEtE`G~DlKdQhB|EpCxIr@lCzApINx@bAvGhBpQ\\rDtA|J",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        174
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.85644309999999,
+                                        46.041713099999996
+                                    ],
+                                    "geometry_index": 6387
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Meeker Dr",
+                                "type": "turn",
+                                "bearing_before": 252,
+                                "bearing_after": 174,
+                                "location": [
+                                    -122.85644309999999,
+                                    46.041713099999996
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Meeker Dr",
+                            "duration": 251.0,
+                            "distance": 3695.0,
+                            "driving_side": "right",
+                            "weight": 251.0,
+                            "mode": "driving",
+                            "geometry": "afdyvAt~piiFlIo@tIk@hDhB|BnCnGhLFJx@xAf@`AfMzVjDjEp@z@dArAdApA`@f@vHpHdE|A~DxA~EhBxB^|Ev@bORjI}AxCk@t@Ohz@kRvCq@LChAWlBc@dDu@n_@sIhW_Gbf@uKvA_@h_@sJJEnBe@z[eI|IsB|IsBf^kIzTiF|IsBJC|RsEnVyFJC|G}At@QhHaBr@QhHcB|IsBt@QHC|IsBpTeFJApIqBnVwFvHgBnf@sLjUiF`RwHlDeCdDaCxAcB~AmBrEoFPUpLgPt@aAdIsK`ByBpHmKfCmDzFcIpC}DtAkBvLcPv[{b@bCaDb@m@PUxPgUvD{FdHuKbBiCvDeFdMyPzE_HdD{EzIiRjG_T|Mke@Pm@xCwKPm@dTgv@~Tey@hAeEj@qBt@uChIaZ`@sAn@mBrFkQfCmH`D_IdLoWBE\\u@Xk@lR_b@xDeHv@cABCv@cAxAkBnCyB`G_E~@YvFcB~B[bEWjA@p@@n@?r@BrETxQdAfJd@xAFl@DVBnAFxLr@`ET|a@nCjOv@f@B^DlAHpAJlAFf@B|CPfER|CPnDPfAF~BJ`AFnAFd@B|CPxLj@v@D^BbKh@nNf@~Xt@~AHXBbM|@fI`BlGxCPHhDzCtBhBhB`BfAvAJL|ApBfDnEdBzBBDrChF|ArCpF|JXf@zJlVPn@jEzPp@pD^pBJl@FXn@lDl@~CpCtOZ|AhB|GrA~CvBbEtCzCxH|FdFdBhUzBh`@hFlHz@bM|AxOh@zNJfHKVAxAGzCSvAI`Ik@hFQvBIzKg@jJW`No@jHoAhH_DvGiFx@o@fDwDJMf@m@LKlFyFt@u@zAyAjGaGtN}K",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        161
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.84708540000001,
+                                        46.013617499999995
+                                    ],
+                                    "geometry_index": 6615
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto N 1st St",
+                                "type": "continue",
+                                "bearing_before": 150,
+                                "bearing_after": 161,
+                                "location": [
+                                    -122.84708540000001,
+                                    46.013617499999995
+                                ]
+                            },
+                            "name": "N 1st St",
+                            "duration": 176.0,
+                            "distance": 1193.0,
+                            "driving_side": "right",
+                            "weight": 176.0,
+                            "mode": "driving",
+                            "geometry": "ajmwvAxu~hiFtYqLb@Orl@{Rlb@aOtMqF`KcDbC{@lW{I~Ag@~RmGfBs@fd@kOvSuH`a@aOvE_BbTkHrUaIrJgDdGcCn@S~PeHxHyBp@UtIyCr\\oLjLcD@?~IsBnBa@pF}@lW{DtG_BzAB`NsC`ASx@U~EwABAtIqCvBq@~EcB@Av@Wx@a@zE{BrB_ApJkEjU{LzByAlBoA^WnDkCbLqInCyDhKgK",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        123
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.84230330000001,
+                                        46.0034603
+                                    ],
+                                    "geometry_index": 6670
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight left onto Cloverdale Rd",
+                                "type": "turn",
+                                "bearing_before": 145,
+                                "bearing_after": 123,
+                                "location": [
+                                    -122.84230330000001,
+                                    46.0034603
+                                ],
+                                "modifier": "slight left"
+                            },
+                            "name": "Cloverdale Rd",
+                            "duration": 240.0,
+                            "distance": 3573.0,
+                            "driving_side": "right",
+                            "weight": 240.0,
+                            "mode": "driving",
+                            "geometry": "goyvvA|juhiF|HmUx@eCrAaE`@gAhQwg@|I_X|BgHjGcTlBuGrIk_@vCuMh@{BlBwIvIc`@bJy`@rKka@rBqFrCuH|GiSd@qBdBaHtEwXfImi@fBwLnBkNp@_Fb@kGr@yLOaf@SeJ]iRb@m\\BkAhBiUtB_SzMob@~Oi^nCeHhCiIxAsGdAcFfD{QvBaLv@iEnDcQxB{I|BwHnBgFvCgGhGeKDIpCqEhBkCjDkFvAyBDItDaGpCcF|DsHtCsGh@kAxE{KtA}C~BcGlEeLDMbE_LpAkDtBaGDM`Q_h@|Mma@v@cCl@mBtG}QpEkLtF}KdDuFtAsBlAkBx@oAhZk_@nHgJdRcUx@iAp[_e@`MaT~CsF|Xkf@rDkG|EmIZe@t@kAfG_JxDgFDGXY~VgVzV{Q`Ao@hCcBbAm@n@]rIoDdA_@xIcCbJ_AlQg@~\\CtB?pF@tBApFAvNEd\\InCAvECfU_@tWeF~IcBl@KfQgSd@_AlHeOrBiEbCiKt@_DfBqHxGgYb@yA~Ic[`AeD`Tm_@dLaNrOiKb^aSx@s@~EmFJKrGmIr@}@z[wf@|D_FzCqDFGzGeHnAqAdEiE|AaBdEsElHcIbHmHnCuC~JcPlEeHRi@Ri@bAsCbCyGxEuMnFaKtB{DDCpRuMjIwFhJ}Gd\\aVJIfAw@~F}C|HeEJGhImEfCsAvDiBJGlI_E~IiEpNyC`L?pMvC",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        132
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.8119036,
+                                        45.9823915
+                                    ],
+                                    "geometry_index": 6851
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Green Mountain Rd",
+                                "type": "turn",
+                                "bearing_before": 193,
+                                "bearing_after": 132,
+                                "location": [
+                                    -122.8119036,
+                                    45.9823915
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Green Mountain Rd",
+                            "duration": 412.0,
+                            "distance": 6048.0,
+                            "driving_side": "right",
+                            "weight": 412.0,
+                            "mode": "driving",
+                            "geometry": "ojpuvA~~yfiFdDkGpDqFFOP[hD_IT_A@EJk@rAaIXoDx@gMFu@v@gMFs@jAyNbAiM@q@BkARwLJcOU{HKgEM{HIgEEcDGaJE{HKeLIgHWcOMoKCuAFsS`@oXOsQ[oJo@wIi@kJMuCYuM@q@^cObA{NbA{NB_@NsI@oC?eDEaFEyDg@sKWaL{@oUWqHUoE_@oHIyHFeOFcJF}C\\aOb@cOlAe_@b@aOf@aO`@cOHqNBsDFqI?Q@sNBkODe_@?sABsCDcEBkBFiEHgHF{EFmXXcOhCmGrBkCt@qKn@eHjDyIbEgGlBoCbUeZNS~F}HNSvKoNvEeGbPoWvA_I~@wGFkC?e@CcI]wCoAyIuCoHsDmF{FiEuJeDYKGA{HwAwGsAeAKcJi@c@?qB@mE^wJlByI~DgI~CmFrBsAp@sAj@kGtCiF`CeWlLkI|DgFhCwLnFiF`CeBv@cAb@qNlDuNyBoHwE{GyKmDsLcAkG]_KLgLfAyJ|AsNLmAnAeLzAsNNmAj@kFh@uDpBkNnBkNpBiN^mCdCyHvBwG`AcDzCaKrBsIv@aEzAuHNsD`@gJEyCAoAKyHMwBIoAs@mL}@}NIqA_AuRO{HK{E?kGCqR|Aq\\tC{t@@SHqNTcd@_@iJk@{MiCeOSgAaCoKmBsIq@yBuD}LwD}LwUyv@uD}LuD}LcP{h@cGgSeJa[sEuNuCiNw@sFg@eEM}ETeOzDuWdPwYdOuPxYk\\~GyH|GwHdG}G~KyNnB_Et^su@rTgd@dIsPhFgKhFiK|EsJJUdDuGhAkBzFoJfEeHt@iApMmSjG}MdE}IHaA~Cq^Fw@j@iLR{Dt@_OjB}^hB__@nBe`@~@{QxBe_@nB{[x@aNx@aNv@aZw@eOM_CM}B?AkBuSoEoTcEmMc@uAuCcJK]wHcVcLc`@CIiAuGg@sC}Ga`@a@eCaAcGO}@G]aBiKQaAE[}@qFe@uCQgACUwEsYiAwOy@gLwAq^CmEKiOKiOWs_@?[EmNCgFAcGEuLJoBT}EL}CB[`EgVrBeNVyHJqCGoBK}CEcBCu@MkEAOQkCU{CaAiNw@kZpD}c@`Qgt@`D}MtHw[zCoM|CqM|CqMxHc\\fBsHdGgP|LiYNYjC}KFSbAiEz@_GBUl@_EdA{SHeCd@cMB}@d@uK\\aBDUhCcMFUXyAjB_F`HqI|@u@LKbHcGLKfCwB|CgCLK|AoAnD}EJMbGeIlA_BnIuRf@gAzDoIn@u@JMrA_BrCiBfA?N?fEBjFMrDKhDmAvHmCX[dHiHzB}BhDkDtCyCrE{EnJiKh@m@fFcHjBgCXWxCqChF}E`A}@lH{GlAgAfGl@dJ~@bJ~@dJ~@bJ~@fJCfJEhYItH[vKg@xQy@rBLtHb@D?h@DlHhApCB",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        180
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.7524744,
+                                        45.9746221
+                                    ],
+                                    "geometry_index": 7236
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto Shirley Gordon Rd",
+                                "type": "continue",
+                                "bearing_before": 181,
+                                "bearing_after": 180,
+                                "location": [
+                                    -122.7524744,
+                                    45.9746221
+                                ]
+                            },
+                            "name": "Shirley Gordon Rd",
+                            "duration": 265.0,
+                            "distance": 3190.0,
+                            "driving_side": "right",
+                            "weight": 265.0,
+                            "mode": "driving",
+                            "geometry": "{dauvAr|eciFjH@z@B~@BxADnCJz@Bt@BtFPz@BhHZvENvNd@z@D~@BhFRz@DzCLn@B~ABfJNz@@~@@jFJz@@ne@f@pCBz@@`A@vABpCBz@@~@@xA@jB?d@@z@?~@@xA?pC@z@?`A?vAApC?z@A`A?vAApCCz@A~@AvACrCElUYz@A`AAvAApCCz@?`AAvAApCEz@?`AAvA?pCAz@?~@?hFAz@?`A@vA?|[@dOHtAApGAtA?|B@B?nC@rA?rJDzIB~B@@?nC@tA@~B?@?nC@tA?~BBpCDtA@dA?jEBrE@hCb@pBf@hCtAbAfA^b@rA`BfA`Cj@vAZv@LZ?@jB`Gh@dBVz@HR@DtBvF~@`CXh@jCbFn@jA`ErHr@rA`@r@LTjCbFtAlCHPdCxEtFpHfBdBv@t@@BjBfBfAx@pBzAJH@@VPdCvAd@RdBr@TFH@F@nGx@~@VHBDB~B~@bAd@tAfCJRt@dBlApJRlBXxDRtCNt@@BVlAx@zDTb@HNz@~AJPv@rA~BhAPFjBv@HBD@j@PxG|BdPrHNHdB`AHDdAl@nCxAhSdKNHfB|@HDvCxA`Af@nFlChErCxDpChBxADDLJfAbAhEpDdFhBzDIlDkAJCdAe@f@[\\S`Ak@jBsANIpBwANKb@YlCwALGtDgBhCoALGb@SpA_ANKdAcAzAgC\\w@z@_EPiC@aA@]H{D@U@UR_ETs@FUb@iAv@kAFEtBiAhB[fAKtQnA`@?bBGNAdE[LCBA~Bk@NEvDcATOdC{AbC_Bp@c@ZS~AcANIxDwBDCjB_AJAtMeBrBg@dA_@j@[NKBCZa@TYPS\\_@Za@NSPSHK^a@XYRSjBsAb@QVKLCJCLCTAF?N@LFRDTDPFVRv@bAv@`B^xADRR`BLhK@b@BtARhKBxBDhBN~GDxB?Fn@hIJn@ZrBV`BvAfEVf@x@xAp@pA|ClDfA~@|BjBrBpAjAt@j@\\vE|A|@XhBvDr@tF?TFxFZvFz@bHfAjEtAnFtAtE`BpFNd@`AhDfAxD@BjB~FBJrBpERZbB`CJLtBbBf@`@bCz@dDlApHhAp@FdCR~EFT?tEwAnBg@jFsArBOz@IbBN~B|@t@n@|ArAdDjGf@`AxCnJpBrGbAjDhBjGxA`DbAxBnBlBfBhADDxB`@jBKzA_@jCgB`A{AnA}CXs@bBiIJyAHeA`AsLNqBlAaKVaBhBsH`DuJvEiJh@w@l@_ARYlAgBxDsDjAkAlFyCr@]tGeCfHoAD?v@KXENCtAQxC?~CFhB`@jAr@RN`@^XVR^n@bAlBnD`@dAbDbKb@vATr@rBdGTh@Tl@f@nAlBbF`AjB`DdG`CdDtDjFnMxOtDrEHHtCdDf@b@t@p@rEtDl@`@v@f@VPZRxD`Cd@Zl@^r@h@LLvDfDFFf@n@PVZb@x@lAjHtMzE|H~EtGjChCbExC`Bx@d@NHDhDP|@IPCfAMb@QtCgBvEiEjDsEXi@Vi@nA{Ch@mBNk@v@{CjAsIt@wLXeM?yEAs@EsC]aDGo@Q_BWqBwDcTA_DHuALeBX}AHUl@oAj@wAHMVe@bBuC|D_IhBeHb@cFHwIToDt@aDfAwALKBAl@a@`HgC",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        88
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.757083,
+                                        45.9528543
+                                    ],
+                                    "geometry_index": 7727
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Green Mountain Rd",
+                                "type": "turn",
+                                "bearing_before": 162,
+                                "bearing_after": 88,
+                                "location": [
+                                    -122.757083,
+                                    45.9528543
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Green Mountain Rd",
+                            "duration": 288.0,
+                            "distance": 4055.0,
+                            "driving_side": "right",
+                            "weight": 288.0,
+                            "mode": "driving",
+                            "geometry": "ktvsvAt|nciFKyKIiDc@gI[sBM{@yA{FsByEiE}GcBkCkCyEGUk@_C_@}BBuBRoBJmAz@oDzA_Ex@kB`BsDhAcBJMhCiD~BmCr@y@pFkFNMbA}@nC_CjAcArHiGpHsG~BwB~AiB~@{AHOdBoCbBiENg@DMd@gBz@gF^mF@iEE_B]}Dq@eEg@oB}@}CmGaOuDwHaHiNcGiLiCcGoAiGg@_GLuG~@kFxAkEvAoC`@w@LYhEeGzCiCjCuA`@Sd@WhFw@lAEj@CvDt@|FdC|HxAhFy@v@]rBoAhCsCJQb@q@tAcC|A}EZiAhAqFb@eDNmAT_BpAeRh@uHnA}K?IR}@d@cCjAaCdAw@b@[dBk@hC?nATF?fFdAlBp@B@ZJhCjAzCxBlHxG~BtA~A^bALB?nCRtESvEWnCShH]z@CdJe@NA|T{AdJk@dJa@dJm@jHg@~Jg@lIo@VAdJc@lIe@XAjIs@XClRgAhNqAdMw@l@ERA`BOnF[vBMxAMhBa@d@MvBm@|DaBZOBCbCaBxCsDHKJMvBmD~AkDHWdB_GZmBbAqJLiBDi@BW?eZAmCAsBZmKt@}I@Qd@qBtAeFn@}BjG{J`A{@xBoBbB{AzAa@|F}A`BIfDSnc@`DfAHV@bGXjJZhJEzAEFAbGa@dJu@lQwBxBWzAOlCObBIVCpN_@|ABnU?vIJrB@@?~YObB?nUIJ?xI^J@hJ?fJ?fJEbLFdJO~@AdHO|AExHBjFuBt@k@p@i@n@c@~BqCdAeAdHeHLM`KeKrFoCjH{DXOFCfHyDbIaFdHiE|BmAhE_C~DaCfCyAjSmL~MkG`CiA|RmKHGTMrEeBjEsArFeAJAbDo@hI@zE\\fBLpFlA|@RxGrCxHdGnIjIrIvKpCnCbE~DzFdD|DrBtSpKn@Zf]lNrIjDfEdBhCfApIpDpIpDpIpDpInDpIpDpIpD`J|A`@F`Ih@\\BhI\\dAD`HAfJ?j@?xHShHg@rDO~AGvMGpFCvaA{BdJQdJKfD?fRn@`Jh@jHd@t@DH@~G`@v@DnF\\~Xz@`J_@nJPxJLtA?zHJbl@dApKA~HExJRzT`@lHr@zFr@`c@z@bGNpBT~HzA|FnAdH~Dj@b@jAv@@B|HnFrClBdDlCzHtFfCdBjAx@lL~HjGbG",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        161
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.748719,
+                                        45.923650099999996
+                                    ],
+                                    "geometry_index": 8053
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto Old Pacific Hwy",
+                                "type": "turn",
+                                "bearing_before": 214,
+                                "bearing_after": 161,
+                                "location": [
+                                    -122.748719,
+                                    45.923650099999996
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Old Pacific Hwy",
+                            "duration": 57.0,
+                            "distance": 730.0,
+                            "driving_side": "right",
+                            "weight": 57.0,
+                            "mode": "driving",
+                            "geometry": "cs}qvA|q~biFbTuIpHsCrAi@fU}I`[iMvAq@~BgAjJsF~T{MvLsIt[_Xn^g\\`B{AzP}OdDsCrAiA|YeXjEuDn\\wZdB}AzHgHvDqDpSyP|FyE`UoS",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        147
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.74421799999999,
+                                        45.9179124
+                                    ],
+                                    "geometry_index": 8078
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue straight onto N Goerig St",
+                                "type": "continue",
+                                "bearing_before": 147,
+                                "bearing_after": 147,
+                                "location": [
+                                    -122.74421799999999,
+                                    45.9179124
+                                ]
+                            },
+                            "name": "N Goerig St",
+                            "duration": 46.0,
+                            "distance": 453.0,
+                            "driving_side": "right",
+                            "weight": 46.0,
+                            "mode": "driving",
+                            "geometry": "olrqvArxubiFbPaOtGyGpK_KtM}LbEyDpF{EtJsIhWcUvb@o_@`QoP~NiKpSyI`GeBpEeAdKcD",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        188
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.7413395,
+                                        45.9143926
+                                    ],
+                                    "geometry_index": 8093
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Slight right onto N Goerig St/Lewis River Rd\nContinue to follow Lewis River Rd",
+                                "type": "turn",
+                                "bearing_before": 164,
+                                "bearing_after": 188,
+                                "location": [
+                                    -122.7413395,
+                                    45.9143926
+                                ],
+                                "modifier": "slight right"
+                            },
+                            "name": "N Goerig St/Lewis River Rd\nContinue",
+                            "duration": 101.0,
+                            "distance": 943.0,
+                            "driving_side": "right",
+                            "weight": 101.0,
+                            "mode": "driving",
+                            "geometry": "qpkqvAvdpbiFpBThBD~@?fAClIm@`@CtHe@hMm@fd@_EhFY`RkA`Nw@fKk@ZCrOeBjPuBpEa@VGpDm@lH{A`HmAtD}@lDs@xIkCPGzYuIvOuEBC|L{D`IeCjHyBjJuCvSmGpLoDtIqBnDq@rAWxFe@dCCxBJ`BLbAHPBjCd@bKdCv@TdLjDpBp@|Bp@fDbAxAb@nBt@lHrCjG`DbEbCzBxAz@x@zDvDzBrC^d@zDhGt@~ApBpDtDpIrDlI",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        138
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.74121910000001,
+                                        45.906347499999995
+                                    ],
+                                    "geometry_index": 8158
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto E CC St",
+                                "type": "turn",
+                                "bearing_before": 232,
+                                "bearing_after": 138,
+                                "location": [
+                                    -122.74121910000001,
+                                    45.906347499999995
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "E CC St",
+                            "duration": 48.0,
+                            "distance": 328.0,
+                            "driving_side": "right",
+                            "weight": 48.0,
+                            "mode": "driving",
+                            "geometry": "uy{pvAd}obiFrLwPtBmDlBuDlA_DbAmChAmDv@mCPy@Pw@^qBf@aDV{B^sDJoAF_ADw@DgAD}@@WJoED}E@uJEwOE}LAaEEaIA{B?a@Qy^GwOEeOGcOC_G",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        90
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.73727,
+                                        45.905797799999995
+                                    ],
+                                    "geometry_index": 8191
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto Bridge 80",
+                                "type": "continue",
+                                "bearing_before": 89,
+                                "bearing_after": 90,
+                                "location": [
+                                    -122.73727,
+                                    45.905797799999995
+                                ]
+                            },
+                            "name": "Bridge 80",
+                            "duration": 6.0,
+                            "distance": 90.0,
+                            "driving_side": "right",
+                            "weight": 6.0,
+                            "mode": "driving",
+                            "geometry": "kwzpvAjfhbiFAgGEi_@AiMAy@EoEWsH",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        118
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.73610529999999,
+                                        45.905819199999996
+                                    ],
+                                    "geometry_index": 8197
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto NW Pacific Hwy",
+                                "type": "turn",
+                                "bearing_before": 84,
+                                "bearing_after": 118,
+                                "location": [
+                                    -122.73610529999999,
+                                    45.905819199999996
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "NW Pacific Hwy",
+                            "duration": 507.0,
+                            "distance": 8279.0,
+                            "driving_side": "right",
+                            "weight": 507.0,
+                            "mode": "driving",
+                            "geometry": "uxzpvAp}ebiFdA{Dn@iCj@sD~@eDhAiCxA_ChFkK`GSxAFzBRlC`@vARrDfApEzArEdBxAj@pDlAlAZZHrBd@hAPp@Hj@Hn@Dt@Bt@?tCErBOxBSxAYnBg@nBm@tDyAnEwBfC{AbDwBlDeCbD{ClDkDrC_D`D_Er@}@hEqFxT{[dJeMvDcFRWNSrGeI`HcIhSmShEaE|DeDzHqGv@o@d]cX|BiBzDeDdM_LhEuDRQPMhCwB`CeBj@_@zA_AlCwA~CwAdC_A|C_AjEcAfC]p@K|Da@vG]bEOfI[\\Ab\\iAjL_@vCA~EC~FNlGd@xFr@r@HlKnB|QbEn@NfJhBvBL~AFtADn@@dAErBItASd@K|A]vBy@~BmAbBiAtBeBxAuARSbCkCvAgBpAgB~A_C|BqD|@uA~DwGfBwC|FmJ|FoJzFmJ|@yA~DsGnFuINW|FkJbC}D`CcDdB}BdBsB|@gA~AcBbCuBvAgALMtAaA`BaAbB_AXMnEwBtGoCzD{AhBs@pF_B~DgAzCo@JCrIyANCrEc@`CKh@ClCGpB@|@FbBJ`G`@B?dU|BjJjB~IfBbE^`D\\r@HfB^|HpCpEtBjCnA`EnBVLxEbCvA~@pBtApBvB`AvAnAhBdClE`@z@pC~FpAlCtArCbD~GtFdK|CvElA~AX^vBjCbCvBJHxCtBhDhBFDfCz@jAd@f@Rr@P^Jr@PxA^rB\\pDb@hFN|FEfHShFc@bHu@tC]`QiCrNoCvA]vD{@jCw@h@Ud@WxBgAzBwAXS`BeAxCyCdAuA`B}BbByCbC_GnAuDPy@BOt@qD~@gGd@mGT{F@k@?a@B}EGaGe@qGi@kG?CAEiAmLwIy}@iBaSa@kEUaDMsBQ}COoFAqEPoHr@}Hl@kEn@_D^sBnCqJTq@Z}@v@iB`CuFpAcCl@gAlAeBn@_AJOhB}BjBkBvD}ClC}ApC{AtAa@rBo@~Cs@zGy@`GO~@ER?vFQhJe@tAUnB[pD{@f@MRIhDqAjFsCvDoCdB_BpCwCjBqBzC}D~@yAzBmDvFoJhDmGvLyThIuNvHiNnFyJl@iAbDyF`@q@\\o@rBaDpA}Ab@g@^e@jDeDb@]ROd@YrCkBtBoAp@_@lHgCj@S|FmBv@U^M`GgBv@]vCmAbCiAp@c@VQzAcAdEeDTOdA}@pEiE`GwFf@i@LO`GgGRSJKbEwDtKoJbGmFhC{B|CyBf@YPGZK~Bo@zDkAjCq@~BWtAGjAGlBBdCP`CXdDl@zIdCxBl@bFhAxAZdDh@~AXl@JxDV~BAd@?~BO~Ck@ZKvAe@xFiCDCzA_AhBsAvCwCtDmFbCeErC_Gp@qAxDsHdMaX~Ng[nBeE|GsNnDsHr@{AtJoSzDmJnBwDzCcFf@w@z@qAp@cA|CcE|@mALOzCwDl@o@`AeApAuAtCeCvLgKbDgDbAcAhEmEVWpEyEnAyA~@gAxG_IhBuBtOqRbGoIrCiEtDwGl@qAr@{A`AuBfBeEFOd@oA~@mCvCeJdBcHFWpA}Ff@qC~@iHz@_IFk@jA}JJu@J{@l@}EhAcHrAkFpA_EdD_I~CsDtByBzCoCfFwD`Co@x@e@xC_BhBiArFgDt@e@XQjCcBrDkCTQ~DwDz@_ATWdAgA|AuBzAiCHQpEoJP_@dA}BjDiJpEqM|EyLfBkEdFgK|HcNxDgIhDgJj@mBp@sCx@oFp@yF`@}EB]l@oKv@wJv@aHbAcJnAeJfA_HhAqG`BkKpBuM|@qIf@qGhAmONuBd@wJr@mOPuDH{H?ML{NDoDHoI?IDuDHmIFiGXu`@PcOLaMB_Ab@yIp@gT\\mKBsBnAev@Bgb@?e@Xc^~@uPlByPbBgKhCuLNi@hJuYfFoMtCiI~AqExAeFjA{DnB}IbBuK~@qJXqGlAy_@PiGH}C\\aJF_B`@aLn@_P~ByZLwANwA|@cIjB{PBMdC{QvAwLdCyRJy@L_An@iF\\iCPyAj@uEFu@?KLkDJsGFyDEiIC{CQgJCgAg@{HaBoR}AuQw@}NoAqUOiBs@kHgA_JGa@wCwTUcBs@oCI_@cDkMkBoHYaAc@uAKYcKaYeEmL]}@}CyJgAoDaBwGu@wCiAeIa@iDSyCMcD?SCyDDiI?ERoGPkCDu@Fg@ZcClAeGZsAd@wBpAeEXm@d@mARe@hBuDtB}C^k@~IcLpW{Y^c@`VkXrBeCnH}IpDmElA{ATWbGkHhEgFx[_`@xGaIdK{LjNsPrFuGDGpGyHfYm]dCcDjDcExHgJlDeEtAcB|DwEfLcNnCgDnAyA`@e@hFkGj@y@jGyIvEiHNUjF{InL}R~@}AlRg\\j@}@nSs\\rBaDxBmDlPoXbBsCtFiJvE_I`@s@rE{HfAgBvEaIpDeGzGgLpAwBhDyFb@u@zDmITm@lCuIpEgPbCeL`BmJ|@iG|@mJp@yJ`@uF^yHRmH@a@LcIFyNA_F?oL?[Ai_@?aDAi_@?{CAi_@?gR?_L@}b@Ps]F{L\\aGf@}Gp@aGbAeGz@uD~AyGzBsHfDgIbDaHxDeG`CcDnDmEdGqErDoClC{ArB}@h@UhCaAbGgBbHyBtToGxQkF`k@iPfMsDlF}AxIgC~GqBtPyEtKqCrI{GpDiA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        190
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.67274959999999,
+                                        45.8619862
+                                    ],
+                                    "geometry_index": 8908
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, continue straight to stay on NW Pacific Hwy",
+                                "type": "roundabout",
+                                "bearing_before": 164,
+                                "bearing_after": 190,
+                                "location": [
+                                    -122.67274959999999,
+                                    45.8619862
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "NW Pacific Hwy",
+                            "duration": 18.0,
+                            "distance": 175.0,
+                            "driving_side": "right",
+                            "weight": 18.0,
+                            "mode": "driving",
+                            "geometry": "ceenvAzej~hFTBPDNBPBN?P?NAPCNCPENGNILINKLMLMJOLQJQHQHSHUFS@GjUcK~AcAxHaIdA_AdDo@jIuAvH{@j@ErC_@|JuA",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        172
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.67206700000001,
+                                        45.860524299999994
+                                    ],
+                                    "geometry_index": 8942
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto NW Lacenter Rd",
+                                "type": "continue",
+                                "bearing_before": 171,
+                                "bearing_after": 172,
+                                "location": [
+                                    -122.67206700000001,
+                                    45.860524299999994
+                                ]
+                            },
+                            "name": "NW Lacenter Rd",
+                            "duration": 55.0,
+                            "distance": 913.0,
+                            "driving_side": "right",
+                            "weight": 55.0,
+                            "mode": "driving",
+                            "geometry": "wibnvAd{h~hFtM{AhFa@bBEbGQz@CdFI~@?L@L?p@?dFFx@@xFZjKbAbAJjDb@xDl@nCd@|J~BvCt@`EtAtA`@~DxA|D|AhO|G~C~ArMtG|@d@lG~C|TdLbGnCbBv@`OjHvCvApHvDhFjCn@ZfAl@dFnCDBhFtCzCnBhJtF~O~LlMpKnKzJfRtRlBxBbA~@dJpKhCfDzBtC|F|HdE`GzQvYvBxD~ApCtJ~PbGbLjNrX",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        144
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.6769824,
+                                        45.8533883
+                                    ],
+                                    "geometry_index": 9002
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left onto NW Timmen Rd",
+                                "type": "turn",
+                                "bearing_before": 229,
+                                "bearing_after": 144,
+                                "location": [
+                                    -122.6769824,
+                                    45.8533883
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "NW Timmen Rd",
+                            "duration": 41.0,
+                            "distance": 584.0,
+                            "driving_side": "right",
+                            "weight": 41.0,
+                            "mode": "driving",
+                            "geometry": "wktmvAjnr~hFfRmS`HqHxB_ChDkDpFsF`RgRpYwVjRkObCoBpDuCbCmBpDwCbM{JfUqQnA_AdCkBrDqCzC}B|C{Bv@k@jFaD^OdKwExAk@pNyFb@WjCaBhC{B`@a@`AiAtAmBnBeDLU|AmD`BiEDOjDeMvFkR",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        204
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.6728215,
+                                        45.849109399999996
+                                    ],
+                                    "geometry_index": 9040
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn right onto NW Spencer Rd",
+                                "type": "turn",
+                                "bearing_before": 120,
+                                "bearing_after": 204,
+                                "location": [
+                                    -122.6728215,
+                                    45.849109399999996
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "NW Spencer Rd",
+                            "duration": 90.0,
+                            "distance": 1167.0,
+                            "driving_side": "right",
+                            "weight": 90.0,
+                            "mode": "driving",
+                            "geometry": "i`lmvAjjj~hFtHfEpDzAHDxCtAVJHBxAb@~@VfDbATDn@N`Bb@JBfD|@fAXj@N~@XtA^hAHp@BpCHz@BnC{@tEaCzBwB~DeEbEkGvFcD`AQ`Fw@`@NbCdAbCbDHZdB~F|@zDXnAZtAH^r@zGR|DR`ITxFA`G?zIDfDBbBB|AJ~FP~HhApFb@t@xCpFfAnA`B|@LDzBv@nBPp@Hf@DX@zFFxB@fCLvAZXFdA^t@^n@l@t@z@t@rAdA`Ct@tDZdCv@bIzB`U`DnMrFbNdHbMtErHzBdDvDfFxAjBhEhFrSzTpJ`IlFpFh@f@bIrLb@v@dJ~QpFhMHT^v@dC|FlA|C@@vCtHVt@lLl]fDnK|GnTfGbSxC~J@@Vz@lBtGbAjDvC`K@BVx@rD~LxDvL~DrLFRrEbKfGhJrGrJ",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        213
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.68208469999999,
+                                        45.842455199999996
+                                    ],
+                                    "geometry_index": 9158
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto NW 11th Ave",
+                                "type": "continue",
+                                "bearing_before": 223,
+                                "bearing_after": 213,
+                                "location": [
+                                    -122.68208469999999,
+                                    45.842455199999996
+                                ]
+                            },
+                            "name": "NW 11th Ave",
+                            "duration": 122.0,
+                            "distance": 2161.0,
+                            "driving_side": "right",
+                            "weight": 122.0,
+                            "mode": "driving",
+                            "geometry": "m`_mvAhm|~hFpDbDvFzBpF~@hBXlJl@rFFfJGfJGfJBxN@rVGnUEnUElUEnUGnU@fJ?dJDnUAfJ@fJDnUHzeAGt`@Tdw@j@@?j[~@lw@fBfJNdw@pAdJPnU\\fJTlUb@t`@`AfJZlUz@p`@jAB?rBFjFHD?pBFlFPF?pBDjFN|BFrFLfRd@`X`@R?fJDdJD@?nI?T?pB?vF@T?dFAnA?hC@vFDtB?xQGjA?bA?bCArAA~GIxNSdh@Sl@?jAAjFAn@?jAAv^Wv\\e@v@Ax@ALAzn@o@xAA|VS",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        179
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.68260780000001,
+                                        45.823053699999996
+                                    ],
+                                    "geometry_index": 9244
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto N 65th Ave",
+                                "type": "continue",
+                                "bearing_before": 179,
+                                "bearing_after": 179,
+                                "location": [
+                                    -122.68260780000001,
+                                    45.823053699999996
+                                ]
+                            },
+                            "name": "N 65th Ave",
+                            "duration": 54.0,
+                            "distance": 768.0,
+                            "driving_side": "right",
+                            "weight": 54.0,
+                            "mode": "driving",
+                            "geometry": "{cykvA~m}~hFn`@Mxg@sAhSa@pBCxACnDEzACxAApDG^?NAj@?~LQdEElO[fGMxACpDI`@AN?h@AxAEjP[L?NAD?b@AxAAjGKnFGvBExAAtEIN?f@AjTYzFItAANAf@?dJIxAAvEEN?d@?~LKlGGpHHxALbICvB?pLm@f[KvSPnCAlAtAvBI|ACxBDfBH`ALv@T`E~@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        237
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.68248870000001,
+                                        45.816161
+                                    ],
+                                    "geometry_index": 9307
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, take the 1st exit onto Pioneer St",
+                                "type": "roundabout",
+                                "bearing_before": 193,
+                                "bearing_after": 237,
+                                "location": [
+                                    -122.68248870000001,
+                                    45.816161
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Pioneer St",
+                            "duration": 85.0,
+                            "distance": 580.0,
+                            "driving_side": "right",
+                            "weight": 85.0,
+                            "mode": "driving",
+                            "geometry": "aukkvApf}~hFPf@`@x@T^|BrPZfDP`DD`ABlADjC@|A@t@@vBBhGHnYDnMFvVZr]~@pF`ArFPdLV~Q@t@@t@FxCT|PDzBFzEFhD@r@V`Q@z@DdO@hDcC`M\\lZdA|jAvDfNyBhi@",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        265
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.68985849999999,
+                                        45.8158525
+                                    ],
+                                    "geometry_index": 9345
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Keep left to stay on Pioneer St",
+                                "type": "turn",
+                                "bearing_before": 277,
+                                "bearing_after": 265,
+                                "location": [
+                                    -122.68985849999999,
+                                    45.8158525
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "Pioneer St",
+                            "duration": 5.0,
+                            "distance": 45.0,
+                            "driving_side": "right",
+                            "weight": 5.0,
+                            "mode": "driving",
+                            "geometry": "wakkvAbsk_iFZfNS|HoAhI",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        338
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.69042639999999,
+                                        45.8158879
+                                    ],
+                                    "geometry_index": 9348
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, take the 2nd exit and stay on Pioneer St",
+                                "type": "roundabout",
+                                "bearing_before": 289,
+                                "bearing_after": 338,
+                                "location": [
+                                    -122.69042639999999,
+                                    45.8158879
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "Pioneer St",
+                            "duration": 42.0,
+                            "distance": 502.0,
+                            "driving_side": "right",
+                            "weight": 42.0,
+                            "mode": "driving",
+                            "geometry": "_dkkvArvl_iF_@R_@V]X[\\[^Wb@Wf@Sf@Sz@M|@I~@E`AA`A@`AF~@T`BJf@Nf@Nd@Pd@R`@T`@V\\VZhA`GN~Bt@lIVpLNlO?NDzJr@~j@BvBzAdRBjDFxDDrVB|EA`G?rFB|E?bG?~E@dM?dO@xE@z@@rF@tG@t@?P@jD@vDDzS?F@tD@lC@hC@rFBdIDrDInCi@jEm@lCeA|D",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        328
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.69672930000002,
+                                        45.815813899999995
+                                    ],
+                                    "geometry_index": 9413
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "At the traffic circle, take the 1st exit onto N Discovery Dr",
+                                "type": "roundabout",
+                                "bearing_before": 298,
+                                "bearing_after": 328,
+                                "location": [
+                                    -122.69672930000002,
+                                    45.815813899999995
+                                ],
+                                "modifier": "right"
+                            },
+                            "name": "N Discovery Dr",
+                            "duration": 11.0,
+                            "distance": 111.0,
+                            "driving_side": "right",
+                            "weight": 11.0,
+                            "mode": "driving",
+                            "geometry": "k_kkvAp`y_iFURUTUVSXQXQZQ\\M\\{CdAqBp@mC`@mEF_CJg@LuA`A}L{@yAWcA[aGmC",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        55
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.696832,
+                                        45.8167583
+                                    ],
+                                    "geometry_index": 9432
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Continue onto N Pioneer Canyon Dr",
+                                "type": "continue",
+                                "bearing_before": 21,
+                                "bearing_after": 55,
+                                "location": [
+                                    -122.696832,
+                                    45.8167583
+                                ]
+                            },
+                            "name": "N Pioneer Canyon Dr",
+                            "duration": 28.0,
+                            "distance": 306.0,
+                            "driving_side": "right",
+                            "weight": 28.0,
+                            "mode": "driving",
+                            "geometry": "kzlkvA~fy_iFcDoIwBcGwA}Gq@_IMyHNsLNaMI_MOqAUgCo@{D{AgIeDcNiBeHkBuFyCeGqKqLmFeG}AgBsDgG_A}AyCaFyEyI",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        324
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "out": 0,
+                                    "location": [
+                                        -122.6935319,
+                                        45.817996
+                                    ],
+                                    "geometry_index": 9455
+                                }
+                            ],
+                            "maneuver": {
+                                "instruction": "Turn left",
+                                "type": "turn",
+                                "bearing_before": 48,
+                                "bearing_after": 324,
+                                "location": [
+                                    -122.6935319,
+                                    45.817996
+                                ],
+                                "modifier": "left"
+                            },
+                            "name": "",
+                            "duration": 40.0,
+                            "distance": 213.0,
+                            "driving_side": "right",
+                            "weight": 40.0,
+                            "mode": "driving",
+                            "geometry": "wgokvAvxr_iF}KnLsAlAeBpAeBj@eBRsNOyYIw[MgRK",
+                            "voiceInstructions": [],
+                            "bannerInstructions": []
+                        },
+                        {
+                            "intersections": [
+                                {
+                                    "bearings": [
+                                        1
+                                    ],
+                                    "entry": [
+                                        true
+                                    ],
+                                    "in": 0,
+                                    "admin_index": 0,
+                                    "geometry_index": 9464,
+                                    "location": [
+                                        -122.69383350000001,
+                                        45.8198446
+                                    ]
+                                }
+                            ],
+                            "voiceInstructions": [],
+                            "bannerInstructions": [],
+                            "maneuver": {
+                                "instruction": "You have arrived at your destination.",
+                                "type": "arrive",
+                                "bearing_after": 0,
+                                "bearing_before": 1,
+                                "location": [
+                                    -122.69383350000001,
+                                    45.8198446
+                                ]
+                            },
+                            "name": "",
+                            "duration": 0.0,
+                            "distance": 0.0,
+                            "driving_side": "right",
+                            "weight": 0.0,
+                            "mode": "driving",
+                            "geometry": "i{rkvArks_iF??"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "waypoints": [
+        {
+            "distance": 0.0,
+            "name": "",
+            "location": [
+                -122.91522479999999,
+                46.995970199999995
+            ]
+        },
+        {
+            "distance": 0.0,
+            "name": "",
+            "location": [
+                -122.69383350000001,
+                45.8198446
+            ]
+        }
+    ],
+    "code": "Ok"
+}
