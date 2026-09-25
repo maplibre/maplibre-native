@@ -9,12 +9,15 @@ namespace shaders {
 
 using FillShaderSource = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>;
 
-const std::array<AttributeInfo, 3> FillShaderSource::attributes = {
+const std::array<AttributeInfo, 5> FillShaderSource::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Short2, fillUBOCount + 0, idFillPrevNextVertexAttribute},
+
+    AttributeInfo{2, gfx::AttributeDataType::UInt, fillUBOCount + 1, idFillIndicesVertexAttribute},
 
     // Data driven
-    AttributeInfo{1, gfx::AttributeDataType::Float4, fillUBOCount + 1, idFillColorVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, fillUBOCount + 1, idFillOpacityVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float4, fillUBOCount + 2, idFillColorVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, fillUBOCount + 2, idFillOpacityVertexAttribute},
 };
 const std::array<TextureInfo, 0> FillShaderSource::textures = {};
 
