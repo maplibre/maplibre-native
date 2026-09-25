@@ -31,7 +31,8 @@ bool failSharedUniform = false;
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
                        bool withUniforms = false,
-                       bool scopedUniforms = false) {
+                       bool scopedUniforms = false,
+                       bool stencilOverlapDedup = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -185,6 +186,7 @@ void registerTriangles(const std::string& pluginID,
         layer.shader_count = 1;
         layer.properties = withUniforms ? &radius : nullptr;
         layer.property_count = withUniforms ? 1u : 0u;
+        layer.enable_stencil_overlap_dedup = stencilOverlapDedup;
         layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
             return MLN_PLUGIN_STATUS_OK;
         };
@@ -274,6 +276,18 @@ TEST(PluginRendering, DoesNotGenerateUnusedStencilMasks) {
     test.expectTriangles("test.no-stencil");
     const auto result = test.frontend.render(test.map);
     EXPECT_EQ(0, result.stats.stencilUpdates);
+}
+
+TEST(PluginRendering, StencilOverlapDedupGeneratesStencilUpdates) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.stencil-dedup",
+                                              /*packedColor=*/false,
+                                              /*withUniforms=*/false,
+                                              /*scopedUniforms=*/false,
+                                              /*stencilOverlapDedup=*/true));
+    RenderTest test;
+    test.expectTriangles("test.stencil-dedup");
+    const auto result = test.frontend.render(test.map);
+    EXPECT_GT(result.stats.stencilUpdates, 0u);
 }
 
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {

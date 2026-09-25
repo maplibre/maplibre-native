@@ -99,6 +99,27 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
     if (*evaluatedPaintSnapshot != evaluatedPluginProperties) {
         evaluatedPaintSnapshot = std::make_shared<const style::PluginPropertyMap>(evaluatedPluginProperties);
     }
+    if (registration->shouldAnimate) {
+        std::vector<style::PluginPropertyValue::EvaluationStorage> storage(definitions.size());
+        std::vector<mln_plugin_property_value_v1> animationProperties;
+        animationProperties.reserve(definitions.size());
+        auto storageIt = storage.begin();
+        for (const auto& definition : definitions) {
+            const auto propertyIt = evaluatedPluginProperties.find(definition.name);
+            const auto value = propertyIt == evaluatedPluginProperties.end()
+                                   ? style::defaultPluginPropertyValue(definition)
+                                   : propertyIt->second;
+            mln_plugin_property_value_v1 property{};
+            property.struct_size = sizeof(property);
+            property.name = {definition.name.data(), definition.name.size()};
+            property.value = value.evaluate(parameters.z, definition, *storageIt++);
+            property.explicitly_set = impl.pluginProperties.contains(definition.name);
+            animationProperties.push_back(property);
+        }
+        animated = registration->shouldAnimate(animationProperties.data(), animationProperties.size()) != 0;
+    } else {
+        animated = false;
+    }
     auto properties = makeMutable<style::PluginStyleLayerProperties>(
         staticImmutableCast<style::PluginStyleLayer::Impl>(baseImpl), evaluatedPluginProperties);
     properties->renderPasses = underlying_type(passes);
@@ -107,9 +128,9 @@ void RenderPluginStyleLayer::evaluate(const PropertyEvaluationParameters& parame
 }
 
 bool RenderPluginStyleLayer::hasTransition() const {
-    return std::any_of(transitioningPaintProperties.begin(),
-                       transitioningPaintProperties.end(),
-                       [](const auto& property) { return property.second.hasTransition(); });
+    return animated || std::any_of(transitioningPaintProperties.begin(),
+                                   transitioningPaintProperties.end(),
+                                   [](const auto& property) { return property.second.hasTransition(); });
 }
 
 void RenderPluginStyleLayer::layerChanged(const TransitionParameters&,
@@ -157,6 +178,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
     if (!layerTweaker) {
         layerTweaker = std::make_shared<PluginLayerTweaker>(getID(), evaluatedProperties, registration);
         layerGroup->addLayerTweaker(layerTweaker);
+    }
+    if (registration->enableStencilOverlapDedup) {
+        // Every is3D + stencil-enabled drawable below shares this group's single stencil ref.
+        // See the enable_stencil_overlap_dedup doc comment in plugin_api.h.
+        tileLayerGroup->setStencilTiles(renderTiles);
     }
 
     const auto renderPass = RenderPass::Translucent;
@@ -214,12 +240,19 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             auto builder = context.createDrawableBuilder("plugin/" + registration->type);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
-            builder->setEnableDepth(true);
-            builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-            builder->setIs3D(false);
+            if (registration->enableStencilOverlapDedup) {
+                // No depth test: visibility relative to other layers comes entirely from style layer order.
+                builder->setEnableDepth(false);
+                builder->setIs3D(true);
+                builder->setEnableStencil(true);
+            } else {
+                builder->setEnableDepth(true);
+                builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+                builder->setIs3D(false);
+                builder->setEnableStencil(false);
+            }
             builder->setColorMode(gfx::ColorMode::alphaBlended());
             builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-            builder->setEnableStencil(false);
             builder->setVertexAttributes(std::move(attributes));
             builder->setRawVertices({}, vertexCount, firstType);
             builder->setSegments(

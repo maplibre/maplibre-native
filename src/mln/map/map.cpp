@@ -432,8 +432,8 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
 }
 
-LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
-    return impl->transform.screenCoordinateToLatLng(pixel);
+LatLng Map::latLngForPixel(const ScreenCoordinate& pixel, LatLng::WrapMode wrapMode) const {
+    return impl->transform.screenCoordinateToLatLng(pixel, wrapMode);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {
@@ -445,11 +445,12 @@ std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& l
     return ret;
 }
 
-std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& screenCoords) const {
+std::vector<LatLng> Map::latLngsForPixels(const std::vector<ScreenCoordinate>& screenCoords,
+                                          LatLng::WrapMode wrapMode) const {
     std::vector<LatLng> ret;
     ret.reserve(screenCoords.size());
     for (const auto& point : screenCoords) {
-        ret.emplace_back(latLngForPixel(point));
+        ret.emplace_back(latLngForPixel(point, wrapMode));
     }
     return ret;
 }
