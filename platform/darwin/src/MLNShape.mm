@@ -11,6 +11,86 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
   return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude;
 }
 
+static BOOL MLNIsGeoJSONGeometryType(NSString *type) {
+  return [type isEqualToString:@"Point"] || [type isEqualToString:@"MultiPoint"] ||
+         [type isEqualToString:@"LineString"] || [type isEqualToString:@"MultiLineString"] ||
+         [type isEqualToString:@"Polygon"] || [type isEqualToString:@"MultiPolygon"];
+}
+
+static NSRegularExpression *MLNEmptyArrayRegularExpression(void) {
+  static NSRegularExpression *regularExpression;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    regularExpression = [NSRegularExpression regularExpressionWithPattern:@"\\[\\s*\\]"
+                                                                  options:0
+                                                                    error:nil];
+  });
+  return regularExpression;
+}
+
+static BOOL MLNReplaceEmptyFeatureCoordinates(id object) {
+  if (![object isKindOfClass:[NSMutableDictionary class]]) {
+    return NO;
+  }
+
+  NSMutableDictionary *dictionary = object;
+  NSString *type = dictionary[@"type"];
+  if (![type isKindOfClass:[NSString class]]) {
+    return NO;
+  }
+  if ([type isEqualToString:@"Feature"]) {
+    id geometry = dictionary[@"geometry"];
+    if (![geometry isKindOfClass:[NSDictionary class]]) {
+      return NO;
+    }
+
+    NSString *geometryType = geometry[@"type"];
+    id coordinates = geometry[@"coordinates"];
+    if (![geometryType isKindOfClass:[NSString class]] || !MLNIsGeoJSONGeometryType(geometryType) ||
+        ![coordinates isKindOfClass:[NSArray class]] || [coordinates count] != 0) {
+      return NO;
+    }
+
+    dictionary[@"geometry"] = [NSNull null];
+    return YES;
+  }
+
+  if (![type isEqualToString:@"FeatureCollection"]) {
+    return NO;
+  }
+
+  NSArray *features = dictionary[@"features"];
+  if (![features isKindOfClass:[NSArray class]]) {
+    return NO;
+  }
+
+  BOOL changed = NO;
+  for (id feature in features) {
+    changed |= MLNReplaceEmptyFeatureCoordinates(feature);
+  }
+  return changed;
+}
+
+static NSString *MLNGeoJSONStringByReplacingEmptyFeatureCoordinates(NSString *string) {
+  NSRange range = NSMakeRange(0, string.length);
+  if (![MLNEmptyArrayRegularExpression() firstMatchInString:string options:0 range:range]) {
+    return string;
+  }
+
+  NSData *data = [string dataUsingEncoding:NSUTF8StringEncoding];
+  id jsonObject = [NSJSONSerialization JSONObjectWithData:data
+                                                  options:NSJSONReadingMutableContainers
+                                                    error:nil];
+  if (!MLNReplaceEmptyFeatureCoordinates(jsonObject)) {
+    return string;
+  }
+
+  NSData *updatedData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
+  NSString *updatedString = [[NSString alloc] initWithData:updatedData
+                                                  encoding:NSUTF8StringEncoding];
+  return updatedString ?: string;
+}
+
 @implementation MLNShape
 
 + (nullable MLNShape *)shapeWithData:(NSData *)data
@@ -24,8 +104,9 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
     return nil;
   }
 
+  NSString *normalizedString = MLNGeoJSONStringByReplacingEmptyFeatureCoordinates(string);
   try {
-    const auto geojson = mapbox::geojson::parse(string.UTF8String);
+    const auto geojson = mapbox::geojson::parse(normalizedString.UTF8String);
     return MLNShapeFromGeoJSON(geojson);
   } catch (std::runtime_error &err) {
     if (outError) {
