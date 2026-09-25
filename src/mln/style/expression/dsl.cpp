@@ -200,7 +200,8 @@ std::unique_ptr<Expression> interpolate(Interpolator interpolator,
     std::map<double, std::unique_ptr<Expression>> stops;
     stops[input1] = std::move(output1);
     ParsingContext ctx;
-    ParseResult result = createInterpolate(type, std::move(interpolator), std::move(input), std::move(stops), ctx);
+    ParseResult result = createInterpolate(
+        type, std::move(interpolator), ColorSpace::RGB, std::move(input), std::move(stops), ctx);
     assert(result);
     return std::move(*result);
 }
@@ -216,7 +217,8 @@ std::unique_ptr<Expression> interpolate(Interpolator interpolator,
     stops[input1] = std::move(output1);
     stops[input2] = std::move(output2);
     ParsingContext ctx;
-    ParseResult result = createInterpolate(type, std::move(interpolator), std::move(input), std::move(stops), ctx);
+    ParseResult result = createInterpolate(
+        type, std::move(interpolator), ColorSpace::RGB, std::move(input), std::move(stops), ctx);
     assert(result);
     return std::move(*result);
 }
@@ -235,7 +237,8 @@ std::unique_ptr<Expression> interpolate(Interpolator interpolator,
     stops[input2] = std::move(output2);
     stops[input3] = std::move(output3);
     ParsingContext ctx;
-    ParseResult result = createInterpolate(type, std::move(interpolator), std::move(input), std::move(stops), ctx);
+    ParseResult result = createInterpolate(
+        type, std::move(interpolator), ColorSpace::RGB, std::move(input), std::move(stops), ctx);
     assert(result);
     return std::move(*result);
 }
