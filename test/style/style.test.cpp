@@ -4,6 +4,9 @@
 #include <mln/test/fixture_log_observer.hpp>
 
 #include <mln/style/style_impl.hpp>
+#include <mln/style/observer.hpp>
+#include <mln/style/image.hpp>
+#include <mln/style/sources/geojson_source.hpp>
 #include <mln/style/source_impl.hpp>
 #include <mln/style/sources/vector_source.hpp>
 #include <mln/style/layer.hpp>
@@ -211,4 +214,51 @@ TEST(Style, AddRemoveRemoveImage) {
     EXPECT_TRUE(!!style.getImage("three"));
     EXPECT_FALSE(!!style.getImage("two"));
     EXPECT_FALSE(!!style.getImage("four"));
+}
+
+TEST(Style, SourceCollectionPublishesUpdates) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+    style.addLayer(std::make_unique<LineLayer>("line", "late"));
+
+    struct Observer final : style::Observer {
+        Style::Impl& style;
+        Immutable<std::vector<Immutable<Source::Impl>>> sources;
+        explicit Observer(Style::Impl& style_)
+            : style(style_),
+              sources(style.getSourceImpls()) {}
+        void onUpdate() override { sources = style.getSourceImpls(); }
+    } observer{style};
+    style.setObserver(&observer);
+
+    style.addSource(std::make_unique<GeoJSONSource>("late"));
+    EXPECT_EQ(style.getSourceImpls(), observer.sources);
+
+    style.removeLayer("line");
+    ASSERT_TRUE(style.removeSource("late"));
+    EXPECT_TRUE(observer.sources->empty());
+}
+
+TEST(Style, ImageRemovalPublishesUpdates) {
+    util::RunLoop loop;
+    auto fileSource = std::make_shared<StubFileSource>();
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
+    style.loadJSON(R"({"version":8,"sources":{},"layers":[]})");
+    style.addImage(std::make_unique<style::Image>("image", PremultipliedImage({1, 1}), 1.0f));
+
+    struct Observer final : style::Observer {
+        Style::Impl& style;
+        Immutable<std::vector<Immutable<style::Image::Impl>>> images;
+        explicit Observer(Style::Impl& style_)
+            : style(style_),
+              images(style.getImageImpls()) {}
+        void onUpdate() override { images = style.getImageImpls(); }
+    } observer{style};
+    style.setObserver(&observer);
+    ASSERT_EQ(1u, observer.images->size());
+
+    style.removeImage("image");
+    EXPECT_TRUE(observer.images->empty());
 }
