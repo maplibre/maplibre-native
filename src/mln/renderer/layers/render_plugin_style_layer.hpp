@@ -41,6 +41,8 @@ private:
     style::PluginPropertyMap evaluatedPluginProperties;
     std::shared_ptr<const style::PluginPropertyMap> evaluatedPaintSnapshot;
     std::map<std::string, gfx::ShaderGroupPtr> shaderGroups;
+    /// True while the layer reports an active animation.
+    bool animated = false;
 };
 
 } // namespace mln

@@ -14,11 +14,11 @@
   "targets": [
     {
       "name": "default",
-      "runtimeOS": "HarmonyOS"
+      "runtimeOS": "OpenHarmony"
     },
     {
       "name": "opengl",
-      "runtimeOS": "HarmonyOS",
+      "runtimeOS": "OpenHarmony",
       "config": {
         "buildOption": {
           "externalNativeOptions": {
