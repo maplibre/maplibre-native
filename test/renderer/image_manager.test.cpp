@@ -6,6 +6,7 @@
 #include <mln/renderer/image_manager_observer.hpp>
 #include <mln/sprite/sprite_parser.hpp>
 #include <mln/style/image_impl.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/run_loop.hpp>
@@ -358,4 +359,82 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
     ASSERT_TRUE(imageManager->getImage("missing") == nullptr);
     ASSERT_TRUE(imageManager->getImage("1024px") == nullptr);
     ASSERT_FALSE(imageManager->getImage("sprite") == nullptr);
+}
+
+TEST(ImageManager, MixedDependenciesRetainProvidedImages) {
+    constexpr std::size_t onDemandImageCount = 6;
+    constexpr uint32_t onDemandImageSide = 256;
+    static_assert(onDemandImageCount * onDemandImageSide * onDemandImageSide * 4 >
+                  util::DEFAULT_ON_DEMAND_IMAGES_CACHE_SIZE);
+
+    util::RunLoop runLoop;
+    auto imageManager = ImageManager::create();
+    StubImageManagerObserver observer;
+    imageManager->setObserver(&observer);
+    imageManager->setLoaded(true);
+
+    observer.imageMissing = [&](const std::string& id) {
+        imageManager->addImage(
+            makeMutable<style::Image::Impl>(id, PremultipliedImage({onDemandImageSide, onDemandImageSide}), 3.0f));
+    };
+    std::vector<std::string> evicted;
+    observer.removeUnusedStyleImages = [&](const std::vector<std::string>& ids) {
+        evicted.insert(evicted.end(), ids.begin(), ids.end());
+        for (const auto& id : ids) {
+            imageManager->removeImage(id);
+        }
+    };
+
+    auto requestor = std::make_unique<StubImageRequestor>(imageManager);
+    imageManager->addImage(makeMutable<style::Image::Impl>("sprite", PremultipliedImage({16, 16}), 1.0f));
+    ImageDependencies dependencies{{"sprite", ImageType::Icon}};
+    for (std::size_t i = 0; i < onDemandImageCount; ++i) {
+        dependencies.emplace("a" + std::to_string(i), ImageType::Icon);
+    }
+    bool notified = false;
+    requestor->imagesAvailable = [&](ImageMap icons, ImageMap, ImageVersionMap) {
+        notified = true;
+        EXPECT_EQ(icons.size(), dependencies.size());
+        for (const auto& dependency : dependencies) {
+            EXPECT_TRUE(icons.contains(dependency.first));
+        }
+    };
+    auto request = [&] {
+        notified = false;
+        imageManager->getImages(*requestor, std::make_pair(dependencies, ++requestor->imageCorrelationID));
+        imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
+        EXPECT_TRUE(evicted.empty());
+        runLoop.runOnce();
+        imageManager->notifyIfMissingImageAdded();
+        EXPECT_TRUE(notified);
+    };
+    request();
+    ASSERT_EQ(observer.count, 6);
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
+    ASSERT_TRUE(evicted.empty());
+
+    request();
+    EXPECT_EQ(observer.count, 6);
+
+    for (std::size_t i = 0; i < onDemandImageCount; ++i) {
+        dependencies.emplace("b" + std::to_string(i), ImageType::Icon);
+    }
+    for (int round = 0; round < 2; ++round) {
+        request();
+        imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
+        EXPECT_TRUE(evicted.empty());
+        EXPECT_EQ(observer.count, 12);
+        for (const auto& dependency : dependencies) {
+            EXPECT_NE(imageManager->getImage(dependency.first), nullptr);
+        }
+    }
+
+    requestor.reset();
+    imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
+    EXPECT_EQ(evicted.size(), 12u);
+    dependencies.erase("sprite");
+    for (const auto& dependency : dependencies) {
+        EXPECT_EQ(imageManager->getImage(dependency.first), nullptr);
+    }
+    EXPECT_NE(imageManager->getImage("sprite"), nullptr);
 }
