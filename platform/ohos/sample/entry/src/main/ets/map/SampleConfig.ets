@@ -26,13 +26,13 @@ export const STYLE_OPTIONS: StyleOption[] = [
   }
 ];
 
-export const DEFAULT_STYLE_INDEX: number = 1;
+export const DEFAULT_STYLE_INDEX: number = 0;
 export const DEFAULT_STYLE: StyleOption = STYLE_OPTIONS[DEFAULT_STYLE_INDEX];
 
 export const DEFAULT_CAMERA: CameraOptions = {
-  longitude: 106.5750,
-  latitude: 29.5570,
-  zoom: 12.0,
+  longitude: 0,
+  latitude: 30,
+  zoom: 1,
   bearing: 0,
   pitch: 0
 };

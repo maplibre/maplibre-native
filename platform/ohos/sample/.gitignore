@@ -10,3 +10,4 @@ sign/*.p7b
 sign/*.hap
 sign/material/
 sign/signing.local.json
+signatures/
