@@ -47,6 +47,10 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
         res.set_content(content, "text/plain");
     });
 
+    server->Get("/test-accept", [](const Request& req, Response& res) {
+        res.set_content(req.get_header_value("Accept"), "text/plain");
+    });
+
     server->Get("/stale", [](const Request&, Response&) {
         // Never respond.
     });

@@ -302,4 +302,8 @@ PremultipliedImage decodeImage(const std::string& string) {
     return image;
 }
 
+bool supportsWebPDecoding() {
+    return true;
+}
+
 } // namespace mln

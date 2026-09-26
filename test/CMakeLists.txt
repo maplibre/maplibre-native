@@ -93,6 +93,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/tile/tile_id.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/tile_lod.test.cpp
     ${PROJECT_SOURCE_DIR}/test/tile/vector_tile.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/accept_header.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/action_journal.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp

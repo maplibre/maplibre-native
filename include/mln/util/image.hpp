@@ -179,4 +179,7 @@ using AlphaImage = Image<ImageAlphaMode::Exclusive>;
 PremultipliedImage decodeImage(const std::string&);
 std::string encodePNG(const PremultipliedImage&);
 
+/// Whether `decodeImage` can decode WebP on this platform.
+bool supportsWebPDecoding();
+
 } // namespace mln
