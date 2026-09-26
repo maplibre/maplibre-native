@@ -53,16 +53,16 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     std::optional<gfx::DepthMode> depthMode3d;
     std::optional<gfx::StencilMode> stencilMode3d;
 
-    if (stencilTiles && !stencilTiles->empty()) {
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
-                }
+    // 3D features take the group-wide depth state, and the single-value stencil when clipping is in use
+    const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    visitDrawables([&](const gfx::Drawable& drawable) {
+        if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+            features3d = true;
+            if (hasStencilTiles && drawable.getEnableStencil()) {
+                stencil3d = true;
             }
-        });
-    }
+        }
+    });
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
@@ -73,7 +73,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         if (stencil3d) {
             stencilMode3d = parameters.stencilModeFor3D();
         }
-    } else if (stencilTiles && !stencilTiles->empty()) {
+    } else if (hasStencilTiles) {
         // Handle stencil tiles if present (2D stenciling)
         parameters.renderTileClippingMasks(stencilTiles);
     }

@@ -13,6 +13,8 @@
 #include <mln/renderer/buckets/symbol_bucket.hpp> // For PlacedSymbol: pull out to another location
 
 #include <cmath>
+#include <limits>
+#include <numbers>
 
 namespace mln {
 
@@ -146,17 +148,19 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
     return result;
 }
 
-std::pair<bool, bool> CollisionIndex::placeFeature(
+PlacedFeatureResult CollisionIndex::placeFeature(
     const CollisionFeature& feature,
     Point<float> shift,
-    const mat4& posMatrix,
-    const mat4& labelPlaneMatrix,
+    Point<float> translation,
+    const TileProjector& tileProjector,
+    const LabelPlaneProjector& labelPlane,
     const float textPixelRatio,
     const PlacedSymbol& symbol,
     const float scale,
     const float fontSize,
     const bool allowOverlap,
     const bool pitchWithMap,
+    const bool rotateWithMap,
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
     const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
@@ -164,19 +168,38 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
         const CollisionBox& box = feature.boxes.front();
-        auto collisionBoundaries = getProjectedCollisionBoundaries(posMatrix, shift, textPixelRatio, box);
+        const auto projectedPoint = projectAndGetPerspectiveRatio(tileProjector, box.anchor + translation);
+        const float tileToViewport = textPixelRatio * projectedPoint.perspectiveRatio;
+        CollisionBoundaries collisionBoundaries;
+        bool occluded = projectedPoint.occluded;
+        if (transformState.isGlobeRendering() && (pitchWithMap || rotateWithMap)) {
+            const auto projectedBox = projectCollisionBox(box,
+                                                          tileToViewport,
+                                                          scale,
+                                                          tileProjector,
+                                                          pitchWithMap,
+                                                          rotateWithMap,
+                                                          projectedPoint,
+                                                          shift,
+                                                          translation);
+            collisionBoundaries = projectedBox.boundaries;
+            occluded = pitchWithMap ? projectedBox.allPointsOccluded : projectedPoint.occluded;
+        } else {
+            collisionBoundaries = getProjectedCollisionBoundaries(projectedPoint, shift, textPixelRatio, box);
+        }
         projectedBoxes.emplace_back(
             collisionBoundaries[0], collisionBoundaries[1], collisionBoundaries[2], collisionBoundaries[3]);
-        if ((avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) || !isInsideGrid(collisionBoundaries) ||
+        if (occluded || (avoidEdges && !isInsideTile(collisionBoundaries, *avoidEdges)) ||
+            !isInsideGrid(collisionBoundaries) ||
             (!allowOverlap && collisionGrid.hitTest(projectedBoxes.back().box(), collisionGroupPredicate))) {
-            return {false, false};
+            return {.placed = false, .offscreen = false, .occluded = occluded};
         }
 
-        return {true, isOffscreen(collisionBoundaries)};
+        return {.placed = true, .offscreen = isOffscreen(collisionBoundaries), .occluded = false};
     } else {
         return placeLineFeature(feature,
-                                posMatrix,
-                                labelPlaneMatrix,
+                                tileProjector,
+                                labelPlane,
                                 textPixelRatio,
                                 symbol,
                                 scale,
@@ -190,10 +213,10 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     }
 }
 
-std::pair<bool, bool> CollisionIndex::placeLineFeature(
+PlacedFeatureResult CollisionIndex::placeLineFeature(
     const CollisionFeature& feature,
-    const mat4& posMatrix,
-    const mat4& labelPlaneMatrix,
+    const TileProjector& tileProjector,
+    const LabelPlaneProjector& labelPlane,
     const float textPixelRatio,
     const PlacedSymbol& symbol,
     const float scale,
@@ -207,14 +230,25 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     assert(feature.alongLine);
     assert(projectedBoxes.empty());
     const auto tileUnitAnchorPoint = symbol.anchorPoint;
-    const auto projectedAnchor = projectAnchor(posMatrix, tileUnitAnchorPoint);
+    const auto anchor = projectAndGetPerspectiveRatio(tileProjector, tileUnitAnchorPoint);
+    if (anchor.occluded) {
+        return {.placed = false, .offscreen = false, .occluded = true};
+    }
+    const auto projectedAnchor = std::make_pair(anchor.perspectiveRatio, anchor.signedDistanceFromCamera);
 
-    const float fontScale = fontSize / 24;
-    const float lineOffsetX = symbol.lineOffset[0] * fontSize;
-    const float lineOffsetY = symbol.lineOffset[1] * fontSize;
+    const float correctedFontSize = pitchWithMap ? fontSize * static_cast<float>(tileProjector.pitchedTextCorrection(
+                                                                  {tileUnitAnchorPoint.x, tileUnitAnchorPoint.y}))
+                                                 : fontSize;
+    const float fontScale = correctedFontSize / 24;
+    const float lineOffsetX = symbol.lineOffset[0] * correctedFontSize;
+    const float lineOffsetY = symbol.lineOffset[1] * correctedFontSize;
 
-    const auto labelPlaneAnchorPoint = project(tileUnitAnchorPoint, labelPlaneMatrix).first;
+    const auto projectedLabelPlaneAnchor = labelPlane.project(tileUnitAnchorPoint).point;
+    const Point<float> labelPlaneAnchorPoint{static_cast<float>(projectedLabelPlaneAnchor.x),
+                                             static_cast<float>(projectedLabelPlaneAnchor.y)};
 
+    LineProjectionCache projections;
+    projections.reset(symbol.line.size());
     const auto firstAndLastGlyph = placeFirstAndLastGlyph(fontScale,
                                                           lineOffsetX,
                                                           lineOffsetY,
@@ -222,7 +256,8 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
                                                           labelPlaneAnchorPoint,
                                                           tileUnitAnchorPoint,
                                                           symbol,
-                                                          labelPlaneMatrix,
+                                                          labelPlane,
+                                                          projections,
                                                           /*return tile distance*/ true);
 
     bool collisionDetected = false;
@@ -264,7 +299,7 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
             continue;
         }
 
-        const auto projectedPoint = projectPoint(posMatrix, circle.anchor);
+        const auto projectedPoint = projectPoint(tileProjector, circle.anchor);
         const float tileUnitRadius = (circle.x2 - circle.x1) / 2;
         const float radius = tileUnitRadius * tileToViewport;
 
@@ -422,24 +457,29 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
     return result;
 }
 
-std::pair<float, float> CollisionIndex::projectAnchor(const mat4& posMatrix, const Point<float>& point) const {
-    vec4 p = {{point.x, point.y, 0, 1}};
-    matrix::transformMat4(p, p, posMatrix);
-    return std::make_pair(0.5f + 0.5f * (transformState.getCameraToCenterDistance() / static_cast<float>(p[3])),
-                          static_cast<float>(p[3]));
+CollisionIndex::ProjectedAnchor CollisionIndex::projectAndGetPerspectiveRatio(const TileProjector& tileProjector,
+                                                                              const Point<float>& point) const {
+    return toViewport(tileProjector.project({point.x, point.y}));
 }
 
-std::pair<Point<float>, float> CollisionIndex::projectAndGetPerspectiveRatio(const mat4& posMatrix,
-                                                                             const Point<float>& point) const {
-    vec4 p = {{point.x, point.y, 0, 1}};
-    matrix::transformMat4(p, p, posMatrix);
-    auto size = transformState.getSize();
-    return std::make_pair(Point<float>(static_cast<float>(((p[0] / p[3] + 1) / 2) * size.width + viewportPadding),
-                                       static_cast<float>(((-p[1] / p[3] + 1) / 2) * size.height + viewportPadding)),
-                          // See perspective ratio comment in symbol_sdf.vertex
-                          // We're doing collision detection in viewport space so we need
-                          // to scale down boxes in the distance
-                          0.5f + 0.5f * transformState.getCameraToCenterDistance() / static_cast<float>(p[3]));
+CollisionIndex::ProjectedAnchor CollisionIndex::toViewport(const ProjectedTilePoint& projected) const {
+    const auto size = transformState.getSize();
+    const auto distance = static_cast<float>(projected.signedDistanceFromCamera);
+    return {.point = Point<float>(static_cast<float>(((projected.point.x + 1) / 2) * size.width + viewportPadding),
+                                  static_cast<float>(((-projected.point.y + 1) / 2) * size.height + viewportPadding)),
+            // See perspective ratio comment in symbol_sdf.vertex
+            // We're doing collision detection in viewport space so we need
+            // to scale down boxes in the distance
+            .perspectiveRatio = 0.5f + 0.5f * transformState.getCameraToCenterDistance() / distance,
+            .signedDistanceFromCamera = distance,
+            .occluded = projected.occluded};
+}
+
+Point<float> CollisionIndex::projectPoint(const TileProjector& tileProjector, const Point<float>& point) const {
+    const auto projected = tileProjector.project({point.x, point.y});
+    const auto size = transformState.getSize();
+    return Point<float>{static_cast<float>((((projected.point.x + 1) / 2) * size.width) + viewportPadding),
+                        static_cast<float>((((-projected.point.y + 1) / 2) * size.height) + viewportPadding)};
 }
 
 Point<float> CollisionIndex::projectPoint(const mat4& posMatrix, const Point<float>& point) const {
@@ -454,14 +494,114 @@ CollisionBoundaries CollisionIndex::getProjectedCollisionBoundaries(const mat4& 
                                                                     Point<float> shift,
                                                                     float textPixelRatio,
                                                                     const CollisionBox& box) const {
-    const auto projectedPoint = projectAndGetPerspectiveRatio(posMatrix, box.anchor);
-    const float tileToViewport = textPixelRatio * projectedPoint.second;
+    vec4 p = {{box.anchor.x, box.anchor.y, 0, 1}};
+    matrix::transformMat4(p, p, posMatrix);
+    const ProjectedTilePoint projected{
+        .point = {p[0] / p[3], p[1] / p[3]}, .signedDistanceFromCamera = p[3], .occluded = false};
+    return getProjectedCollisionBoundaries(toViewport(projected), shift, textPixelRatio, box);
+}
+
+CollisionBoundaries CollisionIndex::getProjectedCollisionBoundaries(const ProjectedAnchor& projectedPoint,
+                                                                    Point<float> shift,
+                                                                    float textPixelRatio,
+                                                                    const CollisionBox& box) const {
+    const float tileToViewport = textPixelRatio * projectedPoint.perspectiveRatio;
     return CollisionBoundaries{{
-        (box.x1 + shift.x) * tileToViewport + projectedPoint.first.x,
-        (box.y1 + shift.y) * tileToViewport + projectedPoint.first.y,
-        (box.x2 + shift.x) * tileToViewport + projectedPoint.first.x,
-        (box.y2 + shift.y) * tileToViewport + projectedPoint.first.y,
+        (box.x1 + shift.x) * tileToViewport + projectedPoint.point.x,
+        (box.y1 + shift.y) * tileToViewport + projectedPoint.point.y,
+        (box.x2 + shift.x) * tileToViewport + projectedPoint.point.x,
+        (box.y2 + shift.y) * tileToViewport + projectedPoint.point.y,
     }};
+}
+
+CollisionIndex::ProjectedBox CollisionIndex::projectCollisionBox(const CollisionBox& box,
+                                                                 const float tileToViewport,
+                                                                 const float scale,
+                                                                 const TileProjector& tileProjector,
+                                                                 const bool pitchWithMap,
+                                                                 const bool rotateWithMap,
+                                                                 const ProjectedAnchor& projectedPoint,
+                                                                 const Point<float> shift,
+                                                                 const Point<float> translation) const {
+    const Point<float> anchor = box.anchor + translation;
+    // These vectors hold for screen-space texts aligned with the viewport and for pitched texts aligned with the map.
+    Point<float> vecEast{1, 0};
+    Point<float> vecSouth{0, 1};
+
+    if (rotateWithMap && !pitchWithMap) {
+        // Screen-space texts that stay east-west aligned.
+        const auto projectedEast = projectAndGetPerspectiveRatio(tileProjector, {anchor.x + 1, anchor.y});
+        const float toEastX = projectedEast.point.x - projectedPoint.point.x;
+        const float toEastY = projectedEast.point.y - projectedPoint.point.y;
+        const float angle = std::atan(toEastY / toEastX) + (toEastX < 0 ? std::numbers::pi_v<float> : 0.f);
+        vecEast = {std::cos(angle), std::sin(angle)};
+        vecSouth = {-std::sin(angle), std::cos(angle)};
+    } else if (!rotateWithMap && pitchWithMap) {
+        // Pitched texts that stay aligned with the viewport's X axis.
+        vec2 east, south;
+        getTileSkewVectors(transformState, east, south);
+        vecEast = {static_cast<float>(east[0]), static_cast<float>(east[1])};
+        vecSouth = {static_cast<float>(south[0]), static_cast<float>(south[1])};
+    }
+
+    Point<float> basePoint = projectedPoint.point;
+    float distanceMultiplier = tileToViewport;
+
+    if (pitchWithMap) {
+        // Offsets are in tile units for pitched boxes.
+        basePoint = anchor;
+        distanceMultiplier = static_cast<float>(1.0 / scale *
+                                                tileProjector.pitchedTextCorrection({anchor.x, anchor.y}));
+        // The shader scales the label by the perspective ratio; variable anchors already account for it.
+        if (shift.x == 0 && shift.y == 0) {
+            const float distanceRatio = projectedPoint.signedDistanceFromCamera /
+                                        transformState.getCameraToCenterDistance();
+            distanceMultiplier *= std::clamp(0.5f + 0.5f * distanceRatio, 0.0f, 4.0f);
+        }
+    }
+
+    basePoint += vecEast * (shift.x * distanceMultiplier) + vecSouth * (shift.y * distanceMultiplier);
+
+    const float xMin = box.x1 * distanceMultiplier;
+    const float xMax = box.x2 * distanceMultiplier;
+    const float xHalf = (xMin + xMax) / 2;
+    const float yMin = box.y1 * distanceMultiplier;
+    const float yMax = box.y2 * distanceMultiplier;
+    const float yHalf = (yMin + yMax) / 2;
+
+    // 0--1--2
+    // |     |
+    // 7     3
+    // |     |
+    // 6--5--4
+    const std::array<Point<float>, 8> offsets = {{{xMin, yMin},
+                                                  {xHalf, yMin},
+                                                  {xMax, yMin},
+                                                  {xMax, yHalf},
+                                                  {xMax, yMax},
+                                                  {xHalf, yMax},
+                                                  {xMin, yMax},
+                                                  {xMin, yHalf}}};
+
+    bool anyPointVisible = !pitchWithMap;
+    CollisionBoundaries bounds = {{std::numeric_limits<float>::infinity(),
+                                   std::numeric_limits<float>::infinity(),
+                                   -std::numeric_limits<float>::infinity(),
+                                   -std::numeric_limits<float>::infinity()}};
+    for (const auto& offset : offsets) {
+        Point<float> point = basePoint + vecEast * offset.x + vecSouth * offset.y;
+        if (pitchWithMap) {
+            const auto projected = projectAndGetPerspectiveRatio(tileProjector, point);
+            anyPointVisible = anyPointVisible || !projected.occluded;
+            point = projected.point;
+        }
+        bounds[0] = std::min(bounds[0], point.x);
+        bounds[1] = std::min(bounds[1], point.y);
+        bounds[2] = std::max(bounds[2], point.x);
+        bounds[3] = std::max(bounds[3], point.y);
+    }
+
+    return {.boundaries = bounds, .allPointsOccluded = !anyPointVisible};
 }
 
 } // namespace mln

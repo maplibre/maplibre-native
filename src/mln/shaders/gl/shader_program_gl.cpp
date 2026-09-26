@@ -141,7 +141,11 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
 
         for (const auto& blockInfo : uniformBlocksInfo) {
-            GLint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
+            const GLuint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
+            if (index == GL_INVALID_INDEX) {
+                // Declared for the program but not referenced by this variant of it.
+                continue;
+            }
             GLint size = 0;
             MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
             assert(size > 0);

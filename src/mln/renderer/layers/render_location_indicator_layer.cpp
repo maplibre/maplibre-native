@@ -60,6 +60,18 @@ using namespace std::numbers;
 
 namespace mln {
 
+namespace {
+/// Whether the puck is drawn on the globe: the drawables follow the projection, OpenGL's own renderer draws with
+/// its Mercator matrix on either one.
+bool drawsOnGlobe([[maybe_unused]] const TransformState& state) {
+#ifdef MLN_DRAWABLE_LOCATION_INDICATOR
+    return state.isGlobeRendering();
+#else
+    return false;
+#endif
+}
+} // namespace
+
 struct LocationIndicatorRenderParameters {
     LocationIndicatorRenderParameters() = default;
     explicit LocationIndicatorRenderParameters(const TransformParameters& tp)
@@ -522,7 +534,7 @@ public:
 #endif
 
         projectionCircle = params.projectionMatrix;
-        const Point<double> positionMercator = project(params.puckPosition, *params.state);
+        positionMercator = project(params.puckPosition, *params.state);
         matrix::identity(translation);
         matrix::translate(translation, translation, positionMercator.x, positionMercator.y, 0.0);
         matrix::multiply(projectionCircle, projectionCircle, translation);
@@ -569,6 +581,7 @@ public:
 
     const auto& getProjectionCircle() const { return projectionCircle; }
     const auto& getProjectionPuck() const { return projectionPuck; }
+    const auto& getPositionMercator() const { return positionMercator; }
 
     auto getPuckGeometry() const {
 #ifdef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -624,6 +637,13 @@ protected:
 
     // Size in "map pixels" for a screen pixel
     static float pixelSizeToWorldSizeH(const LatLng& pos, const TransformState& s) {
+        if (drawsOnGlobe(s)) {
+            // Toward the horizon a pixel covers more of the map because the sphere turns away, which is not
+            // perspective and would stretch the puck along the horizon: only the camera distance counts.
+            vec4 clip;
+            s.latLngToScreenCoordinate(pos, clip);
+            return static_cast<float>(clip[3] / s.getCameraToCenterDistance());
+        }
         ScreenCoordinate posScreen = latLngToScreenCoordinate(pos, s);
         ScreenCoordinate posScreenLeftPx = posScreen;
         posScreenLeftPx.x -= 1;
@@ -712,10 +732,18 @@ protected:
         // edge of the screen going toward the top.
 
         Point<double> verticalShift = hatShadowShiftVector(params.puckPosition, params);
+        // The puck is sized in Mercator pixels, which the sphere shrinks with the latitude: keep the size it has at
+        // the map's center, the way the globe keeps circles and pitched text.
+        const double puckLatitude = util::clamp(
+            params.puckPosition.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
+        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(s.getProjection().circleRadiusCorrection(s) /
+                                                                         std::cos(util::deg2rad(puckLatitude)))
+                                                    : 1.0f;
         const float horizontalScaleFactor =
-            (1.0f - params.perspectiveCompensation) +
-            util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
-                params.perspectiveCompensation; // Compensation factor for the perspective deformation
+            ((1.0f - params.perspectiveCompensation) +
+             util::clamp(pixelSizeToWorldSizeH(params.puckPosition, s), 0.8f, 10.1f) *
+                 params.perspectiveCompensation) * // Compensation factor for the perspective deformation
+            latitudeScale;
         //     ^ clamping this to 0.8 to avoid growing the puck too much close to the camera.
 
 #ifndef MLN_DRAWABLE_LOCATION_INDICATOR
@@ -878,6 +906,7 @@ protected:
     mln::mat4 translation{};
     mln::mat4 projectionCircle{};
     mln::mat4 projectionPuck{};
+    Point<double> positionMercator{};
 
     bool positionChanged = false;
     bool radiusChanged = false;
@@ -1025,7 +1054,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
     if (paintParameters.captureRenderedFeatures) {
-        captureRenderedFeatures();
+        captureRenderedFeatures(paintParameters.state);
     }
 
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
@@ -1044,19 +1073,37 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
-void RenderLocationIndicatorLayer::captureRenderedFeatures() {
+void RenderLocationIndicatorLayer::captureRenderedFeatures(const TransformState& state) {
     using namespace vector;
+    constexpr auto locationID = "maplibre:LocationIndicator";
 
     // Only considering the puck for now, not the accuracy circle
     const auto& proj = renderImpl->getProjectionPuck();
     const auto& geom = renderImpl->getPuckGeometry();
+
+    // On the globe the puck's corners are world pixel offsets from its position on the sphere.
+    if (drawsOnGlobe(state)) {
+        const auto& position = renderImpl->getPositionMercator();
+        std::vector<vec3> visible;
+        for (const auto& corner : geom) {
+            const auto latLng = Projection::unproject({position.x + corner.x, position.y + corner.y}, state.getScale());
+            if (!state.isLocationOccluded(latLng)) {
+                vec4 clip;
+                state.latLngToScreenCoordinate(latLng, clip);
+                visible.push_back({clip[0] / clip[3], clip[1] / clip[3], 0});
+            }
+        }
+        if (const auto bound = computeFeatureNDCBound(visible.size(), [&](std::size_t i) { return visible[i]; })) {
+            stats.addRenderedFeature(locationID, *bound, {/* no tile */});
+        }
+        return;
+    }
 
     const auto getVertex = [&](std::size_t i) {
         return vec3{geom[i].x, geom[i].y, 0};
     };
 
     if (const auto bound = computeFeatureNDCBound(geom.size(), proj, getVertex)) {
-        constexpr auto locationID = "maplibre:LocationIndicator";
         stats.addRenderedFeature(locationID, *bound, {/* no tile */});
     }
 }
@@ -1065,7 +1112,7 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures() {
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,
-                                          const TransformState&,
+                                          const TransformState& state,
                                           const std::shared_ptr<UpdateParameters>& updateParameters,
                                           [[maybe_unused]] const PaintParameters& paintParameters,
                                           const RenderTree&,
@@ -1080,8 +1127,17 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    if (updateProjectionVariant(state)) {
+        quadShader.reset();
+        circleShader.reset();
+        // the drawables were built with the other projection's shaders
+        if (layerGroup) {
+            static_cast<LayerGroup*>(layerGroup.get())->clearDrawables();
+        }
+    }
+
     if (!quadShader) {
-        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader");
+        quadShader = context.getGenericShader(shaders, "LocationIndicatorTexturedShader", projectionVariant);
     }
 
     if (!quadShader) {
@@ -1090,7 +1146,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!circleShader) {
-        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader");
+        circleShader = context.getGenericShader(shaders, "LocationIndicatorShader", projectionVariant);
     }
 
     if (!circleShader) {
@@ -1107,13 +1163,16 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
-            getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
+        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(getID(),
+                                                                       evaluatedProperties,
+                                                                       renderImpl->getProjectionCircle(),
+                                                                       renderImpl->getProjectionPuck(),
+                                                                       renderImpl->getPositionMercator());
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
     if (updateParameters->captureRenderedFeatures) {
-        captureRenderedFeatures();
+        captureRenderedFeatures(state);
     }
 
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());

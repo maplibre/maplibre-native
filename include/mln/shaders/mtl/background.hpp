@@ -96,12 +96,13 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
-                                device const BackgroundDrawableUnionUBO* drawableVector [[buffer(idBackgroundDrawableUBO)]]) {
+                                device const BackgroundDrawableUnionUBO* drawableVector [[buffer(idBackgroundDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]]) {
 
     device const BackgroundDrawableUBO& drawable = drawableVector[uboIndex].backgroundDrawableUBO;
 
     return {
-        .position = drawable.matrix * float4(float2(in.position.xy), 0, 1)
+        .position = projectTile(float2(in.position.xy), float2(in.position.xy), projectionVector[uboIndex])
     };
 }
 
@@ -142,6 +143,7 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(idGlobalUBOIndex)]],
                                 device const BackgroundDrawableUnionUBO* drawableVector [[buffer(idBackgroundDrawableUBO)]],
+                                device const ProjectionUBO* projectionVector [[buffer(idProjectionUBO)]],
                                 device const BackgroundPatternPropsUBO& props [[buffer(idBackgroundPropsUBO)]]) {
 
     device const BackgroundPatternDrawableUBO& drawable = drawableVector[uboIndex].backgroundPatternDrawableUBO;
@@ -158,7 +160,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                          drawable.tile_units_to_pixels,
                                          pos);
     return {
-        .position = drawable.matrix * float4(float2(in.position.xy), 0, 1),
+        .position = projectTile(float2(in.position.xy), float2(in.position.xy), projectionVector[uboIndex]),
         .pos_a = pos_a,
         .pos_b = pos_b,
     };
