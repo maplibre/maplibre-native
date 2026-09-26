@@ -146,13 +146,12 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
-# The OHOS toolchain is not listed as a built-in CMake platform for this
-# feature, so teach CMake how to whole-archive static targets for the native
-# module link.
-set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE "-Wl,--whole-archive <LIBRARY> -Wl,--no-whole-archive")
-set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED True)
-
 function(mln_ohos_link_core_whole_archive target)
+    # Stock CMake has no OHOS definition for this feature. Define it in the
+    # consumer's directory scope, where the link expression is evaluated.
+    set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE "-Wl,--whole-archive <LIBRARY> -Wl,--no-whole-archive" PARENT_SCOPE)
+    set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED True PARENT_SCOPE)
+
     target_link_libraries(
         ${target}
         PRIVATE
