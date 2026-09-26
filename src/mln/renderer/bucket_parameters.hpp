@@ -3,6 +3,9 @@
 #include <mln/map/mode.hpp>
 #include <mln/renderer/bucket.hpp>
 #include <mln/tile/tile_id.hpp>
+#include <mln/util/feature.hpp>
+
+#include <memory>
 
 namespace mln {
 namespace style {
@@ -15,6 +18,8 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
+    // The style's global state, used by "global-state" expressions.
+    std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     const bool retainFeaturesById = false;
 };
 

@@ -71,10 +71,29 @@ public abstract class Layer {
     return nativeGetId();
   }
 
+  /**
+   * When the visibility was set as an expression, this returns the current evaluated value.
+   */
   @NonNull
   public PropertyValue<String> getVisibility() {
     checkThread();
     return new PaintPropertyValue<>("visibility", (String) nativeGetVisibility());
+  }
+
+  /**
+   * Get the visibility of this layer as an expression.
+   *
+   * @return the visibility expression, or null when the visibility is a constant value
+   */
+  @Nullable
+  public Expression getVisibilityExpression() {
+    checkThread();
+    JsonElement jsonElement = nativeGetVisibilityExpression();
+    if (jsonElement != null) {
+      return Expression.Converter.convert(jsonElement);
+    } else {
+      return null;
+    }
   }
 
   public float getMinZoom() {
@@ -108,6 +127,10 @@ public abstract class Layer {
   @NonNull
   @Keep
   protected native Object nativeGetVisibility();
+
+  @Nullable
+  @Keep
+  private native JsonElement nativeGetVisibilityExpression();
 
   @Keep
   protected native void nativeSetLayoutProperty(String name, Object value);

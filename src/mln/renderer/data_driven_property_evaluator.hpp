@@ -24,18 +24,31 @@ public:
     ResultType operator()(const T& constant) const { return ResultType(constant); }
 
     ResultType operator()(const style::PropertyExpression<T>& expression) const {
+        // Expressions that depend on the feature or on runtime-loaded images
+        // cannot be evaluated yet and are kept for later per-feature
+        // evaluation. Global-state-only expressions can be evaluated
+        // immediately with the state carried by the evaluation parameters.
+        const bool needsFeature = !expression.isFeatureConstant() ||
+                                  (expression.getDependencies() & style::expression::Dependency::Image);
         if constexpr (useIntegerZoom) { // Compiler will optimize out the unused branch.
-            if (!expression.isFeatureConstant() || !expression.isRuntimeConstant()) {
+            if (needsFeature) {
                 auto returnExpression = expression;
                 returnExpression.setUseIntegerZoom(true);
+                returnExpression.captureGlobalState(parameters.globalState);
                 return ResultType(returnExpression);
             }
-            return ResultType(expression.evaluate(std::floor(parameters.z)));
+            return ResultType(expression.evaluate(style::expression::EvaluationContext(std::floor(parameters.z))
+                                                      .withGlobalState(parameters.globalState.get()),
+                                                  defaultValue));
         } else {
-            if (!expression.isFeatureConstant() || !expression.isRuntimeConstant()) {
-                return ResultType(expression);
+            if (needsFeature) {
+                auto returnExpression = expression;
+                returnExpression.captureGlobalState(parameters.globalState);
+                return ResultType(returnExpression);
             }
-            return ResultType(expression.evaluate(parameters.z));
+            return ResultType(expression.evaluate(
+                style::expression::EvaluationContext(parameters.z).withGlobalState(parameters.globalState.get()),
+                defaultValue));
         }
     }
 
@@ -62,7 +75,9 @@ public:
 
     ResultType operator()(const style::PropertyExpression<T>& expression) const {
         if (!expression.isFeatureConstant() || !expression.isRuntimeConstant()) {
-            return ResultType(expression);
+            auto returnExpression = expression;
+            returnExpression.captureGlobalState(parameters.globalState);
+            return ResultType(returnExpression);
         } else {
             const T evaluated = expression.evaluate(std::floor(parameters.z));
             return ResultType(calculate(evaluated, evaluated, evaluated));

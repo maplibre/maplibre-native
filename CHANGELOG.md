@@ -5,6 +5,11 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add support for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression and the root [`state`](https://maplibre.org/maplibre-style-spec/root/#state) style property in filters, layout properties, and paint properties, including the runtime API `style::Style::setGlobalStateProperty` / `style::Style::getGlobalState`. Calls to `setGlobalStateProperty` before the style has loaded are rejected, matching MapLibre GL JS ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [core] Add `style::Style::isLoaded` to report whether style JSON has finished loading and parsing without waiting for source or sprite resources ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [android] Add `Style#setGlobalStateProperty` / `Style#getGlobalState` (also available on `MapSnapshotter`) and the `Expression.globalState` builder for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [ios] Add `MLNStyle.globalState` / `-[MLNStyle setGlobalStateValue:forProperty:]` and `NSExpression` support (`mgl_globalState:`) for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [node] Add `map.setGlobalStateProperty` / `map.getGlobalState` for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
 - [core] Locally rasterized CJK glyphs now render at 2x texture resolution, preserving fine strokes. Mirrors [maplibre-gl-js#3006](https://github.com/maplibre/maplibre-gl-js/pull/3006).
 - [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)
