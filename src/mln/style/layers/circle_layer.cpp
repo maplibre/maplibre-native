@@ -103,6 +103,7 @@ void CircleLayer::setCircleBlurTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleBlur>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleBlurTransition() const {
@@ -130,6 +131,7 @@ void CircleLayer::setCircleColorTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleColorTransition() const {
@@ -157,6 +159,7 @@ void CircleLayer::setCircleOpacityTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleOpacityTransition() const {
@@ -184,6 +187,7 @@ void CircleLayer::setCirclePitchAlignmentTransition(const TransitionOptions& opt
     auto impl_ = mutableImpl();
     impl_->paint.template get<CirclePitchAlignment>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCirclePitchAlignmentTransition() const {
@@ -211,6 +215,7 @@ void CircleLayer::setCirclePitchScaleTransition(const TransitionOptions& options
     auto impl_ = mutableImpl();
     impl_->paint.template get<CirclePitchScale>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCirclePitchScaleTransition() const {
@@ -238,6 +243,7 @@ void CircleLayer::setCircleRadiusTransition(const TransitionOptions& options) {
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleRadius>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleRadiusTransition() const {
@@ -265,6 +271,7 @@ void CircleLayer::setCircleStrokeColorTransition(const TransitionOptions& option
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleStrokeColor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleStrokeColorTransition() const {
@@ -292,6 +299,7 @@ void CircleLayer::setCircleStrokeOpacityTransition(const TransitionOptions& opti
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleStrokeOpacity>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleStrokeOpacityTransition() const {
@@ -319,6 +327,7 @@ void CircleLayer::setCircleStrokeWidthTransition(const TransitionOptions& option
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleStrokeWidth>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleStrokeWidthTransition() const {
@@ -346,6 +355,7 @@ void CircleLayer::setCircleTranslateTransition(const TransitionOptions& options)
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleTranslate>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleTranslateTransition() const {
@@ -373,6 +383,7 @@ void CircleLayer::setCircleTranslateAnchorTransition(const TransitionOptions& op
     auto impl_ = mutableImpl();
     impl_->paint.template get<CircleTranslateAnchor>().options = options;
     baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
 }
 
 TransitionOptions CircleLayer::getCircleTranslateAnchorTransition() const {
