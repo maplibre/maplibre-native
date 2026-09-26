@@ -25,6 +25,7 @@ public:
         bool onRecord(EventSeverity, Event, int64_t, const std::string&) override { return true; }
     };
 
+    /// Observers are not destroyed at process exit. Remove them before tearing down their host environment.
     static void setObserver(std::unique_ptr<Observer> Observer);
     static std::unique_ptr<Observer> removeObserver();
 
@@ -42,6 +43,7 @@ public:
     ///
     /// In a crash or other unexpected termination, pending asynchronous log entries will be lost.
     /// The default is true (asynchronous) for all levels except `Error`.
+    /// Async logging requires the containing library to remain loaded until process exit.
     static void useLogThread(bool enable, std::optional<EventSeverity> = {});
 
     template <typename... Args>
