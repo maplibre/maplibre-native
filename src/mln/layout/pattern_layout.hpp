@@ -191,11 +191,34 @@ public:
         bucket->setRetainFeaturesById(retainFeaturesById);
         bucket->reserveFeatures(features.size());
 
+        const auto recordSDFPattern = [&](const std::string& layerID, const std::string& imageID) {
+            const auto position = patternPositions.find(imageID);
+            if (position != patternPositions.end()) {
+                bucket->recordSDFPattern(layerID, position->second.sdf);
+            }
+        };
+
+        for (const auto& [layerID, layerProperties] : layerPropertiesMap) {
+            const auto& paint = static_cast<const LayerPropertiesType&>(*layerProperties).evaluated;
+            const auto& patternProperty = paint.template get<PatternPropertyType>();
+            if (patternProperty.isConstant()) {
+                const auto pattern = patternProperty.constantOr(Faded<style::expression::Image>{.from = "", .to = ""});
+                recordSDFPattern(layerID, pattern.from.id());
+                recordSDFPattern(layerID, pattern.to.id());
+            }
+        }
+
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
             const auto& feature = patternFeature.feature;
             const PatternLayerMap& patterns = patternFeature.getPatterns();
             const GeometryCollection& geometries = feature->getGeometries();
+
+            for (const auto& [layerID, pattern] : patterns) {
+                recordSDFPattern(layerID, pattern.min);
+                recordSDFPattern(layerID, pattern.mid);
+                recordSDFPattern(layerID, pattern.max);
+            }
 
             featureIndex->insert(geometries, i, sourceLayerID, bucketLeaderID);
             bucket->addFeature(*feature, geometries, patternPositions, patterns, i, canonical);
