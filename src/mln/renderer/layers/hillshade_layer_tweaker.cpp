@@ -172,8 +172,17 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        const auto matrix = getTileMatrix(
-            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
+        // Pixel-align only while the map is at rest, as the raster layer does (and as GL-JS does for
+        // hillshade): an always-aligned matrix makes the shading step a whole pixel at a time under
+        // an animated camera while the layers around it move smoothly.
+        const auto matrix = getTileMatrix(tileID,
+                                          parameters,
+                                          {0.f, 0.f},
+                                          TranslateAnchorType::Viewport,
+                                          false,
+                                          false,
+                                          drawable,
+                                          !parameters.state.isChanging());
 
 #if MLN_UBO_CONSOLIDATION
         drawableUBOVector[i] = {

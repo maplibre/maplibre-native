@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+- Draw hillshade at sub-pixel positions while the camera is moving, as raster layers already do, so shading no longer steps a pixel at a time during animations.
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
 
 ## 6.31.0
