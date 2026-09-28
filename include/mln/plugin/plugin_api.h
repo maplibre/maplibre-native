@@ -339,10 +339,9 @@ typedef enum mln_plugin_drawable_depth_mode_v1 {
 
 typedef struct mln_plugin_drawable_descriptor_v1 {
     /* Indexed triangles in the translucent pass, premultiplied-alpha blending by
-     * default. When depth_mode and related fields are omitted (struct_size ends
-     * at segment_count), the host uses read-only depth unless the layer sets
-     * enable_stencil_overlap_dedup, in which case depth is disabled and stencil
-     * overlap dedup applies to every drawable. */
+     * default. depth_mode, enable_stencil_overlap, and cull_back_faces select the
+     * host depth/stencil/cull state for this drawable. blend_mode and reserved are
+     * unused; set them to zero. */
     uint32_t struct_size;
     uint64_t drawable_key;
     mln_plugin_string shader_id;

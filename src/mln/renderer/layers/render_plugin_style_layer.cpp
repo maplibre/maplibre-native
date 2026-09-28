@@ -240,9 +240,8 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             auto builder = context.createDrawableBuilder("plugin/" + registration->type);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
-            const bool stencilOverlap = definition.enableStencilOverlap ||
-                                        (registration->enableStencilOverlapDedup &&
-                                         definition.depthMode == PluginDrawableDepthMode::Disabled);
+            const bool stencilOverlap =
+                definition.enableStencilOverlap || registration->enableStencilOverlapDedup;
             if (stencilOverlap) {
                 builder->setEnableDepth(false);
                 builder->setIs3D(true);

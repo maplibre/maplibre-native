@@ -114,16 +114,9 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!valid) break;
         drawable.key = input.drawable_key;
         drawable.shaderID.assign(input.shader_id.data, input.shader_id.size);
-        constexpr size_t kExtendedDrawableSize = offsetof(mln_plugin_drawable_descriptor_v1, depth_mode) +
-                                                 sizeof(uint8_t) * 4;
-        if (input.struct_size >= kExtendedDrawableSize) {
-            drawable.depthMode = static_cast<PluginDrawableDepthMode>(input.depth_mode);
-            drawable.enableStencilOverlap = input.enable_stencil_overlap != 0;
-            drawable.cullBackFaces = input.cull_back_faces != 0;
-        } else if (registration->enableStencilOverlapDedup) {
-            drawable.depthMode = PluginDrawableDepthMode::Disabled;
-            drawable.enableStencilOverlap = true;
-        }
+        drawable.depthMode = static_cast<PluginDrawableDepthMode>(input.depth_mode);
+        drawable.enableStencilOverlap = input.enable_stencil_overlap != 0;
+        drawable.cullBackFaces = input.cull_back_faces != 0;
         const auto shaderIt = std::find_if(registration->shaders.begin(),
                                            registration->shaders.end(),
                                            [&](const auto& shader) { return shader.id == drawable.shaderID; });
