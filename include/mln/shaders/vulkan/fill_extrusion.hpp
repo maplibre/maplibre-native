@@ -64,6 +64,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
@@ -106,7 +110,7 @@ void main() {
     const float z = t > 0.0 ? height : base;
     const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
 
-    gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
+    gl_Position = projectTileFor3D(vec2(in_position) + decimals, z, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -212,6 +216,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(set = LAYER_SET_INDEX, binding = idFillExtrusionPropsUBO) uniform FillExtrusionPropsUBO {
     vec4 color;
     vec4 light_color_pad;
@@ -279,7 +287,7 @@ void main() {
     const float t = float(in_position.y);
     const float z = t > 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
+    gl_Position = projectTileFor3D(in_position.x == 0.0 ? p1 : p2, z, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -390,6 +398,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 struct FillExtrusionTilePropsUBO {
     vec4 pattern_from;
     vec4 pattern_to;
@@ -449,7 +461,7 @@ void main() {
     const float z = t > 0.0 ? height : base;
     const vec2 decimals = unpack_float(floor(in_decimals_ed.x / 2)) / 128.0;
 
-    gl_Position = drawable.matrix * vec4(in_position + decimals, z, 1.0);
+    gl_Position = projectTileFor3D(vec2(in_position) + decimals, z, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
@@ -658,6 +670,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idFillExtrusionDrawableUBO) read
     FillExtrusionDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 struct OutlineInstance {
     int pos;
     uint decimals_ed;
@@ -741,7 +757,7 @@ void main() {
     const float t = float(in_position.y);
     const float z = t > 0.0 ? height : base;
 
-    gl_Position = drawable.matrix * vec4(in_position.x == 0.0 ? p1 : p2, z, 1.0);
+    gl_Position = projectTileFor3D(in_position.x == 0.0 ? p1 : p2, z, projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)

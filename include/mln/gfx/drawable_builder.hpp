@@ -92,7 +92,15 @@ public:
     bool getIs3D() const { return is3D; }
 
     /// Set 3D mode
-    void setIs3D(bool value) { is3D = value; }
+    void setIs3D(bool value) {
+        is3D = value;
+        // Historically every 3D drawable used PaintParameters::depthModeFor3D(),
+        // which always wrote depth regardless of the builder's default. Preserve
+        // that behavior while allowing callers to opt into ReadOnly afterwards.
+        if (value) {
+            depthType = DepthMaskType::ReadWrite;
+        }
+    }
 
     /// Set the draw priority on all drawables including those already generated
     void resetDrawPriority(DrawPriority);

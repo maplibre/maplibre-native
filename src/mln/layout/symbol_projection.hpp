@@ -1,8 +1,11 @@
 #pragma once
 
 #include <mln/util/mat4.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
+
+#include <optional>
 
 namespace mln {
 
@@ -40,17 +43,61 @@ struct PlacedGlyph {
 };
 
 float evaluateSizeForFeature(const ZoomEvaluatedSize& zoomEvaluatedSize, const PlacedSymbol& placedSymbol);
-mat4 getLabelPlaneMatrix(
-    const mat4& posMatrix, bool pitchWithMap, bool rotateWithMap, const TransformState& state, float pixelsToTileUnits);
-mat4 getGlCoordMatrix(
-    const mat4& posMatrix, bool pitchWithMap, bool rotateWithMap, const TransformState& state, float pixelsToTileUnits);
+void getTileSkewVectors(const TransformState& state, vec2& vecEast, vec2& vecSouth);
+
+/// Pitched labels: tile units to the pitched map plane in pixels. Viewport labels: clip space to viewport pixels.
+mat4 getLabelPlaneMatrix(bool pitchWithMap, bool rotateWithMap, const TransformState& state, float pixelsToTileUnits);
+/// The inverse for the shader: pitched labels back to tile units, viewport labels to clip space.
+mat4 getGlCoordMatrix(bool pitchWithMap, bool rotateWithMap, const TransformState& state, float pixelsToTileUnits);
 
 using PointAndCameraDistance = std::pair<Point<float>, float>;
 PointAndCameraDistance project(const Point<float>& point, const mat4& matrix);
 
+/// Projects tile points to the label plane a symbol is laid out in, through the tile's projection.
+class LabelPlaneProjector {
+public:
+    LabelPlaneProjector(const TileProjector&,
+                        bool pitchWithMap,
+                        bool rotateWithMap,
+                        float pixelsToTileUnits,
+                        Point<float> translation = {0, 0});
+
+    /// Tile units to the label plane; distance and occlusion come from the projection.
+    ProjectedTilePoint project(const Point<float>& tilePoint) const;
+    /// Label plane to clip space, for orientation checks.
+    Point<float> toClipSpace(const Point<float>& labelPlanePoint) const;
+    /// Tile units straight to clip space.
+    ProjectedTilePoint toClipSpaceFromTile(const Point<float>& tilePoint) const;
+
+private:
+    TileProjector tile;
+    bool pitchWithMap;
+    Point<float> translation;
+    mat4 pitchedLabelPlaneMatrix;
+    mat4 pitchedLabelPlaneMatrixInverse;
+    float width;
+    float height;
+};
+
+/// The projections of one symbol's line vertices, so each vertex is projected once however many glyphs walk it.
+class LineProjectionCache {
+public:
+    void reset(std::size_t vertexCount) {
+        points.assign(vertexCount, std::nullopt);
+        occluded = false;
+    }
+    const ProjectedTilePoint& get(std::size_t index, const GeometryCoordinates& line, const LabelPlaneProjector&);
+    /// Whether any vertex projected so far is behind the globe's horizon.
+    bool anyOccluded() const { return occluded; }
+
+private:
+    std::vector<std::optional<ProjectedTilePoint>> points;
+    bool occluded = false;
+};
+
 void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
                          const std::vector<PlacedSymbol>&,
-                         const mat4& posMatrix,
+                         const TileProjector&,
                          bool pitchWithMap,
                          bool rotateWithMap,
                          bool keepUpright,
@@ -65,7 +112,8 @@ std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float 
                                                                           const Point<float>& anchorPoint,
                                                                           const Point<float>& tileAnchorPoint,
                                                                           const PlacedSymbol& symbol,
-                                                                          const mat4& labelPlaneMatrix,
+                                                                          const LabelPlaneProjector&,
+                                                                          LineProjectionCache&,
                                                                           bool returnTileDistance);
 
 void hideGlyphs(std::size_t numGlyphs, SymbolBucket::DynamicAttributeVector& dynamicVertexArray);

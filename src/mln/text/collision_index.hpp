@@ -4,6 +4,7 @@
 
 #include <mln/text/collision_feature.hpp>
 #include <mln/util/grid_index.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 
 #include <array>
@@ -11,8 +12,16 @@
 namespace mln {
 
 class PlacedSymbol;
+class LabelPlaneProjector;
 
 struct TileDistance;
+
+struct PlacedFeatureResult {
+    bool placed = false;
+    bool offscreen = false;
+    /// Behind the planet's horizon: hidden even when overlap is allowed.
+    bool occluded = false;
+};
 
 using CollisionBoundaries = std::array<float, 4>; // [x1, y1, x2, y2]
 struct IntersectStatus {
@@ -35,17 +44,19 @@ public:
                                         const mat4& posMatrix,
                                         float textPixelRatio,
                                         const CollisionBoundaries& tileEdges) const;
-    std::pair<bool, bool> placeFeature(
+    PlacedFeatureResult placeFeature(
         const CollisionFeature& feature,
         Point<float> shift,
-        const mat4& posMatrix,
-        const mat4& labelPlaneMatrix,
+        Point<float> translation,
+        const TileProjector& tileProjector,
+        const LabelPlaneProjector& labelPlane,
         float textPixelRatio,
         const PlacedSymbol& symbol,
         float scale,
         float fontSize,
         bool allowOverlap,
         bool pitchWithMap,
+        bool rotateWithMap,
         bool collisionDebug,
         const std::optional<CollisionBoundaries>& avoidEdges,
         const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
@@ -72,10 +83,10 @@ private:
     bool isInsideTile(const CollisionBoundaries& boundaries, const CollisionBoundaries& tileBoundaries) const;
     bool overlapsTile(const CollisionBoundaries& boundaries, const CollisionBoundaries& tileBoundaries) const;
 
-    std::pair<bool, bool> placeLineFeature(
+    PlacedFeatureResult placeLineFeature(
         const CollisionFeature& feature,
-        const mat4& posMatrix,
-        const mat4& labelPlaneMatrix,
+        const TileProjector& tileProjector,
+        const LabelPlaneProjector& labelPlane,
         float textPixelRatio,
         const PlacedSymbol& symbol,
         float scale,
@@ -94,14 +105,41 @@ private:
                                   float cameraToAnchorDistance,
                                   bool pitchWithMap);
 
-    std::pair<float, float> projectAnchor(const mat4& posMatrix, const Point<float>& point) const;
-    std::pair<Point<float>, float> projectAndGetPerspectiveRatio(const mat4& posMatrix,
-                                                                 const Point<float>& point) const;
+    struct ProjectedAnchor {
+        Point<float> point;
+        float perspectiveRatio;
+        float signedDistanceFromCamera;
+        bool occluded;
+    };
+
+    ProjectedAnchor toViewport(const ProjectedTilePoint&) const;
+    ProjectedAnchor projectAndGetPerspectiveRatio(const TileProjector&, const Point<float>& point) const;
     Point<float> projectPoint(const mat4& posMatrix, const Point<float>& point) const;
+    Point<float> projectPoint(const TileProjector&, const Point<float>& point) const;
     CollisionBoundaries getProjectedCollisionBoundaries(const mat4& posMatrix,
                                                         Point<float> shift,
                                                         float textPixelRatio,
                                                         const CollisionBox& box) const;
+    CollisionBoundaries getProjectedCollisionBoundaries(const ProjectedAnchor&,
+                                                        Point<float> shift,
+                                                        float textPixelRatio,
+                                                        const CollisionBox& box) const;
+
+    struct ProjectedBox {
+        CollisionBoundaries boundaries;
+        bool allPointsOccluded;
+    };
+    /// Pitched or rotated boxes on the globe: the box outline is sampled at eight points and projected,
+    /// so it foreshortens toward the horizon the way the label does.
+    ProjectedBox projectCollisionBox(const CollisionBox& box,
+                                     float tileToViewport,
+                                     float scale,
+                                     const TileProjector&,
+                                     bool pitchWithMap,
+                                     bool rotateWithMap,
+                                     const ProjectedAnchor& projectedPoint,
+                                     Point<float> shift,
+                                     Point<float> translation) const;
 
     const TransformState transformState;
 

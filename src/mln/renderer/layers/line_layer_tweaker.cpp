@@ -78,6 +78,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     const auto zoom = static_cast<float>(parameters.state.getZoom());
     const auto intZoom = parameters.state.getIntegerZoom();
+    const auto& state = parameters.state;
+    const auto pixelScale = static_cast<float>(1.0 + (state.getProjection().pixelScale(state) - 1.0) *
+                                                         state.getProjectionTransition());
 
 #if MLN_RENDER_BACKEND_METAL
     const auto getExpressionBuffer = [&]() {
@@ -199,6 +202,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     int i = 0;
     std::vector<LineDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<LineTilePropsUnionUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -224,8 +228,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const auto anchor = evaluated.get<LineTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto& matrix = projection.fallbackMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
 #if !MLN_UBO_CONSOLIDATION
         auto& drawableUniforms = drawable.mutableUniformBuffers();
@@ -238,7 +249,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const LineDrawableUBO drawableUBO = {
 #endif
                     .matrix = util::cast<float>(matrix),
-                    .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                    .ratio = pixelScale / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
 
                     .color_t = std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
                     .blur_t = std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
@@ -262,7 +273,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const LineGradientDrawableUBO drawableUBO = {
 #endif
                     .matrix = util::cast<float>(matrix),
-                    .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                    .ratio = pixelScale / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
 
                     .blur_t = std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
@@ -289,7 +300,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const LinePatternDrawableUBO drawableUBO = {
 #endif
                     .matrix = util::cast<float>(matrix),
-                    .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                    .ratio = pixelScale / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
 
                     .blur_t = std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
                     .opacity_t = std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
@@ -356,7 +367,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         .patternscale_b = {1.0f / tileID.pixelsToTileUnits(widthB, intZoom), -posB.height / 2.0f},
                         .tex_y_a = posA.y,
                         .tex_y_b = posB.y,
-                        .ratio = 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                        .ratio = pixelScale / tileID.pixelsToTileUnits(1.0f, zoom),
 
                         .color_t = std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
                         .blur_t = std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
@@ -416,6 +427,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     layerUniforms.set(idLineDrawableUBO, drawableUniformBuffer);
     layerUniforms.set(idLineTilePropsUBO, tilePropsUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

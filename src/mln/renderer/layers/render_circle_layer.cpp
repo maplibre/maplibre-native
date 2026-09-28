@@ -5,6 +5,7 @@
 #include <mln/gfx/drawable_builder.hpp>
 #include <mln/gfx/shader_group.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/buckets/circle_bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/layers/circle_layer_tweaker.hpp>
@@ -266,6 +267,12 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
 
     std::optional<mat4> tileMatrix;
 
+    // On the globe the tile's projection stands in for the tile matrix, and takes the translation in tile units.
+    const auto projector = state.isGlobeRendering() ? std::make_optional<TileProjector>(state, tileID.toUnwrapped())
+                                                    : std::nullopt;
+    const auto tileTranslation = RenderTile::tileUnitTranslation(
+        tileID.toUnwrapped(), translation, translationAnchor, state);
+
     const auto& features = bucket.getRetainedFeatures();
     stats.renderedFeatures.reserve(features.size());
 
@@ -298,7 +305,7 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
         }
 
         // Compute the tile matrix once
-        if (!tileMatrix.has_value()) {
+        if (!projector && !tileMatrix.has_value()) {
             tileMatrix = LayerTweaker::getTileMatrix(tileID.toUnwrapped(),
                                                      state,
                                                      transformParams,
@@ -319,8 +326,38 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             const bool useProjectedCenter = !pitchWithMap || !scaleWithMap;
             return getVertexImpl({vertex, *tileMatrix, radius, strokeWidth, extrudeScale, useProjectedCenter});
         };
-        if (const auto bound = computeFeatureNDCBound(
-                featureEntry.vertexCount, *tileMatrix, preTransformedVertices, getVertex)) {
+        // The same corners in NDC on the globe: a circle on the viewport keeps its pixel radius around the projected
+        // center, a circle on the map is the ellipse its east and north radii project to.
+        const auto getGlobeVertex = [&](std::size_t vi) -> vec3 {
+            const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
+            const Point<double> center{std::trunc(vertex[0] / 2.0) + tileTranslation[0],
+                                       std::trunc(vertex[1] / 2.0) + tileTranslation[1]};
+            const auto projected = projector->project(center);
+            if (projected.occluded) {
+                // Not drawn; NaN stays out of the bound.
+                return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), 0};
+            }
+            const double w = projected.signedDistanceFromCamera;
+            const double pixels = radius + strokeWidth;
+            vec2 halfExtent;
+            if (pitchWithMap) {
+                const double tileRadius = pixels * pixelsToTileUnits * projector->pitchedTextCorrection(center) *
+                                          (scaleWithMap ? 1.0 : w / cameraToCenterDistance);
+                const auto east = projector->project({center.x + tileRadius, center.y}).point - projected.point;
+                const auto north = projector->project({center.x, center.y + tileRadius}).point - projected.point;
+                halfExtent = {std::hypot(east.x, north.x), std::hypot(east.y, north.y)};
+            } else {
+                const double clipScale = (scaleWithMap ? cameraToCenterDistance : w) / w;
+                halfExtent = {pixels * 2.0 / state.getSize().width * clipScale,
+                              pixels * 2.0 / state.getSize().height * clipScale};
+            }
+            const vec2 extrude = gl_fmod(vec(vertex[0], vertex[1]), 2.0) * 2 - 1;
+            return {projected.point.x + extrude[0] * halfExtent[0], projected.point.y + extrude[1] * halfExtent[1], 0};
+        };
+        const auto vertexCount = featureEntry.vertexCount;
+        if (const auto bound = projector ? computeFeatureNDCBound(vertexCount, getGlobeVertex)
+                                         : computeFeatureNDCBound(
+                                               vertexCount, *tileMatrix, preTransformedVertices, getVertex)) {
             stats.addRenderedFeature(featureID, *bound, {tileID});
         }
     }
@@ -333,6 +370,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                const PaintParameters&,
                                const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(transformState);
     stats.renderedFeatures.clear();
 
     if (!renderTiles || renderTiles->empty()) {
@@ -425,7 +463,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeOpacity>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
-        const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+        const auto circleShader = circleShaderGroup->getOrCreateShader(
+            context, propertiesAsUniforms, projectionVariant);
         if (!circleShader) {
             continue;
         }

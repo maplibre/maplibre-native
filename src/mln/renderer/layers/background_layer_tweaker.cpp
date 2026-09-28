@@ -15,10 +15,6 @@ namespace mln {
 using namespace style;
 using namespace shaders;
 
-#ifndef NDEBUG
-constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
-#endif
-
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
         return;
@@ -76,6 +72,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
 #if MLN_UBO_CONSOLIDATION
     int i = 0;
     std::vector<BackgroundDrawableUnionUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -84,13 +81,16 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
             return;
         }
 
-        // We assume that drawables don't change between pattern and non-pattern.
-        assert(hasPattern == (drawable.getShader() ==
-                              context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
-
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = getTileMatrix(
+        const auto projection = getProjectionData(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable);
+        const auto& matrix = projection.fallbackMatrix;
+#if MLN_UBO_CONSOLIDATION
+        projectionUBOVector[i] = toProjectionUBO(projection);
+#else
+        const auto projectionUBO = toProjectionUBO(projection);
+        drawable.mutableUniformBuffers().createOrUpdate(idProjectionUBO, &projectionUBO, context);
+#endif
 
 #if !MLN_UBO_CONSOLIDATION
         auto& drawableUniforms = drawable.mutableUniformBuffers();
@@ -156,6 +156,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     }
 
     layerUniforms.set(idBackgroundDrawableUBO, drawableUniformBuffer);
+    uploadProjectionUBOs(layerUniforms, projectionUBOVector, context);
 #endif
 }
 

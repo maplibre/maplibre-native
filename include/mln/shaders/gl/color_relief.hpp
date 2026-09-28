@@ -24,7 +24,7 @@ layout (location = 1) in vec2 a_texture_pos;
 out vec2 v_pos;
 
 void main() {
-    gl_Position = u_matrix * vec4(a_pos, 0, 1);
+    gl_Position = projectTile(a_pos, a_pos);
 
     highp vec2 epsilon = 1.0 / u_dimension;
     float scale = (u_dimension.x - 2.0) / u_dimension.x;

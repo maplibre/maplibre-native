@@ -1,5 +1,12 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### ✨ Features and improvements
+
+- Add runtime `Sky` style API support, including zoom expressions, transitions, and removal.
+- feat(core): render the map as a globe when the style sets `"projection": {"type": "globe"}` ([#4533](https://github.com/maplibre/maplibre-native/pull/4533)).
+
 ## 13.6.1
 
 ### 🐞 Bug fixes

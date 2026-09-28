@@ -14,6 +14,8 @@
 #include <mln/mtl/uniform_buffer.hpp>
 #include <mln/mtl/upload_pass.hpp>
 #include <mln/mtl/vertex_buffer_resource.hpp>
+#include <mln/gfx/projection_variant.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/renderer/render_target.hpp>
@@ -55,6 +57,10 @@ Context::~Context() noexcept {
         clipMaskDepthStencilState.reset();
         clipMaskPipelineState.reset();
         clipMaskUniformsBuffer.reset();
+        globeClipMaskShader.reset();
+        globeClipMaskPipelineState.reset();
+        globeClipMaskUniformsBuffer.reset();
+        globeClipMeshes.clear();
         stencilStateRenderable = nullptr;
 
         for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
@@ -197,6 +203,7 @@ void Context::performCleanup() {
     stats.numDrawCalls = 0;
     stats.numFrames++;
     clipMaskUniformsBufferUsed = false;
+    globeClipMaskUniformsBufferUsed = false;
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
@@ -212,9 +219,11 @@ UniqueUniformBufferArray Context::createLayerUniformBufferArray() {
     return std::make_unique<UniformBufferArray>();
 }
 
-gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders,
+                                                    const std::string& name,
+                                                    gfx::ProjectionVariant variant) {
     const auto shaderGroup = shaders.getShaderGroup(name);
-    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}) : gfx::ShaderProgramBasePtr{};
+    auto shader = shaderGroup ? shaderGroup->getOrCreateShader(*this, {}, variant) : gfx::ShaderProgramBasePtr{};
     return std::static_pointer_cast<gfx::ShaderProgramBase>(std::move(shader));
 }
 
@@ -309,6 +318,66 @@ const auto clipMaskDepthMode = gfx::DepthMode{.func = gfx::DepthFunctionType::Al
                                               .mask = gfx::DepthMaskType::ReadOnly};
 } // namespace
 
+const MTLDepthStencilStatePtr& Context::clipMaskDepthStencilStateFor(const gfx::Renderable& renderable) {
+    if (stencilStateRenderable != &renderable) {
+        // We're on a new renderable, invalidate objects constructed for the previous one.
+        clipMaskPipelineState.reset();
+        globeClipMaskPipelineState.reset();
+        clipMaskDepthStencilState.reset();
+        stencilStateRenderable = &renderable;
+    }
+    if (!clipMaskDepthStencilState) {
+        if (auto depthStencilState = makeDepthStencilState(clipMaskDepthMode, clipMaskStencilMode, renderable)) {
+            clipMaskDepthStencilState = std::move(depthStencilState);
+        }
+    }
+    assert(clipMaskDepthStencilState || !"Failed to create depth-stencil state for clip masking");
+    return clipMaskDepthStencilState;
+}
+
+MTLRenderPipelineStatePtr Context::makeClipMaskPipelineState(const ShaderProgram& shader,
+                                                             const gfx::Renderable& renderable) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal>;
+    constexpr auto vertexSize = sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>::a1);
+
+    // A vertex descriptor tells Metal what's in the vertex buffer
+    auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
+    if (!vertDesc) {
+        return {};
+    }
+    const auto& attribDesc = vertDesc->attributes()->object(ShaderClass::attributes[0].index);
+    attribDesc->setBufferIndex(ShaderClass::attributes[0].bufferIndex);
+    attribDesc->setOffset(0);
+    attribDesc->setFormat(MTL::VertexFormatShort2);
+
+    const auto& layoutDesc = vertDesc->layouts()->object(ShaderClass::attributes[0].bufferIndex);
+    layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
+    layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
+    layoutDesc->setStepRate(1);
+
+    // Create a render pipeline state, telling Metal how to render the primitives
+    const auto colorMode = gfx::ColorMode::disabled();
+    const std::size_t hash = mln::util::hash(
+        ShaderClass::attributes[0].index, 0, MTL::VertexFormatShort2, vertexSize, MTL::VertexStepFunctionPerVertex, 1);
+    return shader.getRenderPipelineState(renderable, vertDesc, colorMode, mln::util::hash(colorMode.hash(), hash));
+}
+
+std::optional<BufferResource>& Context::clipMaskUniformBuffer(std::optional<BufferResource>& persistent,
+                                                              bool& used,
+                                                              std::optional<BufferResource>& temp,
+                                                              const void* data,
+                                                              std::size_t size) {
+    auto& buffer = used ? temp : persistent;
+    used = true;
+    if (!buffer || !*buffer || buffer->getSizeInBytes() < size) {
+        buffer = createBuffer(
+            data, size, gfx::BufferUsageType::StaticDraw, /*isIndexBuffer=*/false, /*persistent=*/false);
+    } else {
+        buffer->update(data, size, /*offset=*/0);
+    }
+    return buffer;
+}
+
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                       RenderStaticData& staticData,
                                       const std::vector<shaders::ClipUBO>& tileUBOs) {
@@ -317,7 +386,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     if (!clipMaskShader) {
         const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
         if (group) {
-            clipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+            clipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Mercator));
         }
     }
     if (!clipMaskShader) {
@@ -328,13 +398,11 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     const auto& mtlShader = static_cast<const mtl::ShaderProgram&>(*clipMaskShader);
     auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
     const auto& encoder = mtlRenderPass.getMetalEncoder();
-    const auto colorMode = gfx::ColorMode::disabled();
 
     // Create a vertex buffer from the fixed tile coordinates
-    constexpr auto vertexSize = sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>::a1);
     const auto& vertexRes = getTileVertexBuffer();
     if (!vertexRes) {
-        assert(vertexSize == vertexRes.getSizeInBytes());
+        assert(sizeof(gfx::Vertex<PositionOnlyLayoutAttributes>::a1) == vertexRes.getSizeInBytes());
         return false;
     }
 
@@ -345,52 +413,11 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         return false;
     }
 
-    const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-    const auto& renderable = renderPassDescriptor.renderable;
-    if (stencilStateRenderable != &renderable) {
-        // We're on a new renderable, invalidate objects constructed for the previous one.
-        clipMaskPipelineState.reset();
-        clipMaskDepthStencilState.reset();
-        stencilStateRenderable = &renderable;
-    }
-
-    // Create the depth-stencil state, if necessary.
-    if (!clipMaskDepthStencilState) {
-        if (auto depthStencilState = makeDepthStencilState(clipMaskDepthMode, clipMaskStencilMode, renderable)) {
-            clipMaskDepthStencilState = std::move(depthStencilState);
-        }
-    }
-    assert(clipMaskDepthStencilState || !"Failed to create depth-stencil state for clip masking");
-    mtlRenderPass.setDepthStencilState(clipMaskDepthStencilState);
+    const auto& renderable = mtlRenderPass.getDescriptor().renderable;
+    mtlRenderPass.setDepthStencilState(clipMaskDepthStencilStateFor(renderable));
 
     if (!clipMaskPipelineState) {
-        // A vertex descriptor tells Metal what's in the vertex buffer
-        auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
-        if (!vertDesc) {
-            return false;
-        }
-
-        const auto& attribDesc = vertDesc->attributes()->object(ShaderClass::attributes[0].index);
-        attribDesc->setBufferIndex(ShaderClass::attributes[0].bufferIndex);
-        attribDesc->setOffset(0);
-        attribDesc->setFormat(MTL::VertexFormatShort2);
-
-        const auto& layoutDesc = vertDesc->layouts()->object(ShaderClass::attributes[0].bufferIndex);
-        layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
-        layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
-        layoutDesc->setStepRate(1);
-
-        // Create a render pipeline state, telling Metal how to render the primitives
-        const std::size_t hash = mln::util::hash(ShaderClass::attributes[0].index,
-                                                 0,
-                                                 MTL::VertexFormatShort2,
-                                                 vertexSize,
-                                                 MTL::VertexStepFunctionPerVertex,
-                                                 1);
-        if (auto state = mtlShader.getRenderPipelineState(
-                renderable, vertDesc, colorMode, mln::util::hash(colorMode.hash(), hash))) {
-            clipMaskPipelineState = std::move(state);
-        }
+        clipMaskPipelineState = makeClipMaskPipelineState(mtlShader, renderable);
     }
     if (clipMaskPipelineState) {
         mtlRenderPass.setRenderPipelineState(clipMaskPipelineState);
@@ -401,22 +428,11 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     // Create a buffer for the UBO data.
     constexpr auto uboSize = sizeof(shaders::ClipUBO);
-    const auto bufferSize = tileUBOs.size() * uboSize;
-
     std::optional<BufferResource> tempBuffer;
-    auto& uboBuffer = clipMaskUniformsBufferUsed ? tempBuffer : clipMaskUniformsBuffer;
-    clipMaskUniformsBufferUsed = true;
-    if (!uboBuffer || !*uboBuffer || uboBuffer->getSizeInBytes() < bufferSize) {
-        uboBuffer = createBuffer(tileUBOs.data(),
-                                 bufferSize,
-                                 gfx::BufferUsageType::StaticDraw,
-                                 /*isIndexBuffer=*/false,
-                                 /*persistent=*/!clipMaskUniformsBufferUsed);
-        if (!uboBuffer) {
-            return false;
-        }
-    } else {
-        uboBuffer->update(tileUBOs.data(), bufferSize, /*offset=*/0);
+    auto& uboBuffer = clipMaskUniformBuffer(
+        clipMaskUniformsBuffer, clipMaskUniformsBufferUsed, tempBuffer, tileUBOs.data(), tileUBOs.size() * uboSize);
+    if (!uboBuffer) {
+        return false;
     }
 
     mtlRenderPass.setCullMode(MTL::CullModeNone);
@@ -448,6 +464,101 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                        /*instanceCount=*/1);
     }
 #endif
+
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
+    return true;
+}
+
+void Context::releaseGlobeClipMasks() {
+    globeClipMeshes.clear();
+}
+
+bool Context::renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                           RenderStaticData& staticData,
+                                           const std::vector<gfx::GlobeClipMask>& masks) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal>;
+
+    if (!globeClipMaskShader) {
+        if (const auto group = staticData.shaders->getShaderGroup(ShaderClass::name)) {
+            globeClipMaskShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                group->getOrCreateShader(*this, {}, gfx::ProjectionVariant::Globe));
+        }
+    }
+    if (!globeClipMaskShader) {
+        assert(!"Failed to create shader for globe clip masking");
+        return false;
+    }
+
+    const auto& mtlShader = static_cast<const mtl::ShaderProgram&>(*globeClipMaskShader);
+    auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
+    const auto& encoder = mtlRenderPass.getMetalEncoder();
+
+    const auto& renderable = mtlRenderPass.getDescriptor().renderable;
+    mtlRenderPass.setDepthStencilState(clipMaskDepthStencilStateFor(renderable));
+
+    if (!globeClipMaskPipelineState) {
+        globeClipMaskPipelineState = makeClipMaskPipelineState(mtlShader, renderable);
+    }
+    if (globeClipMaskPipelineState) {
+        mtlRenderPass.setRenderPipelineState(globeClipMaskPipelineState);
+    } else {
+        assert(!"Failed to create render pipeline state for globe clip masking");
+        return false;
+    }
+
+    constexpr auto uboSize = sizeof(shaders::ProjectionUBO);
+    std::vector<shaders::ProjectionUBO> ubos;
+    ubos.reserve(masks.size());
+    for (const auto& mask : masks) {
+        ubos.push_back(mask.projection);
+    }
+    std::optional<BufferResource> tempBuffer;
+    auto& uboBuffer = clipMaskUniformBuffer(
+        globeClipMaskUniformsBuffer, globeClipMaskUniformsBufferUsed, tempBuffer, ubos.data(), masks.size() * uboSize);
+    if (!uboBuffer) {
+        return false;
+    }
+
+    // the far side of a limb tile projects inside the disc; cull it or it overwrites the tile in front
+    mtlRenderPass.setFrontFacingWinding(MTL::WindingCounterClockwise);
+    mtlRenderPass.setCullMode(MTL::CullModeBack);
+
+    for (std::size_t ii = 0; ii < masks.size(); ++ii) {
+        const auto& tile = masks[ii].tile;
+        const auto key = std::make_tuple(tile.z, tile.y == 0, tile.y == (1u << tile.z) - 1);
+        auto it = globeClipMeshes.find(key);
+        if (it == globeClipMeshes.end()) {
+            const auto mesh = rawGlobeTileMesh(tile, false, SubdivisionGranularitySetting::globe().stencil);
+            auto vertices = createBuffer(mesh.vertices.data(),
+                                         mesh.vertices.size(),
+                                         gfx::BufferUsageType::StaticDraw,
+                                         /*isIndexBuffer=*/false,
+                                         /*persistent=*/true);
+            auto indices = createBuffer(mesh.indices.data(),
+                                        mesh.indices.size() * sizeof(uint16_t),
+                                        gfx::BufferUsageType::StaticDraw,
+                                        /*isIndexBuffer=*/true,
+                                        /*persistent=*/true);
+            it = globeClipMeshes
+                     .emplace(key,
+                              GlobeClipMesh{.vertices = std::move(vertices),
+                                            .indices = std::move(indices),
+                                            .indexCount = mesh.indices.size()})
+                     .first;
+        }
+        const auto& mesh = it->second;
+
+        encoder->setStencilReferenceValue(masks[ii].stencilRef);
+        mtlRenderPass.bindVertex(mesh.vertices, /*offset=*/0, ShaderClass::attributes[0].bufferIndex);
+        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, shaders::idClippingMaskUBO, /*size=*/uboSize);
+        encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
+                                       static_cast<NS::UInteger>(mesh.indexCount),
+                                       MTL::IndexType::IndexTypeUInt16,
+                                       mesh.indices.getMetalBuffer().get(),
+                                       /*indexOffset=*/0,
+                                       /*instanceCount=*/1);
+    }
 
     stats.numDrawCalls++;
     stats.totalDrawCalls++;
