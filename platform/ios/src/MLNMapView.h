@@ -903,8 +903,7 @@ of north, the map will automatically snap to exact north.
  haptic feedback event be played when the user rotates the map to due north
  (0°).
 
- This feature requires a device that supports haptic feedback, running iOS 10 or
- newer.
+ This feature requires a device that supports haptic feedback.
  */
 @property (nonatomic, getter=isHapticFeedbackEnabled) BOOL hapticFeedbackEnabled;
 

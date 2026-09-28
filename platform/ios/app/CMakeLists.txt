@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.20)
 project(app LANGUAGES C CXX OBJC OBJCXX)
 
 set(CMAKE_OSX_ARCHITECTURES "arm64")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0")
 
 file(GLOB APP_SOURCES CONFIGURE_DEPENDS
     "*.m" "*.mm"

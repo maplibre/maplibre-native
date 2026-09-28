@@ -193,15 +193,8 @@ static NSArray *const MLNMapboxStreetsAlternativeLanguages = @[
                                                                      NSString *_Nullable language,
                                                                      NSDictionary<NSString *, id>
                                                                          *_Nullable bindings) {
-                          NSString *languageCode;
-
-                          if (@available(iOS 10.0, macOS 10.12.0, *)) {
-                            languageCode =
-                                [NSLocale localeWithLocaleIdentifier:language].languageCode;
-                          } else {
-                            languageCode = [[NSLocale localeWithLocaleIdentifier:language]
-                                objectForKey:NSLocaleLanguageCode];
-                          }
+                          NSString *languageCode =
+                              [NSLocale localeWithLocaleIdentifier:language].languageCode;
 
                           return [languageCode isEqualToString:@"en"];
                         }]]

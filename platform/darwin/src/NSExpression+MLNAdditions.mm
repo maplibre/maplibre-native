@@ -574,12 +574,10 @@ const MLNExpressionInterpolationMode MLNExpressionInterpolationModeCubicBezier =
 
 + (NSExpression *)expressionForFunctionHelper:(NSString *)name arguments:(NSArray *)parameters {
   if (parameters.count) {
-    if (@available(iOS 15.5, macOS 12, *)) {
-      NSExpression *functionExpression = [NSExpression expressionWithFormat:@"sum({})"];
-      return [NSExpression expressionForFunction:functionExpression.operand
-                                    selectorName:name
-                                       arguments:parameters];
-    }
+    NSExpression *functionExpression = [NSExpression expressionWithFormat:@"sum({})"];
+    return [NSExpression expressionForFunction:functionExpression.operand
+                                  selectorName:name
+                                     arguments:parameters];
   }
   return [NSExpression expressionForFunction:name arguments:parameters];
 }

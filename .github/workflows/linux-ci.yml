@@ -72,14 +72,14 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@ba47c86ac325773530516bb756137ac718732518 # v2.86.5
+      - uses: taiki-e/install-action@26e9283f268b880168bdbd2c545dfcd60ec2c6ab # v2.87.13
         with:
           tool: armerge@2
 
@@ -156,7 +156,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
+        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           category: "/language:cpp"
 
@@ -224,14 +224,16 @@ jobs:
           npm install
           node test/storage/server.js &
 
-      - name: Generate coverage report
+      - name: Run Bazel tests and generate coverage report
         run: |
+          # //test:core includes plugin API tests; //plugins/... tests the examples.
           xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
+            bazel coverage --combined_report=lcov --instrumentation_filter="//:mbgl-core,//plugins" \
+            --//:plugins=true \
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
+            //test:core //render-test:render-test //expression-test:test //plugins/... --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report

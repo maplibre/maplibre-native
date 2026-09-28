@@ -352,8 +352,25 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                    queue:nil
               usingBlock:^(NSNotification *_Nonnull note) {
                 UIScreen *helperScreen = note.object;
-                UIWindow *helperWindow = [[UIWindow alloc] initWithFrame:helperScreen.bounds];
-                helperWindow.screen = helperScreen;
+
+                UIWindowScene *helperWindowScene = nil;
+                for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+                  if (![scene isKindOfClass:[UIWindowScene class]]) {
+                    continue;
+                  }
+
+                  UIWindowScene *windowScene = (UIWindowScene *)scene;
+                  if (windowScene.screen == helperScreen) {
+                    helperWindowScene = windowScene;
+                    break;
+                  }
+                }
+
+                if (!helperWindowScene) {
+                  return;
+                }
+
+                UIWindow *helperWindow = [[UIWindow alloc] initWithWindowScene:helperWindowScene];
                 UIViewController *helperViewController = [[UIViewController alloc] init];
                 MLNMapView *helperMapView =
                     [[MLNMapView alloc] initWithFrame:helperWindow.bounds

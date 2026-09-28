@@ -1338,8 +1338,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable.setTexture(info.textureInfo.texture, shaders::idLocationIndicatorTexture);
             info.textureInfo.dirty = false;
         }
-        // A quad without an image has nothing to sample; WebGPU refuses to draw its textured pipeline unbound.
-        drawable.setEnabled(info.textureInfo.texture != nullptr);
+        drawable.setEnabled(static_cast<bool>(info.textureInfo.texture));
     };
 
     updateCircleDrawable();

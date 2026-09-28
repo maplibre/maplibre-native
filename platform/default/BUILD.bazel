@@ -2,6 +2,17 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
+    name = "standalone-layer-manager",
+    srcs = ["src/mln/layermanager/layer_manager.cpp"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    visibility = [
+        "//plugins:__pkg__",
+        "//render-test:__pkg__",
+    ],
+    deps = ["//:mbgl-core"],
+)
+
+cc_library(
     name = "default-collator",
     srcs = [
         "src/mln/i18n/collator.cpp",
@@ -145,6 +156,8 @@ cc_library(
         "//platform/ios:__pkg__",
         "//platform/linux:__pkg__",
         "//platform/macos:__pkg__",
+        "//plugins:__pkg__",
+        "//render-test:__pkg__",
         "//test:__pkg__",
     ],
     deps = [

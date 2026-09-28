@@ -1,0 +1,19 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_test(
+    name = "render-tests",
+    timeout = "long",
+    srcs = ["render_test.cpp"],
+    args = [
+        "--manifestPath",
+        "plugins/ngon-layer/render-tests/manifest.json",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    data = ["//plugins/ngon-layer:render-fixtures"],
+    tags = ["no-sandbox"],
+    deps = [
+        "//plugins/ngon-layer",
+        "//render-test:render-test-srcs",
+    ],
+)

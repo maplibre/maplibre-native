@@ -165,7 +165,9 @@ void Layer::setObserver(LayerObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver;
 }
 
-std::optional<conversion::Error> Layer::setProperty(const std::string& name, const conversion::Convertible& value) {
+std::optional<conversion::Error> Layer::setProperty(const std::string& name,
+                                                    const conversion::Convertible& value,
+                                                    std::optional<PropertyScope>) {
     using namespace conversion;
     std::optional<Error> error = setPropertyInternal(name, value);
     if (!error) return error; // Successfully set by the derived class implementation.

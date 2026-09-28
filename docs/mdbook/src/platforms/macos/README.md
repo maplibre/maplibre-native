@@ -2,6 +2,10 @@
 
 MapLibre Native can be built for macOS. This is mostly used for development.
 
+The minimum supported macOS version is 14.3. CMake defaults to this version,
+including Qt and `MLN_WITH_CORE_ONLY` builds. Downstream projects may set
+`CMAKE_OSX_DEPLOYMENT_TARGET` to a newer version; lower targets are rejected.
+
 > [!NOTE]
 > There are some [AppKit](https://developer.apple.com/documentation/appkit) APIs for macOS the source tree. However those are not actively maintained. There is an [discussion](https://github.com/maplibre/maplibre-native/discussions/3414) on whether we should remove this code.
 

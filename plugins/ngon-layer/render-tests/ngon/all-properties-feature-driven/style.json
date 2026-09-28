@@ -1,0 +1,269 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 384,
+      "height": 256,
+      "description": "all-properties-feature-driven"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 10,
+  "pitch": 55,
+  "bearing": 25,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {
+              "radius": 22,
+              "corners": 3,
+              "rotate": 0,
+              "color": "#0891b2",
+              "blur": 0,
+              "opacity": 1,
+              "stroke-width": 1,
+              "stroke-color": "#0f172a",
+              "stroke-opacity": 1,
+              "translate": [
+                0,
+                0
+              ],
+              "translate-anchor": "map",
+              "pitch-alignment": "viewport",
+              "pitch-scale": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.075,
+                0.042
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {
+              "radius": 24,
+              "corners": 4,
+              "rotate": 23,
+              "color": "#7c3aed",
+              "blur": 0,
+              "opacity": 0.91,
+              "stroke-width": 2,
+              "stroke-color": "#fbbf24",
+              "stroke-opacity": 0.9,
+              "translate": [
+                4,
+                2
+              ],
+              "translate-anchor": "viewport",
+              "pitch-alignment": "viewport",
+              "pitch-scale": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0.042
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {
+              "radius": 26,
+              "corners": 5,
+              "rotate": 46,
+              "color": "#0891b2",
+              "blur": 0,
+              "opacity": 0.8200000000000001,
+              "stroke-width": 3,
+              "stroke-color": "#0f172a",
+              "stroke-opacity": 0.8,
+              "translate": [
+                8,
+                4
+              ],
+              "translate-anchor": "map",
+              "pitch-alignment": "viewport",
+              "pitch-scale": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.075,
+                0.042
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 4,
+            "properties": {
+              "radius": 28,
+              "corners": 6,
+              "rotate": 69,
+              "color": "#7c3aed",
+              "blur": 0.3,
+              "opacity": 0.73,
+              "stroke-width": 4,
+              "stroke-color": "#fbbf24",
+              "stroke-opacity": 0.7,
+              "translate": [
+                12,
+                6
+              ],
+              "translate-anchor": "viewport",
+              "pitch-alignment": "map",
+              "pitch-scale": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.075,
+                -0.042
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 5,
+            "properties": {
+              "radius": 30,
+              "corners": 7,
+              "rotate": 92,
+              "color": "#0891b2",
+              "blur": 0.3,
+              "opacity": 0.64,
+              "stroke-width": 5,
+              "stroke-color": "#0f172a",
+              "stroke-opacity": 0.6,
+              "translate": [
+                16,
+                8
+              ],
+              "translate-anchor": "map",
+              "pitch-alignment": "map",
+              "pitch-scale": "map"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                -0.042
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 6,
+            "properties": {
+              "radius": 32,
+              "corners": 8,
+              "rotate": 115,
+              "color": "#7c3aed",
+              "blur": 0.3,
+              "opacity": 0.55,
+              "stroke-width": 6,
+              "stroke-color": "#fbbf24",
+              "stroke-opacity": 0.5,
+              "translate": [
+                20,
+                10
+              ],
+              "translate-anchor": "viewport",
+              "pitch-alignment": "map",
+              "pitch-scale": "viewport"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.075,
+                -0.042
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f7"
+      }
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": [
+          "get",
+          "radius"
+        ],
+        "ngon-corners": [
+          "get",
+          "corners"
+        ],
+        "ngon-rotate": [
+          "get",
+          "rotate"
+        ],
+        "ngon-color": [
+          "get",
+          "color"
+        ],
+        "ngon-blur": [
+          "get",
+          "blur"
+        ],
+        "ngon-opacity": [
+          "get",
+          "opacity"
+        ],
+        "ngon-stroke-width": [
+          "get",
+          "stroke-width"
+        ],
+        "ngon-stroke-color": [
+          "get",
+          "stroke-color"
+        ],
+        "ngon-stroke-opacity": [
+          "get",
+          "stroke-opacity"
+        ],
+        "ngon-translate": [
+          "get",
+          "translate"
+        ],
+        "ngon-translate-anchor": [
+          "get",
+          "translate-anchor"
+        ],
+        "ngon-pitch-alignment": [
+          "get",
+          "pitch-alignment"
+        ],
+        "ngon-pitch-scale": [
+          "get",
+          "pitch-scale"
+        ]
+      }
+    }
+  ]
+}
