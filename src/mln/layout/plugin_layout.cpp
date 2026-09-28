@@ -114,8 +114,8 @@ void PluginLayout::createBucket(const ImagePositions&,
         if (!valid) break;
         drawable.key = input.drawable_key;
         drawable.shaderID.assign(input.shader_id.data, input.shader_id.size);
-        constexpr size_t kExtendedDrawableSize =
-            offsetof(mln_plugin_drawable_descriptor_v1, depth_mode) + sizeof(uint8_t) * 4;
+        constexpr size_t kExtendedDrawableSize = offsetof(mln_plugin_drawable_descriptor_v1, depth_mode) +
+                                                 sizeof(uint8_t) * 4;
         if (input.struct_size >= kExtendedDrawableSize) {
             drawable.depthMode = static_cast<PluginDrawableDepthMode>(input.depth_mode);
             drawable.enableStencilOverlap = input.enable_stencil_overlap != 0;
