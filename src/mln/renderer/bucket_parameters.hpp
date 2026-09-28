@@ -16,8 +16,8 @@ public:
     const MapMode mode;
     const float pixelRatio;
     const style::LayerTypeInfo* layerType;
-    const SubdivisionGranularitySetting subdivisionGranularity{};
     const bool retainFeaturesById = false;
+    const SubdivisionGranularitySetting subdivisionGranularity{};
 };
 
 } // namespace mln

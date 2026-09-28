@@ -6,8 +6,8 @@
 #include <mln/renderer/render_static_data.hpp>
 #include <mln/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mln/util/constants.hpp>
-#include <mln/util/subdivision.hpp>
 #include <mln/util/math.hpp>
+#include <mln/util/subdivision.hpp>
 
 #include <optional>
 #include <variant>

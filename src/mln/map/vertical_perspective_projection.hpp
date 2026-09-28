@@ -21,10 +21,14 @@ public:
 
     ProjectedTilePoint projectTilePoint(const ProjectionData&,
                                         const UnwrappedTileID&,
-                                        const Point<double>&) const override;
+                                        const Point<double>&,
+                                        double elevation) const override;
     double circleRadiusCorrection(const TransformState&) const override;
     double pixelScale(const TransformState&) const override;
     double pitchedTextCorrection(const TransformState&, const Point<double>&, const UnwrappedTileID&) const override;
+
+    /// GL JS `earthRadius`, `GLOBE_RADIUS` in the shaders: the meters an elevation is measured against.
+    static constexpr double globeRadiusMeters = 6371008.8;
 
     /// Globe radius in pixels at the given world size and center latitude, so zoom means the same on both projections.
     static double globeRadiusPixels(double worldSize, double centerLatitude);

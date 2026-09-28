@@ -121,7 +121,7 @@ public:
     LatLng latLngForPixel(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
     std::vector<ScreenCoordinate> pixelsForLatLngs(const std::vector<LatLng>&) const;
     std::vector<LatLng> latLngsForPixels(const std::vector<ScreenCoordinate>&,
-                                      LatLng::WrapMode = LatLng::Wrapped) const;
+                                         LatLng::WrapMode = LatLng::Wrapped) const;
     /// Whether the globe hides a location from the camera; a Mercator map hides nothing.
     bool isLocationOccluded(const LatLng&) const;
 

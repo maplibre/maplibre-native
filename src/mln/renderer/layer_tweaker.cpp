@@ -9,11 +9,6 @@
 #include <mln/style/layer_properties.hpp>
 #include <mln/util/containers.hpp>
 #include <mln/util/convert.hpp>
-
-#if MLN_RENDER_BACKEND_METAL
-#include <mln/util/monotonic_timer.hpp>
-#include <chrono>
-#endif // MLN_RENDER_BACKEND_METAL
 #include <mln/util/mat4.hpp>
 
 namespace mln {

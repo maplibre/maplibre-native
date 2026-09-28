@@ -194,6 +194,7 @@ public:
         }
         bucket->setRetainFeaturesById(retainFeaturesById);
         bucket->reserveFeatures(features.size());
+
         for (auto& patternFeature : features) {
             const auto i = patternFeature.i;
             const auto& feature = patternFeature.feature;

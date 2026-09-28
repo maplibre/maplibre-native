@@ -10,6 +10,7 @@
 #include <mln/util/tile_coordinate.hpp>
 #include <mln/util/tile_cover.hpp>
 #include <mln/util/tile_cover_impl.hpp>
+#include <mln/util/tile_lod.hpp>
 
 #include <cassert>
 #include <functional>
@@ -289,19 +290,6 @@ vec3 toSphere(double x, double y, const CanonicalTileID& tile) {
     return VerticalPerspectiveProjection::tileCoordinatesToSphere({x, y}, UnwrappedTileID(0, tile));
 }
 
-constexpr double maxMercatorHorizonAngle = 89.25;
-constexpr double assumedMaxFeatureHeightMeters = 500;
-constexpr double tileCullingHorizonOnsetDegrees = 15;
-
-// Near the bottom of a steeply pitched view, tiles are culled with room for the tallest feature they might hold,
-// so buildings do not vanish before their tile leaves the screen (GL JS `getElevationForTileCulling`).
-double elevationForTileCulling(double pitchDegrees, double fovDegrees) {
-    const double bottomEdgeDegreesAboveHorizontal = maxMercatorHorizonAngle - pitchDegrees - fovDegrees / 2;
-    const double proximityToHorizon = std::clamp(
-        (tileCullingHorizonOnsetDegrees - bottomEdgeDegreesAboveHorizontal) / tileCullingHorizonOnsetDegrees, 0.0, 1.0);
-    return proximityToHorizon * assumedMaxFeatureHeightMeters;
-}
-
 // `elevation` in meters grows the volume above the sphere's surface.
 ConvexVolume tileBoundingVolume(const CanonicalTileID& tile, double elevation) {
     // Distances from the planet's center in a world where the surface is at 1.
@@ -439,59 +427,6 @@ int16_t wrapFor(double centerX, const CanonicalTileID& tile) {
     return 0;
 }
 
-double integralOfCosXByP(double p, double x1, double x2) {
-    constexpr int numPoints = 10;
-    double sum = 0;
-    const double dx = (x2 - x1) / numPoints;
-    for (int i = 0; i < numPoints; i++) {
-        const double x = x1 + (i + 0.5) / numPoints * (x2 - x1);
-        sum += dx * std::pow(std::cos(x), p);
-    }
-    return sum;
-}
-
-// The parts of GL JS `createCalculateTileZoomFunction(9.314, 3.0)` that depend on the camera alone.
-struct TileZoomConstants {
-    double pitchTileLoadingBehavior;
-    double tileCountPitch0;
-
-    explicit TileZoomConstants(double cameraVerticalFOV)
-        : pitchTileLoadingBehavior(2 *
-                                   ((maxZoomLevelsOnScreen - 1) /
-                                        std::log2(std::cos(util::deg2rad(maxMercatorHorizonAngle - cameraVerticalFOV)) /
-                                                  std::cos(util::deg2rad(maxMercatorHorizonAngle))) -
-                                    1)),
-          tileCountPitch0(2 *
-                          integralOfCosXByP(pitchTileLoadingBehavior - 1, 0, util::deg2rad(cameraVerticalFOV / 2))) {}
-
-    static constexpr double maxZoomLevelsOnScreen = 9.314;
-    static constexpr double tileCountMaxMinRatio = 3.0;
-};
-
-// The zoom a tile is loaded at when the view is pitched.
-double calculateTileZoom(const TileZoomConstants& constants,
-                         double requestedCenterZoom,
-                         double distanceToTile2D,
-                         double distanceToTileZ,
-                         double distanceToCenter3D,
-                         double cameraVerticalFOV) {
-    const double pitchTileLoadingBehavior = constants.pitchTileLoadingBehavior;
-    const double centerPitch = std::acos(std::min(1.0, distanceToTileZ / distanceToCenter3D));
-    const double highestPitch = std::min(util::deg2rad(maxMercatorHorizonAngle),
-                                         centerPitch + util::deg2rad(cameraVerticalFOV / 2));
-    const double lowestPitch = std::min(highestPitch, centerPitch - util::deg2rad(cameraVerticalFOV / 2));
-    const double tileCount = integralOfCosXByP(pitchTileLoadingBehavior - 1, lowestPitch, highestPitch);
-    const double thisTilePitch = std::atan(distanceToTile2D / distanceToTileZ);
-    const double distanceToTile3D = std::hypot(distanceToTile2D, distanceToTileZ);
-    double desired = requestedCenterZoom;
-    desired += std::log2(distanceToCenter3D / distanceToTile3D /
-                         std::max(0.5, std::cos(util::deg2rad(cameraVerticalFOV / 2))));
-    desired += pitchTileLoadingBehavior * std::log2(std::cos(thisTilePitch)) / 2;
-    desired -=
-        std::log2(std::max(1.0, tileCount / constants.tileCountPitch0 / TileZoomConstants::tileCountMaxMinRatio)) / 2;
-    return desired;
-}
-
 std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                         uint8_t z,
                                         const Range<uint8_t> zoomRange,
@@ -539,7 +474,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceZ);
     const double requestedCenterZoom = transform.getZoom() + (z - std::floor(transform.getZoom()));
     const double fovDegrees = transform.getFieldOfView() * 180.0 / std::numbers::pi;
-    const TileZoomConstants zoomConstants(fovDegrees);
+    const TileZoomFunction tileZoom(fovDegrees);
     const double cullingElevation = elevationForTileCulling(transform.getPitch() * 180.0 / std::numbers::pi,
                                                             fovDegrees);
 
@@ -564,8 +499,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         double desiredZ = z;
         if (allowVariableZoom) {
             const double distToTile2d = distanceToTile2d(cameraCoord[0], cameraCoord[1], tile);
-            desiredZ = std::floor(calculateTileZoom(
-                zoomConstants, requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d, fovDegrees));
+            desiredZ = std::floor(tileZoom(requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d));
         }
         const auto targetZoom = static_cast<uint8_t>(std::clamp(desiredZ, 0.0, static_cast<double>(maxZoom)));
 

@@ -1,17 +1,23 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/math/angles.hpp>
 #include <mln/plugin/plugin_api.h>
 #include <mln/plugin/plugin_shader.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/layer.hpp>
+#include <mln/style/projection.hpp>
 #include <mln/style/rapidjson_conversion.hpp>
 #include <mln/test/map_adapter.hpp>
 #include <mln/test/stub_file_source.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/run_loop.hpp>
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cmath>
 #include <cstring>
+#include <numbers>
+#include <vector>
 
 using namespace mln;
 
@@ -27,6 +33,7 @@ mln_plugin_string view(const std::string& text) {
 std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
+std::vector<mln_plugin_uniform_context_v1> tileContexts;
 
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
@@ -196,9 +203,14 @@ void registerTriangles(const std::string& pluginID,
                     EXPECT_EQ(16u, size);
                     ++uniformCalls.at(id);
                     if (failSharedUniform) return MLN_PLUGIN_STATUS_CALLBACK_ERROR;
+                    if (id == 0) tileContexts.push_back(*context);
                     if (id == 1) {
                         EXPECT_EQ(0, context->pixels_to_tile_units);
                         for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(i % 5 == 0 ? 1 : 0, context->tile_matrix[i]);
+                        for (unsigned entry = 0; entry < 16; ++entry) {
+                            EXPECT_EQ(entry % 5 == 0 ? 1 : 0, context->projection_matrix[entry]);
+                        }
+                        for (const auto value : context->tile_mercator_coords) EXPECT_EQ(0, value);
                         std::memcpy(bytes, &sharedAlpha, sizeof(sharedAlpha));
                     }
                     return MLN_PLUGIN_STATUS_OK;
@@ -354,6 +366,99 @@ TEST(PluginRendering, SharedUniformsRunAtDeclaredScopeAndUpdateWithoutGeometryCh
     failSharedUniform = false;
     const auto recovered = test.frontend.render(test.map);
     EXPECT_EQ(warm.image, recovered.image);
+}
+
+// A place inside a drawable's tile, taken through the context the way a plugin's vertex shader would, lands where the
+// map puts it. Returns how many drawables held the place.
+unsigned expectPlaceWhereTheMapDrawsIt(RenderTest& test, const LatLng& place, bool globe) {
+    tileContexts.clear();
+    test.frontend.render(test.map);
+    const double placeX = (place.longitude() + 180.0) / 360.0;
+    const double placeY = 0.5 - std::log(std::tan(std::numbers::pi / 4.0 + util::deg2rad(place.latitude()) / 2.0)) /
+                                    (2.0 * std::numbers::pi);
+    const auto pixel = test.map.pixelForLatLng(place);
+    const auto size = test.frontend.getSize();
+    unsigned found = 0;
+    for (const auto& context : tileContexts) {
+        const auto& tile = context.tile_mercator_coords;
+        const double x = (placeX - tile[0]) / tile[2];
+        const double y = (placeY - tile[1]) / tile[3];
+        if (x < 0 || x > util::EXTENT || y < 0 || y > util::EXTENT) continue;
+        ++found;
+        std::array<double, 4> position = {x, y, 0, 1};
+        const float* matrix = context.tile_matrix;
+        // The aligned tile matrix snaps to the pixel grid.
+        double tolerance = 1.0 / size.width;
+        if (globe) {
+            EXPECT_EQ(1, context.projection_transition);
+            const double longitude = (tile[0] + x * tile[2]) * 2.0 * std::numbers::pi - std::numbers::pi;
+            const double latitude = 2.0 * std::atan(std::exp(std::numbers::pi -
+                                                             (tile[1] + y * tile[3]) * 2.0 * std::numbers::pi)) -
+                                    std::numbers::pi / 2.0;
+            position = {std::sin(longitude) * std::cos(latitude),
+                        std::sin(latitude),
+                        std::cos(longitude) * std::cos(latitude),
+                        1};
+            matrix = context.projection_matrix;
+            tolerance = 1e-3;
+            // The place faces the camera and its antipode does not.
+            const auto& plane = context.clipping_plane;
+            const double side = position[0] * plane[0] + position[1] * plane[1] + position[2] * plane[2];
+            EXPECT_GT(side + plane[3], 0);
+            EXPECT_LT(-side + plane[3], 0);
+            // Ten pixels' worth of angle east of the map's center is ten pixels on the screen.
+            const auto project = [&](const std::array<double, 3>& direction) {
+                std::array<double, 4> clip{};
+                for (unsigned row = 0; row < 4; ++row) {
+                    clip[row] = matrix[12 + row];
+                    for (unsigned column = 0; column < 3; ++column)
+                        clip[row] += matrix[column * 4 + row] * direction[column];
+                }
+                return std::array<double, 2>{clip[0] / clip[3] * size.width / 2.0,
+                                             clip[1] / clip[3] * size.height / 2.0};
+            };
+            const auto center = test.map.getCameraOptions().center.value();
+            const double centerLongitude = util::deg2rad(center.longitude());
+            const double centerLatitude = util::deg2rad(center.latitude());
+            const std::array<double, 3> direction = {std::sin(centerLongitude) * std::cos(centerLatitude),
+                                                     std::sin(centerLatitude),
+                                                     std::cos(centerLongitude) * std::cos(centerLatitude)};
+            const double right = std::hypot(direction[0], direction[2]);
+            const double step = std::tan(10.0 * context.pixels_to_sphere_radians);
+            std::array<double, 3> east = {
+                direction[0] + direction[2] / right * step, direction[1], direction[2] - direction[0] / right * step};
+            const double length = std::hypot(east[0], east[1], east[2]);
+            for (auto& value : east) value /= length;
+            const auto from = project(direction);
+            const auto to = project(east);
+            EXPECT_NEAR(10.0, std::hypot(to[0] - from[0], to[1] - from[1]), 0.2);
+        } else {
+            EXPECT_EQ(0, context.projection_transition);
+            for (const auto value : context.clipping_plane) EXPECT_EQ(0, value);
+            for (unsigned i = 0; i < 16; ++i) EXPECT_EQ(context.tile_matrix[i], context.projection_matrix[i]);
+        }
+        std::array<double, 4> clip{};
+        for (unsigned row = 0; row < 4; ++row) {
+            for (unsigned column = 0; column < 4; ++column) clip[row] += matrix[column * 4 + row] * position[column];
+        }
+        EXPECT_NEAR(pixel.x / size.width * 2.0 - 1.0, clip[0] / clip[3], tolerance);
+        EXPECT_NEAR(1.0 - pixel.y / size.height * 2.0, clip[1] / clip[3], tolerance);
+    }
+    return found;
+}
+
+TEST(PluginRendering, UniformContextCarriesTheProjection) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.projection", false, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.projection"));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{20, 40}).withZoom(1));
+    const LatLng place{25, 48};
+    EXPECT_GT(expectPlaceWhereTheMapDrawsIt(test, place, false), 0u);
+
+    auto projection = std::make_unique<style::Projection>();
+    projection->setType(ProjectionDefinition("globe"));
+    test.map.getStyle().setProjection(std::move(projection));
+    EXPECT_GT(expectPlaceWhereTheMapDrawsIt(test, place, true), 0u);
 }
 
 TEST(PluginRendering, RegistrationAfterRendererInitialization) {

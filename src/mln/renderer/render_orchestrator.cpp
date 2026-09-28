@@ -1002,16 +1002,16 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 
+    bool has3D = false;
     gfx::RenderingStats::FrameRenderedFeaturesMap allFeatures;
     allFeatures.reserve(items.size());
 
-    bool has3D = false;
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
+        const auto& layerId = renderLayer.getId();
         // A custom layer may draw 3D geometry, and the planet's depth is what hides it behind the horizon.
         has3D = has3D || renderLayer.is3D() ||
                 renderLayer.baseImpl->getTypeInfo() == style::CustomLayer::Impl::staticTypeInfo();
-        const auto& layerId = renderLayer.getId();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.

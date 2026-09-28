@@ -1333,7 +1333,7 @@ TEST(TransformState, ProjectionDataMatchesTileMatrix) {
                                              .withBearing(bearing)
                                              .withRoll(roll));
                         const TransformState& state = transform.getState();
-                        const double scale = std::pow(2.0, state.getZoom());
+                        const double scale = state.getScale();
 
                         for (const bool aligned : {false, true}) {
                             mat4 projMatrix;

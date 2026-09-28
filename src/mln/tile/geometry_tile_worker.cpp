@@ -462,8 +462,8 @@ void GeometryTileWorker::parse() {
                                     .mode = mode,
                                     .pixelRatio = pixelRatio,
                                     .layerType = leaderImpl.getTypeInfo(),
-                                    .subdivisionGranularity = subdivisionGranularity,
-                                    .retainFeaturesById = captureRenderedFeatures};
+                                    .retainFeaturesById = captureRenderedFeatures,
+                                    .subdivisionGranularity = subdivisionGranularity};
 
         auto geometryLayer = (*data)->getLayer(leaderImpl.sourceLayer);
         if (!geometryLayer) {

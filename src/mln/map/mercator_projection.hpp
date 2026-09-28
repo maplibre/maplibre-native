@@ -17,7 +17,8 @@ public:
 
     ProjectedTilePoint projectTilePoint(const ProjectionData&,
                                         const UnwrappedTileID&,
-                                        const Point<double>&) const override;
+                                        const Point<double>&,
+                                        double elevation) const override;
 };
 
 } // namespace mln

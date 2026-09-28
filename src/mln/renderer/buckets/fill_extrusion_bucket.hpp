@@ -7,8 +7,8 @@
 #include <mln/renderer/render_light.hpp>
 #include <mln/shaders/segment.hpp>
 #include <mln/style/layers/fill_extrusion_layer_properties.hpp>
-#include <mln/util/subdivision_granularity.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 
 namespace mln {
 

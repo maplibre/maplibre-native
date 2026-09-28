@@ -388,6 +388,10 @@ for (let layer of layers) {
   writeIfModified(`src/mln/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), outLocation);
 }
 
+/**
+ * @param {string} className
+ * @param {string} objectName
+ */
 function generateRootProperties(className, objectName) {
   /** @type {any[]} **/
   const properties = Object.keys(spec[objectName]).map(name => ({
