@@ -56,6 +56,7 @@ void Tile::queryRenderedFeatures(std::unordered_map<std::string, std::vector<Fea
                                  const TransformState&,
                                  const std::unordered_map<std::string, const RenderLayer*>&,
                                  const RenderedQueryOptions&,
+                                 const GlobalStateMap*,
                                  const mat4&,
                                  const SourceFeatureState&) {}
 
@@ -63,7 +64,7 @@ float Tile::getQueryPadding(const std::unordered_map<std::string, const RenderLa
     return 0;
 }
 
-void Tile::querySourceFeatures(std::vector<Feature>&, const SourceQueryOptions&) {}
+void Tile::querySourceFeatures(std::vector<Feature>&, const SourceQueryOptions&, const GlobalStateMap*) {}
 
 void Tile::onTileAction(TileOperation op) {
     observer->onTileAction(id, sourceID, op);
