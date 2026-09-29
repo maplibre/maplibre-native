@@ -240,11 +240,23 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             auto builder = context.createDrawableBuilder("plugin/" + registration->type);
             builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
             builder->setRenderPass(renderPass);
-            if (registration->enableStencilOverlapDedup) {
-                // No depth test: visibility relative to other layers comes entirely from style layer order.
+            const bool stencilOverlap = definition.enableStencilOverlap || registration->enableStencilOverlapDedup;
+            if (stencilOverlap) {
                 builder->setEnableDepth(false);
                 builder->setIs3D(true);
                 builder->setEnableStencil(true);
+            } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
+                builder->setEnableDepth(true);
+                builder->setDepthType(gfx::DepthMaskType::ReadWrite);
+                builder->setIs3D(false);
+                builder->setEnableStencil(false);
+                if (definition.cullBackFaces) {
+                    builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                }
+            } else if (definition.depthMode == PluginDrawableDepthMode::Disabled) {
+                builder->setEnableDepth(false);
+                builder->setIs3D(false);
+                builder->setEnableStencil(false);
             } else {
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadOnly);
@@ -252,7 +264,9 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setEnableStencil(false);
             }
             builder->setColorMode(gfx::ColorMode::alphaBlended());
-            builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+            if (!definition.cullBackFaces) {
+                builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+            }
             builder->setVertexAttributes(std::move(attributes));
             builder->setRawVertices({}, vertexCount, firstType);
             builder->setSegments(
