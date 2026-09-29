@@ -12,9 +12,10 @@ public:
     PluginLayout(const BucketParameters&,
                  std::vector<Immutable<style::LayerProperties>>,
                  std::unique_ptr<GeometryTileLayer>,
-                 plugin::RegisteredLayerPtr);
+                 plugin::RegisteredLayerPtr,
+                 const LayoutParameters* = nullptr);
 
-    bool hasDependencies() const override { return false; }
+    bool hasDependencies() const override { return needsImages; }
 
     void createBucket(const ImagePositions&,
                       std::unique_ptr<FeatureIndex>&,
@@ -24,6 +25,7 @@ public:
                       const CanonicalTileID&) override;
 
 private:
+    bool needsImages = false;
     const float zoom;
     std::vector<Immutable<style::LayerProperties>> layers;
     std::unique_ptr<GeometryTileLayer> sourceLayer;

@@ -34,14 +34,26 @@ private:
 
 class PluginPaintVertexVector final : public gfx::VertexVectorBase {
 public:
-    PluginPaintVertexVector(std::size_t count_, std::size_t components_)
-        : data(count_ * components_ * 2),
+    PluginPaintVertexVector(std::size_t count_,
+                            std::size_t components_,
+                            bool singleEndpoint_ = false,
+                            bool normalized_ = false)
+        : data(normalized_ ? 0 : count_ * components_ * (singleEndpoint_ ? 1 : 2)),
+          byteData(normalized_ ? count_ * components_ * (singleEndpoint_ ? 1 : 2) : 0),
           count(count_),
           components(components_),
+          singleEndpoint(singleEndpoint_),
+          normalized(normalized_),
           blocks(count_ / boundsBlockSize + (count_ % boundsBlockSize != 0)) {}
 
-    const void* getRawData() const override { return data.data(); }
-    std::size_t getRawSize() const override { return components * 2 * sizeof(float); }
+    const void* getRawData() const override {
+        return normalized ? static_cast<const void*>(byteData.data()) : static_cast<const void*>(data.data());
+    }
+    std::size_t getRawSize() const override {
+        return components * (singleEndpoint ? 1 : 2) * (normalized ? 1 : sizeof(float));
+    }
+    std::size_t maximumOffset() const { return singleEndpoint ? 0 : components * (normalized ? 1 : sizeof(float)); }
+    bool hasSingleEndpoint() const { return singleEndpoint; }
     std::size_t getRawCount() const override { return count; }
 
     void set(std::size_t first, std::size_t length, const float* minimum, const float* maximum);
@@ -49,8 +61,11 @@ public:
 
 private:
     std::vector<float> data;
+    std::vector<uint8_t> byteData;
     std::size_t count;
     std::size_t components;
+    bool singleEndpoint;
+    bool normalized;
     static constexpr std::size_t boundsBlockSize = 128;
     struct BoundsBlock {
         std::array<float, 4> minimum{}, maximum{};
@@ -84,6 +99,7 @@ public:
         std::size_t featureIndex;
         std::size_t firstVertex;
         std::size_t vertexCount;
+        bool operator==(const Range&) const = default;
     };
     struct Drawable {
         std::vector<Range> ranges;
@@ -109,6 +125,8 @@ public:
                               std::shared_ptr<const PluginFeatureData>,
                               std::shared_ptr<FeatureStates> = std::make_shared<FeatureStates>());
 
+    bool hasImage() const;
+    void setPatternPositions(std::shared_ptr<const ImagePositions>);
     bool isDataDriven() const noexcept { return dataDriven; }
     const plugin::ShaderPropertyBindingDefinition& getBinding() const noexcept { return binding; }
     const plugin::PropertyDefinition& getDefinition() const noexcept { return definition; }
@@ -124,9 +142,13 @@ public:
 private:
     friend class PluginPaintPropertyBinders;
     bool updateRanges(const FeatureStates&);
+    bool canShareEndpoints() const;
     void refill();
     void fillRange(const PluginFeatureData::Range&, const GeometryTileFeature&, const FeatureState&);
     void updateStatistics();
+    void encode(const mln_plugin_value&, std::array<float, 4>&) const;
+    std::shared_ptr<const ImagePositions> imagePositions;
+    std::set<std::string> availableImages;
 
     plugin::PropertyDefinition definition;
     plugin::ShaderPropertyBindingDefinition binding;
@@ -134,6 +156,7 @@ private:
     float bucketZoom;
     std::size_t vertexCount;
     bool dataDriven = false;
+    bool stateDependent = false;
     const uint64_t drawableKey;
     std::shared_ptr<const PluginFeatureData> features;
     std::shared_ptr<FeatureStates> featureStates;
@@ -154,6 +177,7 @@ public:
                                const style::PluginPropertyMap&,
                                std::shared_ptr<const PluginFeatureData>);
 
+    void setPatternPositions(std::shared_ptr<const ImagePositions>);
     void populateVertexAttributes(gfx::VertexAttributeArray&, gfx::StringIDSetsPair&) const;
     void writeUniforms(float zoom, uint32_t uniformID, uint8_t* output, std::size_t outputSize) const;
     bool synchronize(const style::PluginPropertyMap&);
@@ -170,6 +194,7 @@ struct PluginAttributeBinding {
     uint32_t streamID = 0;
     uint32_t byteOffset = 0;
     gfx::AttributeDataType type = gfx::AttributeDataType::Invalid;
+    uint32_t elementOffset = 0;
 };
 
 struct PluginDrawableDefinition {
@@ -177,7 +202,9 @@ struct PluginDrawableDefinition {
     std::string shaderID;
     std::vector<PluginAttributeBinding> attributes;
     SegmentVector segments;
-    std::size_t vertexCount = 0;
+    std::size_t vertexCount = 0; // Number of paint/geometry input records.
+    std::size_t primitiveVertexCount = 0;
+    bool instanced = false;
 };
 
 class PluginBucket final : public Bucket {
@@ -204,7 +231,7 @@ public:
     std::shared_ptr<gfx::IndexVectorBase> indices;
     std::vector<PluginDrawableDefinition> drawables;
     std::vector<PluginFeatureVertexRange> featureVertexRanges;
-    std::map<std::string, std::map<uint64_t, PluginPaintPropertyBinders>> paintPropertyBinders;
+    std::map<std::string, std::map<uint64_t, std::shared_ptr<PluginPaintPropertyBinders>>> paintPropertyBinders;
     std::map<std::string, std::shared_ptr<const style::PluginPropertyMap>> latestPaintProperties;
     std::map<std::string, float> latestZoom;
     float queryRadius = 0.0f;

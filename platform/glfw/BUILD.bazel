@@ -61,7 +61,7 @@ cc_binary(
         "//:maplibre_lib",
         "@glfw",
     ] + select({
-        "//:plugins_enabled": ["//plugins/ngon-layer"],
+        "//:plugins_enabled": ["//plugins/ngon-layer", "//plugins/fill-extrusion"],
         "//conditions:default": [],
     }) + select({
         "@platforms//os:macos": ["metal_backend"],

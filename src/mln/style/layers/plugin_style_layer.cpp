@@ -1,6 +1,7 @@
 #include <mln/style/layers/plugin_style_layer.hpp>
 #include <mln/style/layer_observer.hpp>
 #include <mln/style/conversion_impl.hpp>
+#include <mln/style/conversion/stringify.hpp>
 #include <mln/style/conversion/transition_options.hpp>
 
 namespace mln {
@@ -26,11 +27,27 @@ PluginStyleLayer::Impl::Impl(const std::string& id, const std::string& source, p
 
 bool PluginStyleLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     assert(other.getTypeInfo() == getTypeInfo());
-    return filter != other.filter || visibility != other.visibility;
+    if (filter != other.filter || visibility != other.visibility) return true;
+    const auto& rhs = static_cast<const Impl&>(other);
+    for (const auto& definition : registration->properties) {
+        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+        const auto a = pluginProperties.find(definition.name), b = rhs.pluginProperties.find(definition.name);
+        const auto av = a == pluginProperties.end() ? defaultPluginPropertyValue(definition) : a->second;
+        const auto bv = b == rhs.pluginProperties.end() ? defaultPluginPropertyValue(definition) : b->second;
+        if (av != bv) return true;
+    }
+    return false;
 }
 
 void PluginStyleLayer::Impl::stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>& writer) const {
     writer.StartObject();
+    for (const auto& definition : registration->properties) {
+        if (!definition.isLayout && definition.type != MLN_PLUGIN_VALUE_IMAGE) continue;
+        const auto it = pluginProperties.find(definition.name);
+        const auto value = it == pluginProperties.end() ? defaultPluginPropertyValue(definition) : it->second;
+        writer.String(definition.name);
+        conversion::stringify(writer, value.toStyleProperty().getValue());
+    }
     writer.EndObject();
 }
 
@@ -40,6 +57,10 @@ const LayerTypeInfo* PluginStyleLayer::Impl::getTypeInfo() const noexcept {
 
 expression::Dependency PluginStyleLayer::Impl::getDependencies() const noexcept {
     expression::Dependency result = expression::Dependency::None;
+    if (std::any_of(registration->properties.begin(), registration->properties.end(), [](const auto& p) {
+            return p.type == MLN_PLUGIN_VALUE_IMAGE;
+        }))
+        result |= expression::Dependency::Zoom;
     for (const auto& [name, value] : pluginProperties) {
         (void)name;
         result |= value.getDependencies();
@@ -87,7 +108,7 @@ std::optional<conversion::Error> PluginStyleLayer::setPluginProperty(const std::
     const auto definition = impl().registration->findProperty(name);
     if (!definition) return Error{"layer doesn't support this property"};
     if (scope) {
-        if (*scope != PropertyScope::Paint) {
+        if (*scope != (definition->isLayout ? PropertyScope::Layout : PropertyScope::Paint)) {
             return Error{"plugin property '" + name + "' is in the wrong style section"};
         }
     }
@@ -150,7 +171,7 @@ Value PluginStyleLayer::serialize() const {
     for (const auto& [name, value] : impl().pluginProperties) {
         const auto definition = impl().registration->findProperty(name);
         if (!definition) continue;
-        auto& object = result["paint"];
+        auto& object = result[definition->isLayout ? "layout" : "paint"];
         if (!object.getObject()) object = mapbox::base::ValueObject{};
         const auto property = value.toStyleProperty();
         if (property.getKind() != StyleProperty::Kind::Undefined) {
