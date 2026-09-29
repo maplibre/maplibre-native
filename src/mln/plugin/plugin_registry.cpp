@@ -127,13 +127,13 @@ bool appendShaders(const std::string& pluginID,
             error = "plugin shader descriptor is malformed";
             return false;
         }
-        if (input.tile_pattern_texture > 1 ||
-            (input.tile_pattern_texture && backendMask != MLN_PLUGIN_BACKEND_VULKAN)) {
-            error = "tile pattern textures currently require the Vulkan backend";
+        constexpr uint32_t instancingBackends = MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
+        if (input.tile_pattern_texture > 1 || (input.tile_pattern_texture && (backendMask & ~instancingBackends) != 0)) {
+            error = "tile pattern textures currently require the Vulkan or Metal backend";
             return false;
         }
-        if (input.instanced > 1 || (input.instanced && backendMask != MLN_PLUGIN_BACKEND_VULKAN)) {
-            error = "plugin instancing currently requires the Vulkan backend";
+        if (input.instanced > 1 || (input.instanced && (backendMask & ~instancingBackends) != 0)) {
+            error = "plugin instancing currently requires the Vulkan or Metal backend";
             return false;
         }
         ShaderDefinition shader;

@@ -167,10 +167,16 @@ public:
         auto typed = std::shared_ptr<mtl::ShaderProgram>(std::move(created));
         for (const auto& attr : definition->attributes) {
             if (!propertiesAsUniforms.second.contains(attr.id)) {
-                typed->initVertexAttribute(
-                    {attr.location, attributeType(attr.type), shaders::maxUBOCountPerShader + attr.location, attr.id});
+                const shaders::AttributeInfo info{
+                    attr.location, attributeType(attr.type), shaders::maxUBOCountPerShader + attr.location, attr.id};
+                if (definition->instanced)
+                    typed->initInstanceAttribute(info);
+                else
+                    typed->initVertexAttribute(info);
             }
         }
+        if (definition->tilePatternTexture && propertiesAsUniforms.first.contains("__plugin_pattern_enabled"))
+            typed->initTexture({0, 0});
         shader = std::move(typed);
 #else
         (void)context;

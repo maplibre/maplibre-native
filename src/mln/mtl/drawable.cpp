@@ -402,7 +402,8 @@ void Drawable::bindAttributes(RenderPass& renderPass) const {
                                                                                    : nullptr);
         if (buffer && buffer->get()) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
-            renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
+            const auto offset = static_cast<std::size_t>(binding->vertexOffset) * binding->vertexStride;
+            renderPass.bindVertex(buffer->get(), offset, binding->bufferIndex);
         }
     }
 }
@@ -412,7 +413,8 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const {
         if (binding.has_value()) {
             const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding->vertexBufferResource);
             if (buffer && buffer->get()) {
-                renderPass.bindVertex(buffer->get(), /*offset=*/0, binding->bufferIndex);
+                const auto offset = static_cast<std::size_t>(binding->vertexOffset) * binding->vertexStride;
+                renderPass.bindVertex(buffer->get(), offset, binding->bufferIndex);
             }
         }
     }
