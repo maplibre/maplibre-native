@@ -2,6 +2,18 @@ name: android-release
 
 on:
   workflow_dispatch:
+    inputs:
+      release:
+        type: choice
+        default: full
+        options:
+          - full
+          - pre
+        description: Full release (uses platform/android/VERSION) or pre-release
+      pre_release_version:
+        type: string
+        default: ''
+        description: 'Pre-release version (X.Y.Z-pre*, defaults to VERSION-pre<commit SHA>)'
 
 permissions:
   contents: write
@@ -10,12 +22,26 @@ jobs:
   android-create-release:
     runs-on: ubuntu-24.04
     outputs:
+      version: ${{ steps.prepare_release.outputs.version }}
       version_tag: ${{ steps.prepare_release.outputs.version_tag }}
+      prerelease: ${{ steps.check_version.outputs.prerelease }}
     defaults:
       run:
         working-directory: platform/android
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set pre-release version
+        if: inputs.release == 'pre'
+        env:
+          PRE_RELEASE_VERSION: ${{ inputs.pre_release_version }}
+        run: |
+          version="${PRE_RELEASE_VERSION:-$(cat VERSION)-pre${GITHUB_SHA}}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-pre[0-9A-Za-z-]*(\.[0-9A-Za-z-]+)*$ ]]; then
+            echo "::error::Pre-release version must have the format X.Y.Z-pre*"
+            exit 1
+          fi
+          printf '%s\n' "$version" > VERSION
 
       - name: Validate and set version
         working-directory: .
@@ -29,26 +55,31 @@ jobs:
         id: prepare_release
         run: |
           RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          node scripts/release-notes.mjs ${{ env.version }} > "${RELEASE_NOTES_PATH}"
-          echo release_notes="${RELEASE_NOTES_PATH}" >> "$GITHUB_OUTPUT"
-          echo version_tag=android-v${{ env.version }} >> "$GITHUB_OUTPUT"
+          node scripts/release-notes.mjs "$version" > "${RELEASE_NOTES_PATH}"
+          if [[ ! -s "$RELEASE_NOTES_PATH" && "$version" == *-pre* ]]; then
+            printf 'Pre-release build from commit %s.\n' "$GITHUB_SHA" > "$RELEASE_NOTES_PATH"
+          fi
+          {
+            echo "release_notes=$RELEASE_NOTES_PATH"
+            echo "version=$version"
+            echo "version_tag=android-v$version"
+          } >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: Check if version is pre-release
         id: check_version
         run: |
-          version="${{ env.version }}"
           if [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Valid semver: $version"
-            echo "prerelease=false" >> "$GITHUB_ENV"
+            echo "Release version: $version"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
           else
-            echo "Invalid semver: $version"
-            echo "prerelease=true" >> "$GITHUB_ENV"
+            echo "Pre-release version: $version"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create tag if it does not exist
         working-directory: .
-        run: .github/scripts/ensure-tag.sh android-v${{ env.version }} ${{ github.sha }}
+        run: .github/scripts/ensure-tag.sh "android-v$version" "$GITHUB_SHA"
 
       - name: Create release (draft)
         id: create_release
@@ -58,7 +89,7 @@ jobs:
           name: ${{ steps.prepare_release.outputs.version_tag }}
           body_path: ${{ steps.prepare_release.outputs.release_notes }}
           draft: true
-          prerelease: ${{ env.prerelease }}
+          prerelease: ${{ steps.check_version.outputs.prerelease }}
 
   android-build-and-upload-release:
     needs: android-create-release
@@ -82,6 +113,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+
+      - name: Set build and Maven publication version
+        env:
+          RELEASE_VERSION: ${{ needs.android-create-release.outputs.version }}
+        run: printf '%s\n' "$RELEASE_VERSION" > VERSION
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -124,6 +160,7 @@ jobs:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           fail_on_unmatched_files: true
           draft: true
+          prerelease: ${{ needs.android-create-release.outputs.prerelease }}
           files: |
             platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.aar
             platform/android/build/debug-symbols-maplibre-android-${{ matrix.RENDERER }}-${{ env.buildtype }}-${{ needs.android-create-release.outputs.version_tag }}.tar.gz
@@ -159,6 +196,7 @@ jobs:
           tag_name: ${{ needs.android-create-release.outputs.version_tag }}
           name: ${{ needs.android-create-release.outputs.version_tag }}
           draft: false
+          prerelease: ${{ needs.android-create-release.outputs.prerelease }}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -175,7 +213,7 @@ jobs:
         working-directory: .
 
       - name: Write release notifications
-        if: github.repository_owner == 'maplibre'
+        if: github.repository_owner == 'maplibre' && needs.android-create-release.outputs.prerelease != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ${{ needs.android-create-release.outputs.version_tag }}
