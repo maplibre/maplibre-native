@@ -158,6 +158,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/layer_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/layer_tweaker.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/renderer/render_target.hpp
+    ${PROJECT_SOURCE_DIR}/include/mln/renderer/terrain_cache_policy.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/shaders/shader_program_base.hpp
     ${PROJECT_SOURCE_DIR}/include/mln/util/suppress_copies.hpp
 )

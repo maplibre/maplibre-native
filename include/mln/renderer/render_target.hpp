@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/gfx/types.hpp>
+#include <mln/renderer/terrain_cache_policy.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/size.hpp>
 #include <mln/util/color.hpp>
@@ -11,6 +12,7 @@
 #include <optional>
 #include <ranges>
 #include <string>
+#include <vector>
 
 namespace mln {
 
@@ -116,9 +118,10 @@ protected:
     /// What the draped layers would currently render into this target: how well
     /// they cover it, and a signature of the exact content
     struct DrapeCoverage {
-        int32_t totalGroups = -1;      // draped layer groups in the style
-        int32_t groupsWithContent = 0; // groups with at least one usable tile
-        int64_t zoomDeficit = 0;       // sum of zoom levels lost to ancestor fallbacks
+        int32_t totalGroups = -1; // draped layer groups in the style
+        /// How each draped layer group covers this target (in layer order): exact/deeper
+        /// tiles, an ancestor n levels up, or nothing - see terrain::DrapeGroupFallback
+        std::vector<terrain::DrapeGroupFallback> groups;
 
         /// Hash of the covering tile ids overlapping this target (summed, order-independent),
         /// so it changes only when the SET of covering tiles changes - a tile loading,
@@ -144,11 +147,11 @@ protected:
         bool sameContentAs(const DrapeCoverage& other) const {
             return totalGroups == other.totalGroups && contentHash == other.contentHash && zoom == other.zoom;
         }
-        /// Whether this would draw less than `other`: fewer layers with content, or
-        /// the same layers via coarser ancestor fallbacks
+        /// Whether this would draw less than `other`: no layer group improved, and at least one
+        /// lost its content or fell back to a coarser ancestor. Compared per group, not summed
+        /// over groups - see terrain::drapeFallbackStrictlyWorse.
         bool worseThan(const DrapeCoverage& other) const {
-            return groupsWithContent < other.groupsWithContent ||
-                   (groupsWithContent == other.groupsWithContent && zoomDeficit > other.zoomDeficit);
+            return terrain::drapeFallbackStrictlyWorse(groups, other.groups);
         }
     };
     DrapeCoverage computeDrapeCoverage(RenderOrchestrator&, const PaintParameters&) const;
