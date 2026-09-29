@@ -147,8 +147,8 @@ VulkanWindowBackend::~VulkanWindowBackend() {
 }
 
 void VulkanWindowBackend::setSize(Size size_) {
-    size = size_;
-    if (!setNativeWindowBufferGeometry(window, size)) {
+    setRenderableSize(size_);
+    if (!setNativeWindowBufferGeometry(window, size_)) {
         Log::Warning(Event::Render, "OH_NativeWindow_NativeWindowHandleOpt SET_BUFFER_GEOMETRY failed");
     }
     if (context) {

@@ -259,13 +259,27 @@ target_compile_options(maplibre
                                $<$<CONFIG:Release>:-fvisibility=hidden>
                                $<$<CONFIG:Release>:-fvisibility-inlines-hidden>)
 
+set(MLN_PLUGIN_EXPORTS "")
+set(_export_configs "$<CONFIG:Release>")
+if(MLN_WITH_PLUGINS)
+    set(MLN_PLUGIN_EXPORTS "    mln_plugin_register_v1;")
+    # AGP uses RelWithDebInfo for release variants. Keep the C API public there too,
+    # while hiding the private C++ runtime and implementation symbols.
+    set(_export_configs "$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>")
+    # An exported name alone does not pull an unreferenced function out of mbgl-core.
+    target_link_options(maplibre PRIVATE "-Wl,--undefined=mln_plugin_register_v1")
+endif()
+set(_version_script "${CMAKE_CURRENT_BINARY_DIR}/maplibre-version-script")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../../../version-script.in" "${_version_script}" @ONLY)
+set_property(TARGET maplibre APPEND PROPERTY LINK_DEPENDS "${_version_script}")
+target_link_options(maplibre PRIVATE "$<${_export_configs}:-Wl,--version-script=${_version_script}>")
+
 target_link_libraries(maplibre
                       PRIVATE $<$<CONFIG:Release>:-Oz>
                               $<$<CONFIG:Release>:-Wl,--icf=all>
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
                               $<$<CONFIG:Release>:-flto>
                               $<$<CONFIG:Release>:-fuse-ld=lld>
-                              $<$<CONFIG:Release>:-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../../../version-script>
                               #$<$<CONFIG:Release>:-Wl,-Bsymbolic>
                               $<$<CONFIG:Release>:-Wl,-Bsymbolic-functions>
                               MapLibreNative::Base::jni.hpp

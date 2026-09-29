@@ -45,6 +45,20 @@ public:
     bool getUseIntegerZoom() const { return useIntegerZoom_; }
     void setUseIntegerZoom(bool value) { useIntegerZoom_ = value; }
 
+    /// Capture a snapshot of the style's global state so that later evaluations
+    /// (e.g. per-feature evaluation during tile layout or in paint property
+    /// binders) can resolve `global-state` expressions without explicit
+    /// plumbing.  Only retained if the expression actually depends on it.
+    void captureGlobalState(std::shared_ptr<const GlobalStateMap> globalState) {
+        if (expression && expression->has(Dependency::GlobalState)) {
+            capturedGlobalState = std::move(globalState);
+        }
+    }
+    const std::shared_ptr<const GlobalStateMap>& getCapturedGlobalState() const noexcept { return capturedGlobalState; }
+
+    /// Null if the expression does not reference the global state.
+    const std::set<std::string>* getGlobalStateRefs() const noexcept { return globalStateRefs.get(); }
+
     /// Can be used for aggregating property expressions from multiple properties(layers) into single match / case
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
@@ -58,6 +72,10 @@ public:
 
 protected:
     std::shared_ptr<const Expression> expression;
+
+    std::shared_ptr<const GlobalStateMap> capturedGlobalState;
+
+    std::shared_ptr<const std::set<std::string>> globalStateRefs;
 
     ZoomCurvePtr zoomCurve;
 
@@ -82,18 +100,16 @@ public:
           defaultValue(std::move(defaultValue_)) {}
 
     T evaluate(const expression::EvaluationContext& context, T finalDefaultValue = T()) const {
-        const expression::EvaluationResult result = expression->evaluate(context);
-        if (result) {
-            const std::optional<T> typed = expression::fromExpressionValue<T>(*result);
-            if (typed) {
-                return *typed;
-            }
+        if (context.globalState == nullptr && capturedGlobalState != nullptr) {
+            expression::EvaluationContext contextWithState = context;
+            contextWithState.globalState = capturedGlobalState.get();
+            return evaluateContext(contextWithState, std::move(finalDefaultValue));
         }
-        return defaultValue ? *defaultValue : finalDefaultValue;
+        return evaluateContext(context, std::move(finalDefaultValue));
     }
 
     T evaluate(float zoom) const {
-        assert(!isZoomConstant());
+        assert(!isZoomConstant() || (getDependencies() & expression::Dependency::GlobalState));
         assert(isFeatureConstant());
         return evaluate(expression::EvaluationContext(zoom));
     }
@@ -172,6 +188,17 @@ public:
     }
 
 private:
+    T evaluateContext(const expression::EvaluationContext& context, T finalDefaultValue) const {
+        const expression::EvaluationResult result = expression->evaluate(context);
+        if (result) {
+            const std::optional<T> typed = expression::fromExpressionValue<T>(*result);
+            if (typed) {
+                return *typed;
+            }
+        }
+        return defaultValue ? *defaultValue : finalDefaultValue;
+    }
+
     std::optional<T> defaultValue;
 };
 

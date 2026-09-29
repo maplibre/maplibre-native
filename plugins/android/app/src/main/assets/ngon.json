@@ -1,0 +1,466 @@
+{
+  "version": 8,
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 11.3,
+  "sources": {
+    "shapes": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 3,
+              "color": "#E76F51"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0345,
+                0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 4,
+              "color": "#E9C46A"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0115,
+                0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 5,
+              "color": "#2A9D8F"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0115,
+                0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 6,
+              "color": "#457B9D"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0345,
+                0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 7,
+              "color": "#9067C6",
+              "stroke": 3,
+              "outline": "#FFFFFF"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0345,
+                0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 8,
+              "color": "#EF476F",
+              "stroke": 5,
+              "outline": "#732B44"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0115,
+                0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 12,
+              "color": "#118AB2",
+              "stroke": 4,
+              "outline": "#FFD166"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0115,
+                0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 60,
+              "color": "#06D6A0",
+              "stroke": 6,
+              "outline": "#073B4C"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0345,
+                0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 3,
+              "color": "rgba(0,0,0,0)",
+              "stroke": 3,
+              "outline": "#E76F51"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0345,
+                0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 4,
+              "color": "rgba(0,0,0,0)",
+              "stroke": 5,
+              "outline": "#9067C6",
+              "rotation": 45
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0115,
+                0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 6,
+              "color": "rgba(0,0,0,0)",
+              "stroke": 7,
+              "outline": "#2A9D8F"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0115,
+                0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 60,
+              "color": "rgba(0,0,0,0)",
+              "stroke": 3,
+              "outline": "#457B9D"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0345,
+                0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 4,
+              "color": "#E76F51",
+              "opacity": 0.3,
+              "rotation": 45
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0345,
+                -0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 5,
+              "color": "#9067C6",
+              "opacity": 0.5
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0115,
+                -0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 6,
+              "color": "#118AB2",
+              "opacity": 0.7
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0115,
+                -0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 8,
+              "color": "#2A9D8F",
+              "opacity": 0.9
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0345,
+                -0.015
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 3,
+              "color": "#EF476F",
+              "blur": 0.1
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0345,
+                -0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 5,
+              "color": "#E9C46A",
+              "blur": 0.2
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0115,
+                -0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 8,
+              "color": "#9067C6",
+              "blur": 0.35
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0115,
+                -0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 60,
+              "color": "#118AB2",
+              "blur": 0.5
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0345,
+                -0.045
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 3,
+              "color": "#E76F51",
+              "radius": 16,
+              "rotation": 180
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0345,
+                -0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 4,
+              "color": "#457B9D",
+              "radius": 20,
+              "rotation": 20
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.0115,
+                -0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 5,
+              "color": "#2A9D8F",
+              "radius": 25,
+              "rotation": 36,
+              "stroke": 2,
+              "outline": "#FFFFFF"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0115,
+                -0.075
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "properties": {
+              "sides": 6,
+              "color": "#9067C6",
+              "radius": 30,
+              "rotation": 30,
+              "stroke": 3,
+              "outline": "#E9C46A"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.0345,
+                -0.075
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#F3F2ED"
+      }
+    },
+    {
+      "id": "ngons",
+      "type": "ngon",
+      "source": "shapes",
+      "paint": {
+        "ngon-radius": [
+          "coalesce",
+          [
+            "get",
+            "radius"
+          ],
+          24
+        ],
+        "ngon-corners": [
+          "get",
+          "sides"
+        ],
+        "ngon-color": [
+          "get",
+          "color"
+        ],
+        "ngon-rotate": [
+          "coalesce",
+          [
+            "get",
+            "rotation"
+          ],
+          0
+        ],
+        "ngon-opacity": [
+          "coalesce",
+          [
+            "get",
+            "opacity"
+          ],
+          1
+        ],
+        "ngon-blur": [
+          "coalesce",
+          [
+            "get",
+            "blur"
+          ],
+          0
+        ],
+        "ngon-stroke-width": [
+          "coalesce",
+          [
+            "get",
+            "stroke"
+          ],
+          0
+        ],
+        "ngon-stroke-color": [
+          "coalesce",
+          [
+            "get",
+            "outline"
+          ],
+          "#FFFFFF"
+        ],
+        "ngon-pitch-alignment": "viewport",
+        "ngon-pitch-scale": "viewport"
+      }
+    }
+  ]
+}

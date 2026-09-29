@@ -198,6 +198,19 @@ jni::Local<jni::Object<>> Layer::getVisibility(jni::JNIEnv& env) {
     return std::move(*convert<jni::Local<jni::Object<>>>(env, layer->getVisibility()));
 }
 
+jni::Local<jni::Object<gson::JsonElement>> Layer::getVisibilityExpression(jni::JNIEnv& env) {
+    auto layer = layerPtr.get();
+    if (!layer) {
+        return jni::Local<jni::Object<gson::JsonElement>>(env, nullptr);
+    }
+
+    const mln::Value serialized = layer->getVisibilityExpression();
+    if (serialized.is<NullValue>()) {
+        return jni::Local<jni::Object<gson::JsonElement>>(env, nullptr);
+    }
+    return gson::JsonElement::New(env, serialized);
+}
+
 void Layer::registerNative(jni::JNIEnv& env) {
     // Lookup the class
     static auto& javaClass = jni::Class<Layer>::Singleton(env);
@@ -222,7 +235,8 @@ void Layer::registerNative(jni::JNIEnv& env) {
         METHOD(&Layer::getMaxZoom, "nativeGetMaxZoom"),
         METHOD(&Layer::setMinZoom, "nativeSetMinZoom"),
         METHOD(&Layer::setMaxZoom, "nativeSetMaxZoom"),
-        METHOD(&Layer::getVisibility, "nativeGetVisibility"));
+        METHOD(&Layer::getVisibility, "nativeGetVisibility"),
+        METHOD(&Layer::getVisibilityExpression, "nativeGetVisibilityExpression"));
 }
 
 } // namespace android

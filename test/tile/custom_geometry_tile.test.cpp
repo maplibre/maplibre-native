@@ -134,7 +134,7 @@ TEST(CustomGeometryTile, InvokeTileChanged) {
     };
 
     std::vector<Immutable<LayerProperties>> layers{layerProperties};
-    tile.setLayers(layers);
+    tile.setLayers(layers, test.tileParameters.globalState);
     tile.setObserver(&observer);
     tile.setTileData(features);
 
