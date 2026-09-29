@@ -498,6 +498,51 @@ constexpr mln_plugin_shader_property_binding_v1 bindings[] = {
      0,
      offsetof(Uniforms, interpolation) + 16},
 };
+#if MLN_FILL_EXTRUSION_METAL
+// Metal port: roof + instanced walls + sprite patterns. All 16 attributes and
+// all property bindings (including the pattern image bindings) are shared
+// with the Vulkan tables below; nothing needs to be dropped or renumbered.
+constexpr mln_plugin_shader_source_v1 source{
+    sizeof(source), MLN_PLUGIN_BACKEND_METAL, str(metalSource), {}, str("vertexMain"), str("fragmentMain")};
+constexpr mln_plugin_uniform_block_descriptor_v1 uniform{
+    sizeof(uniform),
+    0,
+    str("ExtrusionUniforms"),
+    sizeof(Uniforms),
+    MLN_PLUGIN_SHADER_STAGE_VERTEX | MLN_PLUGIN_SHADER_STAGE_FRAGMENT,
+    MLN_PLUGIN_UNIFORM_DRAWABLE};
+constexpr mln_plugin_shader_descriptor_v1 shaders[] = {
+    {sizeof(mln_plugin_shader_descriptor_v1),
+     str("roof"),
+     &source,
+     1,
+     attributes,
+     std::size(attributes),
+     &uniform,
+     1,
+     bindings,
+     std::size(bindings),
+     1,
+     0},
+    {sizeof(mln_plugin_shader_descriptor_v1),
+     str("wall"),
+     &source,
+     1,
+     attributes,
+     std::size(attributes),
+     &uniform,
+     1,
+     bindings,
+     std::size(bindings),
+     1,
+     1},
+};
+constexpr mln_plugin_draw_pass_v1 passes[] = {
+    {sizeof(mln_plugin_draw_pass_v1), 1, 1, 1, 1, 0, MLN_PLUGIN_CULL_BACK_CCW},
+    {sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
+    {sizeof(mln_plugin_draw_pass_v1), 1, 1, 1, 1, 1, MLN_PLUGIN_CULL_BACK_CCW},
+};
+#else
 constexpr mln_plugin_shader_source_v1 source{
     sizeof(source), MLN_PLUGIN_BACKEND_VULKAN, str(vertexSource), str(fragmentSource), {}, {}};
 constexpr mln_plugin_uniform_block_descriptor_v1 uniform{
@@ -538,11 +583,16 @@ constexpr mln_plugin_draw_pass_v1 passes[] = {
     {sizeof(mln_plugin_draw_pass_v1), 1, 1, 0, 0, 0, MLN_PLUGIN_CULL_BACK_CCW},
     {sizeof(mln_plugin_draw_pass_v1), 1, 1, 1, 1, 1, MLN_PLUGIN_CULL_BACK_CCW},
 };
+#endif
 const mln_plugin_layer_type_v1 layer = [] {
     mln_plugin_layer_type_v1 l{};
     l.struct_size = sizeof(l);
     l.layer_type = str("fill-extrusion");
+#if MLN_FILL_EXTRUSION_METAL
+    l.backend_mask = MLN_PLUGIN_BACKEND_METAL;
+#else
     l.backend_mask = MLN_PLUGIN_BACKEND_VULKAN;
+#endif
     l.properties = properties;
     l.property_count = std::size(properties);
     l.geometry_type_mask = MLN_PLUGIN_GEOMETRY_POLYGON;

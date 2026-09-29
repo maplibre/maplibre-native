@@ -10,6 +10,10 @@ cc_library(
     ],
     hdrs = ["shared/include/fill_extrusion.hpp"],
     copts = CPP_FLAGS,
+    defines = select({
+        "//:metal_renderer": ["MLN_FILL_EXTRUSION_METAL=1"],
+        "//conditions:default": [],
+    }),
     includes = ["shared/include"],
     # The plugin itself has no renderer dependency: all interaction is C ABI.
     visibility = ["//visibility:public"],

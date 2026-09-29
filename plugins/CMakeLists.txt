@@ -25,6 +25,9 @@ add_library(mln-fill-extrusion STATIC fill-extrusion/shared/cpp/fill_extrusion.c
 target_include_directories(mln-fill-extrusion PUBLIC fill-extrusion/shared/include)
 target_include_directories(mln-fill-extrusion PRIVATE fill-extrusion/vendor)
 target_link_libraries(mln-fill-extrusion PUBLIC mbgl-core)
+if(MLN_WITH_METAL)
+    target_compile_definitions(mln-fill-extrusion PRIVATE MLN_FILL_EXTRUSION_METAL=1)
+endif()
 
 add_executable(mln-fill-extrusion-render-tests EXCLUDE_FROM_ALL fill-extrusion/render_test.cpp)
 target_link_libraries(mln-fill-extrusion-render-tests PRIVATE mln-fill-extrusion mbgl-render-test)
