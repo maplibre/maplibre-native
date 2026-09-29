@@ -163,6 +163,21 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
     }
 
     @Override
+    public void onWindowResize(int w, int h) {
+      synchronized (renderThreadManager) {
+        width = w;
+        height = h;
+        sizeChanged = true;
+        requestRender = true;
+        renderComplete = false;
+
+        // Don't wait for a frame at the new size, the swapchain is recreated asynchronously
+        // and compositor sync is handled by surfaceRedrawNeededAsync
+        renderThreadManager.notifyAll();
+      }
+    }
+
+    @Override
     public boolean ableToDraw() {
       return graphicsSurfaceCreated && readyToDraw();
     }
