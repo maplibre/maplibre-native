@@ -393,7 +393,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // this early-out is a tier-2 tile's only path, so the LRU could otherwise evict the
         // texture from under the drawable still sampling it.
         if (const auto existing = tilesWithDrawables.find(tileID);
-            existing != tilesWithDrawables.end() && existing->second == 2) {
+            existing != tilesWithDrawables.end() && existing->second.tier == 2) {
             if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
                 cached->second.lastUsed = demUpdateCounter;
             }
@@ -411,10 +411,9 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         // dimension rides in .w for the shader's get_elevation() call.
         std::array<float, 4> demCoords{{1.0f / util::EXTENT, 0.0f, 0.0f, static_cast<float>(demDim)}};
         uint8_t demTier = 0;
-        // DEM tile whose texture / array-layer this tile uses. Only *read* by the GL
-        // instanced-depth block below, so mark it maybe_unused: other backends keep the
-        // per-tile depth drawables and would otherwise fail -Wunused-but-set-variable.
-        [[maybe_unused]] const UnwrappedTileID* demTileUsed = nullptr;
+        // DEM tile whose texture / array-layer this tile uses: its zoom decides whether an
+        // existing drawable is rebound, and the GL instanced-depth block reads its array layer.
+        const UnwrappedTileID* demTileUsed = nullptr;
 
         if (auto cached = demTextures.find(unwrapped); cached != demTextures.end()) {
             cached->second.lastUsed = demUpdateCounter;
@@ -455,10 +454,14 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
             }
         }
 
-        // If a drawable already exists for this tile, keep it until a higher
-        // DEM quality tier becomes available, then replace it
+        // If a drawable already exists for this tile, keep it until a better DEM can be
+        // bound - a higher tier, or a deeper ancestor while the tile's own DEM is missing (a
+        // z13 tile first built on a z6 ancestor renders flat until z12 replaces it) - then
+        // replace it
+        const terrain::DEMBinding binding{
+            demTier, static_cast<int8_t>(demTileUsed ? static_cast<int>(demTileUsed->canonical.z) : -1)};
         if (const auto existing = tilesWithDrawables.find(tileID); existing != tilesWithDrawables.end()) {
-            if (existing->second >= demTier) {
+            if (!terrain::shouldRebind(existing->second, binding)) {
                 continue;
             }
             lg->removeDrawablesIf(
@@ -491,7 +494,7 @@ void RenderTerrain::update(RenderOrchestrator& orchestrator,
         auto drawable = createDrawableForTile(context, shaders, tileID, demTexture, renderTarget->getTexture());
         if (drawable) {
             lg->addDrawable(std::move(drawable));
-            tilesWithDrawables[tileID] = demTier;
+            tilesWithDrawables[tileID] = binding;
 #if !MLN_RENDER_BACKEND_OPENGL
             // Non-GL backends: one depth drawable per tile (no instancing path there).
             if (depthLg) {
