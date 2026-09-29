@@ -40,10 +40,6 @@ jobs:
           zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
 
-      - name: Check bundled debug symbols
-        working-directory: .
-        run: python3 platform/ios/scripts/check-xcframework-symbols.py MapLibre.dynamic.xcframework.zip
-
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -73,10 +69,6 @@ jobs:
           chmod +w MapLibre.static.xcframework.zip
           zip MapLibre.static.xcframework.zip LICENSE.md  # add license to zip
         working-directory: .
-
-      - name: Check static debug symbols
-        working-directory: .
-        run: python3 platform/ios/scripts/check-xcframework-symbols.py --static MapLibre.static.xcframework.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

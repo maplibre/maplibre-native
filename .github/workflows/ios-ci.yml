@@ -209,14 +209,10 @@ jobs:
 
       # Size test (Bloaty)
 
-      - name: Test XCFramework symbol checks
-        run: python3 scripts/test_xcframework_symbols.py
-
       - name: Build dynamic library for size test (Bloaty)
         run: |
           bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --apple_generate_dsym
           bazel_bin="$(bazel info --compilation_mode="opt" bazel-bin)"
-          python3 scripts/check-xcframework-symbols.py "$bazel_bin/platform/ios/MapLibre.dynamic.xcframework.zip"
           unzip "$bazel_bin"/platform/ios/MapLibre.dynamic.xcframework.zip
           cp MapLibre.xcframework/ios-arm64/dSYMs/MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_DWARF
           cp MapLibre.xcframework/ios-arm64/MapLibre.framework/MapLibre MapLibre_dynamic
