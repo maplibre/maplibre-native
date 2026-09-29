@@ -11,6 +11,7 @@ on:
       - "node-*"
     paths:
       - CMakeLists.txt
+      - CMakePresets.json
       - "platform/linux/**"
       - "platform/default/**"
       - "platform/node/**"
@@ -39,6 +40,7 @@ on:
       - "*"
     paths:
       - CMakeLists.txt
+      - CMakePresets.json
       - "platform/linux/**"
       - "platform/default/**"
       - "platform/node/**"
