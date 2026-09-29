@@ -4,21 +4,19 @@
     "products": [
       {
         "name": "default",
-        "compatibleSdkVersion": "6.0.1(21)",
-        "targetSdkVersion": "6.0.1(21)",
-        "runtimeOS": "HarmonyOS",
-        "buildOption": {
-          "nativeCompiler": "BiSheng"
-        }
+        "compileSdkVersion": 23,
+        "compatibleSdkVersion": 23,
+        "targetSdkVersion": 23,
+        "runtimeOS": "OpenHarmony",
+        "signingConfig": "default"
       },
       {
         "name": "opengl",
-        "compatibleSdkVersion": "6.0.1(21)",
-        "targetSdkVersion": "6.0.1(21)",
-        "runtimeOS": "HarmonyOS",
-        "buildOption": {
-          "nativeCompiler": "BiSheng"
-        }
+        "compileSdkVersion": 23,
+        "compatibleSdkVersion": 23,
+        "targetSdkVersion": 23,
+        "runtimeOS": "OpenHarmony",
+        "signingConfig": "default"
       }
     ]
   },
