@@ -128,7 +128,8 @@ bool appendShaders(const std::string& pluginID,
             return false;
         }
         constexpr uint32_t instancingBackends = MLN_PLUGIN_BACKEND_VULKAN | MLN_PLUGIN_BACKEND_METAL;
-        if (input.tile_pattern_texture > 1 || (input.tile_pattern_texture && (backendMask & ~instancingBackends) != 0)) {
+        if (input.tile_pattern_texture > 1 ||
+            (input.tile_pattern_texture && (backendMask & ~instancingBackends) != 0)) {
             error = "tile pattern textures currently require the Vulkan or Metal backend";
             return false;
         }
