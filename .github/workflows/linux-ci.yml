@@ -103,7 +103,8 @@ jobs:
       - name: Build MapLibre Native
         env:
           CI: 1
-          CTCACHE_HOST: ${{ vars.CTCACHE_HOST }}
+          # Public cache address so forks can read it without repository variables.
+          CTCACHE_HOST: 32.194.98.193
           CTCACHE_AUTH_KEY: ${{ secrets.CTCACHE_AUTH_KEY }}
         run: |
           cmake --version
@@ -112,10 +113,7 @@ jobs:
           export CTCACHE_PORT=5000
           export CTCACHE_PROTO=http
 
-          if [ -z "$CTCACHE_HOST" ]; then
-            # Run clang-tidy normally when this repository has no remote cache.
-            export CTCACHE_DISABLE=1
-          elif [ -z "$CTCACHE_AUTH_KEY" ]; then
+          if [ -z "$CTCACHE_AUTH_KEY" ]; then
             # Fork pull requests can read the cache without a write key.
             export CTCACHE_HOST_READ_ONLY=1
           fi
