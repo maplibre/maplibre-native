@@ -60,7 +60,10 @@ js_run_binary(
     outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
            MLN_PRIVATE_GENERATED_STYLE_HEADERS +
            MLN_GENERATED_STYLE_SOURCE,
+    env = {"MLN_CODEGEN_ROOT": "."},
     tool = ":generate-style-code-script",
+    # Keep Node in the execution configuration when cross-compiling.
+    use_execroot_entry_point = False,
 )
 
 js_run_binary(
@@ -72,7 +75,9 @@ js_run_binary(
     outs = MLN_GENERATED_SHADER_HEADERS +
            MLN_GENERATED_SHADER_SOURCE +
            MLN_GENERATED_OPENGL_SHADER_HEADERS,
+    env = {"MLN_CODEGEN_ROOT": "."},
     tool = ":generate-shader-code-script",
+    use_execroot_entry_point = False,
 )
 
 # This header only target strips the __generated__ prefix for the compiler

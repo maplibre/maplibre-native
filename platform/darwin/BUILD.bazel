@@ -101,7 +101,10 @@ js_run_binary(
     ],
     outs = MLN_GENERATED_DARWIN_STYLE_SOURCE +
            MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
+    env = {"MLN_CODEGEN_ROOT": "."},
     tool = ":generate-style-code-script",
+    # Run the Node tool on the build host, including when cross-compiling for iOS.
+    use_execroot_entry_point = False,
     visibility = ["//visibility:public"],
 )
 

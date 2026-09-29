@@ -84,7 +84,7 @@ jobs:
           tool: armerge@2
 
       - if: matrix.variant.rust
-        run: cargo install cxxbridge-cmd --version 1.0.157 --locked
+        run: cargo install cxxbridge-cmd --version 1.0.202 --locked
 
       - name: Install ctcache
         run: |

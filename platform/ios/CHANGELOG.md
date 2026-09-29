@@ -5,6 +5,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 ## main
 
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
+- Include device and simulator debug symbols in the dynamic XCFramework. The separate iOS debug-symbol ZIP is no longer published.
+- Update Bazel dependencies and require Rust 1.88 or newer when building with Rust support.
 
 ## 6.31.0
 

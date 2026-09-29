@@ -84,9 +84,11 @@ xed build-ios/MapLibre\ Native.xcodeproj
 
 ## Distribution
 
-MapLibre iOS is distributed as an XCFramework via the [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) repository. See [Release MapLibre iOS](./release.md) for the release process. Refer to the [`ios-ci.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml) workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:
+MapLibre iOS is distributed as an XCFramework via the [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) repository. See [Release MapLibre iOS](./release.md) for the release process. Refer to the [`ios-release.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-release.yml) workflow for an up-to-date recipe for building an XCFramework. From `platform/ios`, run:
 
 ```
 bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
-  --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+  --apple_generate_dsym --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
 ```
+
+The dynamic XCFramework includes device and simulator dSYMs in each slice's `dSYMs` directory, referenced by `DebugSymbolsPath` in its root `Info.plist`. A separate debug-symbol ZIP is no longer published. The static XCFramework retains debug information in its object files for inclusion in the consuming application's dSYM.
