@@ -6,8 +6,7 @@ namespace mln {
 namespace gl {
 
 void VertexArray::bind(Context& context, const gfx::IndexBuffer& indexBuffer, const AttributeBindingArray& bindings) {
-    context.bindVertexArray = state->vertexArray;
-    state->indexBuffer = indexBuffer.getResource<gl::IndexBufferResource>().buffer;
+    bindIndexBuffer(context, indexBuffer);
 
     state->bindings.reserve(bindings.size());
 
@@ -19,6 +18,11 @@ void VertexArray::bind(Context& context, const gfx::IndexBuffer& indexBuffer, co
         }
         state->bindings[location] = bindings[location];
     }
+}
+
+void VertexArray::bindIndexBuffer(Context& context, const gfx::IndexBuffer& indexBuffer) const {
+    context.bindVertexArray = state->vertexArray;
+    state->indexBuffer = indexBuffer.getResource<gl::IndexBufferResource>().buffer;
 }
 
 } // namespace gl

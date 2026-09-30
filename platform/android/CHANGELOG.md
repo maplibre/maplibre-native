@@ -1,5 +1,11 @@
 # Changelog MapLibre Native for Android
 
+## main
+
+### 🐞 Bug fixes
+
+- Refresh OpenGL VAO element-buffer bindings after shared index buffers are replaced, avoiding a GLES encoder crash on Android emulators.
+
 ## 13.6.1
 
 ### 🐞 Bug fixes
