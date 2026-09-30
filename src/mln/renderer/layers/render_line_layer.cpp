@@ -145,7 +145,8 @@ GeometryCollection offsetLine(const GeometryCollection& rings, double offset) {
             auto& p = *i;
 
             Point<double> aToB = i == ring.begin() ? zero : util::perp(util::unit(convertPoint<double>(p - *(i - 1))));
-            Point<double> bToC = i + 1 == ring.end() ? zero
+            // At the last vertex, use the incoming normal so the endpoint receives the full offset.
+            Point<double> bToC = i + 1 == ring.end() ? aToB
                                                      : util::perp(util::unit(convertPoint<double>(*(i + 1) - p)));
             Point<double> extrude = util::unit(aToB + bToC);
 
