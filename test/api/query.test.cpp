@@ -7,6 +7,7 @@
 #include <mln/util/io.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/circle_layer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/image.hpp>
 #include <mln/style/source.hpp>
@@ -177,6 +178,40 @@ TEST(Query, QueryFiltersUseGlobalState) {
     test.frontend.render(test.map);
     EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(point, renderedOptions).empty());
     EXPECT_TRUE(test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).empty());
+}
+
+TEST(Query, QueryRenderedFeaturesFilterUsesOverscaledZoom) {
+    for (const double cameraZoom : {16.5, 20.5}) {
+        SCOPED_TRACE(cameraZoom);
+        QueryTest test;
+        // Keep the point away from tile boundaries so source queries return one copy.
+        test.map.getStyle().getSource("source1")->as<GeoJSONSource>()->setGeoJSON(
+            Geometry<double>{Point<double>{1.003, 1.003}});
+        test.map.getStyle().addLayer(std::make_unique<CircleLayer>("circle_layer", "source1"));
+        const auto tileZoom = std::to_string(static_cast<int>(cameraZoom));
+        const auto equalZoom = parseFilter(R"(["==", ["zoom"], )" + tileZoom + "]");
+        const auto lowerZoom = parseFilter(R"(["<", ["zoom"], )" + tileZoom + "]");
+        const auto higherZoom = parseFilter(R"([">", ["zoom"], )" + tileZoom + "]");
+
+        // Layer filters and query filters should agree on the integer bucket zoom.
+        // Cover both the collision-index symbol path and the geometry-index circle path.
+        for (const auto& layerID : {"layer1", "circle_layer"}) {
+            test.map.getStyle().getLayer(layerID)->setFilter(equalZoom);
+        }
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{1.003, 1.003}).withZoom(cameraZoom));
+        test.frontend.render(test.map);
+        const auto point = test.map.pixelForLatLng({1.003, 1.003});
+        for (const auto& layerID : {"layer1", "circle_layer"}) {
+            SCOPED_TRACE(layerID);
+            auto* renderer = test.frontend.getRenderer();
+            EXPECT_EQ(renderer->queryRenderedFeatures(point, {{{layerID}}, {}}).size(), 1u);
+            EXPECT_EQ(renderer->queryRenderedFeatures(point, {{{layerID}}, {equalZoom}}).size(), 1u);
+            // Reject canonical zoom when overzoomed, and fractional camera zoom at either zoom.
+            EXPECT_TRUE(renderer->queryRenderedFeatures(point, {{{layerID}}, {lowerZoom}}).empty());
+            EXPECT_TRUE(renderer->queryRenderedFeatures(point, {{{layerID}}, {higherZoom}}).empty());
+        }
+        EXPECT_EQ(test.frontend.getRenderer()->querySourceFeatures("source1", {{}, {equalZoom}}).size(), 1u);
+    }
 }
 
 TEST(Query, QuerySourceFeatures) {

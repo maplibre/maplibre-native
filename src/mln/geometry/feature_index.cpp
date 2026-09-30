@@ -154,7 +154,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
                          const double scale,
                          const RenderedQueryOptions& queryOptions,
                          const GlobalStateMap* globalState,
-                         const UnwrappedTileID& tileID,
+                         const OverscaledTileID& tileID,
                          const std::unordered_map<std::string, const RenderLayer*>& layers,
                          const float additionalQueryPadding,
                          const SourceFeatureState& sourceFeatureState) const {
@@ -185,7 +185,7 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
                    indexedFeature,
                    queryOptions,
                    globalState,
-                   tileID.canonical,
+                   tileID,
                    layers,
                    queryGeometry,
                    transformState,
@@ -238,7 +238,7 @@ std::unordered_map<std::string, std::vector<Feature>> FeatureIndex::lookupSymbol
                    symbolFeature,
                    queryOptions,
                    globalState,
-                   tileID.canonical,
+                   tileID,
                    layers,
                    GeometryCoordinates(),
                    {},
@@ -253,7 +253,7 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
                               const RefIndexedSubfeature& indexedFeature,
                               const RenderedQueryOptions& options,
                               const GlobalStateMap* globalState,
-                              const CanonicalTileID& tileID,
+                              const OverscaledTileID& tileID,
                               const std::unordered_map<std::string, const RenderLayer*>& layers,
                               const GeometryCoordinates& queryGeometry,
                               const TransformState& transformState,
@@ -289,19 +289,24 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
 
         bool needsCrossTileIndex = renderLayer->baseImpl->getTypeInfo()->crossTileIndex ==
                                    style::LayerTypeInfo::CrossTileIndex::Required;
-        if (!needsCrossTileIndex &&
-            !renderLayer->queryIntersectsFeature(
-                queryGeometry, *geometryTileFeature, tileID.z, transformState, pixelsToTileUnits, posMatrix, state)) {
+        if (!needsCrossTileIndex && !renderLayer->queryIntersectsFeature(queryGeometry,
+                                                                         *geometryTileFeature,
+                                                                         tileID.canonical.z,
+                                                                         transformState,
+                                                                         pixelsToTileUnits,
+                                                                         posMatrix,
+                                                                         state)) {
             continue;
         }
 
-        if (options.filter && !(*options.filter)(style::expression::EvaluationContext{static_cast<float>(tileID.z),
-                                                                                      geometryTileFeature.get()}
+        // Match layer filters and source queries, including overzoomed tiles.
+        if (options.filter && !(*options.filter)(style::expression::EvaluationContext{
+                                  static_cast<float>(tileID.overscaledZ), geometryTileFeature.get()}
                                                      .withGlobalState(globalState))) {
             continue;
         }
 
-        Feature feature = convertFeature(*geometryTileFeature, tileID);
+        Feature feature = convertFeature(*geometryTileFeature, tileID.canonical);
         feature.source = renderLayer->baseImpl->source;
         feature.sourceLayer = sourceLayer->getName();
         feature.state = state;
