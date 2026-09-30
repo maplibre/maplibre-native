@@ -1,4 +1,5 @@
 #include <mln/util/io.hpp>
+#include <mln/util/filesystem.hpp>
 #include <mln/util/instrumentation.hpp>
 
 #include <cstdio>
@@ -36,7 +37,7 @@ void write_file(const std::string &filename, const std::string &data) {
 std::string read_file(const std::string &filename) {
     MLN_TRACE_FUNC();
 
-    std::ifstream file(filename, std::ios::binary);
+    std::ifstream file(util::pathFromUTF8(filename), std::ios::binary);
     if (file.good()) {
         std::stringstream data;
         data << file.rdbuf();
@@ -50,7 +51,7 @@ std::optional<std::string> readFile(const std::string &filename,
                                     const std::optional<std::pair<uint64_t, uint64_t>> &dataRange) {
     MLN_TRACE_FUNC();
 
-    std::ifstream file(filename, std::ios::binary);
+    std::ifstream file(util::pathFromUTF8(filename), std::ios::binary);
     if (file.good()) {
         if (dataRange) {
             size_t size = static_cast<size_t>(dataRange->second - dataRange->first + 1);
@@ -79,11 +80,11 @@ void deleteFile(const std::string &filename) {
 void copyFile(const std::string &destination, const std::string &source) {
     MLN_TRACE_FUNC();
 
-    std::ifstream src(source, std::ios::binary);
+    std::ifstream src(util::pathFromUTF8(source), std::ios::binary);
     if (!src.good()) {
         throw IOException(errno, "Cannot read file " + source);
     }
-    std::ofstream dst(destination, std::ios::binary);
+    std::ofstream dst(util::pathFromUTF8(destination), std::ios::binary);
     if (!dst.good()) {
         throw IOException(errno, "Cannot write file " + destination);
     }
