@@ -72,6 +72,8 @@ void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) 
     Nan::CallAsFunction(EventEmitter, target, 0, nullptr);
 
     mln::Log::setObserver(std::make_unique<node_mbgl::NodeLogObserver>(target));
+    // Observer cleanup requires a live V8 isolate and libuv loop.
+    node::AddEnvironmentCleanupHook(v8::Isolate::GetCurrent(), [](void*) { mln::Log::removeObserver(); }, nullptr);
 }
 
 NODE_MODULE(mapbox_gl_native, RegisterModule)
