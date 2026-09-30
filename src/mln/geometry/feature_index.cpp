@@ -289,8 +289,9 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
 
         bool needsCrossTileIndex = renderLayer->baseImpl->getTypeInfo()->crossTileIndex ==
                                    style::LayerTypeInfo::CrossTileIndex::Required;
-        // Paint properties follow the camera zoom, including fractional zoom and overzooming.
-        // The canonical tile zoom describes the geometry, not its rendered size.
+        // we use the float camera zoom here, not the integer tile ID zoom,
+        // because for the query we take into account the actual rendered
+        // size of the geometry (#2781)
         if (!needsCrossTileIndex && !renderLayer->queryIntersectsFeature(queryGeometry,
                                                                          *geometryTileFeature,
                                                                          static_cast<float>(transformState.getZoom()),
