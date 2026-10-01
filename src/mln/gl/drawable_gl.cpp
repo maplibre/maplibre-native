@@ -13,6 +13,14 @@
 namespace mln {
 namespace gl {
 
+struct IndexBufferGL : public gfx::IndexBufferBase {
+    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBufferGL() override = default;
+
+    std::unique_ptr<mln::gfx::IndexBuffer> buffer;
+};
+
 DrawableGL::DrawableGL(std::string name_)
     : Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
@@ -69,7 +77,10 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         const auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
         const auto& mlSeg = glSeg.getSegment();
         if (mlSeg.indexLength > 0 && glSeg.getVertexArray().isValid()) {
-            context.bindVertexArray = glSeg.getVertexArray().getID();
+            // Another drawable may have replaced the shared index vector's GPU buffer
+            // since this VAO was created. Refresh its element binding before drawing.
+            const auto& indexBuffer = static_cast<const IndexBufferGL&>(*impl->indexes->getBuffer());
+            glSeg.getVertexArray().bindIndexBuffer(context, *indexBuffer.buffer);
             context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
     }
@@ -134,14 +145,6 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
 void DrawableGL::setVertexAttrId(const size_t id) {
     impl->vertexAttrId = id;
 }
-
-struct IndexBufferGL : public gfx::IndexBufferBase {
-    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
-        : buffer(std::move(buffer_)) {}
-    ~IndexBufferGL() override = default;
-
-    std::unique_ptr<mln::gfx::IndexBuffer> buffer;
-};
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (isCustom) {
