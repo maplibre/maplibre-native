@@ -117,6 +117,22 @@ void Map::Impl::onUpdate() {
 
     transform.updateTransitions(timePoint);
 
+    // Terrain removed: a centre that gestures anchored on it (or the clamp held there) would stay
+    // up to kilometres above the now flat map, and pans, tile cover and label placement would
+    // all work on that raised plane. Bring it back to sea level, keeping the view - once no
+    // transition is running, since one in flight re-applies the altitude it started with.
+    const bool hasTerrain = style->impl->getTerrain() != nullptr;
+    if (hadTerrain && !hasTerrain) {
+        centerAwaitingSeaLevel = true;
+    } else if (hasTerrain) {
+        centerAwaitingSeaLevel = false;
+    }
+    hadTerrain = hasTerrain;
+    if (centerAwaitingSeaLevel && !transform.inTransition()) {
+        centerAwaitingSeaLevel = false;
+        setCenterAltitudeKeepingView(0.0);
+    }
+
     std::optional<Immutable<style::Terrain::Impl>> terrainImpl;
     if (auto* terrain = style->impl->getTerrain()) {
         terrainImpl = terrain->impl;
@@ -328,14 +344,20 @@ void Map::Impl::anchorCenterOnTerrain() {
     if (!style->impl->getTerrain() || std::isnan(terrainCenterElevation)) {
         return;
     }
+    if (setCenterAltitudeKeepingView(terrainCenterElevation)) {
+        onUpdate();
+    }
+}
+
+bool Map::Impl::setCenterAltitudeKeepingView(double altitudeMeters) {
     const TransformState& state = transform.getState();
-    const double rise = terrainCenterElevation - state.getCenterAltitude();
+    const double rise = altitudeMeters - state.getCenterAltitude();
     if (std::abs(rise) < 1.0) {
-        return;
+        return false;
     }
     const CameraOptions camera = transform.getCameraOptions(std::nullopt);
     if (!camera.center || !camera.zoom) {
-        return;
+        return false;
     }
     const double pitch = util::deg2rad(camera.pitch.value_or(0.0));
     const double bearing = util::deg2rad(camera.bearing.value_or(0.0));
@@ -343,12 +365,12 @@ void Map::Impl::anchorCenterOnTerrain() {
     // Camera-to-centre distance in metres, along the line of sight.
     const double metresPerPixel = Projection::getMetersPerPixelAtLatitude(center.latitude(), *camera.zoom);
     const double distance = state.getCameraToCenterDistance() * metresPerPixel;
-    // Up the line of sight by `rise`: that much closer to the camera, rise·tan(pitch) nearer it
-    // on the ground.
+    // Up the line of sight by `rise` (down, for a negative one): that much closer to the camera,
+    // rise·tan(pitch) nearer it on the ground.
     const double closer = rise / std::max(std::cos(pitch), 0.05);
     const double remaining = distance - closer;
     if (remaining < distance * 0.05) {
-        return; // the ground is (nearly) at the camera: leave it
+        return false; // the ground is (nearly) at the camera: leave it
     }
     const double shift = rise * std::tan(pitch);
     // Towards the camera, which sits opposite the bearing.
@@ -358,8 +380,8 @@ void Map::Impl::anchorCenterOnTerrain() {
     transform.jumpTo(CameraOptions()
                          .withCenter(anchored)
                          .withZoom(*camera.zoom + std::log2(distance / remaining))
-                         .withCenterAltitude(terrainCenterElevation));
-    onUpdate();
+                         .withCenterAltitude(altitudeMeters));
+    return true;
 }
 
 void Map::Impl::onTerrainCenterElevationChanged(double elevationMeters) {
