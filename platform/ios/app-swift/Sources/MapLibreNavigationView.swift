@@ -12,8 +12,16 @@ struct MapLibreNavigationView: View {
                     .listRowBackground(MapLibreColors.primary)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
+
                     NavigationLink("Start Map Recycle Test") {
                         MapRecycleTestView()
+                    }
+                    .listRowBackground(MapLibreColors.primary)
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
+
+                    NavigationLink("Start Disappearing Route Test") {
+                        LongRunningMapView(showUserMap: false, trimRoute: true)
                     }
                     .listRowBackground(MapLibreColors.primary)
                     .foregroundColor(.white)

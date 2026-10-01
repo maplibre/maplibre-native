@@ -6,7 +6,7 @@ class UserMap: MLNMapView, MLNMapViewDelegate {
     private var task: Task<Void, Never>?
 
     // config
-    private var RANDOM = RandomNumberGeneratorWithSeed(seed: 42)
+    private var RANDOM = RandomNumberGeneratorWithSeed(seed: stabilityRandomSeed())
 
     private let STYLES = [
         DEMOTILES_STYLE,

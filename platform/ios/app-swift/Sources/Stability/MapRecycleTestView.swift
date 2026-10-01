@@ -1,10 +1,6 @@
 import SwiftUI
 import UIKit
 
-private final class NavigationMapHandle {
-    weak var map: NavigationMap?
-}
-
 struct MapRecycleTestView: View {
     let CYCLE_COUNT = 300
 
