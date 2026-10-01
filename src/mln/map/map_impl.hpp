@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <mln/annotation/annotation_manager.hpp>
 #include <mln/map/map.hpp>
 #include <mln/map/map_observer.hpp>
@@ -123,6 +124,17 @@ public:
     /// pans. Opt in with Map::setCenterClampedToGround until it is applied during render
     /// setup instead, the way GL JS's recalculateZoomAndCenter is.
     bool centerClampedToGround = false;
+    /// Terrain height under the centre, as the renderer last reported it (NaN until then).
+    double terrainCenterElevation = std::numeric_limits<double>::quiet_NaN();
+    void anchorCenterOnTerrain();
+    /// Slides the centre along the line of sight to `altitudeMeters`, the zoom following, so the
+    /// camera stays where it is. False when there was nothing to move, or the plane at that
+    /// altitude is (nearly) at the camera.
+    bool setCenterAltitudeKeepingView(double altitudeMeters);
+    /// Whether the style had terrain at the last update, and whether the centre has yet to come
+    /// back to sea level since it was removed (a transition was in flight).
+    bool hadTerrain = false;
+    bool centerAwaitingSeaLevel = false;
     bool debugAboveGroundLog = false;
 };
 

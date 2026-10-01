@@ -230,8 +230,17 @@ public:
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&, vec4&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Unwrapped) const;
+    /// Unprojects onto the plane `elevationMeters` above sea level (same units as
+    /// latLngToScreenCoordinate's elevation) instead of sea level.
+    LatLng screenCoordinateToLatLng(const ScreenCoordinate&,
+                                    double elevationMeters,
+                                    LatLng::WrapMode = LatLng::Unwrapped) const;
     // Implements mapbox-gl-js pointCoordinate() : MercatorCoordinate.
-    TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
+    // `targetZ` is the world z (metres above sea level, see latLngToScreenCoordinate) of the
+    // plane the screen point is unprojected onto; 0 = sea level.
+    TileCoordinate screenCoordinateToTileCoordinate(const ScreenCoordinate&,
+                                                    uint8_t atZoom,
+                                                    double targetZ = 0.0) const;
 
     double zoomScale(double zoom) const;
     double scaleZoom(double scale) const;
@@ -310,6 +319,9 @@ private:
 
     // map position
     double x = 0, y = 0, z = 0;
+    /// The centre's altitude over sea level; `z` is the same in pixels at the current zoom.
+    double altitudeMeters = 0;
+    void updateZ();
     double bearing = 0;
     double scale = 1;
     double fov = util::DEFAULT_FOV;
