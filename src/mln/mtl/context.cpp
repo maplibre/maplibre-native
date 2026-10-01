@@ -60,6 +60,7 @@ Context::~Context() noexcept {
         for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
             globalUniformBuffers.set(i, nullptr);
         }
+        placeholderTexture2D.reset();
 
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
