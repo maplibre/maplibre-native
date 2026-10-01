@@ -45,14 +45,17 @@ void registerTriangles(const std::string& pluginID,
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
     const mln_plugin_shader_attribute_v1 uniformAttributes[] = {
-        attribute, {sizeof(attribute), 2, 1, {"a_radius", 8}, MLN_PLUGIN_VERTEX_FLOAT_X2}};
+        attribute,
+        {sizeof(attribute), 2, 1, {"a_radius", 8}, MLN_PLUGIN_VERTEX_FLOAT_X2},
+        {sizeof(attribute), 3, 2, {"a_opacity", 9}, MLN_PLUGIN_VERTEX_FLOAT_X2}};
     const mln_plugin_uniform_block_descriptor_v1 uniform = {
         sizeof(uniform), 0, {"QueryUBO", 8}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE};
     const mln_plugin_uniform_block_descriptor_v1 scopedBlocks[] = {
         {sizeof(uniform), 0, {"TileUBO", 7}, 16, MLN_PLUGIN_SHADER_STAGE_VERTEX, MLN_PLUGIN_UNIFORM_DRAWABLE_ARRAY},
         {sizeof(uniform), 1, {"PaintUBO", 8}, 16, MLN_PLUGIN_SHADER_STAGE_FRAGMENT, MLN_PLUGIN_UNIFORM_LAYER}};
-    const mln_plugin_shader_property_binding_v1 paintBinding = {
-        sizeof(paintBinding), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 2, 2, 0, 4};
+    const mln_plugin_shader_property_binding_v1 paintBindings[] = {
+        {sizeof(paintBindings[0]), {"test-radius", 11}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 0, 2, 2, 0, 4},
+        {sizeof(paintBindings[0]), {"test-opacity", 12}, MLN_PLUGIN_PROPERTY_ENCODING_FLOAT, 0, 8, 3, 3, 0, 12}};
     static const uint8_t colors[] = {128, 64, 0, 255, 128, 64, 0, 255, 128, 64, 0, 255};
     static const mln_plugin_vertex_stream_v1 colorStreams[] = {stream,
                                                                {sizeof(stream), 1, colors, sizeof(colors), 3, 4}};
@@ -80,7 +83,11 @@ void registerTriangles(const std::string& pluginID,
     radius.struct_size = sizeof(radius);
     radius.name = {"test-radius", 11};
     radius.type = MLN_PLUGIN_VALUE_FLOAT;
+    radius.expression_capabilities = MLN_PLUGIN_EXPRESSION_FEATURE;
     radius.default_value = {sizeof(mln_plugin_value), MLN_PLUGIN_VALUE_FLOAT, {.float_value = 1}};
+    auto opacity = radius;
+    opacity.name = {"test-opacity", 12};
+    const mln_plugin_property_descriptor_v1 properties[] = {radius, opacity};
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
         const std::string color = i == 0 ? "1,0,0,1" : "0,1,0,1";
@@ -109,27 +116,86 @@ void registerTriangles(const std::string& pluginID,
                            "fragment half4 triangleFragment(Output in [[stage_in]]){return half4(in.color);}"};
         }
         if (withUniforms) {
-            // Keep the declared GL block active in both uniform and attribute variants.
-            const std::string attributes =
-                "\n#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\nin vec2 a_radius;\n#endif\n";
-            const std::string evaluateRadius =
-                "float radius=u_radius;\n#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\n"
-                "radius=mix(a_radius.x,a_radius.y,u_t);\n#endif\ngl_Position.z=radius*0.00001;}";
-            code[i][0] = "in vec2 a_pos;layout(std140) uniform QueryUBO{float u_radius;float u_t;};" + attributes +
-                         body + evaluateRadius;
-            code[i][2] =
-                "layout(location=0) in vec2 a_pos;"
-                "layout(set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_0_BINDING,std140) uniform QueryUBO"
-                "{float u_radius;float u_t;};\n"
-                "#ifndef MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM\n"
-                "layout(location=1) in vec2 a_radius;\n#endif\n" +
-                body + "applySurfaceTransform();" + evaluateRadius;
-            code[i][4] =
-                "struct Input{float2 a_pos [[attribute(0)]];};struct QueryUBO{float radius;float t;};"
-                "vertex float4 triangleVertex(Input in [[stage_in]],constant QueryUBO& paint "
-                "[[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]){return float4((in.a_pos.x" +
-                offset + ")*0.5,in.a_pos.y,paint.radius*0.00001,1);}fragment half4 triangleFragment(){return half4(" +
-                color + ");}";
+            const std::string constants = "const float offset = " + offset + ";const vec4 color = vec4(" + color +
+                                          ");\n";
+            code[i][0] = constants + R"GLSL(
+in vec2 a_pos;
+#if !MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM
+layout(location=1) in vec2 a_radius;
+#endif
+#if !MLN_PLUGIN_PROPERTY_TEST_OPACITY_IS_UNIFORM
+layout(location=2) in vec2 a_opacity;
+#endif
+layout(std140) uniform QueryUBO { float u_radius; float u_radius_t; float u_opacity; float u_opacity_t; };
+out vec4 v_color;
+void main() {
+    float radius = u_radius;
+    float opacity = u_opacity;
+#if !MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM
+    radius = mix(a_radius.x, a_radius.y, u_radius_t);
+#endif
+#if !MLN_PLUGIN_PROPERTY_TEST_OPACITY_IS_UNIFORM
+    opacity = mix(a_opacity.x, a_opacity.y, u_opacity_t);
+#endif
+    gl_Position = vec4((a_pos.x + offset)*0.5, a_pos.y, radius*0.00001, 1);
+    v_color = color*opacity;
+}
+)GLSL";
+            code[i][1] = "in vec4 v_color;void main(){fragColor=v_color;}";
+            code[i][2] = constants + R"GLSL(
+layout(location=0) in vec2 a_pos;
+#if !MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM
+layout(location=1) in vec2 a_radius;
+#endif
+#if !MLN_PLUGIN_PROPERTY_TEST_OPACITY_IS_UNIFORM
+layout(location=2) in vec2 a_opacity;
+#endif
+layout(set=DRAWABLE_UBO_SET_INDEX,binding=MLN_PLUGIN_UNIFORM_0_BINDING,std140)
+uniform QueryUBO { float u_radius; float u_radius_t; float u_opacity; float u_opacity_t; };
+layout(location=0) out vec4 v_color;
+void main() {
+    float radius = u_radius;
+    float opacity = u_opacity;
+#if !MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM
+    radius = mix(a_radius.x, a_radius.y, u_radius_t);
+#endif
+#if !MLN_PLUGIN_PROPERTY_TEST_OPACITY_IS_UNIFORM
+    opacity = mix(a_opacity.x, a_opacity.y, u_opacity_t);
+#endif
+    gl_Position = vec4((a_pos.x + offset)*0.5, a_pos.y, radius*0.00001, 1);
+    applySurfaceTransform();
+    v_color = color*opacity;
+}
+)GLSL";
+            code[i][3] =
+                "layout(location=0) in vec4 v_color;layout(location=0) out vec4 fragColor;"
+                "void main(){fragColor=v_color;}";
+            code[i][4] = "constant float offset = " + offset + ";constant float4 color = float4(" + color + ");\n" +
+                         R"MSL(
+struct Input {
+    float2 a_pos [[attribute(0)]];
+#if !MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM
+    float2 a_radius [[attribute(1)]];
+#endif
+#if !MLN_PLUGIN_PROPERTY_TEST_OPACITY_IS_UNIFORM
+    float2 a_opacity [[attribute(2)]];
+#endif
+};
+struct QueryUBO { float radius; float radius_t; float opacity; float opacity_t; };
+struct Output { float4 position [[position]]; float4 color; };
+vertex Output triangleVertex(Input in [[stage_in]], constant QueryUBO& paint [[buffer(MLN_PLUGIN_UNIFORM_0_BINDING)]]) {
+    float radius = paint.radius;
+    float opacity = paint.opacity;
+#if !MLN_PLUGIN_PROPERTY_TEST_RADIUS_IS_UNIFORM
+    radius = mix(in.a_radius.x, in.a_radius.y, paint.radius_t);
+#endif
+#if !MLN_PLUGIN_PROPERTY_TEST_OPACITY_IS_UNIFORM
+    opacity = mix(in.a_opacity.x, in.a_opacity.y, paint.opacity_t);
+#endif
+    return {float4((in.a_pos.x + offset)*0.5, in.a_pos.y, radius*0.00001, 1), color*opacity};
+}
+fragment half4 triangleFragment(Output in [[stage_in]]) { return half4(in.color); }
+)MSL";
         }
         if (scopedUniforms) {
             // Use instance names to keep uniform members distinct across GL shader stages.
@@ -182,11 +248,11 @@ void registerTriangles(const std::string& pluginID,
                       sources[i].data(),
                       3,
                       withUniforms ? uniformAttributes : (packedColor ? colorAttributes : &attribute),
-                      withUniforms || packedColor ? 2u : 1u,
+                      withUniforms ? 3u : (packedColor ? 2u : 1u),
                       scopedUniforms ? scopedBlocks : (withUniforms ? &uniform : nullptr),
                       scopedUniforms ? 2u : (withUniforms ? 1u : 0u),
-                      withUniforms ? &paintBinding : nullptr,
-                      withUniforms ? 1u : 0u};
+                      withUniforms ? paintBindings : nullptr,
+                      withUniforms ? 2u : 0u};
         auto& layer = layers[i];
         layer.struct_size = sizeof(layer);
         layer.layer_type = view(types[i]);
@@ -194,8 +260,8 @@ void registerTriangles(const std::string& pluginID,
         layer.geometry_type_mask = MLN_PLUGIN_GEOMETRY_POINT;
         layer.shaders = &shaders[i];
         layer.shader_count = 1;
-        layer.properties = withUniforms ? &radius : nullptr;
-        layer.property_count = withUniforms ? 1u : 0u;
+        layer.properties = withUniforms ? properties : nullptr;
+        layer.property_count = withUniforms ? 2u : 0u;
         layer.enable_stencil_overlap_dedup = stencilOverlapDedup;
         layer.update_uniform_block = [](const mln_plugin_uniform_context_v1*, uint32_t, uint8_t*, size_t) {
             return MLN_PLUGIN_STATUS_OK;
@@ -298,6 +364,42 @@ TEST(PluginRendering, StencilOverlapDedupGeneratesStencilUpdates) {
     test.expectTriangles("test.stencil-dedup");
     const auto result = test.frontend.render(test.map);
     EXPECT_GT(result.stats.stencilUpdates, 0u);
+}
+
+TEST(PluginRendering, UniformPaintBetweenVertexAttributes) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.mixed-paint", /*packedColor=*/false, /*withUniforms=*/true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{"points":{"type":"geojson","data":{
+        "type":"Feature","properties":{"radius":0.5,"opacity":0.25},
+        "geometry":{"type":"Point","coordinates":[0,0]}}}},"layers":[
+        {"id":"left","type":"test.mixed-paint.left","source":"points"}]})");
+    // A uniform radius at location 1 leaves a hole before data-driven opacity
+    // at location 2. Switching either property must preserve the opacity input.
+    struct Paint {
+        const char* radius;
+        const char* opacity;
+        int expected;
+    };
+    const Paint cases[] = {{"1", R"(["get","opacity"])", 64},
+                           {R"(["get","radius"])", R"(["get","opacity"])", 64},
+                           {"0.25", "0.5", 128},
+                           {"0.25", R"(["get","opacity"])", 64}};
+    for (const auto& paint : cases) {
+        SCOPED_TRACE(std::string(paint.radius) + ", " + paint.opacity);
+        for (const auto& [name, json] :
+             {std::pair{"test-radius", paint.radius}, std::pair{"test-opacity", paint.opacity}}) {
+            JSDocument value;
+            value.Parse(json);
+            ASSERT_FALSE(test.map.getStyle().getLayer("left")->setProperty(
+                name, style::conversion::Convertible(static_cast<const JSValue*>(&value))));
+        }
+        const auto result = test.frontend.render(test.map);
+        const auto* pixel = result.image.data.get() + (32 * 64 + 16) * 4;
+        EXPECT_NEAR(paint.expected, pixel[0], 1);
+        EXPECT_EQ(0, pixel[1]);
+        EXPECT_EQ(0, pixel[2]);
+        EXPECT_NEAR(paint.expected, pixel[3], 1);
+    }
 }
 
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {

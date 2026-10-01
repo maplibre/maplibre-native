@@ -7,6 +7,7 @@
 #include <mln/shaders/program_parameters.hpp>
 #include <mln/shaders/shader_manifest.hpp>
 
+#include <algorithm>
 #include <cstring>
 #include <utility>
 
@@ -173,8 +174,16 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
                 continue;
             }
             const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-            assert(attributesInfo[location].name == std::string_view(name.data()));
-            addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
+            // Linked locations can be sparse or differ from descriptor order,
+            // especially when paint properties are supplied through uniforms.
+            const std::string_view attributeName(name.data(), length);
+            const auto info = std::find_if(attributesInfo.begin(), attributesInfo.end(), [&](const auto& attribute) {
+                return attribute.name == attributeName;
+            });
+            assert(info != attributesInfo.end());
+            if (info != attributesInfo.end()) {
+                addAttr(attrs, info->id, location, length, size, glType);
+            }
         }
 
         return std::make_shared<ShaderProgramGL>(std::move(program), std::move(attrs), std::move(samplerLocations));
