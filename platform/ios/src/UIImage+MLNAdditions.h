@@ -2,7 +2,7 @@
 
 #import "MLNTypes.h"
 
-#include <mbgl/style/image.hpp>
+#include <mln/style/image.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -10,14 +10,14 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNResourceNotFoundException
 
 @interface UIImage (MLNAdditions)
 
-- (nullable instancetype)initWithMLNStyleImage:(const mbgl::style::Image &)styleImage;
+- (nullable instancetype)initWithMLNStyleImage:(const mln::style::Image &)styleImage;
 
-- (nullable instancetype)initWithMLNPremultipliedImage:(const mbgl::PremultipliedImage &&)mbglImage
+- (nullable instancetype)initWithMLNPremultipliedImage:(const mln::PremultipliedImage &&)mbglImage
                                                  scale:(CGFloat)scale;
 
-- (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier;
+- (std::unique_ptr<mln::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier;
 
-- (mbgl::PremultipliedImage)mgl_premultipliedImage;
+- (mln::PremultipliedImage)mgl_premultipliedImage;
 
 + (UIImage *)mgl_resourceImageNamed:(NSString *)imageName;
 

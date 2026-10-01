@@ -269,9 +269,9 @@ global.mbglTestValue = function (property, layerType) {
             }
             let value = camelize(_.last(_.keys(property.values)));
             if (property['light-property']) {
-                return `mbgl::style::Light${type}Type::${value}`;
+                return `mln::style::Light${type}Type::${value}`;
             }
-            return `mbgl::style::${type}Type::${value}`;
+            return `mln::style::${type}Type::${value}`;
         }
         case 'color':
             return '{ 1, 0, 0, 1 }';
@@ -293,9 +293,9 @@ global.mbglTestValue = function (property, layerType) {
                 case 'translate':
                     return '{ 1, 1 }';
                 case 'anchor':
-                    return '{ mbgl::style::SymbolAnchorType::Top, mbgl::style::SymbolAnchorType::Bottom }';
+                    return '{ mln::style::SymbolAnchorType::Top, mln::style::SymbolAnchorType::Bottom }';
                 case 'mode':
-                    return '{ mbgl::style::TextWritingModeType::Horizontal, mbgl::style::TextWritingModeType::Vertical }';
+                    return '{ mln::style::TextWritingModeType::Horizontal, mln::style::TextWritingModeType::Vertical }';
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -310,7 +310,7 @@ global.mbglExpressionTestValue = function (property, layerType) {
         case 'enum':
             return `"${_.last(_.keys(property.values))}"`;
         case 'color':
-            return 'mbgl::Color(1, 0, 0, 1)';
+            return 'mln::Color(1, 0, 0, 1)';
         case 'array':
             switch (arrayType(property)) {
                 case 'anchor':
@@ -761,23 +761,23 @@ global.valueTransformerArguments = function (property) {
         case 'number':
             return ['float', objCType];
         case 'formatted':
-            return ['mbgl::style::expression::Formatted', objCType];
+            return ['mln::style::expression::Formatted', objCType];
         case 'resolvedImage':
-            return ['mbgl::style::expression::Image', objCType];
+            return ['mln::style::expression::Image', objCType];
         case 'string':
             return ['std::string', objCType];
         case 'enum':
             return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
-            return ['mbgl::Color', objCType];
+            return ['mln::Color', objCType];
         case 'numberArray':
             return ['std::vector<float>', objCType, 'float'];
         case 'colorArray':
-            return ['std::vector<mbgl::Color>', objCType, 'mbgl::Color'];
+            return ['std::vector<mln::Color>', objCType, 'mln::Color'];
         case 'padding':
-            return ['mbgl::Padding', objCType];
+            return ['mln::Padding', objCType];
         case 'variableAnchorOffsetCollection':
-            return ['mbgl::VariableAnchorOffsetCollection', objCType];
+            return ['mln::VariableAnchorOffsetCollection', objCType];
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -787,14 +787,14 @@ global.valueTransformerArguments = function (property) {
                 case 'padding':
                     return ['std::array<float, 4>', objCType];
                 case 'position':
-                    return ['mbgl::style::Position', objCType];
+                    return ['mln::style::Position', objCType];
                 case 'offset':
                 case 'translate':
                     return ['std::array<float, 2>', objCType];
                 case 'anchor':
-                    return ['std::vector<mbgl::style::SymbolAnchorType>', objCType, 'mbgl::style::SymbolAnchorType', 'MLNTextAnchor'];
+                    return ['std::vector<mln::style::SymbolAnchorType>', objCType, 'mln::style::SymbolAnchorType', 'MLNTextAnchor'];
                 case 'mode':
-                    return ['std::vector<mbgl::style::TextWritingModeType>', objCType, 'mbgl::style::TextWritingModeType', 'MLNTextWritingMode'];
+                    return ['std::vector<mln::style::TextWritingModeType>', objCType, 'mln::style::TextWritingModeType', 'MLNTextWritingMode'];
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -810,15 +810,15 @@ global.mbglType = function(property) {
         case 'number':
             return 'float';
         case 'formatted':
-            return 'mbgl::style::expression::Formatted';
+            return 'mln::style::expression::Formatted';
         case 'resolvedImage':
-            return 'mbgl::style::expression::Image';
+            return 'mln::style::expression::Image';
         case 'string':
             return 'std::string';
         case 'enum': {
             let type = camelize(originalPropertyName(property));
             if (property['light-property']) {
-                return `mbgl::style::Light${type}Type`;
+                return `mln::style::Light${type}Type`;
             }
             if (/-translate-anchor$/.test(originalPropertyName(property))) {
                 type = 'TranslateAnchor';
@@ -829,18 +829,18 @@ global.mbglType = function(property) {
             if (/^(text|icon)-anchor$/.test(originalPropertyName(property))) {
                 type = 'SymbolAnchor'
             }
-            return `mbgl::style::${type}Type`;
+            return `mln::style::${type}Type`;
         }
         case 'color':
-            return 'mbgl::Color';
+            return 'mln::Color';
         case 'numberArray':
             return 'std::vector<float>';
         case 'colorArray':
-            return 'std::vector<mbgl::Color>';
+            return 'std::vector<mln::Color>';
         case 'padding':
-            return 'mbgl::Padding';
+            return 'mln::Padding';
         case 'variableAnchorOffsetCollection':
-            return 'mbgl::VariableAnchorOffsetCollection';
+            return 'mln::VariableAnchorOffsetCollection';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -853,11 +853,11 @@ global.mbglType = function(property) {
                 case 'translate':
                     return 'std::array<float, 2>';
                 case 'position':
-                    return 'mbgl::style::Position';
+                    return 'mln::style::Position';
                 case 'anchor':
-                    return 'std::vector<mbgl::style::SymbolAnchorType>';
+                    return 'std::vector<mln::style::SymbolAnchorType>';
                 case 'mode':
-                    return 'std::vector<mbgl::style::TextWritingModeType>';
+                    return 'std::vector<mln::style::TextWritingModeType>';
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -868,9 +868,9 @@ global.mbglType = function(property) {
 
 global.initLayer = function (layerType) {
     if (layerType == "background") {
-       return `_layer = new mbgl::style::${camelize(layerType)}Layer(identifier.UTF8String);`
+       return `_layer = new mln::style::${camelize(layerType)}Layer(identifier.UTF8String);`
     } else {
-        return `_layer = new mbgl::style::${camelize(layerType)}Layer(identifier.UTF8String, source.identifier.UTF8String);`
+        return `_layer = new mln::style::${camelize(layerType)}Layer(identifier.UTF8String, source.identifier.UTF8String);`
     }
 };
 

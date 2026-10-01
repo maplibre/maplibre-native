@@ -1,9 +1,9 @@
 #pragma once
 
-#include <mbgl/storage/database_file_source.hpp>
-#include <mbgl/storage/online_file_source.hpp>
-#include <mbgl/storage/resource_options.hpp>
-#include <mbgl/storage/resource_transform.hpp>
+#include <mln/storage/database_file_source.hpp>
+#include <mln/storage/online_file_source.hpp>
+#include <mln/storage/resource_options.hpp>
+#include <mln/storage/resource_transform.hpp>
 
 #include "asset_manager.hpp"
 
@@ -11,7 +11,7 @@
 
 #include "util/tile_server_options.hpp"
 
-namespace mbgl {
+namespace mln {
 
 template <typename T>
 class Actor;
@@ -81,23 +81,23 @@ public:
 
     static FileSource* getNativePeer(jni::JNIEnv&, const jni::Object<FileSource>&);
 
-    static mbgl::ResourceOptions getSharedResourceOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
+    static mln::ResourceOptions getSharedResourceOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
 
-    static mbgl::ClientOptions getSharedClientOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
+    static mln::ClientOptions getSharedClientOptions(jni::JNIEnv&, const jni::Object<FileSource>&);
 
     static void registerNative(jni::JNIEnv&);
 
 private:
     const std::string DATABASE_FILE = "/mbgl-offline.db";
     std::optional<int> activationCounter;
-    mbgl::ResourceOptions resourceOptions;
-    mbgl::ClientOptions clientOptions;
+    mln::ResourceOptions resourceOptions;
+    mln::ClientOptions clientOptions;
     std::unique_ptr<Actor<ResourceTransform::TransformCallback>> resourceTransform;
     std::function<void()> pathChangeCallback;
-    std::shared_ptr<mbgl::DatabaseFileSource> databaseSource;
-    std::shared_ptr<mbgl::FileSource> onlineSource;
-    std::shared_ptr<mbgl::FileSource> resourceLoader;
+    std::shared_ptr<mln::DatabaseFileSource> databaseSource;
+    std::shared_ptr<mln::FileSource> onlineSource;
+    std::shared_ptr<mln::FileSource> resourceLoader;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

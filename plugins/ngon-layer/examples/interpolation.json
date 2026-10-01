@@ -1,0 +1,98 @@
+{
+  "version": 8,
+  "name": "N-gon zoom and feature interpolation",
+  "center": [0, 0],
+  "zoom": 10.5,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {
+              "n": 3, "size": 20, "angle": 0,
+              "fill-low": "#fecaca", "fill": "#ef4444", "fill-high": "#f59e0b"
+            },
+            "geometry": {"type": "Point", "coordinates": [-0.084, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {
+              "n": 4, "size": 22, "angle": 12,
+              "fill-low": "#fde68a", "fill": "#f59e0b", "fill-high": "#db2777"
+            },
+            "geometry": {"type": "Point", "coordinates": [-0.042, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {
+              "n": 5, "size": 24, "angle": 24,
+              "fill-low": "#bbf7d0", "fill": "#16a34a", "fill-high": "#2563eb"
+            },
+            "geometry": {"type": "Point", "coordinates": [0, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 4,
+            "properties": {
+              "n": 6, "size": 26, "angle": 36,
+              "fill-low": "#bae6fd", "fill": "#0284c7", "fill-high": "#9333ea"
+            },
+            "geometry": {"type": "Point", "coordinates": [0.042, 0]}
+          },
+          {
+            "type": "Feature",
+            "id": 5,
+            "properties": {
+              "n": 8, "size": 28, "angle": 48,
+              "fill-low": "#e9d5ff", "fill": "#9333ea", "fill-high": "#e11d48"
+            },
+            "geometry": {"type": "Point", "coordinates": [0.084, 0]}
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "#eef2f7"}
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["*", 0.2, ["get", "size"]],
+          10, ["get", "size"],
+          12, ["*", 2, ["get", "size"]]
+        ],
+        "ngon-corners": ["get", "n"],
+        "ngon-rotate": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["-", ["get", "angle"], 90],
+          10, ["get", "angle"],
+          12, ["+", ["get", "angle"], 90]
+        ],
+        "ngon-color": [
+          "interpolate", ["linear"], ["zoom"],
+          8, ["to-color", ["get", "fill-low"]],
+          10, ["to-color", ["get", "fill"]],
+          12, ["to-color", ["get", "fill-high"]]
+        ],
+        "ngon-stroke-width": [
+          "interpolate", ["linear"], ["zoom"], 8, 0.5, 10, 2, 12, 4
+        ],
+        "ngon-stroke-color": "#172033"
+      }
+    }
+  ]
+}

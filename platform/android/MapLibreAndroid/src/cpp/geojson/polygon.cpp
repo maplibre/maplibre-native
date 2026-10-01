@@ -4,11 +4,11 @@
 
 #include "util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
-jni::Local<jni::Object<Polygon>> Polygon::New(jni::JNIEnv& env, const mbgl::Polygon<double>& polygon) {
+jni::Local<jni::Object<Polygon>> Polygon::New(jni::JNIEnv& env, const mln::Polygon<double>& polygon) {
     static auto& javaClass = jni::Class<Polygon>::Singleton(env);
     static auto method = javaClass.GetStaticMethod<jni::Object<Polygon>(jni::Object<java::util::List>)>(env,
                                                                                                         "fromLngLats");
@@ -53,4 +53,4 @@ void Polygon::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

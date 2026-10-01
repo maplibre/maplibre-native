@@ -3,16 +3,16 @@
 namespace {
 
 // Dummy initializer (We don't support initializing this from the JVM)
-std::unique_ptr<mbgl::android::UnknownSource> init(jni::JNIEnv&) {
+std::unique_ptr<mln::android::UnknownSource> init(jni::JNIEnv&) {
     throw std::runtime_error("UnknownSource should not be initialized from the JVM");
 }
 
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-UnknownSource::UnknownSource(jni::JNIEnv& env, mbgl::style::Source& coreSource, AndroidRendererFrontend* frontend)
+UnknownSource::UnknownSource(jni::JNIEnv& env, mln::style::Source& coreSource, AndroidRendererFrontend* frontend)
     : Source(env, coreSource, createJavaPeer(env), frontend) {}
 
 jni::Local<jni::Object<Source>> UnknownSource::createJavaPeer(jni::JNIEnv& env) {
@@ -32,4 +32,4 @@ void UnknownSource::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

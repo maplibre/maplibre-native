@@ -2,7 +2,7 @@
 
 #import "MLNOfflineRegion.h"
 
-#include <mbgl/storage/offline.hpp>
+#include <mln/storage/offline.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
  Creates and returns a C++ offline region definition corresponding to the
  receiver.
  */
-- (const mbgl::OfflineRegionDefinition)offlineRegionDefinition;
+- (const mln::OfflineRegionDefinition)offlineRegionDefinition;
 
 /**
  Attributes to be passed into the offline download start event

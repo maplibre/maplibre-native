@@ -33,7 +33,7 @@ jobs:
     outputs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           persist-credentials: false
@@ -66,20 +66,20 @@ jobs:
             rust: true
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           persist-credentials: false
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        uses: github/codeql-action/init@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           languages: cpp
 
       - name: Install dependencies
         run: .github/scripts/install-linux-deps
 
-      - uses: taiki-e/install-action@2ca9b94c269419b7b0c711c09d0b21c4e1d51145 # v2.83.1
+      - uses: taiki-e/install-action@26e9283f268b880168bdbd2c545dfcd60ec2c6ab # v2.87.13
         with:
           tool: armerge@2
 
@@ -156,7 +156,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        uses: github/codeql-action/analyze@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
         with:
           category: "/language:cpp"
 
@@ -199,7 +199,7 @@ jobs:
   linux-coverage:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
           persist-credentials: false
@@ -215,7 +215,7 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: '.nvmrc'
 
@@ -224,14 +224,16 @@ jobs:
           npm install
           node test/storage/server.js &
 
-      - name: Generate coverage report
+      - name: Run Bazel tests and generate coverage report
         run: |
+          # //test:core includes plugin API tests; //plugins/... tests the examples.
           xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
+            bazel coverage --combined_report=lcov --instrumentation_filter="//:mbgl-core,//plugins" \
+            --//:plugins=true \
             --test_output=errors --local_test_jobs=1 \
             --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
-            //test:core //render-test:render-test //expression-test:test --//:renderer=drawable
+            //test:core //render-test:render-test //expression-test:test //plugins/... --//:renderer=drawable
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
@@ -249,7 +251,7 @@ jobs:
       - linux-build-and-test
       - linux-coverage
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number

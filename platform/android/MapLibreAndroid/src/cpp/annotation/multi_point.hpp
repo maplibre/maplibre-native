@@ -1,15 +1,15 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 #include <jni/jni.hpp>
 
 #include "../geometry/lat_lng.hpp"
 #include "../java/util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class MultiPoint : protected mbgl::util::noncopyable {
+class MultiPoint : protected mln::util::noncopyable {
 protected:
     template <class Geometry>
     static Geometry toGeometry(JNIEnv& env, const jni::Object<java::util::List>& pointsList) {
@@ -29,4 +29,4 @@ protected:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

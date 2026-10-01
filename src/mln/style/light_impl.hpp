@@ -1,0 +1,54 @@
+#pragma once
+
+#include <mln/style/light.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/style/types.hpp>
+#include <mln/style/position.hpp>
+#include <mln/style/properties.hpp>
+#include <mln/renderer/property_evaluator.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/indexed_tuple.hpp>
+
+namespace mln {
+namespace style {
+
+template <class T>
+class LightProperty {
+public:
+    using TransitionableType = Transitionable<PropertyValue<T>>;
+    using UnevaluatedType = Transitioning<PropertyValue<T>>;
+    using EvaluatorType = PropertyEvaluator<T>;
+    using PossiblyEvaluatedType = T;
+    using Type = T;
+    static constexpr bool IsDataDriven = false;
+    static constexpr bool IsOverridable = false;
+};
+
+struct LightAnchor : LightProperty<LightAnchorType> {
+    static LightAnchorType defaultValue() { return LightAnchorType::Viewport; }
+};
+
+struct LightPosition : LightProperty<Position> {
+    static Position defaultValue() {
+        std::array<float, 3> default_ = {{1.15f, 210.f, 30.f}};
+        return Position{{default_}};
+    }
+};
+
+struct LightColor : LightProperty<Color> {
+    static Color defaultValue() { return Color::white(); }
+};
+
+struct LightIntensity : LightProperty<float> {
+    static float defaultValue() { return 0.5; }
+};
+
+using LightProperties = Properties<LightAnchor, LightPosition, LightColor, LightIntensity>;
+
+class Light::Impl {
+public:
+    LightProperties::Transitionable properties;
+};
+
+} // namespace style
+} // namespace mln

@@ -2,9 +2,9 @@
 
 #include <jni.h>
 #include <jni/jni.hpp>
-#include <mbgl/util/action_journal_options.hpp>
+#include <mln/util/action_journal_options.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class NativeMapOptions {
@@ -21,7 +21,8 @@ public:
     static bool crossSourceCollisions(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
     static bool asyncRendererCleanup(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
     static bool fastPFOREnabled(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
+    static bool featureInfoEnabled(jni::JNIEnv&, const jni::Object<NativeMapOptions>&);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

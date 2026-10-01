@@ -70,7 +70,7 @@ jobs:
             build_type: RelWithDebInfo
             qt_version: 6.9.1
             qt_target: desktop
-            deployment_target: 12.0
+            deployment_target: 14.3
             deployment_arch: "x86_64;arm64"
             compiler: ""
           # disabled due to https://github.com/llvm/llvm-project/issues/77653
@@ -80,7 +80,7 @@ jobs:
           #   build_type: RelWithDebInfo
           #   qt_version: 6.9.1
           #   qt_target: desktop
-          #   deployment_target: 12.0
+          #   deployment_target: 14.3
           #   deployment_arch: "arm64"
           #   compiler: "llvm"
           - name: win64_msvc2022
@@ -104,7 +104,7 @@ jobs:
         run: git config --global core.longpaths true
 
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           path: source
           submodules: recursive
@@ -177,7 +177,7 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
 
       - name: Download Qt
-        uses: jurplel/install-qt-action@48d3ad6db93f3627c8ee7a0454bc6f3744f7e730 # v4.3.1
+        uses: jurplel/install-qt-action@bcb88e3bed2e992f5f9e24c0f9e364a231d278eb # v4.4.0
         with:
           aqtversion: ==3.1.*
           version: ${{ env.QT_VERSION }}
@@ -188,7 +188,7 @@ jobs:
           extra: --base https://mirrors.ocf.berkeley.edu/qt/
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@d62db5f07c26379fc4b4e0916f098a92573c3b03 # v1.2.23
+        uses: hendrikmuhs/ccache-action@f09c25b45002a07be2955cbe52e8cee55643f89d # v1.2.24
         with:
           key: Qt_${{ matrix.name }}_${{ matrix.qt_version }}
           max-size: 200M

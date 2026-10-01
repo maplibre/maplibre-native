@@ -2,7 +2,7 @@
 
 #include "../java_types.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 // Instance
 
@@ -80,4 +80,4 @@ Value Value::get(const int index) const {
     return Value(env, jni::Local<jni::Object<>>(env, jni::GetObjectArrayElement(env, *array, index)));
 }
 } // namespace android
-} // namespace mbgl
+} // namespace mln

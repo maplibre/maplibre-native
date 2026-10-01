@@ -1,10 +1,10 @@
 #include "allocation_index.hpp"
 
-#include <mbgl/render_test.hpp>
-#include <mbgl/storage/network_status.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/render_test.hpp>
+#include <mln/storage/network_status.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <args.hxx>
 
@@ -15,7 +15,7 @@
 #include "runner.hpp"
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/gfx/backend.hpp>
+#include <mln/gfx/backend.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 #ifdef SHOW_ANSI_COLORS
@@ -94,26 +94,26 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
     } catch (const args::Help&) {
         std::ostringstream stream;
         stream << argumentParser;
-        mbgl::Log::Info(mbgl::Event::General, stream.str());
+        mln::Log::Info(mln::Event::General, stream.str());
         exit(0);
     } catch (const args::ParseError& e) {
         std::ostringstream stream;
         stream << argumentParser;
-        mbgl::Log::Info(mbgl::Event::General, stream.str());
-        mbgl::Log::Error(mbgl::Event::General, e.what());
+        mln::Log::Info(mln::Event::General, stream.str());
+        mln::Log::Error(mln::Event::General, e.what());
         exit(1);
     } catch (const args::ValidationError& e) {
         std::ostringstream stream;
         stream << argumentParser;
-        mbgl::Log::Info(mbgl::Event::General, stream.str());
-        mbgl::Log::Error(mbgl::Event::General, e.what());
+        mln::Log::Info(mln::Event::General, stream.str());
+        mln::Log::Error(mln::Event::General, e.what());
         exit(2);
     }
 
-    mbgl::filesystem::path manifestPath = args::get(testPathValue);
-    if (!mbgl::filesystem::exists(manifestPath) || !manifestPath.has_filename()) {
-        mbgl::Log::Error(mbgl::Event::General,
-                         "Provided test manifest file path '" + manifestPath.string() + "' does not exist");
+    mln::filesystem::path manifestPath = args::get(testPathValue);
+    if (!mln::filesystem::exists(manifestPath) || !manifestPath.has_filename()) {
+        mln::Log::Error(mln::Event::General,
+                        "Provided test manifest file path '" + manifestPath.string() + "' does not exist");
         exit(3);
     }
 
@@ -183,7 +183,7 @@ void runWithAlternateSources(TestRunner& runner, TestMetadata& metadata, bool& e
     }
 }
 } // namespace
-namespace mbgl {
+namespace mln {
 
 int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testStatus) {
     int returnCode = 0;
@@ -205,7 +205,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
     if (!manifestData) {
         exit(5);
     }
-    mbgl::util::RunLoop runLoop;
+    mln::util::RunLoop runLoop;
     TestRunner runner(std::move(*manifestData), updateResults);
     if (shuffle) {
         printf(ANSI_COLOR_YELLOW "Shuffle seed: %d" ANSI_COLOR_RESET "\n", seed);
@@ -216,7 +216,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
 
 #if MLN_RENDER_BACKEND_METAL
     printf(ANSI_COLOR_YELLOW "Using GPU Expression Evaluation" ANSI_COLOR_RESET "\n");
-    mbgl::gfx::Backend::setEnableGPUExpressionEval(true);
+    mln::gfx::Backend::setEnableGPUExpressionEval(true);
 #endif // MLN_RENDER_BACKEND_METAL
 
     const auto& manifest = runner.getManifest();
@@ -247,7 +247,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
         bool shouldIgnore = false;
         std::string ignoreReason;
 
-        const mbgl::filesystem::path ignoreName(id);
+        const mln::filesystem::path ignoreName(id);
         const auto it = std::find_if(
             ignores.cbegin(), ignores.cend(), [&ignoreName](auto pair) { return pair.first == ignoreName; });
         if (it != ignores.end()) {
@@ -255,7 +255,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
             ignoreReason = it->second;
             if (ignoreReason.starts_with("skip")) {
                 printf(ANSI_COLOR_GRAY "* skipped %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
-                mbgl::Log::Info(mbgl::Event::General, "* skipped " + id + "(" + ignoreReason + ")");
+                mln::Log::Info(mln::Event::General, "* skipped " + id + "(" + ignoreReason + ")");
                 continue;
             }
         }
@@ -280,14 +280,14 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
                 color = "#E8A408";
                 stats.ignorePassedTests++;
                 printf(ANSI_COLOR_YELLOW "* ignore %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
-                mbgl::Log::Info(mbgl::Event::General, "* ignore " + id + " (" + ignoreReason + ")");
+                mln::Log::Info(mln::Event::General, "* ignore " + id + " (" + ignoreReason + ")");
             } else {
                 status = "ignored failed";
                 color = "#9E9E9E";
                 stats.ignoreFailedTests++;
                 printf(
                     ANSI_COLOR_LIGHT_GRAY "* ignore %s (%s)" ANSI_COLOR_RESET "\n", id.c_str(), ignoreReason.c_str());
-                mbgl::Log::Info(mbgl::Event::General, "* ignore " + id + " (" + ignoreReason + ")");
+                mln::Log::Info(mln::Event::General, "* ignore " + id + " (" + ignoreReason + ")");
             }
         } else {
             // Only fail the bots on render errors, this is a CI limitation that
@@ -304,7 +304,7 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
                 color = "green";
                 stats.passedTests++;
                 printf(ANSI_COLOR_GREEN "* passed %s" ANSI_COLOR_RESET "\n", id.c_str());
-                mbgl::Log::Info(mbgl::Event::General, "* passed " + id);
+                mln::Log::Info(mln::Event::General, "* passed " + id);
             } else if (errored) {
                 status = "errored";
                 color = "red";
@@ -312,15 +312,15 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
                 returnCode = 2;
                 printf(ANSI_COLOR_RED "* errored %s" ANSI_COLOR_RESET "\n", id.c_str());
                 printf(ANSI_COLOR_RED "* error: %s" ANSI_COLOR_RESET "\n", metadata.errorMessage.c_str());
-                mbgl::Log::Info(mbgl::Event::General, "* errored " + id);
-                mbgl::Log::Info(mbgl::Event::General, "* error " + metadata.errorMessage);
+                mln::Log::Info(mln::Event::General, "* errored " + id);
+                mln::Log::Info(mln::Event::General, "* error " + metadata.errorMessage);
             } else {
                 status = "failed";
                 color = "red";
                 stats.failedTests++;
                 returnCode = 3;
                 printf(ANSI_COLOR_RED "* failed %s" ANSI_COLOR_RESET "\n", id.c_str());
-                mbgl::Log::Info(mbgl::Event::General, "* failed " + id);
+                mln::Log::Info(mln::Event::General, "* failed " + id);
             }
         }
 
@@ -330,10 +330,10 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
         }
     }
 
-    const std::string manifestName = mbgl::filesystem::path(manifestPath).stem().generic_string();
+    const std::string manifestName = mln::filesystem::path(manifestPath).stem().generic_string();
     const std::string resultPath = manifest.getResultPath() + "/" + manifestName + ".html";
     std::string resultsHTML = createResultPage(stats, metadatas, shuffle, seed);
-    mbgl::util::write_file(resultPath, resultsHTML);
+    mln::util::write_file(resultPath, resultsHTML);
 
     const uint32_t count = stats.erroredTests + stats.failedTests + stats.ignoreFailedTests + stats.ignorePassedTests +
                            stats.passedTests;
@@ -342,37 +342,36 @@ int runRenderTests(int argc, char** argv, std::function<void(TestStatus)> testSt
         printf(ANSI_COLOR_GREEN "%u passed (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.passedTests,
                100.0 * stats.passedTests / count);
-        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.passedTests) + " passed tests");
+        mln::Log::Info(mln::Event::General, std::to_string(stats.passedTests) + " passed tests");
     }
     if (stats.ignorePassedTests) {
         printf(ANSI_COLOR_YELLOW "%u passed but were ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.ignorePassedTests,
                100.0 * stats.ignorePassedTests / count);
-        mbgl::Log::Info(mbgl::Event::General,
-                        std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
+        mln::Log::Info(mln::Event::General, std::to_string(stats.ignorePassedTests) + " passed tests but were ignored");
     }
     if (stats.ignoreFailedTests) {
         printf(ANSI_COLOR_LIGHT_GRAY "%u ignored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.ignoreFailedTests,
                100.0 * stats.ignoreFailedTests / count);
-        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.ignoreFailedTests) + " ignored tests");
+        mln::Log::Info(mln::Event::General, std::to_string(stats.ignoreFailedTests) + " ignored tests");
     }
     if (stats.failedTests) {
         printf(ANSI_COLOR_RED "%u failed (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.failedTests,
                100.0 * stats.failedTests / count);
-        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.failedTests) + " failed tests");
+        mln::Log::Info(mln::Event::General, std::to_string(stats.failedTests) + " failed tests");
     }
     if (stats.erroredTests) {
         printf(ANSI_COLOR_RED "%u errored (%.1lf%%)" ANSI_COLOR_RESET "\n",
                stats.erroredTests,
                100.0 * stats.erroredTests / count);
-        mbgl::Log::Info(mbgl::Event::General, std::to_string(stats.erroredTests) + " errored tests");
+        mln::Log::Info(mln::Event::General, std::to_string(stats.erroredTests) + " errored tests");
     }
 
-    printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).generic_string().c_str());
+    printf("Results at: %s\n", mln::filesystem::canonical(resultPath).generic_string().c_str());
 
     return returnCode;
 }
 
-} // namespace mbgl
+} // namespace mln

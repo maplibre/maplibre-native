@@ -3,7 +3,7 @@
 
 #import "MLNStyleLayer_Private.h"
 
-#include <mbgl/style/layers/heatmap_layer.hpp>
+#include <mln/style/layers/heatmap_layer.hpp>
 
 @interface MLNHeatmapColorTests : XCTestCase <MLNMapViewDelegate>
 @end
@@ -18,7 +18,7 @@
   MLNHeatmapStyleLayer *layer = [[MLNHeatmapStyleLayer alloc] initWithIdentifier:@"layerID"
                                                                           source:source];
 
-  auto rawLayer = static_cast<mbgl::style::HeatmapLayer *>(layer.rawLayer);
+  auto rawLayer = static_cast<mln::style::HeatmapLayer *>(layer.rawLayer);
 
   XCTAssertTrue(rawLayer->getHeatmapColor().isUndefined(),
                 @"heatmap-color should be unset initially.");
@@ -27,9 +27,9 @@
   NSExpression *constantExpression = [NSExpression expressionWithFormat:@"%@", [MLNColor redColor]];
   layer.heatmapColor = constantExpression;
 
-  mbgl::style::PropertyValue<float> propertyValue = {0xff};
+  mln::style::PropertyValue<float> propertyValue = {0xff};
   XCTAssertEqual(
-      rawLayer->getHeatmapColor().evaluate(0.0), mbgl::Color::red(),
+      rawLayer->getHeatmapColor().evaluate(0.0), mln::Color::red(),
       @"Setting heatmapColor to a constant value expression should update heatmap-color.");
   XCTAssertEqualObjects(layer.heatmapColor, constantExpression,
                         @"heatmapColor should round-trip constant value expressions.");
@@ -46,10 +46,10 @@
                                          constantExpression, @{@12 : constantExpression2}];
   layer.heatmapColor = functionExpression;
 
-  XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(11.0), mbgl::Color::red(),
+  XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(11.0), mln::Color::red(),
                  @"Setting heatmapColor to an expression depending on $heatmapDensity should "
                  @"update heatmap-color.");
-  XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(12.0), mbgl::Color::blue(),
+  XCTAssertEqual(rawLayer->getHeatmapColor().evaluate(12.0), mln::Color::blue(),
                  @"Setting heatmapColor to an expression depending on $heatmapDensity should "
                  @"update heatmap-color.");
   XCTExpectFailure(

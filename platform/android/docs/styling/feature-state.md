@@ -35,3 +35,5 @@ Tapping a state toggles its `selected` feature-state key and shows a toast:
 - Use `getFeatureState()` on the source to inspect the current state for one feature.
 - Use `removeFeatureState()` or `resetFeatureStates()` on the source to clear state.
 - For `VectorSource`, all feature-state methods require a `sourceLayerId` parameter.
+- Feature-state expressions update paint properties, including symbol paint properties such as `icon-color`, `icon-opacity`, `text-color`, and `text-opacity`.
+- Feature-state expressions are not supported in layout properties such as `icon-image` or `text-field`.

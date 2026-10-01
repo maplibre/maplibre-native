@@ -1,10 +1,10 @@
-#include <mbgl/util/tile_range.hpp>
-#include <mbgl/util/geo.hpp>
-#include <mbgl/map/transform.hpp>
+#include <mln/util/tile_range.hpp>
+#include <mln/util/geo.hpp>
+#include <mln/map/transform.hpp>
 
 #include <gtest/gtest.h>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TileRange, ContainsWorld) {
     auto range = util::TileRange::fromLatLngBounds(LatLngBounds::world(), 0);

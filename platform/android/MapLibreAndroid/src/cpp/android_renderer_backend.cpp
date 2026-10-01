@@ -1,7 +1,7 @@
 #include "android_renderer_backend.hpp"
 #include <cassert>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void AndroidRendererBackend::updateViewPort() {}
@@ -19,4 +19,4 @@ void AndroidRendererBackend::setSwapBehavior(gfx::Renderable::SwapBehaviour swap
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

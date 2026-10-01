@@ -2,7 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "MLNMockGestureRecognizers.h"
 
-#import <mbgl/math/wrap.hpp>
+#import <mln/math/wrap.hpp>
 
 @interface MLNMapView (MLNMapViewDirectionTests)
 - (void)handleRotateGesture:(UIRotationGestureRecognizer *)rotate;
@@ -41,7 +41,7 @@
   for (NSNumber *degrees in
        @[ @-999, @-359, @-240, @-180, @-90, @-45, @0, @45, @90, @180, @240, @360, @999 ]) {
     double inputDegrees = [degrees doubleValue];
-    double wrappedDegrees = mbgl::util::wrap(inputDegrees, 0., 360.);
+    double wrappedDegrees = mln::util::wrap(inputDegrees, 0., 360.);
     self.mapView.direction = inputDegrees;
     XCTAssertEqualWithAccuracy(self.mapView.direction, wrappedDegrees, 0.001);
 
@@ -70,7 +70,7 @@
       [[UIRotationGestureRecognizerMock alloc] initWithTarget:nil action:nil];
   gesture.state = UIGestureRecognizerStateBegan;
   gesture.rotation = MLNRadiansFromDegrees(30);
-  CGFloat wrappedRotation = mbgl::util::wrap(-MLNDegreesFromRadians(gesture.rotation), 0., 360.);
+  CGFloat wrappedRotation = mln::util::wrap(-MLNDegreesFromRadians(gesture.rotation), 0., 360.);
 
   // Disabled
   {
@@ -117,7 +117,7 @@
     gesture.state = UIGestureRecognizerStateChanged;
     gesture.rotation = MLNRadiansFromDegrees([degrees doubleValue]);
     [self.mapView handleRotateGesture:gesture];
-    CGFloat wrappedRotation = mbgl::util::wrap(-MLNDegreesFromRadians(gesture.rotation), 0., 360.);
+    CGFloat wrappedRotation = mln::util::wrap(-MLNDegreesFromRadians(gesture.rotation), 0., 360.);
     XCTAssertEqualWithAccuracy(self.mapView.direction, wrappedRotation, 0.001,
                                @"Map direction should match gesture rotation for input of %@°.",
                                degrees);

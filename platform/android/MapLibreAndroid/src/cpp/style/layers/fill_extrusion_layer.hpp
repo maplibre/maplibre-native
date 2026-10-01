@@ -4,11 +4,11 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/fill_extrusion_layer_factory.hpp>
-#include <mbgl/style/layers/fill_extrusion_layer.hpp>
+#include <mln/layermanager/fill_extrusion_layer_factory.hpp>
+#include <mln/style/layers/fill_extrusion_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class FillExtrusionLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     FillExtrusionLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    FillExtrusionLayer(mbgl::style::FillExtrusionLayer&);
+    FillExtrusionLayer(mln::style::FillExtrusionLayer&);
 
-    FillExtrusionLayer(std::unique_ptr<mbgl::style::FillExtrusionLayer>);
+    FillExtrusionLayer(std::unique_ptr<mln::style::FillExtrusionLayer>);
 
     ~FillExtrusionLayer();
 
@@ -58,13 +58,13 @@ public:
 
 }; // class FillExtrusionLayer
 
-class FillExtrusionJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::FillExtrusionLayerFactory {
+class FillExtrusionJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::FillExtrusionLayerFactory {
 public:
     ~FillExtrusionJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -73,4 +73,4 @@ public:
 }; // class FillExtrusionJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -1,0 +1,80 @@
+#pragma once
+
+#include <mln/gl/object.hpp>
+#include <mln/gl/attribute.hpp>
+#include <mln/gl/state.hpp>
+#include <mln/gl/value.hpp>
+
+#include <array>
+#include <memory>
+
+namespace mln {
+
+namespace gfx {
+class IndexBuffer;
+} // namespace gfx
+
+namespace gl {
+
+class Context;
+
+class VertexArrayState {
+public:
+    VertexArrayState(UniqueVertexArray vertexArray_)
+        : vertexArray(std::move(vertexArray_)) {}
+
+    void setDirty() {
+        indexBuffer.setDirty();
+        for (auto& binding : bindings) {
+            binding.setDirty();
+        }
+    }
+
+    UniqueVertexArray vertexArray;
+    State<value::BindElementBuffer> indexBuffer;
+
+    using AttributeState = State<value::VertexAttribute, Context&, AttributeLocation>;
+    std::vector<AttributeState> bindings;
+};
+
+class VertexArrayStateDeleter {
+public:
+    VertexArrayStateDeleter(bool destroy_)
+        : destroy(destroy_) {}
+
+    void operator()(VertexArrayState* ptr) const {
+        if (destroy) {
+            delete ptr;
+        }
+    }
+
+private:
+    bool destroy;
+};
+
+using UniqueVertexArrayState = std::unique_ptr<VertexArrayState, VertexArrayStateDeleter>;
+
+class VertexArray {
+public:
+    VertexArray(UniqueVertexArrayState state_)
+        : state(std::move(state_)) {}
+    VertexArray(VertexArray&& other)
+        : state(std::move(other.state)) {}
+
+    void bind(Context&, const gfx::IndexBuffer&, const AttributeBindingArray&);
+
+    VertexArray& operator=(VertexArray&& other) {
+        state = std::move(other.state);
+        return *this;
+    }
+
+    bool isValid() const { return state && state->vertexArray && state->vertexArray.get(); }
+
+    VertexArrayID getID() const { return state->vertexArray; }
+
+private:
+    UniqueVertexArrayState state;
+};
+
+} // namespace gl
+} // namespace mln

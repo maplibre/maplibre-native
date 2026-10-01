@@ -1,6 +1,6 @@
 #include "formatted_section.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void FormattedSection::registerNative(jni::JNIEnv& env) {
@@ -8,4 +8,4 @@ void FormattedSection::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

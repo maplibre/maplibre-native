@@ -1,12 +1,12 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/fixture_log_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/test/fixture_log_observer.hpp>
 
-#include <mbgl/storage/sqlite3.hpp>
+#include <mln/storage/sqlite3.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(SQLite, Statement) {
-    using namespace mbgl;
+    using namespace mln;
 
     mapbox::sqlite::Database db = mapbox::sqlite::Database::open(":memory:", mapbox::sqlite::ReadWriteCreate);
     db.exec("CREATE TABLE test (id INTEGER);");

@@ -1,8 +1,8 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/tile/tile_id.hpp>
+#include <mln/tile/tile_id.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(TileID, Canonical) {
     CanonicalTileID id_0_0_0(0, 0, 0);

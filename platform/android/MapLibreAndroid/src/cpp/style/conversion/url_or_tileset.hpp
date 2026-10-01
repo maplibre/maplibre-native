@@ -1,16 +1,16 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
-#include <mbgl/util/tileset.hpp>
+#include <mln/util/variant.hpp>
+#include <mln/util/tileset.hpp>
 
 #include <string>
 
 #include "../value.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value);
+variant<std::string, Tileset> convertURLOrTileset(mln::android::Value&& value);
 
 }
-} // namespace mbgl
+} // namespace mln

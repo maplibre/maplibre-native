@@ -3,18 +3,18 @@
 #include "json_object.hpp"
 #include "json_primitive.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace gson {
 
-jni::Local<jni::Object<JsonElement>> JsonElement::New(jni::JNIEnv& env, const mbgl::Value& value) {
+jni::Local<jni::Object<JsonElement>> JsonElement::New(jni::JNIEnv& env, const mln::Value& value) {
     static auto& primitive = jni::Class<JsonPrimitive>::Singleton(env);
     static auto stringConstructor = primitive.GetConstructor<jni::String>(env);
     static auto numberConstructor = primitive.GetConstructor<jni::Number>(env);
     static auto booleanConstructor = primitive.GetConstructor<jni::Boolean>(env);
 
     return value.match(
-        [&](const mbgl::NullValue&) { return jni::Local<jni::Object<JsonElement>>(); },
+        [&](const mln::NullValue&) { return jni::Local<jni::Object<JsonElement>>(); },
         [&](const std::string& value) {
             return primitive.New(env, stringConstructor, jni::Make<jni::String>(env, value));
         },
@@ -26,13 +26,13 @@ jni::Local<jni::Object<JsonElement>> JsonElement::New(jni::JNIEnv& env, const mb
         [&](const bool value) {
             return primitive.New(env, booleanConstructor, jni::Box(env, value ? jni::jni_true : jni::jni_false));
         },
-        [&](const std::vector<mbgl::Value>& values) { return JsonArray::New(env, values); },
-        [&](const mbgl::PropertyMap& values) { return JsonObject::New(env, values); });
+        [&](const std::vector<mln::Value>& values) { return JsonArray::New(env, values); },
+        [&](const mln::PropertyMap& values) { return JsonObject::New(env, values); });
 }
 
-mbgl::Value JsonElement::convert(jni::JNIEnv& env, const jni::Object<JsonElement>& jsonElement) {
+mln::Value JsonElement::convert(jni::JNIEnv& env, const jni::Object<JsonElement>& jsonElement) {
     if (!jsonElement) {
-        return mbgl::NullValue();
+        return mln::NullValue();
     }
 
     static auto& elementClass = jni::Class<JsonElement>::Singleton(env);
@@ -57,14 +57,14 @@ mbgl::Value JsonElement::convert(jni::JNIEnv& env, const jni::Object<JsonElement
         } else if (primitive.Call(env, isString)) {
             return jni::Make<std::string>(env, primitive.Call(env, getAsString));
         } else {
-            return mbgl::NullValue();
+            return mln::NullValue();
         }
     } else if (jsonElement.Call(env, isJsonObject)) {
         return JsonObject::convert(env, jni::Cast(env, jni::Class<JsonObject>::Singleton(env), jsonElement));
     } else if (jsonElement.Call(env, isJsonArray)) {
         return JsonArray::convert(env, jni::Cast(env, jni::Class<JsonArray>::Singleton(env), jsonElement));
     } else {
-        return mbgl::NullValue();
+        return mln::NullValue();
     }
 }
 
@@ -74,4 +74,4 @@ void JsonElement::registerNative(jni::JNIEnv& env) {
 
 } // namespace gson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

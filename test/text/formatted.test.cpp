@@ -1,9 +1,9 @@
 
-#include <mbgl/style/expression/formatted.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/style/expression/formatted.hpp>
+#include <mln/test/util.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style::expression;
+using namespace mln;
+using namespace mln::style::expression;
 
 TEST(Formatted, Equality) {
     Formatted text{"Formatted"};

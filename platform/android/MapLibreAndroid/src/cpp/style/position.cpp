@@ -1,6 +1,6 @@
 #include "position.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 jni::Local<jni::Object<Position>> Position::fromPosition(jni::JNIEnv& env,
@@ -35,4 +35,4 @@ float Position::getPolarAngle(jni::JNIEnv& env, const jni::Object<Position>& pos
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

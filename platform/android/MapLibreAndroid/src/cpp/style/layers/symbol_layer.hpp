@@ -4,11 +4,11 @@
 
 #include "layer.hpp"
 #include "../transition_options.hpp"
-#include <mbgl/layermanager/symbol_layer_factory.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
+#include <mln/layermanager/symbol_layer_factory.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class SymbolLayer : public Layer {
@@ -18,9 +18,9 @@ public:
 
     SymbolLayer(jni::JNIEnv&, jni::String&, jni::String&);
 
-    SymbolLayer(mbgl::style::SymbolLayer&);
+    SymbolLayer(mln::style::SymbolLayer&);
 
-    SymbolLayer(std::unique_ptr<mbgl::style::SymbolLayer>);
+    SymbolLayer(std::unique_ptr<mln::style::SymbolLayer>);
 
     ~SymbolLayer();
 
@@ -166,13 +166,13 @@ public:
 
 }; // class SymbolLayer
 
-class SymbolJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mbgl::SymbolLayerFactory {
+class SymbolJavaLayerPeerFactory final : public JavaLayerPeerFactory, public mln::SymbolLayerFactory {
 public:
     ~SymbolJavaLayerPeerFactory() override;
 
     // JavaLayerPeerFactory overrides.
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mbgl::style::Layer&) final;
-    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer>) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv&, mln::style::Layer&) final;
+    jni::Local<jni::Object<Layer>> createJavaLayerPeer(jni::JNIEnv& env, std::unique_ptr<mln::style::Layer>) final;
 
     void registerNative(jni::JNIEnv&) final;
 
@@ -181,4 +181,4 @@ public:
 }; // class SymbolJavaLayerPeerFactory
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

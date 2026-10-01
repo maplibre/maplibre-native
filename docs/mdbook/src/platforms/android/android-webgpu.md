@@ -1,6 +1,6 @@
 # WebGPU on Android
 
-Two WebGPU implementations are supported: **Dawn** (Google, C++) and **wgpu-native** (Rust). Both use Vulkan internally on Android. The Gradle product flavors are `webgpuDawn` and `webgpuWgpu`, sharing the `src/webgpu/` Java source set.
+Two WebGPU implementations are supported: **Dawn** (Google, C++) and **wgpu-native** (Rust). Both use Vulkan internally on Android. The Gradle product flavors are `webgpuDawn` and `webgpuWgpu`, sharing the `src/vulkan/` and `src/sharedRenderer/vulkan/` Java source sets.
 
 ## Building with Dawn
 

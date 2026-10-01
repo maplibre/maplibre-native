@@ -1,9 +1,9 @@
 #include <iostream>
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/util/string.hpp>
+#include <mln/util/string.hpp>
 
-using namespace mbgl;
+using namespace mln;
 
 TEST(NumberConversions, number_to_string) {
     EXPECT_EQ("0", util::toString(0));

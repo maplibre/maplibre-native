@@ -1,16 +1,16 @@
 #include "android_vulkan_renderer_backend.hpp"
 
-#include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/vulkan/context.hpp>
-#include <mbgl/vulkan/renderable_resource.hpp>
+#include <mln/gfx/backend_scope.hpp>
+#include <mln/vulkan/context.hpp>
+#include <mln/vulkan/renderable_resource.hpp>
 
 #include <cassert>
 #include <vulkan/vulkan_android.h>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class AndroidVulkanRenderableResource final : public mbgl::vulkan::SurfaceRenderableResource {
+class AndroidVulkanRenderableResource final : public mln::vulkan::SurfaceRenderableResource {
 public:
     AndroidVulkanRenderableResource(AndroidVulkanRendererBackend& backend_)
         : SurfaceRenderableResource(backend_) {}
@@ -71,7 +71,7 @@ void AndroidVulkanRendererBackend::destroySurface() {
 }
 
 std::vector<const char*> AndroidVulkanRendererBackend::getInstanceExtensions() {
-    auto extensions = mbgl::vulkan::RendererBackend::getInstanceExtensions();
+    auto extensions = mln::vulkan::RendererBackend::getInstanceExtensions();
     extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
     extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
     return extensions;
@@ -104,16 +104,16 @@ PremultipliedImage AndroidVulkanRendererBackend::readFramebuffer() {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln
 
-namespace mbgl {
+namespace mln {
 namespace gfx {
 
 template <>
-std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mbgl::gfx::Backend::Type::Vulkan>(
+std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mln::gfx::Backend::Type::Vulkan>(
     ANativeWindow* window) {
     return std::make_unique<android::AndroidVulkanRendererBackend>(window);
 }
 
 } // namespace gfx
-} // namespace mbgl
+} // namespace mln

@@ -1,17 +1,17 @@
 #import <UIKit/UIKit.h>
 
-#include <mbgl/style/property_value.hpp>
-#include <mbgl/util/color.hpp>
+#include <mln/style/property_value.hpp>
+#include <mln/util/color.hpp>
 
 @interface UIColor (MLNAdditions)
 
-- (mbgl::Color)mgl_color;
+- (mln::Color)mgl_color;
 
-- (mbgl::style::PropertyValue<mbgl::Color>)mgl_colorPropertyValue;
+- (mln::style::PropertyValue<mln::Color>)mgl_colorPropertyValue;
 
-- (mbgl::Color)mgl_colorForPremultipliedValue;
+- (mln::Color)mgl_colorForPremultipliedValue;
 
-+ (UIColor *)mgl_colorWithColor:(mbgl::Color)color;
++ (UIColor *)mgl_colorWithColor:(mln::Color)color;
 
 @end
 

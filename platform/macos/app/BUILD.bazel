@@ -19,7 +19,7 @@ macos_application(
     infoplists = [
         "Info.plist",
     ],
-    minimum_os_version = "11.0",
+    minimum_os_version = "14.3",
     resources = glob([
         "*.lproj/**",
         "Assets.xcassets/**",

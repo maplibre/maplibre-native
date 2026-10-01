@@ -2,13 +2,12 @@
 
 #include "feature.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
-mbgl::FeatureCollection FeatureCollection::convert(jni::JNIEnv& env,
-                                                   const jni::Object<FeatureCollection>& jCollection) {
-    auto collection = mbgl::FeatureCollection();
+mln::FeatureCollection FeatureCollection::convert(jni::JNIEnv& env, const jni::Object<FeatureCollection>& jCollection) {
+    auto collection = mln::FeatureCollection();
 
     if (jCollection) {
         auto jFeatureList = FeatureCollection::features(env, jCollection);
@@ -36,4 +35,4 @@ void FeatureCollection::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

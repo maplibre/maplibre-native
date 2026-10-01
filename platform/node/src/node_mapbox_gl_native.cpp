@@ -5,9 +5,9 @@
 #include <nan.h>
 #pragma GCC diagnostic pop
 
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/gfx/backend.hpp>
-#include <mbgl/gfx/backend_scope.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/gfx/backend.hpp>
+#include <mln/gfx/backend_scope.hpp>
 
 #include "node_map.hpp"
 #include "node_logging.hpp"
@@ -28,7 +28,7 @@ void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) 
     //   a) Ensuring that the static local variable is initialized before any
     //   thread contention. b) unreffing an async handle, which otherwise would
     //   keep the default loop running.
-    static mbgl::util::RunLoop nodeRunLoop;
+    static mln::util::RunLoop nodeRunLoop;
     nodeRunLoop.stop();
 
     Nan::SetMethod(target, "setBackendType", SetBackendType);
@@ -40,19 +40,19 @@ void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) 
     // Exports Resource constants.
     v8::Local<v8::Object> resource = Nan::New<v8::Object>();
 
-    Nan::Set(resource, Nan::New("Unknown").ToLocalChecked(), Nan::New(mbgl::Resource::Unknown));
+    Nan::Set(resource, Nan::New("Unknown").ToLocalChecked(), Nan::New(mln::Resource::Unknown));
 
-    Nan::Set(resource, Nan::New("Style").ToLocalChecked(), Nan::New(mbgl::Resource::Style));
+    Nan::Set(resource, Nan::New("Style").ToLocalChecked(), Nan::New(mln::Resource::Style));
 
-    Nan::Set(resource, Nan::New("Source").ToLocalChecked(), Nan::New(mbgl::Resource::Source));
+    Nan::Set(resource, Nan::New("Source").ToLocalChecked(), Nan::New(mln::Resource::Source));
 
-    Nan::Set(resource, Nan::New("Tile").ToLocalChecked(), Nan::New(mbgl::Resource::Tile));
+    Nan::Set(resource, Nan::New("Tile").ToLocalChecked(), Nan::New(mln::Resource::Tile));
 
-    Nan::Set(resource, Nan::New("Glyphs").ToLocalChecked(), Nan::New(mbgl::Resource::Glyphs));
+    Nan::Set(resource, Nan::New("Glyphs").ToLocalChecked(), Nan::New(mln::Resource::Glyphs));
 
-    Nan::Set(resource, Nan::New("SpriteImage").ToLocalChecked(), Nan::New(mbgl::Resource::SpriteImage));
+    Nan::Set(resource, Nan::New("SpriteImage").ToLocalChecked(), Nan::New(mln::Resource::SpriteImage));
 
-    Nan::Set(resource, Nan::New("SpriteJSON").ToLocalChecked(), Nan::New(mbgl::Resource::SpriteJSON));
+    Nan::Set(resource, Nan::New("SpriteJSON").ToLocalChecked(), Nan::New(mln::Resource::SpriteJSON));
 
     Nan::Set(target, Nan::New("Resource").ToLocalChecked(), resource);
 
@@ -71,7 +71,7 @@ void RegisterModule(v8::Local<v8::Object> target, v8::Local<v8::Object> module) 
     Nan::SetPrototype(target, Nan::Get(EventEmitter, Nan::New("prototype").ToLocalChecked()).ToLocalChecked());
     Nan::CallAsFunction(EventEmitter, target, 0, nullptr);
 
-    mbgl::Log::setObserver(std::make_unique<node_mbgl::NodeLogObserver>(target));
+    mln::Log::setObserver(std::make_unique<node_mbgl::NodeLogObserver>(target));
 }
 
 NODE_MODULE(mapbox_gl_native, RegisterModule)

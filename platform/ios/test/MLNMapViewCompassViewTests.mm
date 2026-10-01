@@ -1,7 +1,7 @@
 #import <Mapbox.h>
 #import <XCTest/XCTest.h>
 
-#import <mbgl/math/wrap.hpp>
+#import <mln/math/wrap.hpp>
 
 @interface MLNMapView (MLNCompassButtonTests)
 - (void)resetNorthAnimated:(BOOL)animated;
@@ -91,7 +91,7 @@
   for (NSNumber *degrees in
        @[ @-999, @-359, @-240, @-180, @-90, @-45, @0, @45, @90, @180, @240, @360, @999 ]) {
     self.mapView.direction = [degrees doubleValue];
-    CGFloat wrappedDirection = mbgl::util::wrap(-self.mapView.direction, 0., 360.);
+    CGFloat wrappedDirection = mln::util::wrap(-self.mapView.direction, 0., 360.);
     CGAffineTransform rotation =
         CGAffineTransformMakeRotation(MLNRadiansFromDegrees(wrappedDirection));
     XCTAssertTrue(

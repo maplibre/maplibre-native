@@ -4,11 +4,11 @@
 
 #include "../java/util.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace gson {
 
-jni::Local<jni::Object<JsonObject>> JsonObject::New(jni::JNIEnv& env, const mbgl::PropertyMap& values) {
+jni::Local<jni::Object<JsonObject>> JsonObject::New(jni::JNIEnv& env, const mln::PropertyMap& values) {
     static auto& javaClass = jni::Class<JsonObject>::Singleton(env);
     static auto constructor = javaClass.GetConstructor(env);
     static auto addMethod = javaClass.GetMethod<void(jni::String, jni::Object<JsonElement>)>(env, "add");
@@ -40,8 +40,8 @@ static void iterateEntrySet(jni::JNIEnv& env, const jni::Object<JsonObject>& jso
     }
 }
 
-mbgl::PropertyMap JsonObject::convert(jni::JNIEnv& env, const jni::Object<JsonObject>& jsonObject) {
-    mbgl::PropertyMap map;
+mln::PropertyMap JsonObject::convert(jni::JNIEnv& env, const jni::Object<JsonObject>& jsonObject) {
+    mln::PropertyMap map;
 
     if (jsonObject) {
         iterateEntrySet(
@@ -59,4 +59,4 @@ void JsonObject::registerNative(jni::JNIEnv& env) {
 
 } // namespace gson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

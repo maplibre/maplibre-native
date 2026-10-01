@@ -2,22 +2,22 @@
 
 #import "MLNLight.h"
 
-namespace mbgl {
+namespace mln {
 namespace style {
 class Light;
 }
-}  // namespace mbgl
+}  // namespace mln
 
 @interface MLNLight (Private)
 
 /**
  Initializes and returns a ``MLNLight`` associated with a style's light.
  */
-- (instancetype)initWithMBGLLight:(const mbgl::style::Light *)mbglLight;
+- (instancetype)initWithMBGLLight:(const mln::style::Light *)mbglLight;
 
 /**
- Returns an `mbgl::style::Light` representation of the ``MLNLight``.
+ Returns an `mln::style::Light` representation of the ``MLNLight``.
  */
-- (mbgl::style::Light)mbglLight;
+- (mln::style::Light)mbglLight;
 
 @end

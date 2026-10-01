@@ -1,36 +1,38 @@
-#include <mbgl/style/layers/custom_layer.hpp>
-#include <mbgl/style/layers/custom_layer_impl.hpp>
-#include <mbgl/style/conversion/filter.hpp>
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/style/expression/format_expression.hpp>
-#include <mbgl/style/expression/image.hpp>
-#include <mbgl/style/expression/match.hpp>
-#include <mbgl/style/layers/background_layer.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/style/layers/fill_layer.hpp>
-#include <mbgl/style/layers/fill_layer_impl.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/line_layer_impl.hpp>
-#include <mbgl/style/layers/raster_layer.hpp>
-#include <mbgl/style/layers/raster_layer_impl.hpp>
-#include <mbgl/style/layers/symbol_layer.hpp>
-#include <mbgl/style/layers/symbol_layer_impl.hpp>
-#include <mbgl/style/style_impl.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/stub_layer_observer.hpp>
-#include <mbgl/test/util.hpp>
-#include <mbgl/util/color.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mln/style/layers/custom_layer.hpp>
+#include <mln/style/layers/custom_layer_impl.hpp>
+#include <mln/style/conversion/filter.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/expression/compound_expression.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/style/expression/format_expression.hpp>
+#include <mln/style/expression/image.hpp>
+#include <mln/style/expression/match.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
+#include <mln/style/layers/background_layer.hpp>
+#include <mln/style/layers/background_layer_impl.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/layers/fill_layer.hpp>
+#include <mln/style/layers/fill_layer_impl.hpp>
+#include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
+#include <mln/style/layers/raster_layer.hpp>
+#include <mln/style/layers/raster_layer_impl.hpp>
+#include <mln/style/layers/symbol_layer.hpp>
+#include <mln/style/layers/symbol_layer_impl.hpp>
+#include <mln/style/style_impl.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_layer_observer.hpp>
+#include <mln/test/util.hpp>
+#include <mln/util/color.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/run_loop.hpp>
 
 #include <memory>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 using namespace expression;
 using namespace expression::dsl;
 using namespace std::literals::string_literals;
@@ -63,9 +65,9 @@ class MockLayoutProperties : public Properties<TextField> {};
 class MockPaintProperties : public Properties<TextColor> {};
 using MockOverrides = FormatSectionOverrides<MockPaintProperties::OverridableProperties>;
 
-mbgl::style::Filter parseFilter(const std::string& expression) {
+mln::style::Filter parseFilter(const std::string& expression) {
     Error error;
-    return *convertJSON<mbgl::style::Filter>(expression, error);
+    return *convertJSON<mln::style::Filter>(expression, error);
 }
 
 } // namespace
@@ -442,12 +444,52 @@ TEST(Layer, SymbolLayerOverrides) {
         layout.get<TextField>() = PossiblyEvaluatedPropertyValue<Formatted>(std::move(formatted));
         paint.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
         EXPECT_TRUE(paint.get<TextColor>().isConstant());
-        MockOverrides::setOverrides(layout, paint);
+        MockOverrides::setOverrides(layout, paint, MockPaintProperties::Unevaluated(), nullptr);
         EXPECT_FALSE(paint.get<TextColor>().isConstant());
 
         MockPaintProperties::PossiblyEvaluated updated;
         updated.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
         MockOverrides::updateOverrides(paint, updated);
         EXPECT_FALSE(updated.get<TextColor>().isConstant());
+    }
+
+    // A text-color folded to a constant from a global-state-only expression
+    // keeps the dependency, its keys, and the state through the override
+    // wrapper.
+    {
+        MockLayoutProperties::PossiblyEvaluated layout;
+        MockPaintProperties::PossiblyEvaluated paint;
+
+        auto formatted = Formatted("");
+        formatted.sections.emplace_back("section text"s, std::nullopt, std::nullopt, Color::green());
+        layout.get<TextField>() = PossiblyEvaluatedPropertyValue<Formatted>(std::move(formatted));
+        paint.get<TextColor>() = PossiblyEvaluatedPropertyValue<Color>{Color::red()};
+
+        ParsingContext ctx;
+        std::vector<std::unique_ptr<Expression>> args;
+        args.push_back(literal("labelColor"));
+        ParseResult stateExpression = createCompoundExpression("global-state", std::move(args), ctx);
+        ASSERT_TRUE(stateExpression);
+        MockPaintProperties::Unevaluated unevaluated;
+        unevaluated.get<TextColor>() = Transitioning<PropertyValue<Color>>(
+            PropertyValue<Color>(PropertyExpression<Color>(toColor(std::move(*stateExpression)))));
+
+        auto state = std::make_shared<const GlobalStateMap>(GlobalStateMap{{"labelColor", std::string("red")}});
+        MockOverrides::setOverrides(layout, paint, unevaluated, state);
+
+        const auto& wrapped = paint.get<TextColor>();
+        EXPECT_FALSE(wrapped.isConstant());
+        EXPECT_TRUE(wrapped.getDependencies() & Dependency::GlobalState);
+        ASSERT_TRUE(wrapped.getGlobalStateRefs());
+        EXPECT_EQ((std::set<std::string>{"labelColor"}), *wrapped.getGlobalStateRefs());
+
+        // A section without an override evaluates from the captured state.
+        const StubGeometryTileFeature feature(PropertyMap{});
+        const Color evaluated = wrapped.match(
+            [&](const PropertyExpression<Color>& fn) {
+                return fn.evaluate(EvaluationContext(0.0f, &feature), Color::black());
+            },
+            [](const Color& constant) { return constant; });
+        EXPECT_EQ(*Color::parse("red"), evaluated);
     }
 }

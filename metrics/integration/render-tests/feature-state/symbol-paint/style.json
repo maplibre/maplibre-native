@@ -1,0 +1,106 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 64,
+      "height": 64,
+      "operations": [
+        [
+          "wait"
+        ],
+        [
+          "setFeatureState",
+          {
+            "source": "geojson",
+            "id": "red"
+          },
+          {
+            "color": "red"
+          }
+        ],
+        [
+          "wait"
+        ]
+      ]
+    }
+  },
+  "zoom": 2,
+  "sprite": "local://sprites/sprite",
+  "glyphs": "local://glyphs/{fontstack}/{range}.pbf",
+  "sources": {
+    "geojson": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": "red",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            },
+            "properties": {
+              "label": "R"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "white"
+      }
+    },
+    {
+      "id": "symbol",
+      "type": "symbol",
+      "source": "geojson",
+      "layout": {
+        "icon-image": "dot.sdf",
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
+        "text-field": [
+          "get",
+          "label"
+        ],
+        "text-font": [
+          "Open Sans Semibold",
+          "Arial Unicode MS Bold"
+        ],
+        "text-size": 14,
+        "text-offset": [
+          0,
+          1.5
+        ],
+        "text-allow-overlap": true,
+        "text-ignore-placement": true
+      },
+      "paint": {
+        "icon-color": [
+          "coalesce",
+          [
+            "feature-state",
+            "color"
+          ],
+          "black"
+        ],
+        "text-color": [
+          "coalesce",
+          [
+            "feature-state",
+            "color"
+          ],
+          "black"
+        ]
+      }
+    }
+  ]
+}

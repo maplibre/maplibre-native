@@ -1,0 +1,23 @@
+#pragma once
+
+#include <mln/tile/tile_observer.hpp>
+
+using namespace mln;
+
+/**
+ * An implementation of TileObserver that forwards all methods to
+ * dynamically-settable lambdas.
+ */
+class StubTileObserver : public TileObserver {
+public:
+    void onTileChanged(Tile& tile) override {
+        if (tileChanged) tileChanged(tile);
+    }
+
+    void onTileError(Tile& tile, std::exception_ptr error) override {
+        if (tileError) tileError(tile, error);
+    }
+
+    std::function<void(Tile&)> tileChanged;
+    std::function<void(Tile&, std::exception_ptr)> tileError;
+};

@@ -58,7 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setDesiredAccuracy:(CLLocationAccuracy)desiredAccuracy;
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+#if TARGET_OS_IPHONE
 /**
  Specifies the level of location accuracy the Maps SDK has permission to use.
 
@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setActivityType:(CLActivityType)activityType;
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+#if TARGET_OS_IPHONE
 /**
  Requests the user's permission to temporarily use location update services
  with full accuracy.
@@ -117,7 +117,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Returns the current localization authorization status.
 
- @see `+[CLLocationManger authorizationStatus]`
+ @see `CLLocationManager.authorizationStatus`
  */
 @property (nonatomic, readonly) CLAuthorizationStatus authorizationStatus;
 
@@ -219,7 +219,7 @@ NS_ASSUME_NONNULL_BEGIN
  why the location manager failed.
  */
 - (void)locationManager:(id<MLNLocationManager>)manager didFailWithError:(nonnull NSError *)error;
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+#if TARGET_OS_IPHONE
 /**
  Notifies the delegate that the location authorization status has changed.
 

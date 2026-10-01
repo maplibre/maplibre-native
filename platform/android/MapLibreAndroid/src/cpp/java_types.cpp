@@ -1,6 +1,6 @@
 #include "java_types.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace java {
 
@@ -46,4 +46,4 @@ void registerNatives(JNIEnv& env) {
 
 } // namespace java
 } // namespace android
-} // namespace mbgl
+} // namespace mln

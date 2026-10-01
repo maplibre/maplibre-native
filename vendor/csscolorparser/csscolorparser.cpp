@@ -282,6 +282,8 @@ std::optional<Color> parse(const std::string& css_str) {
                     return {};
                 }
                 alpha = parse_css_float(params.back());
+            } else if (params.size() == 4) {
+                alpha = parse_css_float(params.back());
             } else {
                 if (params.size() != 3) {
                     return {};

@@ -1,58 +1,58 @@
-#include <mbgl/test/fixture_log_observer.hpp>
-#include <mbgl/test/stub_file_source.hpp>
-#include <mbgl/test/stub_render_source_observer.hpp>
-#include <mbgl/test/stub_style_observer.hpp>
-#include <mbgl/test/util.hpp>
+#include <mln/test/fixture_log_observer.hpp>
+#include <mln/test/stub_file_source.hpp>
+#include <mln/test/stub_render_source_observer.hpp>
+#include <mln/test/stub_style_observer.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/layers/circle_layer.hpp>
-#include <mbgl/style/layers/circle_layer_impl.hpp>
-#include <mbgl/style/layers/hillshade_layer.hpp>
-#include <mbgl/style/layers/hillshade_layer_impl.hpp>
-#include <mbgl/style/layers/line_layer.hpp>
-#include <mbgl/style/layers/line_layer_impl.hpp>
-#include <mbgl/style/layers/raster_layer.hpp>
-#include <mbgl/style/layers/raster_layer_impl.hpp>
-#include <mbgl/style/source_impl.hpp>
-#include <mbgl/style/sources/custom_geometry_source.hpp>
-#include <mbgl/style/sources/geojson_source.hpp>
-#include <mbgl/style/sources/image_source.hpp>
-#include <mbgl/style/sources/raster_dem_source.hpp>
-#include <mbgl/style/sources/raster_source.hpp>
-#include <mbgl/style/sources/vector_source.hpp>
-#include <mbgl/style/style.hpp>
+#include <mln/style/layers/circle_layer.hpp>
+#include <mln/style/layers/circle_layer_impl.hpp>
+#include <mln/style/layers/hillshade_layer.hpp>
+#include <mln/style/layers/hillshade_layer_impl.hpp>
+#include <mln/style/layers/line_layer.hpp>
+#include <mln/style/layers/line_layer_impl.hpp>
+#include <mln/style/layers/raster_layer.hpp>
+#include <mln/style/layers/raster_layer_impl.hpp>
+#include <mln/style/source_impl.hpp>
+#include <mln/style/sources/custom_geometry_source.hpp>
+#include <mln/style/sources/geojson_source.hpp>
+#include <mln/style/sources/image_source.hpp>
+#include <mln/style/sources/raster_dem_source.hpp>
+#include <mln/style/sources/raster_source.hpp>
+#include <mln/style/sources/vector_source.hpp>
+#include <mln/style/style.hpp>
 
-#include <mbgl/renderer/sources/render_geojson_source.hpp>
-#include <mbgl/renderer/sources/render_raster_dem_source.hpp>
-#include <mbgl/renderer/sources/render_raster_source.hpp>
-#include <mbgl/renderer/sources/render_vector_source.hpp>
-#include <mbgl/renderer/tile_parameters.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
+#include <mln/renderer/sources/render_geojson_source.hpp>
+#include <mln/renderer/sources/render_raster_dem_source.hpp>
+#include <mln/renderer/sources/render_raster_source.hpp>
+#include <mln/renderer/sources/render_vector_source.hpp>
+#include <mln/renderer/tile_parameters.hpp>
+#include <mln/renderer/update_parameters.hpp>
 
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/string.hpp>
-#include <mbgl/util/io.hpp>
-#include <mbgl/util/premultiply.hpp>
-#include <mbgl/util/image.hpp>
+#include <mln/util/run_loop.hpp>
+#include <mln/util/string.hpp>
+#include <mln/util/io.hpp>
+#include <mln/util/premultiply.hpp>
+#include <mln/util/image.hpp>
 
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/range.hpp>
-#include <mbgl/util/tileset.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/range.hpp>
+#include <mln/util/tileset.hpp>
+#include <mln/util/timer.hpp>
 
-#include <mbgl/annotation/annotation_manager.hpp>
-#include <mbgl/annotation/annotation_source.hpp>
-#include <mbgl/map/transform.hpp>
-#include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/tile_render_data.hpp>
-#include <mbgl/text/glyph_manager.hpp>
-#include <mbgl/gfx/dynamic_texture_atlas.hpp>
+#include <mln/annotation/annotation_manager.hpp>
+#include <mln/annotation/annotation_source.hpp>
+#include <mln/map/transform.hpp>
+#include <mln/renderer/image_manager.hpp>
+#include <mln/renderer/tile_render_data.hpp>
+#include <mln/text/glyph_manager.hpp>
+#include <mln/gfx/dynamic_texture_atlas.hpp>
 
 #include <gmock/gmock.h>
 
 #include <optional>
 
-using namespace mbgl;
-using SourceType = mbgl::style::SourceType;
+using namespace mln;
+using SourceType = mln::style::SourceType;
 
 class SourceTest {
 public:
@@ -1061,4 +1061,43 @@ TEST(Source, SetMaxParentOverscaleFactor) {
         log.count(
             {EventSeverity::Warning, Event::Style, -1, "Parent tile overscale factor will cap prefetch delta to 3"}));
     EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(Source, RasterDEMTileRoundsCoveringZoom) {
+    SourceTest test;
+    test.transform.jumpTo(CameraOptions().withCenter(LatLng()).withZoom(4.6));
+    test.transformState = test.transform.getState();
+
+    std::vector<uint8_t> requestedZooms;
+    test.fileSource->tileResponse = [&](const Resource& res) {
+        requestedZooms.push_back(res.tileData->z);
+        Response response;
+        response.noContent = true;
+        return response;
+    };
+
+    HillshadeLayer layer("id", "source");
+    Immutable<LayerProperties> layerProperties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(layer.baseImpl));
+    std::vector<Immutable<LayerProperties>> layers{layerProperties};
+
+    Tileset tileset;
+    tileset.tiles = {"tiles"};
+
+    RasterDEMSource source("source", tileset, 512);
+    source.loadDescription(*test.fileSource);
+
+    auto renderSource = RenderSource::create(source.baseImpl, test.threadPool);
+    renderSource->setObserver(&test.renderSourceObserver);
+    renderSource->update(source.baseImpl, layers, true, true, test.tileParameters());
+
+    test.renderSourceObserver.tileChanged = [&](RenderSource&, const OverscaledTileID&) {
+        test.end();
+    };
+    test.run();
+
+    ASSERT_FALSE(requestedZooms.empty());
+    for (const auto z : requestedZooms) {
+        EXPECT_EQ(5, z);
+    }
 }

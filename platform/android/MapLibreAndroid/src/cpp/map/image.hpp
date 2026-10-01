@@ -1,21 +1,21 @@
 #pragma once
 
-#include <mbgl/util/noncopyable.hpp>
+#include <mln/util/noncopyable.hpp>
 
 #include <jni/jni.hpp>
-#include <mbgl/style/image.hpp>
+#include <mln/style/image.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-class Image : private mbgl::util::noncopyable {
+class Image : private mln::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/maps/Image"; };
 
-    static mbgl::style::Image getImage(jni::JNIEnv&, const jni::Object<Image>&);
+    static mln::style::Image getImage(jni::JNIEnv&, const jni::Object<Image>&);
 
     static void registerNative(jni::JNIEnv&);
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

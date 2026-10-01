@@ -10,7 +10,7 @@ MapLibre Native uses a monolithic repository that houses both core C++ code and 
 
 ## Core cross-platform C++ code
 
-In the repository, core C++ code is contained in the `include` and `src` directories. The former includes headers that are considered to make up the "public" core C++ API, while the latter includes `.cpp` implementation files and headers that are private to the implementation. Within both directories, files are nested under an `mbgl` directory, which has various subdirectories based on areas of functionality. Both public and private headers therefore can (and should) always be included with the form `#include <mbgl/___/___.hpp>`.
+In the repository, core C++ code is contained in the `include` and `src` directories. The former includes headers that are considered to make up the "public" core C++ API, while the latter includes `.cpp` implementation files and headers that are private to the implementation. Within both directories, files are nested under an `mbgl` directory, which has various subdirectories based on areas of functionality. Both public and private headers therefore can (and should) always be included with the form `#include <mln/___/___.hpp>`.
 
 ## Platform specific code
 
@@ -24,7 +24,7 @@ Code and build scripts belonging to platform SDKs are contained in the `platform
 ## Other directories
 
 - `benchmark` contains the performance tests built using https://github.com/google/benchmark/. The code under this directory builds the `mbgl-benchmark-test` executable to execute the benchmark tests.
-  - The entry point of this executable is `platform/default/src/mbgl/benchmark/main.cpp -> benchmark/src/mbgl/benchmark/benchmark.cpp`.
+  - The entry point of this executable is `platform/default/src/mln/benchmark/main.cpp -> benchmark/src/mln/benchmark/benchmark.cpp`.
   - iOS SDK runs benchmark test through a separate app named `BenchmarkApp`.
   - Android SDK does not have benchmark test.
 - `bin` contains the code for tools like `mbgl-cache`, `mbgl-offline`, and `mbgl-render`.
@@ -142,4 +142,4 @@ To minimize data races and invalid memory access, we aim for zero shared memory 
 
 Invoking a task on another thread itself creates an ownership obligation: the responsibility for the work happening on the other thread. This ownership is represented by the invocation method returning `std::unique_ptr<AsyncTask>`. Destroying this object indicates that the result of the task is no longer required: the callback is guaranteed not to be called, and the work on the other thread may be aborted (if doing so is convenient).
 
-All this is implemented by [Thread](https://github.com/mapbox/mapbox-gl-native/blob/master/src/mbgl/util/thread.hpp) and [RunLoop](https://github.com/mapbox/mapbox-gl-native/blob/master/include/mbgl/util/run_loop.hpp).
+All this is implemented by [Thread](https://github.com/mapbox/mapbox-gl-native/blob/master/src/mln/util/thread.hpp) and [RunLoop](https://github.com/mapbox/mapbox-gl-native/blob/master/include/mln/util/run_loop.hpp).

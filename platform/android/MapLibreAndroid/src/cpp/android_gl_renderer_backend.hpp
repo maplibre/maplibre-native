@@ -1,20 +1,20 @@
 #pragma once
 
-#include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gl/renderer_backend.hpp>
+#include <mln/gfx/renderable.hpp>
+#include <mln/gl/renderer_backend.hpp>
 #include "android_renderer_backend.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 class AndroidGLRendererBackend : public AndroidRendererBackend,
                                  public gl::RendererBackend,
-                                 public mbgl::gfx::Renderable {
+                                 public mln::gfx::Renderable {
 public:
     AndroidGLRendererBackend();
     ~AndroidGLRendererBackend() override;
 
-    mbgl::gfx::RendererBackend& getImpl() override { return *this; }
+    mln::gfx::RendererBackend& getImpl() override { return *this; }
 
     void updateViewPort() override;
 
@@ -24,9 +24,9 @@ public:
     void resizeFramebuffer(int width, int height) override;
     PremultipliedImage readFramebuffer() override;
 
-    // mbgl::gfx::RendererBackend implementation
+    // mln::gfx::RendererBackend implementation
 public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    mln::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
 protected:
     void activate() override {
@@ -36,11 +36,11 @@ protected:
         // no-op
     }
 
-    // mbgl::gl::RendererBackend implementation
+    // mln::gl::RendererBackend implementation
 protected:
-    mbgl::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
+    mln::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
     void updateAssumedState() override;
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -35,7 +35,7 @@ static NSString * const MLNIdeographicFontFamilyNameKey = @"MLNIdeographicFontFa
     } else if ([infoDictionaryObject isKindOfClass:[NSString class]]) {
         return infoDictionaryObject;
     } else if ([infoDictionaryObject isKindOfClass:[NSArray class]]) {
-        // mbgl::LocalGlyphRasterizer::Impl accepts only a single string, but form a cascade list with one font on each line.
+        // mln::LocalGlyphRasterizer::Impl accepts only a single string, but form a cascade list with one font on each line.
         return [infoDictionaryObject componentsJoinedByString:@"\n"];
     }
 

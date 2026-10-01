@@ -7,7 +7,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/render-test/file_source.cpp
     ${PROJECT_SOURCE_DIR}/render-test/file_source.hpp
     ${PROJECT_SOURCE_DIR}/render-test/filesystem.hpp
-    ${PROJECT_SOURCE_DIR}/render-test/include/mbgl/render_test.hpp
+    ${PROJECT_SOURCE_DIR}/render-test/include/mln/render_test.hpp
     ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.cpp
     ${PROJECT_SOURCE_DIR}/render-test/manifest_parser.hpp
     ${PROJECT_SOURCE_DIR}/render-test/metadata.hpp
@@ -19,7 +19,7 @@ add_library(
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL iOS)
-    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${IOS_DEPLOYMENT_TARGET}")
+    set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "${CMAKE_OSX_DEPLOYMENT_TARGET}")
     set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ENABLE_BITCODE "YES")
     set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE bitcode)
     set_target_properties(mbgl-render-test PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<$<CONFIG:Debug>:YES>)

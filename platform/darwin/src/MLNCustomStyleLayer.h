@@ -83,6 +83,18 @@ MLN_EXPORT
 #pragma clang diagnostic pop
 
 #if MLN_RENDER_BACKEND_METAL
+/// The Metal command buffer is used to generate render and other encoders..
+///
+/// This property is only valid when using the Metal-based rendering backend.
+/// If the OpenGL backend is in use, this property will be `nil`.
+@property (nonatomic, weak) id<MTLCommandBuffer> commandBuffer;
+
+/// The Metal render pass descriptor Metal draw commands.
+///
+/// This property is only valid when using the Metal-based rendering backend.
+/// If the OpenGL backend is in use, this property will be `nil`.
+@property (nonatomic, weak) MTLRenderPassDescriptor *renderPassDesc;
+
 /// The Metal render command encoder used for issuing Metal draw commands.
 ///
 /// This property is only valid when using the Metal-based rendering backend.
@@ -123,6 +135,19 @@ MLN_EXPORT
 ///
 /// - Parameter mapView: The map view from whose style the layer is about to be removed.
 - (void)willMoveFromMapView:(MLNMapView *)mapView;
+
+/// Called right before  the layer needs to draw a new frame in a map view.
+///
+/// Override this method in a subclass to do any pre-drawing of the layer’s content. The default
+/// implementation of this method does nothing.
+///
+/// This call exists to do things with the rendering context before MapLibre Native adds its
+/// own rendering commands.
+///
+/// - Parameters:
+///   - mapView: The map view to which the layer draws.
+///   - context: A context structure with information defining the frame to draw.
+- (void)preDrawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context;
 
 /// Called each time the layer needs to draw a new frame in a map view.
 ///

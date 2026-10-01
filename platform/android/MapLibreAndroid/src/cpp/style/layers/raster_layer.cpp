@@ -7,32 +7,32 @@
 #include "../conversion/property_value.hpp"
 #include "../conversion/transition_options.hpp"
 
-#include <mbgl/style/layer_impl.hpp>
+#include <mln/style/layer_impl.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-inline mbgl::style::RasterLayer& toRasterLayer(mbgl::style::Layer& layer) {
-    return static_cast<mbgl::style::RasterLayer&>(layer);
+inline mln::style::RasterLayer& toRasterLayer(mln::style::Layer& layer) {
+    return static_cast<mln::style::RasterLayer&>(layer);
 }
 
 /**
  * Creates an owning peer object (for layers not attached to the map) from the JVM side
  */
 RasterLayer::RasterLayer(jni::JNIEnv& env, jni::String& layerId, jni::String& sourceId)
-    : Layer(std::make_unique<mbgl::style::RasterLayer>(jni::Make<std::string>(env, layerId),
-                                                       jni::Make<std::string>(env, sourceId))) {}
+    : Layer(std::make_unique<mln::style::RasterLayer>(jni::Make<std::string>(env, layerId),
+                                                      jni::Make<std::string>(env, sourceId))) {}
 
 /**
  * Creates a non-owning peer object (for layers currently attached to the map)
  */
-RasterLayer::RasterLayer(mbgl::style::RasterLayer& coreLayer)
+RasterLayer::RasterLayer(mln::style::RasterLayer& coreLayer)
     : Layer(coreLayer) {}
 
 /**
  * Creates an owning peer object (for layers not attached to the map)
  */
-RasterLayer::RasterLayer(std::unique_ptr<mbgl::style::RasterLayer> coreLayer)
+RasterLayer::RasterLayer(std::unique_ptr<mln::style::RasterLayer> coreLayer)
     : Layer(std::move(coreLayer)) {}
 
 RasterLayer::~RasterLayer() = default;
@@ -40,7 +40,7 @@ RasterLayer::~RasterLayer() = default;
 // Property getters
 
 jni::Local<jni::Object<>> RasterLayer::getRasterOpacity(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterOpacity()));
@@ -49,12 +49,12 @@ jni::Local<jni::Object<>> RasterLayer::getRasterOpacity(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> RasterLayer::getRasterOpacityTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toRasterLayer(*layer).getRasterOpacityTransition();
+    mln::style::TransitionOptions options = toRasterLayer(*layer).getRasterOpacityTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -63,14 +63,14 @@ void RasterLayer::setRasterOpacityTransition(jni::JNIEnv&, jlong duration, jlong
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toRasterLayer(*layer).setRasterOpacityTransition(options);
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterHueRotate(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterHueRotate()));
@@ -79,12 +79,12 @@ jni::Local<jni::Object<>> RasterLayer::getRasterHueRotate(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> RasterLayer::getRasterHueRotateTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toRasterLayer(*layer).getRasterHueRotateTransition();
+    mln::style::TransitionOptions options = toRasterLayer(*layer).getRasterHueRotateTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -93,14 +93,14 @@ void RasterLayer::setRasterHueRotateTransition(jni::JNIEnv&, jlong duration, jlo
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toRasterLayer(*layer).setRasterHueRotateTransition(options);
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterBrightnessMin(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterBrightnessMin()));
@@ -109,12 +109,12 @@ jni::Local<jni::Object<>> RasterLayer::getRasterBrightnessMin(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<TransitionOptions>> RasterLayer::getRasterBrightnessMinTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toRasterLayer(*layer).getRasterBrightnessMinTransition();
+    mln::style::TransitionOptions options = toRasterLayer(*layer).getRasterBrightnessMinTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -123,14 +123,14 @@ void RasterLayer::setRasterBrightnessMinTransition(jni::JNIEnv&, jlong duration,
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toRasterLayer(*layer).setRasterBrightnessMinTransition(options);
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterBrightnessMax(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterBrightnessMax()));
@@ -139,12 +139,12 @@ jni::Local<jni::Object<>> RasterLayer::getRasterBrightnessMax(jni::JNIEnv& env) 
 }
 
 jni::Local<jni::Object<TransitionOptions>> RasterLayer::getRasterBrightnessMaxTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toRasterLayer(*layer).getRasterBrightnessMaxTransition();
+    mln::style::TransitionOptions options = toRasterLayer(*layer).getRasterBrightnessMaxTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -153,14 +153,14 @@ void RasterLayer::setRasterBrightnessMaxTransition(jni::JNIEnv&, jlong duration,
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toRasterLayer(*layer).setRasterBrightnessMaxTransition(options);
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterSaturation(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterSaturation()));
@@ -169,12 +169,12 @@ jni::Local<jni::Object<>> RasterLayer::getRasterSaturation(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> RasterLayer::getRasterSaturationTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toRasterLayer(*layer).getRasterSaturationTransition();
+    mln::style::TransitionOptions options = toRasterLayer(*layer).getRasterSaturationTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -183,14 +183,14 @@ void RasterLayer::setRasterSaturationTransition(jni::JNIEnv&, jlong duration, jl
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toRasterLayer(*layer).setRasterSaturationTransition(options);
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterContrast(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterContrast()));
@@ -199,12 +199,12 @@ jni::Local<jni::Object<>> RasterLayer::getRasterContrast(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<TransitionOptions>> RasterLayer::getRasterContrastTransition(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
-        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mbgl::style::TransitionOptions()));
+        return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, mln::style::TransitionOptions()));
     }
-    mbgl::style::TransitionOptions options = toRasterLayer(*layer).getRasterContrastTransition();
+    mln::style::TransitionOptions options = toRasterLayer(*layer).getRasterContrastTransition();
     return std::move(*convert<jni::Local<jni::Object<TransitionOptions>>>(env, options));
 }
 
@@ -213,14 +213,14 @@ void RasterLayer::setRasterContrastTransition(jni::JNIEnv&, jlong duration, jlon
     if (!layer) {
         return;
     }
-    mbgl::style::TransitionOptions options;
-    options.duration.emplace(mbgl::Milliseconds(duration));
-    options.delay.emplace(mbgl::Milliseconds(delay));
+    mln::style::TransitionOptions options;
+    options.duration.emplace(mln::Milliseconds(duration));
+    options.delay.emplace(mln::Milliseconds(delay));
     toRasterLayer(*layer).setRasterContrastTransition(options);
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterResampling(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterResampling()));
@@ -229,7 +229,7 @@ jni::Local<jni::Object<>> RasterLayer::getRasterResampling(jni::JNIEnv& env) {
 }
 
 jni::Local<jni::Object<>> RasterLayer::getRasterFadeDuration(jni::JNIEnv& env) {
-    using namespace mbgl::android::conversion;
+    using namespace mln::android::conversion;
     auto layer = layerPtr.get();
     if (!layer) {
         return std::move(*convert<jni::Local<jni::Object<>>>(env, style::RasterLayer::getDefaultRasterFadeDuration()));
@@ -250,17 +250,17 @@ jni::Local<jni::Object<Layer>> createJavaPeer(jni::JNIEnv& env, Layer* layer) {
 } // namespace
 
 jni::Local<jni::Object<Layer>> RasterJavaLayerPeerFactory::createJavaLayerPeer(jni::JNIEnv& env,
-                                                                               mbgl::style::Layer& layer) {
+                                                                               mln::style::Layer& layer) {
     assert(layer.baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env, new RasterLayer(toRasterLayer(layer)));
 }
 
 jni::Local<jni::Object<Layer>> RasterJavaLayerPeerFactory::createJavaLayerPeer(
-    jni::JNIEnv& env, std::unique_ptr<mbgl::style::Layer> layer) {
+    jni::JNIEnv& env, std::unique_ptr<mln::style::Layer> layer) {
     assert(layer->baseImpl->getTypeInfo() == getTypeInfo());
     return createJavaPeer(env,
-                          new RasterLayer(std::unique_ptr<mbgl::style::RasterLayer>(
-                              static_cast<mbgl::style::RasterLayer*>(layer.release()))));
+                          new RasterLayer(std::unique_ptr<mln::style::RasterLayer>(
+                              static_cast<mln::style::RasterLayer*>(layer.release()))));
 }
 
 void RasterJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
@@ -300,4 +300,4 @@ void RasterJavaLayerPeerFactory::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

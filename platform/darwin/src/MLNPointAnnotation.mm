@@ -4,7 +4,7 @@
 #import "MLNShape_Private.h"
 #import "NSCoder+MLNAdditions.h"
 
-#import <mbgl/util/geometry.hpp>
+#import <mln/util/geometry.hpp>
 
 @implementation MLNPointAnnotation
 
@@ -58,8 +58,8 @@
   };
 }
 
-- (mbgl::Geometry<double>)geometryObject {
-  mbgl::Point<double> point = {self.coordinate.longitude, self.coordinate.latitude};
+- (mln::Geometry<double>)geometryObject {
+  mln::Point<double> point = {self.coordinate.longitude, self.coordinate.latitude};
   return point;
 }
 

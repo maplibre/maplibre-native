@@ -2,36 +2,36 @@
 
 @implementation UIColor (MLNAdditions)
 
-- (mbgl::Color)mgl_color {
+- (mln::Color)mgl_color {
   CGFloat r, g, b, a;
   [self getRed:&r green:&g blue:&b alpha:&a];
   // UIColor provides non-premultiplied color components, so we have to premultiply each
   // color component with the alpha value to transform it into a valid
-  // mbgl::Color which expects premultiplied color components.
+  // mln::Color which expects premultiplied color components.
   return {static_cast<float>(r * a), static_cast<float>(g * a), static_cast<float>(b * a),
           static_cast<float>(a)};
 }
 
 // Intended to be used when providing colors on the basis of an NSExpression
-- (mbgl::Color)mgl_colorForPremultipliedValue {
+- (mln::Color)mgl_colorForPremultipliedValue {
   CGFloat r, g, b, a;
   [self getRed:&r green:&g blue:&b alpha:&a];
   return {static_cast<float>(r), static_cast<float>(g), static_cast<float>(b),
           static_cast<float>(a)};
 }
 
-- (mbgl::style::PropertyValue<mbgl::Color>)mgl_colorPropertyValue {
-  mbgl::Color color = self.mgl_color;
+- (mln::style::PropertyValue<mln::Color>)mgl_colorPropertyValue {
+  mln::Color color = self.mgl_color;
   return {{color.r, color.g, color.b, color.a}};
 }
 
-+ (UIColor *)mgl_colorWithColor:(mbgl::Color)color {
++ (UIColor *)mgl_colorWithColor:(mln::Color)color {
   // If there is no alpha value, return original color values.
   if (color.a == 0.0f) {
     return [UIColor colorWithRed:color.r green:color.g blue:color.b alpha:color.a];
   }
 
-  // mbgl::Color provides premultiplied color components, so we have to convert color
+  // mln::Color provides premultiplied color components, so we have to convert color
   // components to non-premultiplied values to return a valid UIColor object.
   float red = static_cast<float>((color.r / color.a));
   float green = static_cast<float>((color.g / color.a));

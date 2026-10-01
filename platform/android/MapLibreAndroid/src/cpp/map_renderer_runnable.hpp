@@ -1,14 +1,14 @@
 #pragma once
 
-#include <mbgl/actor/mailbox.hpp>
-#include <mbgl/actor/scheduler.hpp>
+#include <mln/actor/mailbox.hpp>
+#include <mln/actor/scheduler.hpp>
 
 #include <memory>
 #include <utility>
 
 #include <jni/jni.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 /**
@@ -41,4 +41,4 @@ private:
 };
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

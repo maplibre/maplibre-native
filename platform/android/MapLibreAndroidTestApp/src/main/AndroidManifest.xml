@@ -747,6 +747,18 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
+            android:name=".activity.style.CustomVectorSourceActivity"
+            android:description="@string/description_custom_vector_source"
+            android:exported="true"
+            android:label="@string/activity_custom_vector_source">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
             android:name=".activity.style.NoStyleActivity"
             android:description="@string/description_no_style"
             android:exported="true"
@@ -848,6 +860,18 @@
             android:description="@string/description_feature_state"
             android:exported="true"
             android:label="@string/activity_feature_state">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_features" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.feature.FeatureStateVectorActivity"
+            android:description="@string/description_feature_state_vector"
+            android:exported="true"
+            android:label="@string/activity_feature_state_vector">
             <meta-data
                 android:name="@string/category"
                 android:value="@string/category_features" />

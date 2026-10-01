@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#include <mbgl/style/filter.hpp>
+#include <mln/style/filter.hpp>
 
 @interface NSCompoundPredicate (MLNAdditions)
 

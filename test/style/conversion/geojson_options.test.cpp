@@ -1,12 +1,12 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/geojson_options.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/geojson_options.hpp>
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(GeoJSONOptions, Basic) {
     Error error;

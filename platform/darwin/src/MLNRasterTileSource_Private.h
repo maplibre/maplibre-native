@@ -1,24 +1,24 @@
 #import "MLNRasterTileSource.h"
 
-#include <mbgl/util/variant.hpp>
 #include <memory>
+#include <mln/util/variant.hpp>
 
-namespace mbgl {
+namespace mln {
 class Tileset;
 namespace style {
 class RasterSource;
 }
-}  // namespace mbgl
+}  // namespace mln
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNRasterTileSource (Private)
 
-@property (nonatomic, readonly, nullable) mbgl::style::RasterSource *rawSource;
+@property (nonatomic, readonly, nullable) mln::style::RasterSource *rawSource;
 
-- (std::unique_ptr<mbgl::style::RasterSource>)
+- (std::unique_ptr<mln::style::RasterSource>)
     pendingSourceWithIdentifier:(NSString *)identifier
-                   urlOrTileset:(mbgl::variant<std::string, mbgl::Tileset>)urlOrTileset
+                   urlOrTileset:(mln::variant<std::string, mln::Tileset>)urlOrTileset
                        tileSize:(uint16_t)tileSize;
 
 @end

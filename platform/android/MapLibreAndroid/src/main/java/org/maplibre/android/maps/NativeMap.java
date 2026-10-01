@@ -8,6 +8,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
@@ -196,6 +197,11 @@ interface NativeMap {
                        @NonNull String featureId,
                        @NonNull JsonObject state);
 
+  int getRenderedFeatureCount(@Nullable String featureId,
+                              @Nullable String layerId,
+                              @Nullable String sourceId);
+
+  // Feature State
   @Nullable
   JsonObject getFeatureState(@NonNull String sourceId,
                              @Nullable String sourceLayerId,
@@ -205,6 +211,11 @@ interface NativeMap {
                           @Nullable String sourceLayerId,
                           @Nullable String featureId,
                           @Nullable String stateKey);
+
+  void setGlobalStateProperty(@NonNull String name, @Nullable JsonElement value);
+
+  @NonNull
+  JsonObject getGlobalState();
 
   //
   // Projection API

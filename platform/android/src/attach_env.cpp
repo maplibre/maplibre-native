@@ -1,7 +1,7 @@
 #include "attach_env.hpp"
 #include "jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 UniqueEnv AttachEnv() {
@@ -19,4 +19,4 @@ UniqueEnv AttachEnv() {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

@@ -2,36 +2,36 @@
 
 #include "value.hpp"
 
-#include <mbgl/util/feature.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/style/conversion/geojson.hpp>
-#include <mbgl/style/conversion_impl.hpp>
+#include <mln/util/feature.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/style/conversion/geojson.hpp>
+#include <mln/style/conversion_impl.hpp>
 
 #include <jni/jni.hpp>
 #include <optional>
 
-namespace mbgl {
+namespace mln {
 namespace style {
 namespace conversion {
 
 template <>
-class ConversionTraits<mbgl::android::Value> {
+class ConversionTraits<mln::android::Value> {
 public:
-    static bool isUndefined(const mbgl::android::Value& value) { return value.isNull(); }
+    static bool isUndefined(const mln::android::Value& value) { return value.isNull(); }
 
-    static bool isArray(const mbgl::android::Value& value) { return value.isArray(); }
+    static bool isArray(const mln::android::Value& value) { return value.isArray(); }
 
-    static bool isObject(const mbgl::android::Value& value) { return value.isObject(); }
+    static bool isObject(const mln::android::Value& value) { return value.isObject(); }
 
-    static std::size_t arrayLength(const mbgl::android::Value& value) {
+    static std::size_t arrayLength(const mln::android::Value& value) {
         return value.getLength();
         ;
     }
 
-    static mbgl::android::Value arrayMember(const mbgl::android::Value& value, std::size_t i) { return value.get(i); }
+    static mln::android::Value arrayMember(const mln::android::Value& value, std::size_t i) { return value.get(i); }
 
-    static std::optional<mbgl::android::Value> objectMember(const mbgl::android::Value& value, const char* key) {
-        mbgl::android::Value member = value.get(key);
+    static std::optional<mln::android::Value> objectMember(const mln::android::Value& value, const char* key) {
+        mln::android::Value member = value.get(key);
         if (!member.isNull()) {
             return member;
         } else {
@@ -40,9 +40,9 @@ public:
     }
 
     template <class Fn>
-    static std::optional<Error> eachMember(const mbgl::android::Value& value, Fn&& fn) {
+    static std::optional<Error> eachMember(const mln::android::Value& value, Fn&& fn) {
         assert(value.isObject());
-        mbgl::android::Value keys = value.keyArray();
+        mln::android::Value keys = value.keyArray();
         std::size_t length = arrayLength(keys);
         for (std::size_t i = 0; i < length; ++i) {
             const auto k = keys.get(i).toString();
@@ -55,7 +55,7 @@ public:
         return {};
     }
 
-    static std::optional<bool> toBool(const mbgl::android::Value& value) {
+    static std::optional<bool> toBool(const mln::android::Value& value) {
         if (value.isBool()) {
             return value.toBool();
         } else {
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    static std::optional<float> toNumber(const mbgl::android::Value& value) {
+    static std::optional<float> toNumber(const mln::android::Value& value) {
         if (value.isNumber()) {
             auto num = value.toFloat();
             return num;
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    static std::optional<double> toDouble(const mbgl::android::Value& value) {
+    static std::optional<double> toDouble(const mln::android::Value& value) {
         if (value.isNumber()) {
             return value.toDouble();
         } else {
@@ -80,7 +80,7 @@ public:
         }
     }
 
-    static std::optional<std::string> toString(const mbgl::android::Value& value) {
+    static std::optional<std::string> toString(const mln::android::Value& value) {
         if (value.isString()) {
             return value.toString();
         } else {
@@ -88,7 +88,7 @@ public:
         }
     }
 
-    static std::optional<Value> toValue(const mbgl::android::Value& value) {
+    static std::optional<Value> toValue(const mln::android::Value& value) {
         if (value.isNull()) {
             return {};
         } else if (value.isBool()) {
@@ -102,7 +102,7 @@ public:
         }
     }
 
-    static std::optional<GeoJSON> toGeoJSON(const mbgl::android::Value& value, Error& error) {
+    static std::optional<GeoJSON> toGeoJSON(const mln::android::Value& value, Error& error) {
         if (value.isNull()) {
             error = {"no json data found"};
             return {};
@@ -113,7 +113,7 @@ public:
         }
 
         if (value.isObject()) {
-            mbgl::android::Value keys = value.keyArray();
+            mln::android::Value keys = value.keyArray();
             std::size_t length = arrayLength(keys);
             for (std::size_t i = 0; i < length; ++i) {
                 if (keys.get(i).toString() == "json") {
@@ -132,10 +132,10 @@ public:
 };
 
 template <class T, class... Args>
-std::optional<T> convert(mbgl::android::Value&& value, Error& error, Args&&... args) {
+std::optional<T> convert(mln::android::Value&& value, Error& error, Args&&... args) {
     return convert<T>(Convertible(std::move(value)), error, std::forward<Args>(args)...);
 }
 
 } // namespace conversion
 } // namespace style
-} // namespace mbgl
+} // namespace mln

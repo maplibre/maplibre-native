@@ -1,14 +1,14 @@
-#include <mbgl/test/util.hpp>
+#include <mln/test/util.hpp>
 
-#include <mbgl/style/conversion/json.hpp>
-#include <mbgl/style/conversion/constant.hpp>
-#include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/style/expression/dsl.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/style/conversion/json.hpp>
+#include <mln/style/conversion/constant.hpp>
+#include <mln/style/conversion/property_value.hpp>
+#include <mln/style/expression/dsl.hpp>
+#include <mln/util/logging.hpp>
 
-using namespace mbgl;
-using namespace mbgl::style;
-using namespace mbgl::style::conversion;
+using namespace mln;
+using namespace mln::style;
+using namespace mln::style::conversion;
 
 TEST(StyleConversion, Function) {
     Error error;
@@ -94,7 +94,7 @@ TEST(StyleConversion, TokenStrings) {
     ASSERT_TRUE(hasTokens("token {token}"));
     ASSERT_TRUE(hasTokens("{token} {token}"));
 
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
     ASSERT_EQ(*convertTokenStringToExpression("{token}"), *toString(get(literal("token"))));
     ASSERT_EQ(*convertTokenStringToExpression("token {token}"), *concat(vec(literal("token "), get(literal("token")))));
     ASSERT_EQ(*convertTokenStringToExpression("{token} token"), *concat(vec(get(literal("token")), literal(" token"))));
@@ -112,10 +112,10 @@ TEST(StyleConversion, FormattedIdentityFunction) {
     Error error;
 
     auto parseFunction = [&](const std::string& json) {
-        return convertJSON<PropertyValue<mbgl::style::expression::Formatted>>(json, error, true, false);
+        return convertJSON<PropertyValue<mln::style::expression::Formatted>>(json, error, true, false);
     };
 
-    using namespace mbgl::style::expression::dsl;
+    using namespace mln::style::expression::dsl;
 
     auto fn1 = parseFunction(R"({ "property": "name", "type": "identity" })");
     ASSERT_TRUE(bool(fn1));

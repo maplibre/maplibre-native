@@ -2,15 +2,15 @@
 #include "geometry.hpp"
 #include "../gson/json_object.hpp"
 
-#include <mbgl/util/string.hpp>
+#include <mln/util/string.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace geojson {
 
 using namespace gson;
 
-mbgl::GeoJSONFeature Feature::convert(jni::JNIEnv& env, const jni::Object<Feature>& jFeature) {
+mln::GeoJSONFeature Feature::convert(jni::JNIEnv& env, const jni::Object<Feature>& jFeature) {
     static auto& javaClass = jni::Class<Feature>::Singleton(env);
     static auto id = javaClass.GetMethod<jni::String()>(env, "id");
     static auto geometry = javaClass.GetMethod<jni::Object<Geometry>()>(env, "geometry");
@@ -20,9 +20,9 @@ mbgl::GeoJSONFeature Feature::convert(jni::JNIEnv& env, const jni::Object<Featur
 
     using mbid = mapbox::feature::identifier;
 
-    return mbgl::GeoJSONFeature{Geometry::convert(env, jFeature.Call(env, geometry)),
-                                JsonObject::convert(env, jFeature.Call(env, properties)),
-                                jId ? mbid{jni::Make<std::string>(env, jId)} : mbid{mapbox::feature::null_value}};
+    return mln::GeoJSONFeature{Geometry::convert(env, jFeature.Call(env, geometry)),
+                               JsonObject::convert(env, jFeature.Call(env, properties)),
+                               jId ? mbid{jni::Make<std::string>(env, jId)} : mbid{mapbox::feature::null_value}};
 }
 
 /**
@@ -42,34 +42,33 @@ public:
     std::string operator()(const mapbox::feature::null_value_t&) const { return {}; }
 };
 
-jni::Local<jni::Object<Feature>> convertFeature(jni::JNIEnv& env, const mbgl::GeoJSONFeature& value) {
+jni::Local<jni::Object<Feature>> convertFeature(jni::JNIEnv& env, const mln::GeoJSONFeature& value) {
     static auto& javaClass = jni::Class<Feature>::Singleton(env);
     static auto method =
         javaClass.GetStaticMethod<jni::Object<Feature>(jni::Object<Geometry>, jni::Object<JsonObject>, jni::String)>(
             env, "fromGeometry");
 
-    return javaClass.Call(
-        env,
-        method,
-        Geometry::New(env, value.geometry),
-        JsonObject::New(env, value.properties),
-        jni::Make<jni::String>(env,
-                               value.id.is<mbgl::NullValue>() ? std::string{} : value.id.match(FeatureIdVisitor())));
+    return javaClass.Call(env,
+                          method,
+                          Geometry::New(env, value.geometry),
+                          JsonObject::New(env, value.properties),
+                          jni::Make<jni::String>(
+                              env, value.id.is<mln::NullValue>() ? std::string{} : value.id.match(FeatureIdVisitor())));
 }
 
 jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(jni::JNIEnv& env,
-                                                              const std::vector<mbgl::Feature>& value) {
+                                                              const std::vector<mln::Feature>& value) {
     auto features = jni::Array<jni::Object<Feature>>::New(env, value.size());
 
     for (size_t i = 0; i < value.size(); ++i) {
-        features.Set(env, i, convertFeature(env, static_cast<mbgl::GeoJSONFeature>(value.at(i))));
+        features.Set(env, i, convertFeature(env, static_cast<mln::GeoJSONFeature>(value.at(i))));
     }
 
     return features;
 }
 
 jni::Local<jni::Array<jni::Object<Feature>>> Feature::convert(jni::JNIEnv& env,
-                                                              const std::vector<mbgl::GeoJSONFeature>& value) {
+                                                              const std::vector<mln::GeoJSONFeature>& value) {
     auto features = jni::Array<jni::Object<Feature>>::New(env, value.size());
 
     for (size_t i = 0; i < value.size(); ++i) {
@@ -85,4 +84,4 @@ void Feature::registerNative(jni::JNIEnv& env) {
 
 } // namespace geojson
 } // namespace android
-} // namespace mbgl
+} // namespace mln

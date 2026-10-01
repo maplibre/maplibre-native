@@ -1,9 +1,9 @@
 #include "marker.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
-mbgl::Point<double> Marker::getPosition(jni::JNIEnv& env, const jni::Object<Marker>& marker) {
+mln::Point<double> Marker::getPosition(jni::JNIEnv& env, const jni::Object<Marker>& marker) {
     static auto& javaClass = jni::Class<Marker>::Singleton(env);
     static auto positionField = javaClass.GetField<jni::Object<LatLng>>(env, "position");
     return LatLng::getGeometry(env, marker.Get(env, positionField));
@@ -20,4 +20,4 @@ void Marker::registerNative(jni::JNIEnv& env) {
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

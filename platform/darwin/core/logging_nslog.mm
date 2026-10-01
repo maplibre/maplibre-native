@@ -1,9 +1,9 @@
-#include <mbgl/util/enum.hpp>
-#include <mbgl/util/logging.hpp>
+#include <mln/util/enum.hpp>
+#include <mln/util/logging.hpp>
 
 #import <Foundation/Foundation.h>
 
-namespace mbgl {
+namespace mln {
 
 void Log::platformRecord(EventSeverity severity, const std::string &msg) {
   NSString *message = [[NSString alloc] initWithBytes:msg.data()
@@ -12,4 +12,4 @@ void Log::platformRecord(EventSeverity severity, const std::string &msg) {
   NSLog(@"[%s] %@", Enum<EventSeverity>::toString(severity), message);
 }
 
-}  // namespace mbgl
+}  // namespace mln

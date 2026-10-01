@@ -1,13 +1,13 @@
 #include "run_loop_impl.hpp"
 
-#include <mbgl/actor/scheduler.hpp>
-#include <mbgl/util/event.hpp>
-#include <mbgl/util/logging.hpp>
-#include <mbgl/util/monotonic_timer.hpp>
-#include <mbgl/util/platform.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/thread_local.hpp>
-#include <mbgl/util/timer.hpp>
+#include <mln/actor/scheduler.hpp>
+#include <mln/util/event.hpp>
+#include <mln/util/logging.hpp>
+#include <mln/util/monotonic_timer.hpp>
+#include <mln/util/platform.hpp>
+#include <mln/util/thread.hpp>
+#include <mln/util/thread_local.hpp>
+#include <mln/util/timer.hpp>
 
 #include <android/looper.h>
 
@@ -26,7 +26,7 @@
 
 namespace {
 
-using namespace mbgl::util;
+using namespace mln::util;
 
 int looperCallbackNew(int fd, int, void* data) {
     int buffer[1];
@@ -71,7 +71,7 @@ int looperCallbackReadEvent(int fd, int, void* data) {
 
 } // namespace
 
-namespace mbgl {
+namespace mln {
 namespace util {
 
 // This is needed only for the RunLoop living on the main thread because of
@@ -89,7 +89,7 @@ public:
         : loop(loop_) {}
 
     void set(const Milliseconds& timeout) {
-        alarm.start(timeout, mbgl::Duration::zero(), [this]() { loop->wake(); });
+        alarm.start(timeout, mln::Duration::zero(), [this]() { loop->wake(); });
     }
 
 private:
@@ -136,11 +136,11 @@ RunLoop::Impl::~Impl() {
     alarm.reset();
 
     if (ALooper_removeFd(loop, fds[PIPE_OUT]) != 1) {
-        Log::Error(mbgl::Event::General, "Failed to remove file descriptor from Looper");
+        Log::Error(mln::Event::General, "Failed to remove file descriptor from Looper");
     }
 
     if (close(fds[PIPE_IN]) || close(fds[PIPE_OUT])) {
-        Log::Error(mbgl::Event::General, "Failed to close file descriptor.");
+        Log::Error(mln::Event::General, "Failed to close file descriptor.");
     }
 
     ALooper_release(loop);
@@ -315,4 +315,4 @@ void RunLoop::removeWatch(int fd) {
 }
 
 } // namespace util
-} // namespace mbgl
+} // namespace mln

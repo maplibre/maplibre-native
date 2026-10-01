@@ -7,9 +7,9 @@
 #import "MLNGeometry_Private.h"
 #import "MLNMapView_Private.h"
 
-#include <mbgl/map/camera.hpp>
-#include <mbgl/map/map.hpp>
-#include <mbgl/util/geo.hpp>
+#include <mln/map/camera.hpp>
+#include <mln/map/map.hpp>
+#include <mln/util/geo.hpp>
 
 @interface MLNTestCalloutView : MLNCompactCalloutView
 @property (nonatomic) BOOL implementsMarginHints;
@@ -31,7 +31,7 @@
 - (MLNMapCamera *)cameraByRotatingToDirection:(CLLocationDirection)degrees
                             aroundAnchorPoint:(CGPoint)anchorPoint;
 - (MLNMapCamera *)cameraByZoomingToZoomLevel:(double)zoom aroundAnchorPoint:(CGPoint)anchorPoint;
-- (MLNMapCamera *)cameraForCameraOptions:(const mbgl::CameraOptions &)cameraOptions;
+- (MLNMapCamera *)cameraForCameraOptions:(const mln::CameraOptions &)cameraOptions;
 @property (nonatomic) UIView<MLNCalloutView> *calloutViewForSelectedAnnotation;
 @end
 
@@ -619,11 +619,11 @@ static const CGPoint kAnnotationRelativeScale = {0.05f, 0.125f};
     NSString *activityTitle = [NSString stringWithFormat:@"Zoom to %0.1f", zoom];
     [XCTContext runActivityNamed:activityTitle
                            block:^(id<XCTActivity> _Nonnull activity) {
-                             mbgl::CameraOptions currentCameraOptions;
+                             mln::CameraOptions currentCameraOptions;
 
                              currentCameraOptions.bearing = angle;
                              currentCameraOptions.anchor =
-                                 mbgl::ScreenCoordinate{anchor.x, anchor.y};
+                                 mln::ScreenCoordinate{anchor.x, anchor.y};
                              currentCameraOptions.zoom = zoom;
                              MLNMapCamera *toCamera =
                                  [self.mapView cameraForCameraOptions:currentCameraOptions];

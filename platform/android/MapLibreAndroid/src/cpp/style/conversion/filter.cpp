@@ -1,20 +1,20 @@
 #include "filter.hpp"
 #include "../android_conversion.hpp"
 
-#include <mbgl/style/conversion.hpp>
-#include <mbgl/style/conversion/filter.hpp>
+#include <mln/style/conversion.hpp>
+#include <mln/style/conversion/filter.hpp>
 
-namespace mbgl {
+namespace mln {
 namespace android {
 namespace conversion {
 
-std::optional<mbgl::style::Filter> toFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
-    std::optional<mbgl::style::Filter> filter;
+std::optional<mln::style::Filter> toFilter(jni::JNIEnv& env, const jni::Array<jni::Object<>>& jfilter) {
+    std::optional<mln::style::Filter> filter;
     if (jfilter) {
-        mbgl::style::conversion::Error error;
-        auto converted = mbgl::style::conversion::convert<mbgl::style::Filter>(Value(env, jfilter), error);
+        mln::style::conversion::Error error;
+        auto converted = mln::style::conversion::convert<mln::style::Filter>(Value(env, jfilter), error);
         if (!converted) {
-            mbgl::Log::Error(mbgl::Event::JNI, "Error converting filter: " + error.message);
+            mln::Log::Error(mln::Event::JNI, "Error converting filter: " + error.message);
         }
         filter = std::move(*converted);
     }
@@ -23,4 +23,4 @@ std::optional<mbgl::style::Filter> toFilter(jni::JNIEnv& env, const jni::Array<j
 
 } // namespace conversion
 } // namespace android
-} // namespace mbgl
+} // namespace mln

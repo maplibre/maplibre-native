@@ -1,0 +1,14 @@
+{
+  "expression": ["semiliteral", [["*", 2, 3], ["concat", "x", "y"]]],
+  "inputs": [[{}, {}]],
+  "expected": {
+    "compiled": {
+      "result": "success",
+      "isFeatureConstant": true,
+      "isZoomConstant": true,
+      "type": "array<value, 2>"
+    },
+    "outputs": [[6, "xy"]],
+    "serialized": ["literal", [6, "xy"]]
+  }
+}

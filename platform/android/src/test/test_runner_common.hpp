@@ -2,11 +2,11 @@
 
 #include <android_native_app_glue.h>
 
-#include <mbgl/util/logging.hpp>
+#include <mln/util/logging.hpp>
 
 #include "jni.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 int severityToPriority(EventSeverity severity);
@@ -20,4 +20,4 @@ bool copyFile(JNIEnv* env,
 void unZipFile(JNIEnv* env, const std::string& zipFilePath, const std::string& destinationPath);
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

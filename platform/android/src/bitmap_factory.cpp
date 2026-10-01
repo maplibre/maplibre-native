@@ -1,6 +1,6 @@
 #include "bitmap_factory.hpp"
 
-namespace mbgl {
+namespace mln {
 namespace android {
 
 void BitmapFactory::registerNative(jni::JNIEnv& env) {
@@ -23,4 +23,4 @@ jni::Local<jni::Object<Bitmap>> BitmapFactory::DecodeByteArray(jni::JNIEnv& env,
 }
 
 } // namespace android
-} // namespace mbgl
+} // namespace mln

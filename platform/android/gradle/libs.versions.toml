@@ -4,6 +4,7 @@ constraintLayout = "2.2.1"
 interpolator = "1.0.0"
 recyclerView = "1.3.0"
 material = "1.13.0"
+sentryAndroid = "8.51.0"
 uiAutomator = "2.3.0"
 espresso = "3.7.0"
 testRunner = "1.3.0"
@@ -41,6 +42,7 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 assertjcore = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
 
+sentryAndroid = { module = "io.sentry:sentry-android", version.ref = "sentryAndroid" }
 testRunner = { group = "androidx.test.ext", name = "junit", version.ref = "testRunner" }
 testRules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
 testEspressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
