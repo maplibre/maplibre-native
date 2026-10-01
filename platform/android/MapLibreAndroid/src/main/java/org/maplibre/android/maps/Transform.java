@@ -309,6 +309,17 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     }
   }
 
+  /**
+   * With terrain, moves the camera's centre along the line of sight onto the ground under it,
+   * so gestures turn round the terrain being looked at rather than a sea-level point behind it.
+   * The view does not change; the centre's lat/lng and zoom do. No-op without terrain.
+   */
+  void anchorCenterOnTerrain() {
+    nativeMap.anchorCenterOnTerrain();
+    // The centre and zoom changed in core: refresh the cached camera position.
+    invalidateCameraPosition();
+  }
+
   void moveBy(double offsetX, double offsetY, long duration) {
     if (duration > 0) {
       mapView.addOnCameraDidChangeListener(moveByChangeListener);

@@ -915,6 +915,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void anchorCenterOnTerrain() {
+    if (checkState("anchorCenterOnTerrain")) {
+      return;
+    }
+    nativeAnchorCenterOnTerrain();
+  }
+
+  @Override
   public void setTerrainSkirtLength(int length) {
     if (checkState("setTerrainSkirtLength")) {
       return;
@@ -1907,6 +1915,9 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native int nativeGetTerrainLoadMode();
+
+  @Keep
+  private native void nativeAnchorCenterOnTerrain();
 
   @Keep
   private native void nativeSetTerrainSkirtLength(int length);

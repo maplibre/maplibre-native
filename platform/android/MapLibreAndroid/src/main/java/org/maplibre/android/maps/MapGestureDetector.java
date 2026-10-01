@@ -489,6 +489,8 @@ final class MapGestureDetector {
       }
 
       cancelTransitionsIfRequired();
+      // With terrain, drag the ground being looked at, not a sea-level plane under it.
+      transform.anchorCenterOnTerrain();
       notifyOnMoveBeginListeners(detector);
       return true;
     }
@@ -584,10 +586,13 @@ final class MapGestureDetector {
         }
       }
 
+      cancelTransitionsIfRequired();
+      // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+      // Before startZoom is read: anchoring changes the zoom (the view stays the same).
+      transform.anchorCenterOnTerrain();
+
       screenHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
       startZoom = transform.getRawZoom();
-
-      cancelTransitionsIfRequired();
 
       notifyOnScaleBeginListeners(detector);
 
@@ -731,6 +736,8 @@ final class MapGestureDetector {
       }
 
       cancelTransitionsIfRequired();
+      // With terrain, turn round the ground being looked at, not a sea-level point behind it.
+      transform.anchorCenterOnTerrain();
 
       notifyOnRotateBeginListeners(detector);
 
@@ -846,6 +853,8 @@ final class MapGestureDetector {
       }
 
       cancelTransitionsIfRequired();
+      // With terrain, tilt round the ground being looked at, not a sea-level point behind it.
+      transform.anchorCenterOnTerrain();
 
       // disabling move gesture during shove
       gesturesManager.getMoveGestureDetector().setEnabled(false);
