@@ -320,6 +320,18 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     invalidateCameraPosition();
   }
 
+  boolean setCenterAltitudeKeepingView(double altitude) {
+    boolean moved = nativeMap.setCenterAltitudeKeepingView(altitude);
+    if (moved) {
+      invalidateCameraPosition();
+    }
+    return moved;
+  }
+
+  double getCenterAltitude() {
+    return nativeMap.getCenterAltitude();
+  }
+
   void moveBy(double offsetX, double offsetY, long duration) {
     if (duration > 0) {
       mapView.addOnCameraDidChangeListener(moveByChangeListener);

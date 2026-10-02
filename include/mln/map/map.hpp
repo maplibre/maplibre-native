@@ -238,6 +238,15 @@ public:
     /// down to sea level the same way.
     void anchorCenterOnTerrain();
 
+    /// Moves the camera's centre along the line of sight to `altitudeMeters` above sea level
+    /// (exaggeration applied, as the terrain is drawn) without moving the camera: the centre and
+    /// zoom change, nothing on screen does. anchorCenterOnTerrain() is this at the ground height;
+    /// 0 puts the centre back at sea level. A centre and zoom describe the same view only at the
+    /// same centre altitude (CameraOptions::centerAltitude), so to restore a saved camera, set its
+    /// altitude with this first, then jump to its centre and zoom. Returns false when nothing
+    /// moved: the centre is already at that altitude, or that altitude is (nearly) at the camera.
+    bool setCenterAltitudeKeepingView(double altitudeMeters);
+
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
     /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
     /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.

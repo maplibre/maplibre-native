@@ -3928,6 +3928,16 @@ static void *windowScreenContext = &windowScreenContext;
   [self setZoomLevel:zoomLevel animated:NO];
 }
 
+- (CLLocationDistance)centerAltitude {
+  return self.mbglMap.getCameraOptions().centerAltitude.value_or(0.0);
+}
+
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude {
+  MLNLogDebug(@"Setting centerAltitude keeping the view: %f", altitude);
+  self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
+  return self.mbglMap.setCenterAltitudeKeepingView(altitude);
+}
+
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated {
   MLNLogDebug(@"Setting zoomLevel: %f animated: %@", zoomLevel, MLNStringFromBOOL(animated));
   if (zoomLevel == self.zoomLevel) return;

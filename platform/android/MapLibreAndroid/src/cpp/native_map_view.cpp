@@ -1383,6 +1383,14 @@ void NativeMapView::anchorCenterOnTerrain(JNIEnv&) {
     map->anchorCenterOnTerrain();
 }
 
+jni::jboolean NativeMapView::setCenterAltitudeKeepingView(JNIEnv&, jni::jdouble altitude) {
+    return jni::jboolean(map->setCenterAltitudeKeepingView(altitude));
+}
+
+jni::jdouble NativeMapView::getCenterAltitude(JNIEnv&) {
+    return jni::jdouble(map->getCameraOptions().centerAltitude.value_or(0.0));
+}
+
 void NativeMapView::setTerrainSkirtLength(JNIEnv&, jni::jint length) {
     map->setTerrainSkirtLength(static_cast<mln::TerrainSkirtLength>(length));
 }
@@ -1572,6 +1580,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setTerrainLoadMode, "nativeSetTerrainLoadMode"),
         METHOD(&NativeMapView::getTerrainLoadMode, "nativeGetTerrainLoadMode"),
         METHOD(&NativeMapView::anchorCenterOnTerrain, "nativeAnchorCenterOnTerrain"),
+        METHOD(&NativeMapView::setCenterAltitudeKeepingView, "nativeSetCenterAltitudeKeepingView"),
+        METHOD(&NativeMapView::getCenterAltitude, "nativeGetCenterAltitude"),
         METHOD(&NativeMapView::setTerrainSkirtLength, "nativeSetTerrainSkirtLength"),
         METHOD(&NativeMapView::getTerrainSkirtLength, "nativeGetTerrainSkirtLength"),
         METHOD(&NativeMapView::setCenterClampedToGround, "nativeSetCenterClampedToGround"),

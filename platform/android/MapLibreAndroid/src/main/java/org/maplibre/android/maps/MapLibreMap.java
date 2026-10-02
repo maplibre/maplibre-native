@@ -489,6 +489,34 @@ public final class MapLibreMap {
   }
 
   /**
+   * Moves the camera's centre along the line of sight to {@code altitude} metres above sea level
+   * without moving the camera. Nothing on screen moves; the target and zoom of
+   * {@link #getCameraPosition()} change to describe the same view from the new centre. Pass 0 to
+   * put the centre back at sea level.
+   * <p>
+   * With 3D terrain, gestures move the centre up onto the terrain under it, and removing the
+   * terrain brings it back down. A target and zoom describe the same view only at the same centre
+   * altitude, so save {@link #getCenterAltitude()} with the camera position, and restore it with
+   * this method before moving the camera to the saved position.
+   *
+   * @param altitude the new centre altitude above sea level in metres, terrain exaggeration applied
+   * @return false if nothing moved: the centre is already at that altitude, or that altitude is at
+   * (or nearly at) the camera
+   */
+  public boolean setCenterAltitudeKeepingView(double altitude) {
+    return transform.setCenterAltitudeKeepingView(altitude);
+  }
+
+  /**
+   * @return the altitude of the camera's centre above sea level in metres: 0 unless 3D terrain
+   * gestures have raised it
+   * @see MapLibreMap#setCenterAltitudeKeepingView(double)
+   */
+  public double getCenterAltitude() {
+    return transform.getCenterAltitude();
+  }
+
+  /**
    * Camera based tile level of detail controls
    *
    * @param threshold pitch angle in radians above which LOD calculation is performed
