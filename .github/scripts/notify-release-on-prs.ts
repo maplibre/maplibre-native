@@ -130,9 +130,15 @@ try {
 
   const release = await octokit.repos.getReleaseByTag({ owner, repo, tag });
   const releaseBody = release.data.body || '';
+  const isPrerelease = release.data.prerelease;
 
-  if (!releaseBody) {
+  if (!releaseBody && !isPrerelease) {
     throw new Error(`No release notes found for tag '${tag}'.`);
+  }
+
+  if (!releaseBody && isPrerelease) {
+    console.log(`No release notes found for prerelease tag '${tag}', skipping PR notifications.`);
+    process.exit(0);
   }
 
   const prs = extractPrNumbers({
