@@ -19,6 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
+  contents: read
   id-token: write         # needed for AWS
 
 jobs:
@@ -218,11 +219,11 @@ jobs:
           cp MapLibre.xcframework/ios-arm64/MapLibre.framework/MapLibre MapLibre_dynamic
 
       - name: Upload size test as artifact (Bloaty)
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ios-size-test-files
-          retention-days: 3
+          retention-days: 14
           if-no-files-found: error
           path: |
             platform/ios/MapLibre_DWARF
