@@ -41,7 +41,10 @@ cc_binary(
     data = glob(["assets/*"]),
     defines = [
         r"MLN_ASSETS_PATH=\"assets/\"",
-    ],
+    ] + select({
+        "//:plugins_enabled": ["MLN_GLFW_PLUGINS=1"],
+        "//conditions:default": [],
+    }),
     linkopts = [
         "-lglfw",
     ] + select({
@@ -58,6 +61,9 @@ cc_binary(
         "//:maplibre_lib",
         "@glfw",
     ] + select({
+        "//:plugins_enabled": ["//plugins/ngon-layer"],
+        "//conditions:default": [],
+    }) + select({
         "@platforms//os:macos": ["metal_backend"],
         "@platforms//os:linux": ["//platform/linux:impl"],
         "//conditions:default": [],

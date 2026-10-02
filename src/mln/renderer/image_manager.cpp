@@ -53,7 +53,7 @@ void ImageManager::addImage(Immutable<style::Image::Impl> image_) {
         requestedImagesCacheSize += image_->image.bytes();
     }
 
-    availableImages.emplace(image_->id);
+    mutate(availableImages, [&](auto& ids) { ids.emplace(image_->id); });
     images.emplace(image_->id, std::move(image_));
 }
 
@@ -99,7 +99,7 @@ void ImageManager::removeImage(const std::string& id) {
     }
 
     images.erase(it);
-    availableImages.erase(id);
+    mutate(availableImages, [&](auto& ids) { ids.erase(id); });
     updatedImageVersions.erase(id);
 }
 
@@ -199,14 +199,10 @@ void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     }
 }
 
-std::set<std::string> ImageManager::getAvailableImages() const {
+Immutable<std::set<std::string>> ImageManager::getAvailableImages() const {
     MLN_TRACE_FUNC();
     std::scoped_lock readWriteLock(rwLock);
-
-    {
-        MLN_TRACE_ZONE(copy);
-        return availableImages;
-    }
+    return availableImages;
 }
 
 void ImageManager::clear() {
@@ -216,7 +212,7 @@ void ImageManager::clear() {
     assert(missingImageRequestors.empty());
 
     images.clear();
-    availableImages.clear();
+    availableImages = makeMutable<std::set<std::string>>();
     updatedImageVersions.clear();
     requestedImages.clear();
     loaded = false;

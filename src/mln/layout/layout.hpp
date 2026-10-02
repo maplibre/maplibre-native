@@ -7,6 +7,8 @@
 #include <mln/util/containers.hpp>
 
 #include <memory>
+#include <set>
+#include <string>
 
 namespace mln {
 
@@ -44,7 +46,7 @@ public:
     std::shared_ptr<FontFaces> fontFaces;
     GlyphDependencies& glyphDependencies;
     ImageDependencies& imageDependencies;
-    std::set<std::string>& availableImages;
+    const std::set<std::string>& availableImages;
 };
 
 } // namespace mln

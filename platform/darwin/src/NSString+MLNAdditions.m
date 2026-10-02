@@ -16,10 +16,7 @@
 
 - (NSString *)mgl_titleCasedStringWithLocale:(NSLocale *)locale {
     NSMutableString *string = self.mutableCopy;
-    NSOrthography *orthography;
-    if (@available(iOS 11.0, macOS 10.13.0, *)) {
-        orthography = [NSOrthography defaultOrthographyForLanguage:locale.localeIdentifier];
-    }
+    NSOrthography *orthography = [NSOrthography defaultOrthographyForLanguage:locale.localeIdentifier];
     [string enumerateLinguisticTagsInRange:string.mgl_wholeRange scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:orthography usingBlock:^(NSString * _Nonnull tag, NSRange tokenRange, NSRange sentenceRange, BOOL * _Nonnull stop) {
         NSString *word = [string substringWithRange:tokenRange];
         if (word.length > 3

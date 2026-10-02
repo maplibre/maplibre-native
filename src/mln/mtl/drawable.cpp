@@ -465,6 +465,8 @@ MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) noexcept {
             return MTL::VertexFormatUChar3;
         case gfx::AttributeDataType::UByte4:
             return MTL::VertexFormatUChar4;
+        case gfx::AttributeDataType::UByte4Normalized:
+            return MTL::VertexFormatUChar4Normalized;
         case gfx::AttributeDataType::Short:
             return MTL::VertexFormatShort;
         case gfx::AttributeDataType::Short2:

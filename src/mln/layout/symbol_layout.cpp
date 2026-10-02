@@ -58,9 +58,13 @@ inline const SymbolLayerProperties& toSymbolLayerProperties(const Immutable<Laye
 }
 
 inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
-    const SymbolLayoutProperties::Unevaluated& unevaluated, float zoom) {
+    const SymbolLayoutProperties::Unevaluated& unevaluated,
+    float zoom,
+    std::shared_ptr<const GlobalStateMap> globalState) {
+    PropertyEvaluationParameters evaluationParameters(zoom);
+    evaluationParameters.globalState = std::move(globalState);
     auto layout = makeMutable<style::SymbolLayoutProperties::PossiblyEvaluated>(
-        unevaluated.evaluate(PropertyEvaluationParameters(zoom)));
+        unevaluated.evaluate(evaluationParameters));
 
     if (layout->get<IconRotationAlignment>() == AlignmentType::Auto) {
         if (layout->get<SymbolPlacement>() != SymbolPlacementType::Point) {
@@ -131,7 +135,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       pixelRatio(parameters.pixelRatio),
       tileSize(static_cast<uint32_t>(util::tileSize_D * overscaling)),
       tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
-      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)),
+      layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom, parameters.globalState)),
       retainFeaturesById(parameters.retainFeaturesById) {
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
@@ -139,6 +143,18 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
     iconSize = leader.layout.get<IconSize>();
     textRadialOffset = leader.layout.get<TextRadialOffset>();
     textVariableAnchorOffset = leader.layout.get<TextVariableAnchorOffset>();
+
+    // These property values are retained unevaluated; capture the global
+    // state so that later evaluations can resolve "global-state" expressions.
+    const auto captureGlobalState = [&](auto& propertyValue) {
+        if (propertyValue.isExpression()) {
+            propertyValue.asExpression().captureGlobalState(parameters.globalState);
+        }
+    };
+    captureGlobalState(textSize);
+    captureGlobalState(iconSize);
+    captureGlobalState(textRadialOffset);
+    captureGlobalState(textVariableAnchorOffset);
 
     const bool hasText = has<TextField>(*layout) && has<TextFont>(*layout);
     const bool hasIcon = has<IconImage>(*layout);
@@ -176,7 +192,8 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
     for (size_t i = 0; i < featureCount; ++i) {
         auto feature = sourceLayer->getFeature(i);
         if (!leader.filter(expression::EvaluationContext(this->zoom, feature.get())
-                               .withCanonicalTileID(&parameters.tileID.canonical))) {
+                               .withCanonicalTileID(&parameters.tileID.canonical)
+                               .withGlobalState(parameters.globalState.get()))) {
             continue;
         }
 

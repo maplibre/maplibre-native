@@ -290,7 +290,9 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
-    static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
+    static bool applyColorRamp(const style::ColorRampPropertyValue&,
+                               PremultipliedImage&,
+                               const GlobalStateMap* globalState = nullptr);
 
     using FloatPair = std::array<float, 2>;
     using FloatQuad = std::array<float, 4>;

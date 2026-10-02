@@ -1,0 +1,100 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 384,
+      "height": 256,
+      "description": "blur-and-opacity"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 10,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {
+              "blur": 0,
+              "alpha": 1
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.09,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {
+              "blur": 0.35,
+              "alpha": 0.7
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 3,
+            "properties": {
+              "blur": 0.7,
+              "alpha": 0.4
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.09,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f7"
+      }
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": 30,
+        "ngon-corners": 5,
+        "ngon-color": "#e11d48",
+        "ngon-blur": [
+          "get",
+          "blur"
+        ],
+        "ngon-opacity": [
+          "get",
+          "alpha"
+        ],
+        "ngon-stroke-width": 4,
+        "ngon-stroke-color": "#2563eb",
+        "ngon-stroke-opacity": 0.5
+      }
+    }
+  ]
+}
