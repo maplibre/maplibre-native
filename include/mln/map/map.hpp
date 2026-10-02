@@ -230,6 +230,23 @@ public:
     void setCenterClampedToGround(bool clamped);
     bool getCenterClampedToGround() const;
 
+    /// Moves the camera's centre onto the terrain under it without moving the camera: the centre
+    /// slides along the line of sight up to the ground and the zoom tightens by the distance saved,
+    /// so nothing on screen shifts. Rotating and pitching then turn around the ground being
+    /// looked at, not a sea-level point behind it. Inert while the style has no terrain, so a
+    /// gesture handler can call it unconditionally. Removing the terrain brings the centre back
+    /// down to sea level the same way.
+    void anchorCenterOnTerrain();
+
+    /// Moves the camera's centre along the line of sight to `altitudeMeters` above sea level
+    /// (exaggeration applied, as the terrain is drawn) without moving the camera: the centre and
+    /// zoom change, nothing on screen does. anchorCenterOnTerrain() is this at the ground height;
+    /// 0 puts the centre back at sea level. A centre and zoom describe the same view only at the
+    /// same centre altitude (CameraOptions::centerAltitude), so to restore a saved camera, set its
+    /// altitude with this first, then jump to its centre and zoom. Returns false when nothing
+    /// moved: the centre is already at that altitude, or that altitude is (nearly) at the camera.
+    bool setCenterAltitudeKeepingView(double altitudeMeters);
+
     /// Debug: when enabled, RenderTerrain logs the camera eye's clearance over the terrain
     /// ("ABOVE-GROUND ...") each frame it is near/below the surface. Off by default; the
     /// per-frame elevation sampling is skipped entirely when off, so it has no cost otherwise.

@@ -5,9 +5,14 @@
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/map/camera.hpp>
 #include <mln/map/map_options.hpp>
+#include <mln/math/angles.hpp>
 #include <mln/style/style.hpp>
+#include <mln/style/terrain.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/image.hpp>
 #include <mln/util/run_loop.hpp>
+
+#include <cmath>
 
 using namespace mln;
 
@@ -119,4 +124,88 @@ TEST(TerrainCamera, ClampingCanBeTurnedOff) {
     EXPECT_FALSE(test.map.getCenterClampedToGround());
 
     EXPECT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+}
+
+// An app can put the centre at any altitude without moving the camera, and restore a saved camera
+// by setting its altitude before its centre and zoom: the same centre and zoom at another altitude
+// are a different camera.
+TEST(TerrainCamera, CentreAltitudeIsSetAndRestoredKeepingTheView) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+
+    const auto eye = [&] {
+        return *test.map.getFreeCameraOptions().position;
+    };
+    // One metre in the Mercator units of the camera position, at the centre's latitude.
+    const double metre = 1.0 / (util::M2PI * util::EARTH_RADIUS_M * std::cos(util::deg2rad(47.2692)));
+    const auto expectEyeAt = [&](const vec3& expected) {
+        const vec3 actual = eye();
+        for (int i = 0; i < 3; ++i) {
+            EXPECT_NEAR(actual[i], expected[i], 5 * metre) << "axis " << i;
+        }
+    };
+    const vec3 before = eye();
+    const double zoomAtSeaLevel = *test.map.getCameraOptions({}).zoom;
+
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(1500.0));
+    const CameraOptions saved = test.map.getCameraOptions({});
+    EXPECT_NEAR(*saved.centerAltitude, 1500.0, 0.001);
+    EXPECT_GT(*saved.zoom, zoomAtSeaLevel);
+    expectEyeAt(before);
+    // Already there: nothing to move.
+    EXPECT_FALSE(test.map.setCenterAltitudeKeepingView(1500.0));
+
+    // Somewhere else, at sea level.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{47.0, 11.0}).withZoom(9.0));
+
+    // Restore: the altitude first, then the centre and zoom.
+    test.map.setCenterAltitudeKeepingView(*saved.centerAltitude);
+    test.map.jumpTo(CameraOptions().withCenter(*saved.center).withZoom(*saved.zoom));
+    expectEyeAt(before);
+
+    // Back at sea level, the original centre and zoom.
+    EXPECT_TRUE(test.map.setCenterAltitudeKeepingView(0.0));
+    EXPECT_NEAR(*test.map.getCameraOptions({}).zoom, zoomAtSeaLevel, 1e-3);
+    expectEyeAt(before);
+}
+
+// A gesture start anchors the centre on the ground being looked at without moving the camera,
+// and removing the terrain brings it back to sea level, again without moving the camera:
+// otherwise the flat map keeps orbiting a point up in the air.
+TEST(TerrainCamera, AnchoredCentreReturnsToSeaLevelWhenTerrainIsRemoved) {
+    TerrainCameraTest test;
+    test.map.setCenterClampedToGround(false);
+    test.map.jumpTo(CameraOptions().withZoom(10.0));
+    // Lets the renderer report the plateau under the centre.
+    ASSERT_NEAR(test.renderAndGetAltitude(8), 0.0, 0.001);
+
+    const auto eye = [&] {
+        return *test.map.getFreeCameraOptions().position;
+    };
+    // One metre in the Mercator units of the camera position, at the centre's latitude.
+    const double metre = 1.0 / (util::M2PI * util::EARTH_RADIUS_M * std::cos(util::deg2rad(47.2692)));
+    const auto expectEyeAt = [&](const vec3& expected) {
+        const vec3 actual = eye();
+        for (int i = 0; i < 3; ++i) {
+            EXPECT_NEAR(actual[i], expected[i], 5 * metre) << "axis " << i;
+        }
+    };
+    const vec3 before = eye();
+    const double zoomBefore = *test.map.getCameraOptions({}).zoom;
+
+    test.map.anchorCenterOnTerrain();
+    EXPECT_NEAR(*test.map.getCameraOptions({}).centerAltitude, plateauMeters, 0.5);
+    EXPECT_GT(*test.map.getCameraOptions({}).zoom, zoomBefore);
+    expectEyeAt(before);
+
+    test.map.getStyle().setTerrain(nullptr);
+    EXPECT_NEAR(test.renderAndGetAltitude(1), 0.0, 0.001);
+    EXPECT_NEAR(*test.map.getCameraOptions({}).zoom, zoomBefore, 1e-3);
+    expectEyeAt(before);
+
+    // Without terrain there is nothing to anchor on, whatever height was last reported.
+    test.map.anchorCenterOnTerrain();
+    EXPECT_NEAR(test.map.getCameraOptions({}).centerAltitude.value_or(0.0), 0.0, 0.001);
 }

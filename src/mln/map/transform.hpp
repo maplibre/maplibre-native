@@ -130,6 +130,10 @@ public:
     // Conversion and projection
     ScreenCoordinate latLngToScreenCoordinate(const LatLng&) const;
     LatLng screenCoordinateToLatLng(const ScreenCoordinate&, LatLng::WrapMode = LatLng::Wrapped) const;
+    /// As above, unprojecting onto the plane `elevationMeters` above sea level.
+    LatLng screenCoordinateToLatLng(const ScreenCoordinate&,
+                                    double elevationMeters,
+                                    LatLng::WrapMode = LatLng::Wrapped) const;
 
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);

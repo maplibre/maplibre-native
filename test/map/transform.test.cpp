@@ -4,7 +4,9 @@
 #include <cmath>
 #include <mln/map/transform.hpp>
 #include <mln/math/angles.hpp>
+#include <mln/util/constants.hpp>
 #include <mln/util/geo.hpp>
+#include <mln/util/projection.hpp>
 #include <mln/util/quaternion.hpp>
 
 #include <numbers>
@@ -145,6 +147,77 @@ TEST(Transform, PerspectiveProjection) {
     transform.jumpTo(CameraOptions().withCenter(LatLng{38.0, -77.0}).withZoom(18.0).withPitch(51.56620156));
     point = transform.getState().latLngToScreenCoordinate({7.692872969426375, -76.75823239205641}, p);
     ASSERT_LT(p[3], 0.0);
+}
+
+TEST(TransformState, CenterAltitudeStaysInMetersAcrossZoomAndLatitude) {
+    TransformState state;
+    state.setSize({1000, 1000});
+    state.setLatLngZoom(LatLng{50.7, 15.0}, 12.0);
+    state.setCenterAltitude(1500.0);
+    ASSERT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+
+    // A height over sea level, not a length on screen: zooming or moving north keeps it.
+    // (Transform's transitions re-apply the altitude after each step; the state alone did not.)
+    state.setLatLngZoom(LatLng{50.7, 15.0}, 14.5);
+    EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+    state.setLatLngZoom(LatLng{51.4, 15.0}, 14.5);
+    EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+    state.setScale(state.getScale() / 2);
+    EXPECT_NEAR(1500.0, state.getCenterAltitude(), 1e-6);
+}
+
+namespace {
+// A pitched camera whose centre sits 1500 m up, on terrain.
+void placeElevatedCamera(Transform& transform) {
+    transform.resize({1000, 1000});
+    transform.jumpTo(
+        CameraOptions().withCenter(LatLng{50.7, 15.0}).withZoom(12.0).withPitch(60.0).withCenterAltitude(1500.0));
+}
+
+// A pixel's worth of ground at the elevated camera's zoom and latitude.
+const double onePixel = Projection::getMetersPerPixelAtLatitude(50.7, 12.0);
+
+double metersBetween(const LatLng& a, const LatLng& b) {
+    return util::EARTH_RADIUS_M * util::deg2rad(1.0) *
+           std::hypot(a.latitude() - b.latitude(),
+                      (a.longitude() - b.longitude()) * std::cos(util::deg2rad(a.latitude())));
+}
+} // namespace
+
+TEST(Transform, MoveByKeepsAnElevatedCenterOnItsPlane) {
+    Transform transform;
+    placeElevatedCamera(transform);
+    const LatLng before = transform.getLatLng();
+
+    // No movement is no movement (to within a pixel). Unprojected onto sea level, the centre
+    // would jump altitude * tan(pitch), ~2.6 km here, along the view on every step.
+    transform.moveBy({0, 0});
+    EXPECT_LT(metersBetween(before, transform.getLatLng()), onePixel);
+
+    // The camera sits where it does relative to the centre whatever the centre's altitude, so a
+    // drag moves the map as far over raised ground as over sea level.
+    Transform seaLevel;
+    seaLevel.resize({1000, 1000});
+    seaLevel.jumpTo(CameraOptions().withCenter(LatLng{50.7, 15.0}).withZoom(12.0).withPitch(60.0));
+    const LatLng seaBefore = seaLevel.getLatLng();
+    seaLevel.moveBy({0, 100});
+    const LatLng elevatedBefore = transform.getLatLng();
+    transform.moveBy({0, 100});
+    const double seaLevelMove = metersBetween(seaBefore, seaLevel.getLatLng());
+    EXPECT_GT(seaLevelMove, 1000.0);
+    EXPECT_NEAR(metersBetween(elevatedBefore, transform.getLatLng()), seaLevelMove, seaLevelMove * 0.01);
+}
+
+TEST(Transform, ZoomAnchoredAtTheCenterKeepsAnElevatedCenter) {
+    Transform transform;
+    placeElevatedCamera(transform);
+    const LatLng before = transform.getLatLng();
+    // Pinch and rotate gestures anchored to the screen centre (as MLNMapView does over terrain)
+    // turn round the centre: it stays put, to within a pixel.
+    transform.jumpTo(CameraOptions().withZoom(13.0).withAnchor(ScreenCoordinate{500, 500}));
+    EXPECT_LT(metersBetween(before, transform.getLatLng()), onePixel);
+    transform.jumpTo(CameraOptions().withBearing(40.0).withAnchor(ScreenCoordinate{500, 500}));
+    EXPECT_LT(metersBetween(before, transform.getLatLng()), onePixel);
 }
 
 TEST(Transform, UnwrappedLatLng) {

@@ -340,6 +340,12 @@ public:
 
     jni::jint getTerrainLoadMode(JNIEnv&);
 
+    void anchorCenterOnTerrain(JNIEnv&);
+
+    jni::jboolean setCenterAltitudeKeepingView(JNIEnv&, jni::jdouble);
+
+    jni::jdouble getCenterAltitude(JNIEnv&);
+
     void setTerrainSkirtLength(JNIEnv&, jni::jint);
 
     jni::jint getTerrainSkirtLength(JNIEnv&);

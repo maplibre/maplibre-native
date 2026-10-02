@@ -1039,6 +1039,32 @@ of north, the map will automatically snap to exact north.
 - (void)setZoomLevel:(double)zoomLevel animated:(BOOL)animated;
 
 /**
+ The altitude of the map's center above sea level, in meters.
+
+ It is 0 unless 3D terrain is on: a pan, pinch, rotate or tilt gesture then
+ moves the center up onto the terrain under it, and removing the terrain brings
+ it back down. Either way the view does not change, but `centerCoordinate` and
+ `zoomLevel` do. A center coordinate and zoom level describe the same view only
+ at the same center altitude, so save this with them, and restore it with
+ `-setCenterAltitudeKeepingView:` before setting them.
+ */
+@property (nonatomic, readonly) CLLocationDistance centerAltitude;
+
+/**
+ Moves the map's center along the line of sight to the given altitude without
+ moving the camera.
+
+ Nothing on screen moves; `centerCoordinate` and `zoomLevel` change to describe
+ the same view from the new center. Pass 0 to put the center back at sea level.
+
+ @param altitude The new center altitude above sea level, in meters, with the
+    terrain exaggeration applied.
+ @return `NO` if nothing moved: the center is already at that altitude, or that
+    altitude is at (or nearly at) the camera.
+ */
+- (BOOL)setCenterAltitudeKeepingView:(CLLocationDistance)altitude;
+
+/**
  * The minimum zoom level at which the map can be shown.
  *
  * Depending on the map view’s aspect ratio, the map view may be prevented
