@@ -282,11 +282,11 @@ in this Software without prior written authorization of the copyright holder.
 
 ---
 
-### [polylabel](https://github.com/mapbox/polylabel) by Mapbox
+### [polylabel](https://github.com/mapnik/polylabel) by Mapbox
 
 ```
 ISC License
-Copyright (c) 2016 Mapbox
+Copyright (c) 2026 Mapbox
 
 Permission to use, copy, modify, and/or distribute this software for any purpose
 with or without fee is hereby granted, provided that the above copyright notice
