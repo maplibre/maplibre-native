@@ -96,6 +96,9 @@ genrule(
     cmd = select({
         "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
         "//conditions:default": "echo '' > $@",
+    }) + select({
+        "//:plugins_enabled": " && echo '#define MLN_WITH_PLUGINS 1' >> $@",
+        "//conditions:default": "",
     }),
 )
 
@@ -137,31 +140,40 @@ apple_bundle_version(
     short_version_string = "{version}",
 )
 
-apple_xcframework(
-    name = "MapLibre.dynamic",
-    bundle_id = "com.maplibre.mapbox",
-    bundle_name = "MapLibre",
-    data = glob([
-        "resources/*.lproj/**",
-        "resources/*.xcassets/**",
-    ]) + [
-        "PrivacyInfo.xcprivacy",
-        "resources/metal-cpp-ignores.txt",
-    ],
-    infoplists = ["info_plist"],
-    ios = {
-        "simulator": [
-            "x86_64",
-            "arm64",
+[
+    apple_xcframework(
+        name = name,
+        bundle_id = bundle_id,
+        bundle_name = bundle_name,
+        data = glob([
+            "resources/*.lproj/**",
+            "resources/*.xcassets/**",
+        ]) + [
+            "PrivacyInfo.xcprivacy",
+            "resources/metal-cpp-ignores.txt",
         ],
-        "device": ["arm64"],
-    },
-    minimum_os_versions = {"ios": "15.5"},
-    public_hdrs = public_hdrs,
-    version = ":maplibre_ios_version",
-    visibility = ["//visibility:public"],
-    deps = ["//platform:ios-sdk-dynamic"],
-)
+        infoplists = ["info_plist"],
+        ios = {
+            "simulator": [
+                "x86_64",
+                "arm64",
+            ],
+            "device": ["arm64"],
+        },
+        minimum_os_versions = {"ios": "15.5"},
+        public_hdrs = public_hdrs + select({
+            "//:plugins_enabled": ["//:include/mln/plugin/plugin_api.h"],
+            "//conditions:default": [],
+        }),
+        version = ":maplibre_ios_version",
+        visibility = ["//visibility:public"],
+        deps = ["//platform:ios-sdk-dynamic"],
+    )
+    for name, bundle_name, bundle_id in [
+        ("MapLibre.dynamic", "MapLibre", "com.maplibre.mapbox"),
+        ("MapLibre.dynamic.plugins", "MapLibreWithPlugins", "org.maplibre.MapLibreWithPlugins"),
+    ]
+]
 
 ios_framework(
     name = "MapLibre.link",

@@ -84,6 +84,16 @@ xed build-ios/MapLibre\ Native.xcodeproj
 
 ## Distribution
 
+Starting with `7.0.0-pre0`, the distribution package also provides the `MapLibreWithPlugins` product. Select that product and use `import MapLibreWithPlugins` to use MapLibre iOS with the plugin API enabled. It includes the C API in `plugin_api.h`. Select only one MapLibre product per application, as both frameworks define the same Objective-C classes.
+
+To build the plugin-enabled variant, run:
+
+```
+bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
+  --apple_generate_dsym --//:renderer=metal --//:plugins=true //platform/ios:MapLibre.dynamic.plugins \
+  --embed_label=maplibre_ios_"$(cat platform/ios/VERSION)"
+```
+
 MapLibre iOS is distributed as an XCFramework via the [maplibre/maplibre-gl-native-distribution](https://github.com/maplibre/maplibre-gl-native-distribution) repository. See [Release MapLibre iOS](./release.md) for the release process. Refer to the [`ios-ci.yml`](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/ios-ci.yml) workflow for an up-to-date recipe for building an XCFramework. As of February 2025 we use:
 
 ```
