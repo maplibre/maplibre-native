@@ -126,7 +126,7 @@ public:
                double scale,
                const RenderedQueryOptions& options,
                const GlobalStateMap* globalState,
-               const UnwrappedTileID&,
+               const OverscaledTileID&,
                const std::unordered_map<std::string, const RenderLayer*>&,
                float additionalQueryPadding,
                const SourceFeatureState& sourceFeatureState) const;
@@ -152,7 +152,7 @@ private:
                     const RefIndexedSubfeature&,
                     const RenderedQueryOptions& options,
                     const GlobalStateMap* globalState,
-                    const CanonicalTileID&,
+                    const OverscaledTileID&,
                     const std::unordered_map<std::string, const RenderLayer*>&,
                     const GeometryCoordinates& queryGeometry,
                     const TransformState& transformState,
