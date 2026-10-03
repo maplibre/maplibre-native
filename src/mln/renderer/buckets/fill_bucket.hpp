@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mln/renderer/bucket.hpp>
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/renderer/paint_property_binder.hpp>
 #include <mln/tile/geometry_tile_data.hpp>
 #include <mln/gfx/vertex_buffer.hpp>
@@ -30,6 +31,8 @@ using FillLayoutVertex = gfx::Vertex<TypeList<attributes::pos>>;
 class FillBucket final : public Bucket {
 public:
     ~FillBucket() override;
+
+    void setSubdivisionGranularity(const SubdivisionGranularitySetting& value) { subdivisionGranularity = value; }
     using PossiblyEvaluatedLayoutProperties = style::FillLayoutProperties::PossiblyEvaluated;
 
     FillBucket(const PossiblyEvaluatedLayoutProperties& layout,
@@ -81,11 +84,12 @@ public:
     TriangleIndexVector& triangles = *sharedTriangles;
 
     SegmentVector triangleSegments;
+    SubdivisionGranularitySetting subdivisionGranularity;
 
     std::map<std::string, FillBinders> paintPropertyBinders;
 
 private:
-    void generateBuffers(const GeometryCollection&);
+    void generateBuffers(const GeometryCollection&, const CanonicalTileID&);
     void populateBinders(const GeometryTileFeature&,
                          const ImagePositions&,
                          const PatternLayerMap&,

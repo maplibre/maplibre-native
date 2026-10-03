@@ -57,6 +57,13 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
+
+    bool u_is_along_line;
+    bool u_is_variable_anchor;
+    highp float u_pitched_scale;
+    highp vec2 u_translation;
+    highp float u_pad1;
+    highp float u_pad2;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -151,7 +158,8 @@ lowp float halo_blur = u_halo_blur;
         size = u_size;
     }
 
-    vec4 projectedPoint = u_matrix * vec4(a_pos, 0, 1);
+    vec2 translated_a_pos = a_pos + u_translation;
+    vec4 projectedPoint = projectTileWithElevation(translated_a_pos, 0.0);
     highp float camera_to_anchor_distance = projectedPoint.w;
     // If the label is pitched with the map, layout is done in pitched space,
     // which makes labels in the distance smaller relative to viewport space.
@@ -178,7 +186,7 @@ lowp float halo_blur = u_halo_blur;
         // Point labels with 'rotation-alignment: map' are horizontal with respect to tile units
         // To figure out that angle in projected space, we draw a short horizontal line in tile
         // space, project it, and measure its angle in projected space.
-        vec4 offsetProjectedPoint = u_matrix * vec4(a_pos + vec2(1, 0), 0, 1);
+        vec4 offsetProjectedPoint = projectTileWithElevation(translated_a_pos + vec2(1, 0), 0.0);
 
         vec2 a = projectedPoint.xy / projectedPoint.w;
         vec2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -190,8 +198,28 @@ lowp float halo_blur = u_halo_blur;
     highp float angle_cos = cos(segment_angle + symbol_rotation);
     mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
-    vec4 projected_pos = u_label_plane_matrix * vec4(a_projected_pos.xy, 0.0, 1.0);
-    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * fontScale), 0.0, 1.0);
+    vec4 projected_pos;
+    if (u_is_along_line || u_is_variable_anchor) {
+        projected_pos = vec4(a_projected_pos.xy, 0.0, 1.0);
+    } else if (u_pitch_with_map) {
+        projected_pos = u_label_plane_matrix * vec4(a_projected_pos.xy + u_translation, 0.0, 1.0);
+    } else {
+        projected_pos = u_label_plane_matrix * projectTileWithElevation(a_projected_pos.xy + u_translation, 0.0);
+    }
+    float z = float(u_pitch_with_map) * projected_pos.z / projected_pos.w;
+
+    float projectionScaling = 1.0;
+#ifdef PROJECTION_GLOBE
+    if (u_pitch_with_map && !u_is_along_line) {
+        float anchor_pos_tile_y = (u_coord_matrix * vec4(projected_pos.xy / projected_pos.w, z, 1.0)).y;
+        projectionScaling = mix(projectionScaling, 1.0 / circumferenceRatioAtTileY(anchor_pos_tile_y) * u_pitched_scale, u_projection_transition);
+    }
+#endif
+
+    gl_Position = u_coord_matrix * vec4(projected_pos.xy / projected_pos.w + rotation_matrix * (a_offset / 32.0 * fontScale) * projectionScaling, z, 1.0);
+    if (u_pitch_with_map) {
+        gl_Position = projectTileWithElevation(gl_Position.xy, gl_Position.z);
+    }
     float gamma_scale = gl_Position.w;
 
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);

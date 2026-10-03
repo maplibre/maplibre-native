@@ -176,6 +176,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 [[maybe_unused]] const PaintParameters& paintParameters,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
+    updateProjectionVariant(state);
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -294,7 +295,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 #endif
 
         if (!heatmapShader) {
-            heatmapShader = heatmapShaderGroup->getOrCreateShader(context, *propertiesAsUniforms);
+            heatmapShader = heatmapShaderGroup->getOrCreateShader(context, *propertiesAsUniforms, projectionVariant);
             if (!heatmapShader) {
                 continue;
             }
@@ -348,7 +349,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     if (!heatmapTextureShader) {
-        heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);
+        heatmapTextureShader = context.getGenericShader(
+            shaders, HeatmapTextureShaderGroupName, gfx::ProjectionVariant::Mercator);
     }
     if (!heatmapTextureShader) {
         removeAllDrawables();

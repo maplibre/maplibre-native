@@ -2,6 +2,7 @@
 
 #include <mln/renderer/render_layer.hpp>
 #include <mln/renderer/buckets/raster_bucket.hpp>
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/style/layers/raster_layer_impl.hpp>
 #include <mln/style/layers/raster_layer_properties.hpp>
 #include <mln/gfx/context.hpp>
@@ -64,6 +65,7 @@ private:
 
     using SegmentVectorPtr = std::shared_ptr<SegmentVector>;
     SegmentVectorPtr staticDataSegments;
+    GlobeTileMeshCache<RasterLayoutVertex, decltype(&RasterBucket::layoutVertex)> globeMeshes;
 };
 
 } // namespace mln

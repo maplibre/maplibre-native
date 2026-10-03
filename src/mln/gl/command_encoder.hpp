@@ -6,6 +6,8 @@ namespace mln {
 namespace gl {
 
 class Context;
+class RenderPass;
+class UploadPass;
 
 class CommandEncoder final : public gfx::CommandEncoder {
 public:

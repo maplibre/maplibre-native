@@ -12,6 +12,7 @@ constexpr auto collisionShaderPrelude = R"(
 enum {
     idCollisionDrawableUBO = idDrawableReservedVertexOnlyUBO,
     idCollisionTilePropsUBO = drawableReservedUBOCount,
+    idCollisionProjectionUBO = idProjectionUBO,
     collisionUBOCount
 };
 
@@ -61,16 +62,29 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const CollisionDrawableUBO& drawable [[buffer(idCollisionDrawableUBO)]],
-                                device const CollisionTilePropsUBO& tileProps [[buffer(idCollisionTilePropsUBO)]]) {
+                                device const CollisionTilePropsUBO& tileProps [[buffer(idCollisionTilePropsUBO)]],
+                                device const ProjectionUBO& projection [[buffer(idCollisionProjectionUBO)]]) {
 
+#if defined(PROJECTION_GLOBE)
+    float4 projectedPoint = projectTile(float2(vertx.anchor_pos), projection);
+#else
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
+#endif
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field boxes in pitched/overzoomed tiles
         4.0);
 
+#if defined(PROJECTION_GLOBE)
+    float4 position = projectTile(float2(vertx.pos), projection);
+    // Boxes just past the horizon stay visible, as in GL JS; ones far behind it are clipped.
+    if (position.z / position.w < 1.1) {
+        position.z = 0.0;
+    }
+#else
     float4 position = drawable.matrix * float4(float2(vertx.pos), 0.0, 1.0);
+#endif
     position.xy += (float2(vertx.extrude) + vertx.shift) * tileProps.extrude_scale * position.w * collision_perspective_ratio;
 
     float placed = float(vertx.placed.x);
@@ -137,16 +151,29 @@ struct FragmentStage {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
                                 device const CollisionDrawableUBO& drawable [[buffer(idCollisionDrawableUBO)]],
-                                device const CollisionTilePropsUBO& tileProps [[buffer(idCollisionTilePropsUBO)]]) {
+                                device const CollisionTilePropsUBO& tileProps [[buffer(idCollisionTilePropsUBO)]],
+                                device const ProjectionUBO& projection [[buffer(idCollisionProjectionUBO)]]) {
 
+#if defined(PROJECTION_GLOBE)
+    float4 projectedPoint = projectTile(float2(vertx.anchor_pos), projection);
+#else
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
+#endif
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field circles in pitched/overzoomed tiles
         4.0);
 
+#if defined(PROJECTION_GLOBE)
+    float4 position = projectTile(float2(vertx.pos), projection);
+    // Circles just past the horizon stay visible, as in GL JS; ones far behind it are clipped.
+    if (position.z / position.w < 1.1) {
+        position.z = 0.0;
+    }
+#else
     float4 position = drawable.matrix * float4(float2(vertx.pos), 0.0, 1.0);
+#endif
 
     float padding_factor = 1.2; // Pad the vertices slightly to make room for anti-alias blur
     position.xy += float2(vertx.extrude) * tileProps.extrude_scale * padding_factor * position.w * collision_perspective_ratio;

@@ -1,0 +1,40 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "description": "Tile borders on the globe: the red edges of the zoom 2 tiles follow the sphere, the equator and the 66.5°N row bending across the disc and the 0° and 90°E meridians curving toward the pole; a straight chord between corners would cut through the planet.",
+      "debug": true,
+      "width": 512,
+      "height": 512
+    }
+  },
+  "center": [30.0, 20.0],
+  "zoom": 2,
+  "projection": {"type": "globe"},
+  "sources": {
+    "world": {
+      "type": "geojson",
+      "data": {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-180, -85], [180, -85], [180, 85], [-180, 85], [-180, -85]]]
+        }
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "white"}
+    },
+    {
+      "id": "world",
+      "type": "fill",
+      "source": "world",
+      "paint": {"fill-color": "#dddddd"}
+    }
+  ]
+}

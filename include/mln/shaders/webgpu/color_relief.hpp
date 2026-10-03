@@ -43,7 +43,8 @@ struct ColorReliefTilePropsUBO {
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
 @group(0) @binding(2) var<storage, read> drawableVector: array<ColorReliefDrawableUBO>;
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
+@group(0) @binding(4) var<storage, read> projectionVector: array<ProjectionUBO>;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
 
 @vertex
 fn main(in: VertexInput) -> VertexOutput {
@@ -51,9 +52,10 @@ fn main(in: VertexInput) -> VertexOutput {
     let drawable = drawableVector[globalIndex.value];
     let tileProps = tilePropsVector[globalIndex.value];
 
-    out.position = drawable.matrix * vec4<f32>(f32(in.position.x), f32(in.position.y), 0.0, 1.0);
+    let pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    out.position = projectTileWithPoles(pos, pos, projectionVector[globalIndex.value]);
 
-    let a_pos = vec2<f32>(f32(in.position.x), f32(in.position.y));
+    let a_pos = pos;
     let epsilon = vec2<f32>(1.0, 1.0) / tileProps.dimension;
     let scale = (tileProps.dimension.x - 2.0) / tileProps.dimension.x;
     out.frag_position = (a_pos / 8192.0) * scale + epsilon;
@@ -91,8 +93,8 @@ struct ColorReliefEvaluatedPropsUBO {
 };
 
 @group(0) @binding(1) var<uniform> globalIndex: GlobalIndexUBO;
-@group(0) @binding(4) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
-@group(0) @binding(5) var<uniform> props: ColorReliefEvaluatedPropsUBO;
+@group(0) @binding(5) var<storage, read> tilePropsVector: array<ColorReliefTilePropsUBO>;
+@group(0) @binding(6) var<uniform> props: ColorReliefEvaluatedPropsUBO;
 @group(1) @binding(0) var texture_sampler: sampler;
 @group(1) @binding(1) var dem_texture: texture_2d<f32>;
 @group(1) @binding(2) var elevation_stops_texture: texture_2d<f32>;

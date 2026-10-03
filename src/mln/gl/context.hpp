@@ -5,6 +5,7 @@
 #include <mln/gfx/stencil_mode.hpp>
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
 #include <mln/gfx/scissor_rect.hpp>
 #include <mln/gl/object.hpp>
 #include <mln/gl/state.hpp>
@@ -20,12 +21,28 @@
 #include <mln/gl/buffer_allocator.hpp>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gl/uniform_buffer_gl.hpp>
+#include <mln/shaders/shader_program_base.hpp>
 
+#include <map>
+#include <memory>
+#include <tuple>
 #include <array>
 #include <functional>
 #include <vector>
 
 namespace mln {
+
+class PaintParameters;
+class RenderStaticData;
+
+namespace gfx {
+class Drawable;
+} // namespace gfx
+
+namespace shaders {
+struct GlobeClipMask;
+} // namespace shaders
+
 namespace gl {
 
 using ProcAddress = void (*)();
@@ -83,6 +100,9 @@ public:
 
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 
+    /// Writes each tile's clip value into the stencil buffer over its pole-capped globe mesh.
+    bool renderGlobeTileClippingMasks(PaintParameters&, RenderStaticData&, const std::vector<gfx::GlobeClipMask>&);
+
     void finish();
 
     std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
@@ -121,7 +141,9 @@ public:
 
     gfx::UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
-    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&,
+                                               const std::string& name,
+                                               gfx::ProjectionVariant) override;
 
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
@@ -158,6 +180,8 @@ public:
 
     void setDirtyState() override;
 
+    void releaseGlobeClipMasks() override;
+
     Texture2DPool& getTexturePool();
 
 private:
@@ -169,6 +193,10 @@ private:
     std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
     size_t frameNum = 0;
     UniformBufferArrayGL globalUniformBuffers;
+
+    gfx::ShaderProgramBasePtr globeClipMaskShader;
+    /// One mesh per zoom and pole row; the projection block is uploaded per tile.
+    std::map<std::tuple<uint8_t, bool, bool>, std::unique_ptr<gfx::Drawable>> globeClipMaskDrawables;
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;

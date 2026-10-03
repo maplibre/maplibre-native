@@ -47,6 +47,10 @@ layout(std140, set = LAYER_SET_INDEX, binding = idColorReliefDrawableUBO) readon
     ColorReliefDrawableUBO drawable_ubo[];
 } drawableVector;
 
+layout(std140, set = LAYER_SET_INDEX, binding = idProjectionUBO) readonly buffer ProjectionUBOVector {
+    ProjectionUBO projection_ubo[];
+} projectionVector;
+
 layout(std140, set = LAYER_SET_INDEX, binding = idColorReliefTilePropsUBO) readonly buffer ColorReliefTilePropsUBOVector {
     ColorReliefTilePropsUBO tile_props_ubo[];
 } tilePropsVector;
@@ -57,7 +61,7 @@ void main() {
     const ColorReliefDrawableUBO drawable = drawableVector.drawable_ubo[constant.ubo_index];
     const ColorReliefTilePropsUBO tileProps = tilePropsVector.tile_props_ubo[constant.ubo_index];
 
-    gl_Position = drawable.matrix * vec4(in_position, 0, 1);
+    gl_Position = projectTile(vec2(in_position), vec2(in_position), projectionVector.projection_ubo[constant.ubo_index]);
     applySurfaceTransform();
 
     highp vec2 epsilon = 1.0 / tileProps.dimension;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mln/util/subdivision_granularity.hpp>
 #include <mln/map/mode.hpp>
 #include <mln/actor/scheduler.hpp>
 #include <mln/util/feature.hpp>
@@ -39,6 +40,7 @@ public:
     double tileLodPitchThreshold = (60.0 / 180.0) * std::numbers::pi;
     double tileLodZoomShift = 0;
     TileLodMode tileLodMode = TileLodMode::Default;
+    SubdivisionGranularitySetting subdivisionGranularity = SubdivisionGranularitySetting::none();
     gfx::DynamicTextureAtlasPtr dynamicTextureAtlas;
     std::shared_ptr<const GlobalStateMap> globalState = nullptr;
     bool isUpdateSynchronous = false;

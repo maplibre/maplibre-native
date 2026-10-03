@@ -19,6 +19,7 @@ class FileSource;
 namespace style {
 
 class Light;
+class Projection;
 class Source;
 class Layer;
 
@@ -49,6 +50,12 @@ public:
     const Light* getLight() const;
 
     void setLight(std::unique_ptr<Light>);
+
+    // Projection
+    Projection* getProjection();
+    const Projection* getProjection() const;
+
+    void setProjection(std::unique_ptr<Projection>);
 
     // Global state, used by the "global-state" expression.
     // Setting a null value resets the property to the default defined in the

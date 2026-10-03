@@ -6,6 +6,8 @@
 #include <mln/gfx/color_mode.hpp>
 #include <mln/gfx/texture2d.hpp>
 #include <mln/gfx/context.hpp>
+#include <mln/gfx/globe_clip_mask.hpp>
+#include <mln/shaders/layer_ubo.hpp>
 #include <mln/util/noncopyable.hpp>
 #include <mln/util/containers.hpp>
 #include <mln/vulkan/dynamic_texture.hpp>
@@ -15,9 +17,11 @@
 #include <mln/vulkan/descriptor_set.hpp>
 #include <mln/util/util.hpp>
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <tuple>
 #include <vector>
 
 namespace mln {
@@ -85,7 +89,9 @@ public:
 
     UniqueUniformBufferArray createLayerUniformBufferArray() override;
 
-    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
+    gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&,
+                                               const std::string& name,
+                                               gfx::ProjectionVariant) override;
 
     TileLayerGroupPtr createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) override;
 
@@ -105,6 +111,8 @@ public:
                                       bool persistent = false) override;
 
     void setDirtyState() override {}
+
+    void releaseGlobeClipMasks() override;
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
@@ -136,6 +144,9 @@ public:
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
 
+    bool renderGlobeTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<gfx::GlobeClipMask>& masks);
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
@@ -211,6 +222,17 @@ private:
 
         PipelineInfo pipelineInfo;
     } clipping;
+
+    struct GlobeClipMesh {
+        BufferResource vertices;
+        BufferResource indices;
+        uint32_t indexCount;
+    };
+    struct {
+        gfx::ShaderProgramBasePtr shader;
+        std::map<std::tuple<uint8_t, bool, bool>, GlobeClipMesh> meshes;
+        PipelineInfo pipelineInfo;
+    } globeClipping;
 
 #if DYNAMIC_TEXTURE_VULKAN_MULTITHREADED_UPLOAD
     std::mutex graphicsQueueSubmitMutex;
