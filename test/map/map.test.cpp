@@ -2338,13 +2338,16 @@ TEST_P(LateStyleImageTest, RendersImageAddedAfterLayout) {
     test.map.getStyle().addLayer(std::move(layer));
 
     // Complete tile layout with the image missing, then add it without changing the camera or layers.
+    const Size iconSize{32, 32};
     const auto before = test.frontend.render(test.map).image;
-    const size_t offset = (240 * before.size.width + 256) * 4;
-    ASSERT_EQ(before.data[offset], 255);
-    ASSERT_EQ(before.data[offset + 1], 255);
-    ASSERT_EQ(before.data[offset + 2], 255);
+    const auto x = before.size.width / 2;
+    const auto y = before.size.height / 2 - iconSize.height / 2;
+    const auto* beforePixel = before.data.get() + y * before.stride() + x * before.channels;
+    ASSERT_EQ(beforePixel[0], 255);
+    ASSERT_EQ(beforePixel[1], 255);
+    ASSERT_EQ(beforePixel[2], 255);
 
-    PremultipliedImage icon({32, 32});
+    PremultipliedImage icon(iconSize);
     for (size_t i = 0; i < icon.bytes(); i += 4) {
         icon.data[i] = 255;
         icon.data[i + 1] = 0;
@@ -2353,10 +2356,11 @@ TEST_P(LateStyleImageTest, RendersImageAddedAfterLayout) {
     }
     test.map.getStyle().addImage(std::make_unique<style::Image>("marker", std::move(icon), 1.0f));
     const auto after = test.frontend.render(test.map).image;
-    EXPECT_EQ(after.data[offset], 255);
-    EXPECT_EQ(after.data[offset + 1], 0);
-    EXPECT_EQ(after.data[offset + 2], 0);
-    EXPECT_EQ(after.data[offset + 3], 255);
+    const auto* afterPixel = after.data.get() + y * after.stride() + x * after.channels;
+    EXPECT_EQ(afterPixel[0], 255);
+    EXPECT_EQ(afterPixel[1], 0);
+    EXPECT_EQ(afterPixel[2], 0);
+    EXPECT_EQ(afterPixel[3], 255);
 }
 
 INSTANTIATE_TEST_SUITE_P(GeoJSON,
