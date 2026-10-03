@@ -179,6 +179,62 @@ TEST(Query, QueryFiltersUseGlobalState) {
     EXPECT_TRUE(test.frontend.getRenderer()->querySourceFeatures("source4", sourceOptions).empty());
 }
 
+TEST(Query, QueryRenderedFeaturesCompositePaintZoom) {
+    struct TestCase {
+        const char* property;
+        double inside;
+        double outside;
+    };
+    const TestCase cases[] = {
+        {"line-width", 8, 14},
+        {"line-gap-width", 14, 20},
+        {"circle-radius", 15, 26},
+        {"circle-stroke-width", 24, 32},
+    };
+
+    // Exercise fractional zoom both below and above the default GeoJSON maxzoom (18).
+    for (const double zoom : {16.5, 20.5}) {
+        for (const auto& testCase : cases) {
+            SCOPED_TRACE(testCase.property);
+            SCOPED_TRACE(zoom);
+            QueryTest test;
+            const std::string property = testCase.property;
+            const bool circle = property.starts_with("circle-");
+            const std::string geometry = circle ? R"({"type":"Point","coordinates":[1.003,1]})"
+                                                : R"({"type":"LineString","coordinates":[[0.993,1],[1.013,1]]})";
+            const std::string paint = property == "circle-stroke-width"    ? R"("circle-radius":6,)"
+                                      : circle || property == "line-width" ? ""
+                                                                           : R"("line-width":6,)";
+            const std::string lowerZoom = std::to_string(static_cast<int>(zoom));
+            const std::string upperZoom = std::to_string(static_cast<int>(zoom) + 1);
+            test.map.getStyle().loadJSON(
+                R"({"version":8,"sources":{"source":{"type":"geojson","data":{
+                    "type":"Feature","properties":{"small":4,"large":40},"geometry":)" +
+                geometry + R"(}}},"layers":[{"id":"layer","type":")" + (circle ? "circle" : "line") +
+                R"(","source":"source","paint":{)" + paint + "\"" + testCase.property +
+                R"(":["interpolate",["linear"],["zoom"],)" + lowerZoom + R"(,["get","small"],)" + upperZoom +
+                R"(,["get","large"]]}}]})");
+            test.map.jumpTo(CameraOptions().withCenter(LatLng{1, 1.003}).withZoom(zoom));
+            const auto rendered = test.frontend.render(test.map);
+            const auto center = test.map.pixelForLatLng({1, 1.003});
+            const ScreenCoordinate inside{center.x, center.y + testCase.inside};
+            const ScreenCoordinate outside{center.x, center.y + testCase.outside};
+
+            // At the camera zoom the composite value is 22; at canonical tile zoom it is 4.
+            // Check actual painted pixels as well as query results, away from antialiased edges.
+            const auto alphaAt = [&](const ScreenCoordinate& point) {
+                return rendered.image.data[4 * (static_cast<uint32_t>(point.y) * rendered.image.size.width +
+                                                static_cast<uint32_t>(point.x)) +
+                                           3];
+            };
+            EXPECT_GT(alphaAt(inside), 0);
+            EXPECT_EQ(alphaAt(outside), 0);
+            EXPECT_EQ(test.frontend.getRenderer()->queryRenderedFeatures(inside, {{{"layer"}}, {}}).size(), 1u);
+            EXPECT_TRUE(test.frontend.getRenderer()->queryRenderedFeatures(outside, {{{"layer"}}, {}}).empty());
+        }
+    }
+}
+
 TEST(Query, QuerySourceFeatures) {
     QueryTest test;
 

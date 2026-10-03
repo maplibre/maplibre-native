@@ -289,9 +289,16 @@ void FeatureIndex::addFeature(std::unordered_map<std::string, std::vector<Featur
 
         bool needsCrossTileIndex = renderLayer->baseImpl->getTypeInfo()->crossTileIndex ==
                                    style::LayerTypeInfo::CrossTileIndex::Required;
-        if (!needsCrossTileIndex &&
-            !renderLayer->queryIntersectsFeature(
-                queryGeometry, *geometryTileFeature, tileID.z, transformState, pixelsToTileUnits, posMatrix, state)) {
+        // we use the float camera zoom here, not the integer tile ID zoom,
+        // because for the query we take into account the actual rendered
+        // size of the geometry (#2781)
+        if (!needsCrossTileIndex && !renderLayer->queryIntersectsFeature(queryGeometry,
+                                                                         *geometryTileFeature,
+                                                                         static_cast<float>(transformState.getZoom()),
+                                                                         transformState,
+                                                                         pixelsToTileUnits,
+                                                                         posMatrix,
+                                                                         state)) {
             continue;
         }
 
