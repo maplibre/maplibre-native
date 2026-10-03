@@ -9,8 +9,6 @@ const platforms = [
   { name: "iOS", workflow: "ios-ci.yml", artifact: "ios-size-test-files", files: ["MapLibre_dynamic", "MapLibre_DWARF"] },
   { name: "Linux", workflow: "linux-ci.yml", artifact: "mbgl-render", files: ["mbgl-render"] },
 ] as const;
-const legacySha = "d38709084a9865fe0bb8300aec70ebf8243b3d43";
-const downloadUrl = "https://maplibre-native.s3.eu-central-1.amazonaws.com";
 
 export interface Run {
   id: number;
@@ -32,8 +30,6 @@ export interface Result {
   before?: Sizes;
   after?: Sizes;
   diff?: string;
-  legacyDiff?: string;
-  legacyStatus?: string;
 }
 
 interface Sizes { vm: number; file: number }
@@ -116,11 +112,6 @@ export function formatReport(report: Report, reportUrl: string, full = false): s
       lines.push(code(full ? result.diff : excerpt), "");
       if (!full && diffLines.length > 14) lines.push("First rows shown; the full report contains all compile units.", "");
     } else lines.push(result.status, "");
-    if (result.legacyDiff !== undefined) {
-      lines.push(`Linux comparison with legacy \`${legacySha.slice(0, 7)}\`:`, "");
-      const legacyLines = result.legacyDiff.trimEnd().split("\n");
-      lines.push(code(full ? result.legacyDiff : legacyLines.at(-1) ?? ""), "");
-    } else if (result.legacyStatus) lines.push(result.legacyStatus, "");
     if (!full) lines.push("</details>");
   }
   return lines.join("\n") + "\n";
@@ -158,13 +149,26 @@ async function downloadInputs(octokit: Octokit, repo: Repo, artifact: Artifact, 
     if (!contents.length) throw new Error(`Empty artifact member: ${file}`);
     writeFileSync(resolve(directory, file), contents);
   }
-  return resolve(directory, platform.files[0]);
 }
 
 function bloaty(args: string[]): string {
   return execFileSync(resolve("bloaty/build/bloaty"), args, {
     encoding: "utf8", maxBuffer: 64 * 1024 ** 2, timeout: 120_000,
   });
+}
+
+export function compareBinaries(platform: Platform["name"], currentDirectory: string, baselineDirectory: string) {
+  const filename = platform === "iOS" ? "MapLibre_dynamic" : "mbgl-render";
+  const current = resolve(currentDirectory, filename);
+  const base = resolve(baselineDirectory, filename);
+  const before = parseSizes(bloaty(["--tsv", "-n", "0", "-d", "sections", base]));
+  const after = parseSizes(bloaty(["--tsv", "-n", "0", "-d", "sections", current]));
+  const debug = platform === "iOS" ? [
+    "--debug-file", resolve(currentDirectory, "MapLibre_DWARF"),
+    "--debug-file", resolve(baselineDirectory, "MapLibre_DWARF"),
+  ] : [];
+  const diff = bloaty([...debug, "-n", "0", "-s", "vm", "-d", "compileunits", current, "--", base]);
+  return { before, after, diff };
 }
 
 export async function analyze(octokit: Octokit, repo: Repo, trigger: Run, platform: Platform): Promise<Result> {
@@ -189,27 +193,10 @@ export async function analyze(octokit: Octokit, repo: Repo, trigger: Run, platfo
     }
     result.baseline = baseline.run;
     const directory = resolve("bloaty-inputs", platform.name.toLowerCase());
-    const current = await downloadInputs(octokit, repo, artifact, platform, resolve(directory, "pr"));
-    const base = await downloadInputs(octokit, repo, baseline.artifact, platform, resolve(directory, "main"));
-    result.before = parseSizes(bloaty(["--tsv", "-n", "0", "-d", "sections", base]));
-    result.after = parseSizes(bloaty(["--tsv", "-n", "0", "-d", "sections", current]));
-    const debug = platform.name === "iOS" ? [
-      "--debug-file", resolve(directory, "pr", "MapLibre_DWARF"),
-      "--debug-file", resolve(directory, "main", "MapLibre_DWARF"),
-    ] : [];
-    result.diff = bloaty([...debug, "-n", "0", "-s", "vm", "-d", "compileunits", current, "--", base]);
+    await downloadInputs(octokit, repo, artifact, platform, resolve(directory, "pr"));
+    await downloadInputs(octokit, repo, baseline.artifact, platform, resolve(directory, "main"));
+    Object.assign(result, compareBinaries(platform.name, resolve(directory, "pr"), resolve(directory, "main")));
     result.status = "Ready";
-    if (platform.name === "Linux") {
-      try {
-        const response = await fetch(`${downloadUrl}/mbgl-render-${legacySha}`, { signal: AbortSignal.timeout(30_000) });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const legacy = resolve(directory, "legacy");
-        writeFileSync(legacy, Buffer.from(await response.arrayBuffer()));
-        result.legacyDiff = bloaty(["-n", "0", "-s", "vm", "-d", "compileunits", current, "--", legacy]);
-      } catch {
-        result.legacyStatus = "Optional legacy comparison unavailable.";
-      }
-    }
   } catch (error) {
     core.warning(`${platform.name} Bloaty analysis failed: ${error instanceof Error ? error.message : error}`);
     result.status = "Analysis failed (see workflow logs)";
