@@ -37,6 +37,7 @@ extern const std::string waitOp;
 extern const std::string sleepOp;
 extern const std::string addImageOp;
 extern const std::string updateImageOp;
+extern const std::string updateImageSourceOp;
 extern const std::string removeImageOp;
 extern const std::string setStyleOp;
 extern const std::string setCenterOp;
