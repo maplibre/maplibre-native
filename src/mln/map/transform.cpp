@@ -111,8 +111,13 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     CameraOptions camera = inputCamera;
 
     Duration duration = animation.duration.value_or(Duration::zero());
-    if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
-        // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
+    // Reuse flyTo (without the zoom-out) for a plain timed ease — but only when the caller has
+    // not asked for a specific easing curve. flyTo moves along the van Wijk path, whose ground
+    // speed at constant zoom is not constant (slow-fast-slow), so an explicit easing such as a
+    // linear one would otherwise be silently replaced. Measured on Android: a 5 s "linear" ease
+    // ran at 0.64x its mean speed in the first 500 ms and 1.27x mid-way.
+    if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero() &&
+        !animation.easing) {
         flyTo(camera, animation, true);
         return;
     }
