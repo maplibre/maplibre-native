@@ -4,6 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## 6.27.0
 
+- Accept GeoJSON features with empty coordinate arrays.
 - First automated native macOS XCFramework release ([#4088](https://github.com/maplibre/maplibre-native/issues/4088)).
 - Add Bazel `MapLibre.dynamic` and `MapLibre.static` xcframework targets for macOS ([#4113](https://github.com/maplibre/maplibre-native/pull/4113)).
 - Fix Xcode 26 build compatibility ([#4226](https://github.com/maplibre/maplibre-native/pull/4226)).
