@@ -65,6 +65,19 @@ TEST(ImageManager, Update) {
     EXPECT_EQ(0, imageManager->updatedImageVersions.size());
 }
 
+TEST(ImageManager, SDFChangeRequiresRelayout) {
+    FixtureLog log;
+    auto imageManager = ImageManager::create();
+
+    imageManager->addImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f, false));
+
+    EXPECT_TRUE(
+        imageManager->updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f, true)));
+    EXPECT_EQ(0, imageManager->updatedImageVersions.size());
+    ASSERT_NE(nullptr, imageManager->getImage("one"));
+    EXPECT_TRUE(imageManager->getImage("one")->sdf);
+}
+
 TEST(ImageManager, RemoveReleasesBinPackRect) {
     FixtureLog log;
     auto imageManager = ImageManager::create();

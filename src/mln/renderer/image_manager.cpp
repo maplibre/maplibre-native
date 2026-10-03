@@ -64,9 +64,11 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
     assert(oldImage != images.end());
     if (oldImage == images.end()) return false;
 
-    auto sizeChanged = oldImage->second->image.size != image_->image.size;
+    const auto sizeChanged = oldImage->second->image.size != image_->image.size;
+    const auto sdfChanged = oldImage->second->sdf != image_->sdf;
+    const auto layoutChanged = sizeChanged || sdfChanged;
 
-    if (sizeChanged) {
+    if (layoutChanged) {
         // Update cache size if requested image size has changed.
         if (requestedImages.contains(image_->id)) {
             int64_t diff = image_->image.bytes() - oldImage->second->image.bytes();
@@ -80,7 +82,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 
     oldImage->second = std::move(image_);
 
-    return sizeChanged;
+    return layoutChanged;
 }
 
 void ImageManager::removeImage(const std::string& id) {
