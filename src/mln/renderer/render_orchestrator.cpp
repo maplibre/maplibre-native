@@ -254,9 +254,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const ImageDifference imageDiff = diffImages(imageImpls, updateParameters->images);
     imageImpls = updateParameters->images;
 
-    // Only trigger tile reparse for changed images. Changed images only need a
-    // relayout when they have a different size.
-    bool hasImageDiff = !imageDiff.removed.empty();
+    // Adding or removing an image changes layout for tiles that already requested it.
+    // Updating an existing image only needs a relayout when its size changes.
+    bool hasImageDiff = !imageDiff.added.empty() || !imageDiff.removed.empty();
 
     // Remove removed images from sprite atlas.
     for (const auto& entry : imageDiff.removed) {
