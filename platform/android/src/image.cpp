@@ -17,4 +17,8 @@ PremultipliedImage decodeImage(const std::string& string) {
     return android::Bitmap::GetImage(*env, android::BitmapFactory::DecodeByteArray(*env, array, 0, string.size()));
 }
 
+bool supportsWebPDecoding() {
+    return true;
+}
+
 } // namespace mln

@@ -3,6 +3,7 @@
 #include <QBuffer>
 #include <QByteArray>
 #include <QImage>
+#include <QImageReader>
 
 namespace mln {
 
@@ -48,4 +49,10 @@ PremultipliedImage decodeImage(const std::string& string) {
 
     return {{static_cast<uint32_t>(image.width()), static_cast<uint32_t>(image.height())}, std::move(img)};
 }
+
+bool supportsWebPDecoding() {
+    static const bool supported = QImageReader::supportedImageFormats().contains("webp");
+    return supported;
+}
+
 } // namespace mln
