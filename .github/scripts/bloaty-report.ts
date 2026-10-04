@@ -79,6 +79,12 @@ function runLink(run: Run): string {
   return `[\`${run.head_sha.slice(0, 7)}\`](${run.html_url})`;
 }
 
+function commitLink(sha: string): string {
+  const repository = process.env.GITHUB_REPOSITORY ?? "maplibre/maplibre-native";
+  const server = process.env.GITHUB_SERVER_URL ?? "https://github.com";
+  return `[\`${sha.slice(0, 7)}\`](${server}/${repository}/commit/${sha})`;
+}
+
 function code(text: string): string {
   // Compile-unit names originate in PR debug information, so they can contain
   // Markdown fences. Use a fence longer than any backtick sequence in the data.
@@ -90,29 +96,28 @@ function code(text: string): string {
 export function formatReport(report: Report, reportUrl: string, full = false): string {
   const lines = [
     "## 🐋 Binary size report", "",
-    `Revision: \`${report.sha.slice(0, 7)}\`. Compared with the latest available main build for each platform.`, "",
-    "| Platform | Main build | VM size change | File size change | Status |",
+    `Revision: ${commitLink(report.sha)}. Compared with the latest available main build for each platform.`, "",
+    "| Platform | Main commit | VM size change | File size change | Status |",
     "| :--- | :--- | ---: | ---: | :--- |",
   ];
   for (const result of report.results) {
-    lines.push(`| ${result.platform} | ${result.baseline ? runLink(result.baseline) : "—"} | ${result.before && result.after ? change(result.before.vm, result.after.vm) : "—"} | ${result.before && result.after ? change(result.before.file, result.after.file) : "—"} | ${result.status} |`);
+    const status = !full && result.status === "Ready" && reportUrl
+      ? `[Ready](${reportUrl}#${result.platform.toLowerCase()})`
+      : result.status;
+    lines.push(`| ${result.platform} | ${result.baseline ? commitLink(result.baseline.head_sha) : "—"} | ${result.before && result.after ? change(result.before.vm, result.after.vm) : "—"} | ${result.before && result.after ? change(result.before.file, result.after.file) : "—"} | ${status} |`);
   }
+  if (!full) return lines.join("\n") + "\n";
   lines.push("", "VM size is the space mapped into memory. File size includes embedded debug information on Linux. Positive changes mean growth.");
-  if (!full) lines.push("", `[Full iOS and Linux report](${reportUrl})`);
   for (const result of report.results) {
-    lines.push("", full ? `### ${result.platform}` : `<details>\n<summary>${result.platform} details</summary>`, "");
+    lines.push("", `### ${result.platform}`, "");
     if (result.run) lines.push(`PR build: ${runLink(result.run)} (${result.run.created_at}).`, "");
     if (result.baseline) lines.push(`Main build: ${runLink(result.baseline)} (${result.baseline.created_at}).`, "");
     if (result.before && result.after) {
       lines.push(`VM size: ${size(result.before.vm)} → ${size(result.after.vm)}. File size: ${size(result.before.file)} → ${size(result.after.file)}.`, "");
     }
     if (result.diff !== undefined) {
-      const diffLines = result.diff.trimEnd().split("\n");
-      const excerpt = diffLines.length <= 14 ? result.diff : [...diffLines.slice(0, 12), "…", diffLines.at(-1)].join("\n");
-      lines.push(code(full ? result.diff : excerpt), "");
-      if (!full && diffLines.length > 14) lines.push("First rows shown; the full report contains all compile units.", "");
+      lines.push(code(result.diff), "");
     } else lines.push(result.status, "");
-    if (!full) lines.push("</details>");
   }
   return lines.join("\n") + "\n";
 }
