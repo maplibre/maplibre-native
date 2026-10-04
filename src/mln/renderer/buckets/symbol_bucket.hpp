@@ -107,9 +107,13 @@ public:
                              )
         : layoutSize(expression_.evaluate(tileZoom + 1)),
           expression(expression_) {
-        const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);
-        coveringRanges = std::make_tuple(
-            zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
+        // A feature-constant expression without a zoom dependency (e.g. one
+        // that only depends on the global state) has no zoom curve.
+        if (!expression_.isZoomConstant()) {
+            const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);
+            coveringRanges = std::make_tuple(
+                zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
+        }
     }
 
     Range<float> getVertexSizeData(const GeometryTileFeature&) noexcept override { return {0.0f, 0.0f}; };

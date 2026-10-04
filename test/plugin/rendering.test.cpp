@@ -40,7 +40,7 @@ void registerTriangles(const std::string& pluginID,
     static const mln_plugin_attribute_binding_v1 binding = {sizeof(binding), 0, 0, 0};
     static const mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
     static const mln_plugin_drawable_descriptor_v1 drawable = {
-        sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1};
+        sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1, MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY, 0, 0, 0, 0};
     static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
@@ -57,8 +57,18 @@ void registerTriangles(const std::string& pluginID,
     static const mln_plugin_vertex_stream_v1 colorStreams[] = {stream,
                                                                {sizeof(stream), 1, colors, sizeof(colors), 3, 4}};
     static const mln_plugin_attribute_binding_v1 colorBindings[] = {binding, {sizeof(binding), 1, 1, 0}};
-    static const mln_plugin_drawable_descriptor_v1 colorDrawable = {
-        sizeof(drawable), 1, {"main", 4}, colorBindings, 2, &segment, 1};
+    static const mln_plugin_drawable_descriptor_v1 colorDrawable = {sizeof(drawable),
+                                                                    1,
+                                                                    {"main", 4},
+                                                                    colorBindings,
+                                                                    2,
+                                                                    &segment,
+                                                                    1,
+                                                                    MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY,
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    0};
     const mln_plugin_shader_attribute_v1 colorAttributes[] = {
         attribute, {sizeof(attribute), 1, 1, {"a_color", 7}, MLN_PLUGIN_VERTEX_UINT8_X4_NORMALIZED}};
     std::array<std::string, 2> types = {pluginID + ".left", pluginID + ".right"};

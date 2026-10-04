@@ -40,6 +40,20 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
             stl = project.property("mapbox.stl") as String
         }
 
+        val withPlugins = providers.gradleProperty("maplibre.with_plugins")
+            .map { it.toBooleanStrict() }
+            .orElse(
+                providers.fileContents(rootProject.layout.projectDirectory.file("VERSION")).asText.map {
+                    Regex("[0-9]+\\.[0-9]+\\.[0-9]+-pre.*").matches(it.trim())
+                }
+            ).get()
+
+        fun pluginArgument(renderer: String): String {
+            // The C plugin API currently supports OpenGL and Vulkan, but not WebGPU.
+            val enabled = withPlugins && renderer in setOf("opengl", "vulkan", "multiBackend")
+            return "-DMLN_WITH_PLUGINS=${if (enabled) "ON" else "OFF"}"
+        }
+
         fun configureNativeBuildBlock(setup: () -> Unit) {
             setup()
         }
@@ -48,6 +62,9 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
         if (appExtension != null) {
             configureNativeBuildBlock {
                 if (abi != "none") {
+                    appExtension.productFlavors.configureEach {
+                        externalNativeBuild.cmake.arguments.add(pluginArgument(name))
+                    }
                     appExtension.externalNativeBuild {
                         cmake {
                             path = file("../MapLibreAndroid/src/cpp/CMakeLists.txt")
@@ -98,6 +115,9 @@ fun Project.nativeBuild(nativeTargets: List<String>) =
         if (libraryExtension != null) {
             configureNativeBuildBlock {
                 if (abi != "none") {
+                    libraryExtension.productFlavors.configureEach {
+                        externalNativeBuild.cmake.arguments.add(pluginArgument(name))
+                    }
                     libraryExtension.externalNativeBuild {
                         cmake {
                             path = file("../MapLibreAndroid/src/cpp/CMakeLists.txt")
