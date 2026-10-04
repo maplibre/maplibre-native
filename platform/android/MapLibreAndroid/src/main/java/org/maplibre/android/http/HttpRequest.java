@@ -13,7 +13,7 @@ public interface HttpRequest {
   int PERMANENT_ERROR = 2;
 
   /**
-   * Executes the request with an Accept header.
+   * Executes the request.
    *
    * @param httpRequest  callback to be invoked when we receive a response
    * @param nativePtr    the pointer associated to the request
