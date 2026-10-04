@@ -58,13 +58,6 @@ public class HttpRequestImpl implements HttpRequest {
   @Override
   public void executeRequest(HttpResponder httpRequest, long nativePtr, @NonNull String resourceUrl,
                              @NonNull String dataRange, @NonNull String etag, @NonNull String modified,
-                             boolean offlineUsage) {
-    executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage, "");
-  }
-
-  @Override
-  public void executeRequest(HttpResponder httpRequest, long nativePtr, @NonNull String resourceUrl,
-                             @NonNull String dataRange, @NonNull String etag, @NonNull String modified,
                              boolean offlineUsage, @NonNull String acceptHeader) {
     OkHttpCallback callback = new OkHttpCallback(httpRequest);
     try {
