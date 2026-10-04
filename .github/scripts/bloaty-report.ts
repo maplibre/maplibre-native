@@ -30,6 +30,7 @@ export interface Result {
   before?: Sizes;
   after?: Sizes;
   diff?: string;
+  reportUrl?: string;
 }
 
 interface Sizes { vm: number; file: number }
@@ -75,25 +76,13 @@ export function change(before: number, after: number): string {
   return `${sign}${size(delta)} (${percent})`;
 }
 
-function runLink(run: Run): string {
-  return `[\`${run.head_sha.slice(0, 7)}\`](${run.html_url})`;
-}
-
 function commitLink(sha: string): string {
   const repository = process.env.GITHUB_REPOSITORY ?? "maplibre/maplibre-native";
   const server = process.env.GITHUB_SERVER_URL ?? "https://github.com";
   return `[\`${sha.slice(0, 7)}\`](${server}/${repository}/commit/${sha})`;
 }
 
-function code(text: string): string {
-  // Compile-unit names originate in PR debug information, so they can contain
-  // Markdown fences. Use a fence longer than any backtick sequence in the data.
-  const longest = Math.max(2, ...(text.match(/`+/g) ?? []).map(match => match.length));
-  const fence = "`".repeat(longest + 1);
-  return `${fence}text\n${text.trimEnd()}\n${fence}`;
-}
-
-export function formatReport(report: Report, reportUrl: string, full = false): string {
+export function formatReport(report: Report, reportUrl: string): string {
   const lines = [
     "## 🐋 Binary size report", "",
     `Revision: ${commitLink(report.sha)}. Compared with the latest available main build for each platform.`, "",
@@ -101,25 +90,31 @@ export function formatReport(report: Report, reportUrl: string, full = false): s
     "| :--- | :--- | ---: | ---: | :--- |",
   ];
   for (const result of report.results) {
-    const status = !full && result.status === "Ready" && reportUrl
-      ? `[Ready](${reportUrl}#${result.platform.toLowerCase()})`
+    const url = result.reportUrl ?? reportUrl;
+    const status = result.status === "Ready" && url
+      ? `[Ready](${url})`
       : result.status;
     lines.push(`| ${result.platform} | ${result.baseline ? commitLink(result.baseline.head_sha) : "—"} | ${result.before && result.after ? change(result.before.vm, result.after.vm) : "—"} | ${result.before && result.after ? change(result.before.file, result.after.file) : "—"} | ${status} |`);
   }
-  if (!full) return lines.join("\n") + "\n";
-  lines.push("", "VM size is the space mapped into memory. File size includes embedded debug information on Linux. Positive changes mean growth.");
-  for (const result of report.results) {
-    lines.push("", `### ${result.platform}`, "");
-    if (result.run) lines.push(`PR build: ${runLink(result.run)} (${result.run.created_at}).`, "");
-    if (result.baseline) lines.push(`Main build: ${runLink(result.baseline)} (${result.baseline.created_at}).`, "");
-    if (result.before && result.after) {
-      lines.push(`VM size: ${size(result.before.vm)} → ${size(result.after.vm)}. File size: ${size(result.before.file)} → ${size(result.after.file)}.`, "");
-    }
-    if (result.diff !== undefined) {
-      lines.push(code(result.diff), "");
-    } else lines.push(result.status, "");
-  }
   return lines.join("\n") + "\n";
+}
+
+export function writeReports(report: Report) {
+  mkdirSync("bloaty-reports", { recursive: true });
+  const combined = report.results.map(result => [
+    `=== ${result.platform} Bloaty diff ===`,
+    `PR: ${report.sha}`,
+    `Main: ${result.baseline?.head_sha ?? "unavailable"}`,
+    "",
+    result.diff ?? result.status,
+  ].join("\n")).join("\n\n");
+  writeFileSync("bloaty-reports/bloaty-report.txt", combined + "\n");
+  for (const result of report.results) {
+    if (result.diff !== undefined) {
+      // Preserve Bloaty's stdout verbatim in each platform's linked report.
+      writeFileSync(`bloaty-reports/${result.platform.toLowerCase()}.txt`, result.diff);
+    }
+  }
 }
 
 async function artifacts(octokit: Octokit, repo: Repo, runId: number): Promise<Artifact[]> {
@@ -172,7 +167,7 @@ export function compareBinaries(platform: Platform["name"], currentDirectory: st
     "--debug-file", resolve(currentDirectory, "MapLibre_DWARF"),
     "--debug-file", resolve(baselineDirectory, "MapLibre_DWARF"),
   ] : [];
-  const diff = bloaty([...debug, "-n", "0", "-s", "vm", "-d", "compileunits", current, "--", base]);
+  const diff = bloaty([...debug, "-w", "-n", "0", "-s", "vm", "-d", "compileunits", current, "--", base]);
   return { before, after, diff };
 }
 
@@ -226,6 +221,9 @@ async function main() {
   const command = process.argv[2];
   if (command === "format") {
     const report = JSON.parse(readFileSync("bloaty-report.json", "utf8")) as Report;
+    for (const result of report.results) {
+      result.reportUrl = process.env[`${result.platform.toUpperCase()}_REPORT_URL`] || undefined;
+    }
     const message = formatReport(report, process.env.REPORT_URL ?? "");
     writeFileSync("message.md", message);
     if (process.env.GITHUB_STEP_SUMMARY) writeFileSync(process.env.GITHUB_STEP_SUMMARY, message);
@@ -249,7 +247,7 @@ async function main() {
     for (const platform of platforms) results.push(await analyze(octokit, repo, trigger, platform));
     const report = { sha: trigger.head_sha, results };
     writeFileSync("bloaty-report.json", JSON.stringify(report));
-    writeFileSync("bloaty-report.md", formatReport(report, "", true));
+    writeReports(report);
     const message = formatReport(report, process.env.REPORT_URL ?? "");
     writeFileSync("message.md", message);
     core.setOutput("has-errors", results.some(result => result.status.startsWith("Analysis failed")));

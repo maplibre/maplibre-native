@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bloaty-report
-          path: bloaty-report.md
+          path: bloaty-reports/*.txt
           if-no-files-found: error
 
       - name: Configure AWS credentials
@@ -91,19 +91,26 @@ jobs:
         id: publish
         continue-on-error: true
         run: |
-          report_path="bloaty-results/pr-$PR_NUMBER/$HEAD_SHA/$GITHUB_RUN_ID.md"
-          aws s3 cp bloaty-report.md "s3://maplibre-native/$report_path" --content-type text/markdown
+          report_path="bloaty-results/pr-$PR_NUMBER/$HEAD_SHA/$GITHUB_RUN_ID"
+          aws s3 cp bloaty-reports/ "s3://maplibre-native/$report_path/" --recursive --content-type text/plain
           echo "report-url=$REPORT_URL" >> "$GITHUB_OUTPUT"
+          for platform in ios linux; do
+            if test -f "bloaty-reports/$platform.txt"; then
+              echo "$platform-report-url=${REPORT_URL%/bloaty-report.txt}/$platform.txt" >> "$GITHUB_OUTPUT"
+            fi
+          done
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          REPORT_URL: https://maplibre-native.s3.eu-central-1.amazonaws.com/bloaty-results/pr-${{ steps.pr.outputs.number }}/${{ github.event.workflow_run.head_sha }}/${{ github.run_id }}.md
+          REPORT_URL: https://maplibre-native.s3.eu-central-1.amazonaws.com/bloaty-results/pr-${{ steps.pr.outputs.number }}/${{ github.event.workflow_run.head_sha }}/${{ github.run_id }}/bloaty-report.txt
 
       - name: Format Bloaty comment
         if: steps.pr.outputs.number
         run: node .github/scripts/bloaty-report.ts format
         env:
           REPORT_URL: ${{ steps.publish.outputs.report-url || steps.report-artifact.outputs.artifact-url }}
+          IOS_REPORT_URL: ${{ steps.publish.outputs.ios-report-url }}
+          LINUX_REPORT_URL: ${{ steps.publish.outputs.linux-report-url }}
 
       - name: Check that the PR still has this revision
         if: steps.pr.outputs.number
