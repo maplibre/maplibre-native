@@ -1,19 +1,31 @@
 #!/usr/bin/bash
 
-sudo apt-get update
-DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
-  libcurl4-openssl-dev \
-  libuv1-dev \
-  libjpeg-dev \
-  libpng-dev \
-  libglfw3-dev \
-  libwebp-dev \
-  libopengl0 \
-  mesa-vulkan-drivers \
-  llvm \
-  glslang-dev \
-  libbz2-dev \
-  libxinerama-dev \
-  libxcursor-dev \
-  libxi-dev \
+packages=(
+  libcurl4-openssl-dev
+  libuv1-dev
+  libjpeg-dev
+  libpng-dev
+  libglfw3-dev
+  libwebp-dev
+  libopengl0
+  mesa-vulkan-drivers
+  llvm
+  glslang-dev
+  libbz2-dev
+  libxinerama-dev
+  libxcursor-dev
+  libxi-dev
   libx11-xcb-dev
+)
+
+retry() {
+  for attempt in 1 2 3; do
+    sudo timeout 300 apt-get -o Acquire::Retries=3 "$@" && return 0
+    echo "::warning::apt-get $1 failed or timed out (attempt $attempt of 3)"
+  done
+  return 1
+}
+
+retry update
+retry install --download-only -y "${packages[@]}"
+DEBIAN_FRONTEND=noninteractive sudo apt-get install -y "${packages[@]}"

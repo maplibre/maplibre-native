@@ -49,6 +49,7 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: macos-26
+    timeout-minutes: 300
     env:
       BUILDTYPE: Debug
       HOMEBREW_NO_AUTO_UPDATE: 1
@@ -260,6 +261,7 @@ jobs:
   ios-build-cmake:
     needs: pre_job
     runs-on: macos-14
+    timeout-minutes: 60
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -294,6 +296,7 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: macos-26
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -329,6 +332,7 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: macos-26
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
