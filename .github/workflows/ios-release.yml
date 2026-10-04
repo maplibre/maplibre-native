@@ -63,8 +63,10 @@ jobs:
       - name: Create .zip with debug symbols
         working-directory: ./bazel-bin/platform/ios/${{ matrix.variant.target }}_dsyms
         run: |
-          zip ${FRAMEWORK_NAME}_ios_device.framework.dSYM.zip ${FRAMEWORK_NAME}_ios_device.framework.dSYM/Contents/Resources/DWARF/${FRAMEWORK_NAME}_ios_device ${FRAMEWORK_NAME}_ios_device.framework.dSYM/Contents/Info.plist
-          echo debug_symbols_ios="$(realpath ${FRAMEWORK_NAME}_ios_device.framework.dSYM.zip)" >> "$GITHUB_ENV"
+          zip "${FRAMEWORK_NAME}_ios_device.framework.dSYM.zip" \
+            "${FRAMEWORK_NAME}_ios_device.framework.dSYM/Contents/Resources/DWARF/${FRAMEWORK_NAME}_ios_device" \
+            "${FRAMEWORK_NAME}_ios_device.framework.dSYM/Contents/Info.plist"
+          echo "debug_symbols_ios=$(realpath "${FRAMEWORK_NAME}_ios_device.framework.dSYM.zip")" >> "$GITHUB_ENV"
 
       - name: Copy debug symbols to root
         working-directory: .
