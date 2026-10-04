@@ -26,9 +26,7 @@ public interface HttpRequest {
    */
   void executeRequest(HttpResponder httpRequest, long nativePtr, String resourceUrl,
                               String dataRange, String etag, String modified, boolean offlineUsage,
-                              String acceptHeader) {
-    executeRequest(httpRequest, nativePtr, resourceUrl, dataRange, etag, modified, offlineUsage);
-  }
+                              String acceptHeader);
 
   /**
    * Cancels the request.
