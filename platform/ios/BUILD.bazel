@@ -160,6 +160,12 @@ apple_bundle_version(
             ],
             "device": ["arm64"],
         },
+        # The C entry point is called by plugins outside this binary. Pull its
+        # object file out of mbgl-core even when nothing in the SDK calls it.
+        linkopts = select({
+            "//:plugins_enabled": ["-Wl,-u,_mln_plugin_register_v1"],
+            "//conditions:default": [],
+        }),
         minimum_os_versions = {"ios": "15.5"},
         public_hdrs = public_hdrs + select({
             "//:plugins_enabled": ["//:include/mln/plugin/plugin_api.h"],

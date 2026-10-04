@@ -58,10 +58,7 @@ jobs:
         if: matrix.variant.plugins
         run: |
           unzip -q "$xcframework" -d "$RUNNER_TEMP/plugin-xcframework"
-          for slice in "$RUNNER_TEMP/plugin-xcframework/MapLibreWithPlugins.xcframework"/*/MapLibreWithPlugins.framework; do
-            test -f "$slice/Headers/plugin_api.h"
-            nm -gU "$slice/MapLibreWithPlugins" | grep ' _mln_plugin_register_v1$'
-          done
+          python3 scripts/verify-plugin-xcframework.py "$RUNNER_TEMP/plugin-xcframework/MapLibreWithPlugins.xcframework"
 
       - name: Create .zip with debug symbols
         working-directory: ./bazel-bin/platform/ios/${{ matrix.variant.target }}_dsyms
