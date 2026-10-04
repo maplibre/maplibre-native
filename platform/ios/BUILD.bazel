@@ -163,7 +163,7 @@ apple_bundle_version(
         # The C entry point is called by plugins outside this binary. Pull its
         # object file out of mbgl-core even when nothing in the SDK calls it.
         linkopts = select({
-            "//:plugins_enabled": ["-Wl,-u,_mln_plugin_register_v1"],
+            "//:plugins_enabled": ["-u", "_mln_plugin_register_v1"],
             "//conditions:default": [],
         }),
         minimum_os_versions = {"ios": "15.5"},
