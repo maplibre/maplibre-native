@@ -109,8 +109,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
 #else
         const RasterDrawableUBO drawableUBO = {
 #endif
-            /* .matrix = */ util::cast<float>(matrix)
-        };
+            /* .matrix = */ util::cast<float>(matrix)};
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);
 #else

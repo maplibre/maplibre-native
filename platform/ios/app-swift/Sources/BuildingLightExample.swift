@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(BuildingLightExample)
+/// #-example-code(BuildingLightExample)
 class BuildingLightExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
     var light: MLNLight!
@@ -22,7 +22,7 @@ class BuildingLightExample: UIViewController, MLNMapViewDelegate {
         addSlider()
     }
 
-    // Add a slider to the map view. This will be used to adjust the map's light object.
+    /// Add a slider to the map view. This will be used to adjust the map's light object.
     func addSlider() {
         slider = UISlider()
         slider.translatesAutoresizingMaskIntoConstraints = false

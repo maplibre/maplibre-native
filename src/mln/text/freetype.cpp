@@ -25,7 +25,7 @@ FreeTypeLibrary::~FreeTypeLibrary() {
 
 // FreeTypeFace
 
-FreeTypeFace::FreeTypeFace(const std::string &fontFileName, const FreeTypeLibrary &lib) {
+FreeTypeFace::FreeTypeFace(const std::string& fontFileName, const FreeTypeLibrary& lib) {
     FT_Error error = FT_New_Face(lib.library, fontFileName.c_str(), 0, &face);
     valid = (error == 0);
     if (!valid) return;
@@ -34,7 +34,7 @@ FreeTypeFace::FreeTypeFace(const std::string &fontFileName, const FreeTypeLibrar
     FT_Set_Char_Size(face, 0, SDF_FONT_SIZE * 64, 72, 72);
 }
 
-FreeTypeFace::FreeTypeFace(const char *fontData, size_t fontDataSize, const FreeTypeLibrary &lib) {
+FreeTypeFace::FreeTypeFace(const char* fontData, size_t fontDataSize, const FreeTypeLibrary& lib) {
     memoryFile.resize(fontDataSize);
     std::memcpy(memoryFile.data(), fontData, fontDataSize);
     FT_Error error = FT_New_Memory_Face(lib.library, memoryFile.data(), (FT_Long)fontDataSize, 0, &face);
@@ -59,7 +59,7 @@ int FreeTypeFace::force_ucs2_charmap(FT_Face ftf) {
     return -1;
 }
 
-Glyph FreeTypeFace::rasterizeGlyph(const GlyphID &glyph) {
+Glyph FreeTypeFace::rasterizeGlyph(const GlyphID& glyph) {
     Glyph fixedMetrics;
 
     FT_Int32 flags = FT_LOAD_DEFAULT;
@@ -71,7 +71,7 @@ Glyph FreeTypeFace::rasterizeGlyph(const GlyphID &glyph) {
     FT_GlyphSlot slot = face->glyph;
     FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
 
-    const FT_Bitmap &ftBitmap = slot->bitmap;
+    const FT_Bitmap& ftBitmap = slot->bitmap;
 
     fixedMetrics.id = glyph;
 

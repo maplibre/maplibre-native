@@ -105,8 +105,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .stroke_opacity_t = std::get<0>(binders->get<CircleStrokeOpacity>()->interpolationFactor(zoom)),
             .pad1 = 0,
             .pad2 = 0,
-            .pad3 = 0
-        };
+            .pad3 = 0};
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);
 #else

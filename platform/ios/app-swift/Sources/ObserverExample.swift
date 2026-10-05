@@ -31,7 +31,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
         view.addSubview(button)
     }
 
-    // #-example-code(ObserverExampleActionJournal)
+    /// #-example-code(ObserverExampleActionJournal)
     @objc func printActionJournal() {
         print("ActionJournalLog files: \(mapView.getActionJournalLogFiles())")
         print("ActionJournalLog : \(mapView.getActionJournalLog())")
@@ -47,12 +47,12 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
         // #-end-example-code
     }
 
-    // #-example-code(ObserverExampleRenderingStats)
+    /// #-example-code(ObserverExampleRenderingStats)
     func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, renderingStats _: MLNRenderingStats) {}
 
     // #-end-example-code
 
-    // #-example-code(ObserverExampleShaders)
+    /// #-example-code(ObserverExampleShaders)
     func mapView(_: MLNMapView, shaderWillCompile id: Int, backend: Int, defines: String) {
         print("A new shader is being compiled - shaderID:\(id), backend type:\(backend), program configuration:\(defines)")
     }
@@ -63,7 +63,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
     // #-end-example-code
 
-    // #-example-code(ObserverExampleGlyphs)
+    /// #-example-code(ObserverExampleGlyphs)
     func mapView(_: MLNMapView, glyphsWillLoad fontStack: [String], range: NSRange) {
         print("Glyphs are being requested for the font stack \(fontStack), ranging from \(range.location) to \(range.location + range.length)")
     }
@@ -74,7 +74,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
     // #-end-example-code
 
-    // #-example-code(ObserverExampleTiles)
+    /// #-example-code(ObserverExampleTiles)
     func mapView(_: MLNMapView, tileDidTriggerAction operation: MLNTileOperation,
                  x: Int,
                  y: Int,
@@ -121,7 +121,7 @@ class ObserverExampleView: UIViewController, MLNMapViewDelegate {
 
     // #-end-example-code
 
-    // #-example-code(ObserverExampleSprites)
+    /// #-example-code(ObserverExampleSprites)
     func mapView(_: MLNMapView, spriteWillLoad id: String, url: String) {
         print("The sprite \(id) has been requested from \(url)")
     }

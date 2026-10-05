@@ -17,8 +17,14 @@ class NavigationLocationManager: NSObject, MLNLocationManager {
     var speedMultiplier = 1.0
     var currentDistance = 0.0
     let path: RoutePath
-    var totalDistance: Double { path.totalDistance }
-    var coordinates: [CLLocationCoordinate2D] { path.coordinates }
+    var totalDistance: Double {
+        path.totalDistance
+    }
+
+    var coordinates: [CLLocationCoordinate2D] {
+        path.coordinates
+    }
+
     private(set) var lastLocationAnimationDuration: TimeInterval = 0
     private var lastLocationTimestamp: Date?
 

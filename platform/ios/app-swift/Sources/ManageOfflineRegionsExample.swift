@@ -2,7 +2,7 @@ import Foundation
 import MapLibre
 import SwiftUI
 
-// #-example-code(ManageOfflineRegionsExample)
+/// #-example-code(ManageOfflineRegionsExample)
 class ManageOfflineRegionsExample: UIViewController, MLNMapViewDelegate {
     let jsonDecoder = JSONDecoder()
 
@@ -74,7 +74,7 @@ class ManageOfflineRegionsExample: UIViewController, MLNMapViewDelegate {
         ])
     }
 
-    /*
+    /**
        For the purposes of this example, remove any offline packs
        that exist before the example is re-loaded.
      */
@@ -93,7 +93,7 @@ class ManageOfflineRegionsExample: UIViewController, MLNMapViewDelegate {
         // Setup offline pack notification handlers.
         setupOfflinePackHandler()
 
-        /**
+        /* 
          Create a region that includes the current map camera, to be captured
          in an offline map. Note: Because tile count grows exponentially as zoom level
          increases, you should be conservative with your `toZoomLevel` setting.
@@ -127,7 +127,7 @@ class ManageOfflineRegionsExample: UIViewController, MLNMapViewDelegate {
     // MARK: - MLNOfflinePack notification handlers
 
     @objc func offlinePackProgressDidChange(notification: NSNotification) {
-        /**
+        /* 
          Get the offline pack this notification is referring to,
          along with its associated metadata.
          */
@@ -162,8 +162,7 @@ private extension MLNOfflinePackProgress {
             return 0
         }
 
-        let percentage = Float(countOfResourcesCompleted) / Float(countOfResourcesExpected) * 100
-        return percentage
+        return Float(countOfResourcesCompleted) / Float(countOfResourcesExpected) * 100
     }
 
     var formattedCountOfBytesCompleted: String {
@@ -173,7 +172,7 @@ private extension MLNOfflinePackProgress {
 }
 
 extension ManageOfflineRegionsExample: UITableViewDelegate, UITableViewDataSource {
-    // Create the table view which will display the downloaded regions.
+    /// Create the table view which will display the downloaded regions.
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         if let packs = MLNOfflineStorage.shared.packs {
             return packs.count

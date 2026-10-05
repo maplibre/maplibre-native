@@ -7,7 +7,7 @@ class FeatureStateVectorExampleUIKit: UIViewController, MLNMapViewDelegate {
     private var mapView: MLNMapView!
     private var countriesSource: MLNVectorTileSource!
 
-    // The source layer that holds the country polygons in the demo tiles.
+    /// The source layer that holds the country polygons in the demo tiles.
     private let countriesSourceLayer = "countries"
 
     override func viewDidLoad() {
@@ -123,7 +123,7 @@ struct FeatureStateVectorExampleUIViewControllerRepresentable: UIViewControllerR
     func updateUIViewController(_: FeatureStateVectorExampleUIKit, context _: Context) {}
 }
 
-// SwiftUI wrapper
+/// SwiftUI wrapper
 struct FeatureStateVectorExample: View {
     var body: some View {
         FeatureStateVectorExampleUIViewControllerRepresentable()

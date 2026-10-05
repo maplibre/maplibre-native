@@ -2,7 +2,7 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(AddMarkerSymbolExample)
+/// #-example-code(AddMarkerSymbolExample)
 class AddMarkerSymbolExampleUIKit: UIViewController, MLNMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()

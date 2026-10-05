@@ -168,7 +168,9 @@ class NavigationMap: MLNMapView, MLNMapViewDelegate, NavigationLocationManagerDe
             notifyOnMapLoad = false
             onDidFinishLoadingMap?()
         }
-        if styleReady { return }
+        if styleReady {
+            return
+        }
 
         let gate = Gate()
         styleGate = gate

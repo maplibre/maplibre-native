@@ -6,7 +6,7 @@
 
 namespace mln {
 
-int runTests(int argc, char *argv[]) {
+int runTests(int argc, char* argv[]) {
 #if (TEST_HAS_SERVER && defined(__QT__)) || USE_CPP_TEST_SERVER
     auto server = std::make_unique<test::HttpServer>();
 #endif

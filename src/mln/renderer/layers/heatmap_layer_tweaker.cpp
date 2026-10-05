@@ -79,8 +79,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
             .weight_t = std::get<0>(binders->get<HeatmapWeight>()->interpolationFactor(zoom)),
             .radius_t = std::get<0>(binders->get<HeatmapRadius>()->interpolationFactor(zoom)),
-            .pad1 = 0
-        };
+            .pad1 = 0};
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);
 #else
