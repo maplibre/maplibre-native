@@ -20,16 +20,16 @@ public:
                          [NSString stringWithCString:msg.c_str() encoding:NSUTF8StringEncoding]];
     switch (severity) {
       case EventSeverity::Debug:
-        MLNLogDebug(message);
+        MLNLogDebug(@"%@", message);
         break;
       case EventSeverity::Info:
-        MLNLogInfo(message);
+        MLNLogInfo(@"%@", message);
         break;
       case EventSeverity::Warning:
-        MLNLogWarning(message);
+        MLNLogWarning(@"%@", message);
         break;
       case EventSeverity::Error:
-        MLNLogError(message);
+        MLNLogError(@"%@", message);
         break;
       default:
         assert(false);
