@@ -14,6 +14,10 @@ on:
         type: string
         default: ''
         description: Version (only for pre-releases)
+      build_run_id:
+        type: string
+        default: ''
+        description: Reuse artifacts and source commit from a completed ios-release run instead of rebuilding
       distribution_ref:
         type: string
         default: main
@@ -21,6 +25,7 @@ on:
 
 jobs:
   ios-build-dynamic:
+    if: inputs.build_run_id == ''
     name: iOS dynamic (${{ matrix.variant.name }})
     runs-on: macos-26
     strategy:
@@ -88,6 +93,7 @@ jobs:
             ${{ matrix.variant.name }}_ios_device.framework.dSYM.zip
 
   ios-build-static:
+    if: inputs.build_run_id == ''
     runs-on: macos-15
     defaults:
       run:
@@ -119,6 +125,7 @@ jobs:
             MapLibre.static.xcframework.zip
 
   ios-release:
+    if: ${{ !cancelled() && (inputs.build_run_id != '' || (needs.ios-build-dynamic.result == 'success' && needs.ios-build-static.result == 'success')) }}
     permissions:
       id-token: write         # needed for AWS
       contents: write         # allow making a release
@@ -133,11 +140,43 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
+      - name: Select release source
+        id: release_source
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          release_commit="$GITHUB_SHA"
+          if [[ -n "$BUILD_RUN_ID" ]]; then
+            if [[ ! "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]; then
+              echo "::error::build_run_id must be a numeric workflow run ID"
+              exit 1
+            fi
+            release_commit="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" \
+              --jq 'select(.path == ".github/workflows/ios-release.yml" and .status == "completed") | .head_sha')"
+            if [[ ! "$release_commit" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::Choose a completed ios-release run with successful framework builds"
+              exit 1
+            fi
+            builds_succeeded="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID/jobs?per_page=100" \
+              --jq '[.jobs[] | select(.name == "iOS dynamic (MapLibre)" or .name == "iOS dynamic (MapLibreWithPlugins)" or .name == "ios-build-static")] | length == 3 and all(.[]; .conclusion == "success")')"
+            if [[ "$builds_succeeded" != true ]]; then
+              echo "::error::All three framework builds must have succeeded before reusing their artifacts"
+              exit 1
+            fi
+          fi
+          echo "sha=$release_commit" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ steps.release_source.outputs.sha }}
           submodules: recursive
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          run-id: ${{ inputs.build_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -151,11 +190,14 @@ jobs:
 
       - name: Get version (pre-release)
         if: github.event.inputs.release == 'pre'
+        env:
+          PRE_RELEASE_VERSION: ${{ inputs.pre_release_version }}
+          RELEASE_COMMIT: ${{ steps.release_source.outputs.sha }}
         run: |
-          version="${{ github.event.inputs.pre_release_version }}"
+          version="$PRE_RELEASE_VERSION"
           if [[ -z "$version" ]]; then
             version="$(head VERSION)"
-            version="${version%%-pre*}"-pre${{ github.sha }}
+            version="${version%%-pre*}-pre${RELEASE_COMMIT}"
           fi
           if [[ "$version" != *"pre"* ]]; then
             echo "::error::Pre-release version must include 'pre' (Current version: $version)"
@@ -166,7 +208,16 @@ jobs:
 
       - name: Create tag if it does not exist
         working-directory: .
-        run: .github/scripts/ensure-tag.sh ios-v${{ env.version }} ${{ github.sha }}
+        env:
+          VERSION: ${{ env.version }}
+          RELEASE_COMMIT: ${{ steps.release_source.outputs.sha }}
+        run: |
+          tag="ios-v$VERSION"
+          # A shallow checkout may not contain a tag created before a retry.
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            git fetch --no-tags origin "refs/tags/$tag:refs/tags/$tag"
+          fi
+          .github/scripts/ensure-tag.sh "$tag" "$RELEASE_COMMIT"
 
       - name: Extract changelog for version
         run: |
