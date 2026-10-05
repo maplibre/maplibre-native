@@ -1,0 +1,15 @@
+{
+  "id": "2026-10-05T22-36-37-705Z",
+  "startedAt": "2026-10-05T22:36:37.788Z",
+  "status": "running",
+  "intent": "Please review PR number 4575",
+  "driver": "claude-code",
+  "caller": {
+    "runner": {
+      "host": "Mac.fritz.box",
+      "pid": 21945,
+      "publish": "branch"
+    },
+    "host": "Mac.fritz.box"
+  }
+}
