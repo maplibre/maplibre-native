@@ -80,6 +80,14 @@ MLNStyleLayer* LayerManagerDarwin::createPeer(style::Layer* layer) {
   if (auto* factory = getPeerFactory(layer->getTypeInfo())) {
     return factory->createPeer(layer);
   }
+#if MLN_WITH_PLUGINS
+  // Runtime plugins register core factories through the C API, without an
+  // Objective-C peer factory. Give them the common style-layer interface so
+  // style enumeration (including accessibility) never inserts a nil peer.
+  if (!getFactory(layer->getTypeInfo()) && hasLayerType(layer->getTypeInfo()->type)) {
+    return [[MLNStyleLayer alloc] initWithRawLayer:layer];
+  }
+#endif
   return nullptr;
 }
 

@@ -31,3 +31,21 @@ gh workflow run ios-ci.yml -f release=pre --ref main
 Or run the workflow from the Actions tab on GitHub.
 
 The items under the `## main` heading in `platform/ios/CHANGELOG.md` will be used as changelog for the pre-release.
+
+## Retrying publication
+
+If all framework builds passed but publication failed, run `ios-release.yml` with
+`build_run_id` set to the completed workflow run ID. The workflow reuses its
+artifacts and checks out its source commit, so the version, changelog, and tag
+match the binaries even if the release workflow has since been fixed.
+
+```sh
+gh workflow run ios-release.yml --ref RELEASE_BRANCH \
+  -f release=full -f build_run_id=RUN_ID -f distribution_ref=DISTRIBUTION_BRANCH
+```
+
+When releasing from a branch that changes workflow files, GitHub may prevent the
+workflow token from creating the release tag. A maintainer can create and push
+`ios-v<VERSION>` at the successful build run's commit using their own authorized
+Git credentials, then retry publication with `build_run_id`. The workflow verifies
+that an existing tag points to that exact commit.

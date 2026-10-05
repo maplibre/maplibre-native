@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 7.0.0-pre0
+
+- Add a MapLibre iOS variant with the plugin API enabled, distributed as the `MapLibreWithPlugins` Swift package product.
+
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
 
 ## 6.31.0

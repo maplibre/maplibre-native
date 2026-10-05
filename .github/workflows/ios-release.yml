@@ -14,10 +14,35 @@ on:
         type: string
         default: ''
         description: Version (only for pre-releases)
+      build_run_id:
+        type: string
+        default: ''
+        description: Reuse artifacts and source commit from a completed ios-release run instead of rebuilding
+      distribution_ref:
+        type: string
+        default: main
+        description: Branch of maplibre-gl-native-distribution containing the release workflow
 
 jobs:
   ios-build-dynamic:
+    if: inputs.build_run_id == ''
+    name: iOS dynamic (${{ matrix.variant.name }})
     runs-on: macos-26
+    strategy:
+      matrix:
+        variant:
+          - name: MapLibre
+            target: MapLibre.dynamic
+            plugins: false
+            artifact: xcframework
+          - name: MapLibreWithPlugins
+            target: MapLibre.dynamic.plugins
+            plugins: true
+            artifact: xcframework-plugins
+    env:
+      FRAMEWORK_NAME: ${{ matrix.variant.name }}
+      FRAMEWORK_TARGET: ${{ matrix.variant.target }}
+      WITH_PLUGINS: ${{ matrix.variant.plugins }}
     defaults:
       run:
         working-directory: platform/ios
@@ -30,35 +55,45 @@ jobs:
       - name: Build XCFramework (Dynamic)
         run: |
           bazel build --compilation_mode=opt --features=dead_strip,thin_lto --objc_enable_binary_stripping \
-            --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
-          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+            --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal --//:plugins="$WITH_PLUGINS" \
+            "//platform/ios:$FRAMEWORK_TARGET" --embed_label=maplibre_ios_"$(cat VERSION)"
+          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal --//:plugins="$WITH_PLUGINS" "//platform/ios:$FRAMEWORK_TARGET")" >> "$GITHUB_ENV"
+
+      - name: Verify plugin API in XCFramework
+        if: matrix.variant.plugins
+        run: |
+          unzip -q "$xcframework" -d "$RUNNER_TEMP/plugin-xcframework"
+          python3 scripts/verify-plugin-xcframework.py "$RUNNER_TEMP/plugin-xcframework/MapLibreWithPlugins.xcframework"
 
       - name: Create .zip with debug symbols
-        working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
+        working-directory: ./bazel-bin/platform/ios/${{ matrix.variant.target }}_dsyms
         run: |
-          zip MapLibre_ios_device.framework.dSYM.zip MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_ios_device.framework.dSYM/Contents/Info.plist
-          echo debug_symbols_ios="$(realpath MapLibre_ios_device.framework.dSYM.zip)" >> "$GITHUB_ENV"
+          zip "${FRAMEWORK_NAME}_ios_device.framework.dSYM.zip" \
+            "${FRAMEWORK_NAME}_ios_device.framework.dSYM/Contents/Resources/DWARF/${FRAMEWORK_NAME}_ios_device" \
+            "${FRAMEWORK_NAME}_ios_device.framework.dSYM/Contents/Info.plist"
+          echo "debug_symbols_ios=$(realpath "${FRAMEWORK_NAME}_ios_device.framework.dSYM.zip")" >> "$GITHUB_ENV"
 
       - name: Copy debug symbols to root
         working-directory: .
-        run: cp ${{ env.debug_symbols_ios }} .
+        run: cp "$debug_symbols_ios" .
 
       - name: Add license to XCFramework zip
         run: |
-          cp ${{ env.xcframework }} MapLibre.dynamic.xcframework.zip
-          chmod +w MapLibre.dynamic.xcframework.zip
-          zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
+          cp "$xcframework" "$FRAMEWORK_TARGET.xcframework.zip"
+          chmod +w "$FRAMEWORK_TARGET.xcframework.zip"
+          zip "$FRAMEWORK_TARGET.xcframework.zip" LICENSE.md  # add license to zip
         working-directory: .
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: xcframework
+          name: ${{ matrix.variant.artifact }}
           path: |
-            MapLibre.dynamic.xcframework.zip
-            MapLibre_ios_device.framework.dSYM.zip
+            ${{ matrix.variant.target }}.xcframework.zip
+            ${{ matrix.variant.name }}_ios_device.framework.dSYM.zip
 
   ios-build-static:
+    if: inputs.build_run_id == ''
     runs-on: macos-15
     defaults:
       run:
@@ -90,6 +125,7 @@ jobs:
             MapLibre.static.xcframework.zip
 
   ios-release:
+    if: ${{ !cancelled() && (inputs.build_run_id != '' || (needs.ios-build-dynamic.result == 'success' && needs.ios-build-static.result == 'success')) }}
     permissions:
       id-token: write         # needed for AWS
       contents: write         # allow making a release
@@ -104,11 +140,43 @@ jobs:
         working-directory: platform/ios
         shell: bash
     steps:
+      - name: Select release source
+        id: release_source
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          release_commit="$GITHUB_SHA"
+          if [[ -n "$BUILD_RUN_ID" ]]; then
+            if [[ ! "$BUILD_RUN_ID" =~ ^[0-9]+$ ]]; then
+              echo "::error::build_run_id must be a numeric workflow run ID"
+              exit 1
+            fi
+            release_commit="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" \
+              --jq 'select(.path == ".github/workflows/ios-release.yml" and .status == "completed") | .head_sha')"
+            if [[ ! "$release_commit" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::Choose a completed ios-release run with successful framework builds"
+              exit 1
+            fi
+            builds_succeeded="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID/jobs?per_page=100" \
+              --jq '[.jobs[] | select(.name == "iOS dynamic (MapLibre)" or .name == "iOS dynamic (MapLibreWithPlugins)" or .name == "ios-build-static")] | length == 3 and all(.[]; .conclusion == "success")')"
+            if [[ "$builds_succeeded" != true ]]; then
+              echo "::error::All three framework builds must have succeeded before reusing their artifacts"
+              exit 1
+            fi
+          fi
+          echo "sha=$release_commit" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ steps.release_source.outputs.sha }}
           submodules: recursive
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          run-id: ${{ inputs.build_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -122,10 +190,14 @@ jobs:
 
       - name: Get version (pre-release)
         if: github.event.inputs.release == 'pre'
+        env:
+          PRE_RELEASE_VERSION: ${{ inputs.pre_release_version }}
+          RELEASE_COMMIT: ${{ steps.release_source.outputs.sha }}
         run: |
-          version="${{ github.event.inputs.pre_release_version }}"
+          version="$PRE_RELEASE_VERSION"
           if [[ -z "$version" ]]; then
-            version="$(head VERSION)"-pre${{ github.sha }}
+            version="$(head VERSION)"
+            version="${version%%-pre*}-pre${RELEASE_COMMIT}"
           fi
           if [[ "$version" != *"pre"* ]]; then
             echo "::error::Pre-release version must include 'pre' (Current version: $version)"
@@ -136,7 +208,16 @@ jobs:
 
       - name: Create tag if it does not exist
         working-directory: .
-        run: .github/scripts/ensure-tag.sh ios-v${{ env.version }} ${{ github.sha }}
+        env:
+          VERSION: ${{ env.version }}
+          RELEASE_COMMIT: ${{ steps.release_source.outputs.sha }}
+        run: |
+          tag="ios-v$VERSION"
+          # A shallow checkout may not contain a tag created before a retry.
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            git fetch --no-tags origin "refs/tags/$tag:refs/tags/$tag"
+          fi
+          .github/scripts/ensure-tag.sh "$tag" "$RELEASE_COMMIT"
 
       - name: Extract changelog for version
         run: |
@@ -161,9 +242,11 @@ jobs:
           files: |
             xcframework/MapLibre.dynamic.xcframework.zip
             xcframework/MapLibre_ios_device.framework.dSYM.zip
+            xcframework-plugins/MapLibre.dynamic.plugins.xcframework.zip
+            xcframework-plugins/MapLibreWithPlugins_ios_device.framework.dSYM.zip
             xcframework-static/MapLibre.static.xcframework.zip
           tag_name: ios-v${{ env.version }}
-          prerelease: ${{ github.event.inputs.release == 'pre' }}
+          prerelease: ${{ github.event.inputs.release == 'pre' || contains(env.version, '-pre') }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
           draft: true
@@ -194,19 +277,17 @@ jobs:
           draft: false
 
       - name: Release (Swift Package Index)
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+          DISTRIBUTION_REF: ${{ inputs.distribution_ref }}
+          VERSION: ${{ env.version }}
         run: |
-          echo "::add-mask::${{ steps.generate_token.outputs.token }}"
-          release_workflow_id=81221759  # id of release.yml
-          curl -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ steps.generate_token.outputs.token }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/actions/workflows/$release_workflow_id/dispatches \
-            -d '{"ref":"main","inputs":{
-              "changelog_url": "https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-${{ env.version }}.md",
-              "version":"${{ env.version }}",
-              "download_url": "https://github.com/maplibre/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"}}'
+          gh workflow run release.yml --repo maplibre/maplibre-gl-native-distribution \
+            --ref "$DISTRIBUTION_REF" \
+            --field version="$VERSION" \
+            --field changelog_url="https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-$VERSION.md" \
+            --field download_url="https://github.com/maplibre/maplibre-native/releases/download/ios-v$VERSION/MapLibre.dynamic.xcframework.zip" \
+            --field plugins_download_url="https://github.com/maplibre/maplibre-native/releases/download/ios-v$VERSION/MapLibre.dynamic.plugins.xcframework.zip"
 
       - name: Write release notifications
         if: github.repository_owner == 'maplibre'

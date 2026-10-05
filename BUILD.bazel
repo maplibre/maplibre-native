@@ -291,6 +291,7 @@ config_setting(
 exports_files(
     [
         "LICENSE.md",
+        "include/mln/plugin/plugin_api.h",
         "scripts/style-spec-reference/v8.json",
     ],
     visibility = ["//visibility:public"],
