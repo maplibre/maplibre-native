@@ -10,6 +10,7 @@
 #include <mln/gfx/backend_scope.hpp>
 #include <mln/gfx/headless_frontend.hpp>
 #include <mln/gfx/shader_registry.hpp>
+#include <mln/layermanager/layer_manager.hpp>
 #include <mln/map/map_options.hpp>
 #include <mln/map/map_projection.hpp>
 #include <mln/math/log2.hpp>
@@ -53,15 +54,6 @@
 using namespace mln;
 using namespace mln::style;
 using namespace std::literals::string_literals;
-
-// Layer types are provided by the platform's LayerManager; the Darwin layer
-// manager does not register location-indicator, so styles using it drop the
-// layer at parse time (https://github.com/maplibre/maplibre-native/issues/1405).
-static bool isLayerTypeAvailable(const std::string& type) {
-    conversion::Error error;
-    return conversion::convertJSON<std::unique_ptr<Layer>>(R"({"id":"probe","type":")" + type + R"("})", error)
-        .has_value();
-}
 
 template <class FileSource = StubFileSource, class Frontend = HeadlessFrontend>
 class MapTest {
@@ -2213,10 +2205,19 @@ TEST(Map, FeatureStateChangesRenderedStyle) {
     }
 }
 
+static std::size_t countGreenPixels(const PremultipliedImage& image) {
+    std::size_t greenPixels = 0;
+    for (std::size_t i = 0; i < image.bytes(); i += image.channels) {
+        if (image.data[i] < 40 && image.data[i + 1] > 200 && image.data[i + 2] < 40) {
+            ++greenPixels;
+        }
+    }
+    return greenPixels;
+}
+
 TEST(Map, LocationIndicatorAccuracyColorsTransition) {
-    if (!isLayerTypeAvailable("location-indicator")) {
-        GTEST_SKIP() << "location-indicator layer is not registered on this platform "
-                        "(https://github.com/maplibre/maplibre-native/issues/1405)";
+    if (!LayerManager::get()->hasLayerType("location-indicator")) {
+        GTEST_SKIP() << "location-indicator layer is not registered on this platform";
     }
 
     MapTest<> test{1, MapMode::Continuous};
@@ -2277,13 +2278,7 @@ TEST(Map, LocationIndicatorAccuracyColorsTransition) {
     const auto result = readImage();
     EXPECT_GT(centerChannel(result, 0), 240);
     EXPECT_LT(centerChannel(result, 2), 10);
-    std::size_t greenPixels = 0;
-    for (std::size_t i = 0; i < result.bytes(); i += 4) {
-        if (result.data[i] < 40 && result.data[i + 1] > 200 && result.data[i + 2] < 40) {
-            ++greenPixels;
-        }
-    }
-    EXPECT_GT(greenPixels, 0u) << "The accuracy border should finish transitioning to green";
+    EXPECT_GT(countGreenPixels(result), 0u) << "The accuracy border should finish transitioning to green";
 }
 
 TEST(Map, LocationIndicatorWithoutImages) {
