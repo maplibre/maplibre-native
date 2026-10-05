@@ -386,8 +386,8 @@ TEST(PluginRendering, CameraPaintRefreshesAfterZoomAndPropertyChanges) {
     for (const char* json : {"0.25", R"(["interpolate",["linear"],["zoom"],0,1,1,0.5])"}) {
         JSDocument value;
         value.Parse(json);
-        ASSERT_FALSE(layer->setProperty(
-            "test-opacity", style::conversion::Convertible(static_cast<const JSValue*>(&value))));
+        ASSERT_FALSE(
+            layer->setProperty("test-opacity", style::conversion::Convertible(static_cast<const JSValue*>(&value))));
         const bool constant = value.IsNumber();
         expectOpacity(0, constant ? 64 : 255);
         expectOpacity(1, constant ? 64 : 128);
