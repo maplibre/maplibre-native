@@ -13,11 +13,11 @@
 
 namespace std {
 
-inline int stoi(const std::string &str) {
+inline int stoi(const std::string& str) {
     return atoi(str.c_str());
 }
 
-inline float stof(const std::string &str) {
+inline float stof(const std::string& str) {
     return static_cast<float>(atof(str.c_str()));
 }
 
@@ -82,9 +82,9 @@ inline std::string toString(long double t, bool decimal = false) {
     return toString(static_cast<double>(t), decimal);
 }
 
-std::string toString(const std::thread::id &);
+std::string toString(const std::thread::id&);
 
-std::string toString(const std::exception_ptr &);
+std::string toString(const std::exception_ptr&);
 
 template <class T>
 std::string toString(T) = delete;
@@ -92,7 +92,7 @@ std::string toString(T) = delete;
 std::string toHex(uint32_t);
 std::string toHex(uint64_t);
 
-inline float stof(const std::string &str) {
+inline float stof(const std::string& str) {
     return std::stof(str);
 }
 

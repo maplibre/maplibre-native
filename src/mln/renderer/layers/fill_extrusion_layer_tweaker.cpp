@@ -128,8 +128,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             .color_t = std::get<0>(binders->get<FillExtrusionColor>()->interpolationFactor(zoom)),
             .pattern_from_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
             .pattern_to_t = std::get<0>(binders->get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            .pad1 = 0
-        };
+            .pad1 = 0};
 
 #if MLN_UBO_CONSOLIDATION
         tilePropsUBOVector[i] = {
@@ -140,8 +139,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             .pattern_to = patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
             .texsize = {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             .pad1 = 0,
-            .pad2 = 0
-        };
+            .pad2 = 0};
 
 #if MLN_UBO_CONSOLIDATION
         drawable.setUBOIndex(i++);

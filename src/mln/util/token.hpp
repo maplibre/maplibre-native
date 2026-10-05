@@ -12,7 +12,7 @@ const static std::string tokenReservedChars = "{}";
 
 // Replaces {tokens} in a string by calling the lookup function.
 template <typename Lookup>
-std::string replaceTokens(const std::string &source, const Lookup &lookup) {
+std::string replaceTokens(const std::string& source, const Lookup& lookup) {
     std::string result;
     result.reserve(source.size());
 

@@ -5,7 +5,7 @@
 
 namespace mln {
 
-void Log::platformRecord(EventSeverity severity, const std::string &msg) {
+void Log::platformRecord(EventSeverity severity, const std::string& msg) {
     std::cerr << "[" << Enum<EventSeverity>::toString(severity) << "] " << msg << '\n';
 }
 

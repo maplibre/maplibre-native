@@ -4,7 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNPolygon (Private)
 
-- (NSArray<id> *)mgl_coordinates;
+- (NSArray<id>*)mgl_coordinates;
 
 @end
 

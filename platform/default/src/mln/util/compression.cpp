@@ -12,7 +12,7 @@
 
 // Check zlib library version.
 [[maybe_unused]] const static bool zlibVersionCheck = []() {
-    const char *const version = zlibVersion();
+    const char* const version = zlibVersion();
     if (version[0] != ZLIB_VERSION[0]) {
         char message[96];
         snprintf(
@@ -31,7 +31,7 @@ namespace util {
 // cause a link error.
 #undef compress
 
-bool is_compressed(const std::string &v) {
+bool is_compressed(const std::string& v) {
     if (v.size() > 2) {
         const auto byte0 = static_cast<uint8_t>(v[0]);
         const auto byte1 = static_cast<uint8_t>(v[1]);
@@ -54,7 +54,7 @@ bool is_compressed(const std::string &v) {
     return false;
 }
 
-std::string compress(const std::string &raw, int windowBits) {
+std::string compress(const std::string& raw, int windowBits) {
     z_stream deflate_stream;
     memset(&deflate_stream, 0, sizeof(deflate_stream));
 
@@ -63,7 +63,7 @@ std::string compress(const std::string &raw, int windowBits) {
         throw std::runtime_error("failed to initialize deflate");
     }
 
-    deflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(raw.data()));
+    deflate_stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(raw.data()));
     deflate_stream.avail_in = uInt(raw.size());
 
     std::string result;
@@ -71,7 +71,7 @@ std::string compress(const std::string &raw, int windowBits) {
 
     int code;
     do {
-        deflate_stream.next_out = reinterpret_cast<Bytef *>(out);
+        deflate_stream.next_out = reinterpret_cast<Bytef*>(out);
         deflate_stream.avail_out = sizeof(out);
         code = deflate(&deflate_stream, Z_FINISH);
         if (result.size() < deflate_stream.total_out) {
@@ -89,7 +89,7 @@ std::string compress(const std::string &raw, int windowBits) {
     return result;
 }
 
-std::string decompress(const std::string &raw, int windowBits) {
+std::string decompress(const std::string& raw, int windowBits) {
     z_stream inflate_stream;
     memset(&inflate_stream, 0, sizeof(inflate_stream));
 
@@ -98,7 +98,7 @@ std::string decompress(const std::string &raw, int windowBits) {
         throw std::runtime_error("failed to initialize inflate");
     }
 
-    inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(raw.data()));
+    inflate_stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(raw.data()));
     inflate_stream.avail_in = uInt(raw.size());
 
     std::string result;
@@ -106,7 +106,7 @@ std::string decompress(const std::string &raw, int windowBits) {
 
     int code;
     do {
-        inflate_stream.next_out = reinterpret_cast<Bytef *>(out);
+        inflate_stream.next_out = reinterpret_cast<Bytef*>(out);
         inflate_stream.avail_out = sizeof(out);
         code = inflate(&inflate_stream, 0);
         if (result.size() < inflate_stream.total_out) {
@@ -123,10 +123,10 @@ std::string decompress(const std::string &raw, int windowBits) {
     return result;
 }
 
-std::uint32_t crc32(const void *raw, size_t size) noexcept {
+std::uint32_t crc32(const void* raw, size_t size) noexcept {
     auto hash = ::crc32(0L, Z_NULL, 0);
     if (raw) {
-        const auto *p = static_cast<const Bytef *>(raw);
+        const auto* p = static_cast<const Bytef*>(raw);
         while (size > 0) {
             const auto blockSize = static_cast<uInt>(size);
             hash = ::crc32(hash, p, blockSize);
