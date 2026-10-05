@@ -78,12 +78,42 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
       vertexFunction(std::move(vert)),
       fragmentFunction(std::move(frag)) {}
 
+ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, std::shared_ptr<PendingFunctions> pending_)
+    : ShaderProgramBase(),
+      shaderName(std::move(name)),
+      backend(backend_),
+      pending(std::move(pending_)) {}
+
 ShaderProgram::~ShaderProgram() noexcept = default;
+
+bool ShaderProgram::isReady() const {
+    if (!pending) {
+        return true;
+    }
+    if (!pending->ready.load(std::memory_order_acquire)) {
+        return false;
+    }
+    if (pending->failed.load()) {
+        // Keep reporting "not ready": nothing can be drawn with a program that did not compile
+        // (the failure was logged by the compile completion handler).
+        return false;
+    }
+    {
+        std::scoped_lock lock(pending->mutex);
+        vertexFunction = pending->vertex;
+        fragmentFunction = pending->fragment;
+    }
+    pending.reset();
+    return true;
+}
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Renderable& renderable,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,
                                                                 const gfx::ColorMode& colorMode,
                                                                 const std::optional<std::size_t> reuseHash) const {
+    if (!isReady()) {
+        return nullptr; // still compiling asynchronously
+    }
     if (reuseHash.has_value()) {
         // we'd like to reuse a previous value
         if (auto it = renderPipelineStateCache.find(reuseHash.value()); it != renderPipelineStateCache.end())
