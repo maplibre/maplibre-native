@@ -1980,7 +1980,9 @@ TEST(Map, ObserveTileLifecycle) {
 TEST(Map, EmptyPlacementDoesNotRequestRepaint) {
     MapTest<> test{1, MapMode::Continuous};
     std::optional<MapObserver::RenderFrameStatus> status;
-    test.observer.didFinishRenderingFrameCallback = [&](auto value) { status = value; };
+    test.observer.didFinishRenderingFrameCallback = [&](auto value) {
+        status = value;
+    };
     test.map.getStyle().loadJSON(R"({
         "version": 8, "sources": {}, "transition": {"duration": 0},
         "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
