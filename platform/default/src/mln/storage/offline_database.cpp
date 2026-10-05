@@ -164,7 +164,9 @@ void OfflineDatabase::removeExisting() {
     statements.clear();
     db.reset();
 
-    util::deleteFile(path);
+    if (path != ":memory:") {
+        util::deleteFile(path);
+    }
 }
 
 void OfflineDatabase::removeOldCacheTable() {

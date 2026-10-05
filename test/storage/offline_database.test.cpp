@@ -7,12 +7,14 @@
 #include <mln/storage/response.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/string.hpp>
+#include <mln/util/scoped.hpp>
 
 #include <mln/storage/sqlite3.hpp>
 #include <mln/util/variant.hpp>
 #include <thread>
 #include <random>
 #include <variant>
+#include <filesystem>
 
 using namespace std::literals::string_literals;
 using namespace mln;
@@ -2037,6 +2039,38 @@ TEST(OfflineDatabase, ResetDatabase) {
 
     auto regions = db.listRegions().value();
     EXPECT_EQ(0u, regions.size());
+    EXPECT_EQ(
+        1u,
+        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(OfflineDatabase, ResetInMemoryDatabase) {
+    FixtureLog log;
+#ifndef WIN32 // Windows filenames cannot contain a colon.
+    const auto originalDirectory = std::filesystem::current_path();
+    const auto directory = std::filesystem::temp_directory_path() / "mln-offline-memory-reset";
+    ASSERT_TRUE(std::filesystem::create_directory(directory));
+    const Scoped cleanup([&] {
+        std::filesystem::current_path(originalDirectory);
+        std::filesystem::remove_all(directory);
+    });
+    std::filesystem::current_path(directory);
+    util::write_file(":memory:", "unrelated file");
+#endif
+
+    OfflineDatabase db(":memory:", fixture::tileServerOptions);
+    const Resource resource{Resource::Style, "http://example.com/"};
+    Response response;
+    response.data = std::make_shared<std::string>("cached resource");
+    db.put(resource, response);
+    ASSERT_TRUE(db.get(resource));
+
+    ASSERT_FALSE(db.resetDatabase());
+    EXPECT_FALSE(db.get(resource));
+#ifndef WIN32
+    EXPECT_EQ("unrelated file", util::read_file(":memory:"));
+#endif
     EXPECT_EQ(
         1u,
         log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
