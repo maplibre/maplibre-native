@@ -1977,6 +1977,161 @@ TEST(Map, ObserveTileLifecycle) {
     }
 }
 
+namespace {
+
+class PlacementTestFrontend : public HeadlessFrontend {
+public:
+    explicit PlacementTestFrontend(float pixelRatio)
+        : HeadlessFrontend({64, 64},
+                           pixelRatio,
+                           gfx::HeadlessBackend::SwapBehaviour::NoFlush,
+                           gfx::ContextMode::Unique,
+                           std::nullopt,
+                           false) {}
+
+    void update(std::shared_ptr<UpdateParameters> parameters) override { latest = std::move(parameters); }
+
+    void renderAt(TimePoint time) {
+        auto parameters = std::make_shared<UpdateParameters>(UpdateParameters{
+            .styleLoaded = latest->styleLoaded,
+            .mode = latest->mode,
+            .pixelRatio = latest->pixelRatio,
+            .debugOptions = latest->debugOptions,
+            .timePoint = time,
+            .transformState = latest->transformState,
+            .glyphURL = latest->glyphURL,
+            .fontFaces = latest->fontFaces,
+            .spriteLoaded = latest->spriteLoaded,
+            .transitionOptions = latest->transitionOptions,
+            .light = latest->light,
+            .images = latest->images,
+            .sources = latest->sources,
+            .layers = latest->layers,
+            .globalState = latest->globalState,
+            .annotationManager = latest->annotationManager,
+            .fileSource = latest->fileSource,
+            .prefetchZoomDelta = latest->prefetchZoomDelta,
+            .stillImageRequest = latest->stillImageRequest,
+            .crossSourceCollisions = latest->crossSourceCollisions,
+            .fastPFOREnabled = latest->fastPFOREnabled,
+            .captureRenderedFeatures = latest->captureRenderedFeatures,
+            .tileLodMinRadius = latest->tileLodMinRadius,
+            .tileLodScale = latest->tileLodScale,
+            .tileLodPitchThreshold = latest->tileLodPitchThreshold,
+            .tileLodZoomShift = latest->tileLodZoomShift,
+            .tileLodMode = latest->tileLodMode,
+        });
+        HeadlessFrontend::update(std::move(parameters));
+        renderFrame();
+    }
+
+private:
+    std::shared_ptr<UpdateParameters> latest;
+};
+
+class PlacementRenderingTest : public testing::Test {
+protected:
+    MapTest<StubFileSource, PlacementTestFrontend> test{1, MapMode::Continuous};
+    const TimePoint start = Clock::now();
+
+    void SetUp() override {
+        test.map.getStyle().loadJSON(R"({
+            "version": 8, "sources": {},
+            "layers": [{"id": "background", "type": "background", "paint": {"background-color": "white"}}]
+        })");
+    }
+
+    MapObserver::RenderFrameStatus renderAt(Milliseconds elapsed) {
+        std::optional<MapObserver::RenderFrameStatus> status;
+        test.observer.didFinishRenderingFrameCallback = [&](auto value) {
+            status = value;
+        };
+        test.runLoop.runOnce();
+        test.frontend.renderAt(start + elapsed);
+        test.observer.didFinishRenderingFrameCallback = {};
+        EXPECT_TRUE(status);
+        return status.value();
+    }
+
+    std::array<uint8_t, 4> centerPixel() {
+        gfx::BackendScope scope{*test.frontend.getBackend()};
+        const auto image = test.frontend.readStillImage();
+        const auto* pixel = image.data.get() + image.stride() * 32 + image.channels * 32;
+        return {pixel[0], pixel[1], pixel[2], pixel[3]};
+    }
+};
+
+TEST_F(PlacementRenderingTest, EmptyPlacementDoesNotRequestRepaint) {
+    renderAt(Milliseconds(0));
+    renderAt(Milliseconds(1000));
+    auto start = Milliseconds(2000);
+    for (const auto duration : {Milliseconds(300), Milliseconds(0)}) {
+        SCOPED_TRACE(duration.count());
+        test.map.getStyle().setTransitionOptions({duration});
+        for (const auto elapsed : {Milliseconds(0), Milliseconds(16), Milliseconds(32)}) {
+            test.map.jumpTo(CameraOptions().withCenter(LatLng{0, double(elapsed.count())}));
+            EXPECT_FALSE(renderAt(start + elapsed).needsRepaint);
+        }
+        start += Milliseconds(1000);
+    }
+}
+
+TEST_F(PlacementRenderingTest, EmptyPlacementPreservesPaintTransitions) {
+    renderAt(Milliseconds(0));
+    renderAt(Milliseconds(1000));
+    auto& background = *static_cast<BackgroundLayer*>(test.map.getStyle().getLayer("background"));
+    background.setBackgroundColor(Color::red());
+    EXPECT_TRUE(renderAt(Milliseconds(1016)).needsRepaint);
+    EXPECT_TRUE(renderAt(Milliseconds(1166)).needsRepaint);
+    const auto midpoint = centerPixel();
+    EXPECT_EQ(midpoint[0], 255);
+    EXPECT_GT(midpoint[1], 0);
+    EXPECT_LT(midpoint[1], 255);
+    EXPECT_FALSE(renderAt(Milliseconds(1316)).needsRepaint);
+    EXPECT_EQ(centerPixel(), (std::array<uint8_t, 4>{255, 0, 0, 255}));
+}
+
+TEST_F(PlacementRenderingTest, SymbolsResumePlacementAfterEmptyWorkload) {
+    PremultipliedImage icon({16, 16});
+    for (size_t i = 0; i < icon.bytes(); i += 4) {
+        icon.data[i] = 255;
+        icon.data[i + 1] = 0;
+        icon.data[i + 2] = 0;
+        icon.data[i + 3] = 255;
+    }
+    test.map.getStyle().addImage(std::make_unique<style::Image>("marker", std::move(icon), 1.0f));
+    GeoJSONOptions options;
+    options.synchronousUpdate = true;
+    auto source = std::make_unique<GeoJSONSource>("point", makeMutable<GeoJSONOptions>(options));
+    source->setGeoJSON(Geometry<double>{Point<double>{0, 0}});
+    test.map.getStyle().addSource(std::move(source));
+    auto symbol = std::make_unique<SymbolLayer>("symbol", "point");
+    symbol->setIconImage({"marker"s});
+    test.map.getStyle().addLayer(std::move(symbol));
+
+    const auto deadline = Clock::now() + Seconds(5);
+    while (renderAt(Milliseconds(0)).mode != MapObserver::RenderMode::Full) {
+        ASSERT_LT(Clock::now(), deadline);
+    }
+    EXPECT_TRUE(renderAt(Milliseconds(1000)).placementChanged);
+    EXPECT_FALSE(renderAt(Milliseconds(1300)).needsRepaint);
+    EXPECT_EQ(centerPixel(), (std::array<uint8_t, 4>{255, 0, 0, 255}));
+    EXPECT_TRUE(renderAt(Milliseconds(1304)).needsRepaint);
+
+    auto removedLayer = test.map.getStyle().removeLayer("symbol");
+    EXPECT_FALSE(renderAt(Milliseconds(1308)).needsRepaint);
+    EXPECT_EQ(centerPixel(), (std::array<uint8_t, 4>{255, 255, 255, 255}));
+
+    test.map.getStyle().addLayer(std::move(removedLayer));
+    const auto resumed = renderAt(Milliseconds(1312));
+    EXPECT_TRUE(resumed.placementChanged);
+    EXPECT_TRUE(resumed.needsRepaint);
+    EXPECT_FALSE(renderAt(Milliseconds(1612)).needsRepaint);
+    EXPECT_EQ(centerPixel(), (std::array<uint8_t, 4>{255, 0, 0, 255}));
+}
+
+} // namespace
+
 TEST(BackgroundLayer, ImmediateStyleReplacementRetainsColor) {
     MapTest<> test;
     for (int iteration = 0; iteration < 2; ++iteration) {
