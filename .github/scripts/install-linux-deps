@@ -27,5 +27,5 @@ retry() {
 }
 
 retry update
-retry install --download-only -y "${packages[@]}"
+retry install --download-only -y "${packages[@]}" || exit 1
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y "${packages[@]}"
