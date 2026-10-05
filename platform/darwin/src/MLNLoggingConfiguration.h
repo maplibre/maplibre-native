@@ -75,7 +75,7 @@ MLN_EXPORT
  If this property is set to nil or if no custom handler is provided this property
  is set to the default handler.
 
- The default handler uses `os_log` and `NSLog` for iOS 10+ and iOS < 10 respectively.
+ The default handler uses `os_log`.
  */
 @property (nonatomic, copy, null_resettable) MLNLoggingBlockHandler handler;
 

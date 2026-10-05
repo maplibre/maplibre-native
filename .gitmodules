@@ -97,9 +97,6 @@
 [submodule "vendor/maplibre-native-base/deps/geojson.hpp"]
 	path = vendor/maplibre-native-base/deps/geojson.hpp
 	url = https://github.com/mapbox/geojson-cpp.git
-[submodule "vendor/filesystem"]
-	path = vendor/filesystem
-	url = https://github.com/gulrak/filesystem.git
 [submodule "vendor/maplibre-tile-spec"]
 	path = vendor/maplibre-tile-spec
 	url = https://github.com/maplibre/maplibre-tile-spec.git

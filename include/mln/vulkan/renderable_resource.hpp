@@ -1,5 +1,8 @@
 #pragma once
 
+#include <limits>
+#include <stdexcept>
+
 #include <mln/gfx/renderable.hpp>
 #include <mln/vulkan/renderer_backend.hpp>
 #include <mln/vulkan/texture2d.hpp>
@@ -33,6 +36,13 @@ protected:
     vk::UniqueRenderPass renderPass;
 };
 
+// A bounded acquire expired before the frame recorded or submitted GPU work.
+class SurfaceNotReady final : public std::runtime_error {
+public:
+    SurfaceNotReady()
+        : std::runtime_error("Vulkan surface image is not available") {}
+};
+
 class SurfaceRenderableResource : public RenderableResource {
 protected:
     explicit SurfaceRenderableResource(RendererBackend& backend_, vk::PresentModeKHR mode = vk::PresentModeKHR::eFifo)
@@ -51,6 +61,9 @@ protected:
     void copySurfaceToReadTexture();
 
 public:
+    // Hosts using a finite timeout must handle SurfaceNotReady and retry the frame.
+    virtual uint64_t getAcquireTimeout() const { return std::numeric_limits<uint64_t>::max(); }
+
     virtual void createPlatformSurface() = 0;
     virtual std::vector<const char*> getDeviceExtensions() { return {}; }
 

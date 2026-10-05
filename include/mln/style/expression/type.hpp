@@ -2,7 +2,6 @@
 
 #include <mln/util/string.hpp>
 #include <mln/util/variant.hpp>
-#include <vector>
 
 #include <optional>
 

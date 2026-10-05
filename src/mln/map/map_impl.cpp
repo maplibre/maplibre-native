@@ -55,6 +55,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
       fastPFOREnabled(mapOptions.fastPFOREnabled()),
+      captureRenderedFeatures(mapOptions.renderedFeatureInfo()),
       fileSource(std::move(fileSource_)),
       style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
@@ -128,12 +129,14 @@ void Map::Impl::onUpdate() {
                                .images = style->impl->getImageImpls(),
                                .sources = style->impl->getSourceImpls(),
                                .layers = style->impl->getLayerImpls(),
+                               .globalState = style->impl->getGlobalStateShared(),
                                .annotationManager = annotationManager.makeWeakPtr(),
                                .fileSource = fileSource,
                                .prefetchZoomDelta = prefetchZoomDelta,
                                .stillImageRequest = bool(stillImageRequest),
                                .crossSourceCollisions = crossSourceCollisions,
                                .fastPFOREnabled = fastPFOREnabled,
+                               .captureRenderedFeatures = captureRenderedFeatures,
                                .tileLodMinRadius = tileLodMinRadius,
                                .tileLodScale = tileLodScale,
                                .tileLodPitchThreshold = tileLodPitchThreshold,
@@ -249,11 +252,11 @@ void Map::Impl::onWillStartRenderingFrame() {
 void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
                                           bool needsRepaint,
                                           bool placemenChanged,
-                                          const gfx::RenderingStats& stats) {
+                                          std::shared_ptr<gfx::RenderingStats> stats) {
     rendererFullyLoaded = renderMode == RenderMode::Full;
 
     if (renderingStatsView && style) {
-        renderingStatsView->update(*style, stats);
+        renderingStatsView->update(*style, *stats);
     }
 
     if (mode == MapMode::Continuous) {
@@ -280,6 +283,8 @@ void Map::Impl::onDidFinishRenderingFrame(RenderMode renderMode,
         const auto request = std::move(stillImageRequest);
         request->callback(nullptr);
     }
+
+    lastFrameStats = std::move(stats);
 }
 
 void Map::Impl::onWillStartRenderingMap() {

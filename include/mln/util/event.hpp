@@ -24,7 +24,7 @@ enum class Event : uint8_t {
     HttpRequest,
     Sprite,
     Image,
-    OpenGL,
+    GraphicsBackend,
     JNI,
     Android,
     Crash,

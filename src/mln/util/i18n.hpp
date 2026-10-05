@@ -87,6 +87,12 @@ bool isCharInComplexShapingScript(char16_t chr);
 
 bool isWhitespace(char16_t chr);
 
+bool isDigit(char16_t chr);
+
+bool isUppercase(char16_t chr);
+
+bool isPunctuationOrSymbol(char16_t chr);
+
 bool isVariationSelector1(char16_t chr);
 
 } // namespace i18n

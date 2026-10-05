@@ -95,34 +95,6 @@ const std::vector<AttributeInfo> CollisionCircleShaderInfo::attributes = {
 };
 const std::vector<TextureInfo> CollisionCircleShaderInfo::textures = {};
 
-// Custom Geometry
-using CustomGeometryInfo = ShaderInfo<BuiltIn::CustomGeometryShader, gfx::Backend::Type::OpenGL>;
-
-const std::vector<UniformBlockInfo> CustomGeometryInfo::uniformBlocks = {
-    UniformBlockInfo{"CustomGeometryDrawableUBO", idCustomGeometryDrawableUBO},
-};
-const std::vector<AttributeInfo> CustomGeometryInfo::attributes = {
-    AttributeInfo{"a_pos", idCustomGeometryPosVertexAttribute},
-    AttributeInfo{"a_uv", idCustomGeometryTexVertexAttribute},
-};
-const std::vector<TextureInfo> CustomGeometryInfo::textures = {
-    TextureInfo{"u_image", idCustomGeometryTexture},
-};
-
-// Custom Symbol Icon
-using CustomSymbolIconShaderInfo = ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>;
-
-const std::vector<UniformBlockInfo> CustomSymbolIconShaderInfo::uniformBlocks = {
-    UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolDrawableUBO},
-};
-const std::vector<AttributeInfo> CustomSymbolIconShaderInfo::attributes = {
-    AttributeInfo{"a_pos", idCustomSymbolPosVertexAttribute},
-    AttributeInfo{"a_tex", idCustomSymbolTexVertexAttribute},
-};
-const std::vector<TextureInfo> CustomSymbolIconShaderInfo::textures = {
-    TextureInfo{"u_texture", idCustomSymbolImageTexture},
-};
-
 // Debug
 using DebugShaderInfo = ShaderInfo<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL>;
 

@@ -180,7 +180,7 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(CacheControlParsing)) {
                               EXPECT_EQ(nullptr, res.error);
                               ASSERT_TRUE(res.data.get());
                               EXPECT_EQ("Hello World!", *res.data);
-                              EXPECT_GT(Seconds(2), util::abs(*res.expires - util::now() - Seconds(120)))
+                              EXPECT_GT(Seconds(2), std::chrono::abs(*res.expires - util::now() - Seconds(120)))
                                   << "Expiration date isn't about 120 seconds in the future";
                               EXPECT_FALSE(res.mustRevalidate);
                               EXPECT_FALSE(bool(res.modified));

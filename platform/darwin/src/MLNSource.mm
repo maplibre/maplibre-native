@@ -1,11 +1,16 @@
 #import "MLNMapView_Private.h"
 #import "MLNSource_Private.h"
+#import "MLNStyleValue_Private.h"
 #import "MLNStyle_Private.h"
 #import "NSBundle+MLNAdditions.h"
+#import "NSDictionary+MLNAdditions.h"
+#import "NSException+MLNAdditions.h"
 
 #include <mln/map/map.hpp>
+#include <mln/renderer/renderer.hpp>
 #include <mln/style/source.hpp>
 #include <mln/style/style.hpp>
+#include <mln/util/feature.hpp>
 
 const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceException";
 
@@ -106,6 +111,92 @@ const MLNExceptionName MLNInvalidStyleSourceException = @"MLNInvalidStyleSourceE
   }
 
   return removed;
+}
+
+// MARK: - Feature state
+
+/**
+ The renderer of the map view the source is attached to, or `nullptr` when the
+ source is not attached to a map view. Feature state lives in the renderer, so
+ it can only be manipulated while the source is attached.
+ */
+- (mln::Renderer *)mgl_renderer {
+  if ([self.stylable isKindOfClass:[MLNMapView class]]) {
+    return ((MLNMapView *)self.stylable).renderer;
+  }
+  return nullptr;
+}
+
+- (BOOL)mgl_setFeatureStateForSourceLayerID:(nullable NSString *)sourceLayerID
+                                  featureID:(NSString *)featureID
+                                      state:(NSDictionary<NSString *, id> *)state {
+  MLNAssertIsMainThread();
+  MLNAssertStyleSourceIsValid();
+
+  mln::Renderer *renderer = self.mgl_renderer;
+  if (!renderer || !featureID || !state) {
+    return NO;
+  }
+
+  mln::FeatureState featureState = [state mgl_propertyMap];
+
+  renderer->setFeatureState(
+      self.rawSource->getID(),
+      sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
+      featureID.UTF8String, featureState);
+
+  [(MLNMapView *)self.stylable setNeedsRerender];
+  return YES;
+}
+
+- (nullable NSDictionary<NSString *, id> *)mgl_featureStateForSourceLayerID:
+                                               (nullable NSString *)sourceLayerID
+                                                                  featureID:(NSString *)featureID {
+  MLNAssertIsMainThread();
+  MLNAssertStyleSourceIsValid();
+
+  mln::Renderer *renderer = self.mgl_renderer;
+  if (!renderer || !featureID) {
+    return nil;
+  }
+
+  mln::FeatureState featureState;
+  renderer->getFeatureState(
+      featureState, self.rawSource->getID(),
+      sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
+      featureID.UTF8String);
+
+  if (featureState.empty()) {
+    return nil;
+  }
+
+  NSMutableDictionary<NSString *, id> *state =
+      [NSMutableDictionary dictionaryWithCapacity:featureState.size()];
+  for (const auto &pair : featureState) {
+    state[@(pair.first.c_str())] = MLNJSONObjectFromMBGLValue(pair.second);
+  }
+  return [state copy];
+}
+
+- (BOOL)mgl_removeFeatureStateForSourceLayerID:(nullable NSString *)sourceLayerID
+                                     featureID:(nullable NSString *)featureID
+                                      stateKey:(nullable NSString *)stateKey {
+  MLNAssertIsMainThread();
+  MLNAssertStyleSourceIsValid();
+
+  mln::Renderer *renderer = self.mgl_renderer;
+  if (!renderer) {
+    return NO;
+  }
+
+  renderer->removeFeatureState(
+      self.rawSource->getID(),
+      sourceLayerID ? std::optional<std::string>(sourceLayerID.UTF8String) : std::nullopt,
+      featureID ? std::optional<std::string>(featureID.UTF8String) : std::nullopt,
+      stateKey ? std::optional<std::string>(stateKey.UTF8String) : std::nullopt);
+
+  [(MLNMapView *)self.stylable setNeedsRerender];
+  return YES;
 }
 
 - (NSString *)description {

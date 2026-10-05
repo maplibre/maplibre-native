@@ -12,8 +12,6 @@
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
 
-#import "MLNCustomDrawableStyleLayer_Private.h"
-
 #include <vector>
 
 namespace mln {
@@ -73,12 +71,6 @@ LayerManagerDarwin::LayerManagerDarwin() {
   addLayerTypeCoreOnly(std::make_unique<CustomLayerFactory>());
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
   addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
-#endif
-
-#if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
-  addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
-#elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
-  addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
 #endif
 }
 

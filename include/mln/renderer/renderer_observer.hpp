@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mln/tile/tile_id.hpp>
-#include <mln/util/font_stack.hpp>
-#include <mln/gfx/rendering_stats.hpp>
-#include <mln/text/glyph_range.hpp>
-#include <mln/tile/tile_operation.hpp>
 #include <mln/gfx/backend.hpp>
+#include <mln/gfx/rendering_stats.hpp>
 #include <mln/shaders/shader_source.hpp>
+#include <mln/text/glyph_range.hpp>
+#include <mln/tile/tile_id.hpp>
+#include <mln/tile/tile_operation.hpp>
+#include <mln/util/font_stack.hpp>
 #include <mln/util/symbol_error_observer.hpp>
 
 #include <cstdint>
@@ -58,6 +58,13 @@ public:
                                            bool placementChanged,
                                            const gfx::RenderingStats& stats) {
         onDidFinishRenderingFrame(mode, repaint, placementChanged, stats.encodingTime, stats.renderingTime);
+    }
+
+    virtual void onDidFinishRenderingFrame(RenderMode mode,
+                                           bool repaint,
+                                           bool placementChanged,
+                                           std::shared_ptr<gfx::RenderingStats> stats) {
+        onDidFinishRenderingFrame(mode, repaint, placementChanged, *stats);
     }
 
     /// Final frame
