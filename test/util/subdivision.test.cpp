@@ -1,5 +1,6 @@
 #include <mln/test/util.hpp>
 
+#include <mln/renderer/globe_tile_mesh.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/subdivision.hpp>
 #include <mln/util/subdivision_granularity.hpp>
@@ -25,6 +26,17 @@ double signedArea(const std::vector<int16_t>& v, Index i0, Index i1, Index i2) {
     const double e1y = v[i2 * 2 + 1] - v[i0 * 2 + 1];
     return e0x * e1y - e0y * e1x;
 }
+
+struct GlobeTestVertex {
+    Point<int16_t> position;
+    Point<uint16_t> texture;
+};
+
+GlobeTestVertex globeTestVertex(Point<int16_t> position, Point<uint16_t> texture) {
+    return {position, texture};
+}
+
+using GlobeTestMesh = GlobeTileMesh<GlobeTestVertex, decltype(&globeTestVertex)>;
 
 double totalArea(const SubdivisionResult& r) {
     double area = 0;
@@ -311,4 +323,60 @@ TEST(TileMesh, QuadAndGrid) {
     for (std::size_t i = 0; i + 2 < polar.indices.size(); i += 3) {
         EXPECT_LT(signedArea(polar.vertices, polar.indices[i], polar.indices[i + 1], polar.indices[i + 2]), 0.0);
     }
+}
+
+TEST(TileMesh, GlobeMaskKeepsTheUncoveredParts) {
+    const CanonicalTileID tile{1, 0, 0};
+    const GlobeTestMesh masked(tile, {{1, 1, 0}, {1, 0, 1}, {1, 1, 1}}, &globeTestVertex);
+    const GlobeTestMesh child({2, 0, 0}, {{0, 0, 0}}, &globeTestVertex);
+    const auto& vertices = masked.vertices->vector();
+    const auto& indices = masked.indices->vector();
+    ASSERT_EQ(1u, masked.segments.size());
+
+    for (std::size_t i = 0; i + 2 < indices.size(); i += 3) {
+        double x = 0, y = 0;
+        for (std::size_t k = 0; k < 3; k++) {
+            x += vertices[indices[i + k]].position.x / 3.0;
+            y += vertices[indices[i + k]].position.y / 3.0;
+        }
+        EXPECT_FALSE(x < EXTENT / 2 && y >= 0 && y < EXTENT / 2)
+            << "triangle in the covered quadrant at " << x << ", " << y;
+    }
+
+    std::set<int16_t> maskedEdge;
+    for (const auto& vertex : vertices) {
+        if (vertex.position.x == EXTENT / 2 && vertex.position.y >= 0 && vertex.position.y <= EXTENT / 2) {
+            maskedEdge.insert(vertex.position.y);
+        }
+    }
+    std::set<int16_t> childEdge;
+    for (const auto& vertex : child.vertices->vector()) {
+        if (vertex.position.x == EXTENT && vertex.position.y >= 0) {
+            childEdge.insert(static_cast<int16_t>(vertex.position.y / 2));
+        }
+    }
+    EXPECT_EQ(childEdge, maskedEdge);
+    EXPECT_EQ(33u, maskedEdge.size());
+
+    std::size_t northPole = 0;
+    for (const auto& vertex : vertices) {
+        if (vertex.position.y == NORTH_POLE_Y) {
+            EXPECT_GE(vertex.position.x, EXTENT / 2);
+            northPole++;
+        }
+    }
+    EXPECT_EQ(33u, northPole);
+
+    const GlobeTestMesh full(tile, {{0, 0, 0}}, &globeTestVertex);
+    const auto grid = createTileMesh(
+        {.granularity = SubdivisionGranularitySetting::globe().tile.getGranularityForZoomLevel(1),
+         .extendToNorthPole = true});
+    ASSERT_EQ(grid.vertices.size() / 2, full.vertices->elements());
+    for (std::size_t i = 0; i < full.vertices->elements(); i++) {
+        EXPECT_EQ(grid.vertices[i * 2], full.vertices->at(i).position.x);
+        EXPECT_EQ(grid.vertices[i * 2 + 1], full.vertices->at(i).position.y);
+    }
+    EXPECT_EQ(grid.indices, full.indices->vector());
+
+    EXPECT_EQ(0u, GlobeTestMesh(tile, {}, &globeTestVertex).vertices->elements());
 }
