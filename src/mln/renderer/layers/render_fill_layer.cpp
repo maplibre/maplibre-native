@@ -382,21 +382,27 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             switch (static_cast<FillVariant>(drawable.getType())) {
                 case FillVariant::Fill:
                 case FillVariant::FillPattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
-                                                    fillVertexCount,
-                                                    gfx::Triangles(),
-                                                    bucket.sharedTriangles,
-                                                    bucket.triangleSegments.data(),
-                                                    bucket.triangleSegments.size());
+                    if (const auto updated = drawable.getAttributeUpdateTime();
+                        !updated || vertexAttrs->isModifiedAfter(*updated)) {
+                        drawable.updateVertexAttributes(vertexAttrs,
+                                                        fillVertexCount,
+                                                        gfx::Triangles(),
+                                                        bucket.sharedTriangles,
+                                                        bucket.triangleSegments.data(),
+                                                        bucket.triangleSegments.size());
+                    }
                     break;
                 case FillVariant::FillOutline:
                 case FillVariant::FillOutlinePattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
-                                                    fillVertexCount,
-                                                    gfx::Lines(lineWidth),
-                                                    bucket.sharedBasicLineIndexes,
-                                                    bucket.basicLineSegments.data(),
-                                                    bucket.basicLineSegments.size());
+                    if (const auto updated = drawable.getAttributeUpdateTime();
+                        !updated || vertexAttrs->isModifiedAfter(*updated)) {
+                        drawable.updateVertexAttributes(vertexAttrs,
+                                                        fillVertexCount,
+                                                        gfx::Lines(lineWidth),
+                                                        bucket.sharedBasicLineIndexes,
+                                                        bucket.basicLineSegments.data(),
+                                                        bucket.basicLineSegments.size());
+                    }
                     break;
 #if MLN_TRIANGULATE_FILL_OUTLINES
                 case FillVariant::FillOutlineTriangulated:
