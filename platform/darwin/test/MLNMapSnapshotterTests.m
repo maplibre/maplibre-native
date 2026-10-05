@@ -74,6 +74,26 @@ MLNImage *MLNImageFromCurrentContext(void) {
     [super tearDown];
 }
 
+- (void)testSettingGlobalStateBeforeStyleLoadsRaisesException {
+    NSURL *styleURL = [NSURL URLWithString:@"https://example.invalid/style.json"];
+    MLNMapSnapshotOptions *options = [[MLNMapSnapshotOptions alloc]
+        initWithStyleURL:styleURL
+                  camera:[MLNMapCamera camera]
+                    size:CGSizeMake(64, 64)];
+    MLNMapSnapshotter *snapshotter = [[MLNMapSnapshotter alloc] initWithOptions:options];
+
+    [snapshotter startWithCompletionHandler:^(__unused MLNMapSnapshot *snapshot,
+                                               __unused NSError *error) {
+    }];
+
+    MLNStyle *style = snapshotter.style;
+    XCTAssertNotNil(style);
+    XCTAssertThrowsSpecificNamed([style setGlobalStateValue:@YES forProperty:@"showLabels"],
+                                 NSException, NSInternalInconsistencyException);
+
+    [snapshotter cancel];
+}
+
 - (void)testOverlayHandler {
     XCTSkip(@"Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1862");
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];

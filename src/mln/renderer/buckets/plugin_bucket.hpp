@@ -172,12 +172,21 @@ struct PluginAttributeBinding {
     gfx::AttributeDataType type = gfx::AttributeDataType::Invalid;
 };
 
+enum class PluginDrawableDepthMode : uint8_t {
+    Disabled = 0,
+    ReadOnly = 1,
+    ReadWrite = 2,
+};
+
 struct PluginDrawableDefinition {
     uint64_t key = 0;
     std::string shaderID;
     std::vector<PluginAttributeBinding> attributes;
     SegmentVector segments;
     std::size_t vertexCount = 0;
+    PluginDrawableDepthMode depthMode = PluginDrawableDepthMode::ReadOnly;
+    bool enableStencilOverlap = false;
+    bool cullBackFaces = false;
 };
 
 class PluginBucket final : public Bucket {

@@ -639,6 +639,7 @@ const std::string addSourceOp("addSource");
 const std::string removeSourceOp("removeSource");
 const std::string setPaintPropertyOp("setPaintProperty");
 const std::string setLayoutPropertyOp("setLayoutProperty");
+const std::string setGlobalStatePropertyOp("setGlobalStateProperty");
 const std::string fileSizeProbeOp("probeFileSize");
 const std::string memoryProbeOp("probeMemory");
 const std::string memoryProbeStartOp("probeMemoryStart");
@@ -661,6 +662,44 @@ const std::string setTileLodModeOp("setTileLodMode");
 } // namespace TestOperationNames
 
 using namespace TestOperationNames;
+
+namespace {
+
+mln::Value parseGlobalStateValue(const mln::JSValue& value) {
+    switch (value.GetType()) {
+        case rapidjson::kNullType:
+            return mln::NullValue();
+        case rapidjson::kFalseType:
+            return false;
+        case rapidjson::kTrueType:
+            return true;
+        case rapidjson::kStringType:
+            return std::string{value.GetString(), value.GetStringLength()};
+        case rapidjson::kNumberType:
+            if (value.IsUint64()) return value.GetUint64();
+            if (value.IsInt64()) return value.GetInt64();
+            return value.GetDouble();
+        case rapidjson::kArrayType: {
+            mapbox::base::ValueArray result;
+            result.reserve(value.Size());
+            for (const auto& element : value.GetArray()) {
+                result.emplace_back(parseGlobalStateValue(element));
+            }
+            return result;
+        }
+        case rapidjson::kObjectType: {
+            mapbox::base::ValueObject result;
+            for (const auto& member : value.GetObject()) {
+                result.emplace(std::string{member.name.GetString(), member.name.GetStringLength()},
+                               parseGlobalStateValue(member.value));
+            }
+            return result;
+        }
+    }
+    return mln::NullValue();
+}
+
+} // namespace
 
 TestOperations parseTestOperations(TestMetadata& metadata) {
     TestOperations result;
@@ -964,6 +1003,17 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                     layer->setProperty(propertyName, propertyValue);
                     return true;
                 });
+        } else if (operationArray[0].GetString() == setGlobalStatePropertyOp) {
+            // setGlobalStateProperty
+            assert(operationArray.Size() >= 3u);
+            assert(operationArray[1].IsString());
+
+            std::string propertyName{operationArray[1].GetString(), operationArray[1].GetStringLength()};
+            auto value = parseGlobalStateValue(operationArray[2]);
+            result.emplace_back([propertyName, value = std::move(value)](TestContext& ctx) {
+                ctx.getMap().getStyle().setGlobalStateProperty(propertyName, value);
+                return true;
+            });
         } else if (operationArray[0].GetString() == fileSizeProbeOp) {
             // probeFileSize
             assert(operationArray.Size() >= 4u);

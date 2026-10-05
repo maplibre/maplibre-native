@@ -331,10 +331,17 @@ typedef struct mln_plugin_segment_v1 {
     uint32_t index_length;
 } mln_plugin_segment_v1;
 
+typedef enum mln_plugin_drawable_depth_mode_v1 {
+    MLN_PLUGIN_DRAWABLE_DEPTH_DISABLED = 0,
+    MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY = 1,
+    MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE = 2
+} mln_plugin_drawable_depth_mode_v1;
+
 typedef struct mln_plugin_drawable_descriptor_v1 {
-    /* Indexed triangles in the translucent pass, premultiplied-alpha blending,
-     * read-only depth and no tile stencil/culling. Point ownership belongs to
-     * layout; screen-space marks may extend beyond their owning tile. */
+    /* Indexed triangles in the translucent pass, premultiplied-alpha blending by
+     * default. depth_mode, enable_stencil_overlap, and cull_back_faces select the
+     * host depth/stencil/cull state for this drawable. blend_mode and reserved are
+     * unused; set them to zero. */
     uint32_t struct_size;
     uint64_t drawable_key;
     mln_plugin_string shader_id;
@@ -342,6 +349,11 @@ typedef struct mln_plugin_drawable_descriptor_v1 {
     size_t attribute_count;
     const mln_plugin_segment_v1* segments;
     size_t segment_count;
+    uint8_t depth_mode;
+    uint8_t enable_stencil_overlap;
+    uint8_t cull_back_faces;
+    uint8_t blend_mode;
+    uint8_t reserved;
 } mln_plugin_drawable_descriptor_v1;
 
 typedef struct mln_plugin_feature_vertex_range_v1 {
