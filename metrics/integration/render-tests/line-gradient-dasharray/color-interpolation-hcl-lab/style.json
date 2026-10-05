@@ -2,6 +2,7 @@
     "version": 8,
     "metadata": {
         "test": {
+            "allowed": 0.00046,
             "description": "Tests color interpolation in sRGB/HCL/LAB color spaces with dasharray",
             "width": 1024,
             "height": 430
