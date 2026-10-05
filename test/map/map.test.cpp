@@ -2281,6 +2281,27 @@ TEST(Map, LocationIndicatorAccuracyColorsTransition) {
     EXPECT_GT(countGreenPixels(result), 0u) << "The accuracy border should finish transitioning to green";
 }
 
+TEST(Map, RenderingStatisticsTrackDrawsAcrossFrames) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(R"({"version":8,"sources":{"points":{"type":"geojson","data":{
+        "type":"Point","coordinates":[0,0]}}},"layers":[{"id":"circle","type":"circle","source":"points"}]})");
+    const auto first = test.frontend.render(test.map).stats;
+    ASSERT_GT(first.numFrames, 0);
+    ASSERT_GT(first.numDrawCalls, 0);
+    EXPECT_GE(first.totalDrawCalls, first.numDrawCalls);
+
+    const auto second = test.frontend.render(test.map).stats;
+    EXPECT_EQ(first.numFrames + 1, second.numFrames);
+    EXPECT_GT(second.numDrawCalls, 0);
+    EXPECT_EQ(first.totalDrawCalls + second.numDrawCalls, second.totalDrawCalls);
+
+    test.map.getStyle().getLayer("circle")->setVisibility(VisibilityType::None);
+    const auto empty = test.frontend.render(test.map).stats;
+    EXPECT_EQ(second.numFrames + 1, empty.numFrames);
+    EXPECT_EQ(0, empty.numDrawCalls);
+    EXPECT_EQ(second.totalDrawCalls, empty.totalDrawCalls);
+}
+
 TEST(Map, LocationIndicatorWithoutImages) {
     MapTest<> test;
     test.map.getStyle().loadJSON(R"STYLE({
