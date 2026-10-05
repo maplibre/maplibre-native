@@ -1,15 +1,25 @@
 {
   "id": "2026-10-05T22-36-37-705Z",
   "startedAt": "2026-10-05T22:36:37.788Z",
-  "status": "running",
+  "endedAt": "2026-10-05T22:38:00.456Z",
+  "status": "done",
   "intent": "Please review PR number 4575",
   "driver": "claude-code",
+  "model": "claude-opus-5-5",
+  "branch": "agent-2026-10-05T22-36-37-705Z",
+  "cost": 0.345761,
   "caller": {
     "runner": {
       "host": "Mac.fritz.box",
       "pid": 21945,
-      "publish": "branch"
+      "publish": "branch",
+      "baseCommit": "f13ceb6eb817cd8945abcc95f946dd25aa97c229"
     },
-    "host": "Mac.fritz.box"
+    "pid": 21945,
+    "host": "Mac.fritz.box",
+    "baseCommit": "f13ceb6eb817cd8945abcc95f946dd25aa97c229",
+    "kind": "prompt",
+    "workspace": "/Users/bart/src/maplibre-native/.branches/agent-2026-10-05T22-36-37-705Z",
+    "sessionId": "2d7d91c8-14ff-437b-b061-ebbb94ce5b75"
   }
 }
