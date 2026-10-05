@@ -73,7 +73,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-324eb2cf.js";
+            window.path_to_searchindex_js = "searchindex-2702e539.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-24c1b73c.js"></script>
@@ -224,8 +224,8 @@
 <pre><code class="language-shell">rustup target add --toolchain stable-x86_64-unknown-linux-gnu aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 </code></pre>
 <p>See <a href="https://doc.rust-lang.org/nightly/rustc/platform-support.html">Platform Support</a> in the Rust documentation for more details. You will get a descriptive error message when the correct toolchain is not available, so we don’t list all possible combinations here.</p>
-<p>You also need to have cxxbridge installed:</p>
-<pre><code class="language-shell">cargo install cxxbridge-cmd@1.0.157 --locked
+<p>Rust 1.88 or newer is required. You also need to have the matching cxxbridge version installed:</p>
+<pre><code class="language-shell">cargo install cxxbridge-cmd@1.0.202 --locked
 </code></pre>
 <p>Set <code>-DMLN_USE_RUST=ON</code> when generating a configuration with CMake.</p>
 <h3 id="bazel"><a class="header" href="#bazel">Bazel</a></h3>
