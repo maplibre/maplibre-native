@@ -2046,17 +2046,20 @@ TEST(OfflineDatabase, ResetDatabase) {
 
 #ifndef WIN32 // Windows filenames cannot contain a colon.
 TEST(OfflineDatabase, ResetInMemoryDatabase) {
-    FixtureLog log;
-    const Scoped cleanup([] { util::deleteFile(":memory:"); });
-    util::write_file(":memory:", "unrelated file");
+    for (const auto* path : {":memory:", "file::memory:", "file::memory:?cache=shared", "file:reset-test?mode=memory"}) {
+        SCOPED_TRACE(path);
+        FixtureLog log;
+        const Scoped cleanup([path] { util::deleteFile(path); });
+        util::write_file(path, "unrelated file");
 
-    OfflineDatabase db(":memory:", fixture::tileServerOptions);
-    EXPECT_FALSE(db.resetDatabase());
-    EXPECT_EQ("unrelated file", util::read_file(":memory:"));
-    EXPECT_EQ(
-        1u,
-        log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
-    EXPECT_EQ(0u, log.uncheckedCount());
+        OfflineDatabase db(path, fixture::tileServerOptions);
+        EXPECT_FALSE(db.resetDatabase());
+        EXPECT_EQ("unrelated file", util::read_file(path));
+        EXPECT_EQ(
+            1u,
+            log.count({EventSeverity::Warning, Event::Database, -1, "Removing existing incompatible offline database"}));
+        EXPECT_EQ(0u, log.uncheckedCount());
+    }
 }
 #endif
 
