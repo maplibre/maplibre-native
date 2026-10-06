@@ -499,7 +499,41 @@ TEST(FeatureTracking, GlobeNDCBoundFillExtrusion) {
     EXPECT_NEAR(extruded->minY, flat->minY, 1e-6);
     EXPECT_GT(extruded->maxX, flat->maxX + 0.01);
     EXPECT_GT(extruded->maxY, flat->maxY + 0.01);
-    EXPECT_EQ(0, test.map.getRenderedFeatureCount("farPolygon", "extrusion"));
+}
+
+// A roof that rises above the horizon is drawn at the limb, and is captured where it is drawn.
+TEST(FeatureTracking, GlobeFillExtrusionAboveHorizon) {
+    GlobeFeatureTrackingTest test;
+    auto extrusionLayer = std::make_unique<FillExtrusionLayer>("extrusion", test.sourceName);
+    extrusionLayer->setFillExtrusionHeight({500000.0f});
+    extrusionLayer->setFillExtrusionColor(Color::red());
+    extrusionLayer->setFilter(Filter(dsl::eq(dsl::get("name"), dsl::literal("5"))));
+    test.map.getStyle().addLayer(std::move(extrusionLayer));
+    const auto image = test.run({}).image;
+
+    std::optional<gfx::RenderingStats::NDCBound> rendered;
+    for (uint32_t y = 0; y < image.size.height; ++y) {
+        for (uint32_t x = 0; x < image.size.width; ++x) {
+            const auto* pixel = image.data.get() + (y * image.size.width + x) * 4;
+            if (pixel[0] > 150 && pixel[1] < 100) {
+                const double ndcX = (x + 0.5) / image.size.width * 2.0 - 1.0;
+                const double ndcY = 1.0 - (y + 0.5) / image.size.height * 2.0;
+                rendered = rendered ? gfx::RenderingStats::NDCBound{std::min(rendered->minX, ndcX),
+                                                                    std::max(rendered->maxX, ndcX),
+                                                                    std::min(rendered->minY, ndcY),
+                                                                    std::max(rendered->maxY, ndcY)}
+                                    : gfx::RenderingStats::NDCBound{ndcX, ndcX, ndcY, ndcY};
+            }
+        }
+    }
+    ASSERT_TRUE(rendered);
+    const auto captured = test.bound("farPolygon", "extrusion");
+    ASSERT_TRUE(captured);
+    const double pixel = 2.0 / image.size.width;
+    EXPECT_LE(captured->minX, rendered->minX + pixel);
+    EXPECT_GE(captured->maxX, rendered->maxX - pixel);
+    EXPECT_LE(captured->minY, rendered->minY + pixel);
+    EXPECT_GE(captured->maxY, rendered->maxY - pixel);
 }
 
 // What the horizon hides is not rendered, wherever Mercator would have put it.

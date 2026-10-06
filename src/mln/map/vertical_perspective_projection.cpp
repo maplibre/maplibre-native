@@ -55,6 +55,19 @@ vec3 add(const vec3& a, const vec3& b) {
     return {{a[0] + b[0], a[1] + b[1], a[2] + b[2]}};
 }
 
+// GL JS `VerticalPerspectiveTransform._isLineOfSightBlocked`: whether the planet stands between the camera and a
+// point, both on the unit sphere's scale.
+bool lineOfSightBlocked(const vec3& camera, const vec3& point) {
+    const vec3 toPoint = add(point, scaled(camera, -1.0));
+    const double lengthSq = dot(toPoint, toPoint);
+    if (lengthSq == 0) {
+        return false;
+    }
+    const double t = std::clamp(-dot(camera, toPoint) / lengthSq, 0.0, 1.0);
+    const vec3 closest = add(camera, scaled(toPoint, t));
+    return dot(closest, closest) < 1.0;
+}
+
 struct RaySphereIntersection {
     double tMin;
     double tMax;
@@ -455,19 +468,25 @@ ProjectionData VerticalPerspectiveProjection::getProjectionData(const TransformS
             .tileMercatorCoords = mercatorTileCoords(tileID),
             .clippingPlane = state.getGlobeClippingPlane(),
             .projectionTransition = state.getProjectionTransition(),
-            .fallbackMatrix = mercatorMatrix};
+            .fallbackMatrix = mercatorMatrix,
+            .cameraPosition = state.getGlobeCameraPosition()};
 }
 
 ProjectedTilePoint VerticalPerspectiveProjection::projectTilePoint(const ProjectionData& data,
                                                                    const UnwrappedTileID& tileID,
                                                                    const Point<double>& point,
                                                                    const double elevation) const {
-    const vec3 sphere = scaled(tileCoordinatesToSphere(point, tileID), 1.0 + elevation / globeRadiusMeters);
+    const vec3 surface = tileCoordinatesToSphere(point, tileID);
+    const double heightScale = 1.0 + elevation / globeRadiusMeters;
+    const vec3 sphere = scaled(surface, heightScale);
     vec4 pos = {{sphere[0], sphere[1], sphere[2], 1}};
     matrix::transformMat4(pos, pos, data.mainMatrix);
+    // GL JS: the horizon plane hides a point on the surface, and only the planet itself hides a raised one.
     const auto& plane = data.clippingPlane;
-    const double side = plane[0] * sphere[0] + plane[1] * sphere[1] + plane[2] * sphere[2] + plane[3];
-    return {.point = {pos[0] / pos[3], pos[1] / pos[3]}, .signedDistanceFromCamera = pos[3], .occluded = side < 0.0};
+    const bool occluded = heightScale <= 1.0
+                              ? plane[0] * surface[0] + plane[1] * surface[1] + plane[2] * surface[2] + plane[3] < 0.0
+                              : lineOfSightBlocked(data.cameraPosition, sphere);
+    return {.point = {pos[0] / pos[3], pos[1] / pos[3]}, .signedDistanceFromCamera = pos[3], .occluded = occluded};
 }
 
 double VerticalPerspectiveProjection::circleRadiusCorrection(const TransformState& state) const {
