@@ -40,7 +40,8 @@ void registerTriangles(const std::string& pluginID,
                        bool withUniforms = false,
                        bool scopedUniforms = false,
                        bool stencilOverlapDedup = false,
-                       mln_plugin_should_animate_fn shouldAnimate = nullptr) {
+                       mln_plugin_should_animate_fn shouldAnimate = nullptr,
+                       bool stencilOverlap = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -49,6 +50,18 @@ void registerTriangles(const std::string& pluginID,
     static const mln_plugin_segment_v1 segment = {sizeof(segment), 0, 0, 3, 3};
     static const mln_plugin_drawable_descriptor_v1 drawable = {
         sizeof(drawable), 1, {"main", 4}, &binding, 1, &segment, 1, MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY, 0, 0, 0, 0};
+    static const mln_plugin_drawable_descriptor_v1 overlapDrawable = {sizeof(overlapDrawable),
+                                                                      1,
+                                                                      {"main", 4},
+                                                                      &binding,
+                                                                      1,
+                                                                      &segment,
+                                                                      1,
+                                                                      MLN_PLUGIN_DRAWABLE_DEPTH_READ_ONLY,
+                                                                      1,
+                                                                      0,
+                                                                      0,
+                                                                      0};
     static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
@@ -240,6 +253,12 @@ void registerTriangles(const std::string& pluginID,
             *output = {sizeof(*output), &stream, 1, indices, 3, &drawable, 1, 0, &range, 1};
             return MLN_PLUGIN_STATUS_OK;
         };
+        if (stencilOverlap) {
+            layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+                *output = {sizeof(*output), &stream, 1, indices, 3, &overlapDrawable, 1, 0, &range, 1};
+                return MLN_PLUGIN_STATUS_OK;
+            };
+        }
         if (packedColor) {
             layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
                 *output = {sizeof(*output), colorStreams, 2, indices, 3, &colorDrawable, 1, 0, nullptr, 0};
@@ -338,6 +357,18 @@ TEST(PluginRendering, CameraPaintRefreshesAfterPropertyAndZoomChanges) {
         "test-radius", style::conversion::Convertible(static_cast<const JSValue*>(&value))));
     expectRadius(0, 1);
     expectRadius(1, 0.5f);
+}
+
+TEST(PluginRendering, StencilOverlapWithoutDedupDraws) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.stencil-overlap",
+                                              /*packedColor=*/false,
+                                              /*withUniforms=*/false,
+                                              /*scopedUniforms=*/false,
+                                              /*stencilOverlapDedup=*/false,
+                                              /*shouldAnimate=*/nullptr,
+                                              /*stencilOverlap=*/true));
+    RenderTest test;
+    test.expectTriangles("test.stencil-overlap");
 }
 
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {

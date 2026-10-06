@@ -53,12 +53,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     std::optional<gfx::DepthMode> depthMode3d;
     std::optional<gfx::StencilMode> stencilMode3d;
 
-    // 3D features take the group-wide depth state, and the single-value stencil when clipping is in use
+    // 3D features take the group-wide depth state, and the single-value stencil when they enable stenciling
     const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
     visitDrawables([&](const gfx::Drawable& drawable) {
         if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
             features3d = true;
-            if (hasStencilTiles && drawable.getEnableStencil()) {
+            if (drawable.getEnableStencil()) {
                 stencil3d = true;
             }
         }
