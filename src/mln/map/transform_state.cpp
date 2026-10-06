@@ -871,11 +871,8 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
     }
 
     if (isGlobeRendering()) {
-        // On the world copy nearest the center, which is the copy the globe's tile cover gives each tile.
-        const LatLng latLng = VerticalPerspectiveProjection::screenCoordinateToLatLng(*this, point, LatLng::Unwrapped);
-        const double turns = std::round((getLatLng().longitude() - latLng.longitude()) / util::DEGREES_MAX);
         return TileCoordinate::fromLatLng(
-            atZoom, LatLng(latLng.latitude(), latLng.longitude() + turns * util::DEGREES_MAX, LatLng::Unwrapped));
+            atZoom, VerticalPerspectiveProjection::screenCoordinateToLatLng(*this, point, LatLng::Unwrapped));
     }
 
     return mercatorScreenCoordinateToTileCoordinate(point, atZoom);
