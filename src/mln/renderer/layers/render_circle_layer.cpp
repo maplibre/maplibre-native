@@ -76,19 +76,18 @@ bool RenderCircleLayer::hasCrossfade() const {
     return false;
 }
 
-GeometryCoordinate projectPoint(const GeometryCoordinate& p, const mat4& posMatrix, const Size& size) {
-    vec4 pos = {{static_cast<double>(p.x), static_cast<double>(p.y), 0, 1}};
-    matrix::transformMat4(pos, pos, posMatrix);
-    return {static_cast<int16_t>((static_cast<float>(pos[0] / pos[3]) + 1) * size.width * 0.5),
-            static_cast<int16_t>((static_cast<float>(pos[1] / pos[3]) + 1) * size.height * 0.5)};
+GeometryCoordinate projectPoint(const GeometryCoordinate& p, const TileProjector& projector, const Size& size) {
+    const Point<double> pos = projector.project({static_cast<double>(p.x), static_cast<double>(p.y)}).point;
+    return {static_cast<int16_t>((static_cast<float>(pos.x) + 1) * size.width * 0.5),
+            static_cast<int16_t>((static_cast<float>(pos.y) + 1) * size.height * 0.5)};
 }
 
 GeometryCoordinates projectQueryGeometry(const GeometryCoordinates& queryGeometry,
-                                         const mat4& posMatrix,
+                                         const TileProjector& projector,
                                          const Size& size) {
     GeometryCoordinates projectedGeometry;
     for (auto& p : queryGeometry) {
-        projectedGeometry.push_back(projectPoint(p, posMatrix, size));
+        projectedGeometry.push_back(projectPoint(p, projector, size));
     }
     return projectedGeometry;
 }
@@ -98,7 +97,7 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
                                                const float zoom,
                                                const TransformState& transformState,
                                                const float pixelsToTileUnits,
-                                               const mat4& posMatrix,
+                                               const TileProjector& projector,
                                                const FeatureState& featureState) const {
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
     // Translate query geometry
@@ -124,7 +123,7 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
     bool alignWithMap = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature) == AlignmentType::Map;
     const GeometryCoordinates& transformedQueryGeometry = alignWithMap ? translatedQueryGeometry
                                                                        : projectQueryGeometry(translatedQueryGeometry,
-                                                                                              posMatrix,
+                                                                                              projector,
                                                                                               transformState.getSize());
     auto transformedSize = alignWithMap ? size * pixelsToTileUnits : size;
 
@@ -133,17 +132,17 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
         for (auto& point : ring) {
             const GeometryCoordinate& transformedPoint = alignWithMap
                                                              ? point
-                                                             : projectPoint(point, posMatrix, transformState.getSize());
+                                                             : projectPoint(point, projector, transformState.getSize());
 
             float adjustedSize = transformedSize;
-            vec4 center = {{static_cast<double>(point.x), static_cast<double>(point.y), 0, 1}};
-            matrix::transformMat4(center, center, posMatrix);
+            const double w = projector.project({static_cast<double>(point.x), static_cast<double>(point.y)})
+                                 .signedDistanceFromCamera;
             auto pitchScale = evaluated.evaluate<style::CirclePitchScale>(zoom, feature);
             auto pitchAlignment = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature);
             if (pitchScale == CirclePitchScaleType::Viewport && pitchAlignment == AlignmentType::Map) {
-                adjustedSize *= static_cast<float>(center[3] / transformState.getCameraToCenterDistance());
+                adjustedSize *= static_cast<float>(w / transformState.getCameraToCenterDistance());
             } else if (pitchScale == CirclePitchScaleType::Map && pitchAlignment == AlignmentType::Viewport) {
-                adjustedSize *= static_cast<float>(transformState.getCameraToCenterDistance() / center[3]);
+                adjustedSize *= static_cast<float>(transformState.getCameraToCenterDistance() / w);
             }
 
             if (util::polygonIntersectsBufferedPoint(transformedQueryGeometry, transformedPoint, adjustedSize))

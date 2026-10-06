@@ -25,7 +25,7 @@ public:
                                 float,
                                 const TransformState&,
                                 float,
-                                const mat4&,
+                                const TileProjector&,
                                 const FeatureState&) const override;
 
 private:

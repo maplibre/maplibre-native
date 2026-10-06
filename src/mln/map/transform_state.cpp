@@ -892,13 +892,15 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
     }
 
     if (isGlobeRendering()) {
-        const Point<double> p = Projection::project(VerticalPerspectiveProjection::screenCoordinateToLatLng(
-                                                        *this, point, LatLng::Unwrapped),
-                                                    scale) /
-                                util::tileSize_D * static_cast<double>(1 << atZoom);
-        return {.p = {p.x, p.y}, .z = static_cast<double>(atZoom)};
+        return TileCoordinate::fromLatLng(
+            atZoom, VerticalPerspectiveProjection::screenCoordinateToLatLng(*this, point, LatLng::Unwrapped));
     }
 
+    return mercatorScreenCoordinateToTileCoordinate(point, atZoom);
+}
+
+TileCoordinate TransformState::mercatorScreenCoordinateToTileCoordinate(const ScreenCoordinate& point,
+                                                                        uint8_t atZoom) const {
     float targetZ = 0;
 
     double flippedY = size.height - point.y;
@@ -1208,7 +1210,9 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    auto latLng = screenCoordinateToLatLng({0, static_cast<float>(getSize().height)});
+    // The globe pads queries with the Mercator factor, as GL JS does.
+    const auto corner = mercatorScreenCoordinateToTileCoordinate({0, static_cast<float>(getSize().height)}, 0);
+    const auto latLng = projection->unproject(corner.p, 1. / util::tileSize_D, LatLng::Unwrapped);
 
     Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
     vec4 p = {{pt.x, pt.y, 0, 1}};

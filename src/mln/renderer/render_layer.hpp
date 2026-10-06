@@ -148,7 +148,7 @@ public:
                                         const float,
                                         const TransformState&,
                                         const float,
-                                        const mat4&,
+                                        const TileProjector&,
                                         const FeatureState&) const {
         return false;
     };

@@ -9,6 +9,7 @@
 #include <mln/gfx/shader_group.hpp>
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/gfx/vertex_attribute.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
 #include <mln/plugin/plugin_shader.hpp>
 #include <mln/renderer/change_request.hpp>
@@ -293,7 +294,7 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
                                                     float zoom,
                                                     const TransformState& transformState,
                                                     float pixelsToTileUnits,
-                                                    const mat4& tileMatrix,
+                                                    const TileProjector& projector,
                                                     const FeatureState& featureState) const {
     const auto& registration = pluginImpl(baseImpl).registration;
     if (!registration->queryFeature) return false;
@@ -323,6 +324,7 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     queryContext.pixels_to_tile_units = pixelsToTileUnits;
     queryContext.camera_to_center_distance = transformState.getCameraToCenterDistance();
     queryContext.bearing = transformState.getBearing();
+    const mat4& tileMatrix = projector.getProjectionData().mainMatrix;
     std::copy(tileMatrix.begin(), tileMatrix.end(), queryContext.tile_matrix);
     queryContext.viewport_width = transformState.getSize().width;
     queryContext.viewport_height = transformState.getSize().height;

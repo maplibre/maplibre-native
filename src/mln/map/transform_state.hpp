@@ -310,6 +310,7 @@ private:
 
     mat4 coordinatePointMatrix(const mat4& projMatrix) const;
     mat4 getPixelMatrix() const;
+    TileCoordinate mercatorScreenCoordinateToTileCoordinate(const ScreenCoordinate&, uint8_t atZoom) const;
 
     void setScalePoint(double scale, const ScreenCoordinate& point);
 
