@@ -135,7 +135,13 @@ public:
     ProjectionDefinition operator()(const ProjectionDefinition& a,
                                     const ProjectionDefinition& b,
                                     const double t) const {
-        return {a.from, b.to, t};
+        if (a.from == a.to && b.from == b.to) {
+            return {a.from, b.to, t};
+        }
+        // A stop that is already between two projections keeps its share of the globe.
+        return {ProjectionType::Mercator,
+                ProjectionType::VerticalPerspective,
+                interpolate(a.transitionState(), b.transitionState(), t)};
     }
 };
 

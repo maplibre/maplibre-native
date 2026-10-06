@@ -35,6 +35,10 @@ struct ProjectionDefinition {
 
     bool operator==(const ProjectionDefinition&) const = default;
 
+    /// How far the definition is toward the globe: 0 is Mercator, 1 the globe (GL JS
+    /// `GlobeProjection.transitionState`).
+    double transitionState() const;
+
     mln::Value serialize() const;
 };
 
