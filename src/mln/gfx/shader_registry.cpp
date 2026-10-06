@@ -1,8 +1,10 @@
 #include <mln/gfx/shader_registry.hpp>
 #include <mln/gfx/shader_group.hpp>
 
-namespace mln {
-namespace gfx {
+#include <mutex>
+#include <shared_mutex>
+
+namespace mln::gfx {
 
 ShaderRegistry::ShaderRegistry()
     : legacyGroup() {}
@@ -46,5 +48,4 @@ bool ShaderRegistry::registerShaderGroup(ShaderGroupPtr&& shader, const std::str
     return true;
 }
 
-} // namespace gfx
-} // namespace mln
+} // namespace mln::gfx

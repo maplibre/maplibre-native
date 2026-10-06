@@ -1,10 +1,10 @@
 #pragma once
 
+#include <mln/layout/pattern_layout.hpp>
+#include <mln/renderer/buckets/fill_bucket.hpp>
 #include <mln/renderer/render_layer.hpp>
 #include <mln/style/layers/fill_layer_impl.hpp>
 #include <mln/style/layers/fill_layer_properties.hpp>
-#include <mln/layout/pattern_layout.hpp>
-#include <mln/renderer/buckets/fill_bucket.hpp>
 
 #include <memory>
 
@@ -50,6 +50,13 @@ private:
                                 float,
                                 const mat4 &,
                                 const FeatureState &) const override;
+
+    void captureRenderedFeatures(const FillBucket &,
+                                 const RenderTile &,
+                                 const FillBinders &,
+                                 const style::FillPaintProperties::PossiblyEvaluated &,
+                                 const TransformState &,
+                                 const TransformParameters &);
 
     // Paint properties
     style::FillPaintProperties::Unevaluated unevaluated;

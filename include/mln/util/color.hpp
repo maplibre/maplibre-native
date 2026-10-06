@@ -9,6 +9,13 @@
 
 namespace mln {
 
+// The space a color interpolation runs in: RGB blends the premultiplied channels, LAB and HCL the straight color.
+enum class ColorSpace : uint8_t {
+    RGB,
+    LAB,
+    HCL,
+};
+
 // Stores a premultiplied color, with all four channels ranging from 0..1
 class Color {
 public:
@@ -43,6 +50,7 @@ public:
     static Color blue() { return {0.0f, 0.0f, 1.0f, 1.0f}; };
 
     static std::optional<Color> parse(const std::string&);
+    static Color interpolate(const Color& from, const Color& to, double t, ColorSpace space);
     std::string stringify() const;
     std::array<double, 4> toArray() const;
     operator std::array<float, 4>() const { return {r, g, b, a}; }

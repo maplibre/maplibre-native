@@ -1,0 +1,126 @@
+{
+  "version": 8,
+  "metadata": {
+    "test": {
+      "width": 384,
+      "height": 256,
+      "description": "composite-fractional-zoom"
+    }
+  },
+  "center": [
+    0,
+    0
+  ],
+  "zoom": 10.5,
+  "sources": {
+    "points": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "type": "Feature",
+            "id": 1,
+            "properties": {
+              "size": 16,
+              "n": 3,
+              "angle": 0
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                -0.05,
+                0
+              ]
+            }
+          },
+          {
+            "type": "Feature",
+            "id": 2,
+            "properties": {
+              "size": 24,
+              "n": 5,
+              "angle": 30
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                0.05,
+                0
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#eef2f7"
+      }
+    },
+    {
+      "id": "points",
+      "type": "ngon",
+      "source": "points",
+      "paint": {
+        "ngon-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          [
+            "get",
+            "size"
+          ],
+          11,
+          [
+            "*",
+            2,
+            [
+              "get",
+              "size"
+            ]
+          ]
+        ],
+        "ngon-rotate": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          [
+            "get",
+            "angle"
+          ],
+          11,
+          [
+            "+",
+            90,
+            [
+              "get",
+              "angle"
+            ]
+          ]
+        ],
+        "ngon-corners": [
+          "get",
+          "n"
+        ],
+        "ngon-color": "#2563eb",
+        "ngon-stroke-width": 3,
+        "ngon-stroke-color": "#111827"
+      }
+    }
+  ]
+}

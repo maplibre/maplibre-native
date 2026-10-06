@@ -60,5 +60,9 @@ void detachThread() {
     detach_jni_thread(theJVM, &env, detach);
 }
 
+void runTask(const std::function<void()>& task) {
+    task();
+}
+
 } // namespace platform
 } // namespace mln

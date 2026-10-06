@@ -61,6 +61,8 @@ enum class AttributeDataType : uint8_t {
     Float3, ///< pack of 3 floating point values
     Float4, ///< pack of 4 floating point values
 
+    UByte4Normalized, ///< four unsigned bytes converted to floats in [0, 1]
+
     Invalid = 255,
 };
 

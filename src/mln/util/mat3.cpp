@@ -102,9 +102,15 @@ void scale(mat3& out, const mat3& a, double x, double y) noexcept {
 }
 
 void transformMat3f(vec3f& out, const vec3f& a, const mat3& m) noexcept {
-    out[0] = static_cast<float>(m[0]) * a[0] + static_cast<float>(m[3]) * a[1] + static_cast<float>(m[6]) * a[2];
-    out[1] = static_cast<float>(m[1]) * a[0] + static_cast<float>(m[4]) * a[1] + static_cast<float>(m[7]) * a[2];
-    out[2] = static_cast<float>(m[2]) * a[0] + static_cast<float>(m[5]) * a[1] + static_cast<float>(m[8]) * a[2];
+    // Read the input before writing the output: callers pass the same vector as both, and
+    // writing out[0] first would leave out[1] and out[2] reading the transformed x.
+    const float x = a[0];
+    const float y = a[1];
+    const float z = a[2];
+
+    out[0] = static_cast<float>(m[0]) * x + static_cast<float>(m[3]) * y + static_cast<float>(m[6]) * z;
+    out[1] = static_cast<float>(m[1]) * x + static_cast<float>(m[4]) * y + static_cast<float>(m[7]) * z;
+    out[2] = static_cast<float>(m[2]) * x + static_cast<float>(m[5]) * y + static_cast<float>(m[8]) * z;
 }
 
 } // namespace matrix
