@@ -12,6 +12,7 @@
 #include <mln/util/logging.hpp>
 
 #include <Metal/Metal.hpp>
+#include <unordered_map>
 
 namespace mln {
 namespace mtl {
@@ -54,13 +55,18 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
 
-    // 3D features take the group-wide depth state, and the single-value stencil when they enable stenciling
+    // 3D features take the group-wide depth state, and a stencil value shared across the group when it has stencil
+    // tiles or their own when it does not
     const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, gfx::StencilMode> ownStencilModes;
     visitDrawables([&](const gfx::Drawable& drawable) {
         if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
             features3d = true;
             if (drawable.getEnableStencil()) {
                 stencil3d = true;
+                if (!hasStencilTiles) {
+                    ownStencilModes.emplace(&drawable, parameters.stencilModeFor3D());
+                }
             }
         }
     });
@@ -110,7 +116,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             }
         };
 
-        if (stencil3d) {
+        if (stencil3d && hasStencilTiles) {
             stencilMode3d = parameters.stencilModeFor3D();
             encoder->setStencilReferenceValue(stencilMode3d.ref);
         }
@@ -137,6 +143,10 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // stencil mode for features with stencil enabled or disable stenciling.
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
+            if (const auto own = ownStencilModes.find(&drawable); own != ownStencilModes.end()) {
+                stencilMode3d = own->second;
+                encoder->setStencilReferenceValue(stencilMode3d.ref);
+            }
             const auto& state = getDepthStencilState(drawable.getEnableDepth(), drawable.getEnableStencil());
             renderPass.setDepthStencilState(state);
         }
