@@ -92,6 +92,7 @@ jobs:
             qt_arch: win64_msvc2022_64
             qt_tools: ""
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 150
     env:
       BUILD_TYPE: ${{ matrix.build_type }}
       COMPILER_TYPE: ${{ matrix.compiler_type }}
