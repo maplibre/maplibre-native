@@ -1192,11 +1192,11 @@ float TransformState::maxPitchScaleFactor() const {
     if (size.isEmpty()) {
         return {};
     }
-    // The globe pads queries with the Mercator factor, as GL JS does.
+    // The globe pads queries with the Mercator factor, as GL JS does, from the corner's unclamped Mercator position.
     const auto corner = mercatorScreenCoordinateToTileCoordinate({0, static_cast<float>(getSize().height)}, 0);
     const auto latLng = projection->unproject(corner.p, 1. / util::tileSize_D, LatLng::Unwrapped);
 
-    Point<double> pt = Projection::project(latLng, scale) / util::tileSize_D;
+    Point<double> pt = isGlobeRendering() ? corner.p * scale : Projection::project(latLng, scale) / util::tileSize_D;
     vec4 p = {{pt.x, pt.y, 0, 1}};
     vec4 topPoint;
     matrix::transformMat4(topPoint, p, getCoordMatrix());
