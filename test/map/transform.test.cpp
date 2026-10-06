@@ -1868,6 +1868,26 @@ TEST(TileProjector, GlobeOccludesTheFarSideAndCorrectsForLatitude) {
     EXPECT_NEAR(cos40, projector.pitchedTextCorrection({100.0, util::EXTENT}), 1e-6);
 }
 
+// A query on the globe is padded with GL JS's Mercator pitch factor, taken at the screen corner's unclamped Mercator
+// position: the values are GL JS's `GlobeTransform.maxPitchScaleFactor()` for the same views.
+TEST(Transform, GlobeMaxPitchScaleFactor) {
+    struct View {
+        LatLng center;
+        double zoom;
+        double pitch;
+        double factor;
+    };
+    for (const auto& view : {View{.center = {20, 30}, .zoom = 1, .pitch = 50, .factor = 1.659065925812732},
+                             View{.center = {0, 0}, .zoom = 1, .pitch = 60, .factor = 2.3660254037842425},
+                             View{.center = {20, 30}, .zoom = 2, .pitch = 50, .factor = 1.6590659258122578}}) {
+        Transform transform;
+        transform.resize({512, 512});
+        transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        transform.jumpTo(CameraOptions().withCenter(view.center).withZoom(view.zoom).withPitch(view.pitch));
+        EXPECT_NEAR(view.factor, transform.getState().maxPitchScaleFactor(), 1e-4);
+    }
+}
+
 TEST(Transform, GlobeLocationOcclusion) {
     Transform transform;
     setUpGlobe(transform, {0, 0}, 1);
