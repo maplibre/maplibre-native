@@ -81,6 +81,8 @@ template std::optional<PropertyValue<Color>> Converter<PropertyValue<Color>>::op
                                                                                          bool) const;
 template std::optional<PropertyValue<Padding>> Converter<PropertyValue<Padding>>::operator()(
     conversion::Convertible const&, conversion::Error&, bool, bool) const;
+template std::optional<PropertyValue<VerticalGradient>> Converter<PropertyValue<VerticalGradient>>::operator()(
+    conversion::Convertible const&, conversion::Error&, bool, bool) const;
 template std::optional<PropertyValue<VariableAnchorOffsetCollection>>
 Converter<PropertyValue<VariableAnchorOffsetCollection>>::operator()(conversion::Convertible const&,
                                                                      conversion::Error&,

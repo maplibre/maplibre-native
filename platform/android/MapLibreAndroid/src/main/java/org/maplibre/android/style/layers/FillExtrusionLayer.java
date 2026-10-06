@@ -385,13 +385,13 @@ public class FillExtrusionLayer extends Layer {
   /**
    * Get the FillExtrusionVerticalGradient property
    *
-   * @return property wrapper value around Boolean
+   * @return property wrapper value around Object[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<Boolean> getFillExtrusionVerticalGradient() {
+  public PropertyValue<Object[]> getFillExtrusionVerticalGradient() {
     checkThread();
-    return (PropertyValue<Boolean>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
+    return (PropertyValue<Object[]>) new PropertyValue("fill-extrusion-vertical-gradient", nativeGetFillExtrusionVerticalGradient());
   }
 
   @NonNull
