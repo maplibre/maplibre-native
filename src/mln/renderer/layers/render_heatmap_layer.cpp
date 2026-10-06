@@ -112,7 +112,7 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
                                                 const float zoom,
                                                 const TransformState&,
                                                 const float pixelsToTileUnits,
-                                                const mat4&,
+                                                const TileProjector&,
                                                 const FeatureState&) const {
     (void)queryGeometry;
     (void)feature;

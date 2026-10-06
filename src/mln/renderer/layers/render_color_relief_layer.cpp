@@ -468,7 +468,7 @@ bool RenderColorReliefLayer::queryIntersectsFeature(const GeometryCoordinates&,
                                                     float,
                                                     const TransformState&,
                                                     float,
-                                                    const mat4&,
+                                                    const TileProjector&,
                                                     const FeatureState&) const {
     return false;
 }
