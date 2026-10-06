@@ -115,29 +115,8 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
 
 // MARK: - Projection
 
-namespace {
-
-// GL JS `GlobeProjection.transitionState`.
-double transitionStateFor(const ProjectionDefinition& definition) {
-    const auto isGlobe = [](ProjectionType type) {
-        return type != ProjectionType::Mercator;
-    };
-    if (definition.from == definition.to) {
-        return isGlobe(definition.from) ? 1 : 0;
-    }
-    if (isGlobe(definition.from) && !isGlobe(definition.to)) {
-        return 1 - definition.transition;
-    }
-    if (!isGlobe(definition.from) && isGlobe(definition.to)) {
-        return definition.transition;
-    }
-    return 1;
-}
-
-} // namespace
-
 void TransformState::setProjectionDefinition(const ProjectionDefinition& definition) {
-    const double transition = transitionStateFor(definition);
+    const double transition = definition.transitionState();
     if (transition == projectionTransition) {
         return;
     }
