@@ -331,8 +331,8 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             const auto& vertex = bucket.vertices.at(vertexOffset + vi).a1;
             const Point<double> center{std::trunc(vertex[0] / 2.0) + tileTranslation[0],
                                        std::trunc(vertex[1] / 2.0) + tileTranslation[1]};
-            const auto projected = projector->project(center);
-            if (projected.occluded) {
+            const auto projected = projector->projectAsDrawn(center);
+            if (projected.occluded || projected.signedDistanceFromCamera <= 0) {
                 // Not drawn; NaN stays out of the bound.
                 return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), 0};
             }
@@ -342,8 +342,8 @@ void RenderCircleLayer::captureRenderedFeatures(const CircleBucket& bucket,
             if (pitchWithMap) {
                 const double tileRadius = pixels * pixelsToTileUnits * projector->pitchedTextCorrection(center) *
                                           (scaleWithMap ? 1.0 : w / cameraToCenterDistance);
-                const auto east = projector->project({center.x + tileRadius, center.y}).point - projected.point;
-                const auto north = projector->project({center.x, center.y + tileRadius}).point - projected.point;
+                const auto east = projector->projectAsDrawn({center.x + tileRadius, center.y}).point - projected.point;
+                const auto north = projector->projectAsDrawn({center.x, center.y + tileRadius}).point - projected.point;
                 halfExtent = {std::hypot(east.x, north.x), std::hypot(east.y, north.y)};
             } else {
                 const double clipScale = (scaleWithMap ? cameraToCenterDistance : w) / w;

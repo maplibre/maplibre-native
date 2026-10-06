@@ -23,6 +23,10 @@ public:
                                         const UnwrappedTileID&,
                                         const Point<double>&,
                                         double elevation) const override;
+    ProjectedTilePoint drawnTilePoint(const ProjectionData&,
+                                      const UnwrappedTileID&,
+                                      const Point<double>&,
+                                      double elevation) const override;
     double circleRadiusCorrection(const TransformState&) const override;
     double pixelScale(const TransformState&) const override;
     double pitchedTextCorrection(const TransformState&, const Point<double>&, const UnwrappedTileID&) const override;

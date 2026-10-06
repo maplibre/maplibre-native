@@ -617,7 +617,7 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
         const auto& translation = isText ? textTileTranslation : iconTileTranslation;
         const auto projectTile = [&](const vec2& tilePoint) -> vec4 {
             if (projector) {
-                const auto projected = projector->project({tilePoint[0], tilePoint[1]});
+                const auto projected = projector->projectAsDrawn({tilePoint[0], tilePoint[1]});
                 const double w = projected.signedDistanceFromCamera;
                 return {projected.point.x * w, projected.point.y * w, 0, w};
             }
@@ -641,7 +641,8 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
             }
             // The shader hides what the horizon covers, whatever the placement made of it.
             if (projector &&
-                projector->project({symbol.anchorPoint.x + translation[0], symbol.anchorPoint.y + translation[1]})
+                projector
+                    ->projectAsDrawn({symbol.anchorPoint.x + translation[0], symbol.anchorPoint.y + translation[1]})
                     .occluded) {
                 continue;
             }

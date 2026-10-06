@@ -56,6 +56,15 @@ public:
                                                 const Point<double>&,
                                                 double elevation) const = 0;
 
+    /// Where the vertex shaders draw a tile point: `projectTilePoint`, except while one projection hands over to
+    /// another.
+    virtual ProjectedTilePoint drawnTilePoint(const ProjectionData& data,
+                                              const UnwrappedTileID& tileID,
+                                              const Point<double>& point,
+                                              double elevation) const {
+        return projectTilePoint(data, tileID, point, elevation);
+    }
+
     /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center.
     virtual double circleRadiusCorrection(const TransformState&) const { return 1.0; }
 
