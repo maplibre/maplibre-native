@@ -434,6 +434,21 @@ This function corresponds to the
 [`distance`](https://maplibre.org/maplibre-style-spec/expressions/#distance)
 operator in the MapLibre Style Spec.
 
+### mgl_globalState:
+
+**Selector:** `mgl_globalState:`
+
+**Format string syntax:** `mgl_globalState('chargerType')`
+
+Returns the value of the given property in the map's global state, or `nil` if
+the property is not present. The global state can be set with
+``MLNStyle/setGlobalStateValue:forProperty:`` and defaults can be defined with
+the style's root `state` property.
+
+This function corresponds to the
+[`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state)
+operator in the MapLibre Style Spec.
+
 ### mgl_coalesce:
 
 **Selector:** `mgl_coalesce:`

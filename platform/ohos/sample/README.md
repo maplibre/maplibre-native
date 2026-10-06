@@ -1,29 +1,39 @@
-# MapLibre Native HarmonyOS Sample
+# MapLibre Native OpenHarmony Sample
 
-Open this directory in DevEco Studio and let it sync the project.
+Build and run the sample with the public OpenHarmony SDK and
+[Oniro emulator](https://docs.oniroproject.org/device-development/developer-boards/emulator/).
 
-The default product builds the Vulkan renderer. Select the `opengl` product in
-DevEco Studio to build the EGL/GLES renderer instead.
+## Setup
 
-## Signing
-
-Before installing on a device, place your AppGallery Connect debug signing files
-in `sign/` with these names:
-
-- `maplibre-debug.p12` — private keystore
-- `maplibre-debug.cer` — debug certificate
-- `maplibre-debug.p7b` — debug profile for bundle `org.maplibre.native.demo`
-
-Generate the local Hvigor signing config:
+On Linux, install Node.js 20+, JDK 21, Ninja, and QEMU, then install
+[Oniro App Builder](https://github.com/eclipse-oniro4openharmony/oniro-app-builder)
+and the OpenHarmony 6.1 tools:
 
 ```sh
-node sign/generate-signing-config.mjs
+npm install -g @oniroproject/oniro-app@0.11.0
+oniro-app sdk install 6.1
+oniro-app cmdtools install
+oniro-app emulator install
 ```
 
-The script writes `sign/signing.local.json` and `sign/material/`. Keep both
-uncommitted.
+## Build and run
 
-If DevEco Studio writes a signing config into `build-profile.json5`, revert
-`build-profile.json5` before sending a PR.
+From the repository root:
 
-Keep signing passwords outside the repository.
+```sh
+git submodule update --init --recursive
+cd platform/ohos/sample
+oniro-app sign
+oniro-app build --product opengl --mode release
+oniro-app emulator start --wait-for-hdc 300
+```
+
+Unlock the emulator screen, then install and launch the sample:
+
+```sh
+oniro-app app install --hap entry/build/opengl/outputs/opengl/entry-opengl-signed.hap
+oniro-app app launch
+```
+
+Use `opengl` for the emulator; the `default` product builds Vulkan.
+Keep generated signing changes to `build-profile.json5` uncommitted.

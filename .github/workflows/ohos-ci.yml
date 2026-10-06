@@ -110,11 +110,18 @@ jobs:
           ninja --version
           "${OHOS_SDK_NATIVE}/llvm/bin/clang" --version
 
-      - name: Configure maplibre-native
+      - name: Configure OHOS native sample
         run: |
-          cmake --preset "${{ matrix.preset }}" \
+          cmake -S platform/ohos/sample/entry/src/main/cpp \
+            -B "build-${{ matrix.preset }}-sample" -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${OHOS_SDK_NATIVE}/build/cmake/ohos.toolchain.cmake" \
+            -DOHOS_ARCH=arm64-v8a \
+            -DOHOS_STL=c++_shared \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DMLN_OHOS_SAMPLE_RENDERER="${{ matrix.name }}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache"
 
-      - name: Build mbgl-core
-        run: cmake --build --preset "${{ matrix.preset }}"
+      # Whole-archive linking with --no-undefined catches missing platform definitions.
+      - name: Build maplibre_native_ohos
+        run: cmake --build "build-${{ matrix.preset }}-sample" --target maplibre_native_ohos

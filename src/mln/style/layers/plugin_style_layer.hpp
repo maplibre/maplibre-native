@@ -15,10 +15,9 @@ public:
     PluginStyleLayer(const std::string& id, const std::string& source, plugin::RegisteredLayerPtr);
     ~PluginStyleLayer() final;
 
-    using Layer::setProperty;
     std::optional<conversion::Error> setProperty(const std::string&,
                                                  const conversion::Convertible&,
-                                                 PropertyScope) final;
+                                                 std::optional<PropertyScope> scope = std::nullopt) final;
     Value serialize() const final;
     StyleProperty getProperty(const std::string&) const final;
 

@@ -167,7 +167,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
     const auto& layout = impl_cast(baseImpl).layout;
 
     if (hasFormatSectionOverrides) {
-        SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated);
+        SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated, unevaluated, parameters.globalState);
     }
 
     const auto hasIconOpacity = evaluated.get<style::IconColor>().constantOr(IconColor::defaultValue()).a > 0 ||
