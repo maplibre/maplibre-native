@@ -48,8 +48,9 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto& renderable = renderPass.getDescriptor().renderable;
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
-    // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
-    // drawables end up using the same mode value.
+    // drawables in this layer use 3D stencil mode with stencil tiles, we need to set it up here
+    // so that all the drawables end up using the same mode value; without stencil tiles each
+    // drawable gets its own.
     // 2D and 3D features in the same layer group is not supported.
     bool features3d = false;
     bool stencil3d = false;
@@ -65,11 +66,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             if (drawable.getEnableStencil()) {
                 stencil3d = true;
                 if (!hasStencilTiles) {
-                    ownStencilModes.emplace(&drawable, parameters.stencilModeFor3D());
+                    ownStencilModes.emplace(&drawable, gfx::StencilMode{});
                 }
             }
         }
     });
+    parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");

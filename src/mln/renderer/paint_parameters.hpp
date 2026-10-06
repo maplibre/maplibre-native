@@ -13,6 +13,7 @@
 
 #include <array>
 #include <map>
+#include <unordered_map>
 
 namespace mln {
 
@@ -26,6 +27,7 @@ class UnwrappedTileID;
 
 namespace gfx {
 class Context;
+class Drawable;
 class RendererBackend;
 class CommandEncoder;
 class RenderPass;
@@ -124,6 +126,10 @@ public:
     ///          cannot be used until `renderTileClippingMasks` is called again.
     /// @return The stencil mode, each value is unique.
     gfx::StencilMode stencilModeFor3D();
+
+    /// @brief Give each drawable a 3D stencil mode of its own, clearing the stencil buffer first if they would not all
+    ///        fit, so no value handed out before the clear is drawn after it.
+    void stencilModesFor3D(std::unordered_map<const gfx::Drawable*, gfx::StencilMode>& modes);
 
 private:
     template <typename TIter>

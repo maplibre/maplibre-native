@@ -473,6 +473,15 @@ gfx::StencilMode PaintParameters::stencilModeFor3D() {
                             .pass = gfx::StencilOpType::Replace};
 }
 
+void PaintParameters::stencilModesFor3D(std::unordered_map<const gfx::Drawable*, gfx::StencilMode>& modes) {
+    if (nextStencilID + modes.size() > maxStencilValue) {
+        clearStencil();
+    }
+    for (auto& [drawable, mode] : modes) {
+        mode = stencilModeFor3D();
+    }
+}
+
 gfx::ColorMode PaintParameters::colorModeForRenderPass() const {
     if (debugOptions & MapDebugOptions::Overdraw) {
         constexpr float overdraw = 1.0f / 8.0f;

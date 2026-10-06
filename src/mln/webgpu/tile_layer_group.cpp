@@ -64,11 +64,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             if (drawable.getEnableStencil()) {
                 stencil3d = true;
                 if (!hasStencilTiles) {
-                    ownStencilModes.emplace(&drawable, parameters.stencilModeFor3D());
+                    ownStencilModes.emplace(&drawable, gfx::StencilMode{});
                 }
             }
         }
     });
+    parameters.stencilModesFor3D(ownStencilModes);
 
 #if !defined(NDEBUG)
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
