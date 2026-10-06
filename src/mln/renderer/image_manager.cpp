@@ -70,7 +70,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 
     if (layoutChanged) {
         // Update cache size if requested image size has changed.
-        if (requestedImages.contains(image_->id)) {
+        if (sizeChanged && requestedImages.contains(image_->id)) {
             int64_t diff = image_->image.bytes() - oldImage->second->image.bytes();
             assert(static_cast<int64_t>(requestedImagesCacheSize + diff) >= 0ll);
             requestedImagesCacheSize += diff;
