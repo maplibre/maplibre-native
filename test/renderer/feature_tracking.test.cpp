@@ -473,7 +473,7 @@ struct GlobeFeatureTrackingTest : FeatureTrackingTest {
         return result;
     }
 
-    /// The capture covers the green pixels the feature was drawn with, to within a pixel.
+    /// The capture is the box of the green pixels the feature was drawn with, to within a pixel on each side.
     void expectCapturedAsDrawn(const std::string& featureID,
                                const std::string& layerID,
                                const PremultipliedImage& image) {
@@ -483,10 +483,10 @@ struct GlobeFeatureTrackingTest : FeatureTrackingTest {
         const auto captured = bound(featureID, layerID);
         ASSERT_TRUE(captured);
         const double pixel = 2.0 / image.size.width;
-        EXPECT_LE(captured->minX, rendered->minX + pixel);
-        EXPECT_GE(captured->maxX, rendered->maxX - pixel);
-        EXPECT_LE(captured->minY, rendered->minY + pixel);
-        EXPECT_GE(captured->maxY, rendered->maxY - pixel);
+        EXPECT_NEAR(rendered->minX, captured->minX, pixel);
+        EXPECT_NEAR(rendered->maxX, captured->maxX, pixel);
+        EXPECT_NEAR(rendered->minY, captured->minY, pixel);
+        EXPECT_NEAR(rendered->maxY, captured->maxY, pixel);
     }
 };
 
