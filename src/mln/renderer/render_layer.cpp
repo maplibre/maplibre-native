@@ -417,17 +417,33 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const s
 
     auto ndcRangeX = initRange;
     auto ndcRangeY = initRange;
-    for (std::size_t iz = 0; iz <= stepsZ; ++iz) {
-        const double elevation = iz == 0 ? rangeZ.first : rangeZ.second;
-        for (std::size_t iy = 0; iy <= stepsY; ++iy) {
-            const double y = util::interpolate(rangeY.first, rangeY.second, static_cast<double>(iy) / stepsY);
-            for (std::size_t ix = 0; ix <= stepsX; ++ix) {
-                const double x = util::interpolate(rangeX.first, rangeX.second, static_cast<double>(ix) / stepsX);
-                const auto projected = projector.project({x + translation[0], y + translation[1]}, elevation);
-                if (!projected.occluded) {
-                    ndcRangeX = minmax(ndcRangeX, projected.point.x);
-                    ndcRangeY = minmax(ndcRangeY, projected.point.y);
+    const auto include = [&](const ProjectedTilePoint& projected) {
+        if (!projected.occluded) {
+            ndcRangeX = minmax(ndcRangeX, projected.point.x);
+            ndcRangeY = minmax(ndcRangeY, projected.point.y);
+        }
+    };
+    for (std::size_t iy = 0; iy <= stepsY; ++iy) {
+        const double y = util::interpolate(rangeY.first, rangeY.second, static_cast<double>(iy) / stepsY);
+        for (std::size_t ix = 0; ix <= stepsX; ++ix) {
+            const double x = util::interpolate(rangeX.first, rangeX.second, static_cast<double>(ix) / stepsX);
+            const Point<double> point{x + translation[0], y + translation[1]};
+            const auto base = projector.project(point, rangeZ.first);
+            include(base);
+            if (stepsZ == 0) {
+                continue;
+            }
+            const auto top = projector.project(point, rangeZ.second);
+            include(top);
+            if (base.occluded != top.occluded) {
+                // The wall comes into view part way up, where it is drawn at the limb: find that height.
+                double hidden = base.occluded ? rangeZ.first : rangeZ.second;
+                double shown = base.occluded ? rangeZ.second : rangeZ.first;
+                for (int i = 0; i < 16; ++i) {
+                    const double mid = (hidden + shown) / 2.0;
+                    (projector.project(point, mid).occluded ? hidden : shown) = mid;
                 }
+                include(projector.project(point, shown));
             }
         }
     }

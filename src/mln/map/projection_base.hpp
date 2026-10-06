@@ -19,6 +19,8 @@ struct ProjectionData {
     double depthOffset = 0;
     /// The layer's translation in tile units, added on the sphere; the fallback matrix already carries it.
     vec2 translate{};
+    /// The camera on the unit sphere's scale, for the line of sight to points above the surface.
+    vec3 cameraPosition{};
 };
 
 /// A tile point in clip space, as the vertex shaders would place it.
