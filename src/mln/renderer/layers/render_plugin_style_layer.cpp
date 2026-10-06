@@ -322,7 +322,8 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
     queryContext.pixels_to_tile_units = pixelsToTileUnits;
     queryContext.camera_to_center_distance = transformState.getCameraToCenterDistance();
     queryContext.bearing = transformState.getBearing();
-    const mat4& tileMatrix = projector.getProjectionData().mainMatrix;
+    // The Mercator side of the projection, as the uniform callback gets it; the same matrix on Mercator.
+    const mat4& tileMatrix = projector.getProjectionData().fallbackMatrix;
     std::copy(tileMatrix.begin(), tileMatrix.end(), queryContext.tile_matrix);
     queryContext.viewport_width = transformState.getSize().width;
     queryContext.viewport_height = transformState.getSize().height;

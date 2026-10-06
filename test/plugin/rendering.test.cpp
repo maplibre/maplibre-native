@@ -3,6 +3,7 @@
 #include <mln/math/angles.hpp>
 #include <mln/plugin/plugin_api.h>
 #include <mln/plugin/plugin_shader.hpp>
+#include <mln/renderer/renderer.hpp>
 #include <mln/style/style.hpp>
 #include <mln/style/layer.hpp>
 #include <mln/style/projection.hpp>
@@ -13,6 +14,7 @@
 #include <mln/util/run_loop.hpp>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
@@ -34,6 +36,7 @@ std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
 std::vector<mln_plugin_uniform_context_v1> tileContexts;
+std::vector<std::array<double, 16>> queryTileMatrices;
 
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
@@ -265,6 +268,16 @@ void registerTriangles(const std::string& pluginID,
         layer.destroy_layout = [](void* instance) {
             delete static_cast<int*>(instance);
         };
+        layer.query_feature = [](const mln_plugin_feature_v1*,
+                                 const mln_plugin_tile_point_v1*,
+                                 size_t,
+                                 const mln_plugin_query_context_v1* context,
+                                 const mln_plugin_property_value_v1*,
+                                 size_t) -> uint8_t {
+            auto& matrix = queryTileMatrices.emplace_back();
+            std::copy(std::begin(context->tile_matrix), std::end(context->tile_matrix), matrix.begin());
+            return 1;
+        };
     }
     const mln_plugin_descriptor_v1 descriptor = {
         sizeof(descriptor), MLN_PLUGIN_ABI_VERSION_1, view(pluginID), {"1", 1}, 1, 1, layers.data(), layers.size()};
@@ -272,10 +285,12 @@ void registerTriangles(const std::string& pluginID,
     ASSERT_EQ(MLN_PLUGIN_STATUS_OK, mln_plugin_register_v1(&descriptor, error, sizeof(error))) << error;
 }
 
-std::string triangleStyle(const std::string& pluginID) {
+std::string triangleStyle(const std::string& pluginID,
+                          const std::string& geometry = R"({"type":"Point","coordinates":[0,0]})") {
     return R"({"version":8,"sources":{"points":{"type":"geojson","data":{
         "type":"FeatureCollection","features":[{"type":"Feature","properties":{},
-        "geometry":{"type":"Point","coordinates":[0,0]}}]}}},"layers":[
+        "geometry":)" +
+           geometry + R"(}]}}},"layers":[
         {"id":"left","type":")" +
            pluginID + R"(.left","source":"points"},
         {"id":"right","type":")" +
@@ -499,6 +514,58 @@ TEST(PluginRendering, UniformContextCarriesTheProjection) {
     projection->setType(ProjectionDefinition("globe"));
     test.map.getStyle().setProjection(std::move(projection));
     EXPECT_GT(expectPlaceWhereTheMapDrawsIt(test, place, true), 0u);
+}
+
+// A plugin's hit test gets the tile matrix its uniform callback gets, the Mercator side of the projection.
+TEST(PluginRendering, QueryContextCarriesTheMercatorTileMatrix) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.query-projection", false, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.query-projection", R"({"type":"Point","coordinates":[45,30]})"));
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{20, 40}).withZoom(1));
+    const LatLng place{30, 45};
+    const double placeX = (place.longitude() + 180.0) / 360.0;
+    const double placeY = 0.5 - std::log(std::tan(std::numbers::pi / 4.0 + util::deg2rad(place.latitude()) / 2.0)) /
+                                    (2.0 * std::numbers::pi);
+    for (const bool globe : {false, true}) {
+        if (globe) {
+            auto projection = std::make_unique<style::Projection>();
+            projection->setType(ProjectionDefinition("globe"));
+            test.map.getStyle().setProjection(std::move(projection));
+        }
+        tileContexts.clear();
+        test.frontend.render(test.map);
+        queryTileMatrices.clear();
+        const auto pixel = test.map.pixelForLatLng(place);
+        test.frontend.getRenderer()->queryRenderedFeatures(
+            ScreenBox{{pixel.x - 1, pixel.y - 1}, {pixel.x + 1, pixel.y + 1}});
+        ASSERT_FALSE(queryTileMatrices.empty());
+        const auto rendered = std::ranges::find_if(tileContexts, [&](const auto& context) {
+            const auto& tile = context.tile_mercator_coords;
+            const double x = (placeX - tile[0]) / tile[2];
+            const double y = (placeY - tile[1]) / tile[3];
+            return x >= 0 && x <= util::EXTENT && y >= 0 && y <= util::EXTENT;
+        });
+        ASSERT_NE(tileContexts.end(), rendered);
+        const auto& tile = rendered->tile_mercator_coords;
+        const std::array<double, 4> point = {(placeX - tile[0]) / tile[2], (placeY - tile[1]) / tile[3], 0, 1};
+        const auto clip = [&](const auto& matrix) {
+            std::array<double, 4> result{};
+            for (unsigned row = 0; row < 4; ++row) {
+                for (unsigned column = 0; column < 4; ++column) {
+                    result[row] += matrix[column * 4 + row] * point[column];
+                }
+            }
+            return result;
+        };
+        const auto expected = clip(rendered->tile_matrix);
+        // The uniform callback's matrix is aligned to the pixel grid; the hit test's is not.
+        const double tolerance = 1.0 / test.frontend.getSize().width;
+        for (const auto& matrix : queryTileMatrices) {
+            const auto actual = clip(matrix);
+            EXPECT_NEAR(expected[0] / expected[3], actual[0] / actual[3], tolerance) << (globe ? "globe" : "mercator");
+            EXPECT_NEAR(expected[1] / expected[3], actual[1] / actual[3], tolerance) << (globe ? "globe" : "mercator");
+        }
+    }
 }
 
 TEST(PluginRendering, RegistrationAfterRendererInitialization) {
