@@ -61,8 +61,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
 
 out vec2 v_normal;
 out vec2 v_width2;
-out vec2 v_tex_a;
-out vec2 v_tex_b;
+out highp vec2 v_tex_a;
+out highp vec2 v_tex_b;
 out float v_gamma_scale;
 out highp float v_lineprogress;
 

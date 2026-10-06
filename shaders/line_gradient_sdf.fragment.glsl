@@ -22,8 +22,8 @@ uniform sampler2D u_image_dash;
 
 in vec2 v_normal;
 in vec2 v_width2;
-in vec2 v_tex_a;
-in vec2 v_tex_b;
+in highp vec2 v_tex_a;
+in highp vec2 v_tex_b;
 in float v_gamma_scale;
 in highp float v_lineprogress;
 

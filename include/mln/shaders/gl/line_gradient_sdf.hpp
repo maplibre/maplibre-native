@@ -71,8 +71,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
 
 out vec2 v_normal;
 out vec2 v_width2;
-out vec2 v_tex_a;
-out vec2 v_tex_b;
+out highp vec2 v_tex_a;
+out highp vec2 v_tex_b;
 out float v_gamma_scale;
 out highp float v_lineprogress;
 
@@ -208,8 +208,8 @@ uniform sampler2D u_image_dash;
 
 in vec2 v_normal;
 in vec2 v_width2;
-in vec2 v_tex_a;
-in vec2 v_tex_b;
+in highp vec2 v_tex_a;
+in highp vec2 v_tex_b;
 in float v_gamma_scale;
 in highp float v_lineprogress;
 
