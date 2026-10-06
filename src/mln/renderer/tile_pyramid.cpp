@@ -17,6 +17,10 @@
 
 #include <cmath>
 #include <algorithm>
+#include <array>
+#include <optional>
+#include <span>
+#include <unordered_map>
 
 namespace mln {
 
@@ -360,18 +364,47 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         return result;
     }
 
+    const auto toWorld = [&](const ScreenCoordinate& p) {
+        return TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p;
+    };
     LineString<double> queryGeometry;
     queryGeometry.reserve(geometry.size());
 
     for (const auto& p : geometry) {
-        queryGeometry.push_back(
-            TileCoordinate::fromScreenCoordinate(transformState, 0, {p.x, transformState.getSize().height - p.y}).p);
+        queryGeometry.push_back(toWorld(p));
+    }
+
+    const bool globe = transformState.isGlobeRendering();
+    if (globe) {
+        // GL JS's `transformBbox`: the globe has no world copies, so a box across the antimeridian lands on the rest
+        // of the world, which shows when its slightly shrunken corners fall outside it. It moves to the copy west of
+        // the main world.
+        auto screenBox = mapbox::geometry::envelope(geometry);
+        const double shrink = std::min(screenBox.max.x - screenBox.min.x, screenBox.max.y - screenBox.min.y) * 0.001;
+        screenBox.min.x += shrink;
+        screenBox.min.y += shrink;
+        screenBox.max.x -= shrink;
+        screenBox.max.y -= shrink;
+        const auto bounds = mapbox::geometry::envelope(queryGeometry);
+        const bool covered = std::ranges::all_of(
+            std::array<ScreenCoordinate, 4>{
+                screenBox.min, {screenBox.max.x, screenBox.min.y}, {screenBox.min.x, screenBox.max.y}, screenBox.max},
+            [&](const ScreenCoordinate& corner) {
+                const auto c = toWorld(corner);
+                return bounds.min.x <= c.x && c.x <= bounds.max.x && bounds.min.y <= c.y && c.y <= bounds.max.y;
+            });
+        if (!covered) {
+            for (auto& c : queryGeometry) {
+                if (c.x > 0.5) {
+                    c.x -= 1.0;
+                }
+            }
+        }
     }
 
     mapbox::geometry::box<double> box = mapbox::geometry::envelope(queryGeometry);
 
     // GL JS sorts the globe's query tiles by their copy on the main world, so there the wrap only breaks ties.
-    const bool globe = transformState.isGlobeRendering();
     auto cmp = [globe](const UnwrappedTileID& a, const UnwrappedTileID& b) {
         if (globe) {
             return std::tie(a.canonical.z, a.canonical.y, a.canonical.x, a.wrap) <
@@ -386,6 +419,11 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
 
     auto maxPitchScaleFactor = transformState.maxPitchScaleFactor();
 
+    // The globe returns a feature once per tile, as GL JS does, though the tile is tested at two copies and can be
+    // rendered at two wraps: these are where this tile's features start in each layer's results.
+    std::optional<CanonicalTileID> canonicalTile;
+    std::unordered_map<std::string, std::size_t> canonicalTileStart;
+
     for (const auto& entry : sortedTiles) {
         const UnwrappedTileID& id = entry.first;
         Tile& tile = entry.second;
@@ -396,25 +434,64 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
         auto queryPadding = maxPitchScaleFactor * tile.getQueryPadding(layers) * util::EXTENT / util::tileSize_D /
                             scale;
 
-        GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(id, box.min);
-        if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT ||
-            tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {
-            continue;
+        if (globe && canonicalTile != id.canonical) {
+            canonicalTile = id.canonical;
+            canonicalTileStart.clear();
+            for (const auto& [layerID, features] : result) {
+                canonicalTileStart.emplace(layerID, features.size());
+            }
         }
 
-        GeometryCoordinate tileSpaceBoundsMax = TileCoordinate::toGeometryCoordinate(id, box.max);
-        if (tileSpaceBoundsMax.x + queryPadding < 0 || tileSpaceBoundsMax.y + queryPadding < 0) {
-            continue;
-        }
+        // GL JS tests a globe tile at its copies on and west of the main world, where the query geometry lies.
+        const std::array<UnwrappedTileID, 2> globeCopies{UnwrappedTileID(-1, id.canonical),
+                                                         UnwrappedTileID(0, id.canonical)};
+        for (const auto& copy :
+             globe ? std::span<const UnwrappedTileID>(globeCopies) : std::span<const UnwrappedTileID>(&id, 1)) {
+            GeometryCoordinate tileSpaceBoundsMin = TileCoordinate::toGeometryCoordinate(copy, box.min);
+            if (tileSpaceBoundsMin.x - queryPadding >= util::EXTENT ||
+                tileSpaceBoundsMin.y - queryPadding >= util::EXTENT) {
+                continue;
+            }
 
-        GeometryCoordinates tileSpaceQueryGeometry;
-        tileSpaceQueryGeometry.reserve(queryGeometry.size());
-        for (const auto& c : queryGeometry) {
-            tileSpaceQueryGeometry.push_back(TileCoordinate::toGeometryCoordinate(id, c));
-        }
+            GeometryCoordinate tileSpaceBoundsMax = TileCoordinate::toGeometryCoordinate(copy, box.max);
+            if (tileSpaceBoundsMax.x + queryPadding < 0 || tileSpaceBoundsMax.y + queryPadding < 0) {
+                continue;
+            }
 
-        tile.queryRenderedFeatures(
-            result, tileSpaceQueryGeometry, transformState, layers, options, globalState, projMatrix, featureState);
+            GeometryCoordinates tileSpaceQueryGeometry;
+            tileSpaceQueryGeometry.reserve(queryGeometry.size());
+            for (const auto& c : queryGeometry) {
+                tileSpaceQueryGeometry.push_back(TileCoordinate::toGeometryCoordinate(copy, c));
+            }
+
+            if (!globe) {
+                tile.queryRenderedFeatures(result,
+                                           tileSpaceQueryGeometry,
+                                           transformState,
+                                           layers,
+                                           options,
+                                           globalState,
+                                           projMatrix,
+                                           featureState);
+                continue;
+            }
+
+            std::unordered_map<std::string, std::vector<Feature>> found;
+            tile.queryRenderedFeatures(
+                found, tileSpaceQueryGeometry, transformState, layers, options, globalState, projMatrix, featureState);
+            for (auto& [layerID, features] : found) {
+                auto& layerResult = result[layerID];
+                const auto start = canonicalTileStart.contains(layerID) ? canonicalTileStart.at(layerID) : 0;
+                const auto end = layerResult.size();
+                for (auto& feature : features) {
+                    if (std::none_of(layerResult.begin() + start, layerResult.begin() + end, [&](const Feature& other) {
+                            return other == feature;
+                        })) {
+                        layerResult.push_back(std::move(feature));
+                    }
+                }
+            }
+        }
     }
 
     return result;

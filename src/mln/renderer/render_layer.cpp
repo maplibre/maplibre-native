@@ -451,7 +451,6 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const s
     // corners, edges and center is drawn wherever it falls inside the box.
     const auto& state = projector.getTransformState();
     const auto& tileID = projector.getTileID();
-    const auto tilesPerSide = static_cast<double>(1ull << tileID.canonical.z);
     for (const double screenX : {0.0, 0.5, 1.0}) {
         for (const double screenY : {0.0, 0.5, 1.0}) {
             const auto tile = state
@@ -459,7 +458,8 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const s
                                       {screenX * state.getSize().width, screenY * state.getSize().height},
                                       tileID.canonical.z)
                                   .p;
-            const Point<double> point{(tile.x - tileID.canonical.x - tileID.wrap * tilesPerSide) * util::EXTENT,
+            // The globe draws a tile on the same part of the sphere at any wrap.
+            const Point<double> point{(tile.x - tileID.canonical.x) * util::EXTENT,
                                       (tile.y - tileID.canonical.y) * util::EXTENT};
             const double x = point.x - translation[0];
             const double y = point.y - translation[1];
