@@ -4,6 +4,7 @@
 #include <mln/math/wrap.hpp>
 #include <mln/tile/tile_id.hpp>
 #include <mln/util/constants.hpp>
+#include <mln/util/interpolate.hpp>
 #include <mln/util/projection.hpp>
 
 #include <algorithm>
@@ -487,6 +488,36 @@ ProjectedTilePoint VerticalPerspectiveProjection::projectTilePoint(const Project
                               ? plane[0] * surface[0] + plane[1] * surface[1] + plane[2] * surface[2] + plane[3] < 0.0
                               : lineOfSightBlocked(data.cameraPosition, sphere);
     return {.point = {pos[0] / pos[3], pos[1] / pos[3]}, .signedDistanceFromCamera = pos[3], .occluded = occluded};
+}
+
+ProjectedTilePoint VerticalPerspectiveProjection::drawnTilePoint(const ProjectionData& data,
+                                                                 const UnwrappedTileID& tileID,
+                                                                 const Point<double>& point,
+                                                                 const double elevation) const {
+    const auto globe = projectTilePoint(data, tileID, point, elevation);
+    const double t = data.projectionTransition;
+    if (t > 0.999) {
+        return globe;
+    }
+    // The shaders' `interpolateProjection`: the sphere blended with Mercator, the horizon clipping through the
+    // blended depth from a fifth of the hand-over on. Raised geometry keeps its depth and the globe hides it.
+    vec4 flat = {{point.x, point.y, elevation, 1}};
+    matrix::transformMat4(flat, flat, data.fallbackMatrix);
+    const double globeW = globe.signedDistanceFromCamera;
+    const double w = util::interpolate(flat[3], globeW, t);
+    const double globeness = std::clamp((t - 0.2) / 0.8, 0.0, 1.0);
+    bool occluded = globeness > 0 && globe.occluded;
+    if (elevation <= 0) {
+        const vec3 surface = tileCoordinatesToSphere(point, tileID);
+        const auto& plane = data.clippingPlane;
+        const double clippingZ = 1.0 -
+                                 (plane[0] * surface[0] + plane[1] * surface[1] + plane[2] * surface[2] + plane[3]);
+        occluded = globeness * clippingZ * globeW > w;
+    }
+    return {.point = {util::interpolate(flat[0], globe.point.x * globeW, t) / w,
+                      util::interpolate(flat[1], globe.point.y * globeW, t) / w},
+            .signedDistanceFromCamera = w,
+            .occluded = occluded};
 }
 
 double VerticalPerspectiveProjection::circleRadiusCorrection(const TransformState& state) const {

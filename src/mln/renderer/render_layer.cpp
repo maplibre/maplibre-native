@@ -418,7 +418,7 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const s
     auto ndcRangeX = initRange;
     auto ndcRangeY = initRange;
     const auto include = [&](const ProjectedTilePoint& projected) {
-        if (!projected.occluded) {
+        if (!projected.occluded && projected.signedDistanceFromCamera > 0) {
             ndcRangeX = minmax(ndcRangeX, projected.point.x);
             ndcRangeY = minmax(ndcRangeY, projected.point.y);
         }
@@ -428,12 +428,12 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const s
         for (std::size_t ix = 0; ix <= stepsX; ++ix) {
             const double x = util::interpolate(rangeX.first, rangeX.second, static_cast<double>(ix) / stepsX);
             const Point<double> point{x + translation[0], y + translation[1]};
-            const auto base = projector.project(point, rangeZ.first);
+            const auto base = projector.projectAsDrawn(point, rangeZ.first);
             include(base);
             if (stepsZ == 0) {
                 continue;
             }
-            const auto top = projector.project(point, rangeZ.second);
+            const auto top = projector.projectAsDrawn(point, rangeZ.second);
             include(top);
             if (base.occluded != top.occluded) {
                 // The wall comes into view part way up, where it is drawn at the limb: find that height.
@@ -441,9 +441,30 @@ std::optional<RenderLayer::NDCBound> RenderLayer::computeFeatureNDCBound(const s
                 double shown = base.occluded ? rangeZ.second : rangeZ.first;
                 for (int i = 0; i < 16; ++i) {
                     const double mid = (hidden + shown) / 2.0;
-                    (projector.project(point, mid).occluded ? hidden : shown) = mid;
+                    (projector.projectAsDrawn(point, mid).occluded ? hidden : shown) = mid;
                 }
-                include(projector.project(point, shown));
+                include(projector.projectAsDrawn(point, shown));
+            }
+        }
+    }
+    // Close up, the visible part of the planet can be smaller than the sampling grid: the surface under the screen's
+    // corners, edges and center is drawn wherever it falls inside the box.
+    const auto& state = projector.getTransformState();
+    const auto& tileID = projector.getTileID();
+    const auto tilesPerSide = static_cast<double>(1ull << tileID.canonical.z);
+    for (const double screenX : {0.0, 0.5, 1.0}) {
+        for (const double screenY : {0.0, 0.5, 1.0}) {
+            const auto tile = state
+                                  .screenCoordinateToTileCoordinate(
+                                      {screenX * state.getSize().width, screenY * state.getSize().height},
+                                      tileID.canonical.z)
+                                  .p;
+            const Point<double> point{(tile.x - tileID.canonical.x - tileID.wrap * tilesPerSide) * util::EXTENT,
+                                      (tile.y - tileID.canonical.y) * util::EXTENT};
+            const double x = point.x - translation[0];
+            const double y = point.y - translation[1];
+            if (rangeX.first <= x && x <= rangeX.second && rangeY.first <= y && y <= rangeY.second) {
+                include(projector.projectAsDrawn(point, rangeZ.first));
             }
         }
     }
