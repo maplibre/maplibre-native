@@ -73,7 +73,7 @@ TEST(ImageManager, SDFChangeRequiresRelayout) {
 
     EXPECT_TRUE(
         imageManager->updateImage(makeMutable<style::Image::Impl>("one", PremultipliedImage({16, 16}), 2.0f, true)));
-    EXPECT_EQ(0, imageManager->updatedImageVersions.size());
+    EXPECT_EQ(1, imageManager->updatedImageVersions.size());
     ASSERT_NE(nullptr, imageManager->getImage("one"));
     EXPECT_TRUE(imageManager->getImage("one")->sdf);
 }

@@ -148,8 +148,11 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
         for (const auto& iconEntry : icons) {
             const auto& icon = iconEntry.second;
 
+            // Flip the low bit for SDF images so a same-size image whose SDF flag changed
+            // gets a fresh, uploaded bin instead of reusing the stale one.
             auto imageHash = util::hash(icon->id);
-            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area());
+            int32_t uniqueId = static_cast<int32_t>(sqrt(imageHash) / 2 + icon->image.size.area()) ^
+                               static_cast<int32_t>(icon->sdf);
             const auto size = Size(icon->image.size.width + 2 * padding, icon->image.size.height + 2 * padding);
             const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
             if (!texHandle) {
@@ -163,7 +166,8 @@ ImageAtlas DynamicTextureAtlas::uploadIconsAndPatterns(const ImageMap& icons,
                 const auto& pattern = patternEntry.second;
 
                 auto patternHash = util::hash(pattern->id);
-                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area());
+                int32_t uniqueId = static_cast<int32_t>(sqrt(patternHash) / 2 + pattern->image.size.area()) ^
+                                   static_cast<int32_t>(pattern->sdf);
                 const auto size = Size(pattern->image.size.width + 2 * padding,
                                        pattern->image.size.height + 2 * padding);
                 const auto& texHandle = imageAtlas.dynamicTexture->reserveSize(size, uniqueId);
