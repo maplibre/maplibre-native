@@ -370,7 +370,13 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
 
     mapbox::geometry::box<double> box = mapbox::geometry::envelope(queryGeometry);
 
-    auto cmp = [](const UnwrappedTileID& a, const UnwrappedTileID& b) {
+    // GL JS sorts the globe's query tiles by their copy on the main world, so there the wrap only breaks ties.
+    const bool globe = transformState.isGlobeRendering();
+    auto cmp = [globe](const UnwrappedTileID& a, const UnwrappedTileID& b) {
+        if (globe) {
+            return std::tie(a.canonical.z, a.canonical.y, a.canonical.x, a.wrap) <
+                   std::tie(b.canonical.z, b.canonical.y, b.canonical.x, b.wrap);
+        }
         return std::tie(a.canonical.z, a.canonical.y, a.wrap, a.canonical.x) <
                std::tie(b.canonical.z, b.canonical.y, b.wrap, b.canonical.x);
     };
