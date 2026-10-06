@@ -386,6 +386,26 @@ TEST(PluginRendering, StencilOverlapWithoutDedupDraws) {
     test.expectTriangles("test.stencil-overlap");
 }
 
+// The point sits on the corner of the four zoom 1 tiles, so each layer draws its triangle four times at half opacity.
+// Without dedup every drawable stencils against itself only and all four blend; with dedup the layer draws once.
+TEST(PluginRendering, StencilOverlapWithoutDedupStencilsEachDrawableOnItsOwn) {
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.overlap-per-drawable", false, false, true, false, nullptr, true));
+    ASSERT_NO_FATAL_FAILURE(registerTriangles("test.overlap-per-layer", false, false, true, true, nullptr, false));
+    sharedAlpha = 0.5f;
+    const auto leftRed = [](const std::string& pluginID) {
+        RenderTest test;
+        test.map.getStyle().loadJSON(triangleStyle(pluginID));
+        test.map.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(1));
+        const auto result = test.frontend.render(test.map);
+        return result.image.data[(32 * 64 + 16) * 4];
+    };
+    const auto perDrawable = leftRed("test.overlap-per-drawable");
+    const auto perLayer = leftRed("test.overlap-per-layer");
+    sharedAlpha = 1;
+    EXPECT_NEAR(239, perDrawable, 1);
+    EXPECT_NEAR(128, perLayer, 1);
+}
+
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {
     ASSERT_NO_FATAL_FAILURE(registerTriangles("test.cached-uniforms", false, true));
     RenderTest test;

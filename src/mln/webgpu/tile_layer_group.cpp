@@ -15,6 +15,7 @@
 #include <mln/util/logging.hpp>
 
 #include <optional>
+#include <unordered_map>
 
 namespace mln {
 namespace webgpu {
@@ -53,13 +54,18 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     std::optional<gfx::DepthMode> depthMode3d;
     std::optional<gfx::StencilMode> stencilMode3d;
 
-    // 3D features take the group-wide depth state, and the single-value stencil when they enable stenciling
+    // 3D features take the group-wide depth state, and a stencil value shared across the group when it has stencil
+    // tiles or their own when it does not
     const bool hasStencilTiles = stencilTiles && !stencilTiles->empty();
+    std::unordered_map<const gfx::Drawable*, gfx::StencilMode> ownStencilModes;
     visitDrawables([&](const gfx::Drawable& drawable) {
         if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
             features3d = true;
             if (drawable.getEnableStencil()) {
                 stencil3d = true;
+                if (!hasStencilTiles) {
+                    ownStencilModes.emplace(&drawable, parameters.stencilModeFor3D());
+                }
             }
         }
     });
@@ -70,7 +76,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     if (features3d) {
         depthMode3d = parameters.depthModeFor3D();
-        if (stencil3d) {
+        if (stencil3d && hasStencilTiles) {
             stencilMode3d = parameters.stencilModeFor3D();
         }
     } else if (hasStencilTiles) {
@@ -125,8 +131,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         if (features3d) {
             const auto depth = (drawable.getEnableDepth() && depthMode3d) ? *depthMode3d : gfx::DepthMode::disabled();
-            const auto stencil = (drawable.getEnableStencil() && stencilMode3d) ? *stencilMode3d
-                                                                                : gfx::StencilMode::disabled();
+            const auto own = ownStencilModes.find(&drawable);
+            const auto stencil = !drawable.getEnableStencil()   ? gfx::StencilMode::disabled()
+                                 : own != ownStencilModes.end() ? own->second
+                                 : stencilMode3d                ? *stencilMode3d
+                                                                : gfx::StencilMode::disabled();
             drawableWebGPU.setDepthModeFor3D(depth);
             drawableWebGPU.setStencilModeFor3D(stencil);
         }
