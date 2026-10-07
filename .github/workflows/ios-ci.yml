@@ -100,9 +100,6 @@ jobs:
           disk-cache: ${{ github.workflow }}
           repository-cache: true
           cache-save: ${{ github.event_name != 'pull_request' }}
-          # Reused Darwin sandboxes can retain inputs and fail with "File exists".
-          bazelrc: |
-            build --noreuse_sandbox_directories
 
       # render test
 
