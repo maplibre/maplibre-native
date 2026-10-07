@@ -6237,6 +6237,26 @@
         ]
       },
       "property-type": "cross-faded-data-driven"
+    },
+    "fill-rounded-corner-distance": {
+      "type": "number",
+      "default": 0,
+      "minimum": 0,
+      "units": "meters",
+      "doc": "The distance from the corner that will be cut and replaced with rounded corner.",
+      "sdk-support": {
+        "basic functionality": {
+          "android": "13.7.0",
+          "ios": "7.1.0"
+        }
+      },
+      "expression": {
+        "interpolated": true,
+        "parameters": [
+          "zoom"
+        ]
+      },
+      "property-type": "data-constant"
     }
   },
   "paint_fill-extrusion": {

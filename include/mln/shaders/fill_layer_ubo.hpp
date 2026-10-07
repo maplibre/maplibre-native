@@ -107,12 +107,16 @@ struct alignas(16) FillEvaluatedPropsUBO {
     /*  0 */ Color color;
     /* 16 */ Color outline_color;
     /* 32 */ float opacity;
-    /* 36 */ float fade;
-    /* 40 */ float from_scale;
-    /* 44 */ float to_scale;
-    /* 48 */
+    /* 36 */ float rounded_corner_distance;
+    /* 40 */ float fade;
+    /* 44 */ float from_scale;
+    /* 48 */ float to_scale;
+    /* 52 */ float pad1;
+    /* 56 */ float pad2;
+    /* 60 */ float pad3;
+    /* 64 */
 };
-static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
+static_assert(sizeof(FillEvaluatedPropsUBO) == 4 * 16);
 
 #if MLN_UBO_CONSOLIDATION
 
