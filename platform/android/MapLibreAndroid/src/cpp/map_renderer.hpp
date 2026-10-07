@@ -70,7 +70,7 @@ public:
 
     // Gives a handle to the Renderer to enable actions on
     // any thread.
-    ActorRef<Renderer> actor() const;
+    std::optional<ActorRef<Renderer>> actor();
 
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
@@ -106,10 +106,13 @@ protected:
 private:
     struct MailboxData {
         explicit MailboxData(Scheduler*);
+        void reset();
         std::shared_ptr<Mailbox> getMailbox() const noexcept;
 
     private:
         Scheduler* scheduler;
+        // getMailbox() is called from the main thread and the render thread, reset() from the render thread
+        mutable std::mutex mutex;
         mutable std::shared_ptr<Mailbox> mailbox;
     };
     // Called from the GL Thread //
@@ -127,7 +130,7 @@ private:
     void onSurfaceDestroyed(JNIEnv&);
 
 private:
-    // Called on either Main or GL thread //
+    // Called on either Main or render thread //
     void onRendererReset(JNIEnv&);
 
     void setSwapBehaviorFlush(JNIEnv&, jboolean flush);
@@ -139,7 +142,7 @@ private:
     std::optional<std::string> localIdeographFontFamily;
 
     TaggedScheduler threadPool;
-    const MailboxData mailboxData;
+    MailboxData mailboxData;
 
     std::mutex initialisationMutex;
     std::shared_ptr<RendererObserver> rendererObserver;
