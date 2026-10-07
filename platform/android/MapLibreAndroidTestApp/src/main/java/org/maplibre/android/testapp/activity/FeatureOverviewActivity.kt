@@ -55,11 +55,13 @@ class FeatureOverviewActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.addOnItemTouchListener(SimpleOnItemTouchListener())
         recyclerView.setHasFixedSize(true)
-        // Since targetSdk 35 the window is edge-to-edge, keep the list clear of the system bars
-        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { view, insets ->
+        // Since targetSdk 35 the window is edge-to-edge: clip the list below the status and action bar,
+        // but let it scroll behind the navigation bar
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView.parent as View) { view, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            view.updatePadding(left = bars.left, top = bars.top, right = bars.right, bottom = bars.bottom)
-            insets
+            view.updatePadding(left = bars.left, top = bars.top, right = bars.right)
+            recyclerView.updatePadding(bottom = bars.bottom)
+            WindowInsetsCompat.CONSUMED
         }
 
         ItemClickSupport.addTo(recyclerView)
