@@ -67,7 +67,7 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
     const auto sizeChanged = oldImage->second->image.size != image_->image.size;
     // A changed SDF flag requires a relayout so buckets pick up the new pattern type.
     // Same-size updates still bump the version so existing layouts patch their pixels;
-    // the atlas keys allocations on the SDF flag, so the relayout gets a freshly uploaded bin.
+    // the atlas allocates per image revision, so the relayout gets a freshly uploaded bin.
     const auto sdfChanged = oldImage->second->sdf != image_->sdf;
 
     if (sizeChanged) {
