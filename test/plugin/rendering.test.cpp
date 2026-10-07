@@ -36,7 +36,7 @@ std::array<unsigned, 2> uniformCalls{};
 float sharedAlpha = 1;
 bool failSharedUniform = false;
 std::vector<mln_plugin_uniform_context_v1> tileContexts;
-std::vector<std::array<double, 16>> queryTileMatrices;
+std::vector<mln_plugin_query_context_v1> queryContexts;
 
 void registerTriangles(const std::string& pluginID,
                        bool packedColor = false,
@@ -274,8 +274,7 @@ void registerTriangles(const std::string& pluginID,
                                  const mln_plugin_query_context_v1* context,
                                  const mln_plugin_property_value_v1*,
                                  size_t) -> uint8_t {
-            auto& matrix = queryTileMatrices.emplace_back();
-            std::copy(std::begin(context->tile_matrix), std::end(context->tile_matrix), matrix.begin());
+            queryContexts.push_back(*context);
             return 1;
         };
     }
@@ -536,8 +535,8 @@ TEST(PluginRendering, UniformContextCarriesTheProjection) {
     EXPECT_GT(expectPlaceWhereTheMapDrawsIt(test, place, true), 0u);
 }
 
-// A plugin's hit test gets the tile matrix its uniform callback gets, the Mercator side of the projection.
-TEST(PluginRendering, QueryContextCarriesTheMercatorTileMatrix) {
+// A plugin's hit test gets the projection its uniform callback gets, with the Mercator side as the tile matrix.
+TEST(PluginRendering, QueryContextCarriesTheProjection) {
     ASSERT_NO_FATAL_FAILURE(registerTriangles("test.query-projection", false, false, true));
     RenderTest test;
     test.map.getStyle().loadJSON(triangleStyle("test.query-projection", R"({"type":"Point","coordinates":[45,30]})"));
@@ -546,7 +545,23 @@ TEST(PluginRendering, QueryContextCarriesTheMercatorTileMatrix) {
     const double placeX = (place.longitude() + 180.0) / 360.0;
     const double placeY = 0.5 - std::log(std::tan(std::numbers::pi / 4.0 + util::deg2rad(place.latitude()) / 2.0)) /
                                     (2.0 * std::numbers::pi);
+    const double longitude = util::deg2rad(place.longitude());
+    const double latitude = util::deg2rad(place.latitude());
+    const std::array<double, 4> onSphere = {
+        std::sin(longitude) * std::cos(latitude), std::sin(latitude), std::cos(longitude) * std::cos(latitude), 1};
+    const auto ndc = [](const auto& matrix, const std::array<double, 4>& point) {
+        std::array<double, 4> result{};
+        for (unsigned row = 0; row < 4; ++row) {
+            for (unsigned column = 0; column < 4; ++column) {
+                result[row] += matrix[column * 4 + row] * point[column];
+            }
+        }
+        return std::array<double, 2>{result[0] / result[3], result[1] / result[3]};
+    };
+    // The uniform callback's tile matrix is aligned to the pixel grid; the hit test's is not.
+    const double tolerance = 1.0 / test.frontend.getSize().width;
     for (const bool globe : {false, true}) {
+        SCOPED_TRACE(globe ? "globe" : "mercator");
         if (globe) {
             auto projection = std::make_unique<style::Projection>();
             projection->setType(ProjectionDefinition("globe"));
@@ -554,11 +569,11 @@ TEST(PluginRendering, QueryContextCarriesTheMercatorTileMatrix) {
         }
         tileContexts.clear();
         test.frontend.render(test.map);
-        queryTileMatrices.clear();
+        queryContexts.clear();
         const auto pixel = test.map.pixelForLatLng(place);
         test.frontend.getRenderer()->queryRenderedFeatures(
             ScreenBox{{pixel.x - 1, pixel.y - 1}, {pixel.x + 1, pixel.y + 1}});
-        ASSERT_FALSE(queryTileMatrices.empty());
+        ASSERT_FALSE(queryContexts.empty());
         const auto rendered = std::ranges::find_if(tileContexts, [&](const auto& context) {
             const auto& tile = context.tile_mercator_coords;
             const double x = (placeX - tile[0]) / tile[2];
@@ -567,23 +582,22 @@ TEST(PluginRendering, QueryContextCarriesTheMercatorTileMatrix) {
         });
         ASSERT_NE(tileContexts.end(), rendered);
         const auto& tile = rendered->tile_mercator_coords;
-        const std::array<double, 4> point = {(placeX - tile[0]) / tile[2], (placeY - tile[1]) / tile[3], 0, 1};
-        const auto clip = [&](const auto& matrix) {
-            std::array<double, 4> result{};
-            for (unsigned row = 0; row < 4; ++row) {
-                for (unsigned column = 0; column < 4; ++column) {
-                    result[row] += matrix[column * 4 + row] * point[column];
-                }
+        const std::array<double, 4> inTile = {(placeX - tile[0]) / tile[2], (placeY - tile[1]) / tile[3], 0, 1};
+        const auto& sphereInput = globe ? onSphere : inTile;
+        for (const auto& context : queryContexts) {
+            for (const auto& [drawn, hit] :
+                 {std::pair{ndc(rendered->tile_matrix, inTile), ndc(context.tile_matrix, inTile)},
+                  std::pair{ndc(rendered->projection_matrix, sphereInput),
+                            ndc(context.projection_matrix, sphereInput)}}) {
+                EXPECT_NEAR(drawn[0], hit[0], tolerance);
+                EXPECT_NEAR(drawn[1], hit[1], tolerance);
             }
-            return result;
-        };
-        const auto expected = clip(rendered->tile_matrix);
-        // The uniform callback's matrix is aligned to the pixel grid; the hit test's is not.
-        const double tolerance = 1.0 / test.frontend.getSize().width;
-        for (const auto& matrix : queryTileMatrices) {
-            const auto actual = clip(matrix);
-            EXPECT_NEAR(expected[0] / expected[3], actual[0] / actual[3], tolerance) << (globe ? "globe" : "mercator");
-            EXPECT_NEAR(expected[1] / expected[3], actual[1] / actual[3], tolerance) << (globe ? "globe" : "mercator");
+            EXPECT_EQ(rendered->projection_transition, context.projection_transition);
+            EXPECT_FLOAT_EQ(rendered->pixels_to_sphere_radians, static_cast<float>(context.pixels_to_sphere_radians));
+            for (unsigned i = 0; i < 4; ++i) {
+                EXPECT_FLOAT_EQ(rendered->tile_mercator_coords[i], static_cast<float>(context.tile_mercator_coords[i]));
+                EXPECT_FLOAT_EQ(rendered->clipping_plane[i], static_cast<float>(context.clipping_plane[i]));
+            }
         }
     }
 }

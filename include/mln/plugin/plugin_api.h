@@ -430,6 +430,16 @@ typedef struct mln_plugin_query_context_v1 {
     double tile_matrix[16];
     uint32_t viewport_width;
     uint32_t viewport_height;
+    /*
+     * The tile's projection, with the meaning mln_plugin_uniform_context_v1
+     * gives these fields, so a hit test can put a feature where the uniform
+     * callback's shader draws it; tile_matrix is the Mercator side of the blend.
+     */
+    double projection_transition;
+    double tile_mercator_coords[4];
+    double projection_matrix[16];
+    double clipping_plane[4];
+    double pixels_to_sphere_radians;
 } mln_plugin_query_context_v1;
 
 /* Optional exact hit test. Query and feature geometry use tile coordinates.
