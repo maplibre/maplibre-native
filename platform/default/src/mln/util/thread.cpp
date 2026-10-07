@@ -59,5 +59,9 @@ void attachThread() {}
 
 void detachThread() {}
 
+void runTask(const std::function<void()>& task) {
+    task();
+}
+
 } // namespace platform
 } // namespace mln

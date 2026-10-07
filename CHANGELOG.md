@@ -5,6 +5,11 @@
 ### ✨ New features
 
 - *...Add new stuff here...*
+- [core] Add support for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression and the root [`state`](https://maplibre.org/maplibre-style-spec/root/#state) style property in filters, layout properties, and paint properties, including the runtime API `style::Style::setGlobalStateProperty` / `style::Style::getGlobalState`. Calls to `setGlobalStateProperty` before the style has loaded are rejected, matching MapLibre GL JS ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [core] Add `style::Style::isLoaded` to report whether style JSON has finished loading and parsing without waiting for source or sprite resources ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [android] Add `Style#setGlobalStateProperty` / `Style#getGlobalState` (also available on `MapSnapshotter`) and the `Expression.globalState` builder for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [ios] Add `MLNStyle.globalState` / `-[MLNStyle setGlobalStateValue:forProperty:]` and `NSExpression` support (`mgl_globalState:`) for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
+- [node] Add `map.setGlobalStateProperty` / `map.getGlobalState` for the [`global-state`](https://maplibre.org/maplibre-style-spec/expressions/#global-state) expression ([#3302](https://github.com/maplibre/maplibre-native/issues/3302)).
 - [core] Locally rasterized CJK glyphs now render at 2x texture resolution, preserving fine strokes. Mirrors [maplibre-gl-js#3006](https://github.com/maplibre/maplibre-gl-js/pull/3006).
 - [core] Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
 - [core] Add WebP image decoding support to default platform (Linux, Windows)
@@ -30,6 +35,7 @@
 
 - *...Add new stuff here...*
 - [core] Fix PMTiles tiles failing with `Error parsing PMTiles directory: map::at` (or `invalid map<K, T> key`): concurrent requests for one directory pushed duplicate keys onto the directory cache's LRU list, and evicting a duplicate dropped a directory still in use ([#4421](https://github.com/maplibre/maplibre-native/issues/4421)).
+- [OpenGL] Fix invisible raster layers on Adreno 3xx by avoiding an in-place alpha assignment in the fragment shader.
 - [core] Draw numbers and short uppercase codes upright in vertical CJK line labels ([#4565](https://github.com/maplibre/maplibre-native/issues/4565)), compat to [maplibre-gl-js#8205](https://github.com/maplibre/maplibre-gl-js/pull/8205).
 - [core] Fix `ImageSource` not rendering across world copies ([#4508](https://github.com/maplibre/maplibre-native/issues/4508)).
 - [core] Repaint data-driven symbol paint properties after feature-state updates.

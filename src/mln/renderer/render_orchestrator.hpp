@@ -166,6 +166,10 @@ public:
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
 
+    gfx::RenderingStats::FrameRenderedFeaturesMap&& moveFrameRenderedFeatures() {
+        return std::move(frameRenderedFeatures);
+    }
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
@@ -215,6 +219,9 @@ private:
     Immutable<std::vector<Immutable<style::Source::Impl>>> sourceImpls;
     Immutable<std::vector<Immutable<style::Layer::Impl>>> layerImpls;
 
+    // The style's global state as of the last update, used by "global-state" expressions.
+    std::shared_ptr<const GlobalStateMap> globalState;
+
     std::unordered_map<std::string, std::unique_ptr<RenderSource>> renderSources;
     std::unordered_map<std::string, std::unique_ptr<RenderLayer>> renderLayers;
     RenderLight renderLight;
@@ -246,6 +253,8 @@ private:
 
     std::vector<RenderTargetPtr> renderTargets;
     RenderItem::DebugLayerGroupMap debugLayerGroups;
+
+    gfx::RenderingStats::FrameRenderedFeaturesMap frameRenderedFeatures;
 };
 
 } // namespace mln

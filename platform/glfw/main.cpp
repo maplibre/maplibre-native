@@ -15,12 +15,13 @@
 
 #include <args.hxx>
 
+#if MLN_GLFW_PLUGINS
+#include <ngon_layer.hpp>
+#endif
+
 #include <csignal>
-#include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include <cstdio>
-#include <array>
 
 namespace {
 
@@ -44,6 +45,8 @@ int main(int argc, char* argv[]) {
     args::Flag fullscreenFlag(argumentParser, "fullscreen", "Toggle fullscreen", {'f', "fullscreen"});
     args::Flag benchmarkFlag(argumentParser, "benchmark", "Toggle benchmark", {'b', "benchmark"});
     args::Flag offlineFlag(argumentParser, "offline", "Toggle offline", {'o', "offline"});
+    args::Flag showFeaturesFlag(
+        argumentParser, "showFeatures", "Enable rendered feature logging", {'F', "showFeatures"});
 
     args::ValueFlag<std::string> testDirValue(
         argumentParser, "directory", "Root directory for test generation", {"testDir"});
@@ -69,14 +72,23 @@ int main(int argc, char* argv[]) {
         std::cout << argumentParser;
         exit(0);
     } catch (const args::ParseError& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << "\n";
         std::cerr << argumentParser;
         exit(1);
     } catch (const args::ValidationError& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << e.what() << "\n";
         std::cerr << argumentParser;
         exit(2);
     }
+
+#if MLN_GLFW_PLUGINS
+    char pluginError[512]{};
+    const auto pluginStatus = mln_ngon_layer_register(mln_plugin_register_v1, pluginError, sizeof(pluginError));
+    if (pluginStatus != MLN_PLUGIN_STATUS_OK && pluginStatus != MLN_PLUGIN_STATUS_ALREADY_REGISTERED) {
+        std::cerr << "Unable to register n-gon layer: " << pluginError << '\n';
+        return 1;
+    }
+#endif
 
     // Load settings
     mln::Settings_JSON settings;
@@ -150,7 +162,10 @@ int main(int argc, char* argv[]) {
 
     mln::Map map(rendererFrontend,
                  *view,
-                 mln::MapOptions().withSize(view->getSize()).withPixelRatio(view->getPixelRatio()),
+                 mln::MapOptions()
+                     .withSize(view->getSize())
+                     .withPixelRatio(view->getPixelRatio())
+                     .withRenderedFeatureInfo(showFeaturesFlag),
                  resourceOptions,
                  clientOptions,
                  actionJournalOptions);
@@ -196,7 +211,7 @@ int main(int argc, char* argv[]) {
             currentStyleIndex = 0;
         }
 
-        mln::util::DefaultStyle newStyle = orderedStyles[currentStyleIndex];
+        const auto& newStyle = orderedStyles[currentStyleIndex];
         map.getStyle().loadURL(newStyle.getUrl());
         view->setWindowTitle(newStyle.getName());
 

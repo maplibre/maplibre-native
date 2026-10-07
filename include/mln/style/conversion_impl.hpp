@@ -14,7 +14,6 @@
 #include <mapbox/compatibility/value.hpp>
 
 #include <array>
-#include <chrono>
 #include <string>
 #include <type_traits>
 #include <optional>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 namespace mln {
 namespace platform {
 
@@ -8,6 +10,8 @@ void attachThread();
 
 /// Called when a thread is destroyed
 void detachThread();
+
+void runTask(const std::function<void()>& task);
 
 } // namespace platform
 } // namespace mln

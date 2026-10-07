@@ -11,6 +11,7 @@
 -dontnote com.google.gson.**
 -keep enum org.maplibre.android.tile.TileOperation
 -keep class org.maplibre.android.maps.RenderingStats { *; }
+-keep class org.maplibre.android.maps.RenderingStats$* { *; }
 -keep class org.maplibre.android.maps.NativeMapOptions { *; }
 -keepclassmembers class org.maplibre.android.** extends java.lang.Enum {
     <fields>;

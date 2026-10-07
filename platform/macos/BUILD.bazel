@@ -134,7 +134,7 @@ apple_static_xcframework(
         "x86_64",
         "arm64",
     ],
-    minimum_os_versions = {"macos": "13.0"},
+    minimum_os_versions = {"macos": "14.3"},
     public_hdrs = public_hdrs,
     version = ":maplibre_macos_version",
     visibility = ["//visibility:public"],
@@ -154,7 +154,7 @@ apple_xcframework(
         "x86_64",
         "arm64",
     ],
-    minimum_os_versions = {"macos": "13.0"},
+    minimum_os_versions = {"macos": "14.3"},
     public_hdrs = public_hdrs,
     version = ":maplibre_macos_version",
     visibility = ["//visibility:public"],
@@ -163,8 +163,8 @@ apple_xcframework(
 
 macos_command_line_application(
     name = "MapLibreMac",
-    minimum_deployment_os_version = "13.0",
-    minimum_os_version = "13.0",
+    minimum_deployment_os_version = "14.3",
+    minimum_os_version = "14.3",
     visibility = ["//visibility:public"],
     deps = ["//platform:macos-objcpp"],
 )

@@ -78,3 +78,50 @@ TEST(ColorParse, HSLWithAlphaMatchesHSLA) {
     EXPECT_FLOAT_EQ(hsl->b, hsla->b);
     EXPECT_FLOAT_EQ(hsl->a, hsla->a);
 }
+
+namespace {
+
+void expectColor(const Color& actual, float r, float g, float b, float a) {
+    EXPECT_NEAR(r, actual.r, 1e-5f);
+    EXPECT_NEAR(g, actual.g, 1e-5f);
+    EXPECT_NEAR(b, actual.b, 1e-5f);
+    EXPECT_NEAR(a, actual.a, 1e-5f);
+}
+
+} // namespace
+
+// Expected values come from GL JS's Color.interpolate (maplibre-gl-style-spec), premultiplied.
+TEST(ColorInterpolate, Lab) {
+    const Color red = *Color::parse("rgba(255,0,0,0.5)");
+    const Color blue = Color::blue();
+    expectColor(Color::interpolate(red, blue, 0.0, ColorSpace::LAB), 0.5f, 0.0f, 0.0f, 0.5f);
+    expectColor(Color::interpolate(red, blue, 0.25, ColorSpace::LAB), 0.556105f, 0.0f, 0.1941047f, 0.625f);
+    expectColor(Color::interpolate(red, blue, 0.5, ColorSpace::LAB), 0.5676148f, 0.0f, 0.4005062f, 0.75f);
+    expectColor(Color::interpolate(red, blue, 1.0, ColorSpace::LAB), 0.0f, 0.0f, 1.0f, 1.0f);
+    expectColor(Color::interpolate(Color::black(), Color::white(), 0.5, ColorSpace::LAB),
+                0.4663266f,
+                0.4663266f,
+                0.4663266f,
+                1.0f);
+}
+
+TEST(ColorInterpolate, Hcl) {
+    const Color red = *Color::parse("rgba(255,0,0,0.5)");
+    expectColor(Color::interpolate(red, Color::blue(), 0.5, ColorSpace::HCL), 0.7204395f, 0.0f, 0.3944121f, 0.75f);
+    // A hueless start takes the end's hue.
+    expectColor(
+        Color::interpolate(Color::white(), Color::red(), 0.5, ColorSpace::HCL), 1.0f, 0.6241198f, 0.5030824f, 1.0f);
+    // The hue takes the short way round.
+    expectColor(
+        Color::interpolate(*Color::parse("rgb(255,0,128)"), *Color::parse("rgb(255,128,0)"), 0.5, ColorSpace::HCL),
+        1.0f,
+        0.2827256f,
+        0.298255f,
+        1.0f);
+}
+
+TEST(ColorInterpolate, RgbIsTheExistingInterpolation) {
+    const Color red = *Color::parse("rgba(255,0,0,0.5)");
+    const Color mixed = Color::interpolate(red, Color::blue(), 0.5, ColorSpace::RGB);
+    expectColor(mixed, 0.25f, 0.0f, 0.5f, 0.75f);
+}

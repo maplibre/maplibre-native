@@ -2,6 +2,10 @@
 
 #include <mln/shaders/layer_ubo.hpp>
 
+#if MLN_WITH_PLUGINS
+#include <mln/plugin/plugin_api.h>
+#endif
+
 #include <algorithm>
 
 namespace mln {
@@ -545,6 +549,9 @@ enum {
 };
 
 static constexpr uint32_t maxAttributeCountPerShader = std::max({
+#if MLN_WITH_PLUGINS
+    static_cast<uint32_t>(MLN_PLUGIN_MAX_VERTEX_ATTRIBUTES),
+#endif
     static_cast<uint32_t>(backgroundVertexAttributeCount),
     static_cast<uint32_t>(circleVertexAttributeCount),
     static_cast<uint32_t>(clippingMaskVertexAttributeCount),
