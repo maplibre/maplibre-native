@@ -13,6 +13,9 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,6 +55,12 @@ class FeatureOverviewActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.addOnItemTouchListener(SimpleOnItemTouchListener())
         recyclerView.setHasFixedSize(true)
+        // Since targetSdk 35 the window is edge-to-edge, keep the list clear of the system bars
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            view.updatePadding(left = bars.left, top = bars.top, right = bars.right, bottom = bars.bottom)
+            insets
+        }
 
         ItemClickSupport.addTo(recyclerView)
             .setOnItemClickListener(object : ItemClickSupport.OnItemClickListener {
