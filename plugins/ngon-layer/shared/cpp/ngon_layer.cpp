@@ -340,6 +340,39 @@ Point screen(const std::array<double, 4>& p, const mln_plugin_query_context_v1& 
     return {(p[0] / p[3] + 1) * 0.5 * c.viewport_width, (1 - p[1] / p[3]) * 0.5 * c.viewport_height};
 }
 
+// The globe as the vertex shader projects it: ngon_sphere, ngon_rotate and ngon_project.
+using Direction = std::array<double, 3>;
+Direction normalized(const Direction& v) {
+    const double length = std::hypot(v[0], v[1], v[2]);
+    return length > 0 ? Direction{v[0] / length, v[1] / length, v[2] / length} : v;
+}
+Direction sphere(Point p, const double* mercator) {
+    const double x = (mercator[0] + mercator[2] * p.x) * 2 * pi + pi;
+    const double t = std::exp(pi - (mercator[1] + mercator[3] * p.y) * 2 * pi);
+    return {std::sin(x) * 2 * t / (t * t + 1), (t * t - 1) / (t * t + 1), std::cos(x) * 2 * t / (t * t + 1)};
+}
+Direction rotate(const Direction& d, Point angles) {
+    const Direction right = normalized({d[2], 0, -d[0]});
+    const Direction up = normalized(
+        {right[1] * d[2] - right[2] * d[1], right[2] * d[0] - right[0] * d[2], right[0] * d[1] - right[1] * d[0]});
+    const double x = std::tan(angles.x), y = std::tan(angles.y);
+    return normalized(
+        {d[0] + right[0] * x + up[0] * y, d[1] + right[1] * x + up[1] * y, d[2] + right[2] * x + up[2] * y});
+}
+std::array<double, 4> projectOnGlobe(Point p, const Direction& d, const mln_plugin_query_context_v1& c) {
+    const double* m = c.projection_matrix;
+    std::array<double, 4> result{};
+    for (int i = 0; i < 4; ++i) result[i] = m[i] * d[0] + m[4 + i] * d[1] + m[8 + i] * d[2] + m[12 + i];
+    const double* plane = c.clipping_plane;
+    result[2] = (1 - (d[0] * plane[0] + d[1] * plane[1] + d[2] * plane[2] + plane[3])) * result[3];
+    const double t = c.projection_transition;
+    if (t > 0.999) return result;
+    const auto flat = project(p, c.tile_matrix);
+    result[2] *= std::clamp((t - 0.2) / 0.8, 0.0, 1.0);
+    for (const int i : {0, 1, 3}) result[i] = flat[i] + (result[i] - flat[i]) * t;
+    return result;
+}
+
 uint8_t queryFeature(const mln_plugin_feature_v1* feature,
                      const mln_plugin_tile_point_v1* query,
                      size_t queryCount,
@@ -364,15 +397,21 @@ uint8_t queryFeature(const mln_plugin_feature_v1* feature,
         const double c = std::cos(-context->bearing), s = std::sin(-context->bearing);
         offset = {c * offset.x - s * offset.y, s * offset.x + c * offset.y};
     }
+    const bool globe = context->projection_transition > 0;
+    const auto at = [&](Point p) {
+        return globe ? projectOnGlobe(p, sphere(p, context->tile_mercator_coords), *context)
+                     : project(p, context->tile_matrix);
+    };
     std::vector<Point> queryScreen;
     for (size_t i = 0; i < queryCount; ++i)
-        queryScreen.push_back(
-            screen(project({double(query[i].x), double(query[i].y)}, context->tile_matrix), *context));
+        queryScreen.push_back(screen(at({double(query[i].x), double(query[i].y)}), *context));
     for (size_t i = 0; i < feature->point_count; ++i) {
         const Point center = {feature->points[i].x + offset.x * context->pixels_to_tile_units,
                               feature->points[i].y + offset.y * context->pixels_to_tile_units};
-        const auto clip = project(center, context->tile_matrix);
+        const auto clip = at(center);
         if (clip[3] <= 0) continue;
+        // The shader hides an n-gon facing the viewport whose center is behind the horizon.
+        if (globe && alignViewport && clip[2] > clip[3]) continue;
         const auto centerScreen = screen(clip, *context);
         const double scale = alignViewport ? (scaleViewport ? 1 : context->camera_to_center_distance / clip[3])
                                            : context->pixels_to_tile_units *
@@ -382,10 +421,15 @@ uint8_t queryFeature(const mln_plugin_feature_v1* feature,
         for (int n = 0; n < corners; ++n) {
             const double theta = rotation + 2 * pi * n / corners;
             const Point delta = {std::sin(theta) * outer * scale, -std::cos(theta) * outer * scale};
-            polygon.push_back(
-                alignViewport
-                    ? Point{centerScreen.x + delta.x, centerScreen.y + delta.y}
-                    : screen(project({center.x + delta.x, center.y + delta.y}, context->tile_matrix), *context));
+            const Point corner = {center.x + delta.x, center.y + delta.y};
+            const double angle = context->pixels_to_sphere_radians / context->pixels_to_tile_units;
+            polygon.push_back(alignViewport ? Point{centerScreen.x + delta.x, centerScreen.y + delta.y}
+                              : globe       ? screen(projectOnGlobe(corner,
+                                                              rotate(sphere(center, context->tile_mercator_coords),
+                                                                           {delta.x * angle, delta.y * angle}),
+                                                              *context),
+                                               *context)
+                                            : screen(project(corner, context->tile_matrix), *context));
         }
         if (overlaps(polygon, queryScreen)) return 1;
     }
