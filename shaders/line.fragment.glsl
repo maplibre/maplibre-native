@@ -19,7 +19,7 @@ in float v_gamma_scale;
 #pragma mapbox: define lowp float opacity
 
 #ifdef PROJECTION_GLOBE
-in float v_tile_x;
+in highp float v_tile_x;
 #endif
 
 void main() {
