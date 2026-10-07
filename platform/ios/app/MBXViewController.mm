@@ -2524,14 +2524,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
   self.styleURLs = [NSMutableArray array];
 
   /// Style that does not require an `apiKey` nor any further configuration
-//  [self.styleNames addObject:@"OpenFreeMap Liberty"];
-//  [self.styleURLs
-//      addObject:[NSURL URLWithString:
-//                           @"https://api.maptiler.com/maps/019d8d5f-9080-7e3d-a3ce-3f05d755a907/"
-//                           @"style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
+  //  [self.styleNames addObject:@"OpenFreeMap Liberty"];
+  //  [self.styleURLs
+  //      addObject:[NSURL URLWithString:
+  //                           @"https://api.maptiler.com/maps/019d8d5f-9080-7e3d-a3ce-3f05d755a907/"
+  //                           @"style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
 
-//  [self.styleNames addObject:@"MapLibre Basic"];
-//  [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+  //  [self.styleNames addObject:@"MapLibre Basic"];
+  //  [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
   /// This is hte same style as above but copied locally and the three instances of the metal
   /// plug-in layer added to the style Look for "type": "plugin-layer-metal-rendering" in the

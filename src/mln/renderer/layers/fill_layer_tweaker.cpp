@@ -48,8 +48,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             .to_scale = crossfade.toScale,
             .pad1 = 0,
             .pad2 = 0,
-            .pad3 = 0
-        };
+            .pad3 = 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
