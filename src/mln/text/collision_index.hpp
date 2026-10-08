@@ -129,8 +129,8 @@ private:
         CollisionBoundaries boundaries;
         bool allPointsOccluded;
     };
-    /// Pitched or rotated boxes on the globe: the box outline is sampled at eight points and projected,
-    /// so it foreshortens toward the horizon the way the label does.
+    /// Pitched or map-rotated boxes: the box outline is sampled at eight points and projected,
+    /// so it turns and foreshortens the way the label does.
     ProjectedBox projectCollisionBox(const CollisionBox& box,
                                      float tileToViewport,
                                      float scale,

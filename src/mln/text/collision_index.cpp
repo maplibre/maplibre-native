@@ -172,7 +172,7 @@ PlacedFeatureResult CollisionIndex::placeFeature(
         const float tileToViewport = textPixelRatio * projectedPoint.perspectiveRatio;
         CollisionBoundaries collisionBoundaries;
         bool occluded = projectedPoint.occluded;
-        if (transformState.isGlobeRendering() && (pitchWithMap || rotateWithMap)) {
+        if (pitchWithMap || rotateWithMap) {
             const auto projectedBox = projectCollisionBox(box,
                                                           tileToViewport,
                                                           scale,
