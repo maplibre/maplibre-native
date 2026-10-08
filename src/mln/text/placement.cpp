@@ -848,7 +848,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
         bucket.dynamicTextTranslation = textTranslation;
         bucket.dynamicIconTranslation = iconTranslation;
     } else if ((!alongLine && !hasVariableAnchors) ||
-               (textTranslation == bucket.dynamicTextTranslation && iconTranslation == bucket.dynamicIconTranslation)) {
+               (!bucket.hasLayerDynamicAttributeData(*layerID) && textTranslation == bucket.dynamicTextTranslation &&
+                iconTranslation == bucket.dynamicIconTranslation)) {
         return false;
     }
     // GL JS rewrites a shared bucket's positions for each layer it draws; one at another translation keeps its own.
