@@ -87,7 +87,7 @@ info_plist(
 
 genrule(
     name = "mln_defines",
-    outs = ["MLNDefines.h"],
+    outs = ["include/MLNDefines.h"],
     cmd = select({
         "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
         "//conditions:default": "echo '' > $@",
@@ -108,7 +108,7 @@ public_hdrs = [
 genrule(
     name = "umbrella_hdr",
     srcs = public_hdrs,
-    outs = ["MapLibre.h"],
+    outs = ["include/MapLibre.h"],
     cmd = "for f in $(SRCS); do echo \"#import \\\"$$(basename $$f)\\\"\"; done > $@",
     visibility = ["//platform:__pkg__"],
 )
