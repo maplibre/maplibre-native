@@ -1604,6 +1604,31 @@ TEST(GlobeTransform, AnimatedZoomAroundAPointNearTheLimbMovesLikeAJump) {
     EXPECT_LT(animatedMove, 1.25 * jumpMove);
 }
 
+// An animation around an anchor ends where the same change in one jump does, zoom included: the planet keeps its
+// size as the anchor carries the center to another latitude.
+TEST(GlobeTransform, AnimationsAroundAnAnchorEndLikeAJump) {
+    const ScreenCoordinate anchor{256, 256 - 150};
+    for (const bool rotate : {false, true}) {
+        SCOPED_TRACE(rotate ? "rotate" : "zoom");
+        const CameraOptions change = rotate ? CameraOptions().withBearing(60.0).withAnchor(anchor)
+                                            : CameraOptions().withZoom(4.0).withAnchor(anchor);
+        Transform jumped;
+        setUpGlobeCamera(jumped, {45.0, 0.0}, 3.0);
+        jumped.jumpTo(change);
+        ASSERT_GT(std::abs(jumped.getLatLng().latitude() - 45.0), 0.5);
+
+        Transform animated;
+        setUpGlobeCamera(animated, {45.0, 0.0}, 3.0);
+        animated.easeTo(change, linearSecond());
+        for (int frame = 1; frame <= 10; ++frame) {
+            runTo(animated, frame / 10.0);
+        }
+        EXPECT_NEAR(jumped.getLatLng().latitude(), animated.getLatLng().latitude(), 1e-6);
+        EXPECT_NEAR(jumped.getLatLng().longitude(), animated.getLatLng().longitude(), 1e-6);
+        EXPECT_NEAR(jumped.getZoom(), animated.getZoom(), 1e-6);
+    }
+}
+
 TEST(GlobeTransform, PolesAreReachableAndZoomFollowsLatitude) {
     Transform transform;
     setUpGlobe(transform, {0.0, 0.0}, 0.0);
