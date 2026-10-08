@@ -166,6 +166,14 @@ public class Projection {
     latLngs.add(bottomLeft);
     latLngs.add(topLeft);
 
+    // The middles of the edges: on a globe the edges bulge past the corners.
+    float centerX = left + (right - left) / 2;
+    float centerY = top + (bottom - top) / 2;
+    latLngs.add(fromScreenLocation(new PointF(centerX, top)));
+    latLngs.add(fromScreenLocation(new PointF(right, centerY)));
+    latLngs.add(fromScreenLocation(new PointF(centerX, bottom)));
+    latLngs.add(fromScreenLocation(new PointF(left, centerY)));
+
     double maxEastLonSpan = 0;
     double maxWestLonSpan = 0;
 
@@ -177,17 +185,21 @@ public class Projection {
     for (LatLng latLng : latLngs) {
       double bearing = bearing(center, latLng);
 
-      if (bearing >= 0) {
-        double span = getLongitudeSpan(latLng.getLongitude(), center.getLongitude());
-        if (span > maxEastLonSpan) {
-          maxEastLonSpan = span;
-          east = latLng.getLongitude();
-        }
-      } else {
-        double span = getLongitudeSpan(center.getLongitude(), latLng.getLongitude());
-        if (span > maxWestLonSpan) {
-          maxWestLonSpan = span;
-          west = latLng.getLongitude();
+      // A point on the center's meridian, like the middle of an unrotated view's top or bottom edge, is no farther
+      // east or west; its span would read as the whole way around.
+      if (latLng.getLongitude() != center.getLongitude()) {
+        if (bearing >= 0) {
+          double span = getLongitudeSpan(latLng.getLongitude(), center.getLongitude());
+          if (span > maxEastLonSpan) {
+            maxEastLonSpan = span;
+            east = latLng.getLongitude();
+          }
+        } else {
+          double span = getLongitudeSpan(center.getLongitude(), latLng.getLongitude());
+          if (span > maxWestLonSpan) {
+            maxWestLonSpan = span;
+            west = latLng.getLongitude();
+          }
         }
       }
 
@@ -199,12 +211,30 @@ public class Projection {
       }
     }
 
+    // A pole in view puts every longitude in view; Mercator never draws one.
+    if (isPoleInView(GeometryConstants.MAX_LATITUDE, left, top, right, bottom)) {
+      north = GeometryConstants.MAX_LATITUDE;
+      west = GeometryConstants.MIN_WRAP_LONGITUDE;
+      east = GeometryConstants.MAX_WRAP_LONGITUDE;
+    }
+    if (isPoleInView(GeometryConstants.MIN_LATITUDE, left, top, right, bottom)) {
+      south = GeometryConstants.MIN_LATITUDE;
+      west = GeometryConstants.MIN_WRAP_LONGITUDE;
+      east = GeometryConstants.MAX_WRAP_LONGITUDE;
+    }
+
     if (east < west) {
       return new VisibleRegion(topLeft, topRight, bottomLeft, bottomRight,
         LatLngBounds.from(north, east + GeometryConstants.LONGITUDE_SPAN, south, west));
     }
     return new VisibleRegion(topLeft, topRight, bottomLeft, bottomRight,
       LatLngBounds.from(north, east, south, west));
+  }
+
+  private boolean isPoleInView(double latitude, float left, float top, float right, float bottom) {
+    PointF pole = toScreenLocation(new LatLng(latitude, 0));
+    return pole.x > left && pole.x < right && pole.y > top && pole.y < bottom
+      && Math.abs(fromScreenLocation(pole).getLatitude() - latitude) < 1e-3;
   }
 
   /**
