@@ -565,7 +565,8 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
                          bool keepUpright,
                          const RenderTile& tile,
                          const SymbolSizeBinder& sizeBinder,
-                         const TransformState& state) {
+                         const TransformState& state,
+                         const Point<float> translation) {
     const ZoomEvaluatedSize partiallyEvaluatedSize = sizeBinder.evaluateForZoom(static_cast<float>(state.getZoom()));
 
     const std::array<double, 2> clippingBuffer = {
@@ -573,7 +574,7 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
 
     const float pixelsToTileUnits = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(state.getZoom()));
 
-    const LabelPlaneProjector labelPlane(tileProjector, pitchWithMap, rotateWithMap, pixelsToTileUnits);
+    const LabelPlaneProjector labelPlane(tileProjector, pitchWithMap, rotateWithMap, pixelsToTileUnits, translation);
 
     dynamicVertexArray.clear();
 
@@ -594,7 +595,7 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector& dynamicVertexArra
         useVertical = false;
 
         const ProjectedTilePoint anchorPos = tileProjector.project(
-            {placedSymbol.anchorPoint.x, placedSymbol.anchorPoint.y});
+            {placedSymbol.anchorPoint.x + translation.x, placedSymbol.anchorPoint.y + translation.y});
 
         // Don't bother calculating the correct point for invisible labels.
         if (anchorPos.occluded || !isVisible(anchorPos.point, clippingBuffer)) {

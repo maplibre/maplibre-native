@@ -840,7 +840,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    translationPoint(tile.id, data.iconTranslate, state));
                 result = true;
             }
             if (bucket.hasIconData()) {
@@ -852,7 +853,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                     keepUpright,
                                     tile,
                                     *bucket.iconSizeBinder,
-                                    state);
+                                    state,
+                                    translationPoint(tile.id, data.iconTranslate, state));
                 result = true;
             }
         }
@@ -868,7 +870,8 @@ bool Placement::updateBucketDynamicAttributeData(SymbolBucket& bucket,
                                 keepUpright,
                                 tile,
                                 *bucket.textSizeBinder,
-                                state);
+                                state,
+                                translationPoint(tile.id, data.textTranslate, state));
             result = true;
         }
     } else if (hasVariableAnchors) {

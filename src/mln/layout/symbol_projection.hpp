@@ -103,7 +103,8 @@ void reprojectLineLabels(SymbolBucket::DynamicAttributeVector&,
                          bool keepUpright,
                          const RenderTile&,
                          const SymbolSizeBinder& sizeBinder,
-                         const TransformState&);
+                         const TransformState&,
+                         Point<float> translation);
 
 std::optional<std::pair<PlacedGlyph, PlacedGlyph>> placeFirstAndLastGlyph(float fontScale,
                                                                           float lineOffsetX,
