@@ -89,7 +89,8 @@ public:
     int32_t getSurfaceTransformPollingInterval() const { return surfaceTransformPollingInterval; }
 
     void init(uint32_t w, uint32_t h);
-    void recreateSwapchain();
+    void recreateSwapchain(bool recreateSurface = false);
+    void destroyResources();
     void swap() override;
 
     void queueSurfaceRead();
