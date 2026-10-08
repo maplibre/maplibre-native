@@ -675,6 +675,37 @@ TEST(Map, StyleExpiredWithRender) {
     EXPECT_EQ(1u, test.fileSource->requests.size());
 }
 
+TEST(Map, StyleExpiredWithProjection) {
+    // A projection set at runtime, whole or in place, keeps the next response from overwriting the style.
+
+    using namespace std::chrono_literals;
+
+    for (const bool inPlace : {false, true}) {
+        MapTest<FakeFileSource> test;
+
+        test.map.getStyle().loadURL("maptiler://maps/test");
+
+        Response response;
+        response.data = std::make_shared<std::string>(util::read_file("test/fixtures/api/empty.json"));
+        response.expires = util::now() - 1h;
+        test.fileSource->respond(Resource::Style, response);
+
+        if (inPlace) {
+            test.map.getStyle().getProjection()->setType(ProjectionDefinition("globe"));
+        } else {
+            auto projection = std::make_unique<style::Projection>();
+            projection->setType(ProjectionDefinition("globe"));
+            test.map.getStyle().setProjection(std::move(projection));
+        }
+
+        test.fileSource->respond(Resource::Style, response);
+        const style::Style& style = test.map.getStyle();
+        const auto type = style.getProjection()->getType();
+        ASSERT_TRUE(type.isConstant()) << inPlace;
+        EXPECT_EQ(ProjectionType::Globe, type.asConstant().from) << inPlace;
+    }
+}
+
 TEST(Map, StyleEarlyMutation) {
     // An early mutation should not prevent the initial style load.
 
