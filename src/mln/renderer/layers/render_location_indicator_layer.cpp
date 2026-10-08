@@ -10,6 +10,7 @@
 #include <mln/renderer/bucket.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/renderer/layers/render_location_indicator_layer.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/paint_parameters.hpp>
 #include <mln/renderer/render_tree.hpp>
 #include <mln/renderer/update_parameters.hpp>
@@ -1091,16 +1092,17 @@ void RenderLocationIndicatorLayer::captureRenderedFeatures(const TransformState&
     const auto& proj = renderImpl->getProjectionPuck();
     const auto& geom = renderImpl->getPuckGeometry();
 
-    // On the globe the puck's corners are world pixel offsets from its position on the sphere.
+    // On the globe the puck's corners are world pixel offsets from its position, drawn through the projection blend.
     if (drawsOnGlobe(state)) {
         const auto& position = renderImpl->getPositionMercator();
+        const double worldSize = Projection::worldSize(state.getScale());
+        const TileProjector projector(state, UnwrappedTileID(0, 0, 0));
         std::vector<vec3> visible;
         for (const auto& corner : geom) {
-            const auto latLng = Projection::unproject({position.x + corner.x, position.y + corner.y}, state.getScale());
-            if (!state.isLocationOccluded(latLng)) {
-                vec4 clip;
-                state.latLngToScreenCoordinate(latLng, clip);
-                visible.push_back({clip[0] / clip[3], clip[1] / clip[3], 0});
+            const auto drawn = projector.projectAsDrawn({(position.x + corner.x) / worldSize * util::EXTENT,
+                                                         (position.y + corner.y) / worldSize * util::EXTENT});
+            if (!drawn.occluded && drawn.signedDistanceFromCamera > 0) {
+                visible.push_back({drawn.point.x, drawn.point.y, 0});
             }
         }
         if (const auto bound = computeFeatureNDCBound(visible.size(), [&](std::size_t i) { return visible[i]; })) {
