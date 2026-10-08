@@ -21,7 +21,7 @@ Open the `platform/android` directory to get started.
 
 ### Nix
 
-With [Nix](https://nixos.org) and flakes enabled, you can build from the command line instead. Running `nix develop .#android` in the root of the repository opens a shell with JDK 17 and an Android SDK that has the NDK version the build expects:
+With [Nix](https://nixos.org) and flakes enabled, you can build from the command line instead. Running `nix develop .#android` in the root of the repository opens a shell with a JDK and an Android SDK that has the NDK version the build expects:
 
 ```bash
 nix develop .#android

@@ -38,7 +38,7 @@
               ccache
               pkg-config
               llvm.clang-tools
-              nodejs_24
+              nodejs_26
               vulkan-tools
             ];
 
@@ -93,7 +93,7 @@
               packages = with pkgs; [
                 androidComposition.androidsdk
                 jdk17
-                nodejs_24
+                nodejs_26
                 llvm.clang-tools
               ];
 
@@ -102,7 +102,10 @@
               ANDROID_NDK_ROOT = "${androidSdk}/ndk/${ndkVersion}";
               JAVA_HOME = pkgs.jdk17.home;
               # The aapt2 that Gradle downloads from Maven does not run on NixOS.
-              GRADLE_OPTS = "-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/build-tools/${buildToolsVersion}/aapt2";
+              # Appended so that GRADLE_OPTS from the user's environment is kept.
+              shellHook = ''
+                export GRADLE_OPTS="''${GRADLE_OPTS:+$GRADLE_OPTS }-Dorg.gradle.project.android.aapt2FromMavenOverride=${androidSdk}/build-tools/${buildToolsVersion}/aapt2"
+              '';
             };
         }
       );
