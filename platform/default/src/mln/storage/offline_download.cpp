@@ -471,11 +471,6 @@ void OfflineDownload::queueTiles(SourceType type, uint16_t tileSize, const Tiles
             acceptHeader = http::vectorAcceptHeader(*vectorEncoding);
             break;
 
-        case SourceType::Raster:
-        case SourceType::RasterDEM:
-            acceptHeader = http::rasterAcceptHeader();
-            break;
-
         default:
             // Only the tiled source types above reach queueTiles.
             break;

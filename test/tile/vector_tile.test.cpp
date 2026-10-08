@@ -1,5 +1,6 @@
 #include <mln/test/util.hpp>
 #include <mln/test/fake_file_source.hpp>
+#include <mln/tile/vector_mlt_tile.hpp>
 #include <mln/tile/vector_mvt_tile.hpp>
 #include <mln/tile/vector_mvt_tile_data.hpp>
 #include <mln/tile/tile_loader_impl.hpp>
@@ -31,6 +32,27 @@ TEST(VectorTile, setError) {
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
     EXPECT_TRUE(tile.isComplete());
+}
+
+TEST(VectorTile, MLTRequestSetsAcceptHeader) {
+    VectorTileTest test;
+    test.tileset.vectorEncoding = Tileset::VectorEncoding::MLT;
+    VectorMLTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset, nullptr, false);
+
+    tile.setNecessity(TileNecessity::Required);
+    auto& fileSource = static_cast<FakeFileSource&>(*test.fileSource);
+    ASSERT_EQ(1u, fileSource.requests.size());
+    EXPECT_EQ("application/vnd.maplibre-tile", fileSource.requests.front()->resource.acceptHeader);
+}
+
+TEST(VectorTile, MVTRequestHasNoAcceptHeader) {
+    VectorTileTest test;
+    VectorMVTTile tile(OverscaledTileID(0, 0, 0), "source", test.tileParameters, test.tileset);
+
+    tile.setNecessity(TileNecessity::Required);
+    auto& fileSource = static_cast<FakeFileSource&>(*test.fileSource);
+    ASSERT_EQ(1u, fileSource.requests.size());
+    EXPECT_TRUE(fileSource.requests.front()->resource.acceptHeader.empty());
 }
 
 TEST(VectorTile, onError) {

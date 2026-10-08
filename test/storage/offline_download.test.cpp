@@ -11,7 +11,6 @@
 #include <mln/storage/offline_download.hpp>
 #include <mln/storage/http_file_source.hpp>
 #include <mln/text/glyph_range.hpp>
-#include <mln/util/accept_header.hpp>
 #include <mln/util/run_loop.hpp>
 #include <mln/util/io.hpp>
 #include <mln/util/compression.hpp>
@@ -244,9 +243,7 @@ TEST(OfflineDownload, InlineRasterSource) {
     bool tileRequested = false;
     test.fileSource.tileResponse = [&](const Resource& resource) {
         tileRequested = true;
-        // Raster tiles are content negotiated offline exactly as they are online, so that a
-        // downloaded region holds the same encoding the renderer would have fetched live.
-        EXPECT_EQ(http::rasterAcceptHeader(), resource.acceptHeader);
+        EXPECT_TRUE(resource.acceptHeader.empty());
         EXPECT_FALSE(resource.tileData->vectorEncoding.has_value());
         return test.response("0-0-0.vector.pbf");
     };
