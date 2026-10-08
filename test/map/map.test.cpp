@@ -2132,6 +2132,17 @@ TEST(Map, GlobeHandOffKeepsTiles) {
                                   << " tiles were parsed again after the hand-off";
 }
 
+// On the globe the lowest zoom falls with latitude; setting the minimum again keeps a zoom the globe allows there.
+TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
+    MapTest<> test;
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{70, 0}).withZoom(-1.5));
+    ASSERT_NEAR(-1.5, *test.map.getCameraOptions().zoom, 1e-9);
+    test.map.setBounds(BoundOptions().withMinZoom(0));
+    EXPECT_NEAR(-1.5, *test.map.getCameraOptions().zoom, 1e-9);
+}
+
 TEST(Map, GlobeBoundedSourceLoadsFinerTiles) {
     // Just below an integer zoom the globe cover asks for the next zoom's tiles nearest the camera; a source with
     // bounds must create them.
