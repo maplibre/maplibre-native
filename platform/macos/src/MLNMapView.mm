@@ -2708,7 +2708,25 @@ public:
     return;
   }
 
+  // Behind the globe: an annotation that may move into view is centered first and selected there.
   if ([self isCoordinateOccluded:annotation.coordinate]) {
+    if (!moveIntoView ||
+        ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
+                                                       animated:animateSelection]) {
+      return;
+    }
+    __weak __typeof__(self) weakSelf = self;
+    [self setCenterCoordinate:annotation.coordinate
+                     animated:animateSelection
+            completionHandler:^{
+              __typeof__(self) strongSelf = weakSelf;
+              if (strongSelf && ![strongSelf isCoordinateOccluded:annotation.coordinate]) {
+                [strongSelf selectAnnotation:annotation
+                                     atPoint:NSZeroPoint
+                                moveIntoView:NO
+                            animateSelection:animateSelection];
+              }
+            }];
     return;
   }
 
