@@ -51,6 +51,8 @@
 #include <mln/util/timer.hpp>
 
 #include <atomic>
+#include <mutex>
+#include <set>
 
 using namespace mln;
 using namespace mln::style;
@@ -1311,6 +1313,36 @@ TEST(Map, PrefetchDeltaOverride) {
 
     // Each source requests 4 additional parent tiles.
     EXPECT_EQ(8, requestedTiles);
+}
+
+// On the globe, as on Mercator, the prefetch asks for tiles four zooms coarser than the view's.
+TEST(Map, GlobePrefetchRequestsCoarserTiles) {
+    MapTest<> test{1, MapMode::Continuous};
+    test.map.getStyle().loadJSON(
+        R"STYLE({"version": 8, "projection": {"type": "vertical-perspective"}, "sources": {},
+                 "layers": [{"id": "vector", "type": "fill", "source": "vector"}]})STYLE");
+    test.map.getStyle().addSource(std::make_unique<VectorSource>("vector", Tileset{{"a/{z}/{x}/{y}"}}));
+
+    std::mutex mutex;
+    std::set<int> zooms;
+    test.fileSource->tileResponse = [&](const Resource& resource) {
+        if (resource.tileData) {
+            const std::lock_guard lock(mutex);
+            zooms.insert(resource.tileData->z);
+        }
+        Response res;
+        res.noContent = true;
+        return res;
+    };
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{40.0, 10.0}).withZoom(8.0));
+    test.observer.didFinishLoadingMapCallback = [&] {
+        test.runLoop.stop();
+    };
+    test.runLoop.run();
+
+    const std::lock_guard lock(mutex);
+    EXPECT_TRUE(zooms.contains(4));
+    EXPECT_TRUE(zooms.contains(8));
 }
 
 // Test that custom source's tile pyramid is reset
