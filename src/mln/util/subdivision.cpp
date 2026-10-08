@@ -249,32 +249,32 @@ private:
         const double dirY = bY - aY;
         const double dir2X = cX - bX;
         const double dir2Y = cY - bY;
-        const double t2Top = (cellRowYTop - bY) / dir2Y;
-        const double t2Bottom = (cellRowYBottom - bY) / dir2Y;
-        const double t2Enter = std::min(t2Top, t2Bottom);
-        const double t2Exit = std::max(t2Top, t2Bottom);
-        const double enter2X = bX + dir2X * t2Enter;
-
-        auto leftCellX = static_cast<int32_t>(std::floor(std::min(enter2X, exitX) / cellSize)) + 1;
-        auto rightCellX = static_cast<int32_t>(std::ceil(std::max(enter2X, exitX) / cellSize)) - 1;
-        bool leftToRight = exitX < enter2X;
-
         const bool isParallelX2 = dir2Y == 0;
         if (isParallelX2 && (cY == cellRowYTop || cY == cellRowYBottom)) {
             return;
         }
 
-        if (isParallelX2 || t2Enter >= 1 || t2Exit <= 0) {
+        // Where the next edge enters the cell row, or the edge after it when the next one stays out of the row; a
+        // horizontal next edge never enters it, and has no crossing to compute.
+        double enterX = 0;
+        bool nextEdgeEnters = false;
+        if (!isParallelX2) {
+            const double t2Top = (cellRowYTop - bY) / dir2Y;
+            const double t2Bottom = (cellRowYBottom - bY) / dir2Y;
+            const double t2Enter = std::min(t2Top, t2Bottom);
+            nextEdgeEnters = t2Enter < 1 && std::max(t2Top, t2Bottom) > 0;
+            enterX = bX + dir2X * t2Enter;
+        }
+        if (!nextEdgeEnters) {
             const double dir3X = aX - cX;
             const double dir3Y = aY - cY;
             const double t3Top = (cellRowYTop - cY) / dir3Y;
             const double t3Bottom = (cellRowYBottom - cY) / dir3Y;
-            const double t3Enter = std::min(t3Top, t3Bottom);
-            const double enter3X = cX + dir3X * t3Enter;
-            leftCellX = static_cast<int32_t>(std::floor(std::min(enter3X, exitX) / cellSize)) + 1;
-            rightCellX = static_cast<int32_t>(std::ceil(std::max(enter3X, exitX) / cellSize)) - 1;
-            leftToRight = exitX < enter3X;
+            enterX = cX + dir3X * std::min(t3Top, t3Bottom);
         }
+        const auto leftCellX = static_cast<int32_t>(std::floor(std::min(enterX, exitX) / cellSize)) + 1;
+        const auto rightCellX = static_cast<int32_t>(std::ceil(std::max(enterX, exitX) / cellSize)) - 1;
+        const bool leftToRight = exitX < enterX;
 
         const double boundaryY = dirY > 0 ? cellRowYBottom : cellRowYTop;
         if (leftToRight) {
