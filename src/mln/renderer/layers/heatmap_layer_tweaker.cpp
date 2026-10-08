@@ -53,9 +53,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     std::vector<ProjectionUBO> projectionUBOVector(layerGroup.getDrawableCount());
 #endif
 
-    const double latitudeScale = parameters.state.isGlobeRendering()
-                                     ? std::cos(util::deg2rad(parameters.state.getLatLng().latitude()))
-                                     : 1.0;
+    const double latitudeScale = parameters.state.getProjection().circleRadiusCorrection(parameters.state);
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;

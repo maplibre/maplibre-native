@@ -79,8 +79,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto zoom = static_cast<float>(parameters.state.getZoom());
     const auto intZoom = parameters.state.getIntegerZoom();
     const auto& state = parameters.state;
-    const auto pixelScale = static_cast<float>(1.0 + (state.getProjection().pixelScale(state) - 1.0) *
-                                                         state.getProjectionTransition());
+    const auto pixelScale = static_cast<float>(state.getProjection().pixelScale(state));
 
 #if MLN_RENDER_BACKEND_METAL
     const auto getExpressionBuffer = [&]() {

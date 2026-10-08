@@ -65,13 +65,14 @@ public:
         return projectTilePoint(data, tileID, point, elevation);
     }
 
-    /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center.
+    /// Scale that keeps map-aligned circles and pitched text the size they have on Mercator at the map center,
+    /// blended with Mercator's 1 through the projection transition as GL JS blends it.
     virtual double circleRadiusCorrection(const TransformState&) const { return 1.0; }
 
-    /// Ratio of a screen pixel at the map center to one at the same zoom on Mercator.
+    /// Ratio of a screen pixel at the map center to one at the same zoom on Mercator, blended the same way.
     virtual double pixelScale(const TransformState&) const { return 1.0; }
 
-    /// `circleRadiusCorrection` extended to a point away from the center, by its latitude.
+    /// `circleRadiusCorrection` extended to a point away from the center, by its latitude, blended the same way.
     virtual double pitchedTextCorrection(const TransformState&, const Point<double>&, const UnwrappedTileID&) const {
         return 1.0;
     }

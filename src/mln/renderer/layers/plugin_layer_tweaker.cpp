@@ -33,9 +33,7 @@ void PluginLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         uniform.failed = false;
     }
     uint32_t drawableIndex = 0;
-    const double latitudeScale = parameters.state.isGlobeRendering()
-                                     ? std::cos(util::deg2rad(parameters.state.getLatLng().latitude()))
-                                     : 1.0;
+    const double latitudeScale = parameters.state.getProjection().circleRadiusCorrection(parameters.state);
     {
         visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
             if (!drawable.getData() || !checkTweakDrawable(drawable)) return;

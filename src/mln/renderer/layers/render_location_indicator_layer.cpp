@@ -17,6 +17,7 @@
 #include <mln/style/layers/location_indicator_layer_properties.hpp>
 #include <mln/util/mat4.hpp>
 #include <mln/util/tile_cover.hpp>
+#include <mln/util/interpolate.hpp>
 
 #if MLN_RENDER_BACKEND_OPENGL
 #include <mln/gl/context.hpp>
@@ -736,8 +737,11 @@ protected:
         // the map's center, the way the globe keeps circles and pitched text.
         const double puckLatitude = util::clamp(
             params.puckPosition.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
-        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(s.getProjection().circleRadiusCorrection(s) /
-                                                                         std::cos(util::deg2rad(puckLatitude)))
+        const float latitudeScale = drawsOnGlobe(s) ? static_cast<float>(util::interpolate(
+                                                          1.0,
+                                                          std::cos(util::deg2rad(s.getLatLng().latitude())) /
+                                                              std::cos(util::deg2rad(puckLatitude)),
+                                                          s.getProjectionTransition()))
                                                     : 1.0f;
         const float horizontalScaleFactor =
             ((1.0f - params.perspectiveCompensation) +
