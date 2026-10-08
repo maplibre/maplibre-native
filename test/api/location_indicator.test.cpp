@@ -62,8 +62,8 @@ void expectPuckAtItsLocation(const std::string& projection) {
             ResourceOptions().withCachePath(":memory:"));
 
     map.getStyle().loadJSON(
-        R"({"version":8,"projection":{"type":")" + projection +
-        R"("},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
+        R"({"version":8,"projection":{"type":)" + (projection.starts_with('[') ? projection : '"' + projection + '"') +
+        R"(},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
     map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1.0));
 
     const LatLng location{20.0, 20.0};
@@ -100,8 +100,8 @@ Puck renderPuck(const std::string& projection, const LatLng& location) {
             ResourceOptions().withCachePath(":memory:"));
 
     map.getStyle().loadJSON(
-        R"({"version":8,"projection":{"type":")" + projection +
-        R"("},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
+        R"({"version":8,"projection":{"type":)" + (projection.starts_with('[') ? projection : '"' + projection + '"') +
+        R"(},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
     map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1.0));
 
     // Black on white: the WebGPU shader multiplies the image by the black the tweaker hands every textured quad.
@@ -227,4 +227,27 @@ TEST(LocationIndicator, GlobePuckCapturedWhereItIsDrawn) {
     const auto hidden = renderPuck("globe", LatLng{0.0, 120.0});
     EXPECT_FALSE(hidden.rendered);
     EXPECT_FALSE(hidden.captured);
+}
+
+// Half way between Mercator and the globe the capture follows the blend the puck is drawn with.
+TEST(LocationIndicator, PuckCapturedWhereItIsDrawnMidTransition) {
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
+    GTEST_SKIP() << "OpenGL draws the location indicator with its own renderer, which has no globe path yet";
+#endif
+    const mln::JSValue emptyObject(rapidjson::kObjectType);
+    style::conversion::Error error;
+    if (!LayerManager::get()->createLayer("location-indicator", "probe", &emptyObject, error)) {
+        GTEST_SKIP() << "no location-indicator layer on this platform";
+    }
+    constexpr double twoPixels = 2.0 * 2.0 / 256.0;
+    for (const auto& location : {LatLng{0.0, 0.0}, LatLng{40.0, 0.0}, LatLng{0.0, 30.0}, LatLng{-20.0, -45.0}}) {
+        SCOPED_TRACE(testing::Message() << location.latitude() << ", " << location.longitude());
+        const auto puck = renderPuck(R"(["mercator", "vertical-perspective", 0.5])", location);
+        ASSERT_TRUE(puck.rendered);
+        ASSERT_TRUE(puck.captured);
+        EXPECT_NEAR(puck.captured->minX, puck.rendered->minX, twoPixels);
+        EXPECT_NEAR(puck.captured->maxX, puck.rendered->maxX, twoPixels);
+        EXPECT_NEAR(puck.captured->minY, puck.rendered->minY, twoPixels);
+        EXPECT_NEAR(puck.captured->maxY, puck.rendered->maxY, twoPixels);
+    }
 }
