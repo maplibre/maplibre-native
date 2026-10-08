@@ -84,7 +84,7 @@ xed build-ios/MapLibre\ Native.xcodeproj
 
 ## Distribution
 
-Starting with `7.0.0-pre0`, the distribution package also provides the `MapLibreWithPlugins` product. Select that product and use `import MapLibreWithPlugins` to use MapLibre iOS with the plugin API enabled. It includes the C API in `plugin_api.h`. Select only one MapLibre product per application, as both frameworks define the same Objective-C classes.
+A plugin-enabled build of MapLibre iOS is distributed separately as a Swift package at [louwers/maplibre-ios-with-plugin-api](https://github.com/louwers/maplibre-ios-with-plugin-api). Its `MapLibre` product is a drop-in replacement for the standard one: use `import MapLibre` as usual. The framework additionally exports `mln_plugin_register_v1` and the C API in `plugin_api.h`. Plugin packages should depend only on the header-only `MapLibrePluginApi` product from that package and include `<mln/plugin/plugin_api.h>`. Use only one MapLibre package per application, as both frameworks define the same module and Objective-C classes.
 
 To build the plugin-enabled variant, run:
 

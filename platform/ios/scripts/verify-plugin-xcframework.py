@@ -23,7 +23,7 @@ def verify(root):
             raise ValueError(f"Missing public plugin_api.h: {framework}")
         for architecture in sorted(architectures):
             symbols = subprocess.check_output(
-                ["xcrun", "nm", "-arch", architecture, "-gU", str(framework / "MapLibreWithPlugins")],
+                ["xcrun", "nm", "-arch", architecture, "-gU", str(framework / framework.stem)],
                 text=True,
             )
             if not any(line.split()[-1:] == ["_mln_plugin_register_v1"] for line in symbols.splitlines()):

@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 ## main
 
+## 7.0.0-pre1
+
+- Build the plugin-enabled variant as `MapLibre.framework`, so applications use `import MapLibre` and `#import <MapLibre/MapLibre.h>` exactly as with the standard SDK. The plugin-enabled XCFramework is distributed through [louwers/maplibre-ios-with-plugin-api](https://github.com/louwers/maplibre-ios-with-plugin-api), which also provides the header-only `MapLibrePluginApi` product for plugin packages. The `MapLibreWithPlugins` product is no longer published.
+
 ## 7.0.0-pre0
 
 - Add a MapLibre iOS variant with the plugin API enabled, distributed as the `MapLibreWithPlugins` Swift package product.

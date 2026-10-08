@@ -177,7 +177,8 @@ apple_bundle_version(
     )
     for name, bundle_name, bundle_id in [
         ("MapLibre.dynamic", "MapLibre", "com.maplibre.mapbox"),
-        ("MapLibre.dynamic.plugins", "MapLibreWithPlugins", "org.maplibre.MapLibreWithPlugins"),
+        # Same framework and module name, so apps keep `import MapLibre`.
+        ("MapLibre.dynamic.plugins", "MapLibre", "com.maplibre.mapbox"),
     ]
 ]
 
