@@ -239,6 +239,16 @@ void Placement::placeLayer(const RenderLayer& layer, std::set<uint32_t>& seenCro
 }
 
 namespace {
+/// The shift along the label's own axes; collision projects it the way the label is aligned.
+Point<float> calculateVariableLayoutOffset(
+    style::SymbolAnchorType anchor, float width, float height, std::array<float, 2> offset, float textBoxScale) {
+    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
+    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
+    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
+    return {shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
+}
+
+/// The shift as a screen-space offset, for the boxes that are not projected.
 Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
                                            float width,
                                            float height,
@@ -247,14 +257,8 @@ Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
                                            bool rotateWithMap,
                                            bool pitchWithMap,
                                            float bearing) {
-    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
-    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
-    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    Point<float> shift{shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
-    if (rotateWithMap) {
-        shift = util::rotate(shift, pitchWithMap ? bearing : -bearing);
-    }
-    return shift;
+    const Point<float> shift = calculateVariableLayoutOffset(anchor, width, height, offset, textBoxScale);
+    return rotateWithMap ? util::rotate(shift, pitchWithMap ? bearing : -bearing) : shift;
 }
 } // namespace
 
@@ -439,17 +443,19 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     auto anchor = variableTextAnchors[i % anchorsSize];
                     auto variableTextOffset = symbolInstance.getTextVariableAnchorOffset()->getOffsetByAnchor(anchor);
                     const bool allowOverlap = (i >= anchorsSize);
-                    shift = calculateVariableLayoutOffset(anchor,
-                                                          width,
-                                                          height,
-                                                          variableTextOffset,
-                                                          textBoxScale,
-                                                          ctx.rotateTextWithMap,
-                                                          ctx.pitchTextWithMap,
-                                                          static_cast<float>(ctx.getTransformState().getBearing()));
+                    shift = calculateVariableLayoutOffset(anchor, width, height, variableTextOffset, textBoxScale);
                     textBoxes.clear();
+                    const Point<float> screenShift = calculateVariableLayoutOffset(
+                        anchor,
+                        width,
+                        height,
+                        variableTextOffset,
+                        textBoxScale,
+                        ctx.rotateTextWithMap,
+                        ctx.pitchTextWithMap,
+                        static_cast<float>(ctx.getTransformState().getBearing()));
                     if (!canPlaceAtVariableAnchor(
-                            textBox, anchor, shift, variableTextAnchors, posMatrix, ctx.pixelRatio)) {
+                            textBox, anchor, screenShift, variableTextAnchors, posMatrix, ctx.pixelRatio)) {
                         continue;
                     }
 
@@ -483,7 +489,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             fontSize,
                             ctx.iconAllowOverlap,
                             ctx.pitchTextWithMap, // TODO: shall it be pitchIconWithMap?
-                            ctx.rotateIconWithMap,
+                            ctx.rotateTextWithMap,
                             showCollisionBoxes,
                             ctx.avoidEdges,
                             collisionGroup.second,
@@ -583,7 +589,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                                                fontSize,
                                                ctx.iconAllowOverlap,
                                                ctx.pitchTextWithMap,
-                                               ctx.rotateIconWithMap,
+                                               ctx.rotateTextWithMap,
                                                showCollisionBoxes,
                                                ctx.avoidEdges,
                                                collisionGroup.second,
