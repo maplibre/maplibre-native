@@ -301,6 +301,7 @@ public:
     bool hasTextCollisionCircleData() const;
     bool hasFormatSectionOverrides() const;
     bool hasVariableTextAnchors() const;
+    bool hasLayerDynamicAttributeData(const std::string& layerID) const;
 
     void sortFeatures(float angle);
     // Returns references to the `symbolInstances` items, sorted by viewport Y.
@@ -465,7 +466,8 @@ public:
         DynamicAttributeVector& dynamicAttributeData() { return *sharedDynamicAttributeData; }
         const DynamicAttributeVector& dynamicAttributeData() const { return *sharedDynamicAttributeData; }
 
-        /// Positions for each layer that shares the bucket at another translation than its leader's.
+        /// Positions for each layer that shares the bucket at another translation than its leader's. A layer keeps
+        /// them for the bucket's life: drawables moved back to the shared positions would keep bindings to these.
         std::map<std::string, std::shared_ptr<DynamicAttributeVector>> layerDynamicAttributeData;
         const std::shared_ptr<DynamicAttributeVector>& dynamicAttributeDataFor(const std::string& layerID) const {
             const auto it = layerDynamicAttributeData.find(layerID);

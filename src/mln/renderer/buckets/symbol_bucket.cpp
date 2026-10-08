@@ -369,20 +369,22 @@ void SymbolBucket::updateVertices(const Placement& placement,
     }
 }
 
+bool SymbolBucket::hasLayerDynamicAttributeData(const std::string& layerID) const {
+    return text.layerDynamicAttributeData.contains(layerID) || icon.layerDynamicAttributeData.contains(layerID) ||
+           sdfIcon.layerDynamicAttributeData.contains(layerID);
+}
+
 void SymbolBucket::updateLayerVertices(const Placement& placement,
                                        const TransformState& state,
                                        const BucketPlacementData& data,
                                        const std::string& layerID) {
-    const bool laidOut = placement.updateBucketDynamicAttributeData(*this, state, data, &layerID);
+    if (!placement.updateBucketDynamicAttributeData(*this, state, data, &layerID)) {
+        return;
+    }
     for (Buffer* buffer : {&text, &icon, &sdfIcon}) {
-        const auto it = buffer->layerDynamicAttributeData.find(layerID);
-        if (it == buffer->layerDynamicAttributeData.end()) {
-            continue;
-        }
-        if (laidOut) {
+        if (const auto it = buffer->layerDynamicAttributeData.find(layerID);
+            it != buffer->layerDynamicAttributeData.end()) {
             it->second->updateModified();
-        } else {
-            buffer->layerDynamicAttributeData.erase(it);
         }
     }
 }
