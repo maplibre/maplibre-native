@@ -1,6 +1,8 @@
 #include <mln/test/util.hpp>
 
+#include <mln/renderer/buckets/fill_extrusion_bucket.hpp>
 #include <mln/renderer/globe_tile_mesh.hpp>
+#include <mln/test/stub_geometry_tile_feature.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/subdivision.hpp>
 #include <mln/util/subdivision_granularity.hpp>
@@ -8,6 +10,7 @@
 
 #include <limits>
 #include <map>
+#include <memory>
 #include <set>
 #include <stdexcept>
 
@@ -142,6 +145,52 @@ void expectSoundMesh(const SubdivisionResult& r, bool clippedAtZoomZero = false)
         }
     }
     EXPECT_EQ(exposed, outline);
+}
+
+// Extrudes a polygon on a globe tile and checks that every segment stays within its 16-bit indices.
+std::unique_ptr<FillExtrusionBucket> extrudeOnTheGlobe(const GeometryCollection& polygon, const CanonicalTileID& tile) {
+    auto bucket = std::make_unique<FillExtrusionBucket>(FillExtrusionBucket::PossiblyEvaluatedLayoutProperties{},
+                                                        std::map<std::string, Immutable<style::LayerProperties>>{},
+                                                        0.0f,
+                                                        1u);
+    bucket->setSubdivisionGranularity(SubdivisionGranularitySetting::globe());
+    bucket->addFeature(StubGeometryTileFeature{FeatureType::Polygon, polygon.clone()}, polygon, {}, {}, 0, tile);
+    std::size_t vertices = 0;
+    std::size_t indicesOutsideTheirSegment = 0;
+    for (const auto& segment : bucket->triangleSegments) {
+        EXPECT_LE(segment.vertexLength, maxSegmentVertices);
+        for (std::size_t i = segment.indexOffset; i < segment.indexOffset + segment.indexLength; ++i) {
+            indicesOutsideTheirSegment += bucket->triangles.at(i) >= segment.vertexLength ? 1 : 0;
+        }
+        vertices += segment.vertexLength;
+    }
+    EXPECT_EQ(0u, indicesOutsideTheirSegment);
+    EXPECT_EQ(bucket->vertices.elements(), vertices);
+    return bucket;
+}
+
+// The granularity the roof was subdivided at, found from its vertices, which come last; 0 when there is none.
+uint32_t roofGranularity(const FillExtrusionBucket& bucket,
+                         const GeometryCollection& polygon,
+                         const CanonicalTileID& tile) {
+    for (uint32_t granularity = SubdivisionGranularitySetting::globe().fill.getGranularityForZoomLevel(tile.z);
+         granularity >= 1;
+         granularity /= 2) {
+        const auto roof = subdividePolygon(polygon, tile, granularity, false).vertices;
+        const std::size_t count = roof.size() / 2;
+        if (count > bucket.vertices.elements()) {
+            continue;
+        }
+        bool matches = true;
+        for (std::size_t i = 0; i < count && matches; ++i) {
+            const auto& position = bucket.vertices.at(bucket.vertices.elements() - count + i).a1;
+            matches = position[0] == roof[i * 2] && position[1] == roof[i * 2 + 1];
+        }
+        if (matches) {
+            return granularity;
+        }
+    }
+    return 0;
 }
 
 } // namespace
@@ -305,6 +354,31 @@ TEST(Subdivision, PolygonBeyondTheIndexLimitCoarsens) {
     EXPECT_EQ(coarse.triangleIndices, fitted.triangleIndices);
     EXPECT_EQ(coarse.lineIndexLists, fitted.lineIndexLists);
     // The comb is about the vertex count; earcut's triangulation of it is not what is under test here.
+}
+
+TEST(Subdivision, FillExtrusionRoofCountsItsVerticesOnce) {
+    // A tile-sized roof at zoom 0 has 16,899 vertices: too many to count five times over, few enough to fit once.
+    const CanonicalTileID tile(0, 0, 0);
+    const auto polygon = square(0, 0, EXTENT, EXTENT);
+    EXPECT_EQ(128u, roofGranularity(*extrudeOnTheGlobe(polygon, tile), polygon, tile));
+}
+
+TEST(Subdivision, FillExtrusionRoofCoarsensToTheRoomItsWallsLeave) {
+    // A fine zigzag makes a ring of 9,644 vertices, whose walls leave the roof room for 17,319: its 14,371 vertices at
+    // granularity 4 fit, its 20,753 at 8 do not.
+    GeometryCoordinates ring;
+    for (int16_t x = 0; x < EXTENT; ++x) {
+        ring.emplace_back(x, x % 2 == 0 ? 0 : 2);
+    }
+    for (int16_t y = 0; y < EXTENT; y += 6) {
+        ring.emplace_back(y % 12 == 0 ? EXTENT : EXTENT - 2, y);
+    }
+    ring.emplace_back(EXTENT, EXTENT);
+    ring.emplace_back(0, EXTENT);
+    ring.emplace_back(0, 0);
+    const GeometryCollection polygon{ring};
+    const CanonicalTileID tile(2, 1, 1);
+    EXPECT_EQ(4u, roofGranularity(*extrudeOnTheGlobe(polygon, tile), polygon, tile));
 }
 
 TEST(TileMesh, QuadAndGrid) {

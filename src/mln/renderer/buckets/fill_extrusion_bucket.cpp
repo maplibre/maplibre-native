@@ -55,6 +55,13 @@ using namespace style;
 
 struct GeometryTooLongException : std::exception {};
 
+namespace {
+// Each ring vertex can add a wall quad beside itself.
+std::size_t wallVertexCount(std::size_t ringVertices) {
+    return ringVertices == 0 ? 0 : 5 * (ringVertices - 1) + 1;
+}
+} // namespace
+
 FillExtrusionBucket::FillExtrusionBucket(
     const FillExtrusionBucket::PossiblyEvaluatedLayoutProperties& layout_,
     const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
@@ -91,20 +98,30 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             polyVariant = roundPolygonCorners(polygon, roundedCornerDistance);
         }
 
-        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own.
+        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own, coarsened to the
+        // room the walls leave in a segment. Walls that leave the roof no room are drawn as on Mercator.
         const uint32_t granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
         std::optional<util::SubdivisionResult> roof;
         if (granularity >= 2 && roundedCornerDistance <= 0) {
             GeometryCollection subdividedRings;
+            std::size_t ringVertices = 0;
             for (const auto& ring : polygon) {
                 subdividedRings.push_back(util::subdivideVertexLine(ring, granularity, /*isRing=*/true));
+                ringVertices += subdividedRings.back().size();
             }
-            polyVariant = std::move(subdividedRings);
-            roof = util::subdividePolygonWithinLimit(
-                polygon, canonical, granularity, /*generateOutlineLines=*/false, maxSegmentVertices);
+            const std::size_t walls = wallVertexCount(ringVertices);
+            if (walls < maxSegmentVertices) {
+                const std::size_t room = maxSegmentVertices - walls;
+                auto subdivided = util::subdividePolygonWithinLimit(
+                    polygon, canonical, granularity, /*generateOutlineLines=*/false, room);
+                if (subdivided.vertices.size() / 2 <= room) {
+                    polyVariant = std::move(subdividedRings);
+                    roof = std::move(subdivided);
+                }
+            }
         }
 
-        std::size_t totalVertices = roof ? roof->vertices.size() / 2 : 0;
+        std::size_t totalVertices = 0;
 
         std::visit(
             [&totalVertices](const auto& poly) {
@@ -117,13 +134,16 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         if (totalVertices == 0) continue;
 
+        const std::size_t roofVertices = roof ? roof->vertices.size() / 2 : 0;
+        const std::size_t polygonVertices = wallVertexCount(totalVertices) + roofVertices;
+
         std::vector<uint32_t> flatIndices;
         flatIndices.reserve(totalVertices);
 
         std::size_t startVertices = vertices.elements();
 
-        if (triangleSegments.empty() || triangleSegments.back().vertexLength + (5 * (totalVertices - 1) + 1) >
-                                            std::numeric_limits<uint16_t>::max()) {
+        if (triangleSegments.empty() ||
+            triangleSegments.back().vertexLength + polygonVertices > std::numeric_limits<uint16_t>::max()) {
             triangleSegments.emplace_back(startVertices, triangles.elements());
         }
 
@@ -131,7 +151,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
         auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
-        assert(triangleIndex + (5 * (totalVertices - 1) + 1) <= std::numeric_limits<uint16_t>::max());
+        assert(triangleIndex + polygonVertices <= std::numeric_limits<uint16_t>::max());
 
         const auto processRingPoints =
             [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
@@ -241,13 +261,13 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             }
         }
 
-        triangleSegment.vertexLength += totalVertices;
+        triangleSegment.vertexLength += totalVertices + roofVertices;
         triangleSegment.indexLength += nIndices;
 
         if (instanceSegments.empty()) {
             instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
         }
-        instanceSegments.back().instanceCount += totalVertices;
+        instanceSegments.back().instanceCount += totalVertices + roofVertices;
     }
 
     for (auto& pair : paintPropertyBinders) {
