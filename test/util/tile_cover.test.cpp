@@ -757,3 +757,23 @@ TEST(TileCover, GlobeCoverSurvivesTheAntimeridian) {
     EXPECT_EQ(before, after);
     EXPECT_EQ(4u, after.size());
 }
+
+// A center spun into another world copy covers the same tiles, in the same order, moved into that copy.
+TEST(TileCover, GlobeCoverFollowsTheCenterIntoOtherWorldCopies) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20}).withZoom(6.0).withPitch(50.0));
+    const auto home = util::tileCover({transform.getState()}, 6, Range<uint8_t>(0, 14));
+    for (double longitude = 140; longitude <= 740; longitude += 120) {
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10, longitude}));
+    }
+    ASSERT_NEAR(740, transform.getState().getLatLng().longitude(), 1e-9);
+    const auto spun = util::tileCover({transform.getState()}, 6, Range<uint8_t>(0, 14));
+    ASSERT_EQ(home.size(), spun.size());
+    for (std::size_t i = 0; i < home.size(); ++i) {
+        EXPECT_EQ(home[i].canonical, spun[i].canonical) << i;
+        EXPECT_EQ(home[i].wrap + 2, spun[i].wrap) << i;
+        EXPECT_EQ(home[i].overscaledZ, spun[i].overscaledZ) << i;
+    }
+}

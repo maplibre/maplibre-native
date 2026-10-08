@@ -463,6 +463,11 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 
     const Point<double> center = Projection::project(transform.getLatLng(), 1.0 / util::tileSize_D);
     const vec3 centerCoord = {{center.x, center.y, 0.0}};
+    // The globe keeps its center on whichever world copy it has reached, where GL JS keeps it on the first. Wraps,
+    // sort keys and tile distances are taken against the center brought back to the first copy, as GL JS takes
+    // them, and the wraps moved into the center's copy.
+    const double centerWorld = std::floor(centerCoord[0]);
+    const double firstCopyCenterX = centerCoord[0] - centerWorld;
     const std::optional<vec3> cameraPosition = transform.getFreeCameraOptions().position;
     assert(cameraPosition);
     if (!cameraPosition) {
@@ -498,7 +503,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 
         double desiredZ = z;
         if (allowVariableZoom) {
-            const double distToTile2d = distanceToTile2d(cameraCoord[0], cameraCoord[1], tile);
+            const double distToTile2d = distanceToTile2d(cameraCoord[0] - centerWorld, cameraCoord[1], tile);
             desiredZ = std::floor(tileZoom(requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d));
         }
         const auto targetZoom = static_cast<uint8_t>(std::clamp(desiredZ, 0.0, static_cast<double>(maxZoom)));
@@ -507,9 +512,9 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             if (node.zoom < minZoom) {
                 continue;
             }
-            node.wrap = wrapFor(centerCoord[0], tile);
+            node.wrap = static_cast<int16_t>(wrapFor(firstCopyCenterX, tile) + centerWorld);
             // GL JS's sort key: the tile's own x/y against the center at the nominal zoom.
-            const double dx = numTiles * centerCoord[0] - 0.5 - node.x;
+            const double dx = numTiles * firstCopyCenterX - 0.5 - node.x;
             const double dy = numTiles * centerCoord[1] - 0.5 - node.y;
             result.push_back(
                 {OverscaledTileID(
