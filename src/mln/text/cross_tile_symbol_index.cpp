@@ -1,6 +1,7 @@
 #include <mln/text/cross_tile_symbol_index.hpp>
 
 #include <mln/layout/symbol_instance.hpp>
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/render_tile.hpp>
 #include <mln/tile/tile.hpp>
@@ -107,22 +108,20 @@ void CrossTileSymbolLayerIndex::handleWrapJump(float newLng) {
 
 namespace {
 
-bool isInVewport(const mat4& posMatrix, const Point<float>& point) {
-    vec4 p = {{point.x, point.y, 0, 1}};
-    matrix::transformMat4(p, p, posMatrix);
+bool isInVewport(const TileProjector& projector, const Point<float>& point) {
+    const auto projected = projector.projectAsDrawn({point.x, point.y});
+    const auto& p = projected.point;
 
     // buffer covers area of the next zoom level (current zoom - 1 covered area).
     constexpr double buffer = 1.0;
     constexpr double edge = 1.0 + buffer;
-    const double x = p[0] / p[3];
-    const double y = p[1] / p[3];
-    return (x > -edge && y > -edge && x < edge && y < edge);
+    return !projected.occluded && (p.x > -edge && p.y > -edge && p.x < edge && p.y < edge);
 }
 
 } // namespace
 
 bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
-                                          const mat4& tileMatrix,
+                                          const TileProjector& projector,
                                           SymbolBucket& bucket) {
     auto& thisZoomIndexes = indexes[tileID.overscaledZ];
     auto previousIndex = thisZoomIndexes.find(tileID);
@@ -145,7 +144,7 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // For overscaled tiles the viewport might be showing only a small part of the tile,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
-            if (symbolInstance.check(SYM_GUARD_LOC) && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
+            if (symbolInstance.check(SYM_GUARD_LOC) && isInVewport(projector, symbolInstance.getAnchor().point)) {
                 symbolInstance.setCrossTileID(0u);
             } else {
                 symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID);
@@ -220,7 +219,8 @@ bool CrossTileSymbolLayerIndex::removeStaleBuckets(const std::unordered_set<uint
 
 CrossTileSymbolIndex::CrossTileSymbolIndex() = default;
 
-auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddLayerResult {
+auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng, const TransformState& state)
+    -> AddLayerResult {
     MLN_TRACE_FUNC();
     MLN_ZONE_STR(layer.getID());
 
@@ -242,7 +242,7 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
     for (const auto& item : layer.getPlacementData()) {
         const RenderTile& renderTile = item.tile;
         Bucket& bucket = item.bucket;
-        auto pair = bucket.registerAtCrossTileIndex(layerIndex, renderTile);
+        auto pair = bucket.registerAtCrossTileIndex(layerIndex, renderTile, state);
         assert(pair.first != 0u);
         if (pair.second) result |= AddLayerResult::BucketsAdded;
         currentBucketIDs.insert(pair.first);

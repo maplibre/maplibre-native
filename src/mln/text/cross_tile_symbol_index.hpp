@@ -19,6 +19,8 @@ namespace mln {
 class SymbolInstance;
 class RenderLayer;
 class SymbolBucket;
+class TileProjector;
+class TransformState;
 
 class IndexedSymbolInstance {
 public:
@@ -49,7 +51,7 @@ public:
 class CrossTileSymbolLayerIndex {
 public:
     CrossTileSymbolLayerIndex(uint32_t& maxCrossTileID);
-    bool addBucket(const OverscaledTileID&, const mat4& tileMatrix, SymbolBucket&);
+    bool addBucket(const OverscaledTileID&, const TileProjector&, SymbolBucket&);
     bool removeStaleBuckets(const std::unordered_set<uint32_t>& currentIDs);
     void handleWrapJump(float newLng);
 
@@ -72,7 +74,7 @@ public:
         BucketsRemoved = 1 << 1
     };
 
-    AddLayerResult addLayer(const RenderLayer& layer, float lng);
+    AddLayerResult addLayer(const RenderLayer& layer, float lng, const TransformState&);
     void pruneUnusedLayers(const std::set<std::string>&);
 
     void reset();

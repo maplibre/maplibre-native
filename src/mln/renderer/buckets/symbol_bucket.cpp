@@ -1,3 +1,4 @@
+#include <mln/map/tile_projector.hpp>
 #include <mln/renderer/bucket_parameters.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layers/render_symbol_layer.hpp>
@@ -334,8 +335,10 @@ bool SymbolBucket::hasVariableTextAnchors() const {
 }
 
 std::pair<uint32_t, bool> SymbolBucket::registerAtCrossTileIndex(CrossTileSymbolLayerIndex& index,
-                                                                 const RenderTile& renderTile) {
-    bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this);
+                                                                 const RenderTile& renderTile,
+                                                                 const TransformState& state) {
+    bool firstTimeAdded = index.addBucket(
+        renderTile.getOverscaledTileID(), TileProjector(state, renderTile.id, renderTile.projection), *this);
     return std::make_pair(bucketInstanceId, firstTimeAdded);
 }
 

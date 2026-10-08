@@ -535,7 +535,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
         MLN_TRACE_ZONE(placement layer);
         RenderLayer& layer = *it;
-        auto result = crossTileSymbolIndex.addLayer(layer, longitude);
+        auto result = crossTileSymbolIndex.addLayer(layer, longitude, updateParameters->transformState);
         if (isMapModeContinuous) {
             usedSymbolLayers.insert(layer.getID());
             symbolBucketsAdded = symbolBucketsAdded || (result & CrossTileSymbolIndex::AddLayerResult::BucketsAdded);
