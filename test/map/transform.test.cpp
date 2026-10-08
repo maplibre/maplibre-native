@@ -1821,6 +1821,50 @@ TEST(GlobeTransform, CameraForBoundsFitsTheGlobe) {
     EXPECT_NEAR(2.4499189488903967, *fit.zoom, 1e-7);
 }
 
+// Bounds fitted with uneven padding fill the padded part of the view the camera shows: every corner and edge
+// midpoint lands inside it and the nearest touches its edge.
+TEST(GlobeTransform, CameraForBoundsFitsThePaddedView) {
+    Transform transform;
+    setUpGlobeCamera(transform, {0.0, 0.0}, 0.0);
+    const LatLngBounds bounds = LatLngBounds::hull({16.0, -133.0}, {50.0, -68.0});
+    const std::vector<LatLng> corners = {
+        bounds.northwest(), bounds.southwest(), bounds.southeast(), bounds.northeast()};
+    const double midLatitude = (bounds.north() + bounds.south()) / 2.0;
+    const double midLongitude = (bounds.west() + bounds.east()) / 2.0;
+    const std::vector<LatLng> samples = {bounds.northwest(),
+                                         bounds.southwest(),
+                                         bounds.southeast(),
+                                         bounds.northeast(),
+                                         {midLatitude, bounds.west()},
+                                         {midLatitude, bounds.east()},
+                                         {bounds.north(), midLongitude},
+                                         {bounds.south(), midLongitude}};
+
+    for (const EdgeInsets& padding : {EdgeInsets{0, 0, 200, 0}, EdgeInsets{150, 60, 0, 0}}) {
+        SCOPED_TRACE(::testing::Message()
+                     << padding.top() << " " << padding.left() << " " << padding.bottom() << " " << padding.right());
+        const CameraOptions fit = cameraForLatLngs(corners, transform, padding);
+        ASSERT_TRUE(fit.center && fit.zoom);
+        Transform shown(transform.getState());
+        shown.jumpTo(fit);
+        const TransformState& state = shown.getState();
+        const double left = padding.left() / 512.0 * 2.0 - 1.0;
+        const double right = (512.0 - padding.right()) / 512.0 * 2.0 - 1.0;
+        const double top = padding.top() / 512.0 * -2.0 + 1.0;
+        const double bottom = (512.0 - padding.bottom()) / 512.0 * -2.0 + 1.0;
+        double nearest = std::numeric_limits<double>::infinity();
+        for (const LatLng& sample : samples) {
+            const vec3 surface = VerticalPerspectiveProjection::surfaceVector(sample);
+            vec4 clip = {{surface[0], surface[1], surface[2], 1.0}};
+            matrix::transformMat4(clip, clip, state.getGlobeViewProjectionMatrix());
+            const double x = clip[0] / clip[3];
+            const double y = clip[1] / clip[3];
+            nearest = std::min({nearest, x - left, right - x, top - y, y - bottom});
+        }
+        EXPECT_NEAR(0.0, nearest, 1e-3);
+    }
+}
+
 TEST(TileProjector, MercatorMatchesTheTileMatrix) {
     Transform transform;
     transform.resize({512, 512});
