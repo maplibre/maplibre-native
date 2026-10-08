@@ -36,6 +36,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
   ```
 
   </details>
+- Export `MLNPluginStyleLayer` and `MLNBackendResource` from the dynamic framework.
 
 ## 6.27.0
 

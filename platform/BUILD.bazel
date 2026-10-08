@@ -1,4 +1,4 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
+load("@aspect_rules_js//js:defs.bzl", "js_test")
 load("@rules_cc//cc:defs.bzl", "objc_library")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
@@ -346,12 +346,25 @@ objc_library(
     ],
 )
 
-js_binary(
-    name = "check-public-symbols",
-    data = [
-        "//:node_modules/lodash",
-        "//platform/darwin:symbols-to-check",
-        "//platform/ios:symbols-to-check",
-    ],
-    entry_point = "scripts/check-public-symbols.js",
-)
+# Checks that the public classes and constants in the built XCFrameworks are
+# marked MLN_EXPORT.
+[
+    js_test(
+        name = "check-public-symbols-" + platform.lower(),
+        data = [
+            xcframework,
+            "@sourcekitten",
+        ],
+        entry_point = "scripts/check-public-symbols.js",
+        fixed_args = [
+            "$(rootpath @sourcekitten)",
+            platform,
+            "$(rootpath %s)" % xcframework,
+        ],
+        tags = ["manual"],
+    )
+    for platform, xcframework in [
+        ("iOS", "//platform/ios:MapLibre.dynamic"),
+        ("macOS", "//platform/macos:MapLibre.dynamic"),
+    ]
+]
