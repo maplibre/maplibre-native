@@ -435,6 +435,60 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
 }
 
+- (void)testSelectionBehindTheGlobeWaitsForACameraChangeThatOnlyPads
+{
+    [self loadGlobeAtNullIsland];
+    // Animated camera changes run on the window's display link.
+    _window = [[UIWindow alloc] initWithFrame:_mapView.bounds];
+    [_window addSubview:_mapView];
+    [_window makeKeyAndVisible];
+
+    MLNPointAnnotation *back = [[MLNPointAnnotation alloc] init];
+    back.coordinate = CLLocationCoordinate2DMake(70, 70);
+    [_mapView addAnnotation:back];
+
+    // Overtaken by an inset change, which neither pans, zooms nor rotates: settled once that change has moved the
+    // center down to the middle of the inset frame, 20 points below the middle of the view.
+    MLNMapView *mapView = _mapView;
+    XCTestExpectation *settled = [self expectationWithDescription:@"settled after the inset change"];
+    [mapView selectAnnotation:back moveIntoView:YES animateSelection:YES completionHandler:^{
+        CGPoint center = [mapView convertCoordinate:CLLocationCoordinate2DMake(0, 0) toPointToView:mapView];
+        XCTAssertEqualWithAccuracy(center.y, 220, 0.5);
+        [settled fulfill];
+    }];
+    [mapView setContentInset:UIEdgeInsetsMake(40, 0, 0, 0) animated:YES completionHandler:nil];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    XCTAssertEqual(mapView.selectedAnnotations.count, 0u, @"still behind the planet where the camera came to rest");
+}
+
+- (void)testSelectionBehindTheGlobeMadeByACancelledRequestsHandlerIsKept
+{
+    [self loadGlobeAtNullIsland];
+    _window = [[UIWindow alloc] initWithFrame:_mapView.bounds];
+    [_window addSubview:_mapView];
+    [_window makeKeyAndVisible];
+
+    MLNPointAnnotation *first = [[MLNPointAnnotation alloc] init];
+    first.coordinate = CLLocationCoordinate2DMake(70, 70);
+    MLNPointAnnotation *second = [[MLNPointAnnotation alloc] init];
+    second.coordinate = CLLocationCoordinate2DMake(-70, -70);
+    MLNPointAnnotation *third = [[MLNPointAnnotation alloc] init];
+    third.coordinate = CLLocationCoordinate2DMake(70, -70);
+    [_mapView addAnnotations:@[first, second, third]];
+
+    // The third request cancels the first, whose completion handler then asks for the second.
+    MLNMapView *mapView = _mapView;
+    XCTestExpectation *chained = [self expectationWithDescription:@"second request finished"];
+    [mapView selectAnnotation:first moveIntoView:YES animateSelection:YES completionHandler:^{
+        [mapView selectAnnotation:second moveIntoView:YES animateSelection:YES completionHandler:^{
+            [chained fulfill];
+        }];
+    }];
+    [mapView selectAnnotation:third moveIntoView:YES animateSelection:YES completionHandler:nil];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, second);
+}
+
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style
 {
     if (mapView == _mapView) {

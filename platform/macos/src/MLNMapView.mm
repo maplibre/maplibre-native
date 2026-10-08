@@ -188,6 +188,8 @@ public:
   /// An annotation behind the globe, selected once the camera settles with it in view.
   id<MLNAnnotation> _annotationAwaitingSelection;
   BOOL _annotationAwaitingSelectionAnimated;
+  /// From the start to the end of any camera change, one that only pitches or pads included.
+  BOOL _cameraChangeInProgress;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image.
   NSSize _unionedAnnotationImageSize;
   std::vector<MLNAnnotationTag> _annotationsNearbyLastClick;
@@ -952,6 +954,7 @@ public:
   if (!_mbglMap) {
     return;
   }
+  _cameraChangeInProgress = YES;
 
   if ([self.delegate respondsToSelector:@selector(mapView:cameraWillChangeAnimated:)]) {
     [self.delegate mapView:self cameraWillChangeAnimated:animated];
@@ -977,6 +980,7 @@ public:
   if (!_mbglMap) {
     return;
   }
+  _cameraChangeInProgress = NO;
 
   // Update all UI at the end of an animation or atomic change to the
   // viewport. More expensive updates can happen here, but care should
@@ -3016,8 +3020,7 @@ public:
 /// drops it.
 - (void)settleAnnotationAwaitingSelection {
   id<MLNAnnotation> annotation = _annotationAwaitingSelection;
-  if (!annotation || _mbglMap->isPanning() || _mbglMap->isScaling() || _mbglMap->isRotating() ||
-      _mbglMap->isGestureInProgress()) {
+  if (!annotation || _cameraChangeInProgress || _mbglMap->isGestureInProgress()) {
     return;
   }
   _annotationAwaitingSelection = nil;

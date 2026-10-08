@@ -472,6 +472,8 @@ public:
   id<MLNAnnotation> _annotationAwaitingSelection;
   void (^_annotationAwaitingSelectionCompletion)(void);
   BOOL _annotationAwaitingSelectionAnimated;
+  /// From the start to the end of any camera change, one that only pitches or pads included.
+  BOOL _cameraChangeInProgress;
 
   BOOL _userLocationAnnotationIsSelected;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image
@@ -5835,15 +5837,15 @@ static void *windowScreenContext = &windowScreenContext;
   void (^completion)(void) = _annotationAwaitingSelectionCompletion;
   _annotationAwaitingSelection = nil;
   _annotationAwaitingSelectionCompletion = nil;
-  if (completion) completion();
+  // Later, so a handler that selects again is not overwritten by the request that cancelled it.
+  if (completion) dispatch_async(dispatch_get_main_queue(), completion);
 }
 
 /// Once the camera has settled, selects the annotation waiting for it if it came into view, or
 /// drops it.
 - (void)settleAnnotationAwaitingSelection {
   id<MLNAnnotation> annotation = _annotationAwaitingSelection;
-  if (!annotation || self.mbglMap.isPanning() || self.mbglMap.isScaling() ||
-      self.mbglMap.isRotating() || self.mbglMap.isGestureInProgress()) {
+  if (!annotation || _cameraChangeInProgress || self.mbglMap.isGestureInProgress()) {
     return;
   }
   if ([self isCoordinateOccluded:annotation.coordinate]) {
@@ -6891,6 +6893,7 @@ static void *windowScreenContext = &windowScreenContext;
   if (!_mbglMap) {
     return;
   }
+  _cameraChangeInProgress = YES;
 
   if (!_userLocationAnnotationIsSelected || self.userTrackingMode == MLNUserTrackingModeNone ||
       self.userTrackingState != MLNUserTrackingStateChanged) {
@@ -6937,6 +6940,7 @@ static void *windowScreenContext = &windowScreenContext;
   if (!_mbglMap) {
     return;
   }
+  _cameraChangeInProgress = NO;
 
   [self updateCompass];
   [self updateScaleBar];
