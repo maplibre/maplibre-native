@@ -259,11 +259,13 @@ void Context::pollSurfaceUpdate() {
     }
 }
 
-void Context::updateSurface(bool recreateSurface) {
+void Context::updateSurface() {
     auto& renderableImpl = static_cast<Renderable&>(backend.getDefaultRenderable());
     auto& renderableResource = renderableImpl.getResource<SurfaceRenderableResource>();
 
-    renderableResource.recreateSwapchain(recreateSurface);
+    // The request stays pending if this throws, so the next frame retries it
+    renderableResource.recreateSwapchain(surfaceLost);
+    surfaceLost = false;
 
     // we wait for an idle device to recreate the swapchain
     // so it's a good opportunity to delete all queued items
@@ -309,7 +311,8 @@ void Context::beginFrame() {
 
     pollSurfaceUpdate();
 
-    if (platformSurface && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
+    // a lost surface may have been destroyed by a failed recreation
+    if ((platformSurface || surfaceLost) && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
         updateSurface();
     }
 
@@ -347,11 +350,14 @@ void Context::beginFrame() {
                         "acquireNextImageKHR result: " + std::to_string(static_cast<int>(acquireImageResult.result)));
                 }
 
-            } catch (const vk::OutOfDateKHRError& e) {
+            } catch (const vk::OutOfDateKHRError&) {
+                requestSurfaceUpdate(false);
                 updateSurface();
                 continue;
-            } catch (const vk::SurfaceLostKHRError& e) {
-                updateSurface(true);
+            } catch (const vk::SurfaceLostKHRError&) {
+                surfaceLost = true;
+                requestSurfaceUpdate(false);
+                updateSurface();
                 continue;
             }
         } else {
@@ -363,7 +369,6 @@ void Context::beginFrame() {
     }
 
     if (attempt >= maximumSurfaceUpdateRetries) {
-        assert(false);
         throw std::runtime_error("acquireNextImageKHR failed");
     }
 
@@ -427,9 +432,10 @@ void Context::submitFrame() {
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate(false);
-        } catch (const vk::SurfaceLostKHRError& e) {
-            // handled by the next acquireNextImageKHR call
-            throw e;
+        } catch (const vk::SurfaceLostKHRError&) {
+            // the frame was submitted, recreate the surface before the next one
+            surfaceLost = true;
+            requestSurfaceUpdate(false);
         }
     }
 
