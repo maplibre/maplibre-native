@@ -161,10 +161,13 @@ void OfflineDatabase::handleError(const char* action) {
 void OfflineDatabase::removeExisting() {
     Log::Warning(Event::Database, "Removing existing incompatible offline database");
 
+    const auto filename = db ? db->getFilename() : path;
     statements.clear();
     db.reset();
 
-    util::deleteFile(path);
+    if (!filename.empty()) {
+        util::deleteFile(filename);
+    }
 }
 
 void OfflineDatabase::removeOldCacheTable() {

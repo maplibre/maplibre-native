@@ -166,6 +166,12 @@ Database& Database::operator=(Database&& other) noexcept {
 
 Database::~Database() = default;
 
+std::string Database::getFilename() const {
+    assert(impl);
+    const auto* filename = sqlite3_db_filename(impl->db, "main");
+    return filename ? filename : "";
+}
+
 void Database::setBusyTimeout(std::chrono::milliseconds timeout) {
     assert(impl);
     impl->setBusyTimeout(timeout);
