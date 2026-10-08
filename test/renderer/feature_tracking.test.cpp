@@ -222,6 +222,31 @@ TEST(FeatureTracking, NDCBoundSymbolOffset) {
     });
 }
 
+// A variable-anchor label lays out with its translation already applied; the capture follows it once.
+TEST(FeatureTracking, NDCBoundTranslatedVariableAnchor) {
+    const auto captureAt = [](const std::array<float, 2>& translate, double& height) {
+        FeatureTrackingTest test(CameraOptions().withZoom(10.0));
+        test.getSymbolLayer()->setVisibility(VisibilityType::Visible);
+        test.getSymbolLayer()->setIconImage({});
+        test.getSymbolLayer()->setTextVariableAnchor({{SymbolAnchorType::Center}});
+        test.getSymbolLayer()->setTextPitchAlignment(AlignmentType::Map);
+        test.getSymbolLayer()->setTextTranslate({translate});
+        test.run({});
+        height = test.frontend.getSize().height;
+        double maxY = 0;
+        EXPECT_EQ(1, test.map.getRenderedFeatureCount("pt0"));
+        test.map.getRenderedFeatures("pt0", std::nullopt, std::nullopt, [&](const auto&, const auto& info) -> bool {
+            maxY = info.ndcBound.maxY;
+            return true;
+        });
+        return maxY;
+    };
+    double height = 0;
+    const double untranslated = captureAt({0, 0}, height);
+    const double translated = captureAt({0, -50}, height);
+    EXPECT_NEAR(2 * 50 / height, translated - untranslated, 1e-3);
+}
+
 TEST(FeatureTracking, NDCBoundCircle) {
     FeatureTrackingTest test(CameraOptions().withZoom(10.0));
     test.getCircleLayer()->setVisibility(VisibilityType::Visible);
