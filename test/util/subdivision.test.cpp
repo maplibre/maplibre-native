@@ -147,7 +147,8 @@ void expectSoundMesh(const SubdivisionResult& r, bool clippedAtZoomZero = false)
     EXPECT_EQ(exposed, outline);
 }
 
-// Extrudes a polygon on a globe tile and checks that every segment stays within its 16-bit indices.
+// Extrudes a polygon on a globe tile and checks that every segment has something to draw, stays within its 16-bit
+// indices and keeps to its own vertices.
 std::unique_ptr<FillExtrusionBucket> extrudeOnTheGlobe(const GeometryCollection& polygon, const CanonicalTileID& tile) {
     auto bucket = std::make_unique<FillExtrusionBucket>(FillExtrusionBucket::PossiblyEvaluatedLayoutProperties{},
                                                         std::map<std::string, Immutable<style::LayerProperties>>{},
@@ -155,17 +156,19 @@ std::unique_ptr<FillExtrusionBucket> extrudeOnTheGlobe(const GeometryCollection&
                                                         1u);
     bucket->setSubdivisionGranularity(SubdivisionGranularitySetting::globe());
     bucket->addFeature(StubGeometryTileFeature{FeatureType::Polygon, polygon.clone()}, polygon, {}, {}, 0, tile);
-    std::size_t vertices = 0;
+    std::size_t segmentsEnd = 0;
     std::size_t indicesOutsideTheirSegment = 0;
     for (const auto& segment : bucket->triangleSegments) {
         EXPECT_LE(segment.vertexLength, maxSegmentVertices);
+        EXPECT_GT(segment.indexLength, 0u);
+        EXPECT_GE(segment.vertexOffset, segmentsEnd);
         for (std::size_t i = segment.indexOffset; i < segment.indexOffset + segment.indexLength; ++i) {
             indicesOutsideTheirSegment += bucket->triangles.at(i) >= segment.vertexLength ? 1 : 0;
         }
-        vertices += segment.vertexLength;
+        segmentsEnd = segment.vertexOffset + segment.vertexLength;
     }
     EXPECT_EQ(0u, indicesOutsideTheirSegment);
-    EXPECT_EQ(bucket->vertices.elements(), vertices);
+    EXPECT_LE(segmentsEnd, bucket->vertices.elements());
     return bucket;
 }
 
@@ -379,7 +382,9 @@ TEST(Subdivision, FillExtrusionRoofBesideLongWallsTakesItsOwnSegment) {
     const GeometryCollection polygon = fineZigzag();
     const CanonicalTileID tile(2, 1, 1);
     const auto bucket = extrudeOnTheGlobe(polygon, tile);
-    EXPECT_EQ(2u, bucket->triangleSegments.size());
+    const auto roof = subdividePolygon(polygon, tile, 32, false);
+    EXPECT_EQ(roof.vertices.size() / 2, bucket->triangleSegments.back().vertexLength);
+    EXPECT_EQ(roof.triangleIndices.size(), bucket->triangleSegments.back().indexLength);
     EXPECT_EQ(32u, roofGranularity(*bucket, polygon, tile));
 }
 

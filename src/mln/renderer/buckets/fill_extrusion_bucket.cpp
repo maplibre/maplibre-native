@@ -136,14 +136,21 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         std::size_t startVertices = vertices.elements();
 
-        if (triangleSegments.empty() ||
-            triangleSegments.back().vertexLength + wallVertices > std::numeric_limits<uint16_t>::max()) {
+#if MLN_USE_FILL_EXTRUSION_INSTANCING
+        // Instanced walls are drawn from the vertices alone, so beside a roof of its own no triangle indexes them, and
+        // a segment holding only them would have nothing to draw.
+        const bool wallsTakeASegment = !roof;
+#else
+        const bool wallsTakeASegment = true;
+#endif
+        if (wallsTakeASegment && (triangleSegments.empty() || triangleSegments.back().vertexLength + wallVertices >
+                                                                  std::numeric_limits<uint16_t>::max())) {
             triangleSegments.emplace_back(startVertices, triangles.elements());
         }
 
-        auto& triangleSegment = triangleSegments.back();
-        assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
+        SegmentBase* triangleSegment = wallsTakeASegment ? &triangleSegments.back() : nullptr;
+        assert(!triangleSegment || triangleSegment->vertexLength <= std::numeric_limits<uint16_t>::max());
+        auto triangleIndex = static_cast<uint16_t>(triangleSegment ? triangleSegment->vertexLength : 0);
 
         assert(triangleIndex + wallVertices <= std::numeric_limits<uint16_t>::max());
 
@@ -191,8 +198,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                     triangles.emplace_back(triangleIndex, triangleIndex + 2, triangleIndex + 1);
                     triangles.emplace_back(triangleIndex + 1, triangleIndex + 2, triangleIndex + 3);
                     triangleIndex += 4;
-                    triangleSegment.vertexLength += 4;
-                    triangleSegment.indexLength += 6;
+                    triangleSegment->vertexLength += 4;
+                    triangleSegment->indexLength += 6;
                 }
 #endif
             };
@@ -234,8 +241,10 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                    static_cast<uint16_t>(flatIndices[indices[i + 1]]));
         }
 
-        triangleSegment.vertexLength += totalVertices;
-        triangleSegment.indexLength += nIndices;
+        if (triangleSegment) {
+            triangleSegment->vertexLength += totalVertices;
+            triangleSegment->indexLength += nIndices;
+        }
 
         // The roof's triangles index only its own vertices, so it continues the walls' segment or starts its own.
         const std::size_t roofStart = vertices.elements();

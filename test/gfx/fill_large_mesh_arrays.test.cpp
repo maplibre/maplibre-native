@@ -104,6 +104,7 @@ std::vector<std::array<int16_t, Size * 2>> drawn(const Buffers& buffers,
     std::vector<std::array<int16_t, Size * 2>> primitives;
     for (const auto& segment : segments) {
         EXPECT_LE(segment.vertexLength, maxVertices);
+        EXPECT_GT(segment.indexLength, 0u);
         for (std::size_t i = segment.indexOffset; i + Size <= segment.indexOffset + segment.indexLength; i += Size) {
             std::array<int16_t, Size * 2> primitive{};
             for (std::size_t k = 0; k < Size; ++k) {
@@ -225,4 +226,33 @@ TEST(FillLargeMeshArrays, MeshesAfterASplitStartAFreshSegment) {
     fill(buffers, large, 16);
     fill(buffers, small, 16);
     expectDrawsTheSame(merge({large, small}), buffers, 16);
+}
+
+TEST(FillLargeMeshArrays, ContinuesASegmentOnlyWhereTheVertexBufferEnds) {
+    // The split leaves 4 vertices in the last triangle segment and then copies the outline's vertices after them, so
+    // the next mesh's triangles cannot continue that segment from its 4th vertex.
+    const Mesh large = gridMesh(4);
+    const Mesh small = gridMesh(1);
+    Buffers buffers;
+    fill(buffers, large, 24);
+    fill(buffers, small, 24);
+    expectDrawsTheSame(merge({large, small}), buffers, 24);
+}
+
+TEST(FillLargeMeshArrays, MeshWithNothingToDrawAddsNothing) {
+    Buffers buffers;
+    fill(buffers, gridMesh(4), 16);
+    const auto vertexCount = buffers.vertices.elements();
+    const auto triangleSegmentCount = buffers.triangleSegments.size();
+    const auto lineSegmentCount = buffers.lineSegments.size();
+    fill(buffers, Mesh{{0, 0, 1, 0, 0, 1}, {}, {}}, 16);
+    EXPECT_EQ(vertexCount, buffers.vertices.elements());
+    EXPECT_EQ(triangleSegmentCount, buffers.triangleSegments.size());
+    EXPECT_EQ(lineSegmentCount, buffers.lineSegments.size());
+
+    // Triangles without lines start no line segment.
+    Buffers trianglesOnly;
+    fill(trianglesOnly, Mesh{{0, 0, 1, 0, 0, 1}, {0, 1, 2}, {}}, 16);
+    EXPECT_EQ(1u, trianglesOnly.triangleSegments.size());
+    EXPECT_TRUE(trianglesOnly.lineSegments.empty());
 }
