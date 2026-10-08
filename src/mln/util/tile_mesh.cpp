@@ -13,21 +13,25 @@ constexpr int32_t EXTENT_STENCIL_BORDER = EXTENT / 128;
 } // namespace
 
 TileMesh createTileMesh(const TileMeshOptions& options) {
-    const int32_t granularity = static_cast<int32_t>(std::max(options.granularity, 1u));
+    // Capped first so the product cannot wrap; every granularity past the vertex limit fails the check anyway.
+    constexpr uint64_t maxVertices = uint64_t{1} << 16;
+    const uint64_t requestedGranularity = std::min<uint64_t>(std::max(options.granularity, 1u), maxVertices);
+    const uint64_t extraQuadsX = options.generateBorders ? 2 : 0;
+    const uint64_t extraQuadsY = ((options.extendToNorthPole || options.generateBorders) ? 1 : 0) +
+                                 ((options.extendToSouthPole || options.generateBorders) ? 1 : 0);
+    if ((requestedGranularity + extraQuadsX + 1) * (requestedGranularity + extraQuadsY + 1) > maxVertices) {
+        throw std::invalid_argument("Tile mesh granularity is too large for 16 bit indices.");
+    }
 
-    const int32_t quadsPerAxisX = granularity + (options.generateBorders ? 2 : 0);
-    const int32_t quadsPerAxisY = granularity + ((options.extendToNorthPole || options.generateBorders) ? 1 : 0) +
-                                  ((options.extendToSouthPole || options.generateBorders) ? 1 : 0);
+    const auto granularity = static_cast<int32_t>(requestedGranularity);
+    const int32_t quadsPerAxisX = granularity + static_cast<int32_t>(extraQuadsX);
+    const int32_t quadsPerAxisY = granularity + static_cast<int32_t>(extraQuadsY);
     const int32_t verticesPerAxisX = quadsPerAxisX + 1;
     const int32_t verticesPerAxisY = quadsPerAxisY + 1;
     const int32_t offsetX = options.generateBorders ? -1 : 0;
     const int32_t offsetY = (options.generateBorders || options.extendToNorthPole) ? -1 : 0;
     const int32_t endX = granularity + (options.generateBorders ? 1 : 0);
     const int32_t endY = granularity + ((options.generateBorders || options.extendToSouthPole) ? 1 : 0);
-
-    if (verticesPerAxisX * verticesPerAxisY > (1 << 16)) {
-        throw std::invalid_argument("Tile mesh granularity is too large for 16 bit indices.");
-    }
 
     TileMesh mesh;
     mesh.vertices.reserve(static_cast<std::size_t>(verticesPerAxisX) * verticesPerAxisY * 2);

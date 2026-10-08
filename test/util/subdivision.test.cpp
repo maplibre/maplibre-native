@@ -6,8 +6,10 @@
 #include <mln/util/subdivision_granularity.hpp>
 #include <mln/util/tile_mesh.hpp>
 
+#include <limits>
 #include <map>
 #include <set>
+#include <stdexcept>
 
 using namespace mln;
 using namespace mln::util;
@@ -323,6 +325,15 @@ TEST(TileMesh, QuadAndGrid) {
     for (std::size_t i = 0; i + 2 < polar.indices.size(); i += 3) {
         EXPECT_LT(signedArea(polar.vertices, polar.indices[i], polar.indices[i + 1], polar.indices[i + 2]), 0.0);
     }
+}
+
+TEST(TileMesh, GranularityPastTheIndexLimitThrows) {
+    EXPECT_NO_THROW(createTileMesh({.granularity = 255}));
+    EXPECT_THROW(createTileMesh({.granularity = 256}), std::invalid_argument);
+    EXPECT_NO_THROW(createTileMesh({.granularity = 253, .generateBorders = true}));
+    EXPECT_THROW(createTileMesh({.granularity = 254, .generateBorders = true}), std::invalid_argument);
+    EXPECT_THROW(createTileMesh({.granularity = 50000}), std::invalid_argument);
+    EXPECT_THROW(createTileMesh({.granularity = std::numeric_limits<uint32_t>::max()}), std::invalid_argument);
 }
 
 TEST(TileMesh, GlobeMaskKeepsTheUncoveredParts) {
