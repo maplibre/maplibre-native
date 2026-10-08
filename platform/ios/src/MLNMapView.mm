@@ -5463,7 +5463,33 @@ static void *windowScreenContext = &windowScreenContext;
 
   if (annotation == self.selectedAnnotation) return;
 
-  if ([self isCoordinateOccluded:annotation.coordinate]) return;
+  // Behind the globe: an annotation that may move into view is centered first and selected there.
+  if ([self isCoordinateOccluded:annotation.coordinate]) {
+    if (!moveIntoView ||
+        ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
+                                                       animated:animateSelection]) {
+      return;
+    }
+    __weak __typeof__(self) weakSelf = self;
+    [self setCenterCoordinate:annotation.coordinate
+                    zoomLevel:self.zoomLevel
+                    direction:self.direction
+                     animated:animateSelection
+            completionHandler:^{
+              __typeof__(self) strongSelf = weakSelf;
+              if (!strongSelf || [strongSelf isCoordinateOccluded:annotation.coordinate]) {
+                if (completion) completion();
+                return;
+              }
+              [strongSelf selectAnnotation:annotation
+                              moveIntoView:NO
+                          animateSelection:animateSelection
+                    calloutPositioningRect:[strongSelf positioningRectForAnnotation:annotation
+                                                                defaultCalloutPoint:CGPointZero]
+                         completionHandler:completion];
+            }];
+    return;
+  }
 
   [self deselectAnnotation:self.selectedAnnotation animated:NO];
 

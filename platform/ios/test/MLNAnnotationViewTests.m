@@ -302,6 +302,35 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     [_expectation fulfill];
 }
 
+- (void)testSelectingAnnotationBehindTheGlobeMovesItIntoView
+{
+    _mapView.delegate = nil;
+    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"globe" withExtension:@"json"];
+    _styleLoadingExpectation = [self expectationWithDescription:@"globe style"];
+    _mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 400, 400) styleURL:styleURL];
+    _mapView.delegate = self;
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+
+    MLNPointAnnotation *back = [[MLNPointAnnotation alloc] init];
+    back.coordinate = CLLocationCoordinate2DMake(70, 70);
+    [_mapView addAnnotation:back];
+
+    // Left where it is, an annotation behind the globe stays unselected.
+    [_mapView selectAnnotation:back moveIntoView:NO animateSelection:NO completionHandler:nil];
+    XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
+
+    // Moved into view, the map centers on it and selects it.
+    XCTestExpectation *selected = [self expectationWithDescription:@"selected after moving into view"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:NO completionHandler:^{
+        [selected fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, back);
+    XCTAssertEqualWithAccuracy(_mapView.centerCoordinate.latitude, 70, 0.01);
+    XCTAssertEqualWithAccuracy(_mapView.centerCoordinate.longitude, 70, 0.01);
+}
+
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style
 {
     if (mapView == _mapView) {
