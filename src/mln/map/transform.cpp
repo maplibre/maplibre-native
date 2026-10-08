@@ -203,17 +203,19 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
         animation,
         [=, this](double t) {
             if (globe) {
-                // Zooming around an anchor moves the center a frame at a time (see startTransition), so it stays.
-                const bool zoomsAroundAnchor = camera.anchor && !camera.center;
-                LatLng frameLatLng = zoomsAroundAnchor ? state.getLatLng() : latLng;
+                // An anchor moves the center a frame at a time (see startTransition), so it stays, and the zoom
+                // follows its latitude to keep the planet's size.
+                const bool movesAroundAnchor = camera.anchor && !camera.center;
+                LatLng frameLatLng = movesAroundAnchor ? state.getLatLng() : latLng;
                 double frameZoom = zoom;
-                if (t < 1.0) {
+                if (movesAroundAnchor) {
+                    frameZoom = util::interpolate(normalizedStartZoom, normalizedZoom, t) +
+                                VerticalPerspectiveProjection::zoomAdjustment(0, frameLatLng.latitude());
+                } else if (t < 1.0) {
                     const double factor = t * std::pow(base, 1.0 - t);
-                    if (!zoomsAroundAnchor) {
-                        frameLatLng = VerticalPerspectiveProjection::interpolateLatLng(
-                                          startLatLng, deltaLatitude, deltaLongitude, factor)
-                                          .wrapped();
-                    }
+                    frameLatLng = VerticalPerspectiveProjection::interpolateLatLng(
+                                      startLatLng, deltaLatitude, deltaLongitude, factor)
+                                      .wrapped();
                     frameZoom = zoom != startZoom
                                     ? util::interpolate(normalizedStartZoom, normalizedZoom, t) +
                                           VerticalPerspectiveProjection::zoomAdjustment(0, frameLatLng.latitude())
