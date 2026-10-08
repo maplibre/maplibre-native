@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-2702e539.js";
+            window.path_to_searchindex_js = "../../searchindex-b4cda41d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-24c1b73c.js"></script>
@@ -224,6 +224,12 @@ cd platform/android
 <h2 id="requirements"><a class="header" href="#requirements">Requirements</a></h2>
 <p><a href="https://developer.android.com/studio">Android Studio</a> needs to be installed.</p>
 <p>Open the <code>platform/android</code> directory to get started.</p>
+<h3 id="nix"><a class="header" href="#nix">Nix</a></h3>
+<p>With <a href="https://nixos.org">Nix</a> and flakes enabled, you can build from the command line instead. Running <code>nix develop .#android</code> in the root of the repository opens a shell with a JDK and an Android SDK that has the NDK version the build expects:</p>
+<pre><code class="language-bash">nix develop .#android
+cd platform/android
+./gradlew :MapLibreAndroidTestApp:assembleVulkanDebug
+</code></pre>
 <h2 id="setting-an-api-key"><a class="header" href="#setting-an-api-key">Setting an API Key</a></h2>
 <p><em>The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key.</em></p>
 <p>With the first Gradle invocation, Gradle will take the value of the <code>MLN_API_KEY</code> environment variable and save it to <code>MapLibreAndroidTestApp/src/main/res/values/developer-config.xml</code>. If the environment variable wasn’t set, you can edit <code>developer-config.xml</code> manually and add your API key to the <code>api_key</code> resource.</p>

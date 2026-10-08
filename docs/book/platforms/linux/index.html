@@ -73,7 +73,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-2702e539.js";
+            window.path_to_searchindex_js = "../../searchindex-b4cda41d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-24c1b73c.js"></script>
@@ -228,6 +228,8 @@ apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev l
 </code></pre>
 <p>Optional: <code>libsqlite3-dev</code> (when not found will use SQLite as vendored dependency).</p>
 <p>When using Wayland (now default for <code>linux-opengl</code> preset): <code>libegl1-mesa-dev</code>.</p>
+<h3 id="nix"><a class="header" href="#nix">Nix</a></h3>
+<p>With <a href="https://nixos.org">Nix</a> and flakes enabled, you can instead run <code>nix develop</code> in the root of the repository. This opens a shell with all of the tools and libraries above, ready for the CMake presets below.</p>
 <h2 id="build-with-cmake"><a class="header" href="#build-with-cmake">Build with CMake</a></h2>
 <pre><code class="language-bash">cmake --preset linux-opengl
 cmake --build build-linux-opengl --target mbgl-render
