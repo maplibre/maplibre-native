@@ -380,3 +380,14 @@ TEST(TileMesh, GlobeMaskKeepsTheUncoveredParts) {
 
     EXPECT_EQ(0u, GlobeTestMesh(tile, {}, &globeTestVertex).vertices->elements());
 }
+
+// However many masks the tiles go through while they load, a layer's cache of globe meshes stays bounded.
+TEST(TileMesh, GlobeMeshCacheStaysBounded) {
+    GlobeTileMeshCache<GlobeTestVertex, decltype(&globeTestVertex)> cache;
+    const CanonicalTileID tile{3, 2, 2};
+    for (uint32_t i = 0; i < 1000; ++i) {
+        const uint32_t child = i % 256;
+        cache.get(tile, {{4, child % 16, child / 16}}, &globeTestVertex);
+        ASSERT_LE(cache.size(), 64u) << i;
+    }
+}
