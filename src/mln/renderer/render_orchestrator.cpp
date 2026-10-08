@@ -20,7 +20,6 @@
 #include <mln/renderer/query.hpp>
 #include <mln/renderer/image_manager.hpp>
 #include <mln/geometry/line_atlas.hpp>
-#include <mln/style/layers/custom_layer_impl.hpp>
 #include <mln/style/source_impl.hpp>
 #include <mln/style/transition_options.hpp>
 #include <mln/text/glyph_manager.hpp>
@@ -1040,9 +1039,6 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
         const auto& layerId = renderLayer.getId();
-        // A custom layer may draw 3D geometry, and the planet's depth is what hides it behind the horizon.
-        has3D = has3D || renderLayer.is3D() ||
-                renderLayer.baseImpl->getTypeInfo() == style::CustomLayer::Impl::staticTypeInfo();
 #if MLN_RENDER_BACKEND_OPENGL
         // Android Emulator: Goldfish is *very* broken. This will prevent a crash
         // inside the GL translation layer at the cost of emulator performance.
@@ -1055,6 +1051,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         } catch (...) {
             observer->onRenderError(std::current_exception());
         }
+        has3D = has3D || renderLayer.needsGlobeDepth();
 
         // Accumulate rendered features from each render layer, leaving each one empty.
         if (!renderLayer.stats.renderedFeatures.empty()) {

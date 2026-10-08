@@ -25,6 +25,7 @@
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/plugin_property.hpp>
 
+#include <algorithm>
 #include <set>
 
 namespace mln {
@@ -154,6 +155,11 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
                                     const RenderTree&,
                                     UniqueChangeRequestVec& changes) {
     const auto& registration = pluginImpl(baseImpl).registration;
+    // The globe skips the depth test for 2D drawables, so read/write depth drawables are built 3D there, to test
+    // against the planet's depth.
+    updateProjectionVariant(state);
+    const bool globe = projectionVariant == gfx::ProjectionVariant::Globe;
+    readWriteDepth = false;
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -209,6 +215,10 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             removeTile(renderPass, tileID);
         }
         setRenderTileBucketID(tileID, bucket.getID());
+        readWriteDepth = readWriteDepth || std::ranges::any_of(bucket.drawables, [&](const auto& definition) {
+                             return definition.depthMode == PluginDrawableDepthMode::ReadWrite &&
+                                    !definition.enableStencilOverlap && !registration->enableStencilOverlapDedup;
+                         });
         if (updateTile(renderPass, tileID, [&](gfx::Drawable& drawable) {
                 return drawable.getLayerTweaker() == layerTweaker;
             })) {
@@ -253,7 +263,7 @@ void RenderPluginStyleLayer::update(gfx::ShaderRegistry& shaders,
             } else if (definition.depthMode == PluginDrawableDepthMode::ReadWrite) {
                 builder->setEnableDepth(true);
                 builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                builder->setIs3D(false);
+                builder->setIs3D(globe);
                 builder->setEnableStencil(false);
                 if (definition.cullBackFaces) {
                     builder->setCullFaceMode(gfx::CullFaceMode::backCCW());

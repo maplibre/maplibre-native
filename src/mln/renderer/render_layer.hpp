@@ -123,6 +123,9 @@ public:
     /// Returns true if layer writes to depth buffer by drawing using PaintParameters::depthModeFor3D().
     virtual bool is3D() const { return false; }
 
+    /// Returns true if the layer may draw depth-tested 3D geometry, which the planet's depth hides behind the horizon.
+    virtual bool needsGlobeDepth() const { return is3D(); }
+
     /// Returns true is the layer is subject to placement.
     bool needsPlacement() const;
 

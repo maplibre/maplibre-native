@@ -44,7 +44,8 @@ void registerTriangles(const std::string& pluginID,
                        bool scopedUniforms = false,
                        bool stencilOverlapDedup = false,
                        mln_plugin_should_animate_fn shouldAnimate = nullptr,
-                       bool stencilOverlap = false) {
+                       bool stencilOverlap = false,
+                       bool readWriteDepth = false) {
     static const float vertices[] = {-1, -1, 1, -1, 0, 1};
     static const uint16_t indices[] = {0, 1, 2};
     static const mln_plugin_vertex_stream_v1 stream = {
@@ -65,6 +66,18 @@ void registerTriangles(const std::string& pluginID,
                                                                       0,
                                                                       0,
                                                                       0};
+    static const mln_plugin_drawable_descriptor_v1 depthDrawable = {sizeof(depthDrawable),
+                                                                    1,
+                                                                    {"main", 4},
+                                                                    &binding,
+                                                                    1,
+                                                                    &segment,
+                                                                    1,
+                                                                    MLN_PLUGIN_DRAWABLE_DEPTH_READ_WRITE,
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    0};
     static const mln_plugin_feature_vertex_range_v1 range = {sizeof(range), 0, 1, 0, 3};
     const mln_plugin_shader_attribute_v1 attribute = {
         sizeof(attribute), 0, 0, {"a_pos", 5}, MLN_PLUGIN_VERTEX_FLOAT_X2};
@@ -109,15 +122,17 @@ void registerTriangles(const std::string& pluginID,
     for (std::size_t i = 0; i < layers.size(); ++i) {
         const std::string offset = i == 0 ? "-1.0" : "+1.0";
         const std::string color = i == 0 ? "1,0,0,1" : "0,1,0,1";
-        const std::string body = "void main(){gl_Position=vec4((a_pos.x" + offset + ")*0.5,a_pos.y,0,1);";
+        // With depth, the left triangle lies behind the near side of a planet filling the view, the right one in front.
+        const std::string depth = !readWriteDepth ? "0" : (i == 0 ? "0.9999" : "0.5");
+        const std::string body = "void main(){gl_Position=vec4((a_pos.x" + offset + ")*0.5,a_pos.y," + depth + ",1);";
         code[i] = {"in vec2 a_pos;" + body + "}",
                    "void main(){fragColor=vec4(" + color + ");}",
                    "layout(location=0) in vec2 a_pos;" + body + "applySurfaceTransform();}",
                    "layout(location=0) out vec4 fragColor;void main(){fragColor=vec4(" + color + ");}",
                    "struct Input{float2 a_pos [[attribute(0)]];};"
                    "vertex float4 triangleVertex(Input in [[stage_in]]) {return float4((in.a_pos.x" +
-                       offset + ")*0.5,in.a_pos.y,0,1);}fragment half4 triangleFragment(){return half4(" + color +
-                       ");}"};
+                       offset + ")*0.5,in.a_pos.y," + depth + ",1);}fragment half4 triangleFragment(){return half4(" +
+                       color + ");}"};
         if (packedColor) {
             code[i] = {"in vec2 a_pos;in vec4 a_color;out vec4 v_color;" + body + "v_color=a_color;}",
                        "in vec4 v_color;void main(){fragColor=v_color;}",
@@ -262,6 +277,12 @@ void registerTriangles(const std::string& pluginID,
                 return MLN_PLUGIN_STATUS_OK;
             };
         }
+        if (readWriteDepth) {
+            layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
+                *output = {sizeof(*output), &stream, 1, indices, 3, &depthDrawable, 1, 0, &range, 1};
+                return MLN_PLUGIN_STATUS_OK;
+            };
+        }
         if (packedColor) {
             layer.finish_layout = [](void*, mln_plugin_bucket_v1* output) {
                 *output = {sizeof(*output), colorStreams, 2, indices, 3, &colorDrawable, 1, 0, nullptr, 0};
@@ -403,6 +424,28 @@ TEST(PluginRendering, StencilOverlapWithoutDedupStencilsEachDrawableOnItsOwn) {
     sharedAlpha = 1;
     EXPECT_NEAR(239, perDrawable, 1);
     EXPECT_NEAR(128, perLayer, 1);
+}
+
+// On the globe a read/write depth drawable is 3D geometry: the planet hides what lies behind its near side.
+TEST(PluginRendering, ReadWriteDepthDrawablesAreHiddenByThePlanet) {
+    ASSERT_NO_FATAL_FAILURE(
+        registerTriangles("test.read-write-depth", false, false, false, false, nullptr, false, true));
+    RenderTest test;
+    test.map.getStyle().loadJSON(triangleStyle("test.read-write-depth"));
+    const auto render = [&](const char* projectionType) {
+        SCOPED_TRACE(projectionType);
+        auto projection = std::make_unique<style::Projection>();
+        projection->setType(ProjectionDefinition(projectionType));
+        test.map.getStyle().setProjection(std::move(projection));
+        const auto result = test.frontend.render(test.map);
+        const auto* left = result.image.data.get() + (32 * 64 + 16) * 4;
+        const auto* right = result.image.data.get() + (32 * 64 + 48) * 4;
+        EXPECT_EQ(255, right[1]);
+        return left[3];
+    };
+    EXPECT_EQ(0, render("globe"));
+    EXPECT_EQ(255, render("mercator"));
+    EXPECT_EQ(0, render("globe"));
 }
 
 TEST(PluginRendering, UnchangedUniformUploadsAreSkippedButPaintChangesUpload) {
