@@ -440,7 +440,8 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMinZoom(*options.minZoom);
         // On the globe the lowest zoom falls with latitude; on Mercator it is the minimum.
         const TransformState& state = impl->transform.getState();
-        const double minZoom = state.getMinZoomAtLatitude(state.getLatLng().latitude());
+        const double latitudeTerm = state.getMinZoomAtLatitude(state.getLatLng().latitude()) - state.getMinZoom();
+        const double minZoom = *options.minZoom + latitudeTerm;
         if (impl->transform.getZoom() < minZoom) {
             changeCamera = true;
             cameraOptions.withZoom(minZoom);

@@ -2175,6 +2175,15 @@ TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
     EXPECT_NEAR(-1.5, *test.map.getCameraOptions().zoom, 1e-9);
 }
 
+// A minimum set above the current maximum still lifts the zoom to it, which setBounds always did on Mercator.
+TEST(Map, SetBoundsLiftsTheZoomToAMinimumAboveTheMaximum) {
+    MapTest<> test;
+    test.map.setBounds(BoundOptions().withMaxZoom(8));
+    test.map.jumpTo(CameraOptions().withZoom(6.0));
+    test.map.setBounds(BoundOptions().withMinZoom(10).withMaxZoom(16));
+    EXPECT_NEAR(10.0, *test.map.getCameraOptions().zoom, 1e-9);
+}
+
 TEST(Map, GlobeBoundedSourceLoadsFinerTiles) {
     // Just below an integer zoom the globe cover asks for the next zoom's tiles nearest the camera; a source with
     // bounds must create them.
