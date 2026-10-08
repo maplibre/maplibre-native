@@ -1,5 +1,8 @@
-#import <Mapbox.h>
 #import <XCTest/XCTest.h>
+#import "MLNMapView.h"
+#import "MLNMapViewDelegate.h"
+#import "MLNSettings.h"
+#import "MLNStyle.h"
 
 #import "../../darwin/src/MLNGeometry_Private.h"
 #import "MLNMapView_Private.h"

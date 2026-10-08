@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import "MLNNetworkConfiguration.h"
 #import <XCTest/XCTest.h>
 #import "MLNNetworkConfiguration_Private.h"
 

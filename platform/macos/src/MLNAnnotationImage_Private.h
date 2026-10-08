@@ -1,4 +1,4 @@
-#import "Mapbox.h"
+#import "MLNAnnotationImage.h"
 
 @interface MLNAnnotationImage (Private)
 

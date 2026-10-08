@@ -1,7 +1,8 @@
 #import "MBXSnapshotTestViewController.h"
 #import "MLNMapView+Impl.h"
+#import "MLNMapView.h"
+#import "MLNMapViewDelegate.h"
 #import "MLNMapView_Private.h"
-#import "Mapbox.h"
 
 @interface MBXSnapshotTestViewController () <MLNMapViewDelegate>
 @property (nonatomic) UIImageView *snapshotImageView;

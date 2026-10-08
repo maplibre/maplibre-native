@@ -14,10 +14,6 @@ MLN_IOS_SDK_HEADERS = [
     "src/MLNScaleBar.h",
 ]
 
-MLN_IOS_PUBLIC_HEADERS = [
-    "src/Mapbox.h",
-]
-
 MLN_IOS_PRIVATE_HEADERS = [
     "src/NSOrthography+MLNAdditions.h",
     "src/UIDevice+MLNAdditions.h",

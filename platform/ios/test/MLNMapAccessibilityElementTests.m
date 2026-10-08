@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import "MLNFeature.h"
 #import <XCTest/XCTest.h>
 
 #import "../../ios/src/MLNMapAccessibilityElement.h"

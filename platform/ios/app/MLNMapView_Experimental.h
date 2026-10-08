@@ -1,4 +1,4 @@
-#import "Mapbox.h"
+#import "MLNMapView.h"
 
 @interface MLNMapView (Experimental)
 

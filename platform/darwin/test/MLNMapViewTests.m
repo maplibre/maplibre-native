@@ -1,4 +1,12 @@
-#import <Mapbox.h>
+#import "MLNFillStyleLayer.h"
+#import "MLNGeometry.h"
+#import "MLNMapView.h"
+#import "MLNMapViewDelegate.h"
+#import "MLNPointAnnotation.h"
+#import "MLNSettings.h"
+#import "MLNStyle.h"
+#import "MLNTypes.h"
+#import "MLNVectorTileSource.h"
 #import <XCTest/XCTest.h>
 #import <TargetConditionals.h>
 

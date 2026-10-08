@@ -1,5 +1,12 @@
-#import <Mapbox.h>
 #import <XCTest/XCTest.h>
+#import "MLNOfflinePack.h"
+#import "MLNOfflineStorage.h"
+#import "MLNSettings.h"
+#import "MLNShape.h"
+#import "MLNShapeOfflineRegion.h"
+#import "MLNStyle.h"
+#import "MLNTilePyramidOfflineRegion.h"
+#import "NSValue+MLNAdditions.h"
 
 #import "MLNOfflineStorage_Private.h"
 #import "MLNTestAssertionHandler.h"

@@ -1,4 +1,10 @@
-#import <Mapbox.h>
+#import "MLNAnnotation.h"
+#import "MLNAnnotationView.h"
+#import "MLNCalloutView.h"
+#import "MLNFeature.h"
+#import "MLNGeometry.h"
+#import "MLNMapView.h"
+#import "MLNMapViewDelegate.h"
 #import <XCTest/XCTest.h>
 #import "MLNTestUtility.h"
 

@@ -1,4 +1,5 @@
-#import "Mapbox.h"
+#import "MLNMapCamera.h"
+#import "MLNMapSnapshotter.h"
 
 #import "MBXSnapshotsViewController.h"
 

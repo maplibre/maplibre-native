@@ -1,5 +1,10 @@
-#import <Mapbox.h>
 #import <XCTest/XCTest.h>
+#import "MLNCluster.h"
+#import "MLNFeature.h"
+#import "MLNPolygon.h"
+#import "MLNPolyline.h"
+#import "MLNShape.h"
+#import "NSValue+MLNAdditions.h"
 
 #import <mln/util/geometry.hpp>
 #import "../../darwin/src/MLNFeature_Private.h"

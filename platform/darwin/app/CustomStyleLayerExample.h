@@ -1,4 +1,4 @@
-#import "Mapbox.h"
+#import "MLNCustomStyleLayer.h"
 
 @interface CustomStyleLayerExample : MLNCustomStyleLayer
 

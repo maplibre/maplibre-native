@@ -1,4 +1,5 @@
-#import "Mapbox.h"
+#import "MLNLoggingConfiguration.h"
+#import "MLNSettings.h"
 
 #import "MBXAppDelegate.h"
 #import "MBXViewController.h"

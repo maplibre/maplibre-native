@@ -85,7 +85,6 @@ objc_library(
         "//platform/darwin:generated_style_srcs",
         "//platform/ios:ios_objcpp_srcs",
         "//platform/ios:ios_private_hdrs",
-        "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
@@ -133,7 +132,6 @@ objc_library(
         "//platform/darwin:darwin_objc_srcs",
         "//platform/ios:ios_objc_srcs",
         "//platform/ios:ios_private_hdrs",
-        "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ],
     hdrs = [
@@ -350,15 +348,10 @@ objc_library(
 
 js_binary(
     name = "check-public-symbols",
-    args = [
-        "macOS",
-        "iOS",
-    ],
     data = [
         "//:node_modules/lodash",
         "//platform/darwin:symbols-to-check",
         "//platform/ios:symbols-to-check",
-        "//platform/macos:symbols-to-check",
     ],
     entry_point = "scripts/check-public-symbols.js",
 )

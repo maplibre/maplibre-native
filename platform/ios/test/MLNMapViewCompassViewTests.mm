@@ -1,5 +1,9 @@
-#import <Mapbox.h>
 #import <XCTest/XCTest.h>
+#import "MLNCompassButton.h"
+#import "MLNGeometry.h"
+#import "MLNMapView.h"
+#import "MLNSettings.h"
+#import "MLNTypes.h"
 
 #import <mln/math/wrap.hpp>
 

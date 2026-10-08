@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
 import { execFileSync } from "node:child_process";
 import _ from "lodash";
 
@@ -7,13 +6,13 @@ const keyword = /\bMLN_EXPORT\b/;
 
 let scanned = [];
 
-function hasMissingSymbols(os) {
+function hasMissingSymbols() {
   let missing = false;
-  let sdk = os === 'iOS' ? 'iphonesimulator' : 'macosx';
-  let sysroot = execFileSync('xcrun', ['--show-sdk-path', '--sdk', sdk]).toString().trim();
-  let umbrellaPath = `platform/${os.toLowerCase()}/src/Mapbox.h`;
+  let sysroot = execFileSync('xcrun', ['--show-sdk-path', '--sdk', 'iphonesimulator']).toString().trim();
+  let umbrellaPath = 'platform/ios/MapLibre_umbrella.h';
   let docArgs = ['doc', '--objc', umbrellaPath, '--',
-                 '-x', 'objective-c', '-I', 'platform/darwin/src/', '-isysroot', sysroot];
+                 '-x', 'objective-c', '-I', 'platform/ios/src/',
+                 '-I', 'platform/darwin/src/', '-isysroot', sysroot];
   let docStr = execFileSync('sourcekitten', docArgs, { maxBuffer: Infinity }).toString().trim();
   let docJson = JSON.parse(docStr);
   _.forEach(docJson, function (result) {
@@ -54,25 +53,9 @@ function ensureSourceKittenIsInstalled() {
   }
 }
 
-if (process.argv.length < 3) {
-  console.warn(`Usage: ${path.relative(process.cwd(), process.argv[1])} [macOS|iOS] ...`);
-  process.exit(1);
-}
-
 ensureSourceKittenIsInstalled();
 
-let missing = false;
-for (var i = 2; i < process.argv.length; i++) {
-  let os = process.argv[i];
-  if (os == 'iOS' || os == 'macOS') {
-    missing |= hasMissingSymbols(os);
-  } else {
-    console.warn(`Argument must be one of iOS or macOS`);
-    process.exit(1);
-  }
-}
-
-if (missing) {
+if (hasMissingSymbols()) {
   process.exit(1);
 } else {
   console.warn(`All symbols are correctly exported.`);

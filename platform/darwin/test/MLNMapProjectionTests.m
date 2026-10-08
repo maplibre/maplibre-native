@@ -1,4 +1,10 @@
-#import <Mapbox.h>
+#import "MLNGeometry.h"
+#import "MLNMapCamera.h"
+#import "MLNMapView.h"
+#import "MLNSettings.h"
+#if TARGET_OS_IPHONE
+#import "MLNMapProjection.h"
+#endif
 #import <XCTest/XCTest.h>
 #import <TargetConditionals.h>
 

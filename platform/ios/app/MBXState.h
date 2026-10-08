@@ -1,4 +1,6 @@
-#import "Mapbox.h"
+#import "MLNMapCamera.h"
+#import "MLNMapView.h"
+#import "MLNTypes.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

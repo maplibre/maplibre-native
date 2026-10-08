@@ -1,4 +1,9 @@
-#import <Mapbox.h>
+#import "MLNBackgroundStyleLayer.h"
+#import "MLNMapCamera.h"
+#import "MLNMapSnapshotter.h"
+#import "MLNOfflineStorage.h"
+#import "MLNSettings.h"
+#import "MLNStyle.h"
 #import <XCTest/XCTest.h>
 
 MLNImage *MLNNormalizedImage(MLNImage *sourceImage) {

@@ -8,7 +8,7 @@
 
 #import "PluginLayerExampleMetalRendering.h"
 #import <MetalKit/MetalKit.h>
-#import "Mapbox.h"
+#import "MLNMapView.h"
 
 typedef struct {
   vector_float2 position;

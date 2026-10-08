@@ -1,4 +1,9 @@
-#import <Mapbox.h>
+#import "MLNGeometry.h"
+#import "MLNSettings.h"
+#import "MLNShape.h"
+#import "MLNShapeOfflineRegion.h"
+#import "MLNStyle.h"
+#import "MLNTilePyramidOfflineRegion.h"
 
 #import <XCTest/XCTest.h>
 

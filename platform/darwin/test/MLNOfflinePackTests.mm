@@ -1,7 +1,9 @@
-#import <Mapbox.h>
 #import <XCTest/XCTest.h>
+#import "MLNOfflinePack.h"
 #import "MLNOfflinePack_Private.h"
+#import "MLNOfflineStorage.h"
 #import "MLNTestAssertionHandler.h"
+#import "NSValue+MLNAdditions.h"
 
 @interface MLNOfflinePackTests : XCTestCase
 

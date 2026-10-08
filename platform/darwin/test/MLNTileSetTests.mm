@@ -1,7 +1,10 @@
 #import <XCTest/XCTest.h>
 
-#import <Mapbox.h>
+#import "MLNAttributionInfo.h"
+#import "MLNGeometry.h"
 #import "MLNGeometry_Private.h"
+#import "MLNRasterDEMSource.h"
+#import "MLNTileSource.h"
 #import "MLNTileSource_Private.h"
 #import "MLNVectorTileSource.h"
 

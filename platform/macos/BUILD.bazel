@@ -1,4 +1,3 @@
-load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@rules_apple//apple:macos.bzl", "macos_command_line_application")
@@ -201,15 +200,4 @@ exports_files(
     MLN_MACOS_PUBLIC_HEADERS +
     MLN_MACOS_PUBLIC_OBJCPP_SOURCE +
     MLN_MACOS_PUBLIC_OBJC_SOURCE,
-)
-
-js_library(
-    name = "symbols-to-check",
-    srcs = [
-        ":macos_objc_srcs",
-        ":macos_objcpp_srcs",
-        ":macos_private_hdrs",
-        ":macos_public_hdrs",
-    ],
-    visibility = ["//platform:__pkg__"],
 )

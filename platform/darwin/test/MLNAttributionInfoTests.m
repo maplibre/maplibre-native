@@ -1,4 +1,5 @@
-#import <Mapbox.h>
+#import "MLNAttributionInfo.h"
+#import "MLNSettings.h"
 #import <XCTest/XCTest.h>
 
 #import "MLNAttributionInfo_Private.h"

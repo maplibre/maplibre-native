@@ -1,4 +1,7 @@
-#import <Mapbox.h>
+#import "MLNMapView.h"
+#import "MLNMapViewDelegate.h"
+#import "MLNSettings.h"
+#import "MLNStyle.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNMapViewContentInsetTests : XCTestCase <MLNMapViewDelegate>

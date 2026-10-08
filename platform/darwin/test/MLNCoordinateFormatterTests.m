@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import "MLNCoordinateFormatter.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNCoordinateFormatterTests : XCTestCase

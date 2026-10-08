@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import "MLNClockDirectionFormatter.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNClockDirectionFormatterTests : XCTestCase

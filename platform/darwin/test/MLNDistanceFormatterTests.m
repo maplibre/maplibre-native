@@ -1,4 +1,4 @@
-#import <Mapbox.h>
+#import "MLNDistanceFormatter.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNDistanceFormatterTests : XCTestCase

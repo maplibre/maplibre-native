@@ -1,5 +1,5 @@
 #import "MLNScaleBar.h"
-#import "Mapbox.h"
+#import "MLNDistanceFormatter.h"
 
 static const CGFloat MLNFeetPerMile = 5280;
 

@@ -1,4 +1,3 @@
-#import <Mapbox.h>
 #import <XCTest/XCTest.h>
 #import "MLNRendererConfiguration.h"
 

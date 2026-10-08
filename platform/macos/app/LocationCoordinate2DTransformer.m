@@ -1,6 +1,6 @@
 #import "LocationCoordinate2DTransformer.h"
 
-#import <Mapbox.h>
+#import "MLNCoordinateFormatter.h"
 
 @implementation LocationCoordinate2DTransformer {
     MLNCoordinateFormatter *_coordinateFormatter;
