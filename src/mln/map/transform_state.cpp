@@ -1137,7 +1137,14 @@ void TransformState::moveLatLng(const LatLng& latLng, const ScreenCoordinate& an
 }
 
 void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
-    LatLng constrained = bounds.constrain(latLng);
+    LatLng requested = latLng;
+    // Globe centers arrive wrapped, and bounds across the antimeridian reach past 180 degrees: take the copy of the
+    // longitude nearest the bounds before constraining it.
+    if (isGlobeRendering() && bounds != LatLngBounds()) {
+        const double turns = std::round((bounds.center().longitude() - latLng.longitude()) / util::DEGREES_MAX);
+        requested = {latLng.latitude(), latLng.longitude() + turns * util::DEGREES_MAX};
+    }
+    LatLng constrained = bounds.constrain(requested);
     // The globe's tile cover picks each tile's wrap from the center, so a center that jumped a whole world at the
     // antimeridian would re-key every tile; keep it on the copy nearest the current one.
     if (isGlobeRendering() && bounds == LatLngBounds()) {
