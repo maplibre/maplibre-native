@@ -459,7 +459,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const uint8_t minZoom = zoomRange.min;
     const uint8_t overscaledZoom = std::max(overscaledZ.value_or(z), maxZoom);
     const double numTiles = std::pow(2.0, z);
-    const bool allowVariableZoom = z > 4;
+    const auto& transformZoom = state.transformState.getZoom();
+    const double requestedCenterZoom = state.requestedZoom.value_or(transformZoom + (z - std::floor(transformZoom)));
+    const auto wholeZoom = [&](double zoom) {
+        return state.roundZoom ? std::round(zoom) : std::floor(zoom);
+    };
+    const bool allowVariableZoom = wholeZoom(requestedCenterZoom) > 4;
 
     const Point<double> center = Projection::project(transform.getLatLng(), 1.0 / util::tileSize_D);
     const vec3 centerCoord = {{center.x, center.y, 0.0}};
@@ -477,7 +482,6 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     const double distanceToCenter2d = std::hypot(centerCoord[0] - cameraCoord[0], centerCoord[1] - cameraCoord[1]);
     const double distanceZ = std::abs(centerCoord[2] - cameraCoord[2]);
     const double distanceToCenter3d = std::hypot(distanceToCenter2d, distanceZ);
-    const double requestedCenterZoom = transform.getZoom() + (z - std::floor(transform.getZoom()));
     const double fovDegrees = transform.getFieldOfView() * 180.0 / std::numbers::pi;
     const TileZoomFunction tileZoom(fovDegrees);
     const double cullingElevation = elevationForTileCulling(transform.getPitch() * 180.0 / std::numbers::pi,
@@ -504,7 +508,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         double desiredZ = z;
         if (allowVariableZoom) {
             const double distToTile2d = distanceToTile2d(cameraCoord[0] - centerWorld, cameraCoord[1], tile);
-            desiredZ = std::floor(tileZoom(requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d));
+            desiredZ = wholeZoom(tileZoom(requestedCenterZoom, distToTile2d, distanceZ, distanceToCenter3d));
         }
         const auto targetZoom = static_cast<uint8_t>(std::clamp(desiredZ, 0.0, static_cast<double>(maxZoom)));
 
