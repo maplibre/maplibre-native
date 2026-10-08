@@ -6,6 +6,7 @@
 #include <mln/gfx/renderer_backend.hpp>
 #include <mln/gfx/symbol_drawable_data.hpp>
 #include <mln/layout/symbol_projection.hpp>
+#include <mln/map/mercator_projection.hpp>
 #include <mln/renderer/buckets/symbol_bucket.hpp>
 #include <mln/renderer/layer_group.hpp>
 #include <mln/renderer/paint_parameters.hpp>
@@ -137,7 +138,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             matrix::ortho(screenMatrix, 0, util::EXTENT, -util::EXTENT, 0, 0, 1);
             matrix::translate(screenMatrix, screenMatrix, 0, -util::EXTENT, 0);
             matrix::translate(screenMatrix, screenMatrix, translate[0], translate[1], 0);
-            projection = parameters.state.getProjectionDataForMatrix(tileID, screenMatrix);
+            projection = MercatorProjection().getProjectionData(parameters.state, tileID, screenMatrix);
         } else {
             constexpr bool nearClipped = false;
             constexpr bool inViewportPixelUnits = false;

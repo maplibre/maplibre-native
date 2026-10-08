@@ -74,6 +74,12 @@ Point<float> translationPoint(const UnwrappedTileID& tileID,
     const auto translation = RenderTile::tileUnitTranslation(tileID, translate.offset, translate.anchor, state);
     return {translation[0], translation[1]};
 }
+
+/// The projection without the horizon plane, so nothing on it counts as hidden behind the planet.
+ProjectionData withoutHorizon(ProjectionData data) {
+    data.clippingPlane = {{0, 0, 0, 0}};
+    return data;
+}
 } // namespace
 
 // PlacementContext implementation
@@ -122,7 +128,12 @@ public:
     bool pitchIconWithMap = getLayout().get<IconPitchAlignment>() == AlignmentType::Map;
     SymbolPlacementType placementType = getLayout().get<SymbolPlacement>();
 
-    TileProjector tileProjector{state, renderTile.get().id, renderTile.get().projection};
+    // Screen-space symbols are drawn over the view, so the planet does not hide them: no horizon plane.
+    TileProjector tileProjector{state,
+                                renderTile.get().id,
+                                getLayout().get<style::SymbolScreenSpace>()
+                                    ? withoutHorizon(renderTile.get().projection)
+                                    : renderTile.get().projection};
     // Point labels collide where `*-translate` puts them; line labels keep their layout-time circles.
     Point<float> textTranslation;
     Point<float> iconTranslation;
