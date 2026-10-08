@@ -115,8 +115,7 @@ void Map::Impl::onUpdate() {
     TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
-    transform.setProjectionDefinition(
-        style->impl->getProjection()->impl->evaluate(static_cast<float>(transform.getZoom())));
+    transform.setProjectionDefinition(projectionAt(transform.getZoom()));
 
     UpdateParameters params = {
         .styleLoaded = style->impl->isLoaded(),
@@ -146,7 +145,9 @@ void Map::Impl::onUpdate() {
         .tileLodPitchThreshold = tileLodPitchThreshold,
         .tileLodZoomShift = tileLodZoomShift,
         .tileLodMode = tileLodMode,
-        .subdivisionGranularity = style->impl->getProjection()->impl->getSubdivisionGranularity()};
+        .subdivisionGranularity = mode == MapMode::Tile
+                                      ? SubdivisionGranularitySetting::none()
+                                      : style->impl->getProjection()->impl->getSubdivisionGranularity()};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
 }
@@ -324,10 +325,16 @@ void Map::Impl::onDidFinishRenderingMap() {
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     // The style's projection decides how the camera is constrained, so it has to be in place first.
-    transform.setProjectionDefinition(
-        style->impl->getProjection()->impl->evaluate(static_cast<float>(camera.zoom.value_or(transform.getZoom()))));
+    transform.setProjectionDefinition(projectionAt(camera.zoom.value_or(transform.getZoom())));
     transform.jumpTo(camera);
     onUpdate();
+}
+
+ProjectionDefinition Map::Impl::projectionAt(double zoom) const {
+    if (mode == MapMode::Tile) {
+        return ProjectionDefinition(ProjectionType::Mercator);
+    }
+    return style->impl->getProjection()->impl->evaluate(static_cast<float>(zoom));
 }
 
 bool Map::Impl::isRenderingStatsViewEnabled() const {
