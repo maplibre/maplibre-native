@@ -148,7 +148,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             }
 
             if (panZoom < idealZoom) {
-                panTiles = util::tileCover(tileCoverParameters, panZoom, zoomRange);
+                // The prefetch's level of detail falls off from its own, coarser zoom.
+                util::TileCoverParameters panParameters = tileCoverParameters;
+                panParameters.requestedZoom.reset();
+                panParameters.roundZoom = false;
+                panTiles = util::tileCover(panParameters, panZoom, zoomRange);
             }
         }
 
