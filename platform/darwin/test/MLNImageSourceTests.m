@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 
-#import "MapLibre.h"
+#import <MapLibre.h>
 
 @interface MLNImageSourceTests : XCTestCase
 

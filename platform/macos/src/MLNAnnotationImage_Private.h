@@ -1,4 +1,4 @@
-#import "MLNAnnotationImage.h"
+#import "MapLibre.h"
 
 @interface MLNAnnotationImage (Private)
 

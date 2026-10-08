@@ -57,7 +57,6 @@
 #import "MLNReachability.h"
 #import "MLNRenderingStats_Private.h"
 #import "MLNSettings_Private.h"
-#import "MLNTileSource.h"
 #import "NSBundle+MLNAdditions.h"
 #import "NSColor+MLNAdditions.h"
 #import "NSDate+MLNAdditions.h"

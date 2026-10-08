@@ -1,9 +1,9 @@
 #import <XCTest/XCTest.h>
 
+#import <MapLibre.h>
 #import "MLNGeometry_Private.h"
 #import "MLNTileSource_Private.h"
 #import "MLNVectorTileSource.h"
-#import "MapLibre.h"
 
 #include <mln/util/tileset.hpp>
 

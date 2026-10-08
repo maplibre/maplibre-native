@@ -1,6 +1,6 @@
+#import <MapLibre.h>
 #import <XCTest/XCTest.h>
 #import <mln/storage/resource.hpp>
-#import "MapLibre.h"
 
 namespace mln {
 extern NSURL *resourceURL(const Resource &resource);

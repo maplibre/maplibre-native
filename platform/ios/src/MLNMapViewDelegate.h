@@ -1,22 +1,13 @@
 #import <UIKit/UIKit.h>
 
-#import "MLNAnnotation.h"
-#import "MLNCalloutView.h"
 #import "MLNCameraChangeReason.h"
-#import "MLNLocationManager.h"
-#import "MLNMapView.h"
 #import "MLNRenderingStats.h"
 #import "MLNTileOperation.h"
+#import "MapLibre.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MLNAnnotationImage;
-@class MLNAnnotationView;
-@class MLNPolygon;
-@class MLNPolyline;
-@class MLNShape;
-@class MLNSource;
-@class MLNUserLocation;
+@class MLNMapView;
 @class MLNUserLocationAnnotationViewStyle;
 
 /**

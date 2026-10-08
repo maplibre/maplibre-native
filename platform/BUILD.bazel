@@ -11,6 +11,8 @@ objc_library(
         "//platform/macos:macos_objcpp_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
+        "//platform/macos:mln_defines",
+        "//platform/macos:umbrella_hdr",
     ],
     hdrs = [
         "//platform/darwin:include/mln/util/image+MLNAdditions.hpp",
@@ -56,6 +58,8 @@ objc_library(
         "//platform/macos:macos_objc_srcs",
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
+        "//platform/macos:mln_defines",
+        "//platform/macos:umbrella_hdr",
     ],
     copts = select({
         "@platforms//os:ios": WARNING_FLAGS["ios"],
@@ -67,6 +71,8 @@ objc_library(
     includes = [
         "darwin/include",
         "darwin/src",
+        "macos",
+        "macos/src",
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -86,6 +92,8 @@ objc_library(
         "//platform/ios:ios_objcpp_srcs",
         "//platform/ios:ios_private_hdrs",
         "//platform/ios:ios_sdk_hdrs",
+        "//platform/ios:mln_defines",
+        "//platform/ios:umbrella_hdr",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-fcxx-modules",
@@ -133,6 +141,8 @@ objc_library(
         "//platform/ios:ios_objc_srcs",
         "//platform/ios:ios_private_hdrs",
         "//platform/ios:ios_sdk_hdrs",
+        "//platform/ios:mln_defines",
+        "//platform/ios:umbrella_hdr",
     ],
     hdrs = [
         "//platform/darwin:include/mln/util/image+MLNAdditions.hpp",
@@ -170,6 +180,7 @@ objc_library(
     name = "objc-headers",
     includes = [
         "darwin/src",
+        "ios",
         "ios/src",
     ],
     sdk_frameworks = [
@@ -197,7 +208,6 @@ objc_library(
         "//conditions:default": [],
     }),
     data = ["//platform/ios:resources"],
-    includes = ["ios"],
     module_name = "MapLibre",
     sdk_dylibs = [
         "libz",
@@ -249,7 +259,6 @@ objc_library(
         "//platform/macos:umbrella_hdr",
     ],
     data = ["//platform/macos:resources"],
-    includes = ["macos"],
     module_name = "MapLibre",
     sdk_dylibs = [
         "libz",
