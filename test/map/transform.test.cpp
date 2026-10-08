@@ -1870,6 +1870,39 @@ TEST(TileProjector, GlobeOccludesTheFarSideAndCorrectsForLatitude) {
 
 // A query on the globe is padded with GL JS's Mercator pitch factor, taken at the screen corner's unclamped Mercator
 // position: the values are GL JS's `GlobeTransform.maxPitchScaleFactor()` for the same views.
+// Map-aligned circles, pitched text and line widths blend their globe size with Mercator's through the projection
+// transition: the values are GL JS's `GlobeTransform` corrections for the same center and transition.
+TEST(Transform, GlobeSizeCorrectionsBlendThroughTheTransition) {
+    struct Case {
+        double latitude;
+        double transition;
+        double circle;
+        double pixel;
+        double pitched;
+    };
+    for (const auto& c :
+         {Case{.latitude = 52.499167,
+               .transition = 0.5,
+               .circle = 0.8043864815927202,
+               .pixel = 1.321324254256826,
+               .pitched = 1.2637600088069},
+          Case{.latitude = 60, .transition = 0.25, .circle = 0.875, .pixel = 1.25, .pitched = 1.0636473098322572},
+          Case{.latitude = 60, .transition = 1, .circle = 0.5, .pixel = 2, .pitched = 1.2545892393290283},
+          Case{.latitude = 0, .transition = 0.5, .circle = 1, .pixel = 1, .pitched = 1.7545892393290279}}) {
+        Transform transform;
+        transform.resize({256, 256});
+        transform.setProjectionDefinition(
+            ProjectionDefinition(ProjectionType::Mercator, ProjectionType::VerticalPerspective, c.transition));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{c.latitude, 13.418056}).withZoom(11.5));
+        const auto& state = transform.getState();
+        const auto& projection = state.getProjection();
+        EXPECT_NEAR(c.circle, projection.circleRadiusCorrection(state), 1e-9);
+        EXPECT_NEAR(c.pixel, projection.pixelScale(state), 1e-9);
+        // An anchor a quarter of the way down the zoom 0 tile, at 66.5 degrees north.
+        EXPECT_NEAR(c.pitched, projection.pitchedTextCorrection(state, {4096, 2048}, UnwrappedTileID(0, 0, 0)), 1e-9);
+    }
+}
+
 TEST(Transform, GlobeMaxPitchScaleFactor) {
     struct View {
         LatLng center;

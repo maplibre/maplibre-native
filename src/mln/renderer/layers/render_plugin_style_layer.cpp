@@ -11,7 +11,6 @@
 #include <mln/gfx/vertex_attribute.hpp>
 #include <mln/map/tile_projector.hpp>
 #include <mln/map/transform_state.hpp>
-#include <mln/math/angles.hpp>
 #include <mln/plugin/plugin_shader.hpp>
 #include <mln/renderer/change_request.hpp>
 #include <mln/renderer/buckets/plugin_bucket.hpp>
@@ -26,7 +25,6 @@
 #include <mln/shaders/shader_program_base.hpp>
 #include <mln/style/plugin_property.hpp>
 
-#include <cmath>
 #include <set>
 
 namespace mln {
@@ -337,11 +335,10 @@ bool RenderPluginStyleLayer::queryIntersectsFeature(const GeometryCoordinates& q
         projection.tileMercatorCoords.begin(), projection.tileMercatorCoords.end(), queryContext.tile_mercator_coords);
     std::copy(projection.mainMatrix.begin(), projection.mainMatrix.end(), queryContext.projection_matrix);
     std::copy(projection.clippingPlane.begin(), projection.clippingPlane.end(), queryContext.clipping_plane);
-    const double latitudeScale = transformState.isGlobeRendering()
-                                     ? std::cos(util::deg2rad(transformState.getLatLng().latitude()))
-                                     : 1.0;
     queryContext.pixels_to_sphere_radians = LayerTweaker::globeExtrudeScale(
-        UnwrappedTileID(0, 0, 0), static_cast<float>(transformState.getZoom()), latitudeScale);
+        UnwrappedTileID(0, 0, 0),
+        static_cast<float>(transformState.getZoom()),
+        transformState.getProjection().circleRadiusCorrection(transformState));
     return registration->queryFeature(
                &pluginFeature.value, query.data(), query.size(), &queryContext, properties.data(), properties.size()) !=
            0;

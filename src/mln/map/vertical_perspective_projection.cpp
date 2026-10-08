@@ -521,11 +521,13 @@ ProjectedTilePoint VerticalPerspectiveProjection::drawnTilePoint(const Projectio
 }
 
 double VerticalPerspectiveProjection::circleRadiusCorrection(const TransformState& state) const {
-    return std::cos(util::deg2rad(state.getLatLng().latitude()));
+    return util::interpolate(
+        1.0, std::cos(util::deg2rad(state.getLatLng().latitude())), state.getProjectionTransition());
 }
 
 double VerticalPerspectiveProjection::pixelScale(const TransformState& state) const {
-    return 1.0 / std::cos(util::deg2rad(state.getLatLng().latitude()));
+    return util::interpolate(
+        1.0, 1.0 / std::cos(util::deg2rad(state.getLatLng().latitude())), state.getProjectionTransition());
 }
 
 double VerticalPerspectiveProjection::pitchedTextCorrection(const TransformState& state,
@@ -535,7 +537,9 @@ double VerticalPerspectiveProjection::pitchedTextCorrection(const TransformState
     const double mercatorY = tileAnchor.y / util::EXTENT * scale + tileID.canonical.y * scale;
     const double latitude = 2.0 * std::atan(std::exp(std::numbers::pi - (mercatorY * std::numbers::pi * 2.0))) -
                             std::numbers::pi * 0.5;
-    return circleRadiusCorrection(state) / std::cos(latitude);
+    return util::interpolate(1.0,
+                             std::cos(util::deg2rad(state.getLatLng().latitude())) / std::cos(latitude),
+                             state.getProjectionTransition());
 }
 
 } // namespace mln
