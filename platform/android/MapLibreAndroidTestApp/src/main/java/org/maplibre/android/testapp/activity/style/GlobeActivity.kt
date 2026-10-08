@@ -17,6 +17,7 @@ class GlobeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMapSimpleBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.mapView.onCreate(savedInstanceState)
         // # --8<-- [start:setup]
         binding.mapView.getMapAsync { map ->
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraTarget, cameraZoom))
