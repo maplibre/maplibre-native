@@ -1959,3 +1959,12 @@ TEST(Transform, GlobeCenterLongitudeStaysContinuous) {
     transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
     EXPECT_NEAR(-179, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
 }
+
+// The camera the platforms read carries the wrapped center, whichever copy of it the globe keeps.
+TEST(Transform, GlobeCameraCenterIsWrapped) {
+    Transform transform;
+    setUpGlobe(transform, {0, 179}, 1);
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -179}));
+    ASSERT_NEAR(181, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    EXPECT_NEAR(-179, transform.getCameraOptions(std::nullopt).center->longitude(), 1e-9);
+}
