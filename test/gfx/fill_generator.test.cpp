@@ -3,6 +3,9 @@
 #include <mln/gfx/fill_generator.hpp>
 #include <mln/util/constants.hpp>
 
+#include <array>
+#include <tuple>
+
 using namespace mln;
 
 namespace {
@@ -50,4 +53,38 @@ TEST(FillGenerator, ZoomZeroOutlineStaysInsideTheTile) {
         // Only the zoom 0 tile wraps onto itself; every other zoom keeps the outline of its buffer.
         EXPECT_EQ(zoom != 0, anyOutlineVertexOutsideTileX(lineVertices)) << "zoom " << int(zoom);
     }
+}
+
+// MLT tiles carry triangles made for the flat tile: the globe subdivides the polygon instead, outline included,
+// exactly as it does a polygon without them, while Mercator keeps the tile's own triangles.
+TEST(FillGenerator, GlobeSubdividesPretessellatedPolygons) {
+    static const std::array<uint32_t, 6> triangles = {0, 1, 2, 0, 2, 3};
+    const auto generate = [](const GeometryCollection& geometry, uint32_t granularity) {
+        gfx::VertexVector<FillLayoutVertex> fillVertices;
+        gfx::IndexVector<gfx::Triangles> fillIndexes;
+        SegmentVector fillSegments;
+        gfx::VertexVector<LineLayoutVertex> lineVertices;
+        gfx::IndexVector<gfx::Triangles> lineIndexes;
+        SegmentVector lineSegments;
+        gfx::IndexVector<gfx::Lines> basicLineIndexes;
+        SegmentVector basicLineSegments;
+        gfx::generateFillAndOutineBuffers(geometry,
+                                          fillVertices,
+                                          fillIndexes,
+                                          fillSegments,
+                                          lineVertices,
+                                          lineIndexes,
+                                          lineSegments,
+                                          basicLineIndexes,
+                                          basicLineSegments,
+                                          CanonicalTileID(1, 0, 0),
+                                          granularity);
+        return std::tuple{fillVertices.elements(), fillIndexes.elements(), lineVertices.elements()};
+    };
+    auto pretessellated = square(1000, 1000, 7000, 7000);
+    pretessellated.setTriangles(nullptr, triangles);
+    EXPECT_EQ(generate(square(1000, 1000, 7000, 7000), 8), generate(pretessellated, 8));
+    const auto [vertices, indices, outline] = generate(pretessellated, 1);
+    EXPECT_EQ(5u, vertices);
+    EXPECT_EQ(triangles.size(), indices);
 }
