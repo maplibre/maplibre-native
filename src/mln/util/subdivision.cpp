@@ -404,20 +404,6 @@ SubdivisionResult subdividePolygon(const GeometryCollection& polygon,
     return Subdivider(granularity, canonical).subdivide(polygon, generateOutlineLines);
 }
 
-SubdivisionResult subdividePolygonWithinLimit(const GeometryCollection& polygon,
-                                              const CanonicalTileID& canonical,
-                                              uint32_t granularity,
-                                              bool generateOutlineLines,
-                                              std::size_t maxVertices) {
-    while (true) {
-        SubdivisionResult result = subdividePolygon(polygon, canonical, granularity, generateOutlineLines);
-        if (result.vertices.size() / 2 <= maxVertices || granularity < 2) {
-            return result;
-        }
-        granularity /= 2;
-    }
-}
-
 GeometryCoordinates subdivideVertexLine(const GeometryCoordinates& line, uint32_t granularity, bool isRing) {
     if (line.size() < 2) {
         return {};

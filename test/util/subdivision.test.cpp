@@ -169,22 +169,51 @@ std::unique_ptr<FillExtrusionBucket> extrudeOnTheGlobe(const GeometryCollection&
     return bucket;
 }
 
-// The granularity the roof was subdivided at, found from its vertices, which come last; 0 when there is none.
+// A ring with a fine zigzag along two of its sides: about 9,600 vertices on a tile, whatever the granularity.
+GeometryCollection fineZigzag() {
+    GeometryCoordinates ring;
+    for (int16_t x = 0; x < EXTENT; ++x) {
+        ring.emplace_back(x, x % 2 == 0 ? 0 : 2);
+    }
+    for (int16_t y = 0; y < EXTENT; y += 6) {
+        ring.emplace_back(y % 12 == 0 ? EXTENT : EXTENT - 2, y);
+    }
+    ring.emplace_back(EXTENT, EXTENT);
+    ring.emplace_back(0, EXTENT);
+    ring.emplace_back(0, 0);
+    return {ring};
+}
+
+// The granularity the roof was subdivided at, found from the triangles drawn last; 0 when there is none.
 uint32_t roofGranularity(const FillExtrusionBucket& bucket,
                          const GeometryCollection& polygon,
                          const CanonicalTileID& tile) {
+    std::vector<std::array<int16_t, 6>> drawn;
+    for (const auto& segment : bucket.triangleSegments) {
+        for (std::size_t i = segment.indexOffset; i + 3 <= segment.indexOffset + segment.indexLength; i += 3) {
+            std::array<int16_t, 6> triangle{};
+            for (std::size_t k = 0; k < 3; ++k) {
+                const auto& position = bucket.vertices.at(segment.vertexOffset + bucket.triangles.at(i + k)).a1;
+                triangle[k * 2] = position[0];
+                triangle[k * 2 + 1] = position[1];
+            }
+            drawn.push_back(triangle);
+        }
+    }
     for (uint32_t granularity = SubdivisionGranularitySetting::globe().fill.getGranularityForZoomLevel(tile.z);
          granularity >= 1;
          granularity /= 2) {
-        const auto roof = subdividePolygon(polygon, tile, granularity, false).vertices;
-        const std::size_t count = roof.size() / 2;
-        if (count > bucket.vertices.elements()) {
+        const auto roof = subdividePolygon(polygon, tile, granularity, false);
+        const std::size_t count = roof.triangleIndices.size() / 3;
+        if (count > drawn.size()) {
             continue;
         }
         bool matches = true;
-        for (std::size_t i = 0; i < count && matches; ++i) {
-            const auto& position = bucket.vertices.at(bucket.vertices.elements() - count + i).a1;
-            matches = position[0] == roof[i * 2] && position[1] == roof[i * 2 + 1];
+        for (std::size_t i = 0; i < count * 3 && matches; ++i) {
+            const auto& triangle = drawn[drawn.size() - count + i / 3];
+            const uint32_t index = roof.triangleIndices[i];
+            matches = triangle[(i % 3) * 2] == roof.vertices[index * 2] &&
+                      triangle[(i % 3) * 2 + 1] == roof.vertices[index * 2 + 1];
         }
         if (matches) {
             return granularity;
@@ -317,45 +346,6 @@ TEST(Subdivision, WorldPolygonWithBufferIsSound) {
     }
 }
 
-TEST(Subdivision, PolygonBeyondTheIndexLimitCoarsens) {
-    // A comb of 400 teeth hanging from a thin bar: 800 vertical edges each crossing 127 cell rows need more vertices
-    // than a 16-bit index space holds; the fallback halves the granularity until the polygon fits rather than
-    // dropping it.
-    GeometryCoordinates ring;
-    constexpr int16_t teeth = 400;
-    constexpr int16_t step = EXTENT / (teeth * 2);
-    constexpr int16_t bar = EXTENT - step;
-    for (int16_t i = 0; i < teeth; ++i) {
-        const auto x0 = static_cast<int16_t>(i * 2 * step);
-        const auto x1 = static_cast<int16_t>(x0 + step);
-        ring.emplace_back(x0, bar);
-        ring.emplace_back(x0, 0);
-        ring.emplace_back(x1, 0);
-        ring.emplace_back(x1, bar);
-    }
-    ring.emplace_back(EXTENT, bar);
-    ring.emplace_back(EXTENT, EXTENT);
-    ring.emplace_back(0, EXTENT);
-    ring.emplace_back(0, bar);
-    const GeometryCollection polygon{ring};
-    const CanonicalTileID tile(3, 4, 4);
-    constexpr std::size_t limit = std::numeric_limits<uint16_t>::max();
-
-    const auto full = subdividePolygon(polygon, tile, 128, false);
-    EXPECT_GT(full.vertices.size() / 2, limit);
-
-    // 800 edges crossing the cell rows: 128 and 64 both overflow, 32 is the first granularity that fits.
-    EXPECT_GT(subdividePolygon(polygon, tile, 64, false).vertices.size() / 2, limit);
-    const auto coarse = subdividePolygon(polygon, tile, 32, false);
-    EXPECT_LE(coarse.vertices.size() / 2, limit);
-
-    const auto fitted = subdividePolygonWithinLimit(polygon, tile, 128, false, limit);
-    EXPECT_EQ(coarse.vertices, fitted.vertices);
-    EXPECT_EQ(coarse.triangleIndices, fitted.triangleIndices);
-    EXPECT_EQ(coarse.lineIndexLists, fitted.lineIndexLists);
-    // The comb is about the vertex count; earcut's triangulation of it is not what is under test here.
-}
-
 TEST(Subdivision, FillExtrusionRoofCountsItsVerticesOnce) {
     // A tile-sized roof at zoom 0 has 16,899 vertices: too many to count five times over, few enough to fit once.
     const CanonicalTileID tile(0, 0, 0);
@@ -364,23 +354,24 @@ TEST(Subdivision, FillExtrusionRoofCountsItsVerticesOnce) {
 }
 
 TEST(Subdivision, FillExtrusionRoofBesideLongWallsTakesItsOwnSegment) {
-    // A fine zigzag makes a ring of 9,644 vertices and a roof of 59,160 at the zoom's granularity, too many to share a
+    // The zigzag makes a ring of 9,644 vertices and a roof of 59,160 at the zoom's granularity, too many to share a
     // segment with the walls but few enough for one of their own.
-    GeometryCoordinates ring;
-    for (int16_t x = 0; x < EXTENT; ++x) {
-        ring.emplace_back(x, x % 2 == 0 ? 0 : 2);
-    }
-    for (int16_t y = 0; y < EXTENT; y += 6) {
-        ring.emplace_back(y % 12 == 0 ? EXTENT : EXTENT - 2, y);
-    }
-    ring.emplace_back(EXTENT, EXTENT);
-    ring.emplace_back(0, EXTENT);
-    ring.emplace_back(0, 0);
-    const GeometryCollection polygon{ring};
+    const GeometryCollection polygon = fineZigzag();
     const CanonicalTileID tile(2, 1, 1);
     const auto bucket = extrudeOnTheGlobe(polygon, tile);
     EXPECT_EQ(2u, bucket->triangleSegments.size());
     EXPECT_EQ(32u, roofGranularity(*bucket, polygon, tile));
+}
+
+TEST(Subdivision, FillExtrusionRoofBeyondTheIndexLimitKeepsItsGranularity) {
+    // At zoom 1 the zigzag's roof needs more vertices than a 16-bit index space holds, so it is spread over several
+    // segments, as GL JS does, rather than coarsened.
+    const GeometryCollection polygon = fineZigzag();
+    const CanonicalTileID tile(1, 0, 0);
+    EXPECT_GT(subdividePolygon(polygon, tile, 64, false).vertices.size() / 2, maxSegmentVertices);
+    const auto bucket = extrudeOnTheGlobe(polygon, tile);
+    EXPECT_GE(bucket->triangleSegments.size(), 2u);
+    EXPECT_EQ(64u, roofGranularity(*bucket, polygon, tile));
 }
 
 TEST(TileMesh, QuadAndGrid) {

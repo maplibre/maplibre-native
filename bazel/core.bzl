@@ -149,6 +149,7 @@ MLN_CORE_SOURCE = [
     "src/mln/gfx/context.cpp",
     "src/mln/gfx/cull_face_mode.hpp",
     "src/mln/gfx/fill_generator.cpp",
+    "src/mln/gfx/fill_large_mesh_arrays.hpp",
     "src/mln/gfx/index_buffer.hpp",
     "src/mln/gfx/index_vector.hpp",
     "src/mln/gfx/offscreen_texture.hpp",

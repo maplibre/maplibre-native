@@ -1,4 +1,5 @@
 #include <mln/gfx/fill_generator.hpp>
+#include <mln/gfx/fill_large_mesh_arrays.hpp>
 #include <mln/gfx/polyline_generator.hpp>
 #include <mln/util/constants.hpp>
 #include <mln/util/subdivision.hpp>
@@ -146,34 +147,16 @@ void addSubdividedPolygon(const util::SubdivisionResult& subdivided,
                           SegmentVector& fillSegments,
                           gfx::IndexVector<gfx::Lines>& lineIndexes,
                           SegmentVector& lineSegments) {
-    const std::size_t totalVertices = subdivided.vertices.size() / 2;
-    if (totalVertices > maxSegmentVertices) {
-        throw GeometryTooLongException();
-    }
-    const std::size_t startVertices = fillVertices.elements();
-    for (std::size_t i = 0; i < totalVertices; i++) {
-        fillVertices.emplace_back(
-            FillBucket::layoutVertex({subdivided.vertices[i * 2], subdivided.vertices[i * 2 + 1]}));
-    }
-    addFillIndices(fillSegments, fillIndexes, subdivided.triangleIndices, startVertices, totalVertices);
-
-    for (const auto& line : subdivided.lineIndexLists) {
-        if (line.empty()) {
-            continue;
-        }
-        if (lineSegments.empty() || lineSegments.back().vertexLength + totalVertices > maxSegmentVertices) {
-            lineSegments.emplace_back(startVertices, lineIndexes.elements());
-        }
-        auto& lineSegment = lineSegments.back();
-        const auto base = static_cast<uint16_t>(lineSegment.vertexLength);
-        for (std::size_t i = 0; i + 1 < line.size(); i += 2) {
-            lineIndexes.emplace_back(static_cast<uint16_t>(base + line[i]), static_cast<uint16_t>(base + line[i + 1]));
-        }
-        lineSegment.indexLength += line.size();
-    }
-    if (!lineSegments.empty()) {
-        lineSegments.back().vertexLength += totalVertices;
-    }
+    fillLargeMeshArrays(
+        fillVertices,
+        [](int16_t x, int16_t y) { return FillBucket::layoutVertex({x, y}); },
+        fillSegments,
+        fillIndexes,
+        subdivided.vertices,
+        subdivided.triangleIndices,
+        &lineSegments,
+        &lineIndexes,
+        &subdivided.lineIndexLists);
 }
 
 } // namespace
@@ -211,11 +194,10 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         limitHoles(polygon, 500);
 
         if (subdivisionGranularity >= 2) {
-            addSubdividedPolygon(util::subdividePolygonWithinLimit(polygon,
-                                                                   canonical,
-                                                                   subdivisionGranularity,
-                                                                   /*generateOutlineLines=*/true,
-                                                                   maxSegmentVertices),
+            addSubdividedPolygon(util::subdividePolygon(polygon,
+                                                        canonical,
+                                                        subdivisionGranularity,
+                                                        /*generateOutlineLines=*/true),
                                  vertices,
                                  fillIndexes,
                                  fillSegments,
@@ -324,11 +306,10 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                 canonical,
                                 lineOptions);
             }
-            addSubdividedPolygon(util::subdividePolygonWithinLimit(polygon,
-                                                                   canonical,
-                                                                   subdivisionGranularity,
-                                                                   /*generateOutlineLines=*/true,
-                                                                   maxSegmentVertices),
+            addSubdividedPolygon(util::subdividePolygon(polygon,
+                                                        canonical,
+                                                        subdivisionGranularity,
+                                                        /*generateOutlineLines=*/true),
                                  fillVertices,
                                  fillIndexes,
                                  fillSegments,

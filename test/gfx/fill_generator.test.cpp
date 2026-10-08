@@ -2,9 +2,11 @@
 
 #include <mln/gfx/fill_generator.hpp>
 #include <mln/util/constants.hpp>
+#include <mln/util/subdivision.hpp>
 
 #include <array>
 #include <tuple>
+#include <vector>
 
 using namespace mln;
 
@@ -12,6 +14,70 @@ namespace {
 
 GeometryCollection square(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
     return {{{x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}, {x0, y0}}};
+}
+
+using Triangle = std::array<int16_t, 6>;
+using Line = std::array<int16_t, 4>;
+
+// The triangles and lines a draw of every segment fetches, in order.
+std::vector<Triangle> drawnTriangles(const gfx::VertexVector<FillLayoutVertex>& vertices,
+                                     const gfx::IndexVector<gfx::Triangles>& indexes,
+                                     const SegmentVector& segments) {
+    std::vector<Triangle> triangles;
+    for (const auto& segment : segments) {
+        EXPECT_LE(segment.vertexLength, maxSegmentVertices);
+        for (std::size_t i = segment.indexOffset; i + 3 <= segment.indexOffset + segment.indexLength; i += 3) {
+            Triangle triangle{};
+            for (std::size_t k = 0; k < 3; ++k) {
+                const auto& position = vertices.at(segment.vertexOffset + indexes.at(i + k)).a1;
+                triangle[k * 2] = position[0];
+                triangle[k * 2 + 1] = position[1];
+            }
+            triangles.push_back(triangle);
+        }
+    }
+    return triangles;
+}
+
+std::vector<Line> drawnLines(const gfx::VertexVector<FillLayoutVertex>& vertices,
+                             const gfx::IndexVector<gfx::Lines>& indexes,
+                             const SegmentVector& segments) {
+    std::vector<Line> lines;
+    for (const auto& segment : segments) {
+        EXPECT_LE(segment.vertexLength, maxSegmentVertices);
+        for (std::size_t i = segment.indexOffset; i + 2 <= segment.indexOffset + segment.indexLength; i += 2) {
+            const auto& a = vertices.at(segment.vertexOffset + indexes.at(i)).a1;
+            const auto& b = vertices.at(segment.vertexOffset + indexes.at(i + 1)).a1;
+            lines.push_back({a[0], a[1], b[0], b[1]});
+        }
+    }
+    return lines;
+}
+
+std::vector<Triangle> meshTriangles(const util::SubdivisionResult& mesh) {
+    std::vector<Triangle> triangles;
+    for (std::size_t i = 0; i + 3 <= mesh.triangleIndices.size(); i += 3) {
+        Triangle triangle{};
+        for (std::size_t k = 0; k < 3; ++k) {
+            triangle[k * 2] = mesh.vertices[mesh.triangleIndices[i + k] * 2];
+            triangle[k * 2 + 1] = mesh.vertices[mesh.triangleIndices[i + k] * 2 + 1];
+        }
+        triangles.push_back(triangle);
+    }
+    return triangles;
+}
+
+std::vector<Line> meshLines(const util::SubdivisionResult& mesh) {
+    std::vector<Line> lines;
+    for (const auto& list : mesh.lineIndexLists) {
+        for (std::size_t i = 0; i + 2 <= list.size(); i += 2) {
+            lines.push_back({mesh.vertices[list[i] * 2],
+                             mesh.vertices[list[i] * 2 + 1],
+                             mesh.vertices[list[i + 1] * 2],
+                             mesh.vertices[list[i + 1] * 2 + 1]});
+        }
+    }
+    return lines;
 }
 
 // The line vertex packs the tile X doubled, with the round-join bit in the low bit.
@@ -87,4 +153,60 @@ TEST(FillGenerator, GlobeSubdividesPretessellatedPolygons) {
     const auto [vertices, indices, outline] = generate(pretessellated, 1);
     EXPECT_EQ(5u, vertices);
     EXPECT_EQ(triangles.size(), indices);
+}
+
+TEST(FillGenerator, SubdividedPolygonBeyondTheIndexLimitKeepsItsGranularity) {
+    // A comb of 400 teeth hanging from a thin bar: 800 vertical edges each crossing 127 cell rows need more vertices
+    // than a 16-bit index space holds, so the fill spreads them over several segments, as GL JS does, rather than
+    // coarsening them.
+    GeometryCoordinates ring;
+    constexpr int16_t teeth = 400;
+    constexpr int16_t step = util::EXTENT / (teeth * 2);
+    constexpr int16_t bar = util::EXTENT - step;
+    for (int16_t i = 0; i < teeth; ++i) {
+        const auto x0 = static_cast<int16_t>(i * 2 * step);
+        const auto x1 = static_cast<int16_t>(x0 + step);
+        ring.emplace_back(x0, bar);
+        ring.emplace_back(x0, 0);
+        ring.emplace_back(x1, 0);
+        ring.emplace_back(x1, bar);
+    }
+    ring.emplace_back(util::EXTENT, bar);
+    ring.emplace_back(util::EXTENT, util::EXTENT);
+    ring.emplace_back(0, util::EXTENT);
+    ring.emplace_back(0, bar);
+    const GeometryCollection polygon{ring};
+    const CanonicalTileID tile(3, 4, 4);
+
+    gfx::VertexVector<FillLayoutVertex> fillVertices;
+    gfx::IndexVector<gfx::Triangles> fillIndexes;
+    SegmentVector fillSegments;
+    gfx::VertexVector<LineLayoutVertex> lineVertices;
+    gfx::IndexVector<gfx::Triangles> lineIndexes;
+    SegmentVector lineSegments;
+    gfx::IndexVector<gfx::Lines> outlineIndexes;
+    SegmentVector outlineSegments;
+    gfx::generateFillAndOutineBuffers(polygon,
+                                      fillVertices,
+                                      fillIndexes,
+                                      fillSegments,
+                                      lineVertices,
+                                      lineIndexes,
+                                      lineSegments,
+                                      outlineIndexes,
+                                      outlineSegments,
+                                      tile,
+                                      128);
+
+    const auto full = util::subdividePolygon(polygon, tile, 128, true);
+    EXPECT_GT(full.vertices.size() / 2, maxSegmentVertices);
+    EXPECT_GT(fillSegments.size(), 1u);
+    const auto expectedTriangles = meshTriangles(full);
+    const auto triangles = drawnTriangles(fillVertices, fillIndexes, fillSegments);
+    ASSERT_EQ(expectedTriangles.size(), triangles.size());
+    EXPECT_TRUE(expectedTriangles == triangles);
+    const auto expectedLines = meshLines(full);
+    const auto lines = drawnLines(fillVertices, outlineIndexes, outlineSegments);
+    ASSERT_EQ(expectedLines.size(), lines.size());
+    EXPECT_TRUE(expectedLines == lines);
 }

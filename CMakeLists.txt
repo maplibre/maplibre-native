@@ -527,6 +527,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/polyline_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/fill_generator.cpp
+    ${PROJECT_SOURCE_DIR}/src/mln/gfx/fill_large_mesh_arrays.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/render_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mln/gfx/rendering_stats.cpp
