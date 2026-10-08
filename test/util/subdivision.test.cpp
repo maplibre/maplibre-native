@@ -299,6 +299,26 @@ TEST(Subdivision, PoleTilesGetPoleQuads) {
     expectSoundMesh(middle);
 }
 
+TEST(Subdivision, PoleCapsReachThePoleWhereTheInputTouchedIt) {
+    // The polygon's corner sits on the north pole row, so it is moved off it before the caps are built; the cap at
+    // that corner's x still needs a vertex on the pole itself.
+    const GeometryCollection polygon{
+        {{0, NORTH_POLE_Y}, {EXTENT, 0}, {EXTENT, EXTENT}, {0, EXTENT}, {0, NORTH_POLE_Y}}};
+    const auto result = subdividePolygon(polygon, CanonicalTileID(1, 0, 0), 64);
+    bool capReachesThePole = false;
+    for (std::size_t i = 0; i + 2 < result.triangleIndices.size(); i += 3) {
+        bool corner = false;
+        bool pole = false;
+        for (std::size_t k = 0; k < 3; ++k) {
+            const uint32_t index = result.triangleIndices[i + k];
+            corner = corner || (result.vertices[index * 2] == 0 && result.vertices[index * 2 + 1] == 0);
+            pole = pole || (result.vertices[index * 2] == 0 && result.vertices[index * 2 + 1] == NORTH_POLE_Y);
+        }
+        capReachesThePole = capReachesThePole || (corner && pole);
+    }
+    EXPECT_TRUE(capReachesThePole);
+}
+
 TEST(Subdivision, ZoomZeroDropsGeometryOutsideTheTile) {
     const auto wide = square(-2000, 1000, EXTENT + 2000, 2000);
     const auto result = subdividePolygon(wide, CanonicalTileID(0, 0, 0), 8);

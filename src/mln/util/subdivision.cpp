@@ -302,14 +302,19 @@ private:
         return lines;
     }
 
+    // Moves any vertex on a pole row off it, so the caps get pole vertices of their own. The dictionary moves with the
+    // vertex, or a cap would find the moved one again under its old position.
     void ensureNoPoleVertices() {
         for (std::size_t i = 1; i < vertices.size(); i += 2) {
-            if (vertices[i] == NORTH_POLE_Y) {
-                vertices[i] = NORTH_POLE_Y + 1;
+            const int16_t y = vertices[i];
+            if (y != NORTH_POLE_Y && y != SOUTH_POLE_Y) {
+                continue;
             }
-            if (vertices[i] == SOUTH_POLE_Y) {
-                vertices[i] = SOUTH_POLE_Y - 1;
-            }
+            const int16_t x = vertices[i - 1];
+            const int16_t moved = y == NORTH_POLE_Y ? NORTH_POLE_Y + 1 : SOUTH_POLE_Y - 1;
+            vertices[i] = moved;
+            dictionary.erase(key(x, y));
+            dictionary.try_emplace(key(x, moved), static_cast<uint32_t>(i / 2));
         }
     }
 
