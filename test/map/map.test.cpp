@@ -2211,18 +2211,21 @@ TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
 TEST(Map, GlobeBoundsForCamera) {
     MapTest<> test;
     test.map.setSize({512, 512});
+    test.map.setBounds(BoundOptions().withMaxPitch(85));
     test.map.getStyle().loadJSON(
         R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
     struct Case {
         double lng, lat, zoom, bearing, pitch, west, south, east, north;
     };
-    const std::array<Case, 6> cases{{
+    const std::array<Case, 7> cases{{
         {0, 0, 1, 0, 0, -79.91796042106967, -79.91796042106967, 79.91796042106967, 79.91796042106967},
         {30, 20, 1.5, 30, 30, -56.805975633856576, -56.895025199618885, 94.30772744796946, 73.43306521431964},
         {0, 75, 1, 0, 0, -180, 32.70922481421371, 180, 90},
         {0, 75, 2.5, 0, 0, -54.89062256787065, 64.72883925258952, 54.89062256787065, 83.47499358170649},
         {10, 10, 3, 0, 0, -25.90264541368299, -19.587774363137328, 45.90264541369834, 36.43783991311318},
         {170, -10, 2, 45, 40, 90.75153870575207, -71.2057256347772, 267.1780088196146, 42.32122600031687},
+        // Looking away from the north pole, which is behind the camera, with the top of the view in the sky.
+        {0, 85, 6, 180, 85, -7.12413211181115, 82.92590257945324, 7.12413211181115, 85.57800114051855},
     }};
     for (const Case& c : cases) {
         const auto camera =
@@ -2235,6 +2238,19 @@ TEST(Map, GlobeBoundsForCamera) {
             EXPECT_NEAR(c.north, bounds.north(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
         }
     }
+}
+
+// A pixel in the sky snaps to the horizon ahead, as in GL JS, not to the planet behind the camera.
+TEST(Map, GlobeSkyPixelSnapsToTheHorizonAhead) {
+    MapTest<> test;
+    test.map.setSize({512, 512});
+    test.map.setBounds(BoundOptions().withMaxPitch(85));
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
+    test.map.jumpTo(CameraOptions().withCenter(LatLng{84.5, 0}).withZoom(5).withBearing(180).withPitch(84));
+    const LatLng top = test.map.latLngForPixel({256, 0});
+    EXPECT_NEAR(81.42454063588696, top.latitude(), 1e-6);
+    EXPECT_NEAR(0, top.longitude(), 1e-6);
 }
 
 // A minimum set above the current maximum still lifts the zoom to it, which setBounds always did on Mercator.
