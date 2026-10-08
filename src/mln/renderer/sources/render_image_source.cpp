@@ -226,6 +226,8 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     tileIds.push_back(tileCover[0]);
 
     bool hasVisibleTile = false;
+    // A wrap does not move a tile on the globe, so the image draws once there, in the world copy the cover chose.
+    const bool globe = transformState.isGlobeRendering();
     // Add additional wrapped tile ids if necessary
     Range<uint8_t> zoomRange(0, zoom);
     auto idealTiles = util::tileCover({.transformState = transformState,
@@ -241,11 +243,17 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
                 tile.canonical.isChildOf(coveringTile.canonical)) {
                 hasVisibleTile = true;
                 const UnwrappedTileID wrappedTileID(tile.wrap, tileCover[0].canonical);
-                if (tile.wrap != 0 && std::find(tileIds.cbegin(), tileIds.cend(), wrappedTileID) == tileIds.cend()) {
+                if (globe) {
+                    tileIds = {wrappedTileID};
+                } else if (tile.wrap != 0 &&
+                           std::find(tileIds.cbegin(), tileIds.cend(), wrappedTileID) == tileIds.cend()) {
                     tileIds.push_back(wrappedTileID);
                 }
                 break;
             }
+        }
+        if (globe && hasVisibleTile) {
+            break;
         }
     }
 
@@ -257,7 +265,7 @@ void RenderImageSource::update(Immutable<style::Source::Impl> baseImpl_,
     // Calculate Geometry Coordinates based on tile cover at ideal zoom
     GeometryCoordinates geomCoords;
     for (auto tileCoords : tileCoordinates) {
-        auto gc = TileCoordinate::toGeometryCoordinate(tileIds[0], tileCoords);
+        auto gc = TileCoordinate::toGeometryCoordinate(tileCover[0], tileCoords);
         geomCoords.push_back(gc);
     }
     if (!bucket) {
