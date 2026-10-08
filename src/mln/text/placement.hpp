@@ -123,6 +123,8 @@ public:
     virtual ~Placement();
     virtual void placeLayers(const RenderLayerReferences&);
     void updateLayerBuckets(const RenderLayer&, const TransformState&, bool updateOpacities) const;
+    /// Lays out the positions of a layer drawn from buckets other layers place, after `updateLayerBuckets`.
+    void updateFollowerBuckets(const RenderLayer&, const TransformState&) const;
     virtual float symbolFadeChange(TimePoint now) const;
     virtual bool hasTransitions(TimePoint now) const;
     virtual bool transitionsEnabled() const;
@@ -170,8 +172,12 @@ protected:
         return true;
     }
 
-    // Returns `true` if bucket vertices were updated; returns `false` otherwise.
-    bool updateBucketDynamicAttributeData(SymbolBucket&, const TransformState&, const BucketPlacementData&) const;
+    // Returns `true` if bucket vertices were updated; returns `false` otherwise. With a layer ID, updates that layer's
+    // own positions, which it needs only at another translation than the leader's.
+    bool updateBucketDynamicAttributeData(SymbolBucket&,
+                                          const TransformState&,
+                                          const BucketPlacementData&,
+                                          const std::string* layerID = nullptr) const;
     void updateBucketOpacities(SymbolBucket&, const TransformState&, std::set<uint32_t>&) const;
     void markUsedJustification(SymbolBucket&,
                                style::TextVariableAnchorType,

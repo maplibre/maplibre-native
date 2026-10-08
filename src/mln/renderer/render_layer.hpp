@@ -161,6 +161,8 @@ public:
     virtual void prepare(const LayerPrepareParameters&);
 
     const LayerPlacementData& getPlacementData() const { return placementData; }
+    /// Buckets that another layer places and this layer draws, at its own translation.
+    const LayerPlacementData& getFollowerData() const { return followerData; }
 
     /// Latest evaluated properties.
     Immutable<style::LayerProperties> evaluatedProperties;
@@ -332,6 +334,7 @@ protected:
     RenderPass passes = RenderPass::None;
 
     LayerPlacementData placementData;
+    LayerPlacementData followerData;
 
     // will need to be overridden to handle their activation.
     LayerGroupBasePtr layerGroup;

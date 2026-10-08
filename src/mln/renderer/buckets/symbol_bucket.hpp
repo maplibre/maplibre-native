@@ -287,6 +287,11 @@ public:
                         const TransformState&,
                         const BucketPlacementData&,
                         std::set<uint32_t>&) override;
+    /// Lays out the positions a layer sharing this bucket draws at its own translation, from the leader's placement.
+    void updateLayerVertices(const Placement&,
+                             const TransformState&,
+                             const BucketPlacementData&,
+                             const std::string& layerID);
     bool hasTextData() const;
     bool hasIconData() const;
     bool hasSdfIconData() const;
@@ -383,6 +388,9 @@ public:
 
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
+    /// The tile-unit translations the leader's dynamic positions carry, which layers sharing the bucket compare.
+    Point<float> dynamicTextTranslation;
+    Point<float> dynamicIconTranslation;
     float sortedAngle = std::numeric_limits<float>::max();
 
     // Flags
@@ -423,6 +431,9 @@ public:
         ~Buffer() {
             sharedAttributeData->release();
             sharedDynamicAttributeData->release();
+            for (const auto& [layerID, data] : layerDynamicAttributeData) {
+                data->release();
+            }
             sharedOpacityAttributeData->release();
 #if MLN_USE_SYMBOL_INSTANCING
             sharedSortedInstances->release();
@@ -453,6 +464,13 @@ public:
         std::shared_ptr<DynamicAttributeVector> sharedDynamicAttributeData = std::make_shared<DynamicAttributeVector>();
         DynamicAttributeVector& dynamicAttributeData() { return *sharedDynamicAttributeData; }
         const DynamicAttributeVector& dynamicAttributeData() const { return *sharedDynamicAttributeData; }
+
+        /// Positions for each layer that shares the bucket at another translation than its leader's.
+        std::map<std::string, std::shared_ptr<DynamicAttributeVector>> layerDynamicAttributeData;
+        const std::shared_ptr<DynamicAttributeVector>& dynamicAttributeDataFor(const std::string& layerID) const {
+            const auto it = layerDynamicAttributeData.find(layerID);
+            return it == layerDynamicAttributeData.end() ? sharedDynamicAttributeData : it->second;
+        }
 
         std::shared_ptr<OpacityAttributeVector> sharedOpacityAttributeData = std::make_shared<OpacityAttributeVector>();
         OpacityAttributeVector& opacityAttributeData() { return *sharedOpacityAttributeData; }
