@@ -298,8 +298,10 @@ CameraOptions cameraForLatLngsOnGlobe(const std::vector<LatLng>& latLngs,
         return fit;
     }
 
+    // Solve with the padding the returned camera is shown with.
     Transform globe(transform.getState());
-    globe.jumpTo(CameraOptions().withCenter(fit.center).withZoom(fit.zoom).withPitch(0.0).withRoll(0.0));
+    globe.jumpTo(
+        CameraOptions().withCenter(fit.center).withZoom(fit.zoom).withPadding(padding).withPitch(0.0).withRoll(0.0));
     const TransformState& state = globe.getState();
     const mat4& matrix = state.getGlobeViewProjectionMatrix();
     const Size size = state.getSize();
