@@ -11,13 +11,31 @@ bool SymbolLayer::Impl::hasFormatSectionOverrides() const {
     return *hasFormatSectionOverrides_;
 }
 
+namespace {
+/// Line labels and variable anchors carry `*-translate` in the positions placement lays out for the whole bucket.
+bool laysOutTranslation(const SymbolLayoutProperties::Unevaluated& layout) {
+    const auto& placement = layout.get<SymbolPlacement>();
+    return !(placement.isConstant() && placement.asConstant() == SymbolPlacementType::Point) ||
+           !layout.get<TextVariableAnchor>().isUndefined() || !layout.get<TextVariableAnchorOffset>().isUndefined();
+}
+
+bool hasTranslationDifference(const SymbolPaintProperties::Transitionable& a,
+                              const SymbolPaintProperties::Transitionable& b) {
+    return a.get<TextTranslate>().value != b.get<TextTranslate>().value ||
+           a.get<TextTranslateAnchor>().value != b.get<TextTranslateAnchor>().value ||
+           a.get<IconTranslate>().value != b.get<IconTranslate>().value ||
+           a.get<IconTranslateAnchor>().value != b.get<IconTranslateAnchor>().value;
+}
+} // namespace
+
 bool SymbolLayer::Impl::hasLayoutDifference(const Layer::Impl& other) const {
     assert(other.getTypeInfo() == getTypeInfo());
     const auto& impl = static_cast<const style::SymbolLayer::Impl&>(other);
     return filter != impl.filter || visibility != impl.visibility || layout != impl.layout ||
            paint.hasDataDrivenPropertyDifference(impl.paint) ||
            (hasFormatSectionOverrides() &&
-            SymbolLayerPaintPropertyOverrides::hasPaintPropertyDifference(paint, impl.paint));
+            SymbolLayerPaintPropertyOverrides::hasPaintPropertyDifference(paint, impl.paint)) ||
+           (laysOutTranslation(layout) && hasTranslationDifference(paint, impl.paint));
 }
 
 void SymbolLayer::Impl::populateFontStack(std::set<FontStack>& fontStack) const {
