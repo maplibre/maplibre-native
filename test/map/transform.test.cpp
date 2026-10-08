@@ -2020,6 +2020,22 @@ TEST(Transform, LeavingTheGlobeConstrainsTheCamera) {
     EXPECT_NEAR(-150, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
 }
 
+// Bounds across the antimeridian keep a globe center past 180 degrees, which the globe hands over wrapped.
+TEST(Transform, GlobeBoundsAcrossTheAntimeridian) {
+    Transform transform;
+    setUpGlobe(transform, {0, 150}, 3);
+    transform.setLatLngBounds(LatLngBounds::hull({-10.0, 120.0}, {10.0, 240.0}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 175.0}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, -175.0}));
+    EXPECT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+
+    // A drag east across the antimeridian.
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 179.0}));
+    transform.moveBy({-100, 0});
+    EXPECT_GT(transform.getLatLng(LatLng::Unwrapped).longitude(), 180.0);
+    EXPECT_LT(transform.getLatLng(LatLng::Unwrapped).longitude(), 240.0);
+}
+
 // The camera the platforms read carries the wrapped center, whichever copy of it the globe keeps.
 TEST(Transform, GlobeCameraCenterIsWrapped) {
     Transform transform;
