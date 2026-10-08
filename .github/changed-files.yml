@@ -32,6 +32,7 @@ ios:
   - 'platform/ios/**'
   - 'platform/darwin/**'
   - '.github/workflows/ios-ci.yml'
+  - '.github/workflows/ios-release.yml'
   - 'bin/**'
   - 'expression-test/**'
   - 'include/**'

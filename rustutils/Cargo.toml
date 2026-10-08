@@ -7,14 +7,14 @@ description = "Core Rust utilities for MapLibre Native"
 edition = "2021"
 license = "BSD-2-Clause"
 repository = "https://github.com/maplibre/maplibre-native"
-rust-version = "1.78.0"
+rust-version = "1.88.0"
 
 [lib]
 crate-type = ["staticlib"]
 
 [dependencies]
 csscolorparser = "0.7.0"
-cxx = "1.0.157"
+cxx = "=1.0.202"
 
 [profile.release]
 lto = true
