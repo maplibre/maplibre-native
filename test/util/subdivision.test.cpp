@@ -363,9 +363,9 @@ TEST(Subdivision, FillExtrusionRoofCountsItsVerticesOnce) {
     EXPECT_EQ(128u, roofGranularity(*extrudeOnTheGlobe(polygon, tile), polygon, tile));
 }
 
-TEST(Subdivision, FillExtrusionRoofCoarsensToTheRoomItsWallsLeave) {
-    // A fine zigzag makes a ring of 9,644 vertices, whose walls leave the roof room for 17,319: its 14,371 vertices at
-    // granularity 4 fit, its 20,753 at 8 do not.
+TEST(Subdivision, FillExtrusionRoofBesideLongWallsTakesItsOwnSegment) {
+    // A fine zigzag makes a ring of 9,644 vertices and a roof of 59,160 at the zoom's granularity, too many to share a
+    // segment with the walls but few enough for one of their own.
     GeometryCoordinates ring;
     for (int16_t x = 0; x < EXTENT; ++x) {
         ring.emplace_back(x, x % 2 == 0 ? 0 : 2);
@@ -378,7 +378,9 @@ TEST(Subdivision, FillExtrusionRoofCoarsensToTheRoomItsWallsLeave) {
     ring.emplace_back(0, 0);
     const GeometryCollection polygon{ring};
     const CanonicalTileID tile(2, 1, 1);
-    EXPECT_EQ(4u, roofGranularity(*extrudeOnTheGlobe(polygon, tile), polygon, tile));
+    const auto bucket = extrudeOnTheGlobe(polygon, tile);
+    EXPECT_EQ(2u, bucket->triangleSegments.size());
+    EXPECT_EQ(32u, roofGranularity(*bucket, polygon, tile));
 }
 
 TEST(TileMesh, QuadAndGrid) {

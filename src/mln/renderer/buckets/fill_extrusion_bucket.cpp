@@ -98,8 +98,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
             polyVariant = roundPolygonCorners(polygon, roundedCornerDistance);
         }
 
-        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own, coarsened to the
-        // room the walls leave in a segment. Walls that leave the roof no room are drawn as on Mercator.
+        // On the globe the walls follow subdivided rings and the roof is a subdivided mesh of its own, which takes a
+        // segment of its own when it does not fit beside them. Walls too long for a segment are drawn as on Mercator.
         const uint32_t granularity = subdivisionGranularity.fill.getGranularityForZoomLevel(canonical.z);
         std::optional<util::SubdivisionResult> roof;
         if (granularity >= 2 && roundedCornerDistance <= 0) {
@@ -109,12 +109,10 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                 subdividedRings.push_back(util::subdivideVertexLine(ring, granularity, /*isRing=*/true));
                 ringVertices += subdividedRings.back().size();
             }
-            const std::size_t walls = wallVertexCount(ringVertices);
-            if (walls < maxSegmentVertices) {
-                const std::size_t room = maxSegmentVertices - walls;
+            if (wallVertexCount(ringVertices) <= maxSegmentVertices) {
                 auto subdivided = util::subdividePolygonWithinLimit(
-                    polygon, canonical, granularity, /*generateOutlineLines=*/false, room);
-                if (subdivided.vertices.size() / 2 <= room) {
+                    polygon, canonical, granularity, /*generateOutlineLines=*/false, maxSegmentVertices);
+                if (subdivided.vertices.size() / 2 <= maxSegmentVertices) {
                     polyVariant = std::move(subdividedRings);
                     roof = std::move(subdivided);
                 }
@@ -134,8 +132,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         if (totalVertices == 0) continue;
 
-        const std::size_t roofVertices = roof ? roof->vertices.size() / 2 : 0;
-        const std::size_t polygonVertices = wallVertexCount(totalVertices) + roofVertices;
+        const std::size_t wallVertices = wallVertexCount(totalVertices);
 
         std::vector<uint32_t> flatIndices;
         flatIndices.reserve(totalVertices);
@@ -143,7 +140,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         std::size_t startVertices = vertices.elements();
 
         if (triangleSegments.empty() ||
-            triangleSegments.back().vertexLength + polygonVertices > std::numeric_limits<uint16_t>::max()) {
+            triangleSegments.back().vertexLength + wallVertices > std::numeric_limits<uint16_t>::max()) {
             triangleSegments.emplace_back(startVertices, triangles.elements());
         }
 
@@ -151,7 +148,7 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
         auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
-        assert(triangleIndex + polygonVertices <= std::numeric_limits<uint16_t>::max());
+        assert(triangleIndex + wallVertices <= std::numeric_limits<uint16_t>::max());
 
         const auto processRingPoints =
             [&](const Point<double>& p1, const std::optional<Point<double>>& p2, std::size_t& edgeDistance) {
@@ -233,8 +230,24 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
         std::size_t nIndices = indices.size();
         assert(nIndices % 3 == 0);
 
+        for (std::size_t i = 0; i < nIndices; i += 3) {
+            // Counter-Clockwise winding order.
+            triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 2]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 1]]));
+        }
+
+        triangleSegment.vertexLength += totalVertices;
+        triangleSegment.indexLength += nIndices;
+
+        // The roof's triangles index only its own vertices.
+        const std::size_t roofVertices = roof ? roof->vertices.size() / 2 : 0;
         if (roof) {
-            const auto base = triangleIndex;
+            if (triangleSegments.back().vertexLength + roofVertices > std::numeric_limits<uint16_t>::max()) {
+                triangleSegments.emplace_back(vertices.elements(), triangles.elements());
+            }
+            auto& roofSegment = triangleSegments.back();
+            const auto base = static_cast<uint16_t>(roofSegment.vertexLength);
             for (std::size_t i = 0; i + 1 < roof->vertices.size(); i += 2) {
                 const Point<double> p{static_cast<double>(roof->vertices[i]),
                                       static_cast<double>(roof->vertices[i + 1])};
@@ -243,26 +256,16 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 #else
                 vertices.emplace_back(FillExtrusionBucket::layoutVertex(p, 0, 0, 1, 0));
 #endif
-                triangleIndex++;
             }
-            nIndices = roof->triangleIndices.size();
-            assert(nIndices % 3 == 0);
-            for (std::size_t i = 0; i + 2 < nIndices; i += 3) {
+            assert(roof->triangleIndices.size() % 3 == 0);
+            for (std::size_t i = 0; i + 2 < roof->triangleIndices.size(); i += 3) {
                 triangles.emplace_back(static_cast<uint16_t>(base + roof->triangleIndices[i]),
                                        static_cast<uint16_t>(base + roof->triangleIndices[i + 1]),
                                        static_cast<uint16_t>(base + roof->triangleIndices[i + 2]));
             }
-        } else {
-            for (std::size_t i = 0; i < nIndices; i += 3) {
-                // Counter-Clockwise winding order.
-                triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
-                                       static_cast<uint16_t>(flatIndices[indices[i + 2]]),
-                                       static_cast<uint16_t>(flatIndices[indices[i + 1]]));
-            }
+            roofSegment.vertexLength += roofVertices;
+            roofSegment.indexLength += roof->triangleIndices.size();
         }
-
-        triangleSegment.vertexLength += totalVertices + roofVertices;
-        triangleSegment.indexLength += nIndices;
 
         if (instanceSegments.empty()) {
             instanceSegments.emplace_back(RenderStaticData::fillExtrusionSegment());
