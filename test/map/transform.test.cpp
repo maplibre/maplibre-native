@@ -2004,6 +2004,22 @@ TEST(Transform, GlobeCenterLongitudeStaysContinuous) {
     EXPECT_NEAR(-179, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
 }
 
+// Leaving the globe applies Mercator's limits again: its lowest zoom for the view's height and a wrapped center.
+TEST(Transform, LeavingTheGlobeConstrainsTheCamera) {
+    Transform transform;
+    transform.resize({400, 800});
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 0}).withZoom(0.3));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, 120}));
+    transform.jumpTo(CameraOptions().withCenter(LatLng{0, -150}));
+    ASSERT_NEAR(210, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    ASSERT_NEAR(0.3, transform.getZoom(), 1e-9);
+
+    transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+    EXPECT_NEAR(std::log2(800.0 / 512.0), transform.getZoom(), 1e-9);
+    EXPECT_NEAR(-150, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+}
+
 // The camera the platforms read carries the wrapped center, whichever copy of it the globe keeps.
 TEST(Transform, GlobeCameraCenterIsWrapped) {
     Transform transform;
