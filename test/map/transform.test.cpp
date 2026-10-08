@@ -1582,6 +1582,28 @@ TEST(GlobeTransform, ZoomingOutAroundAnAnchorNearTheHorizonStaysContinuous) {
     }
 }
 
+// Near the limb the zoom around a point leans on GL JS's damped heuristic, which adds up step by step: an animated
+// zoom moves the center about as far as the same zoom in one jump.
+TEST(GlobeTransform, AnimatedZoomAroundAPointNearTheLimbMovesLikeAJump) {
+    const ScreenCoordinate anchor{256 + 159, 256};
+    Transform jumped;
+    setUpGlobeCamera(jumped, {0.0, 0.0}, 1.0);
+    jumped.jumpTo(CameraOptions().withZoom(2.0).withAnchor(anchor));
+    const double jumpMove = jumped.getLatLng().longitude();
+    ASSERT_GT(jumpMove, 1.0);
+
+    Transform animated;
+    setUpGlobeCamera(animated, {0.0, 0.0}, 1.0);
+    animated.easeTo(CameraOptions().withZoom(2.0).withAnchor(anchor), linearSecond());
+    for (int frame = 1; frame <= 10; ++frame) {
+        runTo(animated, frame / 10.0);
+    }
+    EXPECT_NEAR(2.0, animated.getZoom(), 1e-9);
+    const double animatedMove = animated.getLatLng().longitude();
+    EXPECT_GT(animatedMove, 0.75 * jumpMove);
+    EXPECT_LT(animatedMove, 1.25 * jumpMove);
+}
+
 TEST(GlobeTransform, PolesAreReachableAndZoomFollowsLatitude) {
     Transform transform;
     setUpGlobe(transform, {0.0, 0.0}, 0.0);
