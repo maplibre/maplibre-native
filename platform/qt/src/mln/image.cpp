@@ -48,5 +48,4 @@ PremultipliedImage decodeImage(const std::string& string) {
 
     return {{static_cast<uint32_t>(image.width()), static_cast<uint32_t>(image.height())}, std::move(img)};
 }
-
 } // namespace mln
