@@ -39,7 +39,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
   </details>
 - Export `MLNPluginStyleLayer` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
-- Export `MLNBackendResource` from the dynamic framework when using the Metal renderer ([#4732](https://github.com/maplibre/maplibre-native/pull/4732)).
+- Export `MLNBackendResource` from the dynamic framework when using the Metal renderer ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
 ## 6.31.0
 
