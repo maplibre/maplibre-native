@@ -120,6 +120,7 @@ void TransformState::setProjectionDefinition(const ProjectionDefinition& definit
     if (transition == projectionTransition) {
         return;
     }
+    const bool leavesGlobe = transition == 0 && projectionTransition > 0;
     if ((transition > 0) != (projectionTransition > 0)) {
         if (transition > 0) {
             projection = std::make_shared<VerticalPerspectiveProjection>();
@@ -129,6 +130,11 @@ void TransformState::setProjectionDefinition(const ProjectionDefinition& definit
     }
     projectionTransition = transition;
     requestMatricesUpdate = true;
+    // As GL JS's `migrateProjection` does: the globe allows lower zooms, latitudes past Mercator's and a center on
+    // another world copy, so Mercator's limits and its wrapped center apply again.
+    if (leavesGlobe && !size.isEmpty()) {
+        setLatLngZoom(getLatLng(LatLng::Wrapped), getZoom());
+    }
 }
 
 // MARK: - Matrix
