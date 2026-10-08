@@ -2059,6 +2059,29 @@ TEST(Transform, GlobeBoundsAcrossTheAntimeridian) {
 }
 
 // The camera the platforms read carries the wrapped center, whichever copy of it the globe keeps.
+// Bounds across the antimeridian keep the center in their own range, past 180 degrees: the camera reports it there,
+// so jumping back to the reported camera does not move the map, on either projection.
+TEST(Transform, CameraRoundTripsInsideBoundsAcrossTheAntimeridian) {
+    for (const bool globe : {false, true}) {
+        SCOPED_TRACE(globe ? "globe" : "mercator");
+        Transform transform;
+        transform.resize({800, 600});
+        if (globe) {
+            transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
+        }
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 180.0}).withZoom(5.0));
+        transform.setLatLngBounds(LatLngBounds::hull({-10.0, 170.0}, {10.0, 190.0}));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0.0, 185.0}));
+        ASSERT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+        transform.jumpTo(transform.getCameraOptions(std::nullopt));
+        EXPECT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+        if (globe) {
+            transform.setProjectionDefinition(ProjectionDefinition("mercator"));
+            EXPECT_NEAR(185.0, transform.getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+        }
+    }
+}
+
 TEST(Transform, GlobeCameraCenterIsWrapped) {
     Transform transform;
     setUpGlobe(transform, {0, 179}, 1);

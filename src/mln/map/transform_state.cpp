@@ -133,7 +133,7 @@ void TransformState::setProjectionDefinition(const ProjectionDefinition& definit
     // As GL JS's `migrateProjection` does: the globe allows lower zooms, latitudes past Mercator's and a center on
     // another world copy, so Mercator's limits and its wrapped center apply again.
     if (leavesGlobe && !size.isEmpty()) {
-        setLatLngZoom(getLatLng(LatLng::Wrapped), getZoom());
+        setLatLngZoom(getLatLng(bounds == LatLngBounds() ? LatLng::Wrapped : LatLng::Unwrapped), getZoom());
     }
 }
 
@@ -538,8 +538,9 @@ void TransformState::setViewportMode(ViewportMode val) {
 // MARK: - Camera options
 
 CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
+    // Bounds across the antimeridian keep the center in their range, past 180 degrees, where it has to stay.
     return CameraOptions()
-        .withCenter(getLatLng(LatLng::Wrapped))
+        .withCenter(getLatLng(bounds == LatLngBounds() ? LatLng::Wrapped : LatLng::Unwrapped))
         .withCenterAltitude(getCenterAltitude())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
