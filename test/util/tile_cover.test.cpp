@@ -847,8 +847,8 @@ TEST(TileCover, GlobeCoverFollowsTheCenterIntoOtherWorldCopies) {
     transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective"));
     transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20}).withZoom(6.0).withPitch(50.0));
     const auto home = util::tileCover({transform.getState()}, 6, Range<uint8_t>(0, 14));
-    for (double longitude = 140; longitude <= 740; longitude += 120) {
-        transform.jumpTo(CameraOptions().withCenter(LatLng{10, longitude}));
+    for (int step = 1; step <= 6; ++step) {
+        transform.jumpTo(CameraOptions().withCenter(LatLng{10, 20.0 + 120.0 * step}));
     }
     ASSERT_NEAR(740, transform.getState().getLatLng().longitude(), 1e-9);
     const auto spun = util::tileCover({transform.getState()}, 6, Range<uint8_t>(0, 14));
