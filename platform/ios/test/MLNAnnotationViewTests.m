@@ -489,6 +489,28 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, second);
 }
 
+- (void)testSelectionBehindTheGlobeOutlastsAResizeDuringTheTurn
+{
+    [self loadGlobeAtNullIsland];
+    _window = [[UIWindow alloc] initWithFrame:_mapView.bounds];
+    [_window addSubview:_mapView];
+    [_window makeKeyAndVisible];
+
+    MLNPointAnnotation *back = [[MLNPointAnnotation alloc] init];
+    back.coordinate = CLLocationCoordinate2DMake(70, 70);
+    [_mapView addAnnotation:back];
+
+    // A resize changes the camera at once without ending the turn: selected where the turn ends.
+    XCTestExpectation *finished = [self expectationWithDescription:@"selection finished"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:YES completionHandler:^{
+        [finished fulfill];
+    }];
+    _mapView.frame = CGRectMake(0, 0, 400, 300);
+    [_mapView layoutIfNeeded];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, back);
+}
+
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style
 {
     if (mapView == _mapView) {
