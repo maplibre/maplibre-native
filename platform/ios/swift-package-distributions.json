@@ -1,0 +1,11 @@
+{
+  "maplibre-gl-native-distribution": {
+    "repository": "maplibre/maplibre-gl-native-distribution",
+    "asset": "MapLibre.dynamic.xcframework.zip"
+  },
+  "maplibre-ios-with-plugin-api": {
+    "repository": "louwers/maplibre-ios-with-plugin-api",
+    "asset": "MapLibre.dynamic.plugins.xcframework.zip",
+    "token_secret": "IOS_PLUGIN_DISTRIBUTION_TOKEN"
+  }
+}

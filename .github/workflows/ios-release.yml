@@ -14,14 +14,18 @@ on:
         type: string
         default: ''
         description: Version (only for pre-releases)
+      distributions:
+        type: string
+        default: maplibre-gl-native-distribution
+        description: Comma-separated Swift package distributions from platform/ios/swift-package-distributions.json to release (empty for none)
       distribution_ref:
         type: string
         default: main
-        description: Branch of maplibre-gl-native-distribution containing the release workflow
-      publish_package_managers:
+        description: Branch of the distribution repositories containing the release workflow
+      cocoapods:
         type: boolean
         default: true
-        description: Publish to CocoaPods and maplibre-gl-native-distribution (disable for plugin-only prereleases)
+        description: Publish the standard XCFramework to CocoaPods
 
 jobs:
   ios-build-dynamic:
@@ -127,6 +131,9 @@ jobs:
             MapLibre.static.xcframework.zip
 
   ios-release:
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      distributions: ${{ steps.distributions.outputs.matrix }}
     permissions:
       id-token: write         # needed for AWS
       contents: write         # allow making a release
@@ -144,6 +151,23 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+
+      # Fail before tagging if a requested distribution is unknown.
+      - name: Select Swift package distributions
+        id: distributions
+        working-directory: .
+        env:
+          DISTRIBUTIONS: ${{ inputs.distributions }}
+        run: |
+          matrix="$(jq -c --arg names "$DISTRIBUTIONS" '
+            . as $all
+            | [$names | split(",")[] | gsub("^\\s+|\\s+$"; "") | select(. != "")]
+            | map(. as $name
+                  | ($all[$name] // error("Unknown distribution: \($name)"))
+                  | {name: $name, repository, asset, token_secret: (.token_secret // "")})
+          ' platform/ios/swift-package-distributions.json)"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "Swift package distributions: $matrix"
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
 
@@ -171,6 +195,10 @@ jobs:
           fi
           echo version="$version" >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
+
+      - name: Expose version
+        id: version
+        run: echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Create tag if it does not exist
         working-directory: .
@@ -208,20 +236,11 @@ jobs:
           fail_on_unmatched_files: true
           draft: true
 
-      # needed to trigger workflow for Swift Package Index release
-      - name: Generate token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: generate_token
-        with:
-          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
-          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
       - run: npm install
         working-directory: .
 
       - name: Release (CocoaPods)
-        if: inputs.publish_package_managers
+        if: inputs.cocoapods
         shell: bash -leo pipefail {0}  # so pod is found
         run: gh workflow run ios-release-cocoapods.yml --field version=${{ env.version }}
         env:
@@ -234,22 +253,51 @@ jobs:
           name: ios-v${{ env.version }}
           draft: false
 
-      - name: Release (Swift Package Index)
-        if: inputs.publish_package_managers
-        env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
-          DISTRIBUTION_REF: ${{ inputs.distribution_ref }}
-          VERSION: ${{ env.version }}
-        run: |
-          gh workflow run release.yml --repo maplibre/maplibre-gl-native-distribution \
-            --ref "$DISTRIBUTION_REF" \
-            --field version="$VERSION" \
-            --field changelog_url="https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-$VERSION.md" \
-            --field download_url="https://github.com/maplibre/maplibre-native/releases/download/ios-v$VERSION/MapLibre.dynamic.xcframework.zip"
-
       - name: Write release notifications
         if: github.repository_owner == 'maplibre'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/notify-release-on-prs.ts --tag ios-v${{ env.version }}
         working-directory: .
+
+  # Each distribution repository is a Swift package with a release.yml workflow that
+  # accepts version, download_url and changelog_url. Add new ones to
+  # platform/ios/swift-package-distributions.json.
+  swift-package-release:
+    name: Swift package (${{ matrix.distribution.name }})
+    needs: ios-release
+    if: ${{ needs.ios-release.outputs.distributions != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distribution: ${{ fromJSON(needs.ios-release.outputs.distributions) }}
+    steps:
+      # Repositories outside the MapLibre bot's installation set token_secret to a
+      # secret holding a token that can dispatch workflows there.
+      - name: Generate token
+        if: matrix.distribution.token_secret == ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: generate_token
+        with:
+          app-id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private-key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Release (Swift Package Index)
+        env:
+          GH_TOKEN: ${{ steps.generate_token.outputs.token || secrets[matrix.distribution.token_secret] }}
+          REPOSITORY: ${{ matrix.distribution.repository }}
+          ASSET: ${{ matrix.distribution.asset }}
+          DISTRIBUTION_REF: ${{ inputs.distribution_ref }}
+          VERSION: ${{ needs.ios-release.outputs.version }}
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::error::No token to dispatch $REPOSITORY. Set the ${{ matrix.distribution.token_secret }} secret."
+            exit 1
+          fi
+          gh workflow run release.yml --repo "$REPOSITORY" \
+            --ref "$DISTRIBUTION_REF" \
+            --field version="$VERSION" \
+            --field changelog_url="https://maplibre-native.s3.eu-central-1.amazonaws.com/changelogs/ios-$VERSION.md" \
+            --field download_url="https://github.com/maplibre/maplibre-native/releases/download/ios-v$VERSION/$ASSET"

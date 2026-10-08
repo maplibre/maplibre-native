@@ -31,3 +31,21 @@ gh workflow run ios-ci.yml -f release=pre --ref main
 Or run the workflow from the Actions tab on GitHub.
 
 The items under the `## main` heading in `platform/ios/CHANGELOG.md` will be used as changelog for the pre-release.
+
+## Swift package distributions
+
+After the GitHub release is published, `ios-release.yml` dispatches the `release.yml` workflow of each selected Swift package distribution repository. Each one points its binary target at an XCFramework asset of the release. The distributions are listed in [`platform/ios/swift-package-distributions.json`](https://github.com/maplibre/maplibre-native/blob/main/platform/ios/swift-package-distributions.json):
+
+| Field | Meaning |
+| --- | --- |
+| `repository` | Distribution repository. Its `release.yml` workflow accepts `version`, `download_url` and `changelog_url`. |
+| `asset` | XCFramework zip from the GitHub release passed as `download_url`. |
+| `token_secret` | Optional. Secret with a token that can dispatch workflows in `repository`, for repositories where the MapLibre bot app is not installed. |
+
+The `distributions` input selects them by name, comma-separated. It defaults to `maplibre-gl-native-distribution`. Pass an empty value to skip Swift package releases. The `cocoapods` input controls the CocoaPods release. For example, the plugin-enabled prerelease is released only to [louwers/maplibre-ios-with-plugin-api](https://github.com/louwers/maplibre-ios-with-plugin-api):
+
+```
+gh workflow run ios-release.yml --ref <branch> -f distributions=maplibre-ios-with-plugin-api -f cocoapods=false
+```
+
+To add a distribution, create a Swift package repository with a compatible `release.yml` (see `maplibre-gl-native-distribution`), add an entry to the JSON file and, if needed, a build variant to the `ios-build-dynamic` matrix and its asset to the release files.
