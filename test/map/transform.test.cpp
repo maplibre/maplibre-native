@@ -1400,6 +1400,24 @@ TEST(Transform, ProjectionDefinition) {
     ASSERT_DOUBLE_EQ(0.0, transform.getState().getProjectionTransition());
 }
 
+// A transition past either end, from a literal or an overshooting curve, holds at that end's projection.
+TEST(Transform, ProjectionTransitionPastEitherEnd) {
+    Transform transform;
+    transform.resize({512, 512});
+    transform.setProjectionDefinition(ProjectionDefinition("mercator", "vertical-perspective", 1.5));
+    EXPECT_DOUBLE_EQ(1.0, transform.getState().getProjectionTransition());
+    transform.jumpTo(CameraOptions().withZoom(1));
+    for (int step = 1; step <= 3; ++step) {
+        transform.jumpTo(CameraOptions().withCenter(LatLng{0, 40.0 + 120.0 * step}));
+    }
+    ASSERT_NEAR(400, transform.getState().getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+    // Past Mercator the globe leaves as it does at 0, so the center wraps back into Mercator's world.
+    transform.setProjectionDefinition(ProjectionDefinition("vertical-perspective", "mercator", 1.5));
+    EXPECT_FALSE(transform.getState().isGlobeRendering());
+    EXPECT_DOUBLE_EQ(0.0, transform.getState().getProjectionTransition());
+    EXPECT_NEAR(40, transform.getState().getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
+}
+
 TEST(VerticalPerspectiveProjection, TileCoordinatesToSphere) {
     const auto near = [](const vec3& a, const vec3& b) {
         return std::abs(a[0] - b[0]) < 1e-9 && std::abs(a[1] - b[1]) < 1e-9 && std::abs(a[2] - b[2]) < 1e-9;

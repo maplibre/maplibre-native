@@ -1,5 +1,6 @@
 #include <mln/style/projection_definition.hpp>
 
+#include <algorithm>
 #include <cassert>
 
 namespace mln {
@@ -60,11 +61,13 @@ double ProjectionDefinition::transitionState() const {
     if (from == to) {
         return isGlobe(from) ? 1 : 0;
     }
+    // A transition past either end, from a literal or an overshooting curve, holds at that end's projection.
+    const double share = std::clamp(transition, 0.0, 1.0);
     if (isGlobe(from) && !isGlobe(to)) {
-        return 1 - transition;
+        return 1 - share;
     }
     if (!isGlobe(from) && isGlobe(to)) {
-        return transition;
+        return share;
     }
     return 1;
 }
