@@ -1,5 +1,5 @@
 #import <XCTest/XCTest.h>
-#import "MLNMapViewDelegate.h"
+#import "MapLibre.h"
 
 #define MLNConstantExpression(constant) [NSExpression expressionForConstantValue:constant]
 

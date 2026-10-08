@@ -1,5 +1,4 @@
-#import "MLNMapView.h"
-#import "MLNSettings.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNMapViewScaleBarTests : XCTestCase

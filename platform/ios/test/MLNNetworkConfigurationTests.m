@@ -1,4 +1,4 @@
-#import "MLNNetworkConfiguration.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 #import "MLNNetworkConfiguration_Private.h"
 

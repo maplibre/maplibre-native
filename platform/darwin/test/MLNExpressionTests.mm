@@ -13,8 +13,6 @@
 #import "NSColor+MLNAdditions.h"
 #endif
 #import "MLNAttributedExpression.h"
-#import "MLNPointAnnotation.h"
-#import "NSPredicate+MLNAdditions.h"
 
 #define MLNAssertEqualValues(actual, expected, ...)                            \
   XCTAssertTrue(actual.is<__typeof__(expected)>());                            \

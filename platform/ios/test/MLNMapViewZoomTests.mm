@@ -1,9 +1,6 @@
 #import <XCTest/XCTest.h>
-#import "MLNGeometry.h"
-#import "MLNMapView+IBAdditions.h"
-#import "MLNMapView.h"
 #import "MLNMockGestureRecognizers.h"
-#import "MLNSettings.h"
+#import "MapLibre.h"
 
 #import <mln/math/wrap.hpp>
 

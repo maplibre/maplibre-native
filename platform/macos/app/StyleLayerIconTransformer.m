@@ -1,17 +1,6 @@
 #import "StyleLayerIconTransformer.h"
 
-#import <Cocoa/Cocoa.h>
-
-#import "MLNBackgroundStyleLayer.h"
-#import "MLNCircleStyleLayer.h"
-#import "MLNFillExtrusionStyleLayer.h"
-#import "MLNFillStyleLayer.h"
-#import "MLNHeatmapStyleLayer.h"
-#import "MLNHillshadeStyleLayer.h"
-#import "MLNLineStyleLayer.h"
-#import "MLNRasterStyleLayer.h"
-#import "MLNStyleLayer.h"
-#import "MLNSymbolStyleLayer.h"
+#import "MapLibre.h"
 
 @implementation StyleLayerIconTransformer
 

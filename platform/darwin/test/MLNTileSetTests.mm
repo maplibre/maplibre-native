@@ -1,12 +1,9 @@
 #import <XCTest/XCTest.h>
 
-#import "MLNAttributionInfo.h"
-#import "MLNGeometry.h"
 #import "MLNGeometry_Private.h"
-#import "MLNRasterDEMSource.h"
-#import "MLNTileSource.h"
 #import "MLNTileSource_Private.h"
 #import "MLNVectorTileSource.h"
+#import "MapLibre.h"
 
 #include <mln/util/tileset.hpp>
 

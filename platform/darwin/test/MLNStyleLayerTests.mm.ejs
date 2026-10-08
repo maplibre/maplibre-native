@@ -8,13 +8,8 @@
 
 #import "MLNStyleLayerTests.h"
 #import "../../darwin/src/NSDate+MLNAdditions.h"
-#import "MLN<%- camelize(type) %>StyleLayer.h"
-#import "MLNFeature.h"
-#import "MLNShapeSource.h"
-#import "MLNTypes.h"
 <% if (type === 'symbol') { -%>
 #include "../../darwin/src/MLNAttributedExpression.h"
-#import "NSExpression+MLNAdditions.h"
 <% } -%>
 
 #import "MLNStyleLayer_Private.h"

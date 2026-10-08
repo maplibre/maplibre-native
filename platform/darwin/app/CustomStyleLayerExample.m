@@ -2,7 +2,6 @@
 
 /* OPENGL Custom Layer example implementation */
 #import "CustomStyleLayerExample.h"
-#import "MLNMapView.h"
 #import <GLKit/GLKit.h>
 
 @implementation CustomStyleLayerExample {
@@ -65,7 +64,6 @@
 
 /* Metal Custom Layer example implementation */
 #import "CustomStyleLayerExample.h"
-#import "MLNMapView.h"
 
 @implementation CustomStyleLayerExample {
     // The render pipeline state

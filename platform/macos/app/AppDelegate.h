@@ -1,9 +1,4 @@
-#import <Cocoa/Cocoa.h>
-
-#import "MLNGeometry.h"
-#import "MLNMapCamera.h"
-#import "MLNOfflinePack.h"
-#import "MLNTypes.h"
+#import "MapLibre.h"
 
 extern NSString *const MLNApiKeyDefaultsKey;
 

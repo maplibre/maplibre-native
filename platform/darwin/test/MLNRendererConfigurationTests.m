@@ -1,3 +1,4 @@
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 #import "MLNRendererConfiguration.h"
 

@@ -1,5 +1,4 @@
-#import "MLNStyle.h"
-#import "MLNStyleLayer.h"
+#import "MapLibre.h"
 
 @interface MLNStyle (MBXAdditions)
 

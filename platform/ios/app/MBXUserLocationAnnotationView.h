@@ -1,4 +1,4 @@
-#import "MLNUserLocationAnnotationView.h"
+#import "MapLibre.h"
 
 @interface MBXUserLocationAnnotationView : MLNUserLocationAnnotationView
 

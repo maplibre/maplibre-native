@@ -89,6 +89,7 @@ genrule(
         "//:metal_renderer": "echo '#define MLN_RENDER_BACKEND_METAL 1' > $@",
         "//conditions:default": "echo '' > $@",
     }),
+    visibility = ["//platform:__pkg__"],
 )
 
 public_hdrs = [
@@ -97,6 +98,17 @@ public_hdrs = [
     "//platform/darwin:darwin_objc_hdrs",
     "//platform/darwin:generated_style_public_hdrs",
 ]
+
+# MapLibre.h umbrella header. Shipped in the XCFrameworks and used by internal
+# targets such as the example apps and tests. MLNDefines.h comes first so that
+# the other headers see the renderer defines.
+genrule(
+    name = "umbrella_hdr",
+    srcs = public_hdrs,
+    outs = ["MapLibre.h"],
+    cmd = "for f in $(SRCS); do echo \"#import \\\"$$(basename $$f)\\\"\"; done > $@",
+    visibility = ["//platform:__pkg__"],
+)
 
 apple_static_xcframework(
     name = "MapLibre.static",
@@ -112,6 +124,7 @@ apple_static_xcframework(
     },
     minimum_os_versions = {"ios": "15.5"},
     public_hdrs = public_hdrs,
+    umbrella_header = ":umbrella_hdr",
     version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
@@ -149,6 +162,7 @@ apple_xcframework(
     },
     minimum_os_versions = {"ios": "15.5"},
     public_hdrs = public_hdrs,
+    umbrella_header = ":umbrella_hdr",
     version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],

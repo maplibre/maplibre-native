@@ -1,9 +1,5 @@
 #import <XCTest/XCTest.h>
-#import "MLNFeature.h"
-#import "MLNPolygon.h"
-#import "MLNPolyline.h"
-#import "NSExpression+MLNAdditions.h"
-#import "NSPredicate+MLNAdditions.h"
+#import "MapLibre.h"
 
 #import "MLNValueEvaluator.h"
 #import "NSPredicate+MLNPrivateAdditions.h"

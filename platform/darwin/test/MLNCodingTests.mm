@@ -1,16 +1,5 @@
-#import "MLNAnnotationImage.h"
-#import "MLNFeature.h"
-#import "MLNPointAnnotation.h"
-#import "MLNPointCollection.h"
-#import "MLNPolygon.h"
-#import "MLNPolyline.h"
-#import "MLNShapeCollection.h"
-#if TARGET_OS_IPHONE
-#import "MLNAnnotationView.h"
-#import "MLNUserLocation.h"
-#import "MLNUserLocationAnnotationView.h"
-#endif
 #import <XCTest/XCTest.h>
+#import "MapLibre.h"
 
 #import "MLNCluster.h"
 #import "MLNFoundation_Private.h"

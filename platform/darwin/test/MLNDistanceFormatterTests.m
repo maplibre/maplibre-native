@@ -1,4 +1,4 @@
-#import "MLNDistanceFormatter.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNDistanceFormatterTests : XCTestCase

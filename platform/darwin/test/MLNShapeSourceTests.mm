@@ -1,14 +1,9 @@
 #import <XCTest/XCTest.h>
 
-#import "MLNFeature.h"
 #import "MLNFeature_Private.h"
-#import "MLNPointAnnotation.h"
-#import "MLNPolygon.h"
-#import "MLNShape.h"
-#import "MLNShapeCollection.h"
-#import "MLNShapeSource.h"
 #import "MLNShapeSource_Private.h"
 #import "MLNSource_Private.h"
+#import "MapLibre.h"
 
 #include <mln/style/sources/geojson_source.hpp>
 

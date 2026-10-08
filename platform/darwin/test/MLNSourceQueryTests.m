@@ -1,7 +1,4 @@
-#import "MLNMapViewDelegate.h"
-#import "MLNShapeCollection.h"
-#import "MLNShapeSource.h"
-#import "MLNVectorTileSource.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNSourceQueryTests : XCTestCase <MLNMapViewDelegate>

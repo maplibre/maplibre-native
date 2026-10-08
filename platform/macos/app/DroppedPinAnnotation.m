@@ -3,7 +3,7 @@
 #import "LocationCoordinate2DTransformer.h"
 #import "TimeIntervalTransformer.h"
 
-#import "MLNCoordinateFormatter.h"
+#import "MapLibre.h"
 
 static MLNCoordinateFormatter *DroppedPinCoordinateFormatter;
 

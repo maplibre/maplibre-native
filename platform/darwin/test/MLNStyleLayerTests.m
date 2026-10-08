@@ -1,9 +1,6 @@
 #import "MLNStyleLayerTests.h"
 
 #import "NSString+MLNAdditions.h"
-#import "MLNFeature.h"
-#import "MLNFillStyleLayer.h"
-#import "MLNShapeSource.h"
 
 #define TEST_STRICT_NAMING_CONVENTIONS 0
 

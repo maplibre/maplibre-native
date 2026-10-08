@@ -1,8 +1,5 @@
 #import <XCTest/XCTest.h>
-#import "MLNFeature.h"
-#import "MLNGeometry.h"
-#import "MLNShape.h"
-#import "NSValue+MLNAdditions.h"
+#import "MapLibre.h"
 
 #import "../../darwin/src/MLNGeometry_Private.h"
 

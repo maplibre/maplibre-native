@@ -1,6 +1,4 @@
-#import "MLNMapView.h"
-#import "MLNMapViewDelegate.h"
-#import "MLNStyle.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNMapViewFrustumOffsetTests : XCTestCase <MLNMapViewDelegate>

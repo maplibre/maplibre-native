@@ -1,4 +1,4 @@
-#import "MLNCompassDirectionFormatter.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNCompassDirectionFormatterTests : XCTestCase

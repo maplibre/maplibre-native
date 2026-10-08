@@ -190,11 +190,14 @@ objc_library(
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
+        "//platform/ios:mln_defines",
+        "//platform/ios:umbrella_hdr",
     ] + select({
         "//:metal_renderer": [],
         "//conditions:default": [],
     }),
     data = ["//platform/ios:resources"],
+    includes = ["ios"],
     module_name = "MapLibre",
     sdk_dylibs = [
         "libz",
@@ -242,8 +245,11 @@ objc_library(
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/macos:macos_public_hdrs",
+        "//platform/macos:mln_defines",
+        "//platform/macos:umbrella_hdr",
     ],
     data = ["//platform/macos:resources"],
+    includes = ["macos"],
     module_name = "MapLibre",
     sdk_dylibs = [
         "libz",

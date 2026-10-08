@@ -1,5 +1,4 @@
 #import "MBXCustomCalloutView.h"
-#import "MLNAnnotation.h"
 
 static CGFloat const tipHeight = 10.0;
 static CGFloat const tipWidth = 10.0;

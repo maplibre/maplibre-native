@@ -1,4 +1,4 @@
-#import "MLNAnnotationView.h"
+#import "MapLibre.h"
 
 @interface MBXAnnotationView : MLNAnnotationView
 @end

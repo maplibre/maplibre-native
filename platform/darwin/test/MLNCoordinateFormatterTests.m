@@ -1,4 +1,4 @@
-#import "MLNCoordinateFormatter.h"
+#import "MapLibre.h"
 #import <XCTest/XCTest.h>
 
 @interface MLNCoordinateFormatterTests : XCTestCase

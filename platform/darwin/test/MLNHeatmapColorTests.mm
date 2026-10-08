@@ -1,8 +1,5 @@
 #import <XCTest/XCTest.h>
-#import "MLNFeature.h"
-#import "MLNHeatmapStyleLayer.h"
-#import "MLNMapViewDelegate.h"
-#import "MLNShapeSource.h"
+#import "MapLibre.h"
 
 #import "MLNStyleLayer_Private.h"
 

@@ -1,6 +1,4 @@
 #import "MBXUserLocationAnnotationView.h"
-#import "MLNMapView.h"
-#import "MLNUserLocation.h"
 
 const CGFloat MBXUserLocationDotSize = 10;
 
