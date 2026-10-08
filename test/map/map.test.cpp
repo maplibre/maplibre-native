@@ -2207,7 +2207,7 @@ TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
 }
 
 // The globe's visible bounds are GL JS's VerticalPerspectiveTransform.getBounds at 512×512: the farthest of eight edge
-// points around the center, every longitude with a pole on screen.
+// points around the center, every longitude with a pole on screen but not with one behind the camera.
 TEST(Map, GlobeBoundsForCamera) {
     MapTest<> test;
     test.map.setSize({512, 512});
@@ -2217,7 +2217,7 @@ TEST(Map, GlobeBoundsForCamera) {
     struct Case {
         double lng, lat, zoom, bearing, pitch, west, south, east, north;
     };
-    const std::array<Case, 7> cases{{
+    const std::array<Case, 9> cases{{
         {0, 0, 1, 0, 0, -79.91796042106967, -79.91796042106967, 79.91796042106967, 79.91796042106967},
         {30, 20, 1.5, 30, 30, -56.805975633856576, -56.895025199618885, 94.30772744796946, 73.43306521431964},
         {0, 75, 1, 0, 0, -180, 32.70922481421371, 180, 90},
@@ -2225,6 +2225,8 @@ TEST(Map, GlobeBoundsForCamera) {
         {10, 10, 3, 0, 0, -25.90264541368299, -19.587774363137328, 45.90264541369834, 36.43783991311318},
         {170, -10, 2, 45, 40, 90.75153870575207, -71.2057256347772, 267.1780088196146, 42.32122600031687},
         // Looking away from the north pole, which is behind the camera, with the top of the view in the sky.
+        {0, 80, 3, 180, 75, -27.136824618012838, 69.5727070878645, 27.136824618012724, 86.22734028617919},
+        {0, 84.5, 5, 180, 84, -9.769090999914397, 81.42454063588696, 9.769090999914397, 85.70848143480487},
         {0, 85, 6, 180, 85, -7.12413211181115, 82.92590257945324, 7.12413211181115, 85.57800114051855},
     }};
     for (const Case& c : cases) {

@@ -425,6 +425,12 @@ LatLngBounds globeBounds(const Transform& transform) {
     north += center.latitude();
 
     const auto onScreen = [&](const LatLng& pole) {
+        // In front of the camera and inside its depth range, as GL JS's isSurfacePointOnScreen asks.
+        vec4 clip;
+        VerticalPerspectiveProjection::latLngToScreenCoordinate(transform.getState(), pole, clip);
+        if (clip[3] <= 0 || std::abs(clip[2] / clip[3]) >= 1) {
+            return false;
+        }
         const ScreenCoordinate point = transform.latLngToScreenCoordinate(pole);
         return !transform.getState().isLocationOccluded(pole) && point.x > 0 && point.x < width && point.y > 0 &&
                point.y < height;
