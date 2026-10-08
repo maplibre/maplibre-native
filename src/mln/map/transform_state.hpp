@@ -194,6 +194,8 @@ public:
     /// Lowest zoom allowed with the map centered at this latitude: the globe lets the zoom fall below `getMinZoom()`
     /// toward the poles by the anchored-zoom adjustment, so the planet keeps its size on screen.
     double getMinZoomAtLatitude(double latitude) const;
+    /// The same for a camera on the globe or not, whatever the current projection.
+    double getMinZoomAtLatitude(double latitude, bool globe) const;
     /// The center `constrain` would settle on for this one, so a zoom adjustment can be computed against it.
     LatLng constrainedCenter(const LatLng&) const;
     uint8_t getIntegerZoom() const;

@@ -586,8 +586,12 @@ double TransformState::getZoom() const {
 }
 
 double TransformState::getMinZoomAtLatitude(double latitude) const {
+    return getMinZoomAtLatitude(latitude, isGlobeRendering());
+}
+
+double TransformState::getMinZoomAtLatitude(double latitude, bool globe) const {
     const double minZoom = getMinZoom();
-    if (!isGlobeRendering()) {
+    if (!globe) {
         return minZoom;
     }
     return minZoom + VerticalPerspectiveProjection::zoomAdjustment(0, latitude);

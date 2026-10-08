@@ -96,6 +96,8 @@ public:
 
     // Projection
     void setProjectionDefinition(const ProjectionDefinition&);
+    /// The projection the style gives at a zoom, which constrains an animation's target as it constrains a jump.
+    void setProjectionForZoom(std::function<ProjectionDefinition(double zoom)>);
     void setNorthOrientation(NorthOrientation);
     NorthOrientation getNorthOrientation() const;
 
@@ -156,6 +158,7 @@ private:
     Duration transitionDuration;
     std::function<bool(const TimePoint)> transitionFrameFn;
     std::function<void()> transitionFinishFn;
+    std::function<ProjectionDefinition(double)> projectionForZoom;
 };
 
 } // namespace mln

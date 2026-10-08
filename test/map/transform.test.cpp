@@ -1418,6 +1418,30 @@ TEST(Transform, ProjectionTransitionPastEitherEnd) {
     EXPECT_NEAR(40, transform.getState().getLatLng(LatLng::Unwrapped).longitude(), 1e-9);
 }
 
+// An animation that crosses into the globe ends where a jump to its camera would, at a zoom only the globe allows.
+TEST(Transform, AnimationIntoTheGlobeTakesTheGlobesMinimumZoom) {
+    const auto projectionForZoom = [](double zoom) {
+        return ProjectionDefinition(zoom < 3 ? "vertical-perspective" : "mercator");
+    };
+    for (const bool fly : {false, true}) {
+        Transform transform;
+        transform.resize({512, 512});
+        transform.setProjectionForZoom(projectionForZoom);
+        transform.setProjectionDefinition(projectionForZoom(5));
+        transform.jumpTo(CameraOptions().withCenter(LatLng{60, 0}).withZoom(5));
+        const auto camera = CameraOptions().withCenter(LatLng{60, 0}).withZoom(-0.5);
+        const AnimationOptions animation(Milliseconds(1000));
+        fly ? transform.flyTo(camera, animation) : transform.easeTo(camera, animation);
+        // As the map does each frame, the projection follows the zoom.
+        for (int frame = 1; frame <= 20; ++frame) {
+            transform.updateTransitions(transform.getTransitionStart() + Milliseconds(50 * frame));
+            transform.setProjectionDefinition(projectionForZoom(transform.getZoom()));
+        }
+        EXPECT_TRUE(transform.getState().isGlobeRendering()) << (fly ? "flyTo" : "easeTo");
+        EXPECT_NEAR(-0.5, transform.getZoom(), 1e-9) << (fly ? "flyTo" : "easeTo");
+    }
+}
+
 TEST(VerticalPerspectiveProjection, TileCoordinatesToSphere) {
     const auto near = [](const vec3& a, const vec3& b) {
         return std::abs(a[0] - b[0]) < 1e-9 && std::abs(a[1] - b[1]) < 1e-9 && std::abs(a[2] - b[2]) < 1e-9;
