@@ -1,6 +1,6 @@
 # Changelog MapLibre Native for Android
 
-## main
+## 13.7.0-pre-globe.0
 
 ### ✨ Features and improvements
 
