@@ -911,6 +911,8 @@ void Context::clearStencilBuffer(const int32_t bits) {
     MLN_TRACE_FUNC();
     MLN_TRACE_FUNC_GL();
 
+    // glClear writes only the bits the stencil write mask lets through, and clipping leaves that mask at zero.
+    stencilMask = value::StencilMask::Default;
     MBGL_CHECK_ERROR(glClearStencil(bits));
     MBGL_CHECK_ERROR(glClear(GL_STENCIL_BUFFER_BIT));
 
