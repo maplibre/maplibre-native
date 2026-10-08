@@ -3429,23 +3429,31 @@ public:
 /// bounding box.
 - (mln::LatLngBounds)convertRect:(NSRect)rect toLatLngBoundsFromView:(nullable NSView *)view {
   auto bounds = mln::LatLngBounds::empty();
-  auto bottomLeft = [self convertPoint:{NSMinX(rect), NSMinY(rect)} toLatLngFromView:view];
-  auto bottomRight = [self convertPoint:{NSMaxX(rect), NSMinY(rect)} toLatLngFromView:view];
-  auto topRight = [self convertPoint:{NSMaxX(rect), NSMaxY(rect)} toLatLngFromView:view];
-  auto topLeft = [self convertPoint:{NSMinX(rect), NSMaxY(rect)} toLatLngFromView:view];
 
   // If the bounds straddles the antimeridian, unwrap it so that one side
   // extends beyond ±180° longitude.
   auto center = [self convertPoint:{NSMidX(rect), NSMidY(rect)} toLatLngFromView:view];
-  bottomLeft.unwrapForShortestPath(center);
-  bottomRight.unwrapForShortestPath(center);
-  topRight.unwrapForShortestPath(center);
-  topLeft.unwrapForShortestPath(center);
 
-  bounds.extend(bottomLeft);
-  bounds.extend(bottomRight);
-  bounds.extend(topRight);
-  bounds.extend(topLeft);
+  // The corners and the middles of the edges: on a globe the edges bulge past the corners.
+  for (const NSPoint point :
+       {NSMakePoint(NSMinX(rect), NSMinY(rect)), NSMakePoint(NSMidX(rect), NSMinY(rect)),
+        NSMakePoint(NSMaxX(rect), NSMinY(rect)), NSMakePoint(NSMaxX(rect), NSMidY(rect)),
+        NSMakePoint(NSMaxX(rect), NSMaxY(rect)), NSMakePoint(NSMidX(rect), NSMaxY(rect)),
+        NSMakePoint(NSMinX(rect), NSMaxY(rect)), NSMakePoint(NSMinX(rect), NSMidY(rect))}) {
+    auto latLng = [self convertPoint:point toLatLngFromView:view];
+    latLng.unwrapForShortestPath(center);
+    bounds.extend(latLng);
+  }
+
+  // A pole in view puts every longitude in view; Mercator never draws one.
+  for (const double latitude : {90.0, -90.0}) {
+    const NSPoint pole = [self convertLatLng:mln::LatLng(latitude, 0) toPointToView:view];
+    if (NSPointInRect(pole, rect) &&
+        std::abs([self convertPoint:pole toLatLngFromView:view].latitude() - latitude) < 1e-3) {
+      bounds = mln::LatLngBounds::hull({latitude > 0 ? bounds.south() : latitude, -180},
+                                       {latitude > 0 ? latitude : bounds.north(), 180});
+    }
+  }
 
   return bounds;
 }

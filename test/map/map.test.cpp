@@ -2206,6 +2206,37 @@ TEST(Map, GlobeSetBoundsKeepsAZoomTheGlobeAllows) {
     EXPECT_NEAR(-1.5, *test.map.getCameraOptions().zoom, 1e-9);
 }
 
+// The globe's visible bounds are GL JS's VerticalPerspectiveTransform.getBounds at 512×512: the farthest of eight edge
+// points around the center, every longitude with a pole on screen.
+TEST(Map, GlobeBoundsForCamera) {
+    MapTest<> test;
+    test.map.setSize({512, 512});
+    test.map.getStyle().loadJSON(
+        R"({"version":8,"projection":{"type":"vertical-perspective"},"sources":{},"layers":[]})");
+    struct Case {
+        double lng, lat, zoom, bearing, pitch, west, south, east, north;
+    };
+    const std::array<Case, 6> cases{{
+        {0, 0, 1, 0, 0, -79.91796042106967, -79.91796042106967, 79.91796042106967, 79.91796042106967},
+        {30, 20, 1.5, 30, 30, -56.805975633856576, -56.895025199618885, 94.30772744796946, 73.43306521431964},
+        {0, 75, 1, 0, 0, -180, 32.70922481421371, 180, 90},
+        {0, 75, 2.5, 0, 0, -54.89062256787065, 64.72883925258952, 54.89062256787065, 83.47499358170649},
+        {10, 10, 3, 0, 0, -25.90264541368299, -19.587774363137328, 45.90264541369834, 36.43783991311318},
+        {170, -10, 2, 45, 40, 90.75153870575207, -71.2057256347772, 267.1780088196146, 42.32122600031687},
+    }};
+    for (const Case& c : cases) {
+        const auto camera =
+            CameraOptions().withCenter(LatLng{c.lat, c.lng}).withZoom(c.zoom).withBearing(c.bearing).withPitch(c.pitch);
+        for (const LatLngBounds& bounds :
+             {test.map.latLngBoundsForCamera(camera), test.map.latLngBoundsForCameraUnwrapped(camera)}) {
+            EXPECT_NEAR(c.west, bounds.west(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+            EXPECT_NEAR(c.south, bounds.south(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+            EXPECT_NEAR(c.east, bounds.east(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+            EXPECT_NEAR(c.north, bounds.north(), 1e-5) << c.lat << ", " << c.lng << " z" << c.zoom;
+        }
+    }
+}
+
 // A minimum set above the current maximum still lifts the zoom to it, which setBounds always did on Mercator.
 TEST(Map, SetBoundsLiftsTheZoomToAMinimumAboveTheMaximum) {
     MapTest<> test;
