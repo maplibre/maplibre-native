@@ -11,7 +11,7 @@ import org.maplibre.android.module.http.HttpRequestImpl
  */
 class ExampleHttpRequestImpl : HttpRequest {
     override fun executeRequest(httpRequest: HttpResponder, nativePtr: Long, resourceUrl: String,
-                                dataRange: String, etag: String, modified: String, offlineUsage: Boolean)
+                                dataRange: String, etag: String, modified: String, offlineUsage: Boolean, acceptHeader: String)
     {
         // Load all json documents and any pbf ending with a 0.
         if (resourceUrl.endsWith(".json")) {
