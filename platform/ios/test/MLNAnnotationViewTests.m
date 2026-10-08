@@ -66,6 +66,7 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 @property (nonatomic) XCTestExpectation *expectation;
 @property (nonatomic) XCTestExpectation *styleLoadingExpectation;
 @property (nonatomic) MLNMapView *mapView;
+@property (nonatomic) UIWindow *window;
 @property (nonatomic, weak) MLNAnnotationView *annotationView;
 @property (nonatomic) NSInteger annotationSelectedCount;
 @property (nonatomic) void (^prepareAnnotationView)(MLNAnnotationView*);
@@ -78,6 +79,13 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     [super setUp];
     _mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 64, 64)];
     _mapView.delegate = self;
+}
+
+- (void)tearDown
+{
+    _window.hidden = YES;
+    _window = nil;
+    [super tearDown];
 }
 
 - (void)testAnnotationView
@@ -373,6 +381,58 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     [self waitForExpectationsWithTimeout:5 handler:nil];
     XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
     XCTAssertFalse([_mapView.annotations containsObject:back]);
+}
+
+- (void)testSelectionBehindTheGlobeSettlesWhereTheCameraDoes
+{
+    [self loadGlobeAtNullIsland];
+    // Animated camera changes run on the window's display link.
+    _window = [[UIWindow alloc] initWithFrame:_mapView.bounds];
+    [_window addSubview:_mapView];
+    [_window makeKeyAndVisible];
+
+    MLNPointAnnotation *back = [[MLNPointAnnotation alloc] init];
+    back.coordinate = CLLocationCoordinate2DMake(70, 70);
+    [_mapView addAnnotation:back];
+
+    // Asked again while the map turns: the second request selects it.
+    XCTestExpectation *first = [self expectationWithDescription:@"first request"];
+    XCTestExpectation *second = [self expectationWithDescription:@"second request"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:YES completionHandler:^{
+        [first fulfill];
+    }];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:YES completionHandler:^{
+        [second fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, back);
+
+    // Zoomed to while the map turns: selected where that camera change ends.
+    [_mapView deselectAnnotation:back animated:NO];
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+    XCTestExpectation *zoomed = [self expectationWithDescription:@"selected after a zoom"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:YES completionHandler:^{
+        [zoomed fulfill];
+    }];
+    [_mapView setCenterCoordinate:back.coordinate zoomLevel:3 direction:0 animated:YES];
+    [self waitForExpectationsWithTimeout:10 handler:nil];
+    XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, back);
+    XCTAssertEqualWithAccuracy(_mapView.zoomLevel, 3, 0.01);
+
+    // Never added, then every annotation removed while the map turns: it does not come back.
+    [_mapView deselectAnnotation:back animated:NO];
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+    MLNPointAnnotation *stray = [[MLNPointAnnotation alloc] init];
+    stray.coordinate = CLLocationCoordinate2DMake(70, 70);
+    [_mapView selectAnnotation:stray moveIntoView:YES animateSelection:YES completionHandler:nil];
+    [_mapView removeAnnotations:_mapView.annotations];
+    XCTestExpectation *settled = [self expectationWithDescription:@"camera settled"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [settled fulfill];
+    });
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    XCTAssertEqual(_mapView.annotations.count, 0u);
+    XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
 }
 
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style

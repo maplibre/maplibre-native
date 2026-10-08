@@ -185,8 +185,9 @@ public:
   MLNAnnotationObjectTagMap _annotationTagsByAnnotation;
   MLNAnnotationTag _selectedAnnotationTag;
   MLNAnnotationTag _lastSelectedAnnotationTag;
-  /// An annotation behind the globe, selected once the map has turned to it.
+  /// An annotation behind the globe, selected once the camera settles with it in view.
   id<MLNAnnotation> _annotationAwaitingSelection;
+  BOOL _annotationAwaitingSelectionAnimated;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image.
   NSSize _unionedAnnotationImageSize;
   std::vector<MLNAnnotationTag> _annotationsNearbyLastClick;
@@ -989,6 +990,14 @@ public:
 
   if ([self.delegate respondsToSelector:@selector(mapView:cameraDidChangeAnimated:)]) {
     [self.delegate mapView:self cameraDidChangeAnimated:animated];
+  }
+
+  if (_annotationAwaitingSelection) {
+    // A camera change that cut this one short starts right after it ends; settle once it has.
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [weakSelf settleAnnotationAwaitingSelection];
+    });
   }
 }
 
@@ -1957,6 +1966,9 @@ public:
       [self selectAnnotation:annotation atPoint:gesturePoint];
     }
   } else {
+    // A click on the map drops a selection still waiting for the map to turn, as it drops the
+    // selected one.
+    _annotationAwaitingSelection = nil;
     [self deselectAnnotation:self.selectedAnnotation];
   }
 }
@@ -2709,37 +2721,34 @@ public:
   MLNLogDebug(@"Selecting annotation: %@ atPoint: %@ moveIntoView: %@ animateSelection: %@",
               annotation, NSStringFromPoint(gesturePoint), MLNStringFromBOOL(moveIntoView),
               MLNStringFromBOOL(animateSelection));
+  // A newer selection, even of the selected annotation, replaces one waiting for the map to turn.
+  _annotationAwaitingSelection = nil;
+
   id<MLNAnnotation> selectedAnnotation = self.selectedAnnotation;
   if (annotation == selectedAnnotation) {
     return;
   }
 
-  // A newer selection replaces one waiting for the map to turn.
-  _annotationAwaitingSelection = nil;
-
-  // Behind the globe: an annotation that may move into view is centered first and selected there.
+  // Behind the globe: an annotation that may move into view is centered first, and selected once
+  // the camera settles with it in view.
   if (annotation && [self isCoordinateOccluded:annotation.coordinate]) {
     if (!moveIntoView ||
         ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
                                                        animated:animateSelection]) {
       return;
     }
+    // Added now, as a selection on Mercator adds it, so removing every annotation meanwhile removes
+    // it too.
+    if ([self annotationTagForAnnotation:annotation] == MLNAnnotationTagNotFound) {
+      [self addAnnotation:annotation];
+    }
     _annotationAwaitingSelection = annotation;
+    _annotationAwaitingSelectionAnimated = animateSelection;
     __weak __typeof__(self) weakSelf = self;
     [self setCenterCoordinate:annotation.coordinate
                      animated:animateSelection
             completionHandler:^{
-              __typeof__(self) strongSelf = weakSelf;
-              if (!strongSelf || strongSelf->_annotationAwaitingSelection != annotation) {
-                return;
-              }
-              strongSelf->_annotationAwaitingSelection = nil;
-              if (![strongSelf isCoordinateOccluded:annotation.coordinate]) {
-                [strongSelf selectAnnotation:annotation
-                                     atPoint:NSZeroPoint
-                                moveIntoView:NO
-                            animateSelection:animateSelection];
-              }
+              [weakSelf settleAnnotationAwaitingSelection];
             }];
     return;
   }
@@ -3001,6 +3010,23 @@ public:
   NSString *symbolName = customSymbol.length ? customSymbol : MLNDefaultStyleMarkerSymbolName;
 
   return [self dequeueReusableAnnotationImageWithIdentifier:symbolName];
+}
+
+/// Once the camera has settled, selects the annotation waiting for it if it came into view, or
+/// drops it.
+- (void)settleAnnotationAwaitingSelection {
+  id<MLNAnnotation> annotation = _annotationAwaitingSelection;
+  if (!annotation || _mbglMap->isPanning() || _mbglMap->isScaling() || _mbglMap->isRotating() ||
+      _mbglMap->isGestureInProgress()) {
+    return;
+  }
+  _annotationAwaitingSelection = nil;
+  if (![self isCoordinateOccluded:annotation.coordinate]) {
+    [self selectAnnotation:annotation
+                   atPoint:NSZeroPoint
+              moveIntoView:NO
+          animateSelection:_annotationAwaitingSelectionAnimated];
+  }
 }
 
 - (void)deselectAnnotation:(id<MLNAnnotation>)annotation {
