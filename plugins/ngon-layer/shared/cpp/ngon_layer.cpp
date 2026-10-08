@@ -192,7 +192,9 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* context,
                                 uint32_t id,
                                 uint8_t* output,
                                 size_t size) {
-    if (!context || context->struct_size < sizeof(*context) || id != 0 || !output || size != sizeof(DrawableUBO)) {
+    // A host older than the projection fields passes the context without them, and the n-gons draw on Mercator.
+    if (!context || context->struct_size < offsetof(mln_plugin_uniform_context_v1, projection_transition) || id != 0 ||
+        !output || size != sizeof(DrawableUBO)) {
         return MLN_PLUGIN_STATUS_INVALID_ARGUMENT;
     }
     DrawableUBO value{};
@@ -203,11 +205,13 @@ mln_plugin_status updateUniform(const mln_plugin_uniform_context_v1* context,
     value.camera[3] = context->camera_to_center_distance;
     value.view[0] = static_cast<float>(context->bearing);
     value.view[1] = context->pixel_ratio;
-    std::copy_n(context->projection_matrix, 16, value.projection);
-    std::copy_n(context->tile_mercator_coords, 4, value.tile_mercator);
-    std::copy_n(context->clipping_plane, 4, value.clipping_plane);
-    value.globe[0] = context->projection_transition;
-    value.globe[1] = context->pixels_to_sphere_radians;
+    if (context->struct_size >= sizeof(*context)) {
+        std::copy_n(context->projection_matrix, 16, value.projection);
+        std::copy_n(context->tile_mercator_coords, 4, value.tile_mercator);
+        std::copy_n(context->clipping_plane, 4, value.clipping_plane);
+        value.globe[0] = context->projection_transition;
+        value.globe[1] = context->pixels_to_sphere_radians;
+    }
     std::memcpy(output, &value, sizeof(value));
     return MLN_PLUGIN_STATUS_OK;
 }
@@ -359,13 +363,12 @@ Direction rotate(const Direction& d, Point angles) {
     return normalized(
         {d[0] + right[0] * x + up[0] * y, d[1] + right[1] * x + up[1] * y, d[2] + right[2] * x + up[2] * y});
 }
-std::array<double, 4> projectOnGlobe(Point p, const Direction& d, const mln_plugin_query_context_v1& c) {
+std::array<double, 4> projectOnGlobe(Point p, const Direction& d, const mln_plugin_query_context_v1& c, double t) {
     const double* m = c.projection_matrix;
     std::array<double, 4> result{};
     for (int i = 0; i < 4; ++i) result[i] = m[i] * d[0] + m[4 + i] * d[1] + m[8 + i] * d[2] + m[12 + i];
     const double* plane = c.clipping_plane;
     result[2] = (1 - (d[0] * plane[0] + d[1] * plane[1] + d[2] * plane[2] + plane[3])) * result[3];
-    const double t = c.projection_transition;
     if (t > 0.999) return result;
     const auto flat = project(p, c.tile_matrix);
     result[2] *= std::clamp((t - 0.2) / 0.8, 0.0, 1.0);
@@ -379,7 +382,8 @@ uint8_t queryFeature(const mln_plugin_feature_v1* feature,
                      const mln_plugin_query_context_v1* context,
                      const mln_plugin_property_value_v1* values,
                      size_t count) try {
-    if (!feature || !feature->points || !context || context->struct_size < sizeof(*context) || !query || !queryCount ||
+    if (!feature || !feature->points || !context ||
+        context->struct_size < offsetof(mln_plugin_query_context_v1, projection_transition) || !query || !queryCount ||
         (count && !values) || context->camera_to_center_distance <= 0)
         return 0;
     const double radius = std::max(0.0, scalar(values, count, "ngon-radius", 5));
@@ -397,21 +401,23 @@ uint8_t queryFeature(const mln_plugin_feature_v1* feature,
         const double c = std::cos(-context->bearing), s = std::sin(-context->bearing);
         offset = {c * offset.x - s * offset.y, s * offset.x + c * offset.y};
     }
-    const bool globe = context->projection_transition > 0;
-    const auto at = [&](Point p) {
-        return globe ? projectOnGlobe(p, sphere(p, context->tile_mercator_coords), *context)
+    // A host older than the projection fields passes the context without them: hit test on Mercator.
+    const bool globe = context->struct_size >= sizeof(*context) && context->projection_transition > 0;
+    const auto at = [&](Point p, double transition) {
+        return globe ? projectOnGlobe(p, sphere(p, context->tile_mercator_coords), *context, transition)
                      : project(p, context->tile_matrix);
     };
+    // The host finds the query on the globe itself, unblended, so that is where it goes back to the screen.
     std::vector<Point> queryScreen;
     for (size_t i = 0; i < queryCount; ++i)
-        queryScreen.push_back(screen(at({double(query[i].x), double(query[i].y)}), *context));
+        queryScreen.push_back(screen(at({double(query[i].x), double(query[i].y)}, 1), *context));
     for (size_t i = 0; i < feature->point_count; ++i) {
         const Point center = {feature->points[i].x + offset.x * context->pixels_to_tile_units,
                               feature->points[i].y + offset.y * context->pixels_to_tile_units};
-        const auto clip = at(center);
+        const auto clip = at(center, context->projection_transition);
         if (clip[3] <= 0) continue;
-        // The shader hides an n-gon facing the viewport whose center is behind the horizon.
-        if (globe && alignViewport && clip[2] > clip[3]) continue;
+        // Behind the horizon: the shader moves an n-gon facing the viewport off the screen, and clips one on the map.
+        if (globe && clip[2] > clip[3]) continue;
         const auto centerScreen = screen(clip, *context);
         const double scale = alignViewport ? (scaleViewport ? 1 : context->camera_to_center_distance / clip[3])
                                            : context->pixels_to_tile_units *
@@ -427,7 +433,8 @@ uint8_t queryFeature(const mln_plugin_feature_v1* feature,
                               : globe       ? screen(projectOnGlobe(corner,
                                                               rotate(sphere(center, context->tile_mercator_coords),
                                                                            {delta.x * angle, delta.y * angle}),
-                                                              *context),
+                                                              *context,
+                                                              context->projection_transition),
                                                *context)
                                             : screen(project(corner, context->tile_matrix), *context));
         }
