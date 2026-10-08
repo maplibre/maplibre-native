@@ -577,19 +577,22 @@ void RenderSymbolLayer::captureRenderedFeatures(const RenderTile& tile,
                                            inViewportPixelUnits,
                                            aligned);
     };
+    // As the tweaker draws them: the tile matrices leave the translation out, which the shader adds to point anchors
+    // and placement to the positions it lays out.
+    constexpr std::array<float, 2> untranslated{0.f, 0.f};
     const mat4 textDrawableMatrix = isScreenSpace ? getScreenMatrix(textTranslation)
-                                                  : getTileMatrix(textTranslation, textTranslationAnchor);
+                                                  : getTileMatrix(untranslated, textTranslationAnchor);
     const mat4 iconDrawableMatrix = isScreenSpace ? getScreenMatrix(iconTranslation)
-                                                  : getTileMatrix(iconTranslation, iconTranslationAnchor);
+                                                  : getTileMatrix(untranslated, iconTranslationAnchor);
 
-    // On the globe the tile's projection stands in for the tile matrix, and the shader adds the translation itself.
+    // On the globe the tile's projection stands in for the tile matrix.
     const auto projector = (state.isGlobeRendering() && !isScreenSpace)
                                ? std::make_optional<TileProjector>(state, tileID)
                                : std::nullopt;
     const auto tileTranslation = [&](const auto& translation, const auto& translationAnchor) {
-        const auto translate = projector
-                                   ? RenderTile::tileUnitTranslation(tileID, translation, translationAnchor, state)
-                                   : std::array<float, 2>{0.f, 0.f};
+        const auto translate = isScreenSpace
+                                   ? std::array<float, 2>{0.f, 0.f}
+                                   : RenderTile::tileUnitTranslation(tileID, translation, translationAnchor, state);
         return vec2{translate[0], translate[1]};
     };
     const vec2 textTileTranslation = tileTranslation(textTranslation, textTranslationAnchor);
