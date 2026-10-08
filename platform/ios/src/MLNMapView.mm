@@ -468,6 +468,8 @@ public:
   /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set
   /// to ``MLNAnnotationTagNotFound``.
   MLNAnnotationTag _selectedAnnotationTag;
+  /// An annotation behind the globe, selected once the map has turned to it.
+  id<MLNAnnotation> _annotationAwaitingSelection;
 
   BOOL _userLocationAnnotationIsSelected;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image
@@ -5087,6 +5089,10 @@ static void *windowScreenContext = &windowScreenContext;
     MLNAssert([annotation conformsToProtocol:@protocol(MLNAnnotation)],
               @"annotation should conform to MLNAnnotation");
 
+    if (annotation == _annotationAwaitingSelection) {
+      _annotationAwaitingSelection = nil;
+    }
+
     MLNAnnotationTag annotationTag = [self annotationTagForAnnotation:annotation];
     if (annotationTag == MLNAnnotationTagNotFound) {
       continue;
@@ -5463,13 +5469,18 @@ static void *windowScreenContext = &windowScreenContext;
 
   if (annotation == self.selectedAnnotation) return;
 
+  // A newer selection replaces one waiting for the map to turn.
+  _annotationAwaitingSelection = nil;
+
   // Behind the globe: an annotation that may move into view is centered first and selected there.
   if ([self isCoordinateOccluded:annotation.coordinate]) {
     if (!moveIntoView ||
         ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
                                                        animated:animateSelection]) {
+      if (completion) completion();
       return;
     }
+    _annotationAwaitingSelection = annotation;
     __weak __typeof__(self) weakSelf = self;
     [self setCenterCoordinate:annotation.coordinate
                     zoomLevel:self.zoomLevel
@@ -5477,7 +5488,10 @@ static void *windowScreenContext = &windowScreenContext;
                      animated:animateSelection
             completionHandler:^{
               __typeof__(self) strongSelf = weakSelf;
-              if (!strongSelf || [strongSelf isCoordinateOccluded:annotation.coordinate]) {
+              const BOOL awaited =
+                  strongSelf && strongSelf->_annotationAwaitingSelection == annotation;
+              if (awaited) strongSelf->_annotationAwaitingSelection = nil;
+              if (!awaited || [strongSelf isCoordinateOccluded:annotation.coordinate]) {
                 if (completion) completion();
                 return;
               }
@@ -5807,6 +5821,10 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (void)deselectAnnotation:(id<MLNAnnotation>)annotation animated:(BOOL)animated {
   if (!annotation) return;
+
+  if (annotation == _annotationAwaitingSelection) {
+    _annotationAwaitingSelection = nil;
+  }
 
   if (self.selectedAnnotation == annotation) {
     MLNLogDebug(@"Deselecting annotation: %@ animated: %@", annotation,

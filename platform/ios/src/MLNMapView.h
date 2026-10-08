@@ -1986,6 +1986,12 @@ of north, the map will automatically snap to exact north.
 
  Note that a selection initiated by a single tap gesture is always animated.
 
+ On a globe, an annotation behind the planet is selected only when the map can bring it into view
+ (`animated` is `YES` and the annotation is of type ``MLNPointAnnotation``): the map centers on the
+ annotation and then selects it, unless it is deselected or removed, or another annotation is
+ selected, before then. Otherwise the annotation is not selected. The completion handler runs
+ either way.
+
  @param annotation The annotation object to select.
  @param animated If `YES`, the annotation and callout view are animated on-screen.
  @param completion The block executed after the animation finishes.
@@ -2006,7 +2012,8 @@ of north, the map will automatically snap to exact north.
  @param annotation The annotation object to select.
  @param moveIntoView If the annotation is not visible (or is partially visible) *and* is of type
  ``MLNPointAnnotation``, the map is panned so that the annotation and its callout are brought into
- view. The annotation is *not* centered within the viewport.
+ view. The annotation is *not* centered within the viewport, except on a globe, where an annotation
+ behind the planet is centered first and selected there.
  @param animateSelection If `YES`, the annotation's selection state and callout view's presentation
  are animated.
  @param completion The block executed after the animation finishes.

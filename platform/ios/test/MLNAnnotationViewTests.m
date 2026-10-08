@@ -104,7 +104,7 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     XCTAssertNil(_annotationView.annotation, @"annotation property should be nil");
 }
 
-- (void)testAnnotationViewBehindTheGlobeIsOffscreen
+- (void)loadGlobeAtNullIsland
 {
     _mapView.delegate = nil;
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"globe" withExtension:@"json"];
@@ -112,10 +112,14 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     _mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 400, 400) styleURL:styleURL];
     _mapView.delegate = self;
     [self waitForExpectationsWithTimeout:10 handler:nil];
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+}
 
+- (void)testAnnotationViewBehindTheGlobeIsOffscreen
+{
     // With the bearing at 45°, the viewport corners land on the horizon due north, east, south and west, so both
     // annotations fall inside the visible coordinate bounds; only the second is behind the globe.
-    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+    [self loadGlobeAtNullIsland];
 
     MLNTestAnnotation *front = [[MLNTestAnnotation alloc] init];
     front.coordinate = CLLocationCoordinate2DMake(50, 50);
@@ -304,21 +308,19 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
 
 - (void)testSelectingAnnotationBehindTheGlobeMovesItIntoView
 {
-    _mapView.delegate = nil;
-    NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"globe" withExtension:@"json"];
-    _styleLoadingExpectation = [self expectationWithDescription:@"globe style"];
-    _mapView = [[MLNMapView alloc] initWithFrame:CGRectMake(0, 0, 400, 400) styleURL:styleURL];
-    _mapView.delegate = self;
-    [self waitForExpectationsWithTimeout:10 handler:nil];
-    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+    [self loadGlobeAtNullIsland];
 
     MLNPointAnnotation *back = [[MLNPointAnnotation alloc] init];
     back.coordinate = CLLocationCoordinate2DMake(70, 70);
     [_mapView addAnnotation:back];
 
-    // Left where it is, an annotation behind the globe stays unselected.
-    [_mapView selectAnnotation:back moveIntoView:NO animateSelection:NO completionHandler:nil];
+    // Left where it is, an annotation behind the globe stays unselected, and the completion handler still runs.
+    __block BOOL completed = NO;
+    [_mapView selectAnnotation:back moveIntoView:NO animateSelection:NO completionHandler:^{
+        completed = YES;
+    }];
     XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
+    XCTAssertTrue(completed);
 
     // Moved into view, the map centers on it and selects it.
     XCTestExpectation *selected = [self expectationWithDescription:@"selected after moving into view"];
@@ -329,6 +331,48 @@ static NSString * const MLNTestAnnotationReuseIdentifer = @"MLNTestAnnotationReu
     XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, back);
     XCTAssertEqualWithAccuracy(_mapView.centerCoordinate.latitude, 70, 0.01);
     XCTAssertEqualWithAccuracy(_mapView.centerCoordinate.longitude, 70, 0.01);
+}
+
+- (void)testSelectionBehindTheGlobeIsCancelledBeforeTheMapTurns
+{
+    [self loadGlobeAtNullIsland];
+
+    MLNPointAnnotation *front = [[MLNPointAnnotation alloc] init];
+    front.coordinate = CLLocationCoordinate2DMake(40, 40);
+    MLNPointAnnotation *back = [[MLNPointAnnotation alloc] init];
+    back.coordinate = CLLocationCoordinate2DMake(70, 70);
+    [_mapView addAnnotations:@[ front, back ]];
+
+    // Deselected while the map turns to it.
+    XCTestExpectation *deselected = [self expectationWithDescription:@"turned after a deselection"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:NO completionHandler:^{
+        [deselected fulfill];
+    }];
+    [_mapView deselectAnnotation:back animated:NO];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
+
+    // Another annotation selected while the map turns to it.
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+    XCTestExpectation *replaced = [self expectationWithDescription:@"turned after another selection"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:NO completionHandler:^{
+        [replaced fulfill];
+    }];
+    [_mapView selectAnnotation:front moveIntoView:NO animateSelection:NO completionHandler:nil];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    XCTAssertEqualObjects(_mapView.selectedAnnotations.firstObject, front);
+
+    // Removed while the map turns to it: it does not come back.
+    [_mapView deselectAnnotation:front animated:NO];
+    [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(0, 0) zoomLevel:1 direction:45 animated:NO];
+    XCTestExpectation *removed = [self expectationWithDescription:@"turned after a removal"];
+    [_mapView selectAnnotation:back moveIntoView:YES animateSelection:NO completionHandler:^{
+        [removed fulfill];
+    }];
+    [_mapView removeAnnotation:back];
+    [self waitForExpectationsWithTimeout:5 handler:nil];
+    XCTAssertEqual(_mapView.selectedAnnotations.count, 0u);
+    XCTAssertFalse([_mapView.annotations containsObject:back]);
 }
 
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style
