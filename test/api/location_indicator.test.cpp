@@ -18,6 +18,7 @@
 #include <cmath>
 #include <optional>
 #include <string>
+#include <vector>
 
 using namespace mln;
 using namespace mln::style;
@@ -90,7 +91,9 @@ struct Puck {
     std::optional<gfx::RenderingStats::NDCBound> captured;
 };
 
-Puck renderPuck(const std::string& projection, const LatLng& location) {
+Puck renderPuck(const std::string& projection,
+                const LatLng& location,
+                const std::vector<LatLng>& cameraPath = {LatLng{0.0, 0.0}}) {
     util::RunLoop loop;
 
     HeadlessFrontend frontend{1};
@@ -102,7 +105,9 @@ Puck renderPuck(const std::string& projection, const LatLng& location) {
     map.getStyle().loadJSON(
         R"({"version":8,"projection":{"type":)" + (projection.starts_with('[') ? projection : '"' + projection + '"') +
         R"(},"sources":{},"layers":[{"id":"background","type":"background","paint":{"background-color":"white"}}]})");
-    map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1.0));
+    for (const auto& center : cameraPath) {
+        map.jumpTo(CameraOptions().withCenter(center).withZoom(1.0));
+    }
 
     // Black on white: the WebGPU shader multiplies the image by the black the tweaker hands every textured quad.
     PremultipliedImage black({16, 16});
@@ -250,4 +255,30 @@ TEST(LocationIndicator, PuckCapturedWhereItIsDrawnMidTransition) {
         EXPECT_NEAR(puck.captured->minY, puck.rendered->minY, twoPixels);
         EXPECT_NEAR(puck.captured->maxY, puck.rendered->maxY, twoPixels);
     }
+}
+
+// Past the antimeridian the globe keeps the center on the next world copy, here at 181 degrees; the puck's
+// Mercator side has to be placed in that copy too, or the blend draws it half a world away.
+TEST(LocationIndicator, PuckDrawnWhereItIsWithTheCenterPastTheAntimeridian) {
+#ifndef MLN_DRAWABLE_LOCATION_INDICATOR
+    GTEST_SKIP() << "OpenGL draws the location indicator with its own renderer, which has no globe path yet";
+#endif
+    const mln::JSValue emptyObject(rapidjson::kObjectType);
+    style::conversion::Error error;
+    if (!LayerManager::get()->createLayer("location-indicator", "probe", &emptyObject, error)) {
+        GTEST_SKIP() << "no location-indicator layer on this platform";
+    }
+    constexpr double twoPixels = 2.0 * 2.0 / 256.0;
+    const auto puck = renderPuck(R"(["mercator", "vertical-perspective", 0.5])",
+                                 LatLng{0.0, 179.0},
+                                 {LatLng{0.0, 0.0}, LatLng{0.0, 120.0}, LatLng{0.0, -179.0}});
+    ASSERT_TRUE(puck.rendered);
+    ASSERT_TRUE(puck.captured);
+    EXPECT_NEAR(puck.captured->minX, puck.rendered->minX, twoPixels);
+    EXPECT_NEAR(puck.captured->maxX, puck.rendered->maxX, twoPixels);
+    EXPECT_NEAR(puck.captured->minY, puck.rendered->minY, twoPixels);
+    EXPECT_NEAR(puck.captured->maxY, puck.rendered->maxY, twoPixels);
+    // Two degrees west of the center, near the middle of the view.
+    EXPECT_LT(std::abs((puck.rendered->minX + puck.rendered->maxX) / 2.0), 0.1);
+    EXPECT_LT(std::abs((puck.rendered->minY + puck.rendered->maxY) / 2.0), 0.1);
 }
