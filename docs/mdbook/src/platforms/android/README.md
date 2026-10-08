@@ -19,6 +19,16 @@ cd platform/android
 
 Open the `platform/android` directory to get started.
 
+### Nix
+
+With [Nix](https://nixos.org) and flakes enabled, you can build from the command line instead. Running `nix develop .#android` in the root of the repository opens a shell with JDK 17 and an Android SDK that has the NDK version the build expects:
+
+```bash
+nix develop .#android
+cd platform/android
+./gradlew :MapLibreAndroidTestApp:assembleVulkanDebug
+```
+
 ## Setting an API Key
 
 _The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key._
