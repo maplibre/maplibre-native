@@ -6,7 +6,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
 
 - Raise the minimum supported iOS version to 15.5, remove the filesystem polyfill, and clean up obsolete compatibility code.
 - Include device and simulator debug symbols in the dynamic XCFramework. The separate iOS debug-symbol ZIP is no longer published ([#4698](https://github.com/maplibre/maplibre-native/pull/4698)).
-- 💥 Breaking: Remove the legacy `Mapbox.h` umbrella header. `MapLibre.xcframework` no longer ships it. Use the `MapLibre.h` umbrella header or the `MapLibre` module instead.
+- 💥 Breaking: Remove the legacy `Mapbox.h` umbrella header. `MapLibre.xcframework` no longer ships it. Use the `MapLibre.h` umbrella header or the `MapLibre` module instead ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
   <details>
   <summary>Migration guide</summary>
@@ -38,7 +38,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`M
   ```
 
   </details>
-- Export `MLNPluginStyleLayer` from the dynamic framework.
+- Export `MLNPluginStyleLayer` from the dynamic framework ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
 ## 6.31.0
 

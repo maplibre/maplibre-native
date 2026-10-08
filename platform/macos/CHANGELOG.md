@@ -4,7 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- 💥 Breaking: Remove the legacy `Mapbox.h` umbrella header. `MapLibre.xcframework` no longer ships it. Use the `MapLibre.h` umbrella header or the `MapLibre` module instead.
+- 💥 Breaking: Remove the legacy `Mapbox.h` umbrella header. `MapLibre.xcframework` no longer ships it. Use the `MapLibre.h` umbrella header or the `MapLibre` module instead ([#4731](https://github.com/maplibre/maplibre-native/pull/4731)).
 
   <details>
   <summary>Migration guide</summary>
