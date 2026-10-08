@@ -150,7 +150,7 @@ IntersectStatus CollisionIndex::intersectsTileEdges(const CollisionBox& box,
 
 PlacedFeatureResult CollisionIndex::placeFeature(
     const CollisionFeature& feature,
-    Point<float> shift,
+    std::optional<Point<float>> shift,
     Point<float> translation,
     const TileProjector& tileProjector,
     const LabelPlaneProjector& labelPlane,
@@ -185,7 +185,8 @@ PlacedFeatureResult CollisionIndex::placeFeature(
             collisionBoundaries = projectedBox.boundaries;
             occluded = pitchWithMap ? projectedBox.allPointsOccluded : projectedPoint.occluded;
         } else {
-            collisionBoundaries = getProjectedCollisionBoundaries(projectedPoint, shift, textPixelRatio, box);
+            collisionBoundaries = getProjectedCollisionBoundaries(
+                projectedPoint, shift.value_or(Point<float>{}), textPixelRatio, box);
         }
         projectedBoxes.emplace_back(
             collisionBoundaries[0], collisionBoundaries[1], collisionBoundaries[2], collisionBoundaries[3]);
@@ -521,7 +522,7 @@ CollisionIndex::ProjectedBox CollisionIndex::projectCollisionBox(const Collision
                                                                  const bool pitchWithMap,
                                                                  const bool rotateWithMap,
                                                                  const ProjectedAnchor& projectedPoint,
-                                                                 const Point<float> shift,
+                                                                 const std::optional<Point<float>> shift,
                                                                  const Point<float> translation) const {
     const Point<float> anchor = box.anchor + translation;
     // These vectors hold for screen-space texts aligned with the viewport and for pitched texts aligned with the map.
@@ -553,14 +554,16 @@ CollisionIndex::ProjectedBox CollisionIndex::projectCollisionBox(const Collision
         distanceMultiplier = static_cast<float>(1.0 / scale *
                                                 tileProjector.pitchedTextCorrection({anchor.x, anchor.y}));
         // The shader scales the label by the perspective ratio; variable anchors already account for it.
-        if (shift.x == 0 && shift.y == 0) {
+        if (!shift) {
             const float distanceRatio = projectedPoint.signedDistanceFromCamera /
                                         transformState.getCameraToCenterDistance();
             distanceMultiplier *= std::clamp(0.5f + 0.5f * distanceRatio, 0.0f, 4.0f);
         }
     }
 
-    basePoint += vecEast * (shift.x * distanceMultiplier) + vecSouth * (shift.y * distanceMultiplier);
+    if (shift) {
+        basePoint += vecEast * (shift->x * distanceMultiplier) + vecSouth * (shift->y * distanceMultiplier);
+    }
 
     const float xMin = box.x1 * distanceMultiplier;
     const float xMax = box.x2 * distanceMultiplier;
