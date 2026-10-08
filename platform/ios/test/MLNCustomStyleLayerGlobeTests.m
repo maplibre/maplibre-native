@@ -24,6 +24,14 @@
 
 @implementation MLNCustomStyleLayerGlobeTests
 
+- (void)tearDown
+{
+    _window.hidden = YES;
+    _window = nil;
+    _mapView = nil;
+    [super tearDown];
+}
+
 - (MLNRecordingStyleLayer *)drawStyleNamed:(NSString *)name
 {
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:name withExtension:@"json"];

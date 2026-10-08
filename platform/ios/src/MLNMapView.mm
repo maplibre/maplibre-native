@@ -468,8 +468,10 @@ public:
   /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set
   /// to ``MLNAnnotationTagNotFound``.
   MLNAnnotationTag _selectedAnnotationTag;
-  /// An annotation behind the globe, selected once the map has turned to it.
+  /// An annotation behind the globe, selected once the camera settles with it in view.
   id<MLNAnnotation> _annotationAwaitingSelection;
+  void (^_annotationAwaitingSelectionCompletion)(void);
+  BOOL _annotationAwaitingSelectionAnimated;
 
   BOOL _userLocationAnnotationIsSelected;
   /// Size of the rectangle formed by unioning the maximum slop area around every annotation image
@@ -2502,8 +2504,13 @@ public:
               animateSelection:YES
         calloutPositioningRect:positionRect
              completionHandler:nil];
-  } else if (self.selectedAnnotation) {
-    [self deselectAnnotation:self.selectedAnnotation animated:YES];
+  } else {
+    // A tap on the map drops a selection still waiting for the map to turn, as it drops the
+    // selected one.
+    [self cancelAnnotationAwaitingSelection];
+    if (self.selectedAnnotation) {
+      [self deselectAnnotation:self.selectedAnnotation animated:YES];
+    }
   }
 }
 
@@ -5097,7 +5104,7 @@ static void *windowScreenContext = &windowScreenContext;
               @"annotation should conform to MLNAnnotation");
 
     if (annotation == _annotationAwaitingSelection) {
-      _annotationAwaitingSelection = nil;
+      [self cancelAnnotationAwaitingSelection];
     }
 
     MLNAnnotationTag annotationTag = [self annotationTagForAnnotation:annotation];
@@ -5474,12 +5481,13 @@ static void *windowScreenContext = &windowScreenContext;
          completionHandler:(nullable void (^)(void))completion {
   if (!annotation) return;
 
+  // A newer selection, even of the selected annotation, replaces one waiting for the map to turn.
+  [self cancelAnnotationAwaitingSelection];
+
   if (annotation == self.selectedAnnotation) return;
 
-  // A newer selection replaces one waiting for the map to turn.
-  _annotationAwaitingSelection = nil;
-
-  // Behind the globe: an annotation that may move into view is centered first and selected there.
+  // Behind the globe: an annotation that may move into view is centered first, and selected once
+  // the camera settles with it in view.
   if ([self isCoordinateOccluded:annotation.coordinate]) {
     if (!moveIntoView ||
         ![self isMovingAnnotationIntoViewSupportedForAnnotation:annotation
@@ -5487,27 +5495,22 @@ static void *windowScreenContext = &windowScreenContext;
       if (completion) completion();
       return;
     }
+    // Added now, as a selection on Mercator adds it, so removing every annotation meanwhile removes
+    // it too.
+    if ([self annotationTagForAnnotation:annotation] == MLNAnnotationTagNotFound &&
+        annotation != self.userLocation) {
+      [self addAnnotation:annotation];
+    }
     _annotationAwaitingSelection = annotation;
+    _annotationAwaitingSelectionCompletion = completion;
+    _annotationAwaitingSelectionAnimated = animateSelection;
     __weak __typeof__(self) weakSelf = self;
     [self setCenterCoordinate:annotation.coordinate
                     zoomLevel:self.zoomLevel
                     direction:self.direction
                      animated:animateSelection
             completionHandler:^{
-              __typeof__(self) strongSelf = weakSelf;
-              const BOOL awaited =
-                  strongSelf && strongSelf->_annotationAwaitingSelection == annotation;
-              if (awaited) strongSelf->_annotationAwaitingSelection = nil;
-              if (!awaited || [strongSelf isCoordinateOccluded:annotation.coordinate]) {
-                if (completion) completion();
-                return;
-              }
-              [strongSelf selectAnnotation:annotation
-                              moveIntoView:NO
-                          animateSelection:animateSelection
-                    calloutPositioningRect:[strongSelf positioningRectForAnnotation:annotation
-                                                                defaultCalloutPoint:CGPointZero]
-                         completionHandler:completion];
+              [weakSelf settleAnnotationAwaitingSelection];
             }];
     return;
   }
@@ -5826,11 +5829,43 @@ static void *windowScreenContext = &windowScreenContext;
   return [self dequeueReusableAnnotationImageWithIdentifier:symbolName];
 }
 
+/// Drops the annotation waiting for the map to turn to it and runs its completion handler.
+- (void)cancelAnnotationAwaitingSelection {
+  if (!_annotationAwaitingSelection) return;
+  void (^completion)(void) = _annotationAwaitingSelectionCompletion;
+  _annotationAwaitingSelection = nil;
+  _annotationAwaitingSelectionCompletion = nil;
+  if (completion) completion();
+}
+
+/// Once the camera has settled, selects the annotation waiting for it if it came into view, or
+/// drops it.
+- (void)settleAnnotationAwaitingSelection {
+  id<MLNAnnotation> annotation = _annotationAwaitingSelection;
+  if (!annotation || self.mbglMap.isPanning() || self.mbglMap.isScaling() ||
+      self.mbglMap.isRotating() || self.mbglMap.isGestureInProgress()) {
+    return;
+  }
+  if ([self isCoordinateOccluded:annotation.coordinate]) {
+    [self cancelAnnotationAwaitingSelection];
+    return;
+  }
+  void (^completion)(void) = _annotationAwaitingSelectionCompletion;
+  _annotationAwaitingSelection = nil;
+  _annotationAwaitingSelectionCompletion = nil;
+  [self selectAnnotation:annotation
+                moveIntoView:NO
+            animateSelection:_annotationAwaitingSelectionAnimated
+      calloutPositioningRect:[self positioningRectForAnnotation:annotation
+                                            defaultCalloutPoint:CGPointZero]
+           completionHandler:completion];
+}
+
 - (void)deselectAnnotation:(id<MLNAnnotation>)annotation animated:(BOOL)animated {
   if (!annotation) return;
 
   if (annotation == _annotationAwaitingSelection) {
-    _annotationAwaitingSelection = nil;
+    [self cancelAnnotationAwaitingSelection];
   }
 
   if (self.selectedAnnotation == annotation) {
@@ -6934,6 +6969,14 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     [self resetCameraChangeReason];
+  }
+
+  if (_annotationAwaitingSelection) {
+    // A camera change that cut this one short starts right after it ends; settle once it has.
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [weakSelf settleAnnotationAwaitingSelection];
+    });
   }
 }
 
