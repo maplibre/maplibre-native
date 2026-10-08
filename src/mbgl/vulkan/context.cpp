@@ -41,6 +41,8 @@ constexpr uint32_t layerDescriptorPoolSize = 2 * 256;
 constexpr uint32_t drawableUniformDescriptorPoolSize = 2 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
+constexpr uint8_t maximumSurfaceUpdateRetries = 3;
+
 namespace {
 std::mutex glslangMutex;
 uint32_t glslangRefCount = 0;
@@ -236,35 +238,11 @@ void Context::requestSurfaceUpdate(bool useDelay) {
     surfaceUpdateLatency = useDelay ? backend.getMaxFrames() * 3 : 0;
 }
 
-bool Context::waitFrame() const {
-    MLN_TRACE_FUNC();
-    MBGL_VERIFY_THREAD(tid);
-
-    const auto& device = backend.getDevice();
-    const auto& dispatcher = backend.getDispatcher();
-    auto& frame = frameResources[frameResourceIndex];
-    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-
-    const vk::Result waitFenceResult = device->waitForFences(
-        1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
-    if (waitFenceResult != vk::Result::eSuccess) {
-        mln::Log::Error(mln::Event::Render, "Wait fence failed");
-        return false;
-    }
-
-    return true;
-}
-
-void Context::beginFrame() {
-    MLN_TRACE_FUNC();
-    MBGL_VERIFY_THREAD(tid);
-
-    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
-
-    const auto& device = backend.getDevice();
-    const auto& dispatcher = backend.getDispatcher();
+void Context::pollSurfaceUpdate() {
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
-    const auto& platformSurface = renderableResource.getPlatformSurface();
+    if (!renderableResource.getPlatformSurface()) {
+        return;
+    }
 
     // poll for surface transform updates if enabled
     const int32_t surfaceTransformPollingInterval = renderableResource.getSurfaceTransformPollingInterval();
@@ -279,71 +257,116 @@ void Context::beginFrame() {
             ++currentFrameCount;
         }
     }
+}
+
+void Context::updateSurface(bool recreateSurface) {
+    auto& renderableImpl = static_cast<Renderable&>(backend.getDefaultRenderable());
+    auto& renderableResource = renderableImpl.getResource<SurfaceRenderableResource>();
+
+    renderableResource.recreateSwapchain(recreateSurface);
+
+    // we wait for an idle device to recreate the swapchain
+    // so it's a good opportunity to delete all queued items
+    for (auto& frame : frameResources) {
+        frame.runDeletionQueue(*this);
+    }
+
+    // sync resources with swapchain
+    frameResourceIndex = 0;
+    surfaceUpdateRequested = false;
+
+    // update renderable size
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        const auto& extent = renderableResource.getExtent();
+        renderableImpl.setSize({extent.width, extent.height});
+    }
+}
+
+bool Context::waitFrame() const {
+    MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
+
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+    auto& frame = frameResources[frameResourceIndex];
+    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
+
+    const vk::Result waitFenceResult = device->waitForFences(
+        1, &frame.flightFrameFence.get(), VK_TRUE, timeout, dispatcher);
+    return waitFenceResult == vk::Result::eSuccess;
+}
+
+void Context::beginFrame() {
+    MLN_TRACE_FUNC();
+    MBGL_VERIFY_THREAD(tid);
+
+    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
+
+    const auto& device = backend.getDevice();
+    const auto& dispatcher = backend.getDispatcher();
+    auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+    const auto& platformSurface = renderableResource.getPlatformSurface();
+
+    pollSurfaceUpdate();
 
     if (platformSurface && surfaceUpdateRequested && --surfaceUpdateLatency <= 0) {
-        renderableResource.recreateSwapchain();
+        updateSurface();
+    }
 
-        // we wait for an idle device to recreate the swapchain
-        // so it's a good opportunity to delete all queued items
-        for (auto& frame : frameResources) {
-            frame.runDeletionQueue(*this);
+    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
+
+    int8_t attempt = 0;
+    for (; attempt < maximumSurfaceUpdateRetries; ++attempt) {
+        if (!waitFrame()) {
+            throw std::runtime_error("waitFrame failed");
         }
 
-        // sync resources with swapchain
-        frameResourceIndex = 0;
-        surfaceUpdateRequested = false;
+        frameResources[frameResourceIndex].runDeletionQueue(*this);
 
-        // update renderable size
-        if (renderableResource.hasSurfaceTransformSupport()) {
-            const auto& extent = renderableResource.getExtent();
+        if (platformSurface) {
+            MLN_TRACE_ZONE(acquireNextImageKHR);
+            try {
+                const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
+                    renderableResource.getSwapchain().get(),
+                    timeout,
+                    renderableResource.getAcquireSemaphore(),
+                    nullptr,
+                    dispatcher);
 
-            auto& renderable = static_cast<Renderable&>(backend.getDefaultRenderable());
-            renderable.setSize({extent.width, extent.height});
+                if (acquireImageResult.result == vk::Result::eSuccess) {
+                    renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
+                    renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                    requestSurfaceUpdate();
+                } else {
+                    mln::Log::Error(
+                        mln::Event::Render,
+                        "acquireNextImageKHR result: " + std::to_string(static_cast<int>(acquireImageResult.result)));
+                }
+
+            } catch (const vk::OutOfDateKHRError& e) {
+                updateSurface();
+                continue;
+            } catch (const vk::SurfaceLostKHRError& e) {
+                updateSurface(true);
+                continue;
+            }
+        } else {
+            renderableResource.setAcquiredImageIndex(frameResourceIndex);
         }
+
+        // acquire successful
+        break;
+    }
+
+    if (attempt >= maximumSurfaceUpdateRetries) {
+        assert(false);
+        throw std::runtime_error("acquireNextImageKHR failed");
     }
 
     backend.startFrameCapture();
 
     auto& frame = frameResources[frameResourceIndex];
-    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
-
-    if (!waitFrame()) {
-        return;
-    }
-
-    frame.runDeletionQueue(*this);
-
-    if (platformSurface) {
-        MLN_TRACE_ZONE(acquireNextImageKHR);
-        try {
-            const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-                renderableResource.getSwapchain().get(),
-                timeout,
-                renderableResource.getAcquireSemaphore(),
-                nullptr,
-                dispatcher);
-
-            if (acquireImageResult.result == vk::Result::eSuccess) {
-                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
-            } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
-                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
-                requestSurfaceUpdate();
-            } else {
-                mln::Log::Error(
-                    mln::Event::Render,
-                    "acquireNextImageKHR result: " + std::to_string(static_cast<int>(acquireImageResult.result)));
-            }
-
-        } catch (const vk::OutOfDateKHRError& e) {
-            // request an update and restart frame
-            requestSurfaceUpdate(false);
-            beginFrame();
-            return;
-        }
-    } else {
-        renderableResource.setAcquiredImageIndex(frameResourceIndex);
-    }
-
     frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources, dispatcher);
     frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit), dispatcher);
 
@@ -401,6 +424,9 @@ void Context::submitFrame() {
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate(false);
+        } catch (const vk::SurfaceLostKHRError& e) {
+            // handled by the next acquireNextImageKHR call
+            throw e;
         }
     }
 
