@@ -63,6 +63,7 @@ jobs:
   build:
     name: MacOS Metal CI Tests
     runs-on: [macos-15]
+    timeout-minutes: 210
     defaults:
       run:
         working-directory: platform/macos
@@ -96,6 +97,7 @@ jobs:
   webgpu-cmake:
     name: macOS WebGPU (${{ matrix.variant.name }})
     runs-on: macos-15
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
