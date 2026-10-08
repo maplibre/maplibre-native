@@ -60,6 +60,15 @@ final class LocationAnimatorCoordinator {
   private boolean compassAnimationEnabled;
   private boolean accuracyAnimationEnabled;
 
+  /**
+   * {@link SystemClock#elapsedRealtime()} when the latest user-location animation started.
+   * {@code 0} until the first location update.
+   */
+  private long userLocationAnimationReferenceTime;
+
+  /** Duration in milliseconds of the latest user-location animation. */
+  private long userLocationAnimationDuration;
+
   @VisibleForTesting
   int maxAnimationFps = Integer.MAX_VALUE;
 
@@ -153,6 +162,10 @@ final class LocationAnimatorCoordinator {
 
       animationDuration = Math.min(animationDuration, MAX_ANIMATION_DURATION_MS);
     }
+
+    // Sample the clock immediately before the animators start so other graphics can share it.
+    userLocationAnimationReferenceTime = SystemClock.elapsedRealtime();
+    userLocationAnimationDuration = animationDuration;
 
     playAnimators(animationDuration,
       ANIMATOR_LAYER_LATLNG,
@@ -548,6 +561,30 @@ final class LocationAnimatorCoordinator {
 
   void setTrackingAnimationDurationMultiplier(float trackingAnimationDurationMultiplier) {
     this.durationMultiplier = trackingAnimationDurationMultiplier;
+  }
+
+  /**
+   * The puck's current position. {@code null} until the first location update.
+   */
+  @Nullable
+  LatLng getUserLocation() {
+    var latLngAnimator = animatorArray.get(ANIMATOR_LAYER_LATLNG);
+    if (latLngAnimator != null) {
+      var value = latLngAnimator.getAnimatedValue();
+      if (value instanceof LatLng) {
+        // Return a copy, don't expose the reused private instance in LatLngEvaluator
+        return new LatLng((LatLng) value);
+      }
+    }
+    return (previousLocation != null) ? new LatLng(previousLocation) : null;
+  }
+
+  long getUserLocationAnimationReferenceTime() {
+    return userLocationAnimationReferenceTime;
+  }
+
+  long getUserLocationAnimationDuration() {
+    return userLocationAnimationDuration;
   }
 
   void setCompassAnimationEnabled(boolean compassAnimationEnabled) {

@@ -14,6 +14,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.maplibre.android.testapp.R
 import java.util.logging.Logger
+import kotlin.time.Duration.Companion.hours
 
 class LongRunningActivity : AppCompatActivity() {
 
@@ -22,7 +23,7 @@ class LongRunningActivity : AppCompatActivity() {
         private val LOG = Logger.getLogger(LongRunningActivity::class.java.name)
 
         // activity lifetime (seconds)
-        private const val DURATION = 72 * 60 * 60
+        private val DURATION = 72.hours
         // start one activity/view per display if available
         private const val USE_SECONDARY_DISPLAY = true
 
@@ -62,7 +63,7 @@ class LongRunningActivity : AppCompatActivity() {
                     .remove(supportFragmentManager.findFragmentById(R.id.navigation_map)!!)
                     .commit()
 
-                // and move it to it's own activity
+                // and move it to its own activity
                 val activityOptions = ActivityOptions.makeBasic()
                 activityOptions.launchDisplayId = displays[1].displayId
 
@@ -70,12 +71,12 @@ class LongRunningActivity : AppCompatActivity() {
             }
         }
 
-        LOG.info("Activity running for $DURATION seconds")
+        LOG.info("Activity running for ${DURATION.inWholeSeconds} seconds")
 
         val context = this
 
         lifecycleScope.launch {
-            delay(DURATION * 1000L)
+            delay(DURATION)
 
             printStats(context)
             finish()
