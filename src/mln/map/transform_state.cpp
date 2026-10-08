@@ -533,7 +533,7 @@ void TransformState::setViewportMode(ViewportMode val) {
 
 CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return CameraOptions()
-        .withCenter(getLatLng())
+        .withCenter(getLatLng(LatLng::Wrapped))
         .withCenterAltitude(getCenterAltitude())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
