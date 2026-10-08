@@ -884,6 +884,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto& layout = impl_cast(baseImpl).layout;
     const bool sortFeaturesByKey = !layout.get<SymbolSortKey>().isUndefined();
+    // Screen-space symbols are drawn over the view, not projected onto the map.
+    const auto screenSpaceProp = layout.get<SymbolScreenSpace>();
+    const auto symbolProjectionVariant = (screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
+                                                                       : SymbolScreenSpace::defaultValue())
+                                             ? gfx::ProjectionVariant::Mercator
+                                             : projectionVariant;
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     const bool isOffset = !layout.get<IconOffset>().isUndefined();
@@ -1183,8 +1189,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         : gfx::ColorMode::unblended());
             }
 
-            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                shaderGroup->getOrCreateShader(context, propertiesAsUniforms, projectionVariant, posOffsetAttribName));
+            const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, symbolProjectionVariant, posOffsetAttribName));
             if (!shader) {
                 return;
             }
