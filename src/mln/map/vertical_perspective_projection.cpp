@@ -86,6 +86,10 @@ std::optional<RaySphereIntersection> raySphereIntersection(const vec3& origin, c
     const double q = -originDotDirection + (originDotDirection < 0 ? 1 : -1) * std::sqrt(discriminant);
     const double t0 = c / q;
     const double t1 = q;
+    // Both behind the ray's origin, as for a ray into the sky past a nearby planet: no intersection.
+    if (std::max(t0, t1) < 0) {
+        return std::nullopt;
+    }
     return RaySphereIntersection{std::min(t0, t1), std::max(t0, t1)};
 }
 
