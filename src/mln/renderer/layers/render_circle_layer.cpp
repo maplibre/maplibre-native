@@ -134,9 +134,13 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
                                                              ? point
                                                              : projectPoint(point, projector, transformState.getSize());
 
+            const auto projected = projector.project({static_cast<double>(point.x), static_cast<double>(point.y)});
+            // The shader hides a circle whose center the horizon covers, so the query finds none there either.
+            if (projected.occluded) {
+                continue;
+            }
             float adjustedSize = transformedSize;
-            const double w = projector.project({static_cast<double>(point.x), static_cast<double>(point.y)})
-                                 .signedDistanceFromCamera;
+            const double w = projected.signedDistanceFromCamera;
             auto pitchScale = evaluated.evaluate<style::CirclePitchScale>(zoom, feature);
             auto pitchAlignment = evaluated.evaluate<style::CirclePitchAlignment>(zoom, feature);
             if (pitchScale == CirclePitchScaleType::Viewport && pitchAlignment == AlignmentType::Map) {
